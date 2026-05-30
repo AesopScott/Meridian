@@ -40,6 +40,7 @@ Append entries here when this file is modified or an active task is completed.
 ```text
 YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-30 ~22:30 CDT - Build 1 completed Prompt Budget package API + FileMap; commit d18d651; tests 604 passed
+2026-05-30 10:33 -06:00 - Codex assigned Relay Prompt Budget integration into RelayRoute; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -63,40 +64,34 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: finish Prompt Budget package API and FileMap exposure.
-
-Important review finding:
-
-`docs/FileMap.md` currently appears to have a duplicate `meridian_core/prompt_budget.py` row because Build 3's integration brief already added a prompt budget row.
+Goal: integrate Prompt Budget into Relay routing without adding prompt drag.
 
 Allowed files only:
 
-- `meridian_core/__init__.py`
-- `tests/test_package_api.py`
-- `meridian_core/filemap.py`
-- `tests/test_filemap.py`
-- `docs/FileMap.md`
+- `meridian_core/relay.py`
+- `tests/test_relay.py`
 
 Task:
 
-- Keep exactly one `meridian_core/prompt_budget.py` row in `docs/FileMap.md`.
-- Preserve the useful details:
-  - deterministic prompt token budget per risk tier
-  - prevents Relay prompt drag
-  - bounded context sources and token limits
-  - related test: `tests/test_prompt_budget.py`
-  - note future RelayRoute integration / integration brief if useful
-- Export these stable Prompt Budget names from package root:
-  - `PromptBudgetTier`
-  - `PromptBudget`
-  - `PromptBudgetPlan`
-  - `prompt_budget_for_risk_tier`
-- Add package API import smoke coverage.
-- Add FileMap required-path coverage.
+- Add a `prompt_budget` field to `RelayRoute`.
+- Populate it in `route_from_assessment()` using `prompt_budget_for_risk_tier(assessment.tier)`.
+- Preserve existing lane, model, session, and `council_plan` behavior.
+- Keep the integration deterministic and domain-only.
+- Do not assemble full prompts.
+- Do not add model calls.
+- Do not add UI.
+- Do not add persistence.
+- Do not insert long instructions into Relay output.
+- Add focused tests proving:
+  - every risk tier produces a matching Prompt Budget plan
+  - Relay routes still include the existing CouncilPlan
+  - budget integration does not mutate shared state between routes
+  - existing routing table behavior is unchanged
 
 Tests:
 
 ```text
+python -m pytest tests/test_relay.py tests/test_prompt_budget.py -q
 python -m pytest -q
 ```
 

@@ -38,6 +38,7 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
+2026-05-30 10:33 -06:00 - Codex assigned Prompt Packet domain slice; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -61,42 +62,49 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: create a Relay Prompt Metrics integration brief.
+Goal: create the Prompt Packet domain slice.
 
 Allowed files only:
 
-- `docs/relay-prompt-metrics-integration-brief.md`
-
-Do not edit FileMap yet. Build 1 is currently touching FileMap/package API.
+- `meridian_core/prompt_packet.py`
+- `tests/test_prompt_packet.py`
 
 Task:
 
-Write a focused future integration brief for how Relay should use Prompt Metrics.
-
-Cover:
-
-- Where `PromptMetricSample` should be created in the future Relay dispatch lifecycle.
-- How to measure prompt construction time.
-- How to record prompt token count.
-- How to measure time to first token and total response time.
-- How to compare against native/vendor baseline when available.
-- How Prompt Metrics should interact with Prompt Budget.
-- How `HEALTHY` / `WATCH` / `DEGRADED` should affect Prime decisions.
-- What should appear in Review Console versus stay internal.
-- What must not be inserted into worker prompts.
-- Required tests before runtime integration.
-
-No runtime code.
-No FileMap edits.
-No package API edits.
+- Add a small domain-only module that models the bounded prompt packet Relay will eventually send through the agent/model harness.
+- Suggested concepts:
+  - `PromptContextSource` enum or value object for allowed context sources
+  - `PromptPacket` immutable dataclass containing:
+    - `request`
+    - `instructions`
+    - `context_references`
+    - `budget`
+    - `estimated_tokens`
+    - optional `notes` / `warnings`
+  - `build_prompt_packet(...)` helper that validates the packet against a provided `PromptBudgetPlan`
+- Enforce:
+  - estimated tokens cannot exceed the budget's max context tokens
+  - context sources must be allowed by the budget plan
+  - empty request is rejected
+  - packet is immutable
+- Keep this domain-only.
+- Do not import or edit Relay.
+- Do not assemble long prompts.
+- Do not call models.
+- Do not add UI.
+- Do not add persistence.
+- Do not edit package exports or FileMap in this slice.
 
 Tests:
 
-- No tests required unless you change code.
+```text
+python -m pytest tests/test_prompt_packet.py tests/test_prompt_budget.py -q
+python -m pytest -q
+```
 
 Completion:
 
-- Commit only this brief.
+- Commit only this slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash in your session.
+- Report commit hash and test count in your session.

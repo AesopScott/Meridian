@@ -38,6 +38,7 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; tests <result>
+2026-05-30 10:33 -06:00 - Codex assigned Prompt Metrics package API + FileMap exposure; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -61,45 +62,50 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: review and harden Prompt Metrics domain slice.
-
-Commit to review:
-
-- `abff252`
+Goal: expose Prompt Metrics as a stable package capability and FileMap entry.
 
 Allowed files only:
 
-- `meridian_core/prompt_metrics.py`
-- `tests/test_prompt_metrics.py`
+- `meridian_core/__init__.py`
+- `tests/test_package_api.py`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/FileMap.md`
 
-Review questions:
+Context:
 
-- Should negative prompt timings or token counts be rejected?
-- Should native baseline greater than total response time produce a negative delta, or should overhead floor at zero?
-- Are `HEALTHY` / `WATCH` / `DEGRADED` thresholds reasonable?
-- Should prompt token count influence status, or only timing?
-- Is the empty sample list error clear enough?
-- Are immutable dataclasses the right choice?
+- Prompt Metrics domain code already exists in `meridian_core/prompt_metrics.py`.
+- `docs/FileMap.md` already has a Prompt Metrics row.
+- Root package exports currently include Prompt Budget but not Prompt Metrics.
 
 Task:
 
-- If the current slice is good, write an Obsidian review note and do not change code.
-- If changes are needed, make them only in the allowed files.
-- Keep this domain-only.
+- Export these stable Prompt Metrics names from package root:
+  - `PromptMetricSample`
+  - `PromptMetricSummary`
+  - `PromptPerformanceStatus`
+  - `summarize_prompt_metrics`
+- Add package API import smoke coverage.
+- Ensure FileMap required-path coverage includes:
+  - `meridian_core/prompt_metrics.py`
+  - `docs/relay-prompt-metrics-integration-brief.md`
+- Keep exactly one `meridian_core/prompt_metrics.py` row in `docs/FileMap.md`.
+- If the FileMap already contains the row, refine only if needed.
+- No runtime behavior changes.
+- No Relay edits.
 - No UI.
 - No persistence.
-- No model calls.
 
 Tests:
 
 ```text
-python -m pytest tests/test_prompt_metrics.py -q
+python -m pytest tests/test_package_api.py tests/test_filemap.py -q
 python -m pytest -q
 ```
 
 Completion:
 
-- If changes were made, commit only this slice.
-- Push to `origin/main` if a commit was made.
+- Commit only this slice.
+- Push to `origin/main`.
 - Update Obsidian.
-- Report whether `abff252` was accepted as-is or changed, plus test count and commit hash if applicable.
+- Report commit hash and test count in your session.
