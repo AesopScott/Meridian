@@ -43,6 +43,7 @@ class FileArea:
     FILE_MAP         = "File map / knowledge tracker"
     BUILD_PROCESS    = "Build process"
     PACKAGE_POLICY   = "Package API policy"
+    BIFROST          = "Bifrost / session harness"
 
 
 @dataclass
@@ -283,9 +284,16 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="meridian_core/relay.py",
             area=FileArea.RELAY_ROUTING,
-            purpose="Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan via council_plan_for_tier().",
+            purpose="Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan and PromptBudgetPlan for every dispatch.",
             related_tests=["tests/test_relay.py"],
-            notes="No real model calls yet. council_plan field populated for all tiers.",
+            notes="No real model calls yet. council_plan and prompt_budget populated for all tiers. See relay_packet.py for PromptPacket assembly.",
+        ),
+        FileMapEntry(
+            path="meridian_core/relay_packet.py",
+            area=FileArea.RELAY_ROUTING,
+            purpose="Relay-owned glue: assembles a validated PromptPacket from a RelayRoute. Reads route.prompt_budget for budget constraints and count_tokens() for token count.",
+            related_tests=["tests/test_relay_packet.py"],
+            notes="Internal to Relay dispatch; not a package-root export.",
         ),
         FileMapEntry(
             path="meridian_core/prompt_budget.py",
@@ -337,6 +345,15 @@ def make_default_map() -> FileMap:
             purpose="Tracks Meridian build number plus per-harness build number and maturity state.",
             related_tests=["tests/test_builds.py"],
             notes="register() raises on duplicates; use upsert() for intentional replacement.",
+        ),
+
+        # -- Bifrost / session harness ---------------------------------
+        FileMapEntry(
+            path="docs/bifrost-cockpit-queue-status-brief.md",
+            area=FileArea.BIFROST,
+            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
+            related_tests=[],
+            notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
         ),
 
         # -- File map itself --------------------------------------------

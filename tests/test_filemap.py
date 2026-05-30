@@ -23,6 +23,7 @@ _REQUIRED_PATHS = [
     "meridian_core/prompt_budget.py",
     "meridian_core/prompt_metrics.py",
     "meridian_core/prompt_packet.py",
+    "meridian_core/relay_packet.py",
     "docs/relay-prompt-metrics-integration-brief.md",
     "docs/meridian-capabilities-architecture-map.md",
     "meridian_core/review_console.py",
