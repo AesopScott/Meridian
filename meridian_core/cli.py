@@ -21,7 +21,7 @@ from .decisions import run_decision_loop
 from .intention import ObjectiveStage, RiskTier
 from .mission import MissionLoadError, find_mission_file, load_mission
 from .models import Initiative
-from .objectives import format_mission_objectives_text, get_mission_objectives
+from .objectives import get_mission_objectives
 from .sample_state import make_sample_heartbeats, make_sample_portfolio
 from .wake import WakeStatus, build_wake_brief
 

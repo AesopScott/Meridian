@@ -64,6 +64,12 @@ Beacon is the Heartbeat / Health Harness.
 
 Beacon reports liveness, stale sessions, failed harnesses, active monitors, and health signals. Beacon data belongs mostly in system views unless it affects Prime's progress intention.
 
+## Build And Harness Maturity
+
+Meridian should track an overall build number plus per-harness build numbers and maturity states.
+
+Build number tells which implementation generation is present. Maturity tells how trustworthy, complete, proven, and operational that harness is. They are related but not the same.
+
 ## Aegis
 
 Aegis is the Proof Harness.

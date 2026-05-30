@@ -448,6 +448,376 @@ Scott should mostly talk to the orchestrator, not individual worker sessions. Th
 
 Worker sessions are managed execution surfaces. They should be visible and inspectable, but manual prompting inside them should be exceptional.
 
+## Prime
+
+Prime is the current provisional name for Meridian's orchestrator/local brain.
+
+Prime reads portfolio state, listens to harness heartbeat, consults memory and knowledge, coordinates worker sessions, and asks Scott for judgment only where judgment matters.
+
+The name comes from the Prime Meridian: the reference line that gives every other position meaning. In Meridian, Prime is the central reference point for orientation, priority, coordination, and decision-making.
+
+Prime is currently preferred over Oracle and Daemon for the user-facing orchestrator identity. Oracle may remain useful as the name for a brief/recommendation mode. Daemon may still describe the internal always-on runtime/process nature of Meridian.
+
+## Dual-Lane Cognition
+
+Risk-tiered dual-lane cognition is Meridian's decision engine.
+
+It is Meridian's answer to weak or probabilistic model judgment inside the orchestrator itself.
+
+The system is dynamic. Prime may switch risk tiers on the fly as context changes.
+
+Changing risk tier may matter more than changing models because it changes the decision process: deterministic logic, single-lane cognition, dual-lane cognition, proof requirements, and human gates.
+
+Prime should not depend on a single model pass for meaningful decisions. For high-impact decisions, Prime should ask Relay for two independent cognition lanes, compare the candidate actions, detect disagreement, and then choose, merge, validate, retry, or escalate to Scott.
+
+The value is not merely "two answers." The value is disagreement detection, risk classification, and adjudication by Prime.
+
+Example flow:
+
+```text
+Prime intent
+  -> Relay
+    -> Candidate A from model/lane A
+    -> Candidate B from model/lane B
+  -> Prime compares candidates
+  -> Aegis checks proof/risk where needed
+  -> Prime chooses, merges, retries, or escalates
+```
+
+Risk-tier rule of thumb:
+
+- Tier 0: deterministic local logic only.
+- Tier 1: one model lane allowed for low-risk reversible actions.
+- Tier 2: two independent lanes required for meaningful Prime decisions.
+- Tier 3: two lanes plus Aegis proof required for high-risk or completion claims.
+- Tier 4: Scott approval required for irreversible, financial, public, policy, account-based automation, or strategic actions.
+
+This principle should influence future Relay, Aegis, Charter, and Prime design, but it should not expand the current wake-sequence build slice unless explicitly requested.
+
+The UI should make the active risk tier visible.
+
+Users should be able to see why Prime selected a tier, what that tier requires, and whether Prime escalated or de-escalated the tier during work.
+
+The interface should treat risk tier as a major control/state, at least as important as model selection.
+
+## Wake Experience
+
+The wake experience is the moment Meridian comes online and the orchestrator session becomes active.
+
+Prime's first wake responsibility is to locate, read, and obey the controlling boot instruction file.
+
+Before Prime summarizes portfolio state, checks harnesses, proposes work, or talks confidently, it must know the first file it is supposed to read and follow without exception.
+
+This file is the root of Prime's authority chain for the current run. Everything else in the wake sequence comes after it.
+
+This file replaces the old "server.js is the heart of the harness" mental model from Polaris. In Meridian, the first center of gravity is a readable mission file that Prime loads before it acts.
+
+The provisional filename is `MISSION.md`.
+
+`MISSION.md` is not the wake sequence copy and not the whole orchestrator personality. It is the launch protocol and authority chain for Prime. Its job is to tell Prime which harnesses to call, in what order, and which immutable operating rules must be followed.
+
+Prime is the actor. `MISSION.md` is the mission control protocol Prime follows.
+
+The mission file may include a small number of immutable rules, but those rules should be rare, plain, and foundational.
+
+Provisional user-facing wake language:
+
+```text
+Good morning, Scott.
+Allow me to check today's mission file.
+```
+
+Target feeling:
+
+```text
+Prime online.
+Meridian has established position.
+Beacon Go.
+Echo Go.
+Relay Go.
+Good morning, Scott.
+```
+
+The wake sequence should feel like a command system coming alive: cinematic enough to be memorable, but functional enough that every "go" maps to a real subsystem check.
+
+The short NASA-style "Go" calls are allowed as the cinematic wake layer:
+
+```text
+Bifrost Go.
+Beacon Go.
+Echo Go.
+Relay Go.
+Aegis Go.
+```
+
+These calls should be brief and status-backed.
+
+The NASA-style wake sentence sequence belongs in the non-orchestrator window as system-level information. It should not crowd the orchestrator conversation queue.
+
+The orchestrator queue should contain Prime's conversational messages, progress intentions, judgment requests, and outcomes. The non-orchestrator window should show system messages, readiness calls, harness health, proof status, worker/session state, and other instrumentation Prime wants visible.
+
+Go calls may happen before the progress intention in time, but they should be displayed as system instrumentation rather than conversational content.
+
+The sequence may support modes such as:
+
+- Full wake sequence: first run of the day, cinematic and complete.
+- Fast wake: short version after the first daily startup.
+- Skip: straight to the command center.
+
+## Progress Intention
+
+Prime should express meaningful work as a progress intention before execution.
+
+The wake brief has two layers:
+
+- Go calls: short, NASA-style subsystem readiness signals.
+- Progress intention: Prime saying, "Here is what I intend to work on next," with clear opportunities for Scott to modify, approve, redirect, or stop it.
+
+The progress intention is not a loading transcript and not a final plan.
+
+Progress intention should focus on valuable work, not internal boot mechanics.
+
+It should describe:
+
+- Which project or projects Prime intends to advance.
+- Which stage of each process the work is in.
+- Why that work is prioritized, especially from backlog priority.
+- How many sessions or worker lanes Prime expects to open.
+- Any valuable health or risk information that affects the work.
+- What Prime will ask Scott to decide before it proceeds.
+- The next stage Prime intends to boot or enter.
+
+It should not normally describe routine loading steps such as reading memory, checking tool availability, or contacting harnesses unless that information affects a user-facing decision.
+
+This applies beyond wake. Prime should prefer progress-intention behavior for meaningful actions:
+
+```text
+Stage: Mission Boot > Compass Initiating
+
+Mission Objectives:
+<Open Project 1 - Stage Build - Risk Tier 2>
+<Open Project 2 - Stage Review - Risk Tier 3>
+<Open Project 3 - Stage Plan - Risk Tier 4>
+
+Next Stage: Intention Engine Bootup
+```
+
+Scott can then approve, modify, or override the intention.
+
+Low-risk observation and formatting actions may happen without explicit intent prompts. Meaningful actions should expose intention before execution, especially when they affect files, sessions, memory, policy, release, accounts, money, or public output.
+
+## Persistent Prime Context
+
+Worker and model sessions have fragile context. They fill up, drift, summarize poorly, or end.
+
+Prime should not lose context just because a model session runs out of tokens.
+
+Meridian's architecture should make Prime durable by backstopping session context with persistent memory and knowledge retrieval:
+
+- Echo stores decisions, preferences, lessons, open loops, and project continuity.
+- Atlas provides long-term RAG/knowledge retrieval.
+- Future deep search can expand Prime's recall beyond local memory and indexed knowledge.
+- Session prompts should receive focused memory injections instead of giant chat-history replays.
+- When a session becomes bloated or polluted, Prime can summarize important state into Echo/Atlas and start a cleaner session.
+
+A very large-context model may be useful for the orchestrator, but it is not the core solution.
+
+The core solution is that Prime has persistent, queryable, ranked access to memory and knowledge. Prime's effective memory should not be bounded by any one model session's context window.
+
+## Meridian Federation
+
+Meridian should eventually support collaboration between multiple Meridian instances.
+
+This is not merely multi-user chat. The stronger model is Meridian-to-Meridian coordination, where each user may have their own Prime, memory, harness state, projects, permissions, and local operating context.
+
+Possible future capabilities:
+
+- Connect one Meridian to another Meridian.
+- Share selected project state, plans, artifacts, and proof.
+- Exchange progress intentions between Primes.
+- Coordinate builder/reviewer/verifier work across users.
+- Keep each user's private Echo memory and local harness state compartmentalized.
+- Route shared work through explicit permissions and gates.
+- Let teams collaborate while preserving each Meridian's local authority chain.
+
+This should not expand V0, but the architecture should avoid assumptions that only one user, one Prime, or one local Meridian can ever exist.
+
+## Build And Harness Maturity
+
+Meridian should track both overall build identity and per-harness maturity.
+
+The overall Meridian build needs a build number starting now. This is separate from package versioning. Package version may describe software release semantics, while build number identifies the evolving Meridian system state.
+
+Each harness should also have its own build number and maturity state.
+
+Harness build number answers:
+
+```text
+Which implementation generation of this harness is currently present?
+```
+
+Harness maturity answers:
+
+```text
+How trustworthy, complete, proven, and operational is this harness?
+```
+
+These are related but not identical. A harness can have a high build number and low maturity if it has churned without becoming reliable. A harness can have a low build number and high maturity if it is small, stable, and well proven.
+
+Suggested maturity states:
+
+- Concept: named and defined, not implemented.
+- Skeleton: domain shape exists, limited behavior.
+- Prototype: works in controlled demo/sample state.
+- Operational: useful in real workflow with tests/proof.
+- Hardened: resilient, observable, recoverable, and trusted.
+- Deprecated: retained for compatibility but no longer preferred.
+
+Prime should be able to report Meridian build number, harness build numbers, and harness maturity in system views. This should eventually influence progress intention, risk tiering, and release gates.
+
+## Prime-Centric Workspace
+
+Meridian's UI should invert the Polaris worker-card model.
+
+Polaris was primarily a wall of worker session cards with orchestration controls around them. Meridian should be Prime-centric: the Prime interface is the deep command surface, and worker sessions become compact controlled instruments.
+
+Earlier default layout concept:
+
+```text
+Row 1:
+  Prime Interface
+  progress intention, bottlenecks, backlog priority, approvals,
+  model lanes, proof status, recent decisions, next moves
+
+Row 2:
+  Builder Session | Reviewer Session | Verifier Session
+  compact status, current assignment, health, last event,
+  transfer/open, stop/retry/archive
+```
+
+This may be useful as a diagnostic or expanded lane view, but it should not be assumed to be the primary Meridian interface.
+
+The stronger current direction is that the whole interface becomes the orchestrator interface, apart from top-level navigation.
+
+Primary layout concept:
+
+```text
+Top:
+  Meridian navigation and project/portfolio controls
+
+Main:
+  Prime Interface
+  progress intention, final plan reviews, unresolved judgment,
+  backlog priority, approvals, proof status, next moves
+
+Secondary:
+  Tabbed main screen
+  Orchestrator Queue tab for Scott/Prime communication
+  Non-Orchestrator Queue tab for review/gating/system visibility
+```
+
+Builder, Reviewer, and Verifier remain important roles:
+
+- Builder: turns intent into artifacts.
+- Reviewer: critiques, improves, and catches issues.
+- Verifier: checks proof, tests, completion, and evidence.
+
+But they do not necessarily need permanent primary session panels. A single session/detail panel may be enough, opened only when Scott wants to inspect a specific worker, review, verification run, log, or transfer target.
+
+Additional lanes such as Researcher or Operator may exist, but the main screen should avoid becoming a wall of sessions. Extra sessions can live behind queues, tabs, drawers, filters, or harness-specific views.
+
+Prime should remain the primary place Scott works. Manual prompting inside worker sessions should be exceptional.
+
+The interface should include a persistent control to call up mission objectives at any time. This should show the current Compass-derived objective list with project, stage, risk tier, and next stage.
+
+Working rule for Codex/Prime collaboration: after providing useful information or giving Scott something to copy into Claude, do not simply wait. Start the next reasonable step immediately unless Scott explicitly asks to pause, stop, or only discuss. Scott may copy/read while Codex continues preparing, reviewing, or drafting the next slice.
+
+Claude handoff rule: every build handoff should include a completion protocol for testing, committing to git, pushing to origin, and updating the Meridian Obsidian build notes unless Scott explicitly says the slice is local-only or no-commit.
+
+Default Obsidian locations:
+
+- `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`
+- `G:\My Drive\Aesop Academy\Obsidian\Meridian_Sessions`
+
+When Codex gives Scott a handoff to paste into Claude, it should be presented in a fenced text block so the UI provides a copy button.
+
+Prime should also own routine review, rejection, retry, and verification loops.
+
+Scott should not be pulled into normal builder/reviewer/verifier coordination. If a review rejects work, Prime should route the correction back to the builder. If tests fail, Prime should retry or assign repair, then rerun review and verification. Dual-lane cognition and multimodal review should reduce the number of issues that require Scott at all.
+
+Human involvement should be reserved for:
+
+- Final plan review and approval.
+- Strategic or taste judgments.
+- Irreversible, public, financial, account-risking, or policy-sensitive actions.
+- Ambiguity that Prime cannot resolve with available memory, knowledge, proof, and model lanes.
+- Explicit user preference to inspect or take over.
+
+The main workspace should show routine worker loops as state, not as requests for Scott to manage them.
+
+The orchestrator queue and non-orchestrator queue are not divided by whether Prime can make a decision.
+
+- Orchestrator Queue: the main conversational queue where Scott and Prime communicate.
+- Non-Orchestrator Queue: a review/gating prompt window for artifacts, plans, decisions, comparisons, proof, worker outputs, or other items Prime chooses to show Scott.
+
+Prime may place an item in the non-orchestrator queue because the human is the explicit gate, because user visibility is valuable, or because Prime has decided human review is the correct next step. It does not necessarily mean Prime is incapable of deciding.
+
+The orchestrator queue and non-orchestrator queue may be tabs of the same main cockpit screen rather than separate simultaneous panels. This saves space while preserving the distinction.
+
+The non-orchestrator window is still a prompt window. It should allow Scott to respond directly to the artifact, plan, proof, comparison, or gate Prime has placed there, without turning worker-session management back into the primary interface.
+
+Cross-check should be automatic in Meridian, as it became in Polaris.
+
+Automatic cross-check messages and findings should appear in the non-orchestrator prompt window/surface. They are not primary conversational messages from Prime, but they are review/gating material Scott may need to see or respond to.
+
+The name "non-orchestrator" is descriptive but awkward. This surface needs an honest product name that says what it does: review, proof, gates, system findings, and promptable artifacts outside the main Prime conversation.
+
+System-level wake messages such as `Bifrost Go`, `Beacon Go`, and `Relay Go` belong in the non-orchestrator queue/window if displayed as text. Prime's conversational wake message and progress intention belong in the orchestrator queue.
+
+The NASA-style boot sequence may also be audio-first: a spoken readiness sequence such as "Relay Go. Bifrost Go. Beacon Go." As each harness is spoken, corresponding lights or indicators on the cockpit panel should illuminate. This creates the launch-room feeling without requiring all boot messages to occupy persistent conversational space.
+
+## Provisional Harness Names
+
+These names are a holding place for later discussion. They are not final API names or required UI labels.
+
+Preferred current direction is mythic-but-not-mostly-gods: named objects, forces, bridges, records, and roles with strong voice-dictation survivability.
+
+Current favorites:
+
+- Prime: Orchestrator / Local Brain
+- Bifrost: UI Harness
+- Beacon: Heartbeat / Health Harness
+- Echo: Memory Harness
+- Atlas: Knowledge / RAG Harness
+- Vault: Archive / Records Harness
+- Forge or Vulcan: Tool Harness
+- Aegis: Proof Harness
+- Charter: Policy Harness
+- Loom: Workflow Harness
+- Compass: Portfolio / Objective Harness
+- Relay: Agent / Model Harness
+- Groot: Git / Worktree Harness, private/internal favorite
+- Grove, Root, or Branch: public-safe Git / Worktree alternatives
+- Lens: Browser Harness
+- Launch: Release Harness
+
+Earlier pantheon candidates worth keeping:
+
+- Oracle: Orchestrator candidate or brief/recommendation mode
+- Athena: Memory Harness
+- Thoth: Knowledge / RAG Harness
+- Horus: Archive / Records Harness
+- Hestia: Heartbeat / Health Harness
+- Themis: Policy Harness
+- Heimdall: UI Harness
+- Odin or Zeus: Orchestrator candidates
+
+Naming rule:
+
+```text
+If Scott has to speak it, it must survive dictation.
+```
+
 ## Open Terms
 
 These terms need more discussion before they become stable:
