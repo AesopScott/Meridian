@@ -79,6 +79,7 @@ The capabilities below are the load-bearing pieces of that shape.
   - The 30-second poll cadence and three-commit Codex review cadence are conventions, not enforced contracts. They need a home in a harness when one exists.
   - Same-file edit conflicts between lanes are currently prevented by per-task file allowlists; a programmatic boundary check would be more durable.
   - The queue currently mixes assignment, log, and audit in one file. Eventually these may want to be separable views over the same underlying event log.
+  - Polaris now has a Q button prototype that lets a session trigger a queue-poll on demand from the UI. Meridian will eventually need an equivalent as a Bifrost/session-harness capability — a way for Prime or Scott to force an immediate pull without waiting for the next timed cycle. This is future work; the flat-file queue does not need it yet.
 
 ---
 
@@ -86,14 +87,14 @@ The capabilities below are the load-bearing pieces of that shape.
 
 - **Definition:** A three-part discipline that makes "Relay must not become prompt drag" measurable: **Prompt Budget** sets tier-locked rules (max tokens, allowed sources), **Prompt Packet** is the validated immutable bundle built under those rules, and **Prompt Metrics** measure construction time, token count, and overhead against a vendor baseline.
 - **Why it matters:** This is one of Meridian's most distinctive architectural claims. The Polaris postmortem identified prompt overhead inside the agent harness — not orchestration itself — as the dominant tax. Meridian answers by making prompt weight a deterministic function of risk tier and by sealing the prompt as a validated artifact *before* dispatch. Worker dispatch stays lean; Prime stays rich. The split between the two is enforced by data, not by prompt convention.
-- **Maturity:** `domain slice` for Prompt Budget (typed, mapped to risk tier, deterministic). Prompt Packet has a design brief and implementation checklist but no runtime code. Prompt Metrics is sketched in the budget integration brief but not built. RelayRoute does not yet carry the budget field in runtime.
+- **Maturity:** `domain slice` for Prompt Budget (typed, mapped to risk tier, deterministic) and Prompt Packet (typed, immutable domain model with full validation hardening in `__post_init__` landed in Build 1, commit `0ce0cf9`). Prompt Metrics is sketched in the budget integration brief but not built. RelayRoute does not yet carry the budget field in runtime.
 - **Likely harness owner:** Relay (carries the budget on every route, builds and seals the packet, emits metrics).
 - **Risks / open questions:**
   - Token counting is provider-specific; the budget abstraction must not pretend tokens are universal across model families.
   - The vendor baseline measurement requires sending the same task minimally to the vendor — that itself costs money and may be rate-limited.
-  - The packet's `is_valid` flag versus exception-on-invalid is still an open design question (see `docs/prompt-packet-implementation-checklist.md` open questions).
-  - The lineage dict is internal accounting; under no circumstance should it leak into the serialized prompt. This needs a test, not just a convention.
+  - The lineage dict is internal accounting; under no circumstance should it leak into the serialized prompt. This is a test requirement, not just a convention.
   - Tier 3/4 budgets allow proof and explanation context to grow — the ceiling values (5,000 / 8,000) are placeholders and will need empirical tuning.
+  - Prompt Packet's next integration step is carrying `PromptBudgetPlan` on `RelayRoute` (see `docs/relay-prompt-budget-integration-brief.md`); until that lands, Budget and Packet exist as standalone domain objects without end-to-end enforcement.
 
 ---
 
@@ -190,7 +191,7 @@ The capabilities below are the load-bearing pieces of that shape.
 | 1 | Prime as persistent orchestrator            | domain slice                       | Prime (kernel)               |
 | 2 | Worker sessions as harness-driven lanes     | domain slice                       | Relay, Beacon, Bifrost       |
 | 3 | Live queue / pull / poll / review loop      | integrated                         | (Loom future) — flat-file today |
-| 4 | Prompt Budget / Packet / Metrics            | domain slice (Budget); planned (Packet, Metrics) | Relay        |
+| 4 | Prompt Budget / Packet / Metrics            | domain slice (Budget, Packet); planned (Metrics) | Relay        |
 | 5 | Review Console / non-orchestrator surface   | planned                            | Bifrost, Aegis, Relay        |
 | 6 | Aegis proof and gated cognition             | domain slice                       | Aegis                        |
 | 7 | Council reasoning                           | domain slice                       | Prime (CouncilPlan via Relay) |
