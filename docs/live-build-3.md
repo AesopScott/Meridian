@@ -264,6 +264,51 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes stale completed FileMap task below):
 
+Goal: FileMap refresh for Model Harness adapter contract.
+
+Context:
+
+- Build 1 landed the provider-neutral Model Harness adapter contract in commit `653488b`.
+- Codex Reviews C Round C3 cleared it with no findings.
+- `meridian_core/model_adapter.py` and `tests/test_model_adapter.py` are important new files and must be discoverable by FileMap / future Echo / Atlas memory injection.
+- This is a dumb-fast FileMap task only. Do not make architecture decisions.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the collision instead of editing.
+
+Allowed files:
+
+- `docs/FileMap.md`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Task:
+
+- Pull latest `origin/main` in your unique worktree before editing.
+- Register `meridian_core/model_adapter.py` in `docs/FileMap.md`.
+- Add the matching `FileMapEntry` in `meridian_core/filemap.py`.
+- Add `meridian_core/model_adapter.py` to `_REQUIRED_PATHS` in `tests/test_filemap.py`.
+- If useful and still tiny, mention `tests/test_model_adapter.py` as the related test for `model_adapter.py`; do not add test files as separate FileMap entries unless the local pattern already does so.
+- Do not edit runtime behavior.
+- Do not edit package exports.
+- Do not edit other live queues.
+
+Tests:
+
+- Run `python -m pytest tests/test_filemap.py -q`.
+
+Completion:
+
+- Commit only this FileMap slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run. Reviews B owns the FileMap review.
+
+Coordinator write log:
+
+- 2026-05-30 15:51 -06:00 - Assigned FileMap refresh for Build 1 model adapter contract `653488b`; commit pending; tests pending.
+
+Stale prior completed FileMap task follows.
+
 Goal: dumb-fast V0/V1 progress tracker sync.
 
 Context:

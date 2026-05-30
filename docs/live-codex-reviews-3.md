@@ -56,7 +56,7 @@ Look for:
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 1 | 7c75f43 | Relay execution proof trail + Aegis pre-dispatch gate (Round C2) | passed | none | continue polling for delegated work |
+| Build 1 | 653488b | Provider-neutral Model Harness adapter contract (Round C3) | passed | none | Build 3 should register `meridian_core/model_adapter.py` and `tests/test_model_adapter.py` in FileMap |
 | Build 2 | 989366f | V0 prime_console / prime_status / route_to_console (Round C1) | passed | LOW deferred: route_to_console type-vs-semantics doc note | Build 2 cadence cleared for three-commit window ending at 989366f; continue polling |
 
 ## Review Round Scope
@@ -81,6 +81,25 @@ Out of scope:
   - V0 capability plan content beyond what the commits touch
   - Queue marker commits (provenance only)
 Reason: delegated V0 runtime-gate review per Active Task in this file
+
+2026-05-30 15:50 MDT - Round C3 scope
+Build lanes: Build 1
+Commit range(s): Build 1 653488b; queue marker a629d23 for provenance only
+Allowed review files:
+  - meridian_core/model_adapter.py
+  - meridian_core/relay_executor.py
+  - tests/test_model_adapter.py
+  - tests/test_relay_executor.py
+  - docs/live-build-1.md for completion/provenance only
+Tests to run:
+  - python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q
+  - python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q
+Out of scope:
+  - Build 2/3/4/5 work
+  - FileMap registration follow-up
+  - package API exports
+  - real vendor SDK implementation
+Reason: Build 1 marked provider-neutral Model Harness adapter contract Ready for Codex Review
 ```
 
 ## Read Checks
@@ -93,6 +112,8 @@ Reason: delegated V0 runtime-gate review per Active Task in this file
 2026-05-30 14:08 MDT - Codex Reviews C checked queue; status: idle; notes: queue unchanged since dbb91f0; no new Review-C delegation in live-codex-reviews.md; other build lanes also idle (Build 1/3/4/5 latest commits are read-check chores); no executable task
 2026-05-30 14:10 MDT - Codex Reviews C checked queue; status: idle; notes: Reviews A Round 3 now completed (live-codex-reviews.md lines 194/206/214/221) — Reviews A explicitly acknowledges Round C1 clearance and confirms our LOW deferred on route_to_console is tracked here authoritatively; Build 2 cadence "fully clear" per Reviews A; no new Review-C delegation; no executable task
 2026-05-30 14:11 MDT - Codex Reviews C checked queue; status: idle; notes: queue unchanged since f15de05; Reviews A queue still records Round 3 closed with no new Review-C delegation; Build 1/Build 2 cadence fully clear; no executable task
+2026-05-30 15:50 MDT - Codex Reviews C checked queue; status: running; notes: starting Round C3 for Build 1 653488b provider-neutral Model Harness adapter contract
+2026-05-30 15:51 MDT - Codex Reviews C checked queue; status: idle; notes: Round C3 complete; Build 1 653488b passed, no findings, no repairs routed
 ```
 
 ## Review Log
@@ -103,6 +124,7 @@ Reason: delegated V0 runtime-gate review per Active Task in this file
 2026-05-30 13:58 MDT - Reviewed Build 2 commit 989366f; result: pass; tests: tests/test_cli.py 24/24 + tests/test_review_console.py 85/85 pass; notes: route_to_console is in-memory only (module-level ReviewConsoleQueue, no I/O), preserves PENDING status default and standard suggested_actions list; prime_console/prime_status deterministic on empty queue and injected queue
 2026-05-30 15:05 MDT - Reviewed Build 1 commit 0e990df; result: pass; tests: tests/test_relay_executor.py 37/37 pass and tests/test_aegis.py tests/test_relay_executor.py 124/124 pass; notes: RelayExecutionSummary converts successful outputs to non-blocking BUILD_OUTPUT evidence and lane errors to proof-blocking ERROR severity evidence; prompt payload and packet id are excluded from evidence text
 2026-05-30 15:05 MDT - Reviewed Build 1 commit 7c75f43; result: pass; tests: tests/test_relay_executor.py 37/37 pass and tests/test_aegis.py tests/test_relay_executor.py 124/124 pass; notes: tier-3+ dispatch checks ProofTrail.blocking() before model calls, raises RelayProofGateError with blocking evidence ids, and tier-2 remains unblocked
+2026-05-30 15:51 MDT - Reviewed Build 1 commit 653488b; result: pass; tests: tests/test_model_adapter.py tests/test_relay_executor.py 46/46 pass and tests/test_aegis.py tests/test_relay_executor.py 126/126 pass; notes: ModelAdapter protocol is payload-only, FakeModelAdapter records only prompt payloads, EnvConfiguredModelAdapter fails on missing API env before transport, Relay executor still aliases ModelCallFn to the payload-only adapter boundary
 ```
 
 ## Proof Log
@@ -117,6 +139,10 @@ Reason: delegated V0 runtime-gate review per Active Task in this file
 2026-05-30 15:05 MDT - Proof for Build 1 commit 0e990df; proof type: diff+test; evidence: relay_execution_summary_to_proof_trail() adds AegisEvidence with EvidenceType.BUILD_OUTPUT, INFO severity for results, ERROR severity for errors, source relay_executor, and target role:model; tests assert clean summary is clean, errors are blocking, role/model target is present, and prompt/packet strings are absent; result: pass
 2026-05-30 15:05 MDT - Proof for Build 1 commit 7c75f43; proof type: diff+test; evidence: execute_relay_dispatch_plan() calls _assert_proof_gate_clear() before the lane loop; tests assert blocking tier-3 ProofTrail raises, no model call occurs, clean tier-3 ProofTrail dispatches, tier-2 is not blocked, and error message names proof-001; result: pass
 2026-05-30 15:05 MDT - Proof for Build 1 commits 0e990df/7c75f43; proof type: reference; evidence: meridian_core/relay_executor.py contains no httpx/requests/anthropic/openai/subprocess imports or calls; the only model boundary remains model_call(lane.payload); result: pass
+2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: test; evidence: python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q -> 46 passed; result: pass
+2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: test; evidence: python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q -> 126 passed; result: pass
+2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: reference; evidence: rg for provider SDK and account automation terms in model_adapter.py and relay_executor.py found no provider SDK or automation code; only explanatory docstrings mention account/session details staying outside Relay; result: pass
+2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: diff; evidence: EnvConfiguredModelAdapter.__call__ invokes config.require_api_key() before transport; test_missing_config_fails_before_transport_call asserts transport calls remain empty when config is missing; Relay executor still calls model_call(lane.payload); result: pass
 ```
 
 Minimum proof expectations:
@@ -135,6 +161,8 @@ Minimum proof expectations:
 2026-05-30 13:58 MDT - Build 2 commit 989366f; severity: LOW; file: meridian_core/review_console.py; finding: route_to_console accepts any ReviewConsoleItemType but always creates a non-promptable, INFO-severity, ACKNOWLEDGE-only item regardless of type — callers passing APPROVAL_GATE or PLAN_REVIEW via this helper get an informational item, not the canonical gate semantics from make_approval_gate / make_plan_review_item. Acceptable for V0 visibility surface (helper is a router, not a gate factory) and Review Console queue invariants (promptable/requires_response/status) remain intact; recommend documenting in docstring or narrowing item_type to SYSTEM_FINDING in V1; action: defer
 2026-05-30 15:05 MDT - Build 1 commit 0e990df; severity: none; file: meridian_core/relay_executor.py; finding: Relay execution summary to Aegis proof trail is provider-neutral, prompt-lean, and proof-blocking for execution errors; action: clear
 2026-05-30 15:05 MDT - Build 1 commit 7c75f43; severity: none; file: meridian_core/relay_executor.py; finding: Aegis pre-dispatch proof gate blocks tier-3+ dispatch before model calls and leaves lower tiers unblocked; action: clear
+2026-05-30 15:51 MDT - Build 1 commit 653488b; severity: none; file: meridian_core/model_adapter.py; finding: Provider-neutral Model Adapter contract is payload-only, env-safe before live transport, and has no vendor/account automation; action: clear
+2026-05-30 15:51 MDT - Build 1 commit 653488b; severity: none; file: meridian_core/relay_executor.py; finding: Relay executor preserves payload-only dispatch and Aegis pre-dispatch blocking with the adapter boundary; action: clear
 ```
 
 ## Repair Routing Log
@@ -147,6 +175,12 @@ Minimum proof expectations:
 ## Active Task
 
 Current Active Task:
+
+Round C3 complete at 2026-05-30 15:51 MDT. Build 1 `653488b` passed with no actionable findings.
+
+No active task. Codex Reviews C is idle - continue polling for Build 1/Build 2 runtime-gate review markers.
+
+Stale prior Round C3 task follows.
 
 Goal: perform Codex Reviews C Round C3 for Build 1 `653488b`.
 
