@@ -240,6 +240,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-01 ~10:28 CDT - Build 1 hygiene note: commit 9dc351f absorbed unintended coordinator restructuring (date corrections, Completed Slices heading) authored by a parallel session whose edits re-entered working tree between my Edit and git add; my Read Checks heartbeat for 10:25 was lost in that commit; this is the corrected heartbeat addition.
 2026-06-01 ~10:30 CDT - Build 1 checked queue; ACTIVE TASK found: Relay adapter registry and lane dispatch bridge; worktree: C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780111650704 (unique); executing.
 2026-06-01 ~10:38 CDT - Build 1 note: parallel session in shared main worktree flagged task as possible duplicate; this polaris-worktree session confirms AdapterRegistry/MissingAdapterError/execute_relay_plan_with_registry are NEW code not present in 653488b; completing as assigned.
+2026-06-01 ~10:48 CDT - Build 1 checked queue; status: idle (Active Task body cleared; Relay adapter registry slice landed as commit 0560eb4 by parallel polaris-worktree session chat_1780111650704; awaiting next assignment)
 ```
 
 ## Write/Completion Log
