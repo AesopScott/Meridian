@@ -55,6 +55,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-30 13:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 14:05 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 14:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
+2026-05-30 14:20 -06:00 - Build 2 checked queue; status: running (Active Task found — repair stale is_valid/validation_errors claim in note)
 ```
 
 ## Write/Completion Log
@@ -77,6 +78,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; tests <result>
 2026-05-30 12:35 -06:00 - Build 2 completed Codex review repair pass; commit 253e505; tests 688 passed
 2026-05-30 11:37 -06:00 - Codex assigned PromptPacket package API note cleanup; commit pending; tests not required
 2026-05-30 13:52 -06:00 - Build 2 completed PromptPacket planning note cleanup; commit 4be1117; tests none required (docs-only)
+2026-05-30 11:43 -06:00 - Codex review found stale PromptPacket note claim after commit 4be1117; repair assigned; tests not required
 ```
 
 ## Cross-Check Activity
@@ -91,6 +93,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:20 -06:00 - Build 2 cross-check: no blocking findings in commit 9c52688; targeted tests 140 passed.
 2026-05-30 11:45 -06:00 - Build 2 cross-check: no blocking findings in commit f2f69ff; targeted tests 11 passed (test_package_api.py).
 2026-05-30 12:35 -06:00 - Build 2 cross-check: Codex found 3 MEDIUM findings in 88fbecb/f2f69ff/e73b840; repaired 2 (test __all__ membership, stale candidates text); 1 deferred (prompt-packet-package-api-note.md not in allowed files); commit 253e505; tests 688 passed.
+2026-05-30 11:43 -06:00 - Build 2 cross-check finding: docs/prompt-packet-package-api-note.md still says callers use is_valid and validation_errors, but PromptPacket raises PromptPacketValidationError and has no such public attributes.
 ```
 
 ## Codex Review Cadence
@@ -112,7 +115,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: clean up the stale PromptPacket package API planning note.
+Goal: repair stale PromptPacket package API note claim.
 
 Allowed files only:
 
@@ -120,15 +123,10 @@ Allowed files only:
 
 Task:
 
-- The note still describes PromptPacket as "not yet exported" and references `PromptPacketError`.
-- Bring the note up to date with the current package surface:
-  - `PromptPacket`
-  - `PromptPacketValidationError`
-  - `build_prompt_packet`
-- State that the export gate has already opened because Build 1 validation hardening and Build 2 package-root export landed.
-- Remove stale "wait before export" language.
-- Keep private validation helpers explicitly internal.
-- Keep the note concise and historically clear: it began as a pre-export decision note, but now records the actual public-contract decision.
+- Codex reviewed Build 2 commit `4be1117`.
+- Finding: the note says callers interact through `is_valid` and `validation_errors`, but the current PromptPacket contract raises `PromptPacketValidationError` during construction and does not expose those public attributes.
+- Repair the note so it accurately describes the current exception-based validation contract.
+- Keep the change narrow.
 - Do not edit `meridian_core/__init__.py`.
 - Do not edit package tests.
 - Do not edit FileMap.

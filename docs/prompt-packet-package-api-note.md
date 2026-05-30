@@ -35,7 +35,7 @@ _validate_construction_time
 _validate_lineage
 ```
 
-Any `_`-prefixed validation helper lives inside `meridian_core/prompt_packet.py` and is not part of the public contract. Callers interact through `is_valid` and `validation_errors` on the packet, not through validation functions directly.
+Any `_`-prefixed validation helper lives inside `meridian_core/prompt_packet.py` and is not part of the public contract. Validation is exception-based: invalid construction raises `PromptPacketValidationError` before the object exists; a successfully constructed packet is always valid and exposes no post-construction validation query attributes.
 
 Sub-exception types (e.g. `BudgetExceededError`) remain module-level imports only until the exception hierarchy is stable across a further review cycle.
 
