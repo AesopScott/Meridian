@@ -101,6 +101,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 15:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 788e101
 2026-05-30 15:01 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 8dfd10a
 2026-05-30 15:02 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 042658a
+2026-05-30 15:03 -06:00 - Build 4 checked queue; status: idle; no new Active Task; 124dba6 added proof logs to review lanes (not Build 4 owned); Round B2 still pending; Build 4 slices still pending sweep; origin/main at 124dba6
 ```
 
 ## Write/Completion Log
