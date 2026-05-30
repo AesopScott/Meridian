@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from meridian_core.council import CouncilPlan, CouncilRole
+from meridian_core.prompt_budget import PromptBudgetPlan, PromptBudgetTier
 from meridian_core.relay import (
     ContextStrategy,
     CostPosture,
@@ -314,3 +315,53 @@ class TestCouncilAwareness:
         route = route_from_assessment(assessment)
         assert isinstance(route.council_plan, CouncilPlan)
         assert CouncilRole.ANALYST in route.council_plan.roles
+
+
+# ---------------------------------------------------------------------------
+# Prompt Budget integration -- RelayRoute carries a bounded PromptBudgetPlan
+# ---------------------------------------------------------------------------
+
+
+class TestPromptBudgetIntegration:
+    @pytest.mark.parametrize("tier", [0, 1, 2, 3, 4])
+    def test_every_tier_has_prompt_budget(self, tier):
+        assert isinstance(route_from_tier(tier).prompt_budget, PromptBudgetPlan)
+
+    @pytest.mark.parametrize("tier,expected", [
+        (0, PromptBudgetTier.MINIMAL),
+        (1, PromptBudgetTier.MINIMAL),
+        (2, PromptBudgetTier.FOCUSED),
+        (3, PromptBudgetTier.BOUNDED),
+        (4, PromptBudgetTier.EXPLAINED),
+    ])
+    def test_budget_tier_matches_risk_tier(self, tier, expected):
+        assert route_from_tier(tier).prompt_budget.tier is expected
+
+    @pytest.mark.parametrize("tier", [0, 1, 2, 3, 4])
+    def test_council_plan_still_present_alongside_budget(self, tier):
+        route = route_from_tier(tier)
+        assert isinstance(route.council_plan, CouncilPlan)
+        assert isinstance(route.prompt_budget, PromptBudgetPlan)
+
+    def test_budget_allowed_sources_are_independent_copies(self):
+        r1 = route_from_tier(2)
+        r2 = route_from_tier(2)
+        r1.prompt_budget.allowed_sources.append("injected")
+        assert "injected" not in r2.prompt_budget.allowed_sources
+
+    @pytest.mark.parametrize("tier", [0, 1, 2, 3, 4])
+    def test_existing_routing_mode_unchanged(self, tier):
+        expected_modes = {
+            0: RoutingMode.NO_MODEL,
+            1: RoutingMode.SINGLE_LANE,
+            2: RoutingMode.DUAL_LANE,
+            3: RoutingMode.DUAL_LANE_PROOF,
+            4: RoutingMode.HUMAN_GATE,
+        }
+        assert route_from_tier(tier).mode is expected_modes[tier]
+
+    def test_budget_populated_via_assessment(self):
+        assessment = assess_tier(3)
+        route = route_from_assessment(assessment)
+        assert route.prompt_budget.tier is PromptBudgetTier.BOUNDED
+        assert route.prompt_budget.max_context_tokens == 5000

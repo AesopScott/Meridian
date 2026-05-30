@@ -12,6 +12,7 @@ from enum import Enum
 from typing import cast
 
 from .council import CouncilPlan, council_plan_for_tier
+from .prompt_budget import PromptBudgetPlan, prompt_budget_for_risk_tier
 from .risk import RiskAssessment, RiskTier, assess_tier
 
 
@@ -61,6 +62,7 @@ class RelayRoute:
     requires_human_gate: bool
     risk_tier: int
     council_plan: CouncilPlan
+    prompt_budget: PromptBudgetPlan
 
 
 # ---------------------------------------------------------------------------
@@ -151,6 +153,7 @@ def route_from_assessment(
         requires_human_gate=row["requires_human_gate"],
         risk_tier=assessment.tier,
         council_plan=council_plan_for_tier(assessment),
+        prompt_budget=prompt_budget_for_risk_tier(assessment.tier),
     )
 
 
