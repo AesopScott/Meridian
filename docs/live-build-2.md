@@ -49,6 +49,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-30 13:00 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 13:10 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 13:20 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
+2026-05-30 13:30 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 ```
 
 ## Write/Completion Log
@@ -104,43 +105,34 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: run Build 2 Codex review pass for package API surface.
+Goal: clean up the stale PromptPacket package API planning note.
 
 Allowed files only:
 
-- `meridian_core/__init__.py`
-- `tests/test_package_api.py`
-- `docs/package-api-surface-note.md`
+- `docs/prompt-packet-package-api-note.md`
 
 Task:
 
-- Build 2 has completed three package/API docs commits since the last review:
-  - `88fbecb` PromptPacket package API planning note
-  - `f2f69ff` PromptPacket package-root exports
-  - `e73b840` package API surface note update
-- Per the live queue cadence, stop normal build work and perform a Codex-style review pass on the Build 2-owned package API surface.
-- Review only the allowed files.
-- Check:
-  - exported names are intentional and present in `__all__`
-  - package API smoke tests cover PromptPacket exports
-  - private helpers are not exported
-  - package API note matches current root exports
-  - no root export has been added without a clear public-contract reason
-- Automatically repair actionable findings in the allowed files.
-- If there are no actionable findings, record that result in this queue and return to polling.
-- Do not edit FileMap; Build 3 owns FileMap.
-- Do not edit PromptPacket runtime code; Build 1 owns PromptPacket.
+- The note still describes PromptPacket as "not yet exported" and references `PromptPacketError`.
+- Bring the note up to date with the current package surface:
+  - `PromptPacket`
+  - `PromptPacketValidationError`
+  - `build_prompt_packet`
+- State that the export gate has already opened because Build 1 validation hardening and Build 2 package-root export landed.
+- Remove stale "wait before export" language.
+- Keep private validation helpers explicitly internal.
+- Keep the note concise and historically clear: it began as a pre-export decision note, but now records the actual public-contract decision.
+- Do not edit `meridian_core/__init__.py`.
+- Do not edit package tests.
+- Do not edit FileMap.
 
 Tests:
 
-```text
-python -m pytest tests/test_package_api.py -q
-python -m pytest -q
-```
+- No tests required. This is docs-only.
 
 Completion:
 
-- Commit only this slice.
+- Commit only this docs slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash and test count in your session.
+- Report commit hash in your session.
