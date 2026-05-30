@@ -40,6 +40,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-30 ~23:12 CDT - Build 1 checked queue; status: idle (awaiting next assignment)
 2026-05-30 ~23:20 CDT - Build 1 checked queue; status: running (PromptPacket validation hardening task)
 2026-05-30 ~23:22 CDT - Build 1 checked queue; status: idle (awaiting next assignment)
+2026-05-31 ~00:05 CDT - Build 1 checked queue; status: running (PromptPacket model-dispatch boundary task)
 ```
 
 ## Write/Completion Log
@@ -58,6 +59,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-30 ~23:10 CDT - Build 1 completed Prompt Packet domain model; commit b453e2e; tests 669 passed
 2026-05-30 11:00 -06:00 - Codex review found PromptPacket direct-construction validation bypass and assigned repair; commit pending; tests pending
 2026-05-30 ~23:20 CDT - Build 1 completed PromptPacket validation hardening; commit 0ce0cf9; tests 675 passed
+2026-05-31 ~00:05 CDT - Build 1 completed PromptPacket model_payload() dispatch boundary; commit 111a975; tests 685 passed; Obsidian updated
 ```
 
 ## Cross-Check Activity
