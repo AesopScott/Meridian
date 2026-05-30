@@ -204,35 +204,20 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 
 Current Active Task:
 
-Goal: perform Codex Reviews A Round 3 with explicit proof.
+Goal: coordinate Review A Round 3 after delegation to Review C.
 
 Scope:
 
-- Build 1 commit `190e527` - V0 Relay executor skeleton.
 - Build 2 commit `d821106` - Relay executor API policy note.
-- Build 2 commit `e800c03` - V0 `prime_wake` CLI surface.
-- Build 2 commit `989366f` - V0 `prime_console`, `prime_status`, and `route_to_console` CLI visibility surface.
+- Delegated to Review C (`docs/live-codex-reviews-3.md`): Build 1 `190e527`, Build 2 `e800c03`, Build 2 `989366f`.
 - Include queue marker commits only as provenance, not product scope.
 
 Required proof:
 
-- For Build 1, inspect `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`.
-- Run `python -m pytest tests/test_relay_executor.py -q`.
-- Confirm the executor forwards only lane payload text to the injected callable.
-- Confirm no vendor/API/account automation was introduced.
-- Confirm exceptions are captured per lane and do not stop other lanes.
 - For Build 2, inspect `docs/relay-executor-api-policy.md`.
 - Confirm the policy does not prematurely require package-root exports before Build 1 is reviewed.
-- For Build 2 `e800c03`, inspect the CLI diff and tests.
-- Run the focused CLI tests that cover `prime_wake`.
-- Confirm mission load failures surface clearly.
-- Confirm wake output is deterministic and suitable for the non-orchestrator/system surface.
-- Confirm no persistence or Bifrost UI was introduced.
-- For Build 2 `989366f`, inspect `meridian_core/cli.py`, `meridian_core/review_console.py`, and `tests/test_cli.py`.
-- Run the focused CLI and Review Console tests touched by the slice.
-- Confirm `route_to_console()` does not create durable persistence or bypass existing Review Console status/type semantics.
-- Confirm `prime_console` and `prime_status` output is deterministic and suitable for V0 CLI visibility.
-- Treat Build 2 as cadence-paused after this review scope because commits `d821106`, `e800c03`, and `989366f` are the three current Build 2 task-changing commits.
+- Confirm Review C has accepted or completed the delegated V0 gate scope before marking Build 1 or Build 2 cadence fully clear.
+- Treat Build 2 as cadence-paused until both Review A's `d821106` policy check and Review C's runtime-gate check complete.
 
 Output:
 
