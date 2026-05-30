@@ -214,6 +214,35 @@ V1 explicitly does not:
 
 ---
 
+## 8A. Prompt / Session Engine Carry-Forward From Polaris
+
+Do not reinvent the prompt/session capability when Bifrost grows the UI around live model sessions.
+
+Polaris already has a working prompt/session engine for the model surfaces Scott actually uses:
+
+- Max / Claude sessions
+- Codex sessions
+- OpenRouter sessions
+- GPT sessions, even though Scott uses these less often
+
+V1 should treat that engine as a proven harness capability to extract, wrap, or adapt. The Bifrost cockpit should provide better orchestration, queue assignment, visibility, and Prime-owned steering around it, not rebuild the prompt dispatch mechanics from scratch inside UI components.
+
+Implementation implications:
+
+- Keep prompt/session mechanics in the Model Harness / Session Harness boundary, not scattered through Bifrost view code.
+- Reuse Polaris behavior for prompt submission, resume, transfer, quick replies, model selection, diagnostic logging, and session card output capture wherever it is stable.
+- Preserve the existing differences between Max/Claude, Codex, OpenRouter, and GPT adapters instead of flattening them into a generic UI-only abstraction.
+- Let Prime decide which adapter/harness receives a directive; let the adapter preserve the provider-specific mechanics.
+- If a feature is already reliable in Polaris, the first Meridian version should wrap it and add state/proof/queue discipline around it.
+
+V1 explicitly does not:
+
+- Rewrite the prompt engine simply because the cockpit UI is new.
+- Move provider-specific prompt mechanics into Bifrost components.
+- Force GPT parity before Scott needs it.
+
+---
+
 ## 9. What Should Be Configurable
 
 V1 ships a settings surface (top-nav Settings button) and per-surface inline controls.
