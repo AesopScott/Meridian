@@ -92,6 +92,7 @@ Reason: delegated V0 runtime-gate review per Active Task in this file
 2026-05-30 14:07 MDT - Codex Reviews C checked queue; status: idle; notes: queue unchanged since 627e29c; Reviews A queue still delegates only the C1 slice (190e527, e800c03, 989366f) which is complete; Build 1 line 211 acknowledges Round C1 clearance (2706806); no new Review-C delegation; no executable task
 2026-05-30 14:08 MDT - Codex Reviews C checked queue; status: idle; notes: queue unchanged since dbb91f0; no new Review-C delegation in live-codex-reviews.md; other build lanes also idle (Build 1/3/4/5 latest commits are read-check chores); no executable task
 2026-05-30 14:10 MDT - Codex Reviews C checked queue; status: idle; notes: Reviews A Round 3 now completed (live-codex-reviews.md lines 194/206/214/221) — Reviews A explicitly acknowledges Round C1 clearance and confirms our LOW deferred on route_to_console is tracked here authoritatively; Build 2 cadence "fully clear" per Reviews A; no new Review-C delegation; no executable task
+2026-05-30 14:11 MDT - Codex Reviews C checked queue; status: idle; notes: queue unchanged since f15de05; Reviews A queue still records Round 3 closed with no new Review-C delegation; Build 1/Build 2 cadence fully clear; no executable task
 ```
 
 ## Review Log
@@ -136,6 +137,33 @@ Minimum proof expectations:
 ```
 
 ## Active Task
+
+Current Active Task:
+
+Goal: prepare Codex Reviews C Round C2 for the next V0 runtime gate.
+
+Scope trigger:
+
+- Build 2 marks `prime_approve <item-id>` Ready for Codex Review, or
+- Build 1 marks Relay + Aegis gate wire Ready for Codex Review.
+
+Until a trigger appears:
+
+- Poll `docs/live-build-1.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md`.
+- Do not execute build-lane tasks.
+- Do not review Build 3/4/5 docs/architecture work; Reviews B owns that.
+- Append read checks only when no trigger exists.
+
+When a trigger appears:
+
+- Declare Round C2 scope before reviewing.
+- Review only the target commit diff and directly necessary supporting files.
+- For Build 2 `prime_approve`, run `python -m pytest tests/test_cli.py -q`.
+- For Build 1 Relay + Aegis gate wire, run `python -m pytest tests/test_relay_executor.py -q` and, if practical, `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`.
+- Record proof before passing.
+- Route repairs back to the originating build lane if actionable.
+
+Stale prior status:
 
 Round C1 complete at 2026-05-30 13:58 MDT. All three commits passed:
 
