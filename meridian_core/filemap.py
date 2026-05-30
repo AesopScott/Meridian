@@ -185,6 +185,13 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Obsidian mirror: G:\\My Drive\\Aesop Academy\\Obsidian\\Meridian_Build\\FileMap.md",
         ),
+        FileMapEntry(
+            path="docs/prime-planning-harness-answers.md",
+            area=FileArea.PLANNING,
+            purpose="First Council-run planning answer brief: answers all Planning Harness questions for V0 Relay model/API dispatch and records the recommended adapter-first path.",
+            related_tests=[],
+            notes="Read before building real Relay dispatch or provider adapters.",
+        ),
 
         # -- Core package -----------------------------------------------
         FileMapEntry(

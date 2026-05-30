@@ -29,6 +29,7 @@ _REQUIRED_PATHS = [
     "meridian_core/relay_dispatch.py",
     "docs/relay-prompt-metrics-integration-brief.md",
     "docs/planning-harness-council-brief.md",
+    "docs/prime-planning-harness-answers.md",
     "docs/meridian-capabilities-architecture-map.md",
     "meridian_core/review_console.py",
     "meridian_core/builds.py",
