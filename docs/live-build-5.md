@@ -63,6 +63,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 12:25 -06:00 - Build 5 checked queue; status: idle; Codex Reviews B lane (docs/live-codex-reviews-2.md) now owns Build 5 review of 7c34566 (Round B1 queued, no result yet); no repair routed, no Cross-Check Activity, Active Task still stale; awaiting orchestrator reassignment; origin/main at 16dc897
 2026-05-30 12:26 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B1 still queued for 7c34566, no result, no repair routed, no Cross-Check Activity, Active Task still stale; awaiting orchestrator reassignment; origin/main at cbfc882
 2026-05-30 12:28 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B1 still queued for 7c34566, no result, no repair routed, no Cross-Check Activity, Active Task still stale; awaiting orchestrator reassignment; origin/main at dff15e5
+2026-05-30 12:29 -06:00 - Build 5 checked queue; status: idle; self-reported boundary cross logged in Cross-Check Activity (commit 5d60bb6 captured a Build 4 lane line); using `git commit -- <pathspec>` going forward; no new Active Task, Reviews B Round B1 still queued; origin/main at d1d2270
 ```
 
 ## Write/Completion Log
@@ -96,6 +97,7 @@ Append entries here when you check or act on cross-check activity.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 5 cross-check: none/finding/fix; details: <short note>
+2026-05-30 12:28 -06:00 - Build 5 cross-check: self-reported boundary cross; details: heartbeat commit 5d60bb6 accidentally captured a Build 4 lane heartbeat entry in docs/live-build-4.md (1-line addition Build 4 had unstaged in the worktree). The added content is legitimate Build 4 work, not edits I authored; the boundary cross is that I committed a file outside my Allowed set (rule 24). Root cause: `git add docs/live-build-5.md` was preceded by stash/pop sequences that left other lanes' files in a partially-tracked state. Going forward, using `git commit -- docs/live-build-5.md` (explicit pathspec) on top of explicit add to lock the commit scope. No revert performed — the line is correct Build 4 content and rewriting history would affect other lanes.
 ```
 
 ## Codex Review Cadence
