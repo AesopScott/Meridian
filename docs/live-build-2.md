@@ -152,6 +152,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 05:35 -06:00 - Build 2 checked queue; status: idle (task d821106 complete; no new Active Task; polling)
 2026-05-31 05:45 -06:00 - Build 2 checked queue; status: running (Active Task found — V0 prime_wake CLI surface)
 2026-05-31 05:55 -06:00 - Build 2 completed V0 prime_wake CLI surface; commit e800c03; files changed: meridian_core/cli.py, tests/test_cli.py; tests 819 passed; boundary note: docs/v1-capability-plan.md swept in from prior staged state (not owned by Build 2); Ready for Codex Review
+2026-05-31 06:05 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 ```
 
 ## Write/Completion Log
