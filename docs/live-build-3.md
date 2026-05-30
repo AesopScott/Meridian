@@ -89,6 +89,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 23:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 00:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 00:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
+2026-05-31 00:35 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — 4 uncatalogued docs from Round B1); starting work
 ```
 
 ## Write/Completion Log
@@ -146,8 +147,45 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-**No active task. Build 3 is idle.**
+Goal: FileMap refresh — register four uncatalogued architecture/strategy docs (Codex Reviews B Round B1 finding).
 
-Last completed: FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; 2026-05-30 17:20 -06:00. Ready for Codex Review.
+Background:
 
-Poll every 30 seconds. When a new task is written here, begin immediately.
+- Codex Reviews B Round B1 (2026-05-30 23:30 -06:00) reviewed Build 3 commit 4075ef4 (PASS), Build 4 commit 1d17fa1 (PASS), Build 5 commit 7c34566 (PASS).
+- During the Build 4 and Build 5 reviews, Round B1 confirmed four docs currently exist on disk but are absent from both `docs/FileMap.md` and `meridian_core/filemap.py`.
+- Build 4 explicitly defers FileMap edits to Build 3 in `docs/prime-orchestration-state-model.md` §"What This Is Not". Build 5 explicitly disclaims FileMap edits in `docs/bifrost-harness-dashboard-brief.md` §15. The gap therefore lives in Build 3's owned scope.
+
+Files to add to FileMap (both `docs/FileMap.md` and `meridian_core/filemap.py`):
+
+- `docs/v0-build-readiness-map.md` — Build 4-owned V0 gap analysis (created in commit `3cbf336`).
+- `docs/prime-orchestration-state-model.md` — Build 4-owned state model bridge to Python domain objects (created in commit `1d17fa1`).
+- `docs/bifrost-v0-cockpit-layout-brief.md` — Build 5-owned V0 cockpit layout brief (created in commit `d1d32af`).
+- `docs/bifrost-harness-dashboard-brief.md` — Build 5-owned Harness dashboard surface brief (created in commit `7c34566`).
+
+Allowed files:
+
+- `docs/FileMap.md`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Required process:
+
+1. Pull latest `origin/main`.
+2. Append timestamped Read Check entry; record cross-check entry citing Round B1 finding.
+3. Add one FileMap.md row and one `FileMapEntry` for each of the four docs, using the area taxonomy already in `FileArea` (likely `ARCHITECTURE` for state model and V0 readiness map; `BIFROST` for both Bifrost briefs). Keep the row prose in `docs/FileMap.md` and the entry prose in `meridian_core/filemap.py` consistent — see Round B1 LOW finding about prose divergence in the `live-codex-reviews.md` / `prime-orchestration-harness-prototype.md` entries.
+4. Add each path to `_REQUIRED_PATHS` in `tests/test_filemap.py` if appropriate, or extend the doc-path coverage assertions if a separate docs list is the convention.
+5. Run `python -m pytest tests/test_filemap.py -q` and the full suite if reasonable; capture results in the completion entry.
+6. Commit only these files. Push to `origin/main`.
+7. Mark slice Ready for Codex Review with commit hash, files changed, and tests run so Reviews B can verify the repair.
+8. Update Obsidian build notes.
+
+Out of scope:
+
+- Editing the Build 4 or Build 5 source docs themselves.
+- Adding any other docs to FileMap unless they were also created since 4075ef4 and currently lack entries (note them in the cross-check section, do not silently bundle).
+- Reconciling the LOW prose-divergence finding from Round B1 against `docs/live-codex-reviews.md` and `docs/prime-orchestration-harness-prototype.md` — that can be folded into this slice opportunistically, but is not required for the repair to pass.
+
+Completion marker: Ready for Codex Review with commit hash, files changed, tests run. Reviews B will verify in Round B2.
+
+Poll every 30 seconds. When this task is complete, return to idle polling.
