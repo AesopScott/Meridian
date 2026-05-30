@@ -150,9 +150,8 @@ class TestPromptBudgetForRiskTier:
         assert plan_a.max_context_tokens == plan_b.max_context_tokens
         assert plan_a.reason == plan_b.reason
 
-    def test_no_mutable_list_leakage(self):
-        plan_a = prompt_budget_for_risk_tier(2)
-        original_count = len(plan_a.allowed_sources)
-        plan_a.allowed_sources.append("injected_garbage")
-        plan_b = prompt_budget_for_risk_tier(2)
-        assert len(plan_b.allowed_sources) == original_count
+    def test_allowed_sources_is_immutable_tuple(self):
+        plan = prompt_budget_for_risk_tier(2)
+        assert isinstance(plan.allowed_sources, tuple)
+        with pytest.raises(AttributeError):
+            plan.allowed_sources += ("injected_garbage",)  # type: ignore[misc]

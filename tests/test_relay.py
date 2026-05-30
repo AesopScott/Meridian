@@ -343,11 +343,13 @@ class TestPromptBudgetIntegration:
         assert isinstance(route.council_plan, CouncilPlan)
         assert isinstance(route.prompt_budget, PromptBudgetPlan)
 
-    def test_budget_allowed_sources_are_independent_copies(self):
+    def test_budget_allowed_sources_are_immutable_tuples(self):
         r1 = route_from_tier(2)
         r2 = route_from_tier(2)
-        r1.prompt_budget.allowed_sources.append("injected")
-        assert "injected" not in r2.prompt_budget.allowed_sources
+        assert isinstance(r1.prompt_budget.allowed_sources, tuple)
+        assert isinstance(r2.prompt_budget.allowed_sources, tuple)
+        with pytest.raises(AttributeError):
+            r1.prompt_budget.allowed_sources += ("injected",)  # type: ignore[misc]
 
     @pytest.mark.parametrize("tier", [0, 1, 2, 3, 4])
     def test_existing_routing_mode_unchanged(self, tier):

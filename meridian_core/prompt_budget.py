@@ -38,11 +38,11 @@ class PromptBudgetPlan:
 
     tier: PromptBudgetTier
     max_context_tokens: int
-    allowed_sources: list[str] = field(default_factory=list)
+    allowed_sources: tuple[str, ...] = field(default_factory=tuple)
     reason: str = ""
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "allowed_sources", list(self.allowed_sources))
+        object.__setattr__(self, "allowed_sources", tuple(self.allowed_sources))
 
 
 # ---------------------------------------------------------------------------
