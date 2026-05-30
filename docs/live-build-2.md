@@ -151,7 +151,6 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 05:25 -06:00 - Build 2 checked queue; status: idle (task d821106 complete; no new Active Task; polling)
 2026-05-31 05:35 -06:00 - Build 2 checked queue; status: idle (task d821106 complete; no new Active Task; polling)
 2026-05-31 05:45 -06:00 - Build 2 checked queue; status: running (Active Task found — V0 prime_wake CLI surface)
-2026-05-31 05:55 -06:00 - Build 2 completed V0 prime_wake CLI surface; commit e800c03; files changed: meridian_core/cli.py, tests/test_cli.py; tests 819 passed; boundary note: docs/v1-capability-plan.md swept in from prior staged state (not owned by Build 2); Ready for Codex Review
 2026-05-31 06:05 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 06:15 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 06:25 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
@@ -160,6 +159,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 06:55 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 07:05 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 07:15 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
+2026-05-31 07:25 -06:00 - Build 2 checked queue; status: running (Active Task found — V0 prime_status and prime_console CLI)
 ```
 
 ## Write/Completion Log
@@ -186,6 +186,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-05-30 14:20 -06:00 - Build 2 completed is_valid/validation_errors claim repair; commit bf15569; files changed: docs/prompt-packet-package-api-note.md; tests none required (docs-only); Ready for Codex Review
 2026-05-30 16:55 -06:00 - Build 2 completed Relay package API policy note; commit 46e4eb3; files changed: docs/relay-package-api-policy-note.md, docs/package-api-surface-note.md; tests none required (docs-only); Ready for Codex Review
 2026-05-31 02:45 -06:00 - Build 2 completed Relay executor API policy note; commit d821106; files changed: docs/relay-executor-api-policy.md; tests none required (docs-only); Ready for Codex Review
+2026-05-31 05:55 -06:00 - Build 2 completed V0 prime_wake CLI surface; commit e800c03; files changed: meridian_core/cli.py, tests/test_cli.py; tests 819 passed; boundary note: docs/v1-capability-plan.md swept in from prior staged state (not owned by Build 2); Ready for Codex Review
 ```
 
 ## Cross-Check Activity
@@ -226,41 +227,44 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale idle text below):
 
-Goal: implement the V0 `prime_wake` CLI surface.
+Goal: implement the V0 `prime_status` and `prime_console` CLI visibility surface.
 
 Context:
 
-- `docs/v0-build-readiness-map.md` names `prime_wake()` as V0 gate item #1.
-- Domain pieces already exist: `meridian_core/mission.py`, `meridian_core/wake.py`, portfolio/heartbeat models, and Review Console item types.
-- Keep this slice narrow: make Prime visibly wake through CLI/stdout. Do not build the whole cockpit.
+- `docs/v0-build-readiness-map.md` names `route_to_console()` + `prime_console` / `prime_status` as V0 gate item #2.
+- Build 2 already completed the `prime_wake` CLI surface in commit `e800c03`.
+- This slice should make Prime's current state visible without waiting for the V1 cockpit.
+- Keep this CLI-only. Do not build Bifrost UI or persistence in this slice.
 
 Allowed files only:
 
 - `meridian_core/cli.py`
+- `meridian_core/review_console.py` only if a tiny `route_to_console()` helper belongs there under the existing local pattern
 - `tests/test_cli.py` or a new focused CLI test file if that is the local pattern
 - `docs/live-build-2.md`
 
 Task:
 
-- Add a CLI-accessible `prime_wake` command or function using the existing CLI pattern.
+- Add CLI-accessible `prime_console` and `prime_status` surfaces using the existing CLI pattern.
 - It should:
-  - load mission data through the existing mission loader
-  - build a wake brief using existing wake/domain helpers
-  - print human-readable Go/degraded/blocked lines suitable for the non-orchestrator/system surface
-  - surface `MissionLoadError` clearly instead of failing silently
-- If real portfolio/heartbeat state is not yet available, use the existing sample/default state pattern already present in tests or domain helpers.
-- Do not create persistence.
-- Do not edit Review Console runtime behavior unless the existing CLI pattern requires a tiny integration.
+  - print current Review Console items in a deterministic, human-readable format
+  - include item id, item type, status, summary/title, and provenance/source when available
+  - make `prime_status` print a compact combined view: mission/wake identity if available, current progress/intention substitute if available, and open Review Console items
+  - add or expose a small `route_to_console(item_type, summary, provenance)` helper if the existing Review Console API lacks a clean Prime-facing entrypoint
+- If there is no durable console store yet, use the existing in-memory/sample/default pattern already present in tests or domain helpers. Do not invent database persistence.
+- If real portfolio/heartbeat state is not yet available, say so clearly in the CLI output instead of faking live data.
+- Do not build gate enforcement in this slice.
 - Do not edit FileMap.
 
 Tests:
 
 - Add focused tests for:
-  - successful wake output includes mission identity and harness statuses
-  - missing/corrupt mission surfaces a readable failure
-  - command returns/prints deterministically
+  - `prime_console` output includes pending console items and statuses
+  - empty console output is deterministic and readable
+  - `prime_status` includes the Prime/wake/status header and console summary
+  - `route_to_console()` creates a Review Console item with the intended type, summary, and provenance if you add that helper
 - Run the focused CLI tests.
-- Run any existing mission/wake tests that are directly affected.
+- Run existing Review Console tests if touched.
 
 Completion:
 
@@ -268,48 +272,3 @@ Completion:
 - Push to `origin/main`.
 - Update Obsidian.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
-
-Stale prior text follows.
-
-Goal: define the package/API exposure policy for the Relay executor and Prime-facing runtime helpers.
-
-Context:
-
-- Build 1 is building `meridian_core/relay_executor.py`.
-- Build 2 owns package API and surface notes.
-- This slice should prepare the package boundary without guessing at unfinished Build 1 symbols.
-
-Allowed files only:
-
-- `docs/relay-executor-api-policy.md`
-- `docs/live-build-2.md`
-
-Task:
-
-- Write a concise policy note for how Relay execution helpers should become package-root exports.
-- Cover:
-  - what belongs at `from meridian_core import ...`
-  - what should remain module-local
-  - when docs-only policy should wait for implementation
-  - how Build 2 should react when Build 1 lands `relay_executor.py`
-  - how package exports interact with FileMap and docs discovery
-  - why vendor/account adapters do not belong in the core executor API
-- Include a short proposed export list, clearly labeled as provisional until Build 1 lands.
-- Do not edit `meridian_core/__init__.py` in this slice.
-- Do not edit runtime code.
-- Do not edit FileMap.
-
-Tests:
-
-- No tests required. This is docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
-
-Stale prior text follows.
-
-No current active task. All previously listed tasks have been completed (last: Relay package API policy note, commit 46e4eb3, Codex cadence review cleared at 2026-05-30 16:55 -06:00). Polling.

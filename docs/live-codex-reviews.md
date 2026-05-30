@@ -210,6 +210,7 @@ Scope:
 
 - Build 1 commit `190e527` - V0 Relay executor skeleton.
 - Build 2 commit `d821106` - Relay executor API policy note.
+- Build 2 commit `e800c03` - V0 `prime_wake` CLI surface.
 - Include queue marker commits only as provenance, not product scope.
 
 Required proof:
@@ -221,6 +222,11 @@ Required proof:
 - Confirm exceptions are captured per lane and do not stop other lanes.
 - For Build 2, inspect `docs/relay-executor-api-policy.md`.
 - Confirm the policy does not prematurely require package-root exports before Build 1 is reviewed.
+- For Build 2 `e800c03`, inspect the CLI diff and tests.
+- Run the focused CLI tests that cover `prime_wake`.
+- Confirm mission load failures surface clearly.
+- Confirm wake output is deterministic and suitable for the non-orchestrator/system surface.
+- Confirm no persistence or Bifrost UI was introduced.
 
 Output:
 

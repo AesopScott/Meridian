@@ -194,6 +194,52 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale text below):
 
+Goal: create the Meridian V3 parking lot.
+
+Context:
+
+- Scott asked whether V2 covers everything discussed or whether V3 is needed now.
+- Codex's call: V2 covers the architecture horizon; V3 should exist only as a parking lot for product/ecosystem ideas so they do not contaminate V0/V1/V2 execution.
+- Build 4 owns high-level Prime/harness planning docs.
+
+Allowed files only:
+
+- `docs/v3-parking-lot.md`
+- `docs/live-build-4.md`
+
+Task:
+
+- Create `docs/v3-parking-lot.md`.
+- Keep it concise and harness-owned.
+- It should state:
+  - V3 is not active scope.
+  - V3 starts after V2 makes Prime genuinely smarter and more autonomous.
+  - V3 candidate themes: public repo/release, marketed tool, provider compliance modes, hosted/cloud packaging, team/business workflows, multi-user polish, distributed Meridian networks, plugin/extension ecosystem.
+  - Every V3 item must still be owned by Prime or a harness.
+  - V3 must not pull effort away from V0 Prime core, V1 Bifrost cockpit, or V2 Echo/Atlas/Prime autonomy.
+- Include a short "Parking Lot Items" checklist grouped by owner:
+  - Prime
+  - Bifrost Harness
+  - Model Harness
+  - Federation Harness
+  - Release Harness
+  - Aegis Harness
+- Do not edit FileMap; Build 3 owns FileMap registration.
+- Do not edit tracker totals unless explicitly assigned later.
+
+Tests:
+
+- No tests required. Docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text follows.
+
 Goal: draft the Meridian V1 capability plan.
 
 Context:

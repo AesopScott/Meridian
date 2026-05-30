@@ -172,7 +172,10 @@ Scope trigger:
 Immediate scope available now:
 
 - Build 4 commit `fd9224d`.
+- Build 4 commits `7b43848` / `9a4e6a4` - V1 capability plan and cockpit-scope revision.
 - Build 5 commit `a412e90` - Bifrost configurable progress and proof surface brief.
+- Build 5 commit `0629e0c` - V1 Bifrost cockpit implementation brief.
+- Build 3 commit `774695f` - FileMap hygiene for the V0/V1 progress tracker and V0 readiness wording.
 
 Required proof for Build 4:
 
@@ -181,6 +184,8 @@ Required proof for Build 4:
 - Confirm the proposed commands do not contradict existing Review Console, Wake Brief, Progress Intention, Beacon, or Bifrost docs.
 - Check whether the new doc needs FileMap registration. If yes, route the FileMap task to Build 3 instead of editing FileMap here.
 - Since this is docs-only, tests are not required; proof must be file inspection plus cross-reference checks.
+- Also inspect `docs/v1-capability-plan.md`.
+- Confirm V1 is scoped to Bifrost cockpit UI plus wiring existing V0/domain capabilities, and explicitly leaves Echo, Atlas, federation, and public/provider strategy out of V1.
 
 Required proof for Build 5:
 
@@ -189,6 +194,15 @@ Required proof for Build 5:
 - Confirm its message categories and user controls align with the Review Console, non-orchestrator prompt surface, and Bifrost cockpit direction.
 - Check whether the new doc needs FileMap registration. If yes, route the FileMap task to Build 3 instead of editing FileMap here.
 - Since this is docs-only, tests are not required; proof must be file inspection plus cross-reference checks.
+- Also inspect `docs/v1-bifrost-cockpit-implementation-brief.md`.
+- Confirm the first UI implementation slices are cockpit-first and do not accidentally pull V2 memory/federation/model-adapter work into V1.
+
+Required proof for Build 3:
+
+- Inspect commit `774695f`.
+- Run or verify `python -m pytest tests/test_filemap.py -q`.
+- Confirm `docs/v0-v1-progress-tracker.md` is registered and `_REQUIRED_PATHS` coverage is updated.
+- Confirm V0 readiness wording now states the Relay executor skeleton exists while live vendor/model dispatch remains future work.
 
 Output:
 
