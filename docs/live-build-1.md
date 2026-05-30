@@ -145,6 +145,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 ~16:25 CDT - Build 1 checked queue; status: idle (no active task; d2820d2 still awaiting Codex review)
 2026-05-31 ~16:35 CDT - Build 1 checked queue; status: idle (no active task; d2820d2 still awaiting Codex review)
 2026-05-31 ~16:45 CDT - Build 1 checked queue; status: idle (no active task; d2820d2 still awaiting Codex review)
+2026-05-31 ~17:05 CDT - Build 1 checked queue; status: running (Relay executor skeleton task)
 ```
 
 ## Write/Completion Log
@@ -206,11 +207,14 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-30 11:43 -06:00 - Build 1 Codex coordinator verification: targeted suite 147 passed; full suite 725 passed; next Relay dispatch-plan slice assigned
 2026-05-31 ~04:30 CDT - Build 1 completed WorkerLaneState domain model; commit d2820d2; tests 785 passed; Obsidian updated
 2026-05-31 ~04:30 CDT - Build 1 slice ready for Codex Review: commit d2820d2; files: lane_state.py, test_lane_state.py; tests: 785 passed
+2026-05-31 ~17:05 CDT - Build 1 completed Relay executor skeleton; commit pending; tests 811 passed; files: relay_executor.py, test_relay_executor.py
 ```
 
 ## Active Task
 
 Current Active Task (supersedes any stale idle text below):
+
+[COMPLETED 2026-05-31 ~17:05 CDT] V0 Relay executor skeleton — commit pending; see Write/Completion Log.
 
 Goal: build the V0 Relay executor skeleton.
 
