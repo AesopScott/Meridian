@@ -52,45 +52,57 @@ Look for:
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 1 | d2820d2 | WorkerLaneState domain model reviewed by Review A Round 2 | passed | none for Review C | review delegated Relay executor skeleton |
-| Build 2 | 46e4eb3 | Relay package API policy note reviewed by Review A Round 2 | passed | none for Review C | review delegated V0 CLI gate commits |
+| Build 1 | 190e527 | V0 Relay executor skeleton (Round C1) | passed | none | continue polling for delegated work |
+| Build 2 | 989366f | V0 prime_console / prime_status / route_to_console (Round C1) | passed | LOW deferred: route_to_console type-vs-semantics doc note | Build 2 cadence cleared for three-commit window ending at 989366f; continue polling |
 
 ## Review Round Scope
 
-Before starting each review round, write the scope here.
-
 ```text
-YYYY-MM-DD HH:MM TZ - Round C<n> scope
-Build lanes: <Build 1, Build 2>
-Commit range(s): <Build 1 abc; Build 2 def..ghi>
-Allowed review files: <diff files only or named supporting files>
-Tests to run: <targeted tests>
-Out of scope: <areas explicitly not reviewed>
-Reason: <delegated review, cadence review, repair verification>
+2026-05-30 13:55 MDT - Round C1 scope
+Build lanes: Build 1, Build 2
+Commit range(s): Build 1 190e527; Build 2 e800c03, 989366f
+Allowed review files:
+  - meridian_core/relay_executor.py
+  - tests/test_relay_executor.py
+  - meridian_core/cli.py (only e800c03 + 989366f diff hunks)
+  - meridian_core/review_console.py (only 989366f diff hunks)
+  - tests/test_cli.py (only e800c03 + 989366f diff hunks)
+Tests to run:
+  - python -m pytest tests/test_relay_executor.py -q
+  - python -m pytest tests/test_cli.py -q
+  - python -m pytest tests/test_review_console.py -q
+Out of scope:
+  - WorkerLaneState domain model and other Build 1 commits
+  - Bifrost / FileMap / architecture docs
+  - V0 capability plan content beyond what the commits touch
+  - Queue marker commits (provenance only)
+Reason: delegated V0 runtime-gate review per Active Task in this file
 ```
 
 ## Read Checks
 
-Append entries here when this file is checked while idle.
-
 ```text
-YYYY-MM-DD HH:MM TZ - Codex Reviews C checked queue; status: idle/running/blocked; notes: <short note>
+2026-05-30 13:55 MDT - Codex Reviews C checked queue; status: running; notes: starting Round C1
+2026-05-30 14:05 MDT - Codex Reviews C checked queue; status: idle; notes: Round C1 complete, all clear, awaiting next delegated work
 ```
 
 ## Review Log
 
-Append one entry per reviewed slice.
-
 ```text
-YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blocked; tests: <summary>; notes: <short note>
+2026-05-30 13:58 MDT - Reviewed Build 1 commit 190e527; result: pass; tests: tests/test_relay_executor.py 26/26 pass; notes: executor forwards only lane.payload to injected callable; per-lane exceptions captured; no vendor/API code introduced
+2026-05-30 13:58 MDT - Reviewed Build 2 commit e800c03; result: pass; tests: tests/test_cli.py 24/24 pass; notes: mission load failure surfaces via "Mission load failed" line; output deterministic on repeat call; no persistence or UI introduced
+2026-05-30 13:58 MDT - Reviewed Build 2 commit 989366f; result: pass; tests: tests/test_cli.py 24/24 + tests/test_review_console.py 85/85 pass; notes: route_to_console is in-memory only (module-level ReviewConsoleQueue, no I/O), preserves PENDING status default and standard suggested_actions list; prime_console/prime_status deterministic on empty queue and injected queue
 ```
 
 ## Proof Log
 
-Append proof entries here before marking a slice passed.
-
 ```text
-YYYY-MM-DD HH:MM TZ - Proof for Build <n> commit <hash>; proof type: diff/test/reference/manual; evidence: <short reproducible evidence>; result: pass/fail/deferred
+2026-05-30 13:58 MDT - Proof for Build 1 commit 190e527; proof type: diff+test; evidence: relay_executor.py line 67 calls model_call(lane.payload) only; tests/test_relay_executor.py TestMetadataNotPassedToModelCall asserts received payload equals lane.payload and excludes packet metadata; TestExceptionConvertedToError verifies partial failure leaves other lanes intact; pytest 26 passed in 0.07s; result: pass
+2026-05-30 13:58 MDT - Proof for Build 1 commit 190e527; proof type: reference; evidence: no imports of httpx/requests/anthropic/openai/google/credentials in meridian_core/relay_executor.py; Protocol-typed ModelCallFn is the only execution boundary; result: pass
+2026-05-30 13:58 MDT - Proof for Build 2 commit e800c03; proof type: diff+test; evidence: cli.py prime_wake catches MissionLoadError and prints "Mission load failed: <exc>"; TestPrimeWakeMissionFailure covers missing/corrupt mission paths without raising; test_output_is_deterministic confirms byte-identical output across two calls; pytest 24 passed in 0.20s; result: pass
+2026-05-30 13:58 MDT - Proof for Build 2 commit e800c03; proof type: reference; evidence: prime_wake uses only Path/print/load_mission/sample data + run_decision_loop + build_wake_brief — no file writes, no network, no Bifrost surface introduced; result: pass
+2026-05-30 13:58 MDT - Proof for Build 2 commit 989366f; proof type: diff+test; evidence: route_to_console preserves ReviewConsoleItem default status PENDING, uses canonical ReviewConsoleAction.ACKNOWLEDGE, routes through ReviewConsoleQueue.enqueue (sequence preserved); _CONSOLE is module-level in-memory ReviewConsoleQueue with no persistence path; prime_console reads via q.pending() in deterministic insertion order; TestPrimeConsole/TestPrimeStatus/TestRouteToConsole cover type/status/provenance/empty-queue determinism (all pass); tests/test_review_console.py 85 passed in 0.09s confirms underlying queue semantics intact; result: pass
+2026-05-30 13:58 MDT - Proof for Build 2 commit 989366f; proof type: manual; evidence: prime_status delegates to prime_wake + prime_console without new state; severity color mapping is a local pure helper; no durable persistence (no open()/sqlite/json.dump) introduced; result: pass
 ```
 
 Minimum proof expectations:
@@ -103,56 +115,26 @@ Minimum proof expectations:
 
 ## Findings
 
-Append findings here before routing repairs.
-
 ```text
-YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LOW; file: <path>; finding: <short note>; action: clear/defer/repair-task-written
+2026-05-30 13:58 MDT - Build 1 commit 190e527; severity: none; file: meridian_core/relay_executor.py; finding: V0 gate intent satisfied — only lane.payload crosses boundary, per-lane exception isolation present, immutable summary; action: clear
+2026-05-30 13:58 MDT - Build 2 commit e800c03; severity: none; file: meridian_core/cli.py; finding: mission load failure path surfaces clearly via stdout without raising; deterministic output verified; no persistence/UI introduced; action: clear
+2026-05-30 13:58 MDT - Build 2 commit 989366f; severity: LOW; file: meridian_core/review_console.py; finding: route_to_console accepts any ReviewConsoleItemType but always creates a non-promptable, INFO-severity, ACKNOWLEDGE-only item regardless of type — callers passing APPROVAL_GATE or PLAN_REVIEW via this helper get an informational item, not the canonical gate semantics from make_approval_gate / make_plan_review_item. Acceptable for V0 visibility surface (helper is a router, not a gate factory) and Review Console queue invariants (promptable/requires_response/status) remain intact; recommend documenting in docstring or narrowing item_type to SYSTEM_FINDING in V1; action: defer
 ```
 
 ## Repair Routing Log
 
-Append entries when writing repair work into a build lane.
-
 ```text
-YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md; finding: <short note>; status: pending
+2026-05-30 13:58 MDT - No repair routed for Round C1 — Build 1 190e527 clear; Build 2 e800c03 clear; Build 2 989366f cleared with LOW finding deferred to V1 (route_to_console type-vs-semantics doc note). Build 2 cadence cleared for three-commit window ending at 989366f.
 ```
 
 ## Active Task
 
-Current Active Task:
+Round C1 complete at 2026-05-30 13:58 MDT. All three commits passed:
 
-Goal: perform Codex Reviews C Round C1, delegated V0 runtime-gate review.
+- Build 1 `190e527` clear
+- Build 2 `e800c03` clear
+- Build 2 `989366f` clear with LOW finding deferred (route_to_console type-vs-semantics doc note)
 
-Scope:
+Build 2 cadence cleared for the three-commit window ending at `989366f`. No repairs routed. Idle — polling docs/live-build-1.md, docs/live-build-2.md, docs/live-codex-reviews.md every 30 seconds for next delegated assignment.
 
-- Build 1 commit `190e527` - V0 Relay executor skeleton.
-- Build 2 commit `e800c03` - V0 `prime_wake` CLI surface.
-- Build 2 commit `989366f` - V0 `prime_console`, `prime_status`, and `route_to_console` CLI visibility surface.
-- Include queue marker commits only as provenance, not product scope.
-
-Required proof:
-
-- For Build 1 `190e527`, inspect `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`.
-- Run `python -m pytest tests/test_relay_executor.py -q`.
-- Confirm the executor forwards only lane payload text to the injected callable.
-- Confirm no vendor/API/account automation was introduced.
-- Confirm exceptions are captured per lane and do not stop other lanes.
-- For Build 2 `e800c03`, inspect the CLI diff and tests.
-- Run the focused CLI tests covering `prime_wake`.
-- Confirm mission load failures surface clearly.
-- Confirm wake output is deterministic and suitable for the non-orchestrator/system surface.
-- Confirm no persistence or Bifrost UI was introduced.
-- For Build 2 `989366f`, inspect `meridian_core/cli.py`, `meridian_core/review_console.py`, and `tests/test_cli.py`.
-- Run the focused CLI and Review Console tests touched by the slice.
-- Confirm `route_to_console()` does not create durable persistence or bypass existing Review Console status/type semantics.
-- Confirm `prime_console` and `prime_status` output is deterministic and suitable for V0 CLI visibility.
-
-Output:
-
-- Declare Round C1 scope in Review Round Scope.
-- Update Checkpoint Ledger.
-- Update Review Log.
-- Update Proof Log.
-- Record findings, if any.
-- Route repairs to Build 1 or Build 2 if actionable.
-- If clean, mark Round C1 complete and note that Build 2 cadence is cleared for the three-commit window ending at `989366f`.
+Durable proof trail also captured in Obsidian: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\2026-05-30 Codex Reviews C Round C1 V0 Gate Clearance.md`.
