@@ -7,6 +7,7 @@ Each build session owns exactly one live queue:
 - Build 1: `docs/live-build-1.md`
 - Build 2: `docs/live-build-2.md`
 - Build 3: `docs/live-build-3.md`
+- Build 4: `docs/live-build-4.md`
 
 Bootstrap command:
 
