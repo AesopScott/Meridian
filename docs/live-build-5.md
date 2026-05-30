@@ -49,6 +49,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 11:57 -06:00 - Build 5 checked queue; status: idle (cadence cleared); Codex Reviews Checkpoint Ledger now shows Build 5 d1d32af PASSED ("818bb31..d1d32af passed; cadence pause cleared by this review; await next Ready for Codex Review marker"); no repair routed, no findings; Active Task still names completed V0 cockpit layout brief — awaiting orchestrator reassignment; Cross-Check Activity: none; origin/main at 16d51de
 2026-05-30 11:59 -06:00 - Build 5 checked queue; status: idle (cleared); Codex Reviews Round 1 sweep fully recorded — Build 5 818bb31 and d1d32af both reviewed as pass with zero findings (no CRITICAL/HIGH/MEDIUM/LOW), no repair routing; Active Task still names completed V0 cockpit layout brief — awaiting orchestrator reassignment; Cross-Check Activity: none; origin/main at 92d02ba
 2026-05-30 12:01 -06:00 - Build 5 checked queue; status: idle (cleared); no change since last poll — Codex Reviews unchanged, no repair routed, no Cross-Check Activity, Active Task still names completed V0 cockpit layout brief; awaiting orchestrator reassignment; origin/main at 0312079
+2026-05-30 12:02 -06:00 - Build 5 checked queue; status: running; new Active Task = design Harness dashboard surface for Bifrost V0 at docs/bifrost-harness-dashboard-brief.md; Cross-Check Activity: none; origin/main at 0ebc84d
 ```
 
 ## Write/Completion Log
@@ -94,6 +95,45 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
+
+Current Active Task (supersedes any stale text below):
+
+Goal: design the Harness dashboard surface for Bifrost V0.
+
+Allowed files only:
+
+- `docs/bifrost-harness-dashboard-brief.md`
+
+Task:
+
+- Write a concise product/architecture brief for the Harness button/dashboard Scott requested.
+- Cover:
+  - where the Harness button belongs in the cockpit/nav
+  - what the dashboard shows for each harness: Relay, Bifrost, Beacon, Aegis, Compass, FileMap/Echo, queue/review harness
+  - what is view-only in V0 versus editable later
+  - how to show harness maturity/build numbers
+  - how to show health and liveness without turning into a worker-card wall
+  - how Prime uses the dashboard versus how Scott uses it
+  - how this dashboard relates to the Review Console and Orchestrator Queue
+  - what V0 should intentionally leave out
+- Keep it design-only.
+- Do not edit runtime code.
+- Do not edit FileMap; Build 3 owns FileMap.
+- Do not edit package exports; Build 2 owns package API.
+- Do not edit other live queues.
+
+Tests:
+
+- No tests required. This is docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text:
 
 Goal: design the V0 cockpit layout around Prime and the Review Console.
 

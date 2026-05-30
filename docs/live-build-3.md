@@ -60,6 +60,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 16:20 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 16:35 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 16:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
+2026-05-30 17:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh for relay_dispatch, live-codex-reviews, prime-orchestration prototype, diagrams); starting work
 ```
 
 ## Write/Completion Log
@@ -115,6 +116,47 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
+
+Current Active Task (supersedes any stale text below):
+
+Goal: refresh FileMap for RelayDispatchPlan and Codex Reviews queue.
+
+Allowed files only:
+
+- `docs/FileMap.md`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+
+Task:
+
+- Codex Reviews Round 1 observed that Build 1 introduced `meridian_core/relay_dispatch.py` after the last FileMap refresh.
+- Add FileMap coverage for:
+  - `meridian_core/relay_dispatch.py`
+  - `tests/test_relay_dispatch.py`
+  - `docs/live-codex-reviews.md`
+  - `docs/prime-orchestration-harness-prototype.md`
+  - the new Meridian engineering diagrams in `docs/assets/diagrams/02-*.png` through `06-*.png` if the human FileMap should mention canonical visual assets
+- Keep entries concise and memory-injection useful.
+- Update required-path coverage only for truly core source/process files.
+- Do not edit runtime code.
+- Do not edit package exports.
+- Do not edit other live queues.
+
+Tests:
+
+```text
+python -m pytest tests/test_filemap.py -q
+python -m pytest -q
+```
+
+Completion:
+
+- Commit only this FileMap slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and test count.
+
+Stale prior text:
 
 Goal: repair stale FileMap Relay maturity claims.
 

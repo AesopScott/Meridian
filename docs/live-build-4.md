@@ -108,6 +108,47 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
+Current Active Task (supersedes any stale text below):
+
+Goal: define Prime orchestration harness state model.
+
+Allowed files only:
+
+- `docs/prime-orchestration-state-model.md`
+
+Task:
+
+- Write a strategic architecture note that turns the current live queue process into Prime-native state.
+- Cover:
+  - lane registry
+  - active task state
+  - review checkpoint state
+  - review round scope
+  - repair routing
+  - Ready for Codex Review markers
+  - lane clearing and cadence pauses
+  - how this maps to Beacon, Bifrost, Relay, Aegis, and the Review Console
+  - what remains markdown prototype versus what should become Python domain objects
+- Use `docs/prime-orchestration-harness-prototype.md` as source context, but do not edit it.
+- Keep it candid and implementation-guiding, not marketing copy.
+- Do not edit runtime code.
+- Do not edit FileMap.
+- Do not edit package exports.
+- Do not edit other live queues.
+
+Tests:
+
+- No tests required. This is docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text:
+
 **Ready for Codex Review**
 - Commit: `3cbf336`
 - Files: `docs/v0-build-readiness-map.md`

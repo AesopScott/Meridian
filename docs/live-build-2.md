@@ -133,6 +133,44 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
+Current Active Task (supersedes any stale text below):
+
+Goal: define package API policy for Relay internals.
+
+Allowed files only:
+
+- `docs/relay-package-api-policy-note.md`
+- `docs/package-api-surface-note.md`
+
+Task:
+
+- Build 1 has added Relay-owned helpers and domain objects (`relay_packet.py`, `relay_dispatch.py`) that are useful internally but may not all belong in the package root yet.
+- Write a concise policy note for what Relay names should remain module-level imports versus package-root exports.
+- Cover:
+  - `assemble_relay_packet()`
+  - `RelayDispatchPlan`
+  - `RelayDispatchLane`
+  - `build_relay_dispatch_plan()`
+  - why these should remain internal/module-level for now unless a later V0 surface needs them
+  - what proof would justify future root export
+- Update `docs/package-api-surface-note.md` with a short cross-reference to this Relay policy note.
+- Do not edit `meridian_core/__init__.py`.
+- Do not edit package tests.
+- Do not edit FileMap.
+
+Tests:
+
+- No tests required. This is docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text:
+
 Goal: repair stale PromptPacket package API note claim.
 
 Allowed files only:

@@ -132,4 +132,43 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
+Current Active Task (supersedes any stale text below):
+
+Goal: add worker lane state domain objects for Prime orchestration.
+
+Allowed files only:
+
+- `meridian_core/lane_state.py`
+- `tests/test_lane_state.py`
+
+Task:
+
+- Build a pure Python domain model for the worker/session lane state Prime needs to coordinate queues.
+- Suggested shape:
+  - `LaneStatus` enum with: IDLE, POLLING, RUNNING, BLOCKED, READY_FOR_REVIEW, UNDER_REVIEW, REPAIR_ROUTED, STALE, OFFLINE
+  - `LaneReviewState` enum with: NOT_REQUIRED, READY, IN_REVIEW, PASSED, REPAIR_REQUIRED
+  - `WorkerLaneState` frozen dataclass with lane id, build name, status, active_task, last_commit, review_state, last_poll_at, notes
+  - small transition helpers such as `mark_ready_for_review()`, `mark_running()`, `mark_blocked()`, `mark_review_passed()`
+- Keep it domain-only. No filesystem polling, no subprocess calls, no model calls, no UI.
+- Make transitions return new objects rather than mutating existing state.
+- Keep timestamps as strings for now; do not introduce datetime parsing unless needed.
+- Do not edit package exports; Build 2 owns package API.
+- Do not edit FileMap; Build 3 owns FileMap.
+
+Tests:
+
+```text
+python -m pytest tests/test_lane_state.py -q
+python -m pytest -q
+```
+
+Completion:
+
+- Commit only this runtime slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and test count.
+
+Stale prior text:
+
 No active task. Build 1 is idle — slice fd35a81 marked Ready for Codex Review; awaiting review result or next assignment.
