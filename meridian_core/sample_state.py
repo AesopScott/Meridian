@@ -72,6 +72,7 @@ def make_sample_portfolio() -> Portfolio:
                     verified=False,
                 ),
                 reason="First coding milestone — proves the shape of the local brain",
+                session_id="agent_harness",
             ),
         ],
     )

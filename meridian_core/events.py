@@ -12,13 +12,14 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-from .models import Decision, ScottBottleneck, SessionInjection
+from .models import Decision, NextMove, ScottBottleneck, SessionInjection
 
 
 class EventKind(Enum):
     DECISION_MADE = "decision_made"
     BOTTLENECK_CREATED = "bottleneck_created"
     INJECTION_GENERATED = "injection_generated"
+    SAFE_MOVE_CLEARED = "safe_move_cleared"
 
 
 @dataclass
@@ -40,6 +41,9 @@ class EventRecorder:
 
     def record_injection(self, injection: SessionInjection) -> None:
         self._events.append(Event(kind=EventKind.INJECTION_GENERATED, payload=injection))
+
+    def record_safe_move(self, move: NextMove) -> None:
+        self._events.append(Event(kind=EventKind.SAFE_MOVE_CLEARED, payload=move))
 
     def all_events(self) -> list[Event]:
         return list(self._events)

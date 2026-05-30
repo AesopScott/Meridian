@@ -192,11 +192,16 @@ class Portfolio:
 
     def all_initiatives(self) -> list[Initiative]:
         initiatives: list[Initiative] = []
+        seen: set[str] = set()
         for venture in self.ventures:
             for project in venture.projects:
-                initiatives.extend(project.initiatives)
+                if project.id not in seen:
+                    seen.add(project.id)
+                    initiatives.extend(project.initiatives)
         for project in self.projects:
-            initiatives.extend(project.initiatives)
+            if project.id not in seen:
+                seen.add(project.id)
+                initiatives.extend(project.initiatives)
         return initiatives
 
     def all_next_moves(self) -> list[NextMove]:

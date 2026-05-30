@@ -130,6 +130,8 @@ def _process_next_moves(
             _request_verification(move, result, recorder)
         else:
             result.safe_next_moves.append(move)
+            if recorder:
+                recorder.record_safe_move(move)
 
 
 def _escalate_to_scott(
@@ -155,6 +157,23 @@ def _request_verification(
     result: DecisionResult,
     recorder: Optional[EventRecorder],
 ) -> None:
+    if move.session_id is None:
+        # No known session target — escalate to Scott rather than misrouting to a hardcoded ID
+        bn = ScottBottleneck(
+            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"bottleneck:verify:{move.id}")),
+            title=f"Proof required but no target session: {move.description}",
+            description=(
+                f"Move {move.id!r} requires proof before proceeding but has no session_id. "
+                "Scott should assign a target session or waive the proof requirement."
+            ),
+            priority=Priority.HIGH,
+            move_id=move.id,
+        )
+        result.scott_bottlenecks.append(bn)
+        if recorder:
+            recorder.record_bottleneck(bn)
+        return
+
     proof_cmd = move.proof.command if move.proof else None
     instruction = (
         f"Verification required before proceeding with: '{move.description}'. "
@@ -162,7 +181,7 @@ def _request_verification(
     )
 
     inj = make_injection(
-        target_session_id=move.session_id or "agent_harness",
+        target_session_id=move.session_id,
         instruction=instruction,
         reason="Next move is autonomous but proof is required and not yet verified",
         priority=Priority.HIGH,
