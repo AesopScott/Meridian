@@ -27,6 +27,18 @@ class PromptMetricSample:
     time_to_first_token_ms: float | None = None
     native_baseline_ms: float | None = None
 
+    def __post_init__(self) -> None:
+        if self.prompt_tokens < 0:
+            raise ValueError(f"prompt_tokens must be >= 0, got {self.prompt_tokens}")
+        if self.construction_time_ms < 0.0:
+            raise ValueError(f"construction_time_ms must be >= 0, got {self.construction_time_ms}")
+        if self.total_response_time_ms < 0.0:
+            raise ValueError(f"total_response_time_ms must be >= 0, got {self.total_response_time_ms}")
+        if self.time_to_first_token_ms is not None and self.time_to_first_token_ms < 0.0:
+            raise ValueError(f"time_to_first_token_ms must be >= 0, got {self.time_to_first_token_ms}")
+        if self.native_baseline_ms is not None and self.native_baseline_ms < 0.0:
+            raise ValueError(f"native_baseline_ms must be >= 0, got {self.native_baseline_ms}")
+
 
 @dataclass(frozen=True)
 class PromptMetricSummary:

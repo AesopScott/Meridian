@@ -65,6 +65,44 @@ class TestPromptMetricSample:
 
 
 # ---------------------------------------------------------------------------
+# Sample validation — negative values
+# ---------------------------------------------------------------------------
+
+
+class TestSampleValidation:
+    def test_negative_prompt_tokens_raises(self):
+        with pytest.raises(ValueError, match="prompt_tokens"):
+            _sample(prompt_tokens=-1)
+
+    def test_negative_construction_time_raises(self):
+        with pytest.raises(ValueError, match="construction_time_ms"):
+            _sample(construction_time_ms=-0.1)
+
+    def test_negative_total_response_time_raises(self):
+        with pytest.raises(ValueError, match="total_response_time_ms"):
+            _sample(total_response_time_ms=-1.0)
+
+    def test_negative_ttft_raises(self):
+        with pytest.raises(ValueError, match="time_to_first_token_ms"):
+            _sample(time_to_first_token_ms=-1.0)
+
+    def test_negative_baseline_raises(self):
+        with pytest.raises(ValueError, match="native_baseline_ms"):
+            _sample(native_baseline_ms=-1.0)
+
+    def test_zero_values_are_valid(self):
+        s = _sample(prompt_tokens=0, construction_time_ms=0.0, total_response_time_ms=0.0,
+                    time_to_first_token_ms=0.0, native_baseline_ms=0.0)
+        assert s.prompt_tokens == 0
+        assert s.construction_time_ms == 0.0
+
+    def test_none_optional_fields_bypass_validation(self):
+        s = _sample(time_to_first_token_ms=None, native_baseline_ms=None)
+        assert s.time_to_first_token_ms is None
+        assert s.native_baseline_ms is None
+
+
+# ---------------------------------------------------------------------------
 # Empty sample list
 # ---------------------------------------------------------------------------
 
@@ -184,8 +222,9 @@ class TestMultiSample:
 
 class TestStatusWithBaseline:
     def _summary_for_delta(self, delta: float) -> PromptMetricSummary:
-        # Set total 400, baseline = 400 - delta so overhead_delta == delta
-        s = _sample(total_response_time_ms=400.0, native_baseline_ms=400.0 - delta)
+        # Drive delta via total: baseline fixed at 100ms, total = baseline + delta.
+        # Keeps native_baseline_ms always non-negative; supports negative delta via total < 100.
+        s = _sample(total_response_time_ms=100.0 + delta, native_baseline_ms=100.0)
         return summarize_prompt_metrics([s])
 
     def test_delta_below_watch_threshold_is_healthy(self):
