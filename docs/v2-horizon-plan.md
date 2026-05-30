@@ -12,7 +12,7 @@ V2 should not be allowed to pull V1 away from its purpose. If a V2 idea does not
 
 ## Candidate V2 Pillars
 
-### 1. Echo Memory Engine
+### 1. Echo Harness: Memory Engine
 
 Prime needs durable memory that survives model context windows, app restarts, and project switching.
 
@@ -25,7 +25,7 @@ V2 scope candidates:
 - memory ranking and decay
 - memory injection into Relay packets
 
-### 2. Atlas Retrieval / RAG Harness
+### 2. Atlas Harness: Retrieval / RAG
 
 FileMap gives Meridian a map. Atlas gives it ranked retrieval.
 
@@ -37,7 +37,7 @@ V2 scope candidates:
 - retrieval budget controls
 - integration with Relay prompt packets
 
-### 3. Stronger Prime Autonomy
+### 3. Prime: Stronger Autonomy
 
 V1 lets Scott see Prime. V2 lets Prime do more without Scott being the bottleneck.
 
@@ -49,7 +49,7 @@ V2 scope candidates:
 - cross-project prioritization
 - bottleneck escalation only when Prime cannot resolve the issue
 
-### 4. Dynamic Risk-Tiered Dual-Structured Gated Cognition
+### 4. Prime + Aegis Harness + Relay Harness: Dynamic Risk-Tiered Dual-Structured Gated Cognition
 
 The decision engine becomes runtime behavior, not just architecture language.
 
@@ -61,7 +61,7 @@ V2 scope candidates:
 - reviewer/verifier routing by risk
 - cost-aware escalation controls
 
-### 5. Model Harness Adapters
+### 5. Model Harness: Adapters
 
 V1 can use whatever V0 provides. V2 should clarify and harden the model interface.
 
@@ -86,7 +86,7 @@ V2 scope candidates:
 - transfer/archive session
 - recover stale sessions
 
-### 7. Multi-Meridian / Multi-User Federation
+### 7. Federation Harness: Multi-Meridian / Multi-User
 
 Not V1. Worth preserving as a future horizon.
 
@@ -118,7 +118,7 @@ V2 scope candidates:
 Once V1 is locked, start V2 planning in this order:
 
 1. Define the V2 success test.
-2. Split V2 into memory, retrieval, autonomy, model harness, and session lifecycle tracks.
+2. Split V2 into harness-owned tracks: Echo, Atlas, Prime, Model Harness, Session Lifecycle, and Federation.
 3. Decide which track is first.
 4. Build the smallest vertical slice that improves Prime's real autonomy inside the cockpit.
 
