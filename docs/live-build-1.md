@@ -274,7 +274,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 evening CDT - Build 1 completed pre-dispatch Aegis proof gate enforcement; commit 7c75f43; files: relay_executor.py, test_relay_executor.py; tests: 124 targeted, 863 full passed; Ready for Codex Review [date corrected; originally logged 2026-05-30 14:43 -06:00]
 2026-06-01 ~04:00 CDT - Coordinator assigned provider-neutral Model Harness adapter contract (from docs/prime-planning-harness-answers.md) [originally logged 2026-05-30 15:21 -06:00; date corrected]
 2026-06-01 ~05:15 CDT - Build 1 completed provider-neutral Model Harness adapter contract; commit 653488b; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py, docs/live-build-1.md; tests: 46 adapter/executor passed, 126 Aegis/executor passed; Ready for Codex Review [originally logged 2026-05-30 15:41 -06:00; date corrected]
-2026-06-01 ~10:30 CDT - Build 1 completed Relay adapter registry and lane dispatch bridge; commit pending; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py; tests: 67 targeted adapter/executor passed, 137 Aegis/executor passed, 911 full passed; Ready for Codex Review.
+2026-06-01 ~10:30 CDT - Build 1 completed Relay adapter registry and lane dispatch bridge; commit 0560eb4; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py; tests: 67 targeted adapter/executor passed, 137 Aegis/executor passed, 911 full passed; Ready for Codex Review.
 ```
 
 ## Cross-Check Activity
@@ -317,11 +317,11 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 **No active task.** Build 1 is idle — awaiting next assignment from the coordinator.
 
-Latest completed slice: Relay adapter registry and lane dispatch bridge; commit pending; Ready for Codex Review.
+Latest completed slice: Relay adapter registry and lane dispatch bridge; commit `0560eb4`; Ready for Codex Review.
 
 ---
 
-[COMPLETED 2026-06-01 ~10:30 CDT] Relay adapter registry and lane dispatch bridge — worktree: C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780111650704; 911 tests pass.
+[COMPLETED 2026-06-01 ~10:30 CDT] Relay adapter registry and lane dispatch bridge — commit `0560eb4`; worktree: C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780111650704; 911 tests pass; Ready for Codex Review.
 
 Goal: Build the V0 Relay adapter registry and lane dispatch bridge.
 
