@@ -46,6 +46,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 11:46 -06:00 - Build 5 checked queue; status: running; rules 18-21 updated by orchestrator (no self-Codex review; Codex Reviews lane owns review/findings/repairs; pause after 3 task-changing commits); new Active Task = design V0 cockpit layout at docs/bifrost-v0-cockpit-layout-brief.md; Cross-Check Activity: none; origin/main at a37b3cb
 2026-05-30 11:50 -06:00 - Build 5 checked queue; status: paused (cadence); V0 cockpit layout brief committed at d1d32af = 3rd task-changing commit; pausing normal build work per rule 21 until Codex Reviews lane records cadence review result; will continue polling for repair tasks; Cross-Check Activity: none; origin/main at c3e3245
 2026-05-30 11:54 -06:00 - Build 5 checked queue; status: paused (cadence); Codex Reviews Round 1 scope declared (Build 5 range 818bb31..d1d32af) but no review result/finding/repair routed for Build 5 yet; Active Task still names completed V0 cockpit layout brief; Cross-Check Activity: none; origin/main at 8a29011
+2026-05-30 11:57 -06:00 - Build 5 checked queue; status: idle (cadence cleared); Codex Reviews Checkpoint Ledger now shows Build 5 d1d32af PASSED ("818bb31..d1d32af passed; cadence pause cleared by this review; await next Ready for Codex Review marker"); no repair routed, no findings; Active Task still names completed V0 cockpit layout brief — awaiting orchestrator reassignment; Cross-Check Activity: none; origin/main at 16d51de
 ```
 
 ## Write/Completion Log
