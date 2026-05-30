@@ -148,9 +148,35 @@ Minimum proof expectations:
 
 Current Active Task:
 
-Round C2 complete at 2026-05-30 15:05 MDT. Build 1 `0e990df` and `7c75f43` passed with no actionable findings.
+Goal: perform Codex Reviews C Round C3 for Build 1 `653488b`.
 
-No active task. Codex Reviews C is idle - continue polling for Build 1/Build 2 runtime-gate review markers.
+Round C3 scope:
+
+- Build 1 commit `653488b`
+- Queue marker commit `a629d23` for provenance only
+- Files:
+  - `meridian_core/model_adapter.py`
+  - `meridian_core/relay_executor.py`
+  - `tests/test_model_adapter.py`
+  - `tests/test_relay_executor.py`
+  - `docs/live-build-1.md` only for completion/provenance
+- Focus:
+  - provider-neutral Model Adapter contract
+  - payload-only adapter boundary
+  - env-safe missing-configuration failure before live transport calls
+  - no vendor SDK dependency
+  - no account-based automation
+  - Relay executor still calls `model_call(lane.payload)` only
+  - Aegis blocking evidence still prevents adapter/model calls before dispatch
+- Tests:
+  - `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+  - `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`
+
+Do not review unrelated Build 2/3/4/5 work in this round. Do not implement product code.
+
+Stale prior Round C2 completion follows.
+
+Round C2 complete at 2026-05-30 15:05 MDT. Build 1 `0e990df` and `7c75f43` passed with no actionable findings.
 
 Stale prior Round C2 task follows.
 
