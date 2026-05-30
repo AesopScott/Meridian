@@ -34,6 +34,7 @@ class FileArea:
     RISK_ENGINE      = "Risk Tier Engine"
     COUNCIL          = "Council cognition"
     RELAY_ROUTING    = "Relay routing"
+    PROMPT_BUDGET    = "Relay prompt budget"
     AEGIS            = "Aegis / Proof harness"
     REVIEW_CONSOLE   = "Review Console"
     BUILD_MATURITY   = "Build/maturity registry"
@@ -276,6 +277,13 @@ def make_default_map() -> FileMap:
             purpose="Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan via council_plan_for_tier().",
             related_tests=["tests/test_relay.py"],
             notes="No real model calls yet. council_plan field populated for all tiers.",
+        ),
+        FileMapEntry(
+            path="meridian_core/prompt_budget.py",
+            area=FileArea.PROMPT_BUDGET,
+            purpose="Deterministic prompt token budget per risk tier. Prevents Relay prompt drag by bounding context sources and token limits per dispatch.",
+            related_tests=["tests/test_prompt_budget.py"],
+            notes="Tiers 0-1 minimal; Tier 2 focused; Tier 3 bounded proof/review; Tier 4 explained for human gate.",
         ),
         FileMapEntry(
             path="meridian_core/aegis.py",

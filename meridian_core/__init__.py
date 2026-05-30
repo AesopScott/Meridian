@@ -92,6 +92,12 @@ from .council import (
     default_council_positions,
     council_plan_for_tier,
 )
+from .prompt_budget import (
+    PromptBudgetTier,
+    PromptBudget,
+    PromptBudgetPlan,
+    prompt_budget_for_risk_tier,
+)
 
 __all__ = [
     # -- Core domain models --------------------------------------------------
@@ -193,4 +199,9 @@ __all__ = [
     "CouncilPlan",
     "default_council_positions",
     "council_plan_for_tier",
+    # -- Relay prompt budget --------------------------------------------------
+    "PromptBudgetTier",
+    "PromptBudget",
+    "PromptBudgetPlan",
+    "prompt_budget_for_risk_tier",
 ]

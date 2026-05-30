@@ -20,6 +20,7 @@ _REQUIRED_PATHS = [
     "meridian_core/risk.py",
     "meridian_core/council.py",
     "meridian_core/relay.py",
+    "meridian_core/prompt_budget.py",
     "meridian_core/review_console.py",
     "meridian_core/builds.py",
     "meridian_core/filemap.py",
