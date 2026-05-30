@@ -42,6 +42,7 @@ Append entries here when this file is modified or an active task is completed.
 YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 10:33 -06:00 - Codex assigned Prompt Packet domain slice; commit pending; tests pending
 2026-05-30 10:37 -06:00 - Codex strengthened polling contract; commit pending; tests not required
+2026-05-30 10:39 -06:00 - Codex reassigned Build 3 to Haiku-sized Prompt Packet design brief; commit pending; tests not required
 ```
 
 ## Cross-Check Activity
@@ -65,49 +66,37 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: create the Prompt Packet domain slice.
+Goal: create a simple Prompt Packet design brief.
 
 Allowed files only:
 
-- `meridian_core/prompt_packet.py`
-- `tests/test_prompt_packet.py`
+- `docs/prompt-packet-design-brief.md`
 
 Task:
 
-- Add a small domain-only module that models the bounded prompt packet Relay will eventually send through the agent/model harness.
-- Suggested concepts:
-  - `PromptContextSource` enum or value object for allowed context sources
-  - `PromptPacket` immutable dataclass containing:
-    - `request`
-    - `instructions`
-    - `context_references`
-    - `budget`
-    - `estimated_tokens`
-    - optional `notes` / `warnings`
-  - `build_prompt_packet(...)` helper that validates the packet against a provided `PromptBudgetPlan`
-- Enforce:
-  - estimated tokens cannot exceed the budget's max context tokens
-  - context sources must be allowed by the budget plan
-  - empty request is rejected
-  - packet is immutable
-- Keep this domain-only.
-- Do not import or edit Relay.
-- Do not assemble long prompts.
-- Do not call models.
-- Do not add UI.
-- Do not add persistence.
-- Do not edit package exports or FileMap in this slice.
+- Write a short design brief for the future Prompt Packet domain model.
+- Keep it simple and concrete.
+- Cover only:
+  - what a Prompt Packet is
+  - why it exists
+  - what fields it should eventually contain
+  - what validations it should eventually perform
+  - how it relates to Prompt Budget
+  - how it prevents Relay prompt drag
+  - what must stay out of worker prompts
+  - a small future test checklist
+- Do not write runtime code.
+- Do not edit package exports.
+- Do not edit FileMap.
+- Do not edit Build 1 or Build 2 files.
 
 Tests:
 
-```text
-python -m pytest tests/test_prompt_packet.py tests/test_prompt_budget.py -q
-python -m pytest -q
-```
+- No tests required. This is docs-only.
 
 Completion:
 
-- Commit only this slice.
+- Commit only this docs slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash and test count in your session.
+- Report commit hash in your session.
