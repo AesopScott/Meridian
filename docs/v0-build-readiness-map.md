@@ -204,7 +204,7 @@ V0 is reachable when these six items exist, in rough dependency order:
 |---|---|---|
 | 1 | `prime_wake()` in `cli.py` — reads mission, builds WakeBrief, emits Go-call console items | Mission boot, Beacon visibility |
 | 2 | `route_to_console()` + `prime_console` / `prime_status` CLI — Prime places items, Scott reads them | Review Console, all gate items |
-| 3 | `relay_executor.py` — takes a `RelayDispatchPlan`, makes a real model API call, returns output | Relay dispatch, session harness, Aegis gate wire |
+| 3 | Wire real model API dispatch into the existing `relay_executor.py` skeleton (`190e527`) — takes a `RelayDispatchPlan`, makes a real model API call, returns output | Relay dispatch, session harness, Aegis gate wire |
 | 4 | `beacon.py` — `check_harness_liveness()` from flat-file or sentinel | Beacon, `build_wake_brief()` using real data |
 | 5 | `prime_approve <item-id>` CLI — Scott disposes of gate items from terminal | Gate enforcement (V0 substitute for Bifrost) |
 | 6 | Relay gate wire in `relay_executor.py` — tier-3/4 dispatch blocked if ProofTrail has blocking evidence | Aegis proof gate, gated cognition |

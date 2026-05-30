@@ -177,7 +177,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 17:20 -06:00 - Build 3 completed FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 2026-05-31 00:35 -06:00 - Build 3 completed FileMap refresh (4 uncatalogued docs: v0-build-readiness-map, prime-orchestration-state-model, bifrost-v0-cockpit-layout-brief, bifrost-harness-dashboard-brief); commit 1378bda; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 2026-05-31 11:20 -06:00 - Build 3 FileMap repair (Round B2 — live-codex-reviews-2.md + A-lane label + prose-divergence fixes) intercepted: work already present in commit 45497b1 (Build 1 cross-lane repair); local edits verified identical to HEAD; tests 46/46 filemap; no new commit required; task closed
-2026-05-31 16:05 -06:00 - Build 3 completed FileMap hygiene (register v0-v1-progress-tracker.md; fix stale relay_executor claims in v0-build-readiness-map.md); commit pending; tests 46/46 filemap; Obsidian pending
+2026-05-31 16:05 -06:00 - Build 3 completed FileMap hygiene (register v0-v1-progress-tracker.md; fix stale relay_executor claims in v0-build-readiness-map.md); commit 774695f; tests 46/46 filemap; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py, docs/v0-build-readiness-map.md
 ```
 
 ## Cross-Check Activity
