@@ -119,6 +119,9 @@ def test_prompt_packet_exports():
     assert PromptPacket
     assert PromptPacketValidationError
     assert build_prompt_packet
+    assert "PromptPacket" in meridian_core.__all__
+    assert "PromptPacketValidationError" in meridian_core.__all__
+    assert "build_prompt_packet" in meridian_core.__all__
 
 
 def test_internal_helpers_are_not_root_exports():

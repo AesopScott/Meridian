@@ -74,9 +74,6 @@ Private validation helpers (`_validate_*`) and sub-exception types should remain
 
 ## Candidates for Future Export
 
-```python
-# Already handled — move to exported list above when landed
-route_from_assessment  # already exported as of current __init__.py
-```
+No names are currently pending export. All known stable domain objects are already in `__all__`.
 
 Review any new names as a deliberate public API decision before adding to `__all__`.
