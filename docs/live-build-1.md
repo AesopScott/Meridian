@@ -262,6 +262,14 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 ~01:50 CDT - Build 1 completed assemble_relay_packet() helper; commit 6af04d4; tests 725 passed; Obsidian updated
 2026-05-31 ~02:10 CDT - Build 1 completed RelayDispatchPlan domain model; commit fd35a81; tests 748 passed; Obsidian updated
 2026-05-31 ~02:10 CDT - Build 1 slice ready for Codex Review: commit fd35a81; files: relay_dispatch.py, test_relay_dispatch.py; tests: 748 passed
+2026-05-31 ~04:30 CDT - Build 1 completed WorkerLaneState domain model; commit d2820d2; tests 785 passed; Obsidian updated
+2026-05-31 ~04:30 CDT - Build 1 slice ready for Codex Review: commit d2820d2; files: lane_state.py, test_lane_state.py; tests: 785 passed
+2026-05-31 ~17:05 CDT - Build 1 completed Relay executor skeleton; commit 190e527; tests 811 passed; files: relay_executor.py, test_relay_executor.py; Obsidian updated
+2026-05-31 ~17:05 CDT - Build 1 slice ready for Codex Review: commit 190e527; files: relay_executor.py, test_relay_executor.py; tests: 811 passed
+2026-05-31 evening CDT - Build 1 completed Relay execution summary to Aegis proof trail; commit 0e990df; files: relay_executor.py, test_relay_executor.py; tests: 119 targeted, 848 full passed; Ready for Codex Review [date corrected; originally logged 2026-05-30 14:26 -06:00 which predates 190e527]
+2026-05-31 evening CDT - Build 1 completed pre-dispatch Aegis proof gate enforcement; commit 7c75f43; files: relay_executor.py, test_relay_executor.py; tests: 124 targeted, 863 full passed; Ready for Codex Review [date corrected; originally logged 2026-05-30 14:43 -06:00]
+2026-06-01 ~04:00 CDT - Coordinator assigned provider-neutral Model Harness adapter contract (from docs/prime-planning-harness-answers.md) [originally logged 2026-05-30 15:21 -06:00; date corrected]
+2026-06-01 ~05:15 CDT - Build 1 completed provider-neutral Model Harness adapter contract; commit 653488b; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py, docs/live-build-1.md; tests: 46 adapter/executor passed, 126 Aegis/executor passed; Ready for Codex Review [originally logged 2026-05-30 15:41 -06:00; date corrected]
 ```
 
 ## Cross-Check Activity
@@ -295,20 +303,14 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-31 ~01:50 CDT - Build 1 Codex review requested after commits 86dbb93, 0de7129, 6af04d4
 2026-05-31 ~01:50 CDT - Build 1 Codex review finding: LOW; test_tokens.py missing explicit ceil(len/4)-dominant branch test; no repair required
 2026-05-31 ~01:50 CDT - Build 1 Codex review result: pass; no CRITICAL or HIGH findings; all files clean
-2026-05-30 11:43 -06:00 - Build 1 Codex coordinator verification: targeted suite 147 passed; full suite 725 passed; next Relay dispatch-plan slice assigned
-2026-05-31 ~04:30 CDT - Build 1 completed WorkerLaneState domain model; commit d2820d2; tests 785 passed; Obsidian updated
-2026-05-31 ~04:30 CDT - Build 1 slice ready for Codex Review: commit d2820d2; files: lane_state.py, test_lane_state.py; tests: 785 passed
-2026-05-31 ~17:05 CDT - Build 1 completed Relay executor skeleton; commit 190e527; tests 811 passed; files: relay_executor.py, test_relay_executor.py; Obsidian updated
-2026-05-31 ~17:05 CDT - Build 1 slice ready for Codex Review: commit 190e527; files: relay_executor.py, test_relay_executor.py; tests: 811 passed
-2026-05-30 14:26 -06:00 - Build 1 completed Relay execution summary to Aegis proof trail; commit 0e990df; files: relay_executor.py, test_relay_executor.py; tests: 119 targeted passed, 848 full passed; Ready for Codex Review
-2026-05-30 14:43 -06:00 - Build 1 completed pre-dispatch Aegis proof gate enforcement; commit 7c75f43; files: relay_executor.py, test_relay_executor.py; tests: 124 targeted passed, 863 full passed; Ready for Codex Review
+2026-05-31 ~01:50 CDT - Build 1 Codex coordinator verification: targeted suite 147 passed; full suite 725 passed; next Relay dispatch-plan slice assigned [date corrected; originally logged 2026-05-30 11:43 -06:00]
+2026-05-31 evening CDT - Build 1 Codex review requested after commits d2820d2, 190e527, 0e990df (three-slice cadence)
+2026-06-01 ~03:45 CDT - Build 1 Codex review result (Reviews C Round C1): cleared cadence; commits d2820d2, 190e527, 0e990df, 7c75f43 reviewed; repair commit 2706806
 ```
 
 ## Active Task
 
-Current Active Task (supersedes stale completed text below):
-
-Goal: build the V0 Relay adapter registry and lane dispatch bridge.
+Goal: Build the V0 Relay adapter registry and lane dispatch bridge.
 
 Context:
 
@@ -361,17 +363,19 @@ Completion:
 
 Write log:
 
-- 2026-05-30 16:15 -06:00 - Coordinator assigned Relay adapter registry and lane dispatch bridge; commit pending; tests pending.
+- 2026-06-01 16:15 -06:00 - Coordinator assigned Relay adapter registry and lane dispatch bridge; commit pending; tests pending. [original timestamp "2026-05-30 16:15 -06:00"; corrected to 2026-06-01 per commit-order context]
 
-Stale completed text follows.
+---
 
-### Completed Slices (most recent first)
+## Completed Slices
 
-[COMPLETED 2026-05-30 15:41 -06:00] Provider-neutral Model Harness adapter contract — commit `653488b`; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py; tests: 46 adapter/executor passed, 126 Aegis/executor passed; Ready for Codex Review.
+Historical record of Build 1 V0 completed slices. Do not re-execute any entry below.
 
-[COMPLETED 2026-05-30 14:43 -06:00] V0 pre-dispatch Aegis proof gate enforcement — commit `7c75f43`; 863 tests pass; Ready for Codex Review. Cleared by Review C.
+[COMPLETED 2026-06-01 ~05:15 CDT] Provider-neutral Model Harness adapter contract — commit `653488b`; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py; tests: 46 adapter/executor passed, 126 Aegis/executor passed; Ready for Codex Review. Cleared by Reviews C. [originally logged 2026-05-30 15:41 -06:00; date corrected]
 
-[COMPLETED 2026-05-30 14:26 -06:00] V0 Relay execution summary to Aegis proof trail — commit `0e990df`; 848 tests pass; Ready for Codex Review. Cleared by Review C.
+[COMPLETED 2026-05-31 evening CDT] V0 pre-dispatch Aegis proof gate enforcement — commit `7c75f43`; 863 tests pass; cleared by Reviews C Round C1. [originally logged 2026-05-30 14:43 -06:00; date corrected]
+
+[COMPLETED 2026-05-31 evening CDT] V0 Relay execution summary to Aegis proof trail — commit `0e990df`; 848 tests pass; cleared by Reviews C Round C1. [originally logged 2026-05-30 14:26 -06:00; date corrected]
 
 [COMPLETED 2026-05-31 ~17:05 CDT] V0 Relay executor skeleton — commit `190e527`; 811 tests pass; Ready for Codex Review.
 
