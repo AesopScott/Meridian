@@ -99,8 +99,11 @@ class AegisEvidence:
 
     def waive(self, reason: str) -> None:
         """Waive this evidence with an explicit reason on record."""
+        clean_reason = reason.strip()
+        if not clean_reason:
+            raise ValueError("waiver reason must not be empty or whitespace-only")
         self.status = EvidenceStatus.WAIVED
-        self.waiver_reason = reason
+        self.waiver_reason = clean_reason
 
     def escalate(self) -> None:
         """Escalate this evidence; it will remain proof-blocking until resolved."""
@@ -120,7 +123,12 @@ class AegisEvidence:
         rc_severity = _SEVERITY_MAP[self.severity]
         item_id = f"aegis-{self.id}"
         self.console_item_id = item_id
+
         content = f"Source: {self.source} | Target: {self.target}"
+        if self.status is not EvidenceStatus.OPEN:
+            content = f"{content} | Status: {self.status.value}"
+        if self.status is EvidenceStatus.WAIVED:
+            content = f"{content} | Waiver: {self.waiver_reason}"
 
         if self.is_proof_blocking():
             return make_approval_gate(

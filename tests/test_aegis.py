@@ -157,6 +157,11 @@ class TestWaived:
         ev.waive("design decision; intentional omission")
         assert ev.waiver_reason == "design decision; intentional omission"
 
+    def test_waive_strips_reason(self):
+        ev = _blocking()
+        ev.waive("  accepted risk  ")
+        assert ev.waiver_reason == "accepted risk"
+
     def test_waive_preserves_other_fields(self):
         ev = _cc(id="ev-w", source="relay.py", severity=EvidenceSeverity.ERROR)
         ev.waive("accepted")
@@ -168,6 +173,14 @@ class TestWaived:
         ev = _cc(severity=EvidenceSeverity.INFO)
         ev.waive("informational only")
         assert ev.is_proof_blocking() is False
+
+    def test_waive_empty_reason_raises(self):
+        with pytest.raises(ValueError):
+            _blocking().waive("")
+
+    def test_waive_whitespace_reason_raises(self):
+        with pytest.raises(ValueError):
+            _blocking().waive("   ")
 
 
 # ---------------------------------------------------------------------------
@@ -239,6 +252,30 @@ class TestToConsoleItem:
         item = ev.to_console_item()
         assert "relay.py" in item.content
         assert "RelayRoute" in item.content
+
+    def test_open_status_appears_in_content(self):
+        item = _cc().to_console_item()
+        assert "Status: open" in item.content
+
+    def test_resolved_status_appears_in_content(self):
+        ev = _blocking()
+        ev.resolve()
+        item = ev.to_console_item()
+        assert "Status: resolved" in item.content
+
+    def test_waived_status_and_reason_appear_in_content(self):
+        ev = _blocking()
+        ev.waive("accepted risk")
+        item = ev.to_console_item()
+        assert "Status: waived" in item.content
+        assert "Waiver: accepted risk" in item.content
+
+    def test_escalated_status_appears_in_content(self):
+        ev = _cc()
+        ev.escalate()
+        item = ev.to_console_item()
+        assert "Status: escalated" in item.content
+
 
 
 # ---------------------------------------------------------------------------
@@ -346,8 +383,6 @@ class TestProofTrailConsoleItems:
         assert len(trail.to_console_items()) == 3
 
     def test_empty_trail_emits_no_items(self):
-        assert trail.to_console_items() == [] if (trail := ProofTrail()) else True
-        # explicit form:
         assert ProofTrail().to_console_items() == []
 
     def test_output_preserves_insertion_order(self):
