@@ -121,6 +121,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 21:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (ba50f1b); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ba50f1b
 2026-05-30 21:29 -06:00 - Build 4 checked queue; status: running; new Active Task = Meridian V1 capability plan (docs/v1-capability-plan.md); origin/main at 9965720
 2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated — V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
+2026-05-30 23:13 -06:00 - Build 4 checked queue; status: idle; V1 plan revision complete (7b43848/9a4e6a4); no new Active Task; origin/main at 9dafd9c
 ```
 
 ## Write/Completion Log
