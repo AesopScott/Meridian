@@ -40,6 +40,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 11:45 -06:00 - Build 3 checked queue; status: idle; FileMap task already complete (73c9628); no new Active Task assigned
 2026-05-30 12:00 -06:00 - Build 3 checked queue; status: idle; no new Active Task assigned; polling
 2026-05-30 12:15 -06:00 - Build 3 checked queue; status: idle; Active Task section stale (FileMap done at 73c9628); awaiting new task assignment
+2026-05-30 12:30 -06:00 - Build 3 checked queue; status: active task found (live queue hygiene note); starting work
 ```
 
 ## Write/Completion Log
@@ -57,6 +58,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:10 -06:00 - Build 3 Codex review requested; awaiting automated review and findings for owned files
 2026-05-30 11:18 -06:00 - Build 3 completed Prompt Packet Codex review checklist; commit d84bb0f; tests 644 passing; Obsidian updated; polling resumed
 2026-05-30 11:28 -06:00 - Build 3 completed FileMap update (prompt_packet.py + capabilities architecture map); commit 73c9628; tests 46 passing (test_filemap.py); Obsidian updated; polling resumed
+2026-05-30 12:32 -06:00 - Build 3 completed live queue hygiene note; commit 26dc597; tests not required (docs-only); Obsidian updated; 3 commits completed (d84bb0f, 73c9628, 26dc597) — Codex review required before next task
 ```
 
 ## Cross-Check Activity
@@ -78,11 +80,12 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review finding: <severity>; details: <short 
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/fixed; details: <short note>
 2026-05-30 11:10 -06:00 - Build 3 Codex review requested after commits 34792fb, 7b67c41, a996abc
+2026-05-30 12:32 -06:00 - Build 3 Codex review requested after commits d84bb0f, 73c9628, 26dc597
 ```
 
 ## Active Task
 
-Goal: create a live queue hygiene note.
+Goal: repair live queue hygiene note after Codex review.
 
 Allowed files only:
 
@@ -90,15 +93,11 @@ Allowed files only:
 
 Task:
 
-- Write a short operational note for live build queue hygiene based on what we learned from Q polling.
-- Cover:
-  - why completed Active Tasks must be replaced or explicitly marked complete
-  - how stale Active Task sections cause repeated queue checks
-  - why Read Checks, Write/Completion Log, Cross-Check Activity, and Codex Review Cadence should remain separate
-  - how allowed-file ownership prevents lane collisions
-  - how queue files should eventually map to a real Meridian session-harness queue state
-  - what Prime should do when a lane is idle
-- Keep it simple and concrete.
+- Codex reviewed Build 3 commit `26dc597`.
+- Finding: the final Summary says these rules apply to `docs/live-build-1.md` through `docs/live-build-4.md` and future lanes, but Build 5 now exists.
+- Repair the note so the current lane set explicitly includes `docs/live-build-5.md`.
+- Keep the change tiny and mechanical.
+- Record the repair in this queue's Cross-Check Activity and Codex Review Cadence sections.
 - Do not edit other live queue files.
 - Do not edit runtime code.
 - Do not edit FileMap.
