@@ -53,12 +53,13 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | `meridian_core/intention.py` | Progress Intention / Compass | Builds stage/objective/risk-tier view from portfolio and decision state. | `tests/test_intention.py` | Functional seed for Prime's work intention. |
 | `meridian_core/objectives.py` | Mission Objectives recall | Stable on-demand API for Compass-derived mission objectives. | `tests/test_objectives.py` | Future cockpit Mission Objectives button uses this. |
 
-## Risk, Relay, Review
+## Risk, Relay, Aegis, Review
 
 | File | Area | Purpose | Related Tests | Notes |
 | --- | --- | --- | --- | --- |
 | `meridian_core/risk.py` | Risk Tier Engine | First-class risk assessment and requirements for tiers 0-4. | `tests/test_risk.py` | Decision engine foundation. |
 | `meridian_core/relay.py` | Relay routing | Deterministic model/session routing plan from risk tier. | `tests/test_relay.py` | No real model calls yet. |
+| `meridian_core/aegis.py` | Aegis / Proof harness | Proof harness: AegisEvidence, ProofTrail, and Review Console bridge for cross-check findings. | `tests/test_aegis.py` | Proof-blocking is severity + status aware; ESCALATED is always blocking. |
 | `meridian_core/review_console.py` | Review Console | Promptable review/gating surface for cross-check, proof, artifacts, plans, gates. | `tests/test_review_console.py` | Replaces "non-orchestrator window" name. |
 
 ## Build And Maturity

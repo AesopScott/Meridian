@@ -33,6 +33,7 @@ class FileArea:
     OBJECTIVES       = "Mission Objectives recall"
     RISK_ENGINE      = "Risk Tier Engine"
     RELAY_ROUTING    = "Relay routing"
+    AEGIS            = "Aegis / Proof harness"
     REVIEW_CONSOLE   = "Review Console"
     BUILD_MATURITY   = "Build/maturity registry"
     FILE_MAP         = "File map / knowledge tracker"
@@ -246,7 +247,7 @@ def make_default_map() -> FileMap:
             notes="Future cockpit Mission Objectives button uses this.",
         ),
 
-        # -- Risk, Relay, Review ----------------------------------------
+        # -- Risk, Relay, Aegis, Review ----------------------------------------
         FileMapEntry(
             path="meridian_core/risk.py",
             area=FileArea.RISK_ENGINE,
@@ -260,6 +261,13 @@ def make_default_map() -> FileMap:
             purpose="Deterministic model/session routing plan from risk tier.",
             related_tests=["tests/test_relay.py"],
             notes="No real model calls yet.",
+        ),
+        FileMapEntry(
+            path="meridian_core/aegis.py",
+            area=FileArea.AEGIS,
+            purpose="Proof harness: AegisEvidence, ProofTrail, and Review Console bridge for cross-check findings.",
+            related_tests=["tests/test_aegis.py"],
+            notes="Proof-blocking is severity + status aware; ESCALATED is always blocking.",
         ),
         FileMapEntry(
             path="meridian_core/review_console.py",
