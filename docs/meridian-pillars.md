@@ -14,7 +14,7 @@ The goal is adaptable judgment with inspectable reasoning, not rigid automation.
 
 ## 2. Dynamic Risk-Tiered Dual-Structured Gated Cognition
 
-Meridian's decision engine is Dynamic Risk-Tiered Dual-Structured Gated Cognition: Prime dynamically adjusts reasoning depth by risk tier, can use independent dual lanes, applies structured Council deliberation, and gates completion claims through Aegis proof when consequences require it.
+Meridian's decision engine is Dynamic Risk-Tiered Dual-Structured Gated Cognition: Prime, Meridian's orchestrator, dynamically adjusts reasoning depth by risk tier, can use independent dual lanes, applies structured Council deliberation, and gates completion claims through Aegis proof when consequences require it.
 
 This is broader than dual-lane cognition alone. Dual lanes are one mechanism inside the larger process. The Council gives Prime structured internal positions to consider. Aegis provides the gate for proof, completion claims, escalation, and human review.
 

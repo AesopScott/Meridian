@@ -460,7 +460,7 @@ Prime is currently preferred over Oracle and Daemon for the user-facing orchestr
 
 ## Dynamic Risk-Tiered Dual-Structured Gated Cognition
 
-Meridian's decision engine is Dynamic Risk-Tiered Dual-Structured Gated Cognition: Prime dynamically adjusts reasoning depth by risk tier, can use independent dual lanes, applies structured Council deliberation, and gates completion claims through Aegis proof when consequences require it.
+Meridian's decision engine is Dynamic Risk-Tiered Dual-Structured Gated Cognition: Prime, Meridian's orchestrator, dynamically adjusts reasoning depth by risk tier, can use independent dual lanes, applies structured Council deliberation, and gates completion claims through Aegis proof when consequences require it.
 
 This is Prime Directive Two.
 
