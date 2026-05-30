@@ -202,6 +202,38 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 
 ## Active Task
 
+Current Active Task:
+
+Goal: perform Codex Reviews A Round 3 with explicit proof.
+
+Scope:
+
+- Build 1 commit `190e527` - V0 Relay executor skeleton.
+- Build 2 commit `d821106` - Relay executor API policy note.
+- Include queue marker commits only as provenance, not product scope.
+
+Required proof:
+
+- For Build 1, inspect `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`.
+- Run `python -m pytest tests/test_relay_executor.py -q`.
+- Confirm the executor forwards only lane payload text to the injected callable.
+- Confirm no vendor/API/account automation was introduced.
+- Confirm exceptions are captured per lane and do not stop other lanes.
+- For Build 2, inspect `docs/relay-executor-api-policy.md`.
+- Confirm the policy does not prematurely require package-root exports before Build 1 is reviewed.
+
+Output:
+
+- Declare Round 3 scope in Review Round Scope.
+- Update Checkpoint Ledger.
+- Update Review Log.
+- Update Proof Log.
+- Record findings, if any.
+- Route repairs to Build 1 or Build 2 if actionable.
+- If clean, mark Round 3 complete and return to polling.
+
+Stale prior status follows.
+
 Round 2 A-portion complete (2026-05-31 16:35 CDT).
 
 - Build 1 d2820d2 (WorkerLaneState): passed — pytest tests/test_lane_state.py 37/37

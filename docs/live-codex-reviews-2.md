@@ -159,6 +159,37 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 
 ## Active Task
 
+Current Active Task:
+
+Goal: perform Codex Reviews B Round B3 when the next docs/architecture slice is ready.
+
+Scope trigger:
+
+- Build 3 completion of the `docs/live-codex-reviews-2.md` FileMap repair, or
+- Build 4 commit `fd9224d` - Prime status console and Review Console CLI bridge, or
+- Build 5 completion of `docs/bifrost-configurable-progress-surface-brief.md`.
+
+Immediate scope available now:
+
+- Build 4 commit `fd9224d`.
+
+Required proof for Build 4:
+
+- Inspect `docs/prime-status-console-cli-brief.md`.
+- Confirm the brief routes NASA/system/proof messages to the non-orchestrator/review surface and keeps Prime's conversational thread clean.
+- Confirm the proposed commands do not contradict existing Review Console, Wake Brief, Progress Intention, Beacon, or Bifrost docs.
+- Check whether the new doc needs FileMap registration. If yes, route the FileMap task to Build 3 instead of editing FileMap here.
+- Since this is docs-only, tests are not required; proof must be file inspection plus cross-reference checks.
+
+Output:
+
+- Declare Round B3 scope.
+- Update Review Ledger, Review Log, Proof Log, Findings, and Repair Routing Log.
+- Route any actionable findings to the owning build lane.
+- If clean, mark the reviewed slice passed and continue polling.
+
+Stale prior status follows.
+
 **Round B2 complete. Codex Reviews B is idle, awaiting Round B3.**
 
 Round B2 result summary:
