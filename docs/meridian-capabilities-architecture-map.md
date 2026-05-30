@@ -87,28 +87,28 @@ The capabilities below are the load-bearing pieces of that shape.
 
 - **Definition:** A three-part discipline that makes "Relay must not become prompt drag" measurable: **Prompt Budget** sets tier-locked rules (max tokens, allowed sources), **Prompt Packet** is the validated immutable bundle built under those rules, and **Prompt Metrics** measure construction time, token count, and overhead against a vendor baseline.
 - **Why it matters:** This is one of Meridian's most distinctive architectural claims. The Polaris postmortem identified prompt overhead inside the agent harness — not orchestration itself — as the dominant tax. Meridian answers by making prompt weight a deterministic function of risk tier and by sealing the prompt as a validated artifact *before* dispatch. Worker dispatch stays lean; Prime stays rich. The split between the two is enforced by data, not by prompt convention.
-- **Maturity:** `domain slice` for Prompt Budget (typed, mapped to risk tier, deterministic) and Prompt Packet (typed, immutable domain model with full validation hardening in `__post_init__` landed in Build 1, commit `0ce0cf9`). Prompt Metrics is sketched in the budget integration brief but not built. RelayRoute does not yet carry the budget field in runtime.
+- **Maturity:** `domain slice` across all three parts. Prompt Budget: typed, mapped to risk tier, deterministic. Prompt Packet: typed immutable domain model with `__post_init__` validation and `model_payload()` dispatch boundary (Build 1, `0ce0cf9`). Prompt Metrics: `PromptMetricSample` and `PromptMetricSummary` domain types exist in `meridian_core/prompt_metrics.py`. RelayRoute now carries `prompt_budget: PromptBudgetPlan` at the domain-routing layer. What remains planned: worker prompt enforcement (reading the budget ceiling during actual dispatch), metrics persistence, dashboard integration, and vendor baseline measurement.
 - **Likely harness owner:** Relay (carries the budget on every route, builds and seals the packet, emits metrics).
 - **Risks / open questions:**
   - Token counting is provider-specific; the budget abstraction must not pretend tokens are universal across model families.
   - The vendor baseline measurement requires sending the same task minimally to the vendor — that itself costs money and may be rate-limited.
   - The lineage dict is internal accounting; under no circumstance should it leak into the serialized prompt. This is a test requirement, not just a convention.
   - Tier 3/4 budgets allow proof and explanation context to grow — the ceiling values (5,000 / 8,000) are placeholders and will need empirical tuning.
-  - Prompt Packet's next integration step is carrying `PromptBudgetPlan` on `RelayRoute` (see `docs/relay-prompt-budget-integration-brief.md`); until that lands, Budget and Packet exist as standalone domain objects without end-to-end enforcement.
+  - The three domain slices (Budget, Packet, Metrics) are standalone objects; end-to-end enforcement — Relay dispatch actually reading the budget ceiling — is the next integration milestone.
 
 ---
 
-## 5. Review Console and Non-Orchestrator Surface
+## 5. Review Console
 
-- **Definition:** A second prompt surface, paired with the Orchestrator Queue, where Prime places artifacts, plans, comparisons, proof, worker outputs, and gate items it wants Scott to see or respond to — separate from the conversational stream.
-- **Why it matters:** Polaris collapsed conversation and gating into one stream, which made every review feel like an interruption. Meridian's split lets Prime own routine review loops in the background while still surfacing the small set of items that genuinely need Scott's eyes. It is also where automatic cross-check messages, Aegis proof results, and Council comparisons land without crowding the orchestrator queue.
-- **Maturity:** `planned`. The surface is described in `context.md` (Non-Orchestrator Queue) and `docs/meridian-pillars.md` (Pillar 10) but is not yet built. The name itself ("non-orchestrator") is acknowledged as awkward and needs a real product name.
-- **Likely harness owner:** Bifrost (UI surface). Aegis (feeds proof outputs). Relay (feeds Council comparisons and lane disagreements). Loom (feeds workflow gates).
+- **Definition:** The Review Console is the named surface where Prime places typed items — proof results, cross-check findings, gate decisions, worker summaries, system Go calls, and artifacts — separate from the Orchestrator Queue where Scott and Prime converse.
+- **Why it matters:** Polaris collapsed conversation and gating into one stream, which made every review feel like an interruption. Meridian's split lets Prime own routine review loops in the background while still surfacing the small set of items that genuinely need Scott's eyes. It is also where Aegis proof results, Council comparisons, and cross-check findings land without crowding the orchestrator queue.
+- **Maturity:** `domain slice`. The typed domain model exists in `meridian_core/review_console.py` — `ReviewConsoleItemType` enum (CROSS_CHECK, PLAN_REVIEW, PROOF, SYSTEM_FINDING, ARTIFACT, APPROVAL_GATE, COMPARISON), `ReviewConsoleStatus` enum (PENDING, RESPONDED, ACKNOWLEDGED, DISMISSED), and the item queue. Aegis bridges proof evidence to Review Console items. The surface is named the **Review Console** (see `docs/review-console-surface-contract.md`). Bifrost UI rendering and live Prime routing to the console remain planned.
+- **Likely harness owner:** Bifrost (UI rendering and navigation). Aegis (feeds proof outputs). Relay (feeds Council comparisons and lane disagreements). Loom (feeds workflow gates).
 - **Risks / open questions:**
-  - Naming. "Non-orchestrator" is descriptive but not a product noun. Candidates worth exploring: Review Console, Gates, Watch, Console, Findings, Brief.
+  - Naming is resolved: **Review Console**. Future brand validation is a minor downstream concern compared to the UI and routing work still needed.
   - The boundary between "Prime decides and tells Scott" and "Prime places in the gate window" must be inspectable — otherwise Scott cannot trust the routine-vs-gate split.
-  - The surface needs an interaction model: scroll-and-acknowledge, swipeable cards, threaded responses, or a queue with disposition actions. This is a design question, not just an architecture one.
-  - Audio/voice integration (NASA-style "Go" calls) is named as a possibility; it crosses into Bifrost surface scope and should not be conflated with the gate surface itself.
+  - The surface contract defines intended card types and Scott's disposition actions; the current domain model uses a leaner action set. These must converge before Bifrost rendering is built.
+  - Audio/voice integration (NASA-style "Go" calls) crosses into Bifrost surface scope and should not be conflated with the Review Console item model itself.
 
 ---
 
@@ -191,8 +191,8 @@ The capabilities below are the load-bearing pieces of that shape.
 | 1 | Prime as persistent orchestrator            | domain slice                       | Prime (kernel)               |
 | 2 | Worker sessions as harness-driven lanes     | domain slice                       | Relay, Beacon, Bifrost       |
 | 3 | Live queue / pull / poll / review loop      | integrated                         | (Loom future) — flat-file today |
-| 4 | Prompt Budget / Packet / Metrics            | domain slice (Budget, Packet); planned (Metrics) | Relay        |
-| 5 | Review Console / non-orchestrator surface   | planned                            | Bifrost, Aegis, Relay        |
+| 4 | Prompt Budget / Packet / Metrics            | domain slice (all three); dispatch enforcement planned | Relay  |
+| 5 | Review Console                              | domain slice; Bifrost UI + Prime routing planned | Bifrost, Aegis, Relay |
 | 6 | Aegis proof and gated cognition             | domain slice                       | Aegis                        |
 | 7 | Council reasoning                           | domain slice                       | Prime (CouncilPlan via Relay) |
 | 8 | Memory and effective unbounded context      | domain slice                       | Echo, Atlas                  |

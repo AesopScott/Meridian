@@ -1,6 +1,6 @@
 # Review Console Surface Contract
 
-**Status:** Strategic/architectural — no runtime code
+**Status:** Surface contract — domain slice exists in `meridian_core/review_console.py`; Bifrost UI rendering and live Prime routing are planned
 **Owner lane:** Build 4 (Opus high-level thinking)
 **Audience:** Prime, Bifrost, Beacon, Aegis, Relay, Scott, future contributors
 **Purpose:** Define what the Review Console is, what belongs there, how Prime populates it, what actions Scott can take from it, and how it avoids the failure modes of prior surfaces.
@@ -197,6 +197,51 @@ During Prime's wake sequence, Beacon checks each harness and sends Go-call cards
 If Beacon detects a harness has gone degraded or failed during a work session, it sends a FINDING card (severity: high or critical) to the Review Console. If the degraded harness affects Prime's active work, Prime also escalates to the Orchestrator Queue. If it is unrelated to current work, it remains visible in the Review Console until Scott acknowledges or Prime resolves it.
 
 Beacon's full health feed (per-harness heartbeat, timing, liveness) is available in Beacon's own view, not streamed into the Review Console by default. The Review Console receives Beacon's judgments (Go / degraded / failed), not Beacon's raw telemetry.
+
+---
+
+## Current Domain Model vs. Future Contract Vocabulary
+
+The surface contract above describes the intended, user-facing vocabulary for the Review Console. The current domain model in `meridian_core/review_console.py` is a leaner typed foundation. These will converge before Bifrost rendering is built. The mapping is:
+
+### Item types
+
+| Contract card type | Current domain enum (`ReviewConsoleItemType`) |
+|---|---|
+| PROOF | `PROOF` |
+| FINDING (cross-check) | `CROSS_CHECK` |
+| GATE | `APPROVAL_GATE` |
+| SUMMARY (plan) | `PLAN_REVIEW` |
+| SUMMARY (worker) | *(future — not yet a distinct type)* |
+| GO-CALL | `SYSTEM_FINDING` |
+| ARTIFACT | `ARTIFACT` |
+| Council comparison | `COMPARISON` |
+
+### Item status
+
+| Contract status | Current domain enum (`ReviewConsoleStatus`) |
+|---|---|
+| pending | `PENDING` |
+| acknowledged | `ACKNOWLEDGED` |
+| approved / rejected | `RESPONDED` |
+| dismissed | `DISMISSED` |
+| deferred | *(future — maps to PENDING with a defer timestamp)* |
+| expired | *(future — policy, not current domain)* |
+
+### Disposition actions
+
+| Contract action | Current domain model | Status |
+|---|---|---|
+| Acknowledge | `ACKNOWLEDGE` | Exists |
+| Approve | `APPROVE` | Exists |
+| Reject | `REJECT` | Exists |
+| Inspect | `INSPECT` | Exists |
+| Modify | `MODIFY` | Exists |
+| Defer | *(not yet in domain model)* | Future UI/policy layer |
+| Override (with waiver) | Handled by Aegis evidence waiver, not Review Console action | Future integration |
+| Escalate to Orchestrator Queue | *(not yet in domain model)* | Future routing |
+
+The contract is intentionally ahead of the domain model — it defines the target state. Actions marked "future" should be added to the domain model and tested before Bifrost builds the interaction layer. This note will be removed when the domain model and contract vocabulary have converged.
 
 ---
 

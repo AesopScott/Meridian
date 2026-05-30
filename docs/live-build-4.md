@@ -78,6 +78,13 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review requested after commits <hash1>, <has
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review finding: <severity>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/fixed; details: <short note>
+2026-05-30 11:31 -06:00 - Build 4 Codex review requested after commits 951a6ed, 1db1b23, d29cca6
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; docs/meridian-capabilities-architecture-map.md claims Prompt Metrics "not built" — prompt_metrics.py exists with domain types; repair: reclassify as domain slice
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; capabilities map says RelayRoute does not carry budget field — relay.py already carries prompt_budget: PromptBudgetPlan; repair: correct claim
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; Review Console marked "planned" — review_console.py domain model exists; repair: reclassify as domain slice
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: HIGH; surface contract card taxonomy mismatches review_console.py enums; repair: add domain-model alignment section to contract
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: HIGH; contract disposition actions (Defer, Override, Escalate) not in current domain model; repair: table distinguishing current vs. future actions added
+2026-05-30 11:37 -06:00 - Build 4 Codex review repair: commit pending; tests not required (docs-only); all 3 CRITICAL + 2 HIGH repaired in docs/meridian-capabilities-architecture-map.md and docs/review-console-surface-contract.md
 ```
 
 ## Active Task
