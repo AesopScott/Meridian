@@ -211,6 +211,7 @@ Scope:
 - Build 1 commit `190e527` - V0 Relay executor skeleton.
 - Build 2 commit `d821106` - Relay executor API policy note.
 - Build 2 commit `e800c03` - V0 `prime_wake` CLI surface.
+- Build 2 commit `989366f` - V0 `prime_console`, `prime_status`, and `route_to_console` CLI visibility surface.
 - Include queue marker commits only as provenance, not product scope.
 
 Required proof:
@@ -227,6 +228,11 @@ Required proof:
 - Confirm mission load failures surface clearly.
 - Confirm wake output is deterministic and suitable for the non-orchestrator/system surface.
 - Confirm no persistence or Bifrost UI was introduced.
+- For Build 2 `989366f`, inspect `meridian_core/cli.py`, `meridian_core/review_console.py`, and `tests/test_cli.py`.
+- Run the focused CLI and Review Console tests touched by the slice.
+- Confirm `route_to_console()` does not create durable persistence or bypass existing Review Console status/type semantics.
+- Confirm `prime_console` and `prime_status` output is deterministic and suitable for V0 CLI visibility.
+- Treat Build 2 as cadence-paused after this review scope because commits `d821106`, `e800c03`, and `989366f` are the three current Build 2 task-changing commits.
 
 Output:
 
