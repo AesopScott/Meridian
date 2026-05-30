@@ -46,6 +46,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 11:29 -06:00 - Build 4 checked queue; status: running; Active Task = Review Console surface contract; origin/main at 27db0e2; this is doc commit 3 of 3 — Codex review follows completion
 2026-05-30 11:41 -06:00 - Build 4 checked queue; status: running; new Active Task = consistency review pass (capabilities map + Review Console contract); Codex review repairs already committed as 7792243
 2026-05-30 11:47 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 736b6af); no new task; origin/main at c6acc6e
+2026-05-30 11:52 -06:00 - Build 4 checked queue; status: running; Active Task = V0 build readiness map (docs/v0-build-readiness-map.md); origin/main at 0282b3a
 ```
 
 ## Write/Completion Log
@@ -61,6 +62,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:41 -06:00 - Build 4 completed consistency review pass: updated Q button note to reference bifrost-session-queue-activation-brief.md, closed Codex cadence; commit pending; tests not required
 2026-05-30 11:37 -06:00 - Codex assigned Build 4 architecture review/finish pass; commit pending; tests not required
 2026-05-30 11:47 -06:00 - Build 4 idle read check logged; cross-check complete; no new task; commit c6acc6e is latest origin/main
+2026-05-30 11:52 -06:00 - Build 4 completed V0 build readiness map (docs/v0-build-readiness-map.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
