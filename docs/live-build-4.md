@@ -48,6 +48,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 11:47 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 736b6af); no new task; origin/main at c6acc6e
 2026-05-30 11:52 -06:00 - Build 4 checked queue; status: running; Active Task = V0 build readiness map (docs/v0-build-readiness-map.md); origin/main at 0282b3a
 2026-05-30 11:57 -06:00 - Build 4 checked queue; status: idle; V0 readiness map complete (3cbf336); Ready for Codex Review marker committed (42950d7); no new task; origin/main at 2caa89e
+2026-05-30 12:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; awaiting Codex Reviews sweep on 3cbf336; origin/main at 5bd55f8
 ```
 
 ## Write/Completion Log
@@ -79,6 +80,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:28 -06:00 - Build 4 cross-check: finding (informational); Build 5 live queue added (b180d55); Build 1 Codex review cadence complete (0246d1b); Codex repair landed whitespace/empty packet_id fixes (9389563); none affect Build 4 owned files
 2026-05-30 11:47 -06:00 - Build 4 cross-check: finding (informational); bf15569 (Build 2) repaired stale is_valid/validation_errors claim in PromptPacket note; no impact on Build 4 docs; all other lanes (Build 1, 3, 5) idle polling; no findings affecting capabilities map or review-console contract
 2026-05-30 11:57 -06:00 - Build 4 cross-check: finding (informational); 2caa89e added missing Meridian engineering diagrams (not Build 4 owned files); Build 1 and Build 3 idle polling; no findings affecting Build 4 docs
+2026-05-30 12:00 -06:00 - Build 4 cross-check: finding (informational); 5bd55f8 — Build 5 cadence pause cleared by Codex Reviews (d1d32af passed); no findings affecting Build 4 docs; all lanes idle or awaiting assignment
 ```
 
 ## Codex Review Cadence
