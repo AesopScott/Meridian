@@ -201,6 +201,7 @@ __all__ = [
     "council_plan_for_tier",
     # -- Relay prompt budget --------------------------------------------------
     "PromptBudgetTier",
+    "PromptBudget",
     "PromptBudgetPlan",
     "prompt_budget_for_risk_tier",
 ]
