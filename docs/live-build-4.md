@@ -149,6 +149,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 16:10 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 19151c4
 2026-05-30 16:11 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 1d5e5a6
 2026-05-30 16:14 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at ea8f289
+2026-05-30 16:15 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 09f7297
 ```
 
 ## Write/Completion Log
@@ -161,16 +162,16 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:09 -06:00 - Build 4 completed Meridian capabilities architecture map (docs/meridian-capabilities-architecture-map.md); commit pending push; tests not required
 2026-05-30 11:23 -06:00 - Build 4 completed capabilities map update: Prompt Packet maturity domain slice (0ce0cf9), Polaris Q button note added to capability 3; commit pending; tests not required
 2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit d29cca6; tests not required; this is doc commit 3 of 3 — Codex review to follow
-2026-05-30 11:41 -06:00 - Build 4 completed consistency review pass: updated Q button note to reference bifrost-session-queue-activation-brief.md, closed Codex cadence; commit pending; tests not required
 2026-05-30 11:37 -06:00 - Codex assigned Build 4 architecture review/finish pass; commit pending; tests not required
+2026-05-30 11:41 -06:00 - Build 4 completed consistency review pass: updated Q button note to reference bifrost-session-queue-activation-brief.md, closed Codex cadence; commit pending; tests not required
 2026-05-30 11:47 -06:00 - Build 4 idle read check logged; cross-check complete; no new task; commit c6acc6e is latest origin/main
 2026-05-30 11:52 -06:00 - Build 4 completed V0 build readiness map (docs/v0-build-readiness-map.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 12:12 -06:00 - Build 4 completed Prime orchestration state model (docs/prime-orchestration-state-model.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 15:08 -06:00 - Build 4 completed Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-30 16:01 -06:00 - Build 4 completed Prime restart/resteer logic (docs/prime-restart-resteer-logic.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 21:29 -06:00 - Build 4 completed Meridian V1 capability plan (docs/v1-capability-plan.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 22:40 -06:00 - Build 4 revised V1 capability plan (docs/v1-capability-plan.md) — cockpit UI scope per Scott clarification; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 01:48 -06:00 - Build 4 completed V3 parking lot (docs/v3-parking-lot.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
-2026-05-30 16:01 -06:00 - Build 4 completed Prime restart/resteer logic (docs/prime-restart-resteer-logic.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
@@ -217,7 +218,9 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Current Active Task (supersedes any stale text below):
+No active task. Polling.
+
+Stale prior text follows.
 
 Goal: define Prime continuous restart/resteer logic.
 
@@ -409,5 +412,3 @@ Completion:
 - Tests: not required (docs-only)
 
 (Previous slices `3cbf336` `docs/v0-build-readiness-map.md`, `1d17fa1` `docs/prime-orchestration-state-model.md`, `fd9224d` `docs/prime-status-console-cli-brief.md`, `7b43848` `docs/v1-capability-plan.md`, and `18e2767` `docs/v3-parking-lot.md` also pending Codex Reviews sweep.)
-
-No active task. Polling.
