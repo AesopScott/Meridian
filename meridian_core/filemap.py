@@ -383,6 +383,20 @@ def make_default_map() -> FileMap:
             related_tests=["tests/test_review_console.py"],
             notes="Replaces 'non-orchestrator window' name.",
         ),
+        FileMapEntry(
+            path="docs/prime-status-console-cli-brief.md",
+            area=FileArea.REVIEW_CONSOLE,
+            purpose="Prime Status Console and Review Console CLI bridge: routes NASA-style mission logs and system messages to the Review Console surface, keeping Prime's conversational thread clean.",
+            related_tests=[],
+            notes="Architecture note, no runtime code. Owner: Build 4. Read before designing any Prime to Review Console message routing.",
+        ),
+        FileMapEntry(
+            path="docs/non-orchestrator-surface-naming.md",
+            area=FileArea.REVIEW_CONSOLE,
+            purpose="Naming rationale for the Review Console surface: establishes 'Review Console' as the canonical product-ready name, replacing the 'non-orchestrator window' placeholder.",
+            related_tests=[],
+            notes="Vocabulary doc. Read before writing docs or code that names this surface.",
+        ),
 
         # -- Build and maturity -----------------------------------------
         FileMapEntry(
@@ -486,6 +500,13 @@ def make_default_map() -> FileMap:
             purpose="V1 Bifrost cockpit implementation brief: what V1 builds, what it omits, and which UI slices land first. Turns V0's domain capabilities into a Prime-centered, browser-rendered cockpit surface.",
             related_tests=[],
             notes="Owner: Build 5. Read before implementing any V1 cockpit UI slice. Source briefs: bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md, bifrost-cockpit-queue-status-brief.md.",
+        ),
+        FileMapEntry(
+            path="docs/bifrost-configurable-progress-surface-brief.md",
+            area=FileArea.BIFROST,
+            purpose="Bifrost configurable progress and proof surface brief: how routine build-lane events, progress updates, and Aegis/Codex proof items are routed to a non-Prime surface, keeping the cockpit uncluttered.",
+            related_tests=[],
+            notes="Design-only. Owner: Build 5. Read before designing cockpit progress/proof routing.",
         ),
 
         # -- File map itself --------------------------------------------
