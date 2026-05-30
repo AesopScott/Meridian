@@ -72,6 +72,8 @@ Three properties make `PromptPacket`, `PromptPacketValidationError`, and `build_
 
 Private validation helpers (`_validate_*`) and sub-exception types should remain module-level imports, not root exports, until their hierarchy is stable across a review cycle.
 
+**Relay dispatch internals** — `assemble_relay_packet`, `RelayDispatchLane`, `RelayDispatchPlan`, and `build_relay_dispatch_plan` are module-level imports only. See `docs/relay-package-api-policy-note.md` for the full reasoning and the proof required before any root export.
+
 ## Candidates for Future Export
 
 No names are currently pending export. All known stable domain objects are already in `__all__`.
