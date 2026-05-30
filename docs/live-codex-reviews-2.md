@@ -20,6 +20,7 @@ Both review lanes must declare scope before reviewing, and neither lane may sile
 - Own review coordination files, docs/architecture review records, and repair routing only.
 - Review completed build slices by commit hash.
 - Inspect the target diff and directly necessary supporting docs only.
+- Record proofs for every review pass. A pass without proof is not a clearance; it is only an opinion.
 - For docs-only slices, check for stale claims, contradictions, missing references, FileMap gaps, and scope drift.
 - Record review results in this file.
 - If a docs/architecture finding requires repair, write the repair Active Task back into the original build lane queue.
@@ -96,6 +97,27 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-30 23:30 -06:00 - Reviewed Build 3 commit 4075ef4 (+ queue marker 6879bd9); result: pass; tests: `python -m pytest tests/test_filemap.py -q` → 46/46 passed in 0.09s; notes: FileMap.md ↔ filemap.py ↔ tests internally consistent; new `RELAY_DISPATCH` area placed sensibly; both new doc rows match registered FileMapEntries by path; referenced files (`meridian_core/relay_dispatch.py`, `tests/test_relay_dispatch.py`, `docs/live-codex-reviews.md`, `docs/prime-orchestration-harness-prototype.md`) exist. Two LOW prose-divergence findings recorded.
 2026-05-30 23:30 -06:00 - Reviewed Build 4 commit 1d17fa1 (+ queue marker 14ae1e9); result: pass-with-findings; tests: docs-only; notes: state model is internally consistent, cross-references to `meridian_core/aegis.py` (EvidenceSeverity, AegisEvidence), `meridian_core/models.py` (TaskStatus), `meridian_core/builds.py`, `docs/meridian-pillars.md`, `docs/review-console-surface-contract.md`, `docs/bifrost-cockpit-queue-status-brief.md`, `docs/prime-orchestration-harness-prototype.md`, `docs/v0-build-readiness-map.md` all verified present. Doc explicitly defers FileMap edits to Build 3 — gap routed accordingly. Severity-ladder reuse/alias question recorded as LOW.
 2026-05-30 23:30 -06:00 - Reviewed Build 5 commit 7c34566 (+ queue marker 3026216); result: pass-with-findings; tests: docs-only; notes: Bifrost Harness dashboard brief is internally consistent and aligns with companion briefs (session-queue activation, cockpit queue status, V0 cockpit layout). §5 reference to bifrost-v0-cockpit-layout-brief.md §5 verified. Cross-references to `docs/cockpit-ui-architecture.md`, `docs/prime-wake-sequence-build-brief.md`, `docs/meridian-capabilities-architecture-map.md` all exist on disk. Brief explicitly disclaims FileMap edits — gap routed to Build 3.
+
+## Proof Log
+
+Append proof entries here before marking a slice passed.
+
+Proof is the evidence behind the review result. It should be short, specific, and reproducible enough that Prime can later turn it into Aegis evidence or Review Console proof cards.
+
+```text
+YYYY-MM-DD HH:MM TZ - Proof for Build <n> commit <hash>; proof type: diff/test/reference/manual; evidence: <short reproducible evidence>; result: pass/fail/deferred
+```
+
+2026-05-30 23:30 -06:00 - Proof for Build 3 commit 4075ef4; proof type: test/reference; evidence: `python -m pytest tests/test_filemap.py -q` passed 46/46 and referenced files (`meridian_core/relay_dispatch.py`, `tests/test_relay_dispatch.py`, `docs/live-codex-reviews.md`, `docs/prime-orchestration-harness-prototype.md`) exist; result: pass.
+2026-05-30 23:30 -06:00 - Proof for Build 4 commit 1d17fa1; proof type: reference/manual; evidence: referenced architecture/domain files exist; doc explicitly defers FileMap edits to Build 3; severity-ladder concern recorded as LOW; result: pass-with-findings.
+2026-05-30 23:30 -06:00 - Proof for Build 5 commit 7c34566; proof type: reference/manual; evidence: companion Bifrost briefs and referenced architecture docs exist; FileMap gap routed to Build 3; result: pass-with-findings.
+
+Minimum proof expectations:
+
+- FileMap slices: `tests/test_filemap.py` plus path/reference verification.
+- Docs/architecture slices: referenced-file existence checks plus contradiction/scope inspection.
+- UI/product briefs: companion-doc reference checks plus V0/V1 scope consistency.
+- Repair verification: original finding, repair commit, and test/reference evidence that the finding is closed.
 
 ## Findings
 

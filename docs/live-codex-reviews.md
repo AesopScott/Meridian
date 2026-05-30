@@ -24,6 +24,7 @@ This split is deliberate: Meridian must be able to dynamically spawn review sess
 - Own review coordination files and live queue routing only.
 - Review completed build slices by commit hash.
 - Inspect the diff, compare it to the lane's allowed files and task text, and run targeted tests when code changed.
+- Record proofs for every review pass. A pass without proof is not a clearance; it is only an opinion.
 - For docs-only slices, inspect for stale claims, contradictions, missing references, and scope drift.
 - Record each review result in this file.
 - If there are no actionable findings, mark the source build lane clear and eligible for new work.
@@ -137,6 +138,29 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-30 15:30 CDT - Reviewed Build 5 commit d1d32af; result: pass; tests: docs-only (no tests required); notes: bifrost-v0-cockpit-layout-brief.md is a coherent 14-section V0 layout brief; cross-references both companion briefs (verified present); ASCII layout sketch + scaling rules + "leave out" list are scope-appropriate; cadence pause cleared.
 ```
 
+## Proof Log
+
+Append proof entries here before marking a slice passed.
+
+Proof is the evidence behind the review result. It should be short, specific, and reproducible enough that Prime can later turn it into Aegis evidence or Review Console proof cards.
+
+```text
+YYYY-MM-DD HH:MM TZ - Proof for Build <n> commit <hash>; proof type: diff/test/reference/manual; evidence: <short reproducible evidence>; result: pass/fail/deferred
+
+2026-05-30 15:30 CDT - Proof for Build 1 commits 6af04d4..fd35a81; proof type: test; evidence: pytest tests/test_relay_packet.py and tests/test_relay_dispatch.py passed; result: pass
+2026-05-30 15:30 CDT - Proof for Build 3 commits 7ec16ac..ef934b1; proof type: test/reference; evidence: pytest tests/test_filemap.py passed and FileMap entries matched expected paths; result: pass
+2026-05-30 15:30 CDT - Proof for Build 4 commit 736b6af; proof type: reference; evidence: referenced bifrost-session-queue-activation brief exists and doc claims match current architecture notes; result: pass
+2026-05-30 15:30 CDT - Proof for Build 5 commits 818bb31..d1d32af; proof type: reference/manual; evidence: referenced cockpit/UI briefs exist and docs-only scope matched allowed files; result: pass
+```
+
+Minimum proof expectations:
+
+- Runtime/code slices: targeted tests plus diff inspection.
+- Package/API slices: import/export smoke check or targeted tests plus diff inspection.
+- FileMap slices: `tests/test_filemap.py` plus path/reference verification.
+- Docs/architecture slices: referenced-file existence checks plus contradiction/scope inspection.
+- Repair verification: original finding, repair commit, and test/reference evidence that the finding is closed.
+
 ## Findings
 
 Append findings here before routing repairs.
@@ -191,9 +215,10 @@ Required review process:
    - Run broader `python -m pytest -q` only if review finds integration risk.
 5. Treat Build 2 as docs-only unless its diff touches runtime code.
 6. Update the Checkpoint Ledger, Review Log, Findings, and Repair Routing Log.
-7. If findings require repair, write the repair Active Task into the original build lane queue. Do not repair it in the Codex Reviews lane.
-8. Commit only review/queue file changes and push to `origin/main`.
-9. Update Obsidian if Round 2 finds or clears important issues.
+7. Update the Proof Log before marking any reviewed slice passed.
+8. If findings require repair, write the repair Active Task into the original build lane queue. Do not repair it in the Codex Reviews lane.
+9. Commit only review/queue file changes and push to `origin/main`.
+10. Update Obsidian if Round 2 finds or clears important issues.
 
 Completion marker:
 
