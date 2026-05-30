@@ -15,9 +15,10 @@ Rules:
 - Every time you modify this file or complete a task from it, add a timestamped entry to the Write/Completion Log section.
 - Every minute while idle, check for cross-check activity relevant to your slice: review notes, Codex findings, Aegis findings, failing tests, or Obsidian build log updates.
 - If cross-check activity affects your task, record it in this file's Cross-Check Activity section and address it before starting unrelated work.
-- After every three completed changes/commits from this build session, stop normal build work and request a Codex review check before taking another build task.
-- The Codex review check must automatically repair actionable findings in your owned files, rerun required tests if any are relevant, commit/push fixes, and report findings/fixes back in this file's heartbeat sections.
-- Record Codex review requests, findings, repairs, and outcomes in the Codex Review Cadence section.
+- After completing a task, mark the slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- Do not perform your own Codex review. A separate Codex Reviews lane owns independent review, findings, and repair routing.
+- If the Codex Reviews lane writes a repair task into this file, complete that repair before taking unrelated work.
+- After every three completed task-changing commits, pause normal build work until the Codex Reviews lane records a cadence review result.
 - Use local time with timezone when possible.
 - Own only the files listed in the active task.
 - Do not edit Build 1, Build 2, or Build 3 live queue files.
@@ -43,6 +44,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 11:28 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at 0246d1b
 2026-05-30 11:29 -06:00 - Build 4 checked queue; status: running; Active Task = Review Console surface contract; origin/main at 27db0e2; this is doc commit 3 of 3 — Codex review follows completion
 2026-05-30 11:41 -06:00 - Build 4 checked queue; status: running; new Active Task = consistency review pass (capabilities map + Review Console contract); Codex review repairs already committed as 7792243
+2026-05-30 11:47 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 736b6af); no new task; origin/main at c6acc6e
 ```
 
 ## Write/Completion Log
@@ -57,6 +59,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit d29cca6; tests not required; this is doc commit 3 of 3 — Codex review to follow
 2026-05-30 11:41 -06:00 - Build 4 completed consistency review pass: updated Q button note to reference bifrost-session-queue-activation-brief.md, closed Codex cadence; commit pending; tests not required
 2026-05-30 11:37 -06:00 - Codex assigned Build 4 architecture review/finish pass; commit pending; tests not required
+2026-05-30 11:47 -06:00 - Build 4 idle read check logged; cross-check complete; no new task; commit c6acc6e is latest origin/main
 ```
 
 ## Cross-Check Activity
@@ -70,6 +73,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:26 -06:00 - Build 4 cross-check: finding (informational); 73c9628 (FileMap) added entries for docs/meridian-capabilities-architecture-map.md and prompt_packet.py; no action required on Build 4 files; map is now indexed in FileMap
 2026-05-30 11:27 -06:00 - Build 4 cross-check: none; Build 3 FileMap task complete and polling resumed (3458256); all other lanes idle; no findings affecting Build 4 slice
 2026-05-30 11:28 -06:00 - Build 4 cross-check: finding (informational); Build 5 live queue added (b180d55); Build 1 Codex review cadence complete (0246d1b); Codex repair landed whitespace/empty packet_id fixes (9389563); none affect Build 4 owned files
+2026-05-30 11:47 -06:00 - Build 4 cross-check: finding (informational); bf15569 (Build 2) repaired stale is_valid/validation_errors claim in PromptPacket note; no impact on Build 4 docs; all other lanes (Build 1, 3, 5) idle polling; no findings affecting capabilities map or review-console contract
 ```
 
 ## Codex Review Cadence
@@ -93,22 +97,27 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: finish the Build 4 architecture-map update and run a review pass.
+Goal: create the V0 build readiness map.
 
 Allowed files only:
 
-- `docs/meridian-capabilities-architecture-map.md`
-- `docs/review-console-surface-contract.md`
+- `docs/v0-build-readiness-map.md`
 
 Task:
 
-- If you already have local edits in `docs/meridian-capabilities-architecture-map.md`, finish and commit them as this slice.
-- Review the Build 4 architecture docs for consistency with the current codebase and recent slices:
-  - Prompt Budget / Prompt Packet / Prompt Metrics maturity
-  - Review Console naming and surface contract
-  - Bifrost queue activation as a design brief, not final runtime
-  - Build queue automation as a Polaris prototype feeding Meridian requirements
-- Fix stale claims or contradictions in the allowed files only.
+- Create a strategic V0 readiness map that names the minimum Meridian capabilities needed before Scott can meaningfully "wake Prime" and let it coordinate work.
+- Organize by capability, not by file:
+  - Mission boot
+  - Compass / progress intention
+  - Relay route + prompt packet + dispatch plan
+  - Review Console
+  - Beacon / queue liveness
+  - Bifrost cockpit
+  - Aegis proof gates
+  - FileMap / memory injection
+  - Build queues / worker session harness
+- For each capability, include: current maturity, what exists today, what is still missing for V0, and the next smallest build slice.
+- Keep it candid and concise. This is a coordinator map, not marketing copy.
 - Do not edit runtime code.
 - Do not edit FileMap.
 - Do not edit package exports.
