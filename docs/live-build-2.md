@@ -63,6 +63,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:25 -06:00 - Build 2 completed PromptPacket package API planning note; commit 88fbecb; tests none required (docs-only)
 2026-05-30 11:45 -06:00 - Build 2 completed PromptPacket package API export; commit f2f69ff; tests 685 passed
 2026-05-30 12:25 -06:00 - Build 2 completed package API surface note update; commit e73b840; tests none required (docs-only)
+2026-05-30 12:35 -06:00 - Build 2 completed Codex review repair pass; commit 253e505; tests 688 passed
 ```
 
 ## Cross-Check Activity
@@ -76,6 +77,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:15 -06:00 - Build 2 cross-check: no blocking findings in commit 9c52688; targeted tests 95 passed (test_package_api.py + test_review_console.py).
 2026-05-30 11:20 -06:00 - Build 2 cross-check: no blocking findings in commit 9c52688; targeted tests 140 passed.
 2026-05-30 11:45 -06:00 - Build 2 cross-check: no blocking findings in commit f2f69ff; targeted tests 11 passed (test_package_api.py).
+2026-05-30 12:35 -06:00 - Build 2 cross-check: Codex found 3 MEDIUM findings in 88fbecb/f2f69ff/e73b840; repaired 2 (test __all__ membership, stale candidates text); 1 deferred (prompt-packet-package-api-note.md not in allowed files); commit 253e505; tests 688 passed.
 ```
 
 ## Codex Review Cadence
@@ -90,6 +92,9 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 2026-05-30 11:15 -06:00 - Build 2 Codex review requested after commits 6d51710, e27da72, 9c52688 (Prompt Metrics package exposure, Review Console bridge, package API export)
 2026-05-30 11:20 -06:00 - Build 2 Codex review result: pass/no actionable findings; package API export cleared.
 2026-05-30 12:25 -06:00 - Build 2 Codex review requested after commits 88fbecb, f2f69ff, e73b840 (PromptPacket planning note, PromptPacket export, surface note update)
+2026-05-30 12:35 -06:00 - Build 2 Codex review finding: MEDIUM (3 findings — see Cross-Check Activity)
+2026-05-30 12:35 -06:00 - Build 2 Codex review repair: commit 253e505; tests 688 passed; repaired 2/3 findings; 1 deferred (out of scope)
+2026-05-30 12:35 -06:00 - Build 2 Codex review result: fixed (2 repaired, 1 deferred — no blocking findings remain in allowed files)
 ```
 
 ## Active Task
