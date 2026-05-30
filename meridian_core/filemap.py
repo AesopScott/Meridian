@@ -370,6 +370,20 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Strategic. Read before designing any orchestration harness slice.",
         ),
+        FileMapEntry(
+            path="docs/v0-build-readiness-map.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="V0 gap analysis: names the minimum Meridian capabilities needed before Prime can wake and coordinate work. Honest per-capability assessment of what is missing for the smallest end-to-end Prime-as-coordinator loop.",
+            related_tests=[],
+            notes="Strategic. Owner: Build 4. Read before planning any V0 milestone or capability integration slice.",
+        ),
+        FileMapEntry(
+            path="docs/prime-orchestration-state-model.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Design bridge from the live build queue prototype to Python domain objects for Prime's state model. Names WorkerLane, TaskSlice, and other state objects with defined transitions.",
+            related_tests=[],
+            notes="Architecture only; no runtime code. Owner: Build 4. Read before implementing Prime orchestration Python domain objects.",
+        ),
 
         # -- Bifrost / session harness ---------------------------------
         FileMapEntry(
@@ -378,6 +392,20 @@ def make_default_map() -> FileMap:
             purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
             related_tests=[],
             notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
+        ),
+        FileMapEntry(
+            path="docs/bifrost-v0-cockpit-layout-brief.md",
+            area=FileArea.BIFROST,
+            purpose="V0 cockpit layout brief: where each surface lives on screen, what is dominant vs. supportive, and what V0 omits to achieve the Prime-centered command center inversion.",
+            related_tests=[],
+            notes="Design-only. Owner: Build 5. Companion to bifrost-cockpit-queue-status-brief.md and bifrost-session-queue-activation-brief.md.",
+        ),
+        FileMapEntry(
+            path="docs/bifrost-harness-dashboard-brief.md",
+            area=FileArea.BIFROST,
+            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
+            related_tests=[],
+            notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
         ),
 
         # -- File map itself --------------------------------------------

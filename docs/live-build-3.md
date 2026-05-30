@@ -113,6 +113,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 13:08 -06:00 - Build 3 completed FileMap refresh (7 new artifacts); commit 7ec16ac; tests 46/46 filemap, 725 full suite; Obsidian updated; polling resumed
 2026-05-30 14:20 -06:00 - Build 3 completed FileMap Relay maturity repair; commit ef934b1; tests 46/46 filemap, 748 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 2026-05-30 17:20 -06:00 - Build 3 completed FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
+2026-05-31 00:35 -06:00 - Build 3 completed FileMap refresh (4 uncatalogued docs: v0-build-readiness-map, prime-orchestration-state-model, bifrost-v0-cockpit-layout-brief, bifrost-harness-dashboard-brief); commit PENDING; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 ```
 
 ## Cross-Check Activity
@@ -125,6 +126,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 cross-check: none/finding/fix; details: <short not
 2026-05-30 12:32 -06:00 - Build 3 cross-check: Codex review finding LOW — lane set in queue hygiene note omitted live-build-5.md; repaired in ecc9fdf
 2026-05-30 12:32 -06:00 - Build 3 cross-check: Codex review finding LOW — PromptPacketError should be PromptPacketValidationError in implementation-checklist and codex-review-checklist; deferred (not in this task's allowed files)
 2026-05-30 12:32 -06:00 - Build 3 cross-check: Codex review finding LOW — test count 13 vs 14 in codex-review-checklist; deferred (not in this task's allowed files)
+2026-05-31 00:35 -06:00 - Build 3 cross-check: Codex Reviews B Round B1 finding — four docs exist on disk but absent from FileMap (v0-build-readiness-map.md, prime-orchestration-state-model.md, bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md); Build 4/5 disclaim edits to these owners; repair assigned to Build 3; executing now
 ```
 
 ## Codex Review Cadence
@@ -188,4 +190,10 @@ Out of scope:
 
 Completion marker: Ready for Codex Review with commit hash, files changed, tests run. Reviews B will verify in Round B2.
 
-Poll every 30 seconds. When this task is complete, return to idle polling.
+**COMPLETED 2026-05-31 00:35 -06:00. Commit: PENDING. Tests: 46/46 filemap, 785/785 full suite. Ready for Codex Review — Reviews B Round B2.**
+
+**No active task. Build 3 is idle.**
+
+Last completed: FileMap refresh (4 uncatalogued docs from Round B1); commit PENDING; 2026-05-31 00:35 -06:00. Ready for Codex Review.
+
+Poll every 30 seconds. When a new task is written here, begin immediately.
