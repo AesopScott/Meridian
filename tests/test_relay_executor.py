@@ -11,6 +11,7 @@ from meridian_core.aegis import (
     EvidenceType,
     ProofTrail,
 )
+from meridian_core.model_adapter import FakeModelAdapter
 from meridian_core.relay import ModelRole, route_from_tier
 from meridian_core.relay_dispatch import RelayDispatchLane, RelayDispatchPlan
 from meridian_core.relay_executor import (
@@ -270,6 +271,12 @@ class TestMetadataNotPassedToModelCall:
         execute_relay_dispatch_plan(plan, capturing_call)
         assert "builder" not in received[0].lower() or received[0] == _PROMPT
 
+    def test_fake_model_adapter_receives_only_lane_payload(self):
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter("ok")
+        execute_relay_dispatch_plan(plan, adapter)
+        assert adapter.received_payloads == [plan.lanes[0].payload]
+
 
 class TestImmutability:
     def test_summary_is_frozen(self):
@@ -342,6 +349,15 @@ class TestAegisProofGate:
         plan = _make_plan(3)
         with pytest.raises(RelayProofGateError, match="proof-001"):
             execute_relay_dispatch_plan(plan, _constant_model_call("ok"), self._blocking_trail())
+
+    def test_blocking_proof_trail_prevents_adapter_call(self):
+        plan = _make_plan(3)
+        adapter = FakeModelAdapter("ok")
+
+        with pytest.raises(RelayProofGateError):
+            execute_relay_dispatch_plan(plan, adapter, self._blocking_trail())
+
+        assert adapter.received_payloads == []
 
 
 class TestRelayExecutionSummaryToProofTrail:

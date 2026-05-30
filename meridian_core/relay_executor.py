@@ -9,7 +9,6 @@ the model-call function; no role, model name, or metadata is passed through.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
 
 from .aegis import (
     AegisEvidence,
@@ -18,14 +17,12 @@ from .aegis import (
     EvidenceType,
     ProofTrail,
 )
+from .model_adapter import ModelAdapter
 from .relay import ModelRole
 from .relay_dispatch import RelayDispatchPlan
 
 
-class ModelCallFn(Protocol):
-    """Callable boundary: receives only the lane payload string, returns text."""
-
-    def __call__(self, payload: str) -> str: ...
+ModelCallFn = ModelAdapter
 
 
 @dataclass(frozen=True)
