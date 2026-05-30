@@ -107,6 +107,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 2026-06-01 04:20 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; awaiting Round B4 trigger.
 2026-06-01 04:35 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; awaiting Round B4 trigger.
 2026-06-01 04:50 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; awaiting Round B4 trigger.
+2026-06-01 05:05 -06:00 - Codex Reviews B checked queue; status: idle; notes: Build 3 queue log shows Round B3 FileMap repair complete (5e0facb, 3 docs registered, cadence reset) — Round B4 verification target when triggered.
 
 ## Review Log
 
