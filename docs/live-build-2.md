@@ -11,6 +11,9 @@ Rules:
 - Every time you modify this file or complete a task from it, add a timestamped entry to the Write/Completion Log section.
 - Every minute while idle, check for cross-check activity relevant to your slice: review notes, Codex findings, Aegis findings, failing tests, or Obsidian build log updates.
 - If cross-check activity affects your task, record it in this file's Cross-Check Activity section and address it before starting unrelated work.
+- After every three completed changes/commits from this build session, stop normal build work and request a Codex review check before taking another build task.
+- The Codex review check must automatically repair actionable findings in your owned files, rerun required tests, commit/push the repair slice, and report findings/fixes back in this file's heartbeat sections.
+- Record Codex review requests, findings, repairs, and outcomes in the Codex Review Cadence section.
 - Use local time with timezone when possible.
 - Own only the files listed in the active task.
 - Do not edit Build 1 or Build 3 live queue files.
@@ -43,6 +46,17 @@ Append entries here when you check or act on cross-check activity.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 cross-check: none/finding/fix; details: <short note>
+```
+
+## Codex Review Cadence
+
+After every three completed changes/commits by Build 2, request a Codex review check before starting another task. The review check should automatically repair actionable findings in Build 2-owned files, rerun tests, commit/push fixes, and report the result here.
+
+```text
+YYYY-MM-DD HH:MM TZ - Build 2 Codex review requested after commits <hash1>, <hash2>, <hash3>
+YYYY-MM-DD HH:MM TZ - Build 2 Codex review finding: <severity>; details: <short note>
+YYYY-MM-DD HH:MM TZ - Build 2 Codex review repair: commit <hash>; tests <result>; details: <short note>
+YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/fixed; details: <short note>
 ```
 
 ## Active Task
