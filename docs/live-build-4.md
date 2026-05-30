@@ -317,7 +317,7 @@ Completion:
 - Tests: not required (docs-only)
 
 **Ready for Codex Review**
-- Commit: (pending — see commit below)
+- Commit: `e800c03` (cross-lane contamination — content correct, attributed to Build 1 commit)
 - Files: `docs/v1-capability-plan.md`
 - Tests: not required (docs-only)
 
