@@ -217,6 +217,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-01 ~04:45 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~04:55 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~05:05 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
+2026-06-01 ~05:15 CDT - Build 1 checked queue; status: idle (model adapter slice 653488b already completed by parallel session and routed to Reviews C in c86d747; deferring slice work to active worker session)
 ```
 
 ## Write/Completion Log
