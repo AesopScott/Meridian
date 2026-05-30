@@ -181,7 +181,13 @@ class TestHttpJsonModelAdapter:
     def test_missing_api_key_fails_before_transport_call(self) -> None:
         calls: list[str] = []
 
-        def fake_post(payload: str, endpoint: str, model: str, api_key: str) -> str:
+        def fake_post(
+            payload: str,
+            endpoint: str,
+            provider: str,
+            model: str,
+            api_key: str,
+        ) -> str:
             calls.append(payload)
             return "should not run"
 
@@ -193,7 +199,13 @@ class TestHttpJsonModelAdapter:
     def test_missing_endpoint_fails_before_transport_call(self) -> None:
         calls: list[str] = []
 
-        def fake_post(payload: str, endpoint: str, model: str, api_key: str) -> str:
+        def fake_post(
+            payload: str,
+            endpoint: str,
+            provider: str,
+            model: str,
+            api_key: str,
+        ) -> str:
             calls.append(payload)
             return "should not run"
 
@@ -208,13 +220,21 @@ class TestHttpJsonModelAdapter:
             adapter("approved prompt")
         assert calls == []
 
-    def test_transport_receives_only_payload_endpoint_model(self) -> None:
+    def test_transport_receives_only_payload_endpoint_provider_model_and_key(self) -> None:
         received: dict[str, str] = {}
 
-        def fake_post(payload: str, endpoint: str, model: str, api_key: str) -> str:
+        def fake_post(
+            payload: str,
+            endpoint: str,
+            provider: str,
+            model: str,
+            api_key: str,
+        ) -> str:
             received["payload"] = payload
             received["endpoint"] = endpoint
+            received["provider"] = provider
             received["model"] = model
+            received["api_key"] = api_key
             return "ok"
 
         adapter = HttpJsonModelAdapter(
@@ -225,10 +245,19 @@ class TestHttpJsonModelAdapter:
         adapter("approved payload text")
         assert received["payload"] == "approved payload text"
         assert received["endpoint"] == "https://api.example.com/v1/chat"
+        assert received["provider"] == "example"
         assert received["model"] == "example-model"
+        assert received["api_key"] == "secret"
+        assert set(received) == {"payload", "endpoint", "provider", "model", "api_key"}
 
     def test_api_key_not_echoed_in_response_or_error(self) -> None:
-        def fake_post(payload: str, endpoint: str, model: str, api_key: str) -> str:
+        def fake_post(
+            payload: str,
+            endpoint: str,
+            provider: str,
+            model: str,
+            api_key: str,
+        ) -> str:
             return "response text without credentials"
 
         adapter = HttpJsonModelAdapter(
@@ -240,7 +269,13 @@ class TestHttpJsonModelAdapter:
         assert "super-secret-key" not in result
 
     def test_returns_transport_response(self) -> None:
-        def fake_post(payload: str, endpoint: str, model: str, api_key: str) -> str:
+        def fake_post(
+            payload: str,
+            endpoint: str,
+            provider: str,
+            model: str,
+            api_key: str,
+        ) -> str:
             return "model response text"
 
         adapter = HttpJsonModelAdapter(

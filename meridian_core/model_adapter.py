@@ -154,10 +154,16 @@ class HttpModelAdapterConfig:
         return url
 
 
-def _stdlib_http_post(payload: str, endpoint: str, model: str, api_key: str) -> str:
+def _stdlib_http_post(
+    payload: str,
+    endpoint: str,
+    provider: str,
+    model: str,
+    api_key: str,
+) -> str:
     """POST approved payload to endpoint using only stdlib urllib. No SDK dependency."""
     body = json.dumps(
-        {"model": model, "messages": [{"role": "user", "content": payload}]}
+        {"provider": provider, "model": model, "input": payload}
     ).encode()
     req = urllib.request.Request(
         endpoint,
@@ -169,7 +175,11 @@ def _stdlib_http_post(payload: str, endpoint: str, model: str, api_key: str) -> 
         method="POST",
     )
     with urllib.request.urlopen(req) as resp:
-        return resp.read().decode()
+        raw = resp.read().decode()
+    decoded = json.loads(raw)
+    if not isinstance(decoded, dict) or not isinstance(decoded.get("text"), str):
+        raise ModelAdapterConfigError("HTTP JSON model adapter response missing text")
+    return decoded["text"]
 
 
 class HttpJsonModelAdapter:
@@ -185,7 +195,7 @@ class HttpJsonModelAdapter:
         config: HttpModelAdapterConfig,
         *,
         env: Mapping[str, str] | None = None,
-        http_post: Callable[[str, str, str, str], str] | None = None,
+        http_post: Callable[[str, str, str, str, str], str] | None = None,
     ) -> None:
         self._config = config
         self._env = env
@@ -194,4 +204,10 @@ class HttpJsonModelAdapter:
     def __call__(self, payload: str) -> str:
         api_key = self._config.require_api_key(self._env)
         endpoint = self._config.require_endpoint()
-        return self._http_post(payload, endpoint, self._config.model, api_key)
+        return self._http_post(
+            payload,
+            endpoint,
+            self._config.provider,
+            self._config.model,
+            api_key,
+        )
