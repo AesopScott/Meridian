@@ -118,6 +118,8 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 12:22 -06:00 - Build 4 cross-check: finding (informational); f344cc0 — Codex Reviews round 2 queued; likely includes Build 4 slices 3cbf336 and 1d17fa1; no action until findings posted
 2026-05-30 12:27 -06:00 - Build 4 cross-check: finding (informational); 9941ecb — orchestrator cleared Build 3 queue; Build 5 awaiting reassignment (e9e11ed); all other lanes idle; no findings affecting Build 4 docs
 2026-05-30 13:42 -06:00 - Build 4 cross-check: finding (informational); 3de9c74 — second Codex review lane added; may accelerate round 2 sweep of Build 4 slices 3cbf336 and 1d17fa1; no action required on Build 4 files
+2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); 22594ca — cross-lane staging contamination: live-build-3.md and live-codex-reviews-2.md picked up in Build 4 idle read check commit; content landed correctly per their owning lanes; same pattern as 7792243 incident; no corrective action needed (history intact, content correct)
+2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); Reviews B Round B1 cleared Build 5 slice 7c34566; MEDIUM FileMap gap routed to Build 3; Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep
 ```
 
 ## Codex Review Cadence
