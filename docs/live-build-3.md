@@ -129,6 +129,8 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 09:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 10:05 -06:00 - Build 3 checked queue; status: idle; Active Task FileMap refresh complete (1378bda); awaiting Reviews B Round B2 verification and next assignment
 2026-05-31 10:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
+2026-05-31 10:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
+2026-05-31 11:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 ```
 
 ## Write/Completion Log
@@ -187,6 +189,48 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
+
+Current Active Task (supersedes stale completed FileMap task below):
+
+Goal: FileMap follow-up repair from Codex Reviews B Round B2.
+
+Background:
+
+- Codex Reviews B Round B2 verified Build 3 commit `1378bda`.
+- The original Round B1 MEDIUM repair is closed: the four routed docs are now registered and `tests/test_filemap.py` passed.
+- Round B2 found one new MEDIUM FileMap gap: `docs/live-codex-reviews-2.md` exists and is still uncatalogued.
+
+Allowed files:
+
+- `docs/FileMap.md`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Task:
+
+- Register `docs/live-codex-reviews-2.md` in `docs/FileMap.md`.
+- Add the matching `FileMapEntry` in `meridian_core/filemap.py`, parallel to the existing `docs/live-codex-reviews.md` entry.
+- Add `docs/live-codex-reviews-2.md` to `_REQUIRED_PATHS` in `tests/test_filemap.py`.
+- Opportunistically, if it stays small and safe, reconcile the two LOW prose-divergence carryovers for:
+  - `docs/live-codex-reviews.md`
+  - `docs/prime-orchestration-harness-prototype.md`
+- Do not edit runtime behavior outside FileMap metadata.
+- Do not edit other live queues except this queue's read/completion log.
+
+Proof required:
+
+- Run `python -m pytest tests/test_filemap.py -q`.
+- Include the test result in the completion marker.
+
+Completion:
+
+- Commit only this repair slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run. Reviews B will verify in Round B3.
+
+Stale prior text follows.
 
 Goal: FileMap refresh — register four uncatalogued architecture/strategy docs (Codex Reviews B Round B1 finding).
 
