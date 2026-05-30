@@ -120,6 +120,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 20:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ee7e8a4
 2026-05-30 21:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (ba50f1b); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ba50f1b
 2026-05-30 21:29 -06:00 - Build 4 checked queue; status: running; new Active Task = Meridian V1 capability plan (docs/v1-capability-plan.md); origin/main at 9965720
+2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated — V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
 ```
 
 ## Write/Completion Log
@@ -139,6 +140,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 12:12 -06:00 - Build 4 completed Prime orchestration state model (docs/prime-orchestration-state-model.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 15:08 -06:00 - Build 4 completed Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 21:29 -06:00 - Build 4 completed Meridian V1 capability plan (docs/v1-capability-plan.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-30 22:40 -06:00 - Build 4 revised V1 capability plan (docs/v1-capability-plan.md) — cockpit UI scope per Scott clarification; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
@@ -317,8 +319,8 @@ Completion:
 - Tests: not required (docs-only)
 
 **Ready for Codex Review**
-- Commit: `e800c03` (cross-lane contamination — content correct, attributed to Build 1 commit)
-- Files: `docs/v1-capability-plan.md`
+- Commit: (pending — revised version, see commit below)
+- Files: `docs/v1-capability-plan.md` (cockpit UI scope revision)
 - Tests: not required (docs-only)
 
 (Previous slices `3cbf336` `docs/v0-build-readiness-map.md`, `1d17fa1` `docs/prime-orchestration-state-model.md`, and `fd9224d` `docs/prime-status-console-cli-brief.md` also pending Codex Reviews sweep.)

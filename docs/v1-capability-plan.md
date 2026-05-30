@@ -2,173 +2,181 @@
 
 **Status:** Architecture plan — no runtime code
 **Owner lane:** Build 4 (Opus high-level thinking)
-**Source:** `docs/v0-v1-progress-tracker.md`, `docs/v0-build-readiness-map.md`, `docs/prime-orchestration-state-model.md`
-**Purpose:** Turn the 12 V1 tracker items into a coherent build sequence, assign ownership, surface risk areas, and name the first 10 commit-sized slices.
+**Source:** `docs/v0-v1-progress-tracker.md`, `docs/v0-build-readiness-map.md`
+**Revision note:** Rewritten after Scott's V1 clarification — V1 is the cockpit UI release, not a memory/federation release.
 
 ---
 
 ## V1 Definition
 
-V1 begins after Prime can wake, report status, dispatch one worker through Relay, show review/gate items, and enforce proof gates (V0 complete).
+V1 turns V0's CLI-and-domain capabilities into something Scott can see, steer, and operate.
 
-V1 turns that CLI-capable Prime into a **cockpit-backed, memory-backed, multi-lane orchestrator** that can coordinate work across days without Scott prompting the next step.
+**V1 = Bifrost cockpit live, wired to everything V0 built.**
+
+Scott opens the cockpit and can see: Prime's current intention, all harness liveness states, pending Review Console items and approval gates, active Relay sessions, Aegis proof status, and build progress — without running a CLI command.
 
 ### V1 Success Test
 
-Prime wakes autonomously, recalls relevant context from Echo + Atlas, dispatches a real worker session through Relay, Aegis verifies proof, Relay clears the dispatch, Bifrost shows harness status, and Prime decides the next move — all without a human prompt. A full session lifecycle completes: **spawn → execute → Aegis verify → Relay clear → Bifrost display → Prime continues**.
+Scott opens the Bifrost cockpit. Without typing `prime_status` or `prime_console`:
 
-Scott's role in V1: judgment calls, gate approvals, direction changes. Not prompt-by-prompt steering.
+- He sees Prime's current mission, intention, and next moves.
+- He sees all harness statuses (Go / Degraded / Blocked / Offline).
+- He sees pending Review Console gate items and can approve them from the UI.
+- He sees active Relay session state (dispatched, running, complete, failed).
+- He sees Aegis proof findings relevant to current work.
+- He sees build progress across lanes.
+
+That is V1. Nothing more.
+
+### Explicitly Out of V1 Scope
+
+- **Echo Harness** — persistent memory engine
+- **Atlas Harness** — retrieval/RAG over FileMap and history
+- **Multi-user / Federation Harness** — connecting Meridian instances
+- **Public/account adapter strategy** — model harness compartmentalization
+
+These are V2 horizon items. See `docs/v2-horizon-plan.md`.
 
 ---
 
 ## What Must Wait for V0 to Complete
 
-These V1 capabilities depend on working V0 dispatch infrastructure and cannot be meaningfully implemented until V0 gates are cleared:
+The cockpit panels display live data from V0 harnesses. No panel can be live-wired until its source data exists:
 
-| Capability | V0 dependency |
+| Panel | V0 dependency |
 |---|---|
-| Session lifecycle harness | Working `relay_executor.py` dispatch |
-| Bifrost live UI implementation | Domain objects + harness events from working wiring |
-| Dynamic RTDSG Cognition runtime | End-to-end Aegis proof gates + session lifecycle |
-| Multi-user / multi-Meridian federation | Stable single-Meridian V1 first |
-| Model harness adapters (account-based path) | Working API dispatch compartmentalized cleanly |
+| Harness status panel | `prime_wake()` + `WakeBrief` emitting per-harness status |
+| Review Console panel | `route_to_console()` + `prime_console` CLI producing `ReviewConsoleItem` records |
+| Gate approval UI | `prime_approve` CLI + `ReviewConsoleQueue.respond()` |
+| Relay session panel | `relay_executor.py` dispatch running and producing session state |
+| Aegis proof panel | Relay gate wire + `ProofTrail.is_proof_blocking()` enforced end-to-end |
+| Beacon liveness | `beacon.py` `check_harness_liveness()` producing liveness signals |
 
-**Gate:** Do not begin runtime implementation on any of the above until `docs/v0-build-readiness-map.md` shows all 6 V0 gate items as Built.
+**Gate:** Do not begin live-data binding for any panel until its V0 source is complete and passing review. Scaffold and layout work can happen in parallel.
 
 ---
 
-## What Can Be Designed in Parallel Now
+## What Can Be Designed and Built in Parallel Now
 
-These items have no runtime V0 dependency — design work and domain model definition can proceed concurrently with V0 build:
-
-| Capability | Parallel work available |
+| Work | Parallel opportunity |
 |---|---|
-| Echo memory store | Schema, `MemoryEntry` / `MemoryStore` interface, eviction policy, write-verify protocol |
-| Atlas retrieval / RAG harness | Query interface design, FileMap integration spec, scoring model |
-| Bifrost cockpit shell | Scaffold design is done; implementation scaffold can start (no live data binding yet) |
-| Dynamic RTDSG Cognition | Spec and decision-tree design; runtime wiring waits for V0 |
-| Model harness adapters (public API path) | API-first design can be specified independently of account-based automation path |
+| Bifrost app scaffold | Framework, window layout, panel slots — no live data needed |
+| Prime conversation surface | Display static or mock orchestrator thread messages |
+| Panel component library | Generic status cards, gate item renderers, severity color coding |
+| `prime_approve` UI action prototype | Mock approval flow before backend wires up |
 
-**Rule:** Design-only slices (docs + domain models) are Build 4 territory. Runtime implementation slices belong to the builder lanes named in the ownership table below.
+**Rule:** Scaffold commits are low-risk and unblock integration. Start them immediately. Do not wait for all V0 gates to clear before touching UI code.
 
 ---
 
-## Capability Dependency Order
+## Cockpit Capability Dependency Order
 
 ```
-V0 complete (all 6 gate items Built)
-  │
-  ├── Echo memory store         (domain model → persistence layer)
-  │     └── Atlas retrieval    (needs Echo for memory-backed queries)
-  │           └── Multi-lane orchestrator loop  (Prime needs memory + retrieval)
-  │
-  ├── Session lifecycle harness  (spawn/steer/wait/stop/archive)
-  │     └── Dynamic RTDSG Cognition runtime  (needs lifecycle + Aegis proof gates)
-  │
-  ├── Bifrost cockpit scaffold   (shell only, no live data)
-  │     └── Bifrost ReviewConsoleQueue binding  (live queue panel)
-  │           └── Bifrost full live UI  (all panels: status, progress, proof)
-  │
-  ├── Model harness adapters
-  │     ├── Public API path (first)
-  │     └── Account-based automation path (after public path is stable)
-  │
-  └── Multi-user / federation   (last — depends on stable V1)
+V0 gate cleared: prime_wake() → WakeBrief
+  └── Harness status panel live                       [Build 5]
+
+V0 gate cleared: route_to_console() + prime_console
+  └── Review Console panel live                       [Build 5]
+        └── Gate approval UI action live               [Build 5]
+
+V0 gate cleared: relay_executor.py dispatch
+  └── Relay session state panel live                  [Build 5]
+
+V0 gate cleared: Relay gate wire + Aegis ProofTrail
+  └── Aegis proof/gate panel live                     [Build 5]
+
+V0 gate cleared: beacon.py liveness
+  └── Beacon status wired into harness panel          [Build 5]
+
+All panels live
+  └── Progress/proof surface (Build 5 configurable)  [Build 5]
+        └── End-to-end smoke test                     [Build 5]
 ```
+
+Build 5 owns all Bifrost implementation slices. Build 4 owns design specs and integration contracts. Build 1 owns any Prime-side event emission needed to feed the cockpit.
 
 ---
 
 ## Recommended Builder Lane Ownership
 
-| Capability | Primary lane | Secondary |
+| Capability | Primary lane | Notes |
 |---|---|---|
-| Echo memory store domain model | Build 2 (domain/API) | Build 4 design |
-| Echo persistence layer | Build 2 | — |
-| Atlas FileMap query interface | Build 3 (FileMap) | Build 4 design |
-| Atlas retrieval implementation | Build 3 | — |
-| Session lifecycle harness | Build 1 (runtime) | — |
-| Bifrost cockpit scaffold | Build 5 (progress/proof) | — |
-| Bifrost → ReviewConsoleQueue binding | Build 5 | — |
-| Bifrost full live UI | Build 5 | — |
-| Dynamic RTDSG Cognition spec | Build 4 | — |
-| Dynamic RTDSG Cognition runtime | Build 1 | — |
-| Model harness adapters | Build 1 | — |
-| Multi-user / federation design | Build 4 | — |
-| Multi-lane orchestrator loop | Build 1 | Build 4 design |
+| Bifrost app scaffold | Build 5 | Framework decision + window/panel layout |
+| Prime conversation surface | Build 5 | Display of orchestrator thread |
+| Harness status panel | Build 5 | Reads `WakeBrief`; depends on `prime_wake()` V0 |
+| Review Console panel | Build 5 | Reads `ReviewConsoleQueue`; depends on `route_to_console()` V0 |
+| Gate approval UI | Build 5 | Calls `ReviewConsoleQueue.respond()`; depends on `prime_approve` V0 |
+| Relay session panel | Build 5 | Reads Relay session state; depends on `relay_executor.py` V0 |
+| Aegis proof panel | Build 5 | Reads `ProofTrail`; depends on gate wire V0 |
+| Progress/proof surface | Build 5 | Configurable per `a412e90` design |
+| UI integration design contracts | Build 4 | What each panel binds to and how |
+| Prime event emission for cockpit | Build 1 | Any new Prime-side signals needed |
 
 ---
 
 ## Risk Areas
 
-### 1. Model Weakness Without Memory
+### 1. UI Sprawl
 
-Prime's ability to orchestrate across sessions degrades rapidly without Echo + Atlas. A session that can't recall what the previous session decided will repeat mistakes or contradict earlier commitments. **Echo + Atlas must land early in V1** — before the multi-lane orchestrator loop, not after.
+Every harness will want its own panel. Without a strict layout contract, the cockpit becomes a dashboard maze. The V0 surface rule holds in V1: orchestrator thread (decisions/intentions) vs. review console (evidence/status). A third surface — archive/log view — catches everything else. Three surfaces maximum.
 
-Mitigation: Build Echo domain model in parallel with V0 build. Do not start the orchestrator loop until Echo persistence is live.
+Mitigation: Build 4 writes the UI integration design contract before Build 5 implements panels beyond the scaffold. Each new panel must map to one of the three surfaces.
 
-### 2. Prompt Drag
+### 2. Stale Status
 
-As lanes accumulate context (FileMap, queue files, build notes, Obsidian), prompt sizes bloat. At V1 scale — multiple active lanes, long session histories — unchecked prompt size will hit model limits and degrade quality. Echo compression (summarize + evict) and Atlas selective retrieval (top-N relevant, not full FileMap) are load-bearing.
+Harness status displayed in Bifrost is only as fresh as the last pull from the source. If Bifrost reads a flat file that Prime updates infrequently, status goes stale. Users lose trust in the panel.
 
-Mitigation: Design Echo with a TTL-based eviction policy from the start. Atlas retrieval must score and truncate, not dump full context.
+Mitigation: V0 harness file writes should be timestamped. Bifrost shows the age of each status reading. Stale = warn after 60s, error after 5min. Do not display status without a timestamp.
 
-### 3. Account-Based Automation Constraints
+### 3. Noisy Progress Surfaces
 
-The account-based automation path (browser automation, Anthropic console access) is fragile, platform-dependent, and subject to policy change. It must live behind a clean boundary — the model harness adapter interface — so Prime's orchestration logic never hard-depends on it.
+Build progress from five lanes in parallel produces a lot of noise: idle read checks, staging contamination, read-check commits every 30s. If every commit scrolls through the progress surface, Scott cannot find meaningful events.
 
-Mitigation: Public API path ships first. Account-based path is a second adapter implementation behind the same interface. Prime never calls it directly; only the adapter does.
+Mitigation: The progress surface filters by event type. Read-check commits are folded into a "heartbeat" row, not shown individually. Only task-completing commits and review findings get full rows.
 
-### 4. Memory Correctness
+### 4. Prompt Drag Through the UI
 
-Stale or contradicted memory in Echo = wrong decisions by Prime. Echo must support write-verify (confirm entry is correct before Prime acts on it) and contradiction detection (flag when a new memory entry conflicts with an existing one).
+If Bifrost sends large context blobs to Prime to display (full queue file content, full FileMap, full proof trail), prompt sizes bloat before Prime can reason. The cockpit must be a display surface, not a context-injection vector.
 
-Mitigation: Echo's domain model must include a `verified` flag and a `contradicts` field. Prime queries `verified` entries first. Contradicted entries route to Review Console as CROSS_CHECK items before Prime uses them.
+Mitigation: Bifrost reads domain objects (`ReviewConsoleItem`, `WakeLine`, `RelayRoute`) and renders them. It does not dump raw file content into any Prime prompt. Prime pulls only what it asks for, not what the UI decides to surface.
 
-### 5. UI Sprawl
+### 5. Confusing Human Gates
 
-Bifrost wants to show everything: status, proof, progress, queue, session history, memory, Atlas queries. Without a strict surface contract, the cockpit becomes noise and Scott has to read a dashboard to find decisions.
+A gate item in the Review Console requires Scott's response. In V0, Scott runs `prime_approve 001`. In V1, the cockpit must make it clear which items require action vs. which are informational. If the panel shows 12 items with no visual distinction between gates and findings, Scott will miss approvals.
 
-Mitigation: Enforce the V0 surface rule into V1 — the orchestrator thread stays clean (decisions/intentions only), the review console gets evidence/status. Bifrost panels map directly to those two surfaces. Anything that doesn't fit one of those two goes to an archive panel, not the main cockpit.
+Mitigation: Gates get a distinct visual treatment (warning/error severity chip, "Action required" label, approve/reject/modify actions inline). Informational items are collapsed by default. Gate count appears in the cockpit header as a badge.
 
 ---
 
 ## First 10 Commit-Sized V1 Slices
 
-These are ordered by dependency. Slices 1–4 can begin concurrently with V0 build (design/domain only). Slices 5–10 require V0 complete.
+These are ordered by dependency. Slices 1–3 can start immediately (scaffold only). Slices 4–10 require the named V0 gate to clear first.
 
-| Slice | Description | Lane | File(s) |
-|---|---|---|---|
-| 1 | Echo memory store domain model — `MemoryEntry`, `MemoryStore` interface, eviction policy | Build 2 | `meridian_core/echo.py` |
-| 2 | Atlas FileMap query interface design brief | Build 4 | `docs/atlas-query-interface-brief.md` |
-| 3 | Echo persistence layer — flat-file V0 echo (`~/.meridian/echo.json`) | Build 2 | `meridian_core/echo_store.py` |
-| 4 | Dynamic RTDSG Cognition spec (decision engine design, not runtime) | Build 4 | `docs/rtdsg-cognition-spec.md` |
-| 5 | Session lifecycle harness — `SessionRecord`, `spawn_session()`, `archive_session()` | Build 1 | `meridian_core/session.py` |
-| 6 | Atlas retrieval implementation — top-N FileMap lookup, query scoring | Build 3 | `meridian_core/atlas.py` |
-| 7 | Bifrost cockpit scaffold — shell app, panel layout, no live data | Build 5 | `bifrost/` |
-| 8 | Bifrost → ReviewConsoleQueue binding — live queue panel with `pending()` and `pending_gates()` | Build 5 | `bifrost/review_panel.py` |
-| 9 | Model harness adapter interface — public API path first, account-based path as second impl | Build 1 | `meridian_core/model_adapter.py` |
-| 10 | Multi-lane orchestrator loop — Prime polls all lane queues and dispatches based on Relay state | Build 1 | `meridian_core/orchestrator.py` |
+| # | Slice | V0 gate required | Lane | File(s) |
+|---|---|---|---|---|
+| 1 | Bifrost app scaffold — framework, window, panel slots, no live data | None | Build 5 | `bifrost/` |
+| 2 | Panel component library — status cards, severity chips, gate renderers | None | Build 5 | `bifrost/components/` |
+| 3 | Prime conversation surface — mock orchestrator thread display | None | Build 5 | `bifrost/prime_panel.py` |
+| 4 | Harness status panel live — reads `WakeBrief` per harness | `prime_wake()` V0 | Build 5 | `bifrost/harness_panel.py` |
+| 5 | Review Console panel live — reads `ReviewConsoleQueue.pending()` | `route_to_console()` V0 | Build 5 | `bifrost/console_panel.py` |
+| 6 | Gate approval UI — inline approve/reject/modify for `APPROVAL_GATE` items | `prime_approve` V0 | Build 5 | `bifrost/gate_action.py` |
+| 7 | Relay session panel live — reads Relay session state | `relay_executor.py` V0 | Build 5 | `bifrost/relay_panel.py` |
+| 8 | Aegis proof panel live — reads `ProofTrail`, shows blocking findings | Relay gate wire V0 | Build 5 | `bifrost/aegis_panel.py` |
+| 9 | Progress/proof surface — filtered build progress, folded read checks | All panels live | Build 5 | `bifrost/progress_panel.py` |
+| 10 | End-to-end integration smoke test — all panels live with V0 running | All V0 gates | Build 5 | `tests/test_bifrost_integration.py` |
 
 ---
 
 ## V1 Readiness Gate
 
-V1 is shippable when:
+V1 ships when:
 
-1. Prime wakes and recalls prior session context via Echo + Atlas without Scott summarizing it.
-2. Prime dispatches a worker through Relay, Aegis verifies the output, and Relay clears — without Scott approving each step.
-3. Bifrost cockpit shows current harness state (all lanes) without Scott running `prime_status` in a terminal.
-4. A session lifecycle runs end-to-end (spawn → work → verify → archive) with no dropped state.
-5. Review Console gate items appear in Bifrost and Scott can approve them from the UI, not the CLI.
-
----
-
-## What This Plan Is Not
-
-- An implementation spec for any individual slice — those belong in builder lane active tasks.
-- A Bifrost UI design — that is `docs/bifrost-cockpit-queue-status-brief.md`.
-- An Echo memory schema — that is slice 1 above, owned by Build 2.
-- A complete Atlas design — that is slice 2 above, owned by Build 4.
+1. Bifrost cockpit opens and all six panels render without errors.
+2. Harness status shows live data from `WakeBrief` (not mocked).
+3. A Review Console gate item appears in the cockpit and Scott approves it from the UI (not CLI).
+4. Relay session state reflects an active dispatch.
+5. Aegis blocking findings surface in the proof panel before Relay clears them.
+6. Build progress shows task-completing commits across all lanes, folded heartbeat, with timestamps.
 
 ---
 
@@ -176,7 +184,8 @@ V1 is shippable when:
 
 - V0/V1 tracker: `docs/v0-v1-progress-tracker.md`
 - V0 capability gaps: `docs/v0-build-readiness-map.md`
-- Prime orchestration state model: `docs/prime-orchestration-state-model.md`
+- V2 horizon: `docs/v2-horizon-plan.md`
 - Prime status console: `docs/prime-status-console-cli-brief.md`
 - Review Console surface contract: `docs/review-console-surface-contract.md`
 - Bifrost cockpit brief: `docs/bifrost-cockpit-queue-status-brief.md`
+- Prime orchestration state model: `docs/prime-orchestration-state-model.md`
