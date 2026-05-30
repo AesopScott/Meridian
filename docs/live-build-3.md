@@ -201,6 +201,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-01 04:12 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 2026-06-01 04:27 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 2026-05-30 16:03 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — model_adapter.py); task complete in commit be34fea; recording completion marker; cadence 3/3 — Codex review required
+2026-05-30 16:06 -06:00 - Build 3 checked queue; status: paused; cadence 3/3 since Round B2; Reviews B Round B3 queued but not yet executed; awaiting cadence-clear
 ```
 
 ## Write/Completion Log
