@@ -1,4 +1,4 @@
-﻿"""
+"""
 Review Console -- promptable review/gating surface for Meridian.
 
 The Review Console is where Prime places artifacts, proof, cross-check

@@ -79,6 +79,14 @@ Allowed review files: <files or "diff files only">
 Tests to run: <targeted tests or docs-only>
 Out of scope: <files/areas explicitly not reviewed>
 Reason: <ready marker, cadence review, repair verification, user request>
+
+2026-05-30 15:30 CDT - Round 1 scope
+Build lanes: Build 1, Build 2, Build 3, Build 4, Build 5
+Commit range(s): Build 1 6af04d4..fd35a81; Build 2 4be1117..bf15569; Build 3 7ec16ac..ef934b1; Build 4 736b6af; Build 5 818bb31..d1d32af
+Allowed review files: diff files in each commit range only
+Tests to run: Build 1 — pytest tests/test_relay_packet.py tests/test_relay_dispatch.py; Build 3 — pytest tests/test_filemap.py; Build 2/4/5 — docs-only
+Out of scope: working-tree modifications to .mcp.json, meridian_core/review_console.py, tests/test_prompt_budget.py (not part of any reviewed commit; left untouched)
+Reason: first centralized review sweep — Ready for Codex Review markers on all 5 lanes
 ```
 
 Scope rules:

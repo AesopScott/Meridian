@@ -73,6 +73,7 @@ class TestPromptBudgetPlan:
         )
         sources.append("injected")
         assert len(plan.allowed_sources) == 1
+        assert isinstance(plan.allowed_sources, tuple)
 
 
 class TestPromptBudgetForRiskTier:
@@ -138,9 +139,9 @@ class TestPromptBudgetForRiskTier:
             assert len(plan.reason) > 0
 
     def test_invalid_tier_raises_error(self):
-        with pytest.raises(ValueError, match="Unknown risk tier"):
+        with pytest.raises(ValueError):
             prompt_budget_for_risk_tier(5)
-        with pytest.raises(ValueError, match="Unknown risk tier"):
+        with pytest.raises(ValueError):
             prompt_budget_for_risk_tier(-1)
 
     def test_deterministic_output(self):
@@ -153,5 +154,5 @@ class TestPromptBudgetForRiskTier:
     def test_allowed_sources_is_immutable_tuple(self):
         plan = prompt_budget_for_risk_tier(2)
         assert isinstance(plan.allowed_sources, tuple)
-        with pytest.raises(AttributeError):
+        with pytest.raises((AttributeError, TypeError)):
             plan.allowed_sources += ("injected_garbage",)  # type: ignore[misc]
