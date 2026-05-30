@@ -392,6 +392,27 @@ def make_default_map() -> FileMap:
             notes="Update when a gate item status changes. Companion to v0-build-readiness-map.md.",
         ),
         FileMapEntry(
+            path="docs/v1-capability-plan.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="V1 capability plan: defines V1 as the Bifrost cockpit release — Prime's intention, harness liveness, Review Console, Relay session state, Aegis findings, and build progress visible without CLI commands.",
+            related_tests=[],
+            notes="Owner: Build 4. V1 = cockpit UI live, wired to V0 domain. Read before planning any V1 capability or Bifrost integration.",
+        ),
+        FileMapEntry(
+            path="docs/v2-horizon-plan.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="V2 horizon plan: persistent memory via Echo, context retrieval via Atlas, stronger Prime autonomy, richer model harnesses. Not active V1 scope — start detailed V2 planning only after V1 cockpit is locked.",
+            related_tests=[],
+            notes="Horizon only. Do not pull V2 work into V0 or V1 build.",
+        ),
+        FileMapEntry(
+            path="docs/v3-parking-lot.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="V3 parking lot: horizon ideas for external reach, federation, and deeper distribution. Not active scope — do not pull V3 effort during V0, V1, or V2.",
+            related_tests=[],
+            notes="Parking lot, not a roadmap. Owner: Build 4. Ideas only until V2 closes.",
+        ),
+        FileMapEntry(
             path="docs/prime-orchestration-state-model.md",
             area=FileArea.ARCHITECTURE,
             purpose="Design bridge from the live build queue prototype to Python domain objects for Prime's state model. Names WorkerLane, TaskSlice, and other state objects with defined transitions.",
@@ -420,6 +441,13 @@ def make_default_map() -> FileMap:
             purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
             related_tests=[],
             notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
+        ),
+        FileMapEntry(
+            path="docs/v1-bifrost-cockpit-implementation-brief.md",
+            area=FileArea.BIFROST,
+            purpose="V1 Bifrost cockpit implementation brief: what V1 builds, what it omits, and which UI slices land first. Turns V0's domain capabilities into a Prime-centered, browser-rendered cockpit surface.",
+            related_tests=[],
+            notes="Owner: Build 5. Read before implementing any V1 cockpit UI slice. Source briefs: bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md, bifrost-cockpit-queue-status-brief.md.",
         ),
 
         # -- File map itself --------------------------------------------
