@@ -33,6 +33,7 @@ Append entries here when this file is checked while idle.
 ```text
 YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 10:54 -06:00 - Build 3 checked queue; status: active task found (Prompt Packet implementation checklist); starting work
+2026-05-30 11:10 -06:00 - Build 3 checked queue; status: awaiting Codex review (3 commits completed, review requested)
 ```
 
 ## Write/Completion Log
@@ -47,6 +48,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 10:48 -06:00 - Build 3 completed Prompt Packet design brief; commit 34792fb; tests 627 passing; Obsidian updated; polling resumed
 2026-05-30 10:51 -06:00 - Codex review cleared Prompt Packet design brief and assigned Haiku-sized implementation checklist; commit pending; tests not required
 2026-05-30 10:57 -06:00 - Build 3 completed Prompt Packet implementation checklist; commit a996abc; tests 644 passing; Obsidian updated; 3 commits completed (34792fb, 7b67c41, a996abc) — Codex review required before next task
+2026-05-30 11:10 -06:00 - Build 3 Codex review requested; awaiting automated review and findings for owned files
 ```
 
 ## Cross-Check Activity
@@ -67,6 +69,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review requested after commits <hash1>, <has
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review finding: <severity>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/fixed; details: <short note>
+2026-05-30 11:10 -06:00 - Build 3 Codex review requested after commits 34792fb, 7b67c41, a996abc
 ```
 
 ## Active Task
