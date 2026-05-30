@@ -13,6 +13,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
+from .prompt_metrics import PromptMetricSummary, PromptPerformanceStatus
+
 
 class ReviewConsoleItemType(Enum):
     CROSS_CHECK = "cross_check"
@@ -221,6 +223,41 @@ def make_system_finding(
         item_type=ReviewConsoleItemType.SYSTEM_FINDING,
         severity=severity,
         title=title,
+        content=content,
+        promptable=False,
+        is_automatic=True,
+        requires_response=False,
+        suggested_actions=[ReviewConsoleAction.ACKNOWLEDGE],
+    )
+
+
+_METRICS_SEVERITY: dict[PromptPerformanceStatus, ReviewConsoleSeverity] = {
+    PromptPerformanceStatus.HEALTHY: ReviewConsoleSeverity.INFO,
+    PromptPerformanceStatus.WATCH: ReviewConsoleSeverity.WARNING,
+    PromptPerformanceStatus.DEGRADED: ReviewConsoleSeverity.ERROR,
+}
+
+
+def make_prompt_metrics_finding(
+    id: str,
+    summary: PromptMetricSummary,
+) -> ReviewConsoleItem:
+    """Automatic system finding from a PromptMetricSummary. Not promptable, not response-required."""
+    parts = [
+        f"Samples: {summary.sample_count}",
+        f"Avg tokens: {summary.avg_prompt_tokens:.0f}",
+        f"Avg construction: {summary.avg_construction_time_ms:.1f}ms",
+        f"Avg response: {summary.avg_total_response_time_ms:.1f}ms",
+    ]
+    if summary.avg_overhead_delta_ms is not None:
+        parts.append(f"Avg overhead: {summary.avg_overhead_delta_ms:.1f}ms")
+    content = " | ".join(parts)
+
+    return ReviewConsoleItem(
+        id=id,
+        item_type=ReviewConsoleItemType.SYSTEM_FINDING,
+        severity=_METRICS_SEVERITY[summary.status],
+        title=f"Prompt performance: {summary.status.value}",
         content=content,
         promptable=False,
         is_automatic=True,

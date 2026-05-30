@@ -15,8 +15,10 @@ from meridian_core.review_console import (
     make_approval_gate,
     make_cross_check_item,
     make_plan_review_item,
+    make_prompt_metrics_finding,
     make_system_finding,
 )
+from meridian_core.prompt_metrics import PromptMetricSummary, PromptPerformanceStatus
 
 
 # ---------------------------------------------------------------------------
@@ -475,3 +477,94 @@ class TestQueueResponses:
         queue.enqueue(_cross("cc-no", "cross", ""))
         with pytest.raises(ValueError, match="not allowed"):
             queue.respond("cc-no", ReviewConsoleAction.APPROVE)
+
+
+# ---------------------------------------------------------------------------
+# make_prompt_metrics_finding
+# ---------------------------------------------------------------------------
+
+
+def _metrics_summary(
+    status: PromptPerformanceStatus = PromptPerformanceStatus.HEALTHY,
+    sample_count: int = 3,
+    avg_prompt_tokens: float = 400.0,
+    avg_construction_time_ms: float = 20.0,
+    avg_total_response_time_ms: float = 350.0,
+    avg_time_to_first_token_ms: float | None = None,
+    avg_overhead_delta_ms: float | None = None,
+) -> PromptMetricSummary:
+    return PromptMetricSummary(
+        sample_count=sample_count,
+        avg_prompt_tokens=avg_prompt_tokens,
+        avg_construction_time_ms=avg_construction_time_ms,
+        avg_total_response_time_ms=avg_total_response_time_ms,
+        avg_time_to_first_token_ms=avg_time_to_first_token_ms,
+        avg_overhead_delta_ms=avg_overhead_delta_ms,
+        status=status,
+    )
+
+
+class TestMakePromptMetricsFinding:
+    def test_returns_review_console_item(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary())
+        assert isinstance(item, ReviewConsoleItem)
+
+    def test_is_system_finding_type(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary())
+        assert item.item_type is ReviewConsoleItemType.SYSTEM_FINDING
+
+    def test_is_automatic(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary())
+        assert item.is_automatic is True
+
+    def test_not_promptable(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary())
+        assert item.promptable is False
+
+    def test_not_requires_response(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary())
+        assert item.requires_response is False
+
+    def test_healthy_maps_to_info(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(PromptPerformanceStatus.HEALTHY))
+        assert item.severity is ReviewConsoleSeverity.INFO
+
+    def test_watch_maps_to_warning(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(PromptPerformanceStatus.WATCH))
+        assert item.severity is ReviewConsoleSeverity.WARNING
+
+    def test_degraded_maps_to_error(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(PromptPerformanceStatus.DEGRADED))
+        assert item.severity is ReviewConsoleSeverity.ERROR
+
+    def test_title_contains_status(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(PromptPerformanceStatus.WATCH))
+        assert "watch" in item.title
+
+    def test_content_includes_sample_count(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(sample_count=7))
+        assert "Samples: 7" in item.content
+
+    def test_content_includes_avg_tokens(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(avg_prompt_tokens=800.0))
+        assert "800" in item.content
+
+    def test_content_includes_construction_time(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(avg_construction_time_ms=25.5))
+        assert "25.5ms" in item.content
+
+    def test_content_includes_response_time(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(avg_total_response_time_ms=410.0))
+        assert "410.0ms" in item.content
+
+    def test_content_includes_overhead_delta_when_present(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(avg_overhead_delta_ms=75.0))
+        assert "Avg overhead: 75.0ms" in item.content
+
+    def test_content_omits_overhead_delta_when_absent(self):
+        item = make_prompt_metrics_finding("pm-1", _metrics_summary(avg_overhead_delta_ms=None))
+        assert "overhead" not in item.content.lower()
+
+    def test_id_is_stored(self):
+        item = make_prompt_metrics_finding("pm-xyz", _metrics_summary())
+        assert item.id == "pm-xyz"
