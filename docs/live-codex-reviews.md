@@ -206,7 +206,31 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-06-01 04:00 CDT - No repairs routed in Round 3 A-portion. Build 2 d821106 clear; Reviews C Round C1 already cleared Build 1 190e527 + Build 2 e800c03/989366f. Build 2 cadence now fully clear.
 ```
 
+## Coordinator Addendum - Planning Harness Review
+
+2026-05-30 15:12 MDT - Reviewed Planning Harness commit `2c90247` plus grill-with-docs anchor `0f0ecbd`.
+
+Result: pass. No actionable findings. No repairs routed.
+
+Proof:
+
+- `python -m pytest tests/test_planning.py tests/test_council.py tests/test_package_api.py tests/test_filemap.py -q` -> 88 passed.
+- `python -m pytest -q` -> 881 passed.
+- Diff inspection: `meridian_core/planning.py` is deterministic/domain-only, Council-owned, package-exported, FileMap-registered, and has no file/network/vendor calls.
+- Documentation inspection: `docs/planning-harness-council-brief.md` names `mattpocock/skills` and `skills/engineering/grill-with-docs`; `docs/meridian-pillars.md` adds Pillar 15 requiring docs/code/context interrogation before durable plans.
+
 ## Active Task
+
+Planning Harness review complete (2026-05-30 15:12 MDT).
+
+- Commit `2c90247` (Council-shaped Planning Harness): passed.
+- Commit `0f0ecbd` (grill-with-docs as Prime planning primitive): passed.
+- Tests: targeted 88/88 passed; full suite 881/881 passed.
+- No repairs routed.
+
+No active task. Continue polling for new Build 1/Build 2 Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
+
+Stale prior status follows.
 
 Round 3 complete (2026-06-01 04:00 CDT).
 

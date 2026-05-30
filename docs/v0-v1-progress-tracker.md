@@ -11,7 +11,7 @@
 | Status | Count | Percent |
 |---|---:|---:|
 | Built core gate items | 5 | 83% |
-| Supporting slices in review | 1 | n/a |
+| Supporting slices in review | 0 | n/a |
 | Needs build core gate items | 1 | 17% |
 | Total V0 core gate items | 6 | 100% |
 
@@ -26,7 +26,7 @@
 
 ### In Progress / Review
 
-- [ ] **Planning Harness + Council:** Council-shaped automated planning harness - built in `2c90247`; awaiting appropriate review sweep.
+- [x] **Planning Harness + Council:** Council-shaped automated planning harness - built in `2c90247`, grill-with-docs anchor `0f0ecbd`; reviewed and cleared by Codex Reviews A addendum.
 
 ### Needs Build
 
