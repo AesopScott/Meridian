@@ -202,3 +202,73 @@ class TestPromptPacketBudgetIntegration:
                 source_lineage={},
                 construction_time_ms=1.0,
             )
+
+
+# ---------------------------------------------------------------------------
+# Direct construction — validation must fire even without build_prompt_packet
+# ---------------------------------------------------------------------------
+
+
+class TestPromptPacketDirectConstruction:
+    def test_direct_construction_with_valid_data_succeeds(self):
+        from types import MappingProxyType
+        pkt = PromptPacket(
+            packet_id="direct-001",
+            serialized_prompt="Direct construction test.",
+            prompt_tokens=5,
+            budget=_budget(),
+            source_lineage={"direct_input": 5},
+            construction_time_ms=1.0,
+        )
+        assert pkt.packet_id == "direct-001"
+
+    def test_direct_construction_with_empty_prompt_raises(self):
+        with pytest.raises(PromptPacketValidationError, match="empty"):
+            PromptPacket(
+                packet_id="bad",
+                serialized_prompt="",
+                prompt_tokens=0,
+                budget=_budget(),
+                source_lineage={},
+                construction_time_ms=0.0,
+            )
+
+    def test_direct_construction_with_non_string_prompt_raises(self):
+        with pytest.raises(PromptPacketValidationError, match="string"):
+            PromptPacket(
+                packet_id="bad",
+                serialized_prompt=12345,  # type: ignore[arg-type]
+                prompt_tokens=5,
+                budget=_budget(),
+                source_lineage={},
+                construction_time_ms=0.0,
+            )
+
+    def test_direct_construction_converts_dict_to_mapping_proxy(self):
+        pkt = PromptPacket(
+            packet_id="direct-002",
+            serialized_prompt="Test.",
+            prompt_tokens=1,
+            budget=_budget(),
+            source_lineage={"direct_input": 1},
+            construction_time_ms=0.5,
+        )
+        assert isinstance(pkt.source_lineage, MappingProxyType)
+
+    def test_direct_construction_input_dict_not_aliased(self):
+        lineage = {"direct_input": 3}
+        pkt = PromptPacket(
+            packet_id="direct-003",
+            serialized_prompt="Test.",
+            prompt_tokens=3,
+            budget=_budget(),
+            source_lineage=lineage,
+            construction_time_ms=0.5,
+        )
+        lineage["injected"] = 999
+        assert "injected" not in pkt.source_lineage
+
+    def test_helper_still_works_after_refactor(self):
+        pkt = build_prompt_packet(**_kwargs())
+        assert isinstance(pkt, PromptPacket)
+        assert isinstance(pkt.source_lineage, MappingProxyType)
