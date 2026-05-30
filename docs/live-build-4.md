@@ -132,141 +132,6 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 16:15 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 09f7297
 2026-05-30 16:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at a762406
 2026-05-30 16:18 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 2a04ddd
-2026-05-30 18:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1/2/5 idle polling; Reviews B Round B2 cleared 7c34566 (48b0afa); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 48b0afa
-2026-05-30 18:21 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at e2f7179
-2026-05-30 18:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (8cacd21); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 8cacd21
-2026-05-30 19:15 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (b9e6db7); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at b9e6db7
-2026-05-30 19:26 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 57b567f
-2026-05-30 19:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (49b5c46); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 49b5c46
-2026-05-30 20:25 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B3 pending (Build 5); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 414fa61
-2026-05-30 20:35 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 4fe8780
-2026-05-30 20:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B3 pending (Build 5); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at df9db69
-2026-05-30 20:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ee7e8a4
-2026-05-30 21:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (ba50f1b); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ba50f1b
-2026-05-30 21:29 -06:00 - Build 4 checked queue; status: running; new Active Task = Meridian V1 capability plan (docs/v1-capability-plan.md); origin/main at 9965720
-2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated — V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
-2026-05-30 23:13 -06:00 - Build 4 checked queue; status: idle; V1 plan revision complete (7b43848/9a4e6a4); no new Active Task; origin/main at 9dafd9c
-2026-05-30 23:45 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0861a97
-2026-05-31 00:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at e972c70
-2026-05-31 00:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0a4ba13
-2026-05-31 01:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 359701d
-2026-05-31 01:48 -06:00 - Build 4 checked queue; status: running; new Active Task = V3 parking lot (docs/v3-parking-lot.md); origin/main at 5c68279
-2026-05-31 02:22 -06:00 - Build 4 checked queue; status: idle; V3 parking lot complete (18e2767/cd787e4); no new Active Task; origin/main at c310f10
-2026-05-30 11:06 -06:00 - Build 4 checked queue; status: running; Active Task = capabilities architecture map; pulled origin/main fast-forward to d84bb0f
-2026-05-30 11:22 -06:00 - Build 4 checked queue; status: running; Active Task = update capabilities map (Prompt Packet maturity + Polaris Q button note); origin/main up to date at 951a6ed
-2026-05-30 11:25 -06:00 - Build 4 checked queue; status: idle; prior Active Task already completed (1db1b23); no new task present; origin/main at 617645a
-2026-05-30 11:26 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at d1563dc
-2026-05-30 11:27 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 1db1b23); no new task; origin/main at 6f554d4
-2026-05-30 11:28 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at 0246d1b
-2026-05-30 11:29 -06:00 - Build 4 checked queue; status: running; Active Task = Review Console surface contract; origin/main at 27db0e2; this is doc commit 3 of 3 — Codex review follows completion
-2026-05-30 11:41 -06:00 - Build 4 checked queue; status: running; new Active Task = consistency review pass (capabilities map + Review Console contract); Codex review repairs already committed as 7792243
-2026-05-30 11:47 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 736b6af); no new task; origin/main at c6acc6e
-2026-05-30 11:52 -06:00 - Build 4 checked queue; status: running; Active Task = V0 build readiness map (docs/v0-build-readiness-map.md); origin/main at 0282b3a
-2026-05-30 11:57 -06:00 - Build 4 checked queue; status: idle; V0 readiness map complete (3cbf336); Ready for Codex Review marker committed (42950d7); no new task; origin/main at 2caa89e
-2026-05-30 12:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; awaiting Codex Reviews sweep on 3cbf336; origin/main at 5bd55f8
-2026-05-30 12:02 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at bb767e9
-2026-05-30 12:04 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Codex Reviews Round 1 cleared Build 5 (c57bd12) but Build 4 3cbf336 not yet reviewed; origin/main at a07d2d8
-2026-05-30 12:07 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0312079
-2026-05-30 12:12 -06:00 - Build 4 checked queue; status: running; Active Task = Prime orchestration state model (docs/prime-orchestration-state-model.md); origin/main at 0ebc84d
-2026-05-30 12:18 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 1d17fa1); no new task; origin/main at 37bcd7a
-2026-05-30 12:22 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Codex Reviews round 2 queued (f344cc0); origin/main at f344cc0
-2026-05-30 12:27 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (completed 1d17fa1); no new task; orchestrator cleared Build 3 queue (9941ecb); origin/main at 9941ecb
-2026-05-30 12:32 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle polling; origin/main at b7f0cf2
-2026-05-30 12:37 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at c9221d3
-2026-05-30 12:42 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 48396f4
-2026-05-30 12:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 11a6828
-2026-05-30 12:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 2ac646c
-2026-05-30 12:57 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 216d2c5
-2026-05-30 13:02 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 79e2af5
-2026-05-30 13:07 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 06f3698
-2026-05-30 13:12 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 8da6286
-2026-05-30 13:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at f8a25a1
-2026-05-30 13:22 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at f13dbcd
-2026-05-30 13:27 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 90fb6f4
-2026-05-30 13:32 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at d77fe43
-2026-05-30 13:37 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 248c143
-2026-05-30 13:42 -06:00 - Build 4 checked queue; status: idle; no new Active Task; 3de9c74 added second Codex review lane; origin/main at bae2de7
-2026-05-30 14:28 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (dff15e5); origin/main at dff15e5
-2026-05-30 14:29 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 7f87226
-2026-05-30 14:30 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 92c139e
-2026-05-30 14:32 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews B Round B1 scope declared (4019a94) — may cover Build 4 slices 3cbf336 and 1d17fa1; origin/main at 4019a94
-2026-05-30 14:33 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews B Round B1 still pending (0818bcc); origin/main at 0818bcc
-2026-05-30 14:34 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B1 still pending; origin/main at 3890603
-2026-05-30 14:35 -06:00 - Build 4 checked queue; status: idle; no new Active Task; 05254b3 clarified review cadence throughput (live-codex-reviews.md + harness-prototype.md, not Build 4 owned); Reviews B Round B1 still pending; origin/main at 5601c46
-2026-05-30 14:36 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B1 still pending; origin/main at fbbc8df
-2026-05-30 14:37 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews B Round B1 cleared Build 5 slice 7c34566 only (45245fb); Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep; origin/main at 45245fb
-2026-05-30 14:39 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 5 confirmed cleared (8564943); Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep; origin/main at 8564943
-2026-05-30 14:40 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 3 FileMap refresh landed (b4d15a4); Build 4 slices still pending Codex Reviews sweep; origin/main at acd45a8
-2026-05-30 14:41 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep; origin/main at 9625a8a
-2026-05-30 14:43 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices still pending Codex Reviews sweep; origin/main at 0a06ca9
-2026-05-30 14:44 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 3 notes Round B2 queued for 1378bda (64743ea); Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep; origin/main at 5a0a6d1
-2026-05-30 14:45 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices still pending Codex Reviews sweep; origin/main at b3cafdd
-2026-05-30 14:46 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices still pending Codex Reviews sweep; origin/main at 47977ed
-2026-05-30 14:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at c242753
-2026-05-30 14:48 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 3621ca2
-2026-05-30 14:50 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 8e2fb3a
-2026-05-30 14:51 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at efc4f95
-2026-05-30 14:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at ad96182
-2026-05-30 14:53 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at bee5e7b
-2026-05-30 14:54 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at e2fcbc8
-2026-05-30 14:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 5a81c28
-2026-05-30 14:56 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at f0c5c04
-2026-05-30 14:58 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 9ee0640
-2026-05-30 14:59 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 315ca54
-2026-05-30 15:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 788e101
-2026-05-30 15:01 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 8dfd10a
-2026-05-30 15:02 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 042658a
-2026-05-30 15:03 -06:00 - Build 4 checked queue; status: idle; no new Active Task; 124dba6 added proof logs to review lanes (not Build 4 owned); Round B2 still pending; Build 4 slices still pending sweep; origin/main at 124dba6
-2026-05-30 15:04 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at e34b957
-2026-05-30 15:05 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at a80760b
-2026-05-30 15:06 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 4b57c90
-2026-05-30 15:07 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 62817b2
-2026-05-30 15:08 -06:00 - Build 4 checked queue; status: running; new Active Task = Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); origin/main at ef41f5f
-2026-05-30 15:12 -06:00 - Build 4 checked queue; status: idle; task fd9224d complete and marked Ready for Codex Review; review lanes setting up proof-backed round scope (9a0c8c8, 01db2ec); origin/main at 01db2ec
-2026-05-30 18:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1/2/5 idle polling; Reviews B Round B2 cleared 7c34566 (48b0afa); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 48b0afa
-2026-05-30 18:21 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at e2f7179
-2026-05-30 18:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (8cacd21); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 8cacd21
-2026-05-30 19:15 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (b9e6db7); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at b9e6db7
-2026-05-30 19:26 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 57b567f
-2026-05-30 19:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (49b5c46); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 49b5c46
-2026-05-30 20:25 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B3 pending (Build 5); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 414fa61
-2026-05-30 20:35 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 4fe8780
-2026-05-30 20:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B3 pending (Build 5); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at df9db69
-2026-05-30 20:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ee7e8a4
-2026-05-30 21:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (ba50f1b); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ba50f1b
-2026-05-30 21:29 -06:00 - Build 4 checked queue; status: running; new Active Task = Meridian V1 capability plan (docs/v1-capability-plan.md); origin/main at 9965720
-2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated — V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
-2026-05-30 23:13 -06:00 - Build 4 checked queue; status: idle; V1 plan revision complete (7b43848/9a4e6a4); no new Active Task; origin/main at 9dafd9c
-2026-05-30 23:45 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0861a97
-2026-05-31 00:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at e972c70
-2026-05-31 00:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0a4ba13
-2026-05-31 01:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 359701d
-2026-05-31 01:48 -06:00 - Build 4 checked queue; status: running; new Active Task = V3 parking lot (docs/v3-parking-lot.md); origin/main at 5c68279
-2026-05-31 02:22 -06:00 - Build 4 checked queue; status: idle; V3 parking lot complete (18e2767/cd787e4); no new Active Task; origin/main at c310f10
-2026-05-30 13:53 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at b640859
-2026-05-30 13:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at fdc9a37
-2026-05-30 13:56 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at f8a9b2a
-2026-05-30 13:57 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at ea2a079
-2026-05-30 13:58 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at ef64baa
-2026-05-30 13:59 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 5712285
-2026-05-30 14:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 902cb4c
-2026-05-30 14:02 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 8dd12a1
-2026-05-30 14:03 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews C Round C1 cleared Build 1/2 V0 gates (2706806); Build 4 slices still pending sweep; origin/main at c5ddf99
-2026-05-30 14:04 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 7ff5a6f
-2026-05-30 14:06 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 95bfff1
-2026-05-30 14:06 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B3/B4 still pending; origin/main at 7b45388
-2026-05-30 14:07 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B3/B4 still pending; origin/main at 0f22c38
-2026-05-30 14:09 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B3/B4 still pending; origin/main at 5de5cff
-2026-05-30 14:10 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 467ffe5
-2026-05-30 14:12 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 2202f51
-2026-05-30 16:01 -06:00 - Build 4 checked queue; status: running; new Active Task = Prime continuous restart/resteer logic (docs/prime-restart-resteer-logic.md); worktree: C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780160745235 (unique); git ops from main worktree C:/Users/scott/Code/Meridian (established pattern); origin/main at c86d747
-2026-05-30 16:07 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (restart/resteer doc complete at 1fb9fff); no new Active Task; origin/main at bb26a2b
-2026-05-30 16:10 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 19151c4
-2026-05-30 16:11 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 1d5e5a6
-2026-05-30 16:14 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at ea8f289
-2026-05-30 16:15 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 09f7297
-2026-05-30 16:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at a762406
-2026-05-30 16:18 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 2a04ddd
 2026-05-30 16:20 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 1878b93
 2026-05-30 16:20 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 47fadfd
 2026-05-30 16:22 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at ab36ce7
@@ -277,6 +142,27 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 16:29 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 1b97699
 2026-05-30 16:30 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Relay adapter registry landed (0560eb4, Build 1/2); origin/main at 0560eb4
 2026-05-30 16:30 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 4cd2fb5
+2026-05-30 18:00 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1/2/5 idle polling; Reviews B Round B2 cleared 7c34566 (48b0afa); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 48b0afa
+2026-05-30 18:21 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at e2f7179
+2026-05-30 18:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (8cacd21); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 8cacd21
+2026-05-30 19:15 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (b9e6db7); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at b9e6db7
+2026-05-30 19:26 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 57b567f
+2026-05-30 19:55 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (49b5c46); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 49b5c46
+2026-05-30 20:25 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B3 pending (Build 5); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 414fa61
+2026-05-30 20:35 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at 4fe8780
+2026-05-30 20:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B3 pending (Build 5); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at df9db69
+2026-05-30 20:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ee7e8a4
+2026-05-30 21:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (ba50f1b); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ba50f1b
+2026-05-30 21:29 -06:00 - Build 4 checked queue; status: running; new Active Task = Meridian V1 capability plan (docs/v1-capability-plan.md); origin/main at 9965720
+2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated — V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
+2026-05-30 23:13 -06:00 - Build 4 checked queue; status: idle; V1 plan revision complete (7b43848/9a4e6a4); no new Active Task; origin/main at 9dafd9c
+2026-05-30 23:45 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0861a97
+2026-05-31 00:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at e972c70
+2026-05-31 00:47 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0a4ba13
+2026-05-31 01:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 359701d
+2026-05-31 01:48 -06:00 - Build 4 checked queue; status: running; new Active Task = V3 parking lot (docs/v3-parking-lot.md); origin/main at 5c68279
+2026-05-31 02:22 -06:00 - Build 4 checked queue; status: idle; V3 parking lot complete (18e2767/cd787e4); no new Active Task; origin/main at c310f10
+2026-05-30 16:33 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at dcc29f9
 ```
 
 ## Write/Completion Log
@@ -346,177 +232,6 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 ## Active Task
 
 No active task. Polling.
-
-Stale prior text follows.
-
-Goal: define Prime continuous restart/resteer logic.
-
-Context:
-
-- Scott identified that Prime will need constant restart and resteer logic.
-- This is orchestration-harness architecture, not UI polish.
-- The current live queue experiment proves why: sessions can go idle, poll the wrong queue, retain stale Active Tasks, leave local scratch edits, or need review capacity reassignment.
-- Build 4 owns high-level Prime/harness planning docs.
-- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
-
-Allowed files only:
-
-- `docs/prime-restart-resteer-logic.md`
-- `docs/live-build-4.md`
-
-Task:
-
-- Pull latest `origin/main` in your unique worktree before editing.
-- Create `docs/prime-restart-resteer-logic.md`.
-- Cover:
-  - what Prime must detect: idle lanes, stale active tasks, wrong queue routing, cadence pauses, uncommitted drift, missing proof, sessions polling but not executing, sessions executing but not committing
-  - what Prime must do: rewrite stale Active Tasks, route repairs, pause/resume lanes, assign review capacity, preserve uncommitted state, and re-anchor Obsidian memory
-  - restart versus resteer: restart restores the operating frame; resteer changes the next move based on current state
-  - how this maps to Beacon, Relay, Aegis, Bifrost, Review Console, FileMap, and the live queue prototype
-  - what belongs in V0 markdown prototype, V1 cockpit visibility, and V2+ native runtime
-  - failure modes and guardrails
-- Add a short "Prime Directive / Pillar" wording proposal for Continuous Restart/Resteer.
-- Keep it candid and implementation-guiding, not marketing copy.
-- Do not edit runtime code.
-- Do not edit FileMap; Build 3 owns FileMap registration.
-- Do not edit tracker totals unless explicitly assigned later.
-
-Tests:
-
-- No tests required. Docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
-
-Stale prior text follows.
-
-Goal: draft the Meridian V1 capability plan.
-
-Context:
-
-- Scott is leaving soon and wants V1 planned enough that builders can keep moving.
-- Scott clarified that V1 is cockpit UI: "V1 is primarily just building a UI and plugging everything we've built into it."
-- `docs/v0-v1-progress-tracker.md` now defines V1 as a cockpit UI release, not a memory/federation/model-adapter release.
-- This is Build 4's high-level architecture lane.
-
-Allowed files only:
-
-- `docs/v1-capability-plan.md`
-- `docs/live-build-4.md`
-
-Task:
-
-- Write a concise V1 plan that turns the cockpit UI scope into a coherent build sequence.
-- Cover:
-  - V1 definition and success test: Scott can see Prime, queues, reviews, proof, status, and harness state in the cockpit
-  - what must wait until V0 is complete before it can be wired into the UI
-  - what can be designed in parallel now
-  - cockpit capability dependency order
-  - recommended builder lane ownership
-  - risk areas: UI sprawl, stale status, noisy progress surfaces, prompt drag through the UI, and confusing human gates
-  - the first 10 commit-sized V1 UI/integration slices
-- Explicitly mark Echo, Atlas, multi-user/federation, and public/account adapter strategy as out of V1 scope.
-- Keep it candid and implementation-guiding, not marketing copy.
-- Do not edit runtime code.
-- Do not edit FileMap.
-- Do not edit package exports.
-- Do not edit other live queues.
-
-Tests:
-
-- No tests required. This is docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
-
-Stale prior text follows.
-
-Goal: define the Prime status console and Review Console CLI bridge.
-
-Context:
-
-- Prime needs a command-center surface that can speak in the orchestrator window and route system/proof/status messages into the non-orchestrator/review surface.
-- This is a docs-only architecture slice for how the current markdown queue prototype becomes Prime-native commands.
-
-Allowed files only:
-
-- `docs/prime-status-console-cli-brief.md`
-- `docs/live-build-4.md`
-
-Task:
-
-- Write a concise architecture brief covering:
-  - `prime_status`
-  - `prime_console`
-  - `prime_approve <item-id>`
-  - `route_to_console(item_type, summary, provenance, status?)`
-  - how Mission Boot, Wake Brief, Progress Intention, Beacon, Review Console, and Aegis gates connect
-  - what belongs in the orchestrator conversation versus the non-orchestrator/review prompt window
-  - how proof summaries should be routed without polluting the main Prime conversation
-  - V0 markdown/CLI prototype versus V1 UI/runtime implementation
-- Include a short example transcript showing NASA-style system messages going to the review/system surface while Prime keeps the conversational thread clean.
-- Do not edit runtime code.
-- Do not edit FileMap.
-- Do not edit package exports.
-- Do not edit other live queues.
-
-Tests:
-
-- No tests required. This is docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
-
-Stale prior text follows.
-
-Goal: define Prime orchestration harness state model.
-
-Allowed files only:
-
-- `docs/prime-orchestration-state-model.md`
-
-Task:
-
-- Write a strategic architecture note that turns the current live queue process into Prime-native state.
-- Cover:
-  - lane registry
-  - active task state
-  - review checkpoint state
-  - review round scope
-  - repair routing
-  - Ready for Codex Review markers
-  - lane clearing and cadence pauses
-  - how this maps to Beacon, Bifrost, Relay, Aegis, and the Review Console
-  - what remains markdown prototype versus what should become Python domain objects
-- Use `docs/prime-orchestration-harness-prototype.md` as source context, but do not edit it.
-- Keep it candid and implementation-guiding, not marketing copy.
-- Do not edit runtime code.
-- Do not edit FileMap.
-- Do not edit package exports.
-- Do not edit other live queues.
-
-Tests:
-
-- No tests required. This is docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 **Ready for Codex Review**
 - Commit: `fd9224d`
