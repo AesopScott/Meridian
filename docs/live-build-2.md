@@ -33,6 +33,7 @@ Append entries here when this file is checked while idle.
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-30 10:38 -06:00 - Build 2 checked queue; status: running (Active Task found — Prompt Metrics package exposure)
+2026-05-30 10:44 -06:00 - Build 2 checked queue; status: running (Active Task found — Review Console visibility bridge)
 ```
 
 ## Write/Completion Log
@@ -45,6 +46,8 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; tests <result>
 2026-05-30 10:37 -06:00 - Codex strengthened polling contract; commit pending; tests not required
 2026-05-30 10:42 -06:00 - Build 2 completed Prompt Metrics package exposure; commit 6d51710; tests 627 passed
 2026-05-30 10:42 -06:00 - Codex review cleared Prompt Metrics package/FileMap exposure and assigned Review Console visibility bridge; commit pending; tests pending
+2026-05-30 10:47 -06:00 - Build 2 completed Review Console visibility bridge; commit e27da72; tests 643 passed
+2026-05-30 10:54 -06:00 - Codex review cleared Prompt Metrics Review Console bridge and assigned package API export; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -54,6 +57,7 @@ Append entries here when you check or act on cross-check activity.
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 cross-check: none/finding/fix; details: <short note>
 2026-05-30 10:42 -06:00 - Build 2 cross-check: no actionable findings in commit 6d51710; targeted tests 103 passed.
+2026-05-30 10:54 -06:00 - Build 2 cross-check: no blocking findings in commit e27da72; targeted tests 239 passed.
 ```
 
 ## Codex Review Cadence
@@ -69,48 +73,34 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: surface Prompt Metrics summaries as Review Console system findings.
+Goal: expose the Prompt Metrics Review Console bridge through the package API.
 
 Allowed files only:
 
-- `meridian_core/review_console.py`
-- `tests/test_review_console.py`
+- `meridian_core/__init__.py`
+- `tests/test_package_api.py`
 
 Context:
 
-- Codex review cleared Build 2 commit `6d51710`.
-- Prompt Metrics are now exported and FileMap-visible.
-- The next step is visibility, not prompt injection.
-- The non-orchestrator surface should receive system-level findings such as prompt drag health.
+- Codex review cleared Build 2 commit `e27da72`.
+- `make_prompt_metrics_finding(...)` now exists in `meridian_core/review_console.py`.
+- Root package exports include other Review Console factories, but not this new bridge yet.
 
 Task:
 
-- Add a factory/helper in `review_console.py` that converts a `PromptMetricSummary` into a `ReviewConsoleItem`.
-- Suggested name: `make_prompt_metrics_finding(...)`.
-- It should create a `SYSTEM_FINDING`.
-- It should be automatic.
-- It should not require a response.
-- It should not be promptable.
-- Severity mapping:
-  - `HEALTHY` -> `INFO`
-  - `WATCH` -> `WARNING`
-  - `DEGRADED` -> `ERROR`
-- Content should be concise and human-readable:
-  - sample count
-  - average prompt tokens
-  - average construction time
-  - average total response time
-  - average overhead delta when available
-- Do not add prompt text for worker sessions.
-- Do not edit Prompt Metrics internals.
-- No Relay edits.
+- Export `make_prompt_metrics_finding` from package root.
+- Add package API import smoke coverage.
+- Keep root API deliberate; do not export private severity maps.
+- No behavior changes.
+- No Review Console implementation edits unless a test requires a tiny import fix.
+- No Prompt Metrics edits.
 - No UI.
 - No persistence.
 
 Tests:
 
 ```text
-python -m pytest tests/test_review_console.py tests/test_prompt_metrics.py -q
+python -m pytest tests/test_package_api.py tests/test_review_console.py -q
 python -m pytest -q
 ```
 

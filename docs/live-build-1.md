@@ -50,6 +50,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-30 ~22:45 CDT - Build 1 completed Relay Prompt Budget integration into RelayRoute; commit 95bb942; tests 626 passed
 2026-05-30 10:39 -06:00 - Codex review cleared RelayRoute integration and assigned PromptBudgetPlan immutability repair; commit pending; tests pending
 2026-05-30 ~23:00 CDT - Build 1 completed PromptBudgetPlan immutability hardening; commit 305b8d4; tests 627 passed
+2026-05-30 10:54 -06:00 - Codex review cleared PromptBudgetPlan immutability hardening and assigned Prompt Packet domain model; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -59,6 +60,7 @@ Append entries here when you check or act on cross-check activity.
 ```text
 YYYY-MM-DD HH:MM TZ - Build 1 cross-check: none/finding/fix; details: <short note>
 2026-05-30 10:39 -06:00 - Build 1 cross-check finding: PromptBudgetPlan is frozen but allowed_sources is mutable list; repair before Prompt Packet runtime work.
+2026-05-30 10:54 -06:00 - Build 1 cross-check: no blocking findings in commit 305b8d4; targeted tests 239 passed.
 ```
 
 ## Codex Review Cadence
@@ -74,25 +76,41 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: harden PromptBudgetPlan immutability.
+Goal: create the Prompt Packet domain model.
 
 Allowed files only:
 
-- `meridian_core/prompt_budget.py`
-- `tests/test_prompt_budget.py`
-- `tests/test_relay.py`
+- `meridian_core/prompt_packet.py`
+- `tests/test_prompt_packet.py`
 
 Task:
 
-- Codex review cleared Build 1 commit `95bb942` for RelayRoute integration.
-- One follow-up finding remains in the Prompt Budget domain:
-  - `PromptBudgetPlan` is declared `frozen=True`, but `allowed_sources` is a mutable `list[str]`.
-  - Current tests prove independent copies, but they also show mutation is possible.
-- Change `allowed_sources` to an immutable collection, preferably `tuple[str, ...]`.
-- Preserve ergonomic construction from lists.
-- Preserve existing tier mappings and Relay behavior.
-- Update tests that currently append to `allowed_sources` so they assert true immutability instead.
-- Keep the backward-compatible `PromptBudget` alias.
+- Codex review cleared Build 1 commit `305b8d4`.
+- Build the first runtime/domain version of Prompt Packet based on `docs/prompt-packet-design-brief.md`.
+- Keep this domain-only.
+- Suggested minimum:
+  - frozen `PromptPacket` dataclass
+  - `PromptPacketValidationError`
+  - `build_prompt_packet(...)` helper
+- The packet should include:
+  - `packet_id`
+  - `serialized_prompt`
+  - `prompt_tokens`
+  - `budget`
+  - `source_lineage`
+  - `construction_time_ms`
+- Validate:
+  - prompt text is non-empty
+  - prompt tokens are non-negative
+  - prompt tokens do not exceed `budget.max_context_tokens`
+  - all lineage sources are in `budget.allowed_sources`
+  - lineage token counts are non-negative
+  - lineage total does not exceed prompt tokens
+  - construction time is non-negative
+- Use immutable internal collections where possible.
+- Do not edit Relay yet.
+- Do not edit package exports.
+- Do not edit FileMap.
 - No UI.
 - No persistence.
 - No model calls.
@@ -100,7 +118,7 @@ Task:
 Tests:
 
 ```text
-python -m pytest tests/test_relay.py tests/test_prompt_budget.py -q
+python -m pytest tests/test_prompt_packet.py tests/test_prompt_budget.py -q
 python -m pytest -q
 ```
 
