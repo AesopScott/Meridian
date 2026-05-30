@@ -184,6 +184,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 23:50 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 2026-06-01 00:05 -06:00 - Build 3 checked queue; status: idle; latest FileMap refresh complete (330f200); cadence 2/3 since Round B2; awaiting Reviews B Round B3 verification and next assignment
 2026-06-01 00:20 -06:00 - Build 3 checked queue; status: idle; latest FileMap refresh complete (330f200); cadence 2/3 since Round B2; awaiting Reviews B Round B3 verification and next assignment
+2026-06-01 00:35 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 ```
 
 ## Write/Completion Log
@@ -249,34 +250,39 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes stale completed FileMap task below):
 
-Goal: dumb-fast FileMap registration for the V3 parking lot.
+Goal: dumb-fast V0/V1 progress tracker sync.
 
 Context:
 
-- Build 4 is a smart queue and created `docs/v3-parking-lot.md` in commit `18e2767`.
-- Build 3 is the dumb fast queue. Its job here is only mechanical registration and test coverage.
-- Do not evaluate, rewrite, or expand the V3 parking lot content.
+- Build 3 is the dumb fast queue. This task is mechanical tracker cleanup only.
+- `docs/v0-v1-progress-tracker.md` is stale: it still says `prime_wake` and `prime_console` / `prime_status` need runtime implementation even though Build 2 landed them.
+- Do not make architecture decisions. Mirror known commit facts from the live queues and V0 readiness map.
 
 Allowed files:
 
 - `docs/FileMap.md`
 - `meridian_core/filemap.py`
 - `tests/test_filemap.py`
+- `docs/v0-v1-progress-tracker.md`
 - `docs/live-build-3.md`
 
 Task:
 
-- Register `docs/v3-parking-lot.md` in both `docs/FileMap.md` and `meridian_core/filemap.py` if missing.
-- Use the existing FileArea taxonomy; this is likely architecture/roadmap/build-process adjacent. Pick the closest existing category and keep it consistent with similar roadmap docs.
-- Add `docs/v3-parking-lot.md` to `_REQUIRED_PATHS` if that matches the existing test convention.
-- Keep `docs/FileMap.md` row prose and `meridian_core/filemap.py` entry prose aligned.
-- If you notice `docs/v1-capability-plan.md`, `docs/v1-bifrost-cockpit-implementation-brief.md`, or `docs/v2-horizon-plan.md` are still missing from FileMap, record that in Cross-Check Activity but do not bundle them into this slice unless the edit stays extremely small and mechanical.
+- Update `docs/v0-v1-progress-tracker.md` to reflect known V0 gate state:
+  - `prime_wake` built in `e800c03`
+  - `route_to_console` / `prime_console` / `prime_status` built in `989366f`, with review repair in `9c3e1a3`
+  - `relay_executor.py` provider-neutral skeleton built in `190e527`, but real vendor/model dispatch still not built
+  - `prime_approve <item-id>` has been assigned to Build 2 but is not built yet unless a newer completion marker exists when you poll
+- Recalculate only the tracker counts that are obviously implied by those facts.
+- Keep every tracker item owned by Prime or a harness.
+- If FileMap entries for `docs/v0-v1-progress-tracker.md` are already current, do not touch FileMap files. If tests require a tiny metadata correction, make only that mechanical correction.
 - Do not edit runtime behavior outside FileMap metadata.
 - Do not edit other live queues except this queue's read/completion log.
 
 Tests:
 
 - Run `python -m pytest tests/test_filemap.py -q`.
+- No full suite required unless you touch Python metadata.
 
 Completion:
 
