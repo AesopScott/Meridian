@@ -56,6 +56,7 @@ Append entries here when you check or act on cross-check activity.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short note>
+2026-05-30 11:23 -06:00 - Build 4 cross-check: finding (informational); Build 1 landed model_payload() dispatch boundary (111a975) and Build 2 exported PromptPacket API (f2f69ff); no action required on Build 4 owned files; confirms map accuracy
 ```
 
 ## Codex Review Cadence
