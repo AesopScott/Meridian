@@ -1,0 +1,112 @@
+"""Tests for Beacon file-backed liveness checks."""
+
+from __future__ import annotations
+
+import os
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import pytest
+
+from meridian_core.beacon import LivenessTarget, check_harness_liveness
+from meridian_core.models import HeartbeatStatus
+
+
+def _touch(path: Path, modified_at: datetime) -> None:
+    path.write_text("sentinel", encoding="utf-8")
+    stamp = modified_at.timestamp()
+    os.utime(path, (stamp, stamp))
+
+
+class TestCheckHarnessLiveness:
+    def test_fresh_sentinel_returns_alive_heartbeat(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0, tzinfo=timezone.utc)
+        sentinel = tmp_path / "live-build-1.md"
+        _touch(sentinel, now - timedelta(seconds=30))
+
+        heartbeats = check_harness_liveness(
+            [LivenessTarget("build_1", sentinel, stale_after_seconds=60)],
+            now=now,
+        )
+
+        assert heartbeats[0].status is HeartbeatStatus.ALIVE
+
+    def test_stale_sentinel_returns_stale_heartbeat(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0, tzinfo=timezone.utc)
+        sentinel = tmp_path / "live-build-1.md"
+        _touch(sentinel, now - timedelta(seconds=61))
+
+        heartbeats = check_harness_liveness(
+            [LivenessTarget("build_1", sentinel, stale_after_seconds=60)],
+            now=now,
+        )
+
+        assert heartbeats[0].status is HeartbeatStatus.STALE
+
+    def test_missing_sentinel_returns_failed_heartbeat(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0, tzinfo=timezone.utc)
+        missing = tmp_path / "missing.md"
+
+        heartbeats = check_harness_liveness(
+            [LivenessTarget("build_1", missing)],
+            now=now,
+        )
+
+        assert heartbeats[0].status is HeartbeatStatus.FAILED
+
+    def test_missing_sentinel_records_blocker(self, tmp_path: Path) -> None:
+        missing = tmp_path / "missing.md"
+
+        heartbeats = check_harness_liveness([LivenessTarget("build_1", missing)])
+
+        assert "missing sentinel" in heartbeats[0].blockers[0]
+
+    def test_current_work_records_target_path(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0, tzinfo=timezone.utc)
+        sentinel = tmp_path / "live-build-1.md"
+        _touch(sentinel, now)
+
+        heartbeats = check_harness_liveness([LivenessTarget("build_1", sentinel)], now=now)
+
+        assert heartbeats[0].current_work == str(sentinel)
+
+    def test_last_event_records_age(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0, tzinfo=timezone.utc)
+        sentinel = tmp_path / "live-build-1.md"
+        _touch(sentinel, now - timedelta(seconds=45))
+
+        heartbeats = check_harness_liveness([LivenessTarget("build_1", sentinel)], now=now)
+
+        assert "45s ago" in heartbeats[0].last_event
+
+    def test_multiple_targets_return_in_input_order(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0, tzinfo=timezone.utc)
+        first = tmp_path / "first.md"
+        second = tmp_path / "second.md"
+        _touch(first, now)
+        _touch(second, now)
+
+        heartbeats = check_harness_liveness(
+            [
+                LivenessTarget("first", first),
+                LivenessTarget("second", second),
+            ],
+            now=now,
+        )
+
+        assert [heartbeat.harness_id for heartbeat in heartbeats] == ["first", "second"]
+
+    def test_naive_now_is_treated_as_utc(self, tmp_path: Path) -> None:
+        now = datetime(2026, 5, 30, 20, 0)
+        sentinel = tmp_path / "live-build-1.md"
+        _touch(sentinel, now.replace(tzinfo=timezone.utc))
+
+        heartbeats = check_harness_liveness([LivenessTarget("build_1", sentinel)], now=now)
+
+        assert heartbeats[0].updated_at.tzinfo is timezone.utc
+
+    def test_negative_stale_threshold_raises(self, tmp_path: Path) -> None:
+        target = LivenessTarget("build_1", tmp_path / "x.md", stale_after_seconds=-1)
+
+        with pytest.raises(ValueError):
+            check_harness_liveness([target])

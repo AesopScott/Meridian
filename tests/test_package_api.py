@@ -124,6 +124,15 @@ def test_prompt_packet_exports():
     assert "build_prompt_packet" in meridian_core.__all__
 
 
+def test_beacon_exports():
+    from meridian_core import LivenessTarget, check_harness_liveness
+
+    assert LivenessTarget
+    assert check_harness_liveness
+    assert "LivenessTarget" in meridian_core.__all__
+    assert "check_harness_liveness" in meridian_core.__all__
+
+
 def test_internal_helpers_are_not_root_exports():
     assert "_TIER_SEMANTICS" not in meridian_core.__all__
     assert "_ROUTING_TABLE" not in meridian_core.__all__

@@ -110,6 +110,7 @@ from .prompt_packet import (
     PromptPacketValidationError,
     build_prompt_packet,
 )
+from .beacon import LivenessTarget, check_harness_liveness
 
 __all__ = [
     # -- Core domain models --------------------------------------------------
@@ -226,4 +227,7 @@ __all__ = [
     "PromptPacket",
     "PromptPacketValidationError",
     "build_prompt_packet",
+    # -- Beacon liveness -----------------------------------------------------
+    "LivenessTarget",
+    "check_harness_liveness",
 ]
