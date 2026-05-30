@@ -173,6 +173,7 @@ Immediate scope available now:
 
 - Build 4 commit `fd9224d`.
 - Build 4 commits `7b43848` / `9a4e6a4` - V1 capability plan and cockpit-scope revision.
+- Build 4 commit `18e2767` - V3 parking lot.
 - Build 5 commit `a412e90` - Bifrost configurable progress and proof surface brief.
 - Build 5 commit `0629e0c` - V1 Bifrost cockpit implementation brief.
 - Build 3 commit `774695f` - FileMap hygiene for the V0/V1 progress tracker and V0 readiness wording.
@@ -186,6 +187,9 @@ Required proof for Build 4:
 - Since this is docs-only, tests are not required; proof must be file inspection plus cross-reference checks.
 - Also inspect `docs/v1-capability-plan.md`.
 - Confirm V1 is scoped to Bifrost cockpit UI plus wiring existing V0/domain capabilities, and explicitly leaves Echo, Atlas, federation, and public/provider strategy out of V1.
+- Also inspect `docs/v3-parking-lot.md`.
+- Confirm V3 is clearly a parking lot, not active scope, and that all items are framed by Prime or harness ownership.
+- Confirm the V3 doc does not pull product/ecosystem work into V0, V1, or V2.
 
 Required proof for Build 5:
 

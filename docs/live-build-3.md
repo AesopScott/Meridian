@@ -232,13 +232,13 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes stale completed FileMap task below):
 
-Goal: FileMap refresh for V1/V2/V3 roadmap docs.
+Goal: dumb-fast FileMap registration for the V3 parking lot.
 
 Context:
 
-- The coordinator added or identified roadmap docs that future Prime sessions must discover automatically.
-- `docs/v0-v1-progress-tracker.md` is already registered, but newer V1/V2 planning docs may not be.
-- Scott and Codex just decided V3 should be a parking lot, not an active build plan. If `docs/v3-parking-lot.md` exists when you poll, register it. If it does not exist yet, note that in Cross-Check Activity and do not create it in this lane.
+- Build 4 is a smart queue and created `docs/v3-parking-lot.md` in commit `18e2767`.
+- Build 3 is the dumb fast queue. Its job here is only mechanical registration and test coverage.
+- Do not evaluate, rewrite, or expand the V3 parking lot content.
 
 Allowed files:
 
@@ -249,14 +249,11 @@ Allowed files:
 
 Task:
 
-- Check whether these docs are registered in both `docs/FileMap.md` and `meridian_core/filemap.py`:
-  - `docs/v1-capability-plan.md`
-  - `docs/v1-bifrost-cockpit-implementation-brief.md`
-  - `docs/v2-horizon-plan.md`
-  - `docs/v3-parking-lot.md` if present
-- Add missing entries using the existing FileArea taxonomy.
-- Add missing paths to `_REQUIRED_PATHS` if that matches the existing test convention.
+- Register `docs/v3-parking-lot.md` in both `docs/FileMap.md` and `meridian_core/filemap.py` if missing.
+- Use the existing FileArea taxonomy; this is likely architecture/roadmap/build-process adjacent. Pick the closest existing category and keep it consistent with similar roadmap docs.
+- Add `docs/v3-parking-lot.md` to `_REQUIRED_PATHS` if that matches the existing test convention.
 - Keep `docs/FileMap.md` row prose and `meridian_core/filemap.py` entry prose aligned.
+- If you notice `docs/v1-capability-plan.md`, `docs/v1-bifrost-cockpit-implementation-brief.md`, or `docs/v2-horizon-plan.md` are still missing from FileMap, record that in Cross-Check Activity but do not bundle them into this slice unless the edit stays extremely small and mechanical.
 - Do not edit runtime behavior outside FileMap metadata.
 - Do not edit other live queues except this queue's read/completion log.
 
