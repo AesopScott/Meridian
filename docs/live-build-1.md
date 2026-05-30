@@ -70,6 +70,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 ~04:00 CDT - Build 1 checked queue; status: idle (no active task)
 2026-05-31 ~04:10 CDT - Build 1 checked queue; status: idle (no active task)
 2026-05-31 ~04:20 CDT - Build 1 checked queue; status: idle (no active task)
+2026-05-31 ~04:30 CDT - Build 1 checked queue; status: running (lane_state.py domain objects task)
 ```
 
 ## Write/Completion Log
@@ -128,47 +129,10 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-31 ~01:50 CDT - Build 1 Codex review finding: LOW; test_tokens.py missing explicit ceil(len/4)-dominant branch test; no repair required
 2026-05-31 ~01:50 CDT - Build 1 Codex review result: pass; no CRITICAL or HIGH findings; all files clean
 2026-05-30 11:43 -06:00 - Build 1 Codex coordinator verification: targeted suite 147 passed; full suite 725 passed; next Relay dispatch-plan slice assigned
+2026-05-31 ~04:30 CDT - Build 1 completed WorkerLaneState domain model; commit d2820d2; tests 785 passed; Obsidian updated
+2026-05-31 ~04:30 CDT - Build 1 slice ready for Codex Review: commit d2820d2; files: lane_state.py, test_lane_state.py; tests: 785 passed
 ```
 
 ## Active Task
 
-Current Active Task (supersedes any stale text below):
-
-Goal: add worker lane state domain objects for Prime orchestration.
-
-Allowed files only:
-
-- `meridian_core/lane_state.py`
-- `tests/test_lane_state.py`
-
-Task:
-
-- Build a pure Python domain model for the worker/session lane state Prime needs to coordinate queues.
-- Suggested shape:
-  - `LaneStatus` enum with: IDLE, POLLING, RUNNING, BLOCKED, READY_FOR_REVIEW, UNDER_REVIEW, REPAIR_ROUTED, STALE, OFFLINE
-  - `LaneReviewState` enum with: NOT_REQUIRED, READY, IN_REVIEW, PASSED, REPAIR_REQUIRED
-  - `WorkerLaneState` frozen dataclass with lane id, build name, status, active_task, last_commit, review_state, last_poll_at, notes
-  - small transition helpers such as `mark_ready_for_review()`, `mark_running()`, `mark_blocked()`, `mark_review_passed()`
-- Keep it domain-only. No filesystem polling, no subprocess calls, no model calls, no UI.
-- Make transitions return new objects rather than mutating existing state.
-- Keep timestamps as strings for now; do not introduce datetime parsing unless needed.
-- Do not edit package exports; Build 2 owns package API.
-- Do not edit FileMap; Build 3 owns FileMap.
-
-Tests:
-
-```text
-python -m pytest tests/test_lane_state.py -q
-python -m pytest -q
-```
-
-Completion:
-
-- Commit only this runtime slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and test count.
-
-Stale prior text:
-
-No active task. Build 1 is idle — slice fd35a81 marked Ready for Codex Review; awaiting review result or next assignment.
+No active task. Build 1 is idle — slice d2820d2 marked Ready for Codex Review; awaiting review result or next assignment.
