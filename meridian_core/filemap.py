@@ -36,6 +36,7 @@ class FileArea:
     PLANNING         = "Planning harness"
     RELAY_ROUTING    = "Relay routing"
     RELAY_DISPATCH   = "Relay dispatch"
+    MODEL_HARNESS    = "Model Harness"
     PROMPT_BUDGET    = "Relay prompt budget"
     PROMPT_METRICS   = "Relay prompt metrics"
     PROMPT_PACKET    = "Relay prompt packet"
@@ -332,6 +333,13 @@ def make_default_map() -> FileMap:
             purpose="Immutable dispatch plan mapping a RelayRoute and PromptPacket to per-lane model work. Pure domain structure; no model calls. RelayDispatchLane.payload is always packet.model_payload().",
             related_tests=["tests/test_relay_dispatch.py"],
             notes="Frozen dataclass. No metadata, lineage, or tokens sent to model.",
+        ),
+        FileMapEntry(
+            path="meridian_core/model_adapter.py",
+            area=FileArea.MODEL_HARNESS,
+            purpose="Provider-neutral Model Adapter contract: payload-only callable boundary, deterministic fake adapter, and env-safe live adapter configuration wrapper.",
+            related_tests=["tests/test_model_adapter.py"],
+            notes="Public/private provider implementations stay outside Relay core; adapter receives only approved payload text.",
         ),
         FileMapEntry(
             path="meridian_core/prompt_budget.py",

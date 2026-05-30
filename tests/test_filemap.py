@@ -27,6 +27,7 @@ _REQUIRED_PATHS = [
     "meridian_core/prompt_packet.py",
     "meridian_core/relay_packet.py",
     "meridian_core/relay_dispatch.py",
+    "meridian_core/model_adapter.py",
     "docs/relay-prompt-metrics-integration-brief.md",
     "docs/planning-harness-council-brief.md",
     "docs/prime-planning-harness-answers.md",
@@ -258,7 +259,7 @@ class TestDefaultMap:
         fm = make_default_map()
         tested = fm.with_tests()
         tested_paths = {e.path for e in tested}
-        for path in ["meridian_core/risk.py", "meridian_core/council.py", "meridian_core/relay.py", "meridian_core/builds.py"]:
+        for path in ["meridian_core/risk.py", "meridian_core/council.py", "meridian_core/relay.py", "meridian_core/builds.py", "meridian_core/model_adapter.py"]:
             assert path in tested_paths, f"{path} should have related tests"
 
     def test_mission_md_in_mission_area(self):
