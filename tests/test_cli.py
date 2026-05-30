@@ -1,10 +1,15 @@
-"""Tests for the prime_wake CLI command."""
+"""Tests for the prime_wake, prime_console, prime_status CLI commands."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from meridian_core.cli import prime_wake
+from meridian_core.cli import prime_console, prime_status, prime_wake
+from meridian_core.review_console import (
+    ReviewConsoleItemType,
+    ReviewConsoleQueue,
+    route_to_console,
+)
 
 _VALID_MISSION = """\
 # Meridian Mission
@@ -88,3 +93,106 @@ class TestPrimeWakeMissionFailure:
         f = tmp_path / "MISSION.md"
         f.write_text("garbage", encoding="utf-8")
         prime_wake(mission_path=f)
+
+
+class TestPrimeConsole:
+    def test_empty_console_is_deterministic(self, capsys) -> None:
+        q = ReviewConsoleQueue()
+        prime_console(console=q)
+        first = capsys.readouterr().out
+        prime_console(console=q)
+        second = capsys.readouterr().out
+        assert first == second
+
+    def test_empty_console_prints_readable_message(self, capsys) -> None:
+        q = ReviewConsoleQueue()
+        prime_console(console=q)
+        out = capsys.readouterr().out
+        assert "no pending items" in out
+
+    def test_pending_item_appears_in_output(self, capsys) -> None:
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "Test finding", "from harness", console=q)
+        prime_console(console=q)
+        out = capsys.readouterr().out
+        assert "Test finding" in out
+
+    def test_item_status_appears_in_output(self, capsys) -> None:
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.CROSS_CHECK, "Check result", console=q)
+        prime_console(console=q)
+        out = capsys.readouterr().out
+        assert "pending" in out
+
+    def test_item_type_appears_in_output(self, capsys) -> None:
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.APPROVAL_GATE, "Approve release", console=q)
+        prime_console(console=q)
+        out = capsys.readouterr().out
+        assert "approval_gate" in out
+
+    def test_item_provenance_appears_in_output(self, capsys) -> None:
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "Summary", "provenance-source", console=q)
+        prime_console(console=q)
+        out = capsys.readouterr().out
+        assert "provenance-source" in out
+
+
+class TestPrimeStatus:
+    def test_includes_prime_online_header(self, tmp_path: Path, capsys) -> None:
+        f = tmp_path / "MISSION.md"
+        f.write_text(_VALID_MISSION, encoding="utf-8")
+        q = ReviewConsoleQueue()
+        prime_status(mission_path=f, console=q)
+        out = capsys.readouterr().out
+        assert "Prime online." in out
+
+    def test_includes_console_section(self, tmp_path: Path, capsys) -> None:
+        f = tmp_path / "MISSION.md"
+        f.write_text(_VALID_MISSION, encoding="utf-8")
+        q = ReviewConsoleQueue()
+        prime_status(mission_path=f, console=q)
+        out = capsys.readouterr().out
+        assert "Review Console" in out
+
+    def test_console_items_appear_in_status(self, tmp_path: Path, capsys) -> None:
+        f = tmp_path / "MISSION.md"
+        f.write_text(_VALID_MISSION, encoding="utf-8")
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.PLAN_REVIEW, "Pending approval", console=q)
+        prime_status(mission_path=f, console=q)
+        out = capsys.readouterr().out
+        assert "Pending approval" in out
+
+
+class TestRouteToConsole:
+    def test_creates_item_with_correct_type(self) -> None:
+        q = ReviewConsoleQueue()
+        item = route_to_console(ReviewConsoleItemType.CROSS_CHECK, "x", console=q)
+        assert item.item_type is ReviewConsoleItemType.CROSS_CHECK
+
+    def test_creates_item_with_correct_summary(self) -> None:
+        q = ReviewConsoleQueue()
+        item = route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "my summary", console=q)
+        assert item.title == "my summary"
+
+    def test_creates_item_with_correct_provenance(self) -> None:
+        q = ReviewConsoleQueue()
+        item = route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "s", "my-harness", console=q)
+        assert item.content == "my-harness"
+
+    def test_item_is_enqueued(self) -> None:
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "s", console=q)
+        assert len(q.pending()) == 1
+
+    def test_accepts_string_item_type(self) -> None:
+        q = ReviewConsoleQueue()
+        item = route_to_console("system_finding", "s", console=q)
+        assert item.item_type is ReviewConsoleItemType.SYSTEM_FINDING
+
+    def test_item_id_is_deterministic(self) -> None:
+        q = ReviewConsoleQueue()
+        item = route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "s", console=q)
+        assert item.id == "rc-0000"

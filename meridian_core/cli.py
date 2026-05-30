@@ -22,6 +22,7 @@ from .intention import RiskTier
 from .mission import MissionLoadError, find_mission_file, load_mission
 from .models import Initiative
 from .objectives import get_mission_objectives
+from .review_console import ReviewConsoleQueue, ReviewConsoleSeverity, _CONSOLE
 from .sample_state import make_sample_heartbeats, make_sample_portfolio
 from .wake import WakeStatus, build_wake_brief
 
@@ -69,6 +70,52 @@ def _header(text: str) -> str:
 
 def _bullet(label: str, value: str, color: str = "") -> str:
     return f"  {_DIM}*{_RESET} {_BOLD}{label}:{_RESET} {color}{value}{_RESET if color else ''}"
+
+
+_SEVERITY_COLOR: dict[str, str] = {
+    "info": "",
+    "warning": "",
+    "error": "",
+    "critical": "",
+}
+
+
+def _severity_color(severity_value: str) -> str:
+    return {
+        "info": _DIM,
+        "warning": _YELLOW,
+        "error": _RED,
+        "critical": _RED,
+    }.get(severity_value, "")
+
+
+def prime_console(console: ReviewConsoleQueue | None = None) -> None:
+    """Print current Review Console items in human-readable format."""
+    q = console if console is not None else _CONSOLE
+    pending = q.pending()
+
+    print(_header("Review Console"))
+    if not pending:
+        print("\n  (no pending items)")
+        return
+    for item in pending:
+        sev = item.severity.value
+        sc = _severity_color(sev)
+        print(f"\n  {_BOLD}[{item.id}]{_RESET}  {sc}{sev.upper()}{_RESET}  {item.item_type.value}")
+        print(f"  {_BOLD}{item.title}{_RESET}")
+        if item.content:
+            print(f"  {_DIM}{item.content}{_RESET}")
+        print(f"  status: {item.status.value}  |  requires_response: {item.requires_response}")
+    print()
+
+
+def prime_status(
+    mission_path: Path | None = None,
+    console: ReviewConsoleQueue | None = None,
+) -> None:
+    """Print a compact combined view: mission/wake identity and open Review Console items."""
+    prime_wake(mission_path=mission_path)
+    prime_console(console=console)
 
 
 def prime_wake(mission_path: Path | None = None) -> None:

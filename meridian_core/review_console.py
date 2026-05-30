@@ -231,6 +231,40 @@ def make_system_finding(
     )
 
 
+# ---------------------------------------------------------------------------
+# Module-level default console + Prime-facing routing helper
+# ---------------------------------------------------------------------------
+
+_CONSOLE: ReviewConsoleQueue = ReviewConsoleQueue()
+
+
+def route_to_console(
+    item_type: ReviewConsoleItemType | str,
+    summary: str,
+    provenance: str = "",
+    *,
+    console: ReviewConsoleQueue | None = None,
+) -> ReviewConsoleItem:
+    """Create and enqueue a console item routed from Prime or a harness."""
+    if isinstance(item_type, str):
+        item_type = ReviewConsoleItemType(item_type)
+    q = console if console is not None else _CONSOLE
+    item_id = f"rc-{len(q.items):04d}"
+    item = ReviewConsoleItem(
+        id=item_id,
+        item_type=item_type,
+        severity=ReviewConsoleSeverity.INFO,
+        title=summary,
+        content=provenance,
+        promptable=False,
+        is_automatic=True,
+        requires_response=False,
+        suggested_actions=[ReviewConsoleAction.ACKNOWLEDGE],
+    )
+    q.enqueue(item)
+    return item
+
+
 _METRICS_SEVERITY: dict[PromptPerformanceStatus, ReviewConsoleSeverity] = {
     PromptPerformanceStatus.HEALTHY: ReviewConsoleSeverity.INFO,
     PromptPerformanceStatus.WATCH: ReviewConsoleSeverity.WARNING,
