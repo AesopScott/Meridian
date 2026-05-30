@@ -202,6 +202,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-01 04:27 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 2026-05-30 16:03 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — model_adapter.py); task complete in commit be34fea; recording completion marker; cadence 3/3 — Codex review required
 2026-05-30 16:06 -06:00 - Build 3 checked queue; status: paused; cadence 3/3 since Round B2; Reviews B Round B3 queued but not yet executed; awaiting cadence-clear
+2026-05-30 16:07 -06:00 - Build 3 checked queue; status: active; Round B3 result in Obsidian: 774695f PASS, cadence reset; executing FileMap repair (3 uncatalogued docs from Round B3 findings)
 ```
 
 ## Write/Completion Log
@@ -263,6 +264,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 2026-05-30 12:37 -06:00 - Build 3 Codex review repair: commit ecc9fdf; tests not required; details: added live-build-5.md to lane set in queue hygiene note
 2026-05-30 12:37 -06:00 - Build 3 Codex review result: fixed (lane set); 2 LOW findings deferred pending future task assignment to allowed files
 2026-05-30 16:03 -06:00 - Build 3 Codex review requested after commits 774695f, 330f200, be34fea
+2026-05-30 16:07 -06:00 - Build 3 Codex review result (Round B3, from Obsidian): 774695f PASS; 330f200 and be34fea sweep to Round B4; 2 MEDIUM FileMap gaps routed back to Build 3 (prime-status-console-cli-brief.md, bifrost-configurable-progress-surface-brief.md, non-orchestrator-surface-naming.md); cadence reset; repair executing now
 ```
 
 ## Active Task
@@ -318,6 +320,8 @@ Ready for Codex Review:
 - FileMap refresh for Model Harness adapter contract; commit `be34fea`; tests: `python -m pytest tests/test_filemap.py -q` -> 46 passed.
 
 **COMPLETED 2026-05-30 16:03 -06:00. Commit: be34fea. Tests: 46/46 filemap. Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py. Cadence: 3/3 since Round B2 — Codex review required before next task.**
+
+**CODEX REVIEW CLEARED 2026-05-30 16:11 -06:00. Reviews B verified be34fea; tests 46/46 filemap; no findings; cadence window 774695f, 330f200, be34fea is clear.**
 
 Stale prior completed FileMap task follows.
 

@@ -168,6 +168,21 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 
 ## Active Task
 
+## Coordinator Addendum - Model Adapter FileMap Clearance
+
+2026-05-30 16:11 MDT - Reviewed Build 3 commit `be34fea` plus queue marker `93d92ee`.
+
+Result: pass. No actionable findings. No repairs routed.
+
+Proof:
+
+- `python -m pytest tests/test_filemap.py -q` -> 46/46 passed.
+- `git show be34fea -- docs/FileMap.md meridian_core/filemap.py tests/test_filemap.py` confirms `meridian_core/model_adapter.py` is registered in the human FileMap, code FileMap, and `_REQUIRED_PATHS`.
+- The FileMap entry uses `FileArea.MODEL_HARNESS` and related test `tests/test_model_adapter.py`.
+- The slice changed FileMap metadata and the Build 3 queue only; no runtime behavior or package exports were changed.
+
+Build 3 cadence window `774695f`, `330f200`, `be34fea` is clear for this FileMap slice.
+
 Current Active Task:
 
 Goal: perform Codex Reviews B Round B3 when the next docs/architecture slice is ready.
