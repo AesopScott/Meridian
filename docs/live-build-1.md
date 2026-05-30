@@ -305,9 +305,64 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-**No active task.** Build 1 is idle — awaiting next assignment from the coordinator.
+Current Active Task (supersedes stale completed text below):
 
-Latest completed slice: provider-neutral Model Harness adapter contract; commit `653488b`; Ready for Codex Review.
+Goal: build the V0 Relay adapter registry and lane dispatch bridge.
+
+Context:
+
+- Provider-neutral Model Harness adapter contract landed in `653488b` and Review C cleared it.
+- FileMap registration for `meridian_core/model_adapter.py` landed in `be34fea`; Reviews B verified that slice.
+- V0's remaining product gap is real Relay model/API dispatch through the Relay executor skeleton.
+- This slice should connect Relay lanes to adapters by role/model selection without choosing a vendor SDK or exposing credentials.
+- Preserve the prompt-drag rule: only approved lane payload text may cross into the model adapter call.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
+
+Allowed files only:
+
+- `meridian_core/model_adapter.py`
+- `tests/test_model_adapter.py`
+- `meridian_core/relay_executor.py`
+- `tests/test_relay_executor.py`
+- `docs/live-build-1.md`
+
+Task:
+
+- Pull latest `origin/main` in your unique worktree before editing.
+- Add a provider-neutral adapter registry/selection helper for Relay dispatch.
+- Include:
+  - an immutable adapter key or selector based on lane role and preferred model;
+  - a registry that can register adapters by exact model, by role default, or another simple deterministic fallback;
+  - a clear missing-adapter error before any model call occurs;
+  - a helper that executes a `RelayDispatchPlan` by resolving the correct adapter for each lane and then calling the existing executor boundary.
+- Keep `execute_relay_dispatch_plan(plan, model_call, proof_trail=None)` payload-only and backward compatible.
+- Do not add vendor SDKs, network calls, shells, CLIs, browser automation, or account-based desktop automation.
+- Do not edit package exports.
+- Do not edit FileMap; Build 3 owns FileMap registration.
+
+Tests:
+
+- Add focused tests proving:
+  - exact model adapter registration is selected for the matching lane;
+  - role-default adapter is used when no exact model adapter exists;
+  - missing adapter raises a clear error before any adapter/model call;
+  - selected adapters receive only lane payload text;
+  - Aegis proof blocking still prevents adapter resolution/model calls for tier-3/4 lanes.
+- Run `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`.
+- If practical, also run `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`.
+
+Completion:
+
+- Commit only this slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Write log:
+
+- 2026-05-30 16:15 -06:00 - Coordinator assigned Relay adapter registry and lane dispatch bridge; commit pending; tests pending.
+
+Stale completed text follows.
 
 ### Completed Slices (most recent first)
 
