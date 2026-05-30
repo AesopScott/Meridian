@@ -48,6 +48,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 ~00:45 CDT - Build 1 checked queue; status: idle (review complete, awaiting next assignment)
 2026-05-31 ~01:00 CDT - Build 1 checked queue; status: running (Relay PromptPacket integration plan task)
 2026-05-31 ~01:05 CDT - Build 1 checked queue; status: idle (awaiting next assignment)
+2026-05-31 ~01:15 CDT - Build 1 checked queue; status: running (tokens.py utility task)
+2026-05-31 ~01:20 CDT - Build 1 checked queue; status: idle (tokens.py task complete, awaiting next assignment)
 ```
 
 ## Write/Completion Log
@@ -69,6 +71,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 ~00:05 CDT - Build 1 completed PromptPacket model_payload() dispatch boundary; commit 111a975; tests 685 passed; Obsidian updated
 2026-05-31 ~00:40 CDT - Build 1 Codex review repair: commit 9389563; tests 688 passed; whitespace prompt + empty packet_id validation added; Obsidian updated
 2026-05-31 ~01:00 CDT - Build 1 completed Relay PromptPacket integration plan; commit 86dbb93; tests N/A (docs-only); Obsidian updated
+2026-05-31 ~01:20 CDT - Build 1 completed count_tokens() token utility; commit 0de7129; tests 707 passed; Obsidian updated
 ```
 
 ## Cross-Check Activity
@@ -100,48 +103,4 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: add a small token counting utility for future Relay PromptPacket construction.
-
-Allowed files only:
-
-- `meridian_core/tokens.py`
-- `tests/test_tokens.py`
-
-Task:
-
-- Build 1 completed `docs/relay-prompt-packet-integration-plan.md`.
-- That plan calls for a future `meridian_core/tokens.py` slice before Relay runtime integration.
-- Add a small deterministic token counting utility:
-  - `count_tokens(text: str) -> int`
-  - raise a clear `TypeError` for non-string input
-  - return `0` for an empty string
-  - be deterministic and dependency-free
-  - prefer a conservative approximation over vendor-specific tokenization
-- Add focused tests for:
-  - empty string
-  - whitespace-only string
-  - simple words
-  - punctuation/code-ish text
-  - deterministic repeated calls
-  - non-string input raises `TypeError`
-- Keep this utility small and clearly documented as an approximation until provider-specific tokenizers exist.
-- Do not edit Relay runtime yet.
-- Do not edit package exports; Build 2 owns package API.
-- Do not edit FileMap; Build 3 owns FileMap.
-- No UI.
-- No persistence.
-- No model calls.
-
-Tests:
-
-```text
-python -m pytest tests/test_tokens.py -q
-python -m pytest -q
-```
-
-Completion:
-
-- Commit only this slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Report commit hash and test count in your session.
+No active task. Build 1 is idle and polling.
