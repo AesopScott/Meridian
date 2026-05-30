@@ -105,6 +105,11 @@ from .prompt_metrics import (
     PromptPerformanceStatus,
     summarize_prompt_metrics,
 )
+from .prompt_packet import (
+    PromptPacket,
+    PromptPacketValidationError,
+    build_prompt_packet,
+)
 
 __all__ = [
     # -- Core domain models --------------------------------------------------
@@ -217,4 +222,8 @@ __all__ = [
     "PromptMetricSummary",
     "PromptPerformanceStatus",
     "summarize_prompt_metrics",
+    # -- Prompt packet --------------------------------------------------------
+    "PromptPacket",
+    "PromptPacketValidationError",
+    "build_prompt_packet",
 ]

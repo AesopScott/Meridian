@@ -113,6 +113,14 @@ def test_prompt_metrics_exports():
     assert summarize_prompt_metrics
 
 
+def test_prompt_packet_exports():
+    from meridian_core import PromptPacket, PromptPacketValidationError, build_prompt_packet
+
+    assert PromptPacket
+    assert PromptPacketValidationError
+    assert build_prompt_packet
+
+
 def test_internal_helpers_are_not_root_exports():
     assert "_TIER_SEMANTICS" not in meridian_core.__all__
     assert "_ROUTING_TABLE" not in meridian_core.__all__
