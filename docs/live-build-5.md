@@ -44,6 +44,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 11:43 -06:00 - Build 5 checked queue; status: idle; Active Task = bifrost-cockpit-queue-status-brief (already complete at 818bb31 in Write/Completion Log; awaiting orchestrator reassignment); Cross-Check Activity: none; origin/main at d1d5619
 2026-05-30 11:44 -06:00 - Build 5 checked queue; status: idle; Active Task = bifrost-cockpit-queue-status-brief (still stale; complete at 818bb31); Cross-Check Activity: none; origin/main at ac0a5d3
 2026-05-30 11:46 -06:00 - Build 5 checked queue; status: running; rules 18-21 updated by orchestrator (no self-Codex review; Codex Reviews lane owns review/findings/repairs; pause after 3 task-changing commits); new Active Task = design V0 cockpit layout at docs/bifrost-v0-cockpit-layout-brief.md; Cross-Check Activity: none; origin/main at a37b3cb
+2026-05-30 11:50 -06:00 - Build 5 checked queue; status: paused (cadence); V0 cockpit layout brief committed at d1d32af = 3rd task-changing commit; pausing normal build work per rule 21 until Codex Reviews lane records cadence review result; will continue polling for repair tasks; Cross-Check Activity: none; origin/main at c3e3245
 ```
 
 ## Write/Completion Log
@@ -57,6 +58,16 @@ YYYY-MM-DD HH:MM TZ - Build 5 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:37 -06:00 - Codex assigned Bifrost cockpit queue status brief; commit pending; tests not required
 2026-05-30 11:39 -06:00 - Build 5 completed Bifrost cockpit queue status surface brief at docs/bifrost-cockpit-queue-status-brief.md; commit pending; tests not required
 2026-05-30 11:46 -06:00 - Build 5 completed Bifrost V0 cockpit layout brief at docs/bifrost-v0-cockpit-layout-brief.md; commit pending; tests not required
+```
+
+## Ready for Codex Review
+
+Append entries here when a completed slice is ready for the Codex Reviews lane to inspect. Format: commit hash, files changed, tests run.
+
+```text
+2026-05-30 11:33 -06:00 - Build 5 slice Ready for Codex Review; commit 3b5435f; files: docs/bifrost-session-queue-activation-brief.md, docs/live-build-5.md; tests: none (docs-only)
+2026-05-30 11:39 -06:00 - Build 5 slice Ready for Codex Review; commit 818bb31; files: docs/bifrost-cockpit-queue-status-brief.md, docs/live-build-5.md; tests: none (docs-only)
+2026-05-30 11:46 -06:00 - Build 5 slice Ready for Codex Review; commit d1d32af; files: docs/bifrost-v0-cockpit-layout-brief.md; tests: none (docs-only); note: 3rd task-changing commit triggers cadence pause per rule 21 — Build 5 pauses normal build work until Codex Reviews lane records cadence review result
 ```
 
 ## Cross-Check Activity
