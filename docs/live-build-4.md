@@ -106,6 +106,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 15:05 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at a80760b
 2026-05-30 15:06 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 4b57c90
 2026-05-30 15:07 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Round B2 still pending; Build 4 slices still pending Codex Reviews sweep; origin/main at 62817b2
+2026-05-30 15:08 -06:00 - Build 4 checked queue; status: running; new Active Task = Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); origin/main at ef41f5f
 ```
 
 ## Write/Completion Log
@@ -123,6 +124,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:47 -06:00 - Build 4 idle read check logged; cross-check complete; no new task; commit c6acc6e is latest origin/main
 2026-05-30 11:52 -06:00 - Build 4 completed V0 build readiness map (docs/v0-build-readiness-map.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 12:12 -06:00 - Build 4 completed Prime orchestration state model (docs/prime-orchestration-state-model.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-30 15:08 -06:00 - Build 4 completed Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
