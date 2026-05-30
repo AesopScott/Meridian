@@ -26,6 +26,7 @@ Rules:
 - Commit only your slice.
 - Push to `origin/main`.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
 
@@ -58,6 +59,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-30 14:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 14:20 -06:00 - Build 2 checked queue; status: running (Active Task found — repair stale is_valid/validation_errors claim in note)
 2026-05-30 14:25 -06:00 - Build 2 checked queue; status: idle (task bf15569 complete; no new Active Task; polling)
+2026-05-30 14:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 ```
 
 ## Write/Completion Log
@@ -143,4 +145,4 @@ Completion:
 - Commit only this docs slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash in your session.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
