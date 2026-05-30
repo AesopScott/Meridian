@@ -32,6 +32,16 @@ The system should be dynamic. Prime can change risk tiers as the situation chang
 
 The interface should visualize the active tier, why Prime selected it, and what requirements are active: single lane, dual lane, Aegis proof, or human gate.
 
+## The Council
+
+The Council is Prime's structured internal deliberation system.
+
+When Prime faces a decision, it does not just pass a prompt to a model and accept the output. The Council gives Prime named cognitive positions to consider before acting: Analyst, Devil's Advocate, Pragmatist, Contrarian, Expansionist, and Chairman.
+
+The Council is risk-tier aware. Low-risk tiers engage fewer voices; high-risk tiers invoke the full Council before Prime commits. This is deterministic — the Council composition for a given tier is fixed, not generated.
+
+The Council is consumed by Relay (each RelayRoute carries a CouncilPlan for its tier) and by Compass (ProgressIntention surfaces the active Council plan alongside the risk tier). This means Prime's routing, deliberation, and intention surfaces are all Council-aware out of the box.
+
 ## Relay
 
 Relay is the Agent / Model Harness.

@@ -285,3 +285,27 @@ class TestDefaultMap:
         summary = fm.injection_summary()
         for path in _REQUIRED_PATHS:
             assert path in summary, f"{path} missing from injection summary"
+
+    def test_council_entry_notes_relay_consumption(self):
+        fm = make_default_map()
+        entry = fm.require("meridian_core/council.py")
+        assert "Relay" in entry.notes or "relay" in entry.notes.lower(), \
+            "council.py notes should mention Relay consumption"
+
+    def test_council_entry_notes_compass_consumption(self):
+        fm = make_default_map()
+        entry = fm.require("meridian_core/council.py")
+        assert "Compass" in entry.notes or "Intention" in entry.notes or "compass" in entry.notes.lower(), \
+            "council.py notes should mention Compass/Intention consumption"
+
+    def test_relay_entry_purpose_mentions_council_plan(self):
+        fm = make_default_map()
+        entry = fm.require("meridian_core/relay.py")
+        assert "council" in entry.purpose.lower() or "CouncilPlan" in entry.purpose, \
+            "relay.py purpose should mention CouncilPlan integration"
+
+    def test_relay_entry_notes_mention_council_plan_field(self):
+        fm = make_default_map()
+        entry = fm.require("meridian_core/relay.py")
+        assert "council_plan" in entry.notes, \
+            "relay.py notes should reference the council_plan field"

@@ -261,14 +261,14 @@ def make_default_map() -> FileMap:
             area=FileArea.COUNCIL,
             purpose="Structured Council cognition roles and deterministic role planning by risk tier.",
             related_tests=["tests/test_council.py"],
-            notes="Domain-only; no model calls or prompt generation.",
+            notes="Consumed by Relay (RelayRoute.council_plan) and Compass (ProgressIntention). Domain-only; no model calls.",
         ),
         FileMapEntry(
             path="meridian_core/relay.py",
             area=FileArea.RELAY_ROUTING,
-            purpose="Deterministic model/session routing plan from risk tier.",
+            purpose="Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan via council_plan_for_tier().",
             related_tests=["tests/test_relay.py"],
-            notes="No real model calls yet.",
+            notes="No real model calls yet. council_plan field populated for all tiers.",
         ),
         FileMapEntry(
             path="meridian_core/aegis.py",

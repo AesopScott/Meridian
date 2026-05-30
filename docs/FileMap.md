@@ -24,7 +24,7 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | --- | --- | --- | --- | --- |
 | `MISSION.md` | Mission / Prime authority | Prime's first boot authority file: directives, harness boot order, current mission objective, queue guidance. | `tests/test_mission.py` | Prime should read this before meaningful action. |
 | `context.md` | Architecture memory | Working architecture vocabulary, product rules, Prime directives, UI decisions, harness naming, collaboration rules. | n/a | Update when major architecture decisions are made. |
-| `docs/meridian-capabilities.md` | Product recall | Plain-language recall sheet for major Meridian capabilities. | n/a | Useful for explaining why Meridian is different. |
+| `docs/meridian-capabilities.md` | Product recall | Plain-language recall sheet for major Meridian capabilities, including The Council. | n/a | Update when a new major capability is wired up. |
 | `docs/meridian-pillars.md` | Prime Directives | Load-bearing Meridian ideas, currently named Prime Directives. | n/a | Public-safe fallback name: Meridian Pillars. |
 
 ## Core Package
@@ -58,8 +58,8 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | File | Area | Purpose | Related Tests | Notes |
 | --- | --- | --- | --- | --- |
 | `meridian_core/risk.py` | Risk Tier Engine | First-class risk assessment and requirements for tiers 0-4. | `tests/test_risk.py` | Decision engine foundation. |
-| `meridian_core/council.py` | Council cognition | Structured Council cognition roles and deterministic role planning by risk tier. | `tests/test_council.py` | Domain-only; no model calls or prompt generation. |
-| `meridian_core/relay.py` | Relay routing | Deterministic model/session routing plan from risk tier. | `tests/test_relay.py` | No real model calls yet. |
+| `meridian_core/council.py` | Council cognition | Structured Council cognition roles and deterministic role planning by risk tier. | `tests/test_council.py` | Consumed by Relay (RelayRoute.council_plan) and Compass (ProgressIntention). Domain-only; no model calls. |
+| `meridian_core/relay.py` | Relay routing | Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan via council_plan_for_tier(). | `tests/test_relay.py` | No real model calls yet. council_plan field populated for all tiers. |
 | `meridian_core/aegis.py` | Aegis / Proof harness | Proof harness: AegisEvidence, ProofTrail, and Review Console bridge for cross-check findings. | `tests/test_aegis.py` | Proof-blocking is severity + status aware; ESCALATED is always blocking. |
 | `meridian_core/review_console.py` | Review Console | Promptable review/gating surface for cross-check, proof, artifacts, plans, gates. | `tests/test_review_console.py` | Replaces "non-orchestrator window" name. |
 
