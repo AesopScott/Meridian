@@ -42,6 +42,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 11:27 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 1db1b23); no new task; origin/main at 6f554d4
 2026-05-30 11:28 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at 0246d1b
 2026-05-30 11:29 -06:00 - Build 4 checked queue; status: running; Active Task = Review Console surface contract; origin/main at 27db0e2; this is doc commit 3 of 3 — Codex review follows completion
+2026-05-30 11:41 -06:00 - Build 4 checked queue; status: running; new Active Task = consistency review pass (capabilities map + Review Console contract); Codex review repairs already committed as 7792243
 ```
 
 ## Write/Completion Log
@@ -53,7 +54,8 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:04 -06:00 - Codex created Build 4 Opus high-level queue and assigned Meridian capabilities architecture map; commit pending; tests not required
 2026-05-30 11:09 -06:00 - Build 4 completed Meridian capabilities architecture map (docs/meridian-capabilities-architecture-map.md); commit pending push; tests not required
 2026-05-30 11:23 -06:00 - Build 4 completed capabilities map update: Prompt Packet maturity domain slice (0ce0cf9), Polaris Q button note added to capability 3; commit pending; tests not required
-2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit pending; tests not required; this is doc commit 3 of 3 — Codex review to follow
+2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit d29cca6; tests not required; this is doc commit 3 of 3 — Codex review to follow
+2026-05-30 11:41 -06:00 - Build 4 completed consistency review pass: updated Q button note to reference bifrost-session-queue-activation-brief.md, closed Codex cadence; commit pending; tests not required
 2026-05-30 11:37 -06:00 - Codex assigned Build 4 architecture review/finish pass; commit pending; tests not required
 ```
 
@@ -85,7 +87,8 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; Review Console marked "planned" — review_console.py domain model exists; repair: reclassify as domain slice
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: HIGH; surface contract card taxonomy mismatches review_console.py enums; repair: add domain-model alignment section to contract
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: HIGH; contract disposition actions (Defer, Override, Escalate) not in current domain model; repair: table distinguishing current vs. future actions added
-2026-05-30 11:37 -06:00 - Build 4 Codex review repair: commit pending; tests not required (docs-only); all 3 CRITICAL + 2 HIGH repaired in docs/meridian-capabilities-architecture-map.md and docs/review-console-surface-contract.md
+2026-05-30 11:37 -06:00 - Build 4 Codex review repair: commit 7792243 (piggy-backed on Build 1 read check — edits were staged and picked up); tests not required (docs-only); all 3 CRITICAL + 2 HIGH repaired
+2026-05-30 11:41 -06:00 - Build 4 Codex review result: fixed; 3 CRITICAL + 2 HIGH addressed; capabilities map now accurately reflects domain slice state for all 10 capabilities; Review Console contract aligned to domain enums
 ```
 
 ## Active Task

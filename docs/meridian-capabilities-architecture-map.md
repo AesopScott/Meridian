@@ -79,7 +79,7 @@ The capabilities below are the load-bearing pieces of that shape.
   - The 30-second poll cadence and three-commit Codex review cadence are conventions, not enforced contracts. They need a home in a harness when one exists.
   - Same-file edit conflicts between lanes are currently prevented by per-task file allowlists; a programmatic boundary check would be more durable.
   - The queue currently mixes assignment, log, and audit in one file. Eventually these may want to be separable views over the same underlying event log.
-  - Polaris now has a Q button prototype that lets a session trigger a queue-poll on demand from the UI. Meridian will eventually need an equivalent as a Bifrost/session-harness capability — a way for Prime or Scott to force an immediate pull without waiting for the next timed cycle. This is future work; the flat-file queue does not need it yet.
+  - Polaris now has a Q button prototype that lets a session trigger a queue-poll on demand from the UI. Meridian's equivalent is now described in `docs/bifrost-session-queue-activation-brief.md` — a design brief (not yet runtime) covering global queue activation, per-session Q state, and Prime-owned dispatch. The Polaris Q button is the prototype; the brief is the requirement; the implementation is future Bifrost/session-harness work.
 
 ---
 
