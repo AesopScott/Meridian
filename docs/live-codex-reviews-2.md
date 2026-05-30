@@ -177,6 +177,8 @@ Scope trigger:
 
 Immediate scope available now:
 
+- Build 3 commit `be34fea` - Model Harness adapter FileMap registration.
+- Build 3 queue marker `93d92ee` - marks `be34fea` Ready for Codex Review.
 - Build 4 commit `fd9224d`.
 - Build 4 commits `7b43848` / `9a4e6a4` - V1 capability plan and cockpit-scope revision.
 - Build 4 commit `18e2767` - V3 parking lot.
@@ -209,6 +211,11 @@ Required proof for Build 5:
 
 Required proof for Build 3:
 
+- Inspect commit `be34fea`.
+- Run or verify `python -m pytest tests/test_filemap.py -q`.
+- Confirm `meridian_core/model_adapter.py` is registered in `docs/FileMap.md`, `meridian_core/filemap.py`, and `_REQUIRED_PATHS`.
+- Confirm related test coverage points to `tests/test_model_adapter.py`.
+- Confirm no runtime or package export files were changed by the FileMap slice.
 - Inspect commit `774695f`.
 - Run or verify `python -m pytest tests/test_filemap.py -q`.
 - Confirm `docs/v0-v1-progress-tracker.md` is registered and `_REQUIRED_PATHS` coverage is updated.
