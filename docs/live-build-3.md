@@ -271,6 +271,7 @@ Context:
 - Build 3 is the dumb fast queue. This task is mechanical tracker cleanup only.
 - `docs/v0-v1-progress-tracker.md` is stale: it still says `prime_wake` and `prime_console` / `prime_status` need runtime implementation even though Build 2 landed them.
 - Do not make architecture decisions. Mirror known commit facts from the live queues and V0 readiness map.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
 
 Allowed files:
 
@@ -282,6 +283,7 @@ Allowed files:
 
 Task:
 
+- Pull latest `origin/main` in your unique worktree before editing.
 - Update `docs/v0-v1-progress-tracker.md` to reflect known V0 gate state:
   - `prime_wake` built in `e800c03`
   - `route_to_console` / `prime_console` / `prime_status` built in `989366f`, with review repair in `9c3e1a3`

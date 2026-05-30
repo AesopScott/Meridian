@@ -287,6 +287,52 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale idle text below):
 
+Goal: build the V0 Relay + Aegis gate wire.
+
+Context:
+
+- `meridian_core/relay_executor.py` exists in commit `190e527` and has been cleared by Codex Reviews C.
+- `meridian_core/aegis.py` already has `ProofTrail`, `AegisEvidence`, and Review Console conversion.
+- This slice should connect Relay execution results/errors to proof evidence without calling real models, vendors, APIs, shells, or account automation.
+- Keep this provider-neutral and domain-only.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
+
+Allowed files only:
+
+- `meridian_core/relay_executor.py`
+- `tests/test_relay_executor.py`
+- `docs/live-build-1.md`
+
+Task:
+
+- Pull latest `origin/main` in your unique worktree before editing.
+- Add a small helper that converts a `RelayExecutionSummary` into an Aegis `ProofTrail`.
+- Use successful lane outputs as non-blocking `BUILD_OUTPUT` evidence.
+- Use lane execution errors as proof-blocking `ERROR` evidence.
+- Preserve the prompt-drag rule: do not add prompt text, packet metadata, or model configuration to the model-call boundary.
+- Do not add vendor/model adapter code.
+- Do not edit package exports.
+- Do not edit Review Console or Aegis internals unless absolutely required; prefer importing existing Aegis types.
+
+Tests:
+
+- Add focused tests for:
+  - clean execution summary produces a clean proof trail
+  - execution errors produce blocking evidence
+  - evidence records include lane role/model target information without leaking prompt payloads
+  - empty execution summary produces a clean empty proof trail
+- Run `python -m pytest tests/test_relay_executor.py -q`.
+- If practical, also run `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`.
+
+Completion:
+
+- Commit only this slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text follows.
+
 [COMPLETED 2026-05-31 ~17:05 CDT] V0 Relay executor skeleton — commit 190e527; 811 tests pass. Slice ready for Codex Review.
 
 Goal: build the V0 Relay executor skeleton.

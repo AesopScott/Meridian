@@ -231,6 +231,54 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-No active task. Build 2 is idle — polling every 10 minutes.
+Current Active Task (supersedes any stale idle text below):
+
+Goal: implement the V0 `prime_approve <item-id>` CLI gate-disposition surface.
+
+Context:
+
+- `prime_console`, `prime_status`, and `route_to_console` exist in commit `989366f` and cadence is cleared by `9c3e1a3`.
+- Review Console has `ReviewConsoleQueue.respond()` and `ReviewConsoleAction.APPROVE`.
+- V0 needs a simple Prime-facing CLI helper for Scott/Prime to dispose approval gates.
+- Keep this CLI/domain-only. Do not build UI, persistence, database storage, or Bifrost wiring.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
+
+Allowed files only:
+
+- `meridian_core/cli.py`
+- `tests/test_cli.py`
+- `docs/live-build-2.md`
+
+Task:
+
+- Pull latest `origin/main` in your unique worktree before editing.
+- Add `prime_approve(item_id: str, console: ReviewConsoleQueue | None = None)`.
+- It should:
+  - use the injected console if provided, otherwise the process-local `_CONSOLE`
+  - approve only items that allow `ReviewConsoleAction.APPROVE`
+  - print a readable success line including item id and resulting status
+  - print a readable `Not found` line for unknown ids without raising
+  - print a readable `Cannot approve` line for non-promptable or non-approvable items without raising
+- Do not interpret approval beyond the Review Console response. Aegis evidence application is a later wire.
+- Do not edit package exports unless tests already require root import support; if so, note the need instead of broadening scope.
+
+Tests:
+
+- Add focused tests for:
+  - approval gate item is approved and status changes to `responded`
+  - success output includes `Approved` and the item id
+  - unknown id prints `Not found` and does not raise
+  - non-promptable item prints `Cannot approve`
+  - promptable item without `APPROVE` in suggested actions prints `Cannot approve`
+- Run `python -m pytest tests/test_cli.py -q`.
+
+Completion:
+
+- Commit only this slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior status:
 
 Last completed: V0 `prime_status` and `prime_console` CLI surface; commit `989366f`; cadence cleared (commit `9c3e1a3`).

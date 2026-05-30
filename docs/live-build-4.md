@@ -221,6 +221,7 @@ Context:
 - This is orchestration-harness architecture, not UI polish.
 - The current live queue experiment proves why: sessions can go idle, poll the wrong queue, retain stale Active Tasks, leave local scratch edits, or need review capacity reassignment.
 - Build 4 owns high-level Prime/harness planning docs.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
 
 Allowed files only:
 
@@ -229,6 +230,7 @@ Allowed files only:
 
 Task:
 
+- Pull latest `origin/main` in your unique worktree before editing.
 - Create `docs/prime-restart-resteer-logic.md`.
 - Cover:
   - what Prime must detect: idle lanes, stale active tasks, wrong queue routing, cadence pauses, uncommitted drift, missing proof, sessions polling but not executing, sessions executing but not committing

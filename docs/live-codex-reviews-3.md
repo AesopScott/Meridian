@@ -156,6 +156,8 @@ Until a trigger appears:
 
 When a trigger appears:
 
+- Before reviewing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of reviewing.
+- Pull latest `origin/main` in your unique worktree before reviewing.
 - Declare Round C2 scope before reviewing.
 - Review only the target commit diff and directly necessary supporting files.
 - For Build 2 `prime_approve`, run `python -m pytest tests/test_cli.py -q`.
