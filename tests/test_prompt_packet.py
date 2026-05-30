@@ -272,3 +272,48 @@ class TestPromptPacketDirectConstruction:
         pkt = build_prompt_packet(**_kwargs())
         assert isinstance(pkt, PromptPacket)
         assert isinstance(pkt.source_lineage, MappingProxyType)
+
+
+# ---------------------------------------------------------------------------
+# Model-dispatch boundary — model_payload() returns only serialized_prompt
+# ---------------------------------------------------------------------------
+
+
+class TestModelDispatchBoundary:
+    def test_model_payload_returns_serialized_prompt(self):
+        pkt = build_prompt_packet(**_kwargs())
+        assert pkt.model_payload() == pkt.serialized_prompt
+
+    def test_model_payload_is_exact_string(self):
+        prompt = "Evaluate the risk tier for this action."
+        pkt = build_prompt_packet(**_kwargs(serialized_prompt=prompt))
+        assert pkt.model_payload() == prompt
+
+    def test_model_payload_excludes_packet_id(self):
+        pkt = build_prompt_packet(**_kwargs())
+        assert pkt.packet_id not in pkt.model_payload()
+
+    def test_model_payload_excludes_construction_time(self):
+        pkt = build_prompt_packet(**_kwargs(construction_time_ms=99.9))
+        assert "99.9" not in pkt.model_payload()
+
+    def test_model_payload_excludes_budget_reason(self):
+        pkt = build_prompt_packet(**_kwargs())
+        assert pkt.budget.reason not in pkt.model_payload()
+
+    def test_model_payload_excludes_source_lineage_keys(self):
+        pkt = build_prompt_packet(**_kwargs())
+        for source in pkt.source_lineage:
+            assert source not in pkt.model_payload()
+
+    def test_model_payload_excludes_prompt_tokens_count(self):
+        pkt = build_prompt_packet(**_kwargs(prompt_tokens=10))
+        assert str(pkt.prompt_tokens) not in pkt.model_payload()
+
+    def test_model_payload_is_str(self):
+        pkt = build_prompt_packet(**_kwargs())
+        assert isinstance(pkt.model_payload(), str)
+
+    def test_validation_still_works_with_dispatch_method(self):
+        with pytest.raises(PromptPacketValidationError):
+            build_prompt_packet(**_kwargs(serialized_prompt=""))

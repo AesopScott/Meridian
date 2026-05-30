@@ -81,6 +81,10 @@ class PromptPacket:
         if errors:
             raise PromptPacketValidationError("; ".join(errors))
 
+    def model_payload(self) -> str:
+        """Return the model-facing prompt payload — only serialized_prompt, no metadata."""
+        return self.serialized_prompt
+
 
 def build_prompt_packet(
     *,
