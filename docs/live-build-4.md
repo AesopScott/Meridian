@@ -144,6 +144,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 14:09 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B3/B4 still pending; origin/main at 5de5cff
 2026-05-30 14:10 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 467ffe5
 2026-05-30 14:12 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 2202f51
+2026-05-30 16:01 -06:00 - Build 4 checked queue; status: running; new Active Task = Prime continuous restart/resteer logic (docs/prime-restart-resteer-logic.md); worktree: C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780160745235 (unique); git ops from main worktree C:/Users/scott/Code/Meridian (established pattern); origin/main at c86d747
 ```
 
 ## Write/Completion Log
@@ -165,6 +166,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 21:29 -06:00 - Build 4 completed Meridian V1 capability plan (docs/v1-capability-plan.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 22:40 -06:00 - Build 4 revised V1 capability plan (docs/v1-capability-plan.md) — cockpit UI scope per Scott clarification; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 01:48 -06:00 - Build 4 completed V3 parking lot (docs/v3-parking-lot.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-30 16:01 -06:00 - Build 4 completed Prime restart/resteer logic (docs/prime-restart-resteer-logic.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
