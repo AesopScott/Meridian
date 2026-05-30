@@ -118,6 +118,7 @@ class AegisEvidence:
         """
         rc_severity = _SEVERITY_MAP[self.severity]
         item_id = f"aegis-{self.id}"
+        self.console_item_id = item_id
         content = f"Source: {self.source} | Target: {self.target}"
 
         if self.is_proof_blocking():

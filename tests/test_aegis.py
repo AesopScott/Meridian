@@ -187,6 +187,11 @@ class TestToConsoleItem:
         item = _cc(id="ev-99").to_console_item()
         assert item.id == "aegis-ev-99"
 
+    def test_console_item_id_is_recorded_on_evidence(self):
+        ev = _cc(id="ev-link")
+        item = ev.to_console_item()
+        assert ev.console_item_id == item.id
+
     def test_console_item_severity_matches_evidence_info(self):
         item = _cc(severity=EvidenceSeverity.INFO).to_console_item()
         assert item.severity is ReviewConsoleSeverity.INFO
