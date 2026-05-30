@@ -98,6 +98,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 
 2026-05-30 23:30 -06:00 - Codex Reviews B checked queue; status: running; notes: starting Round B1 (Build 3 4075ef4, Build 4 1d17fa1, Build 5 7c34566).
 2026-05-31 10:20 -06:00 - Codex Reviews B checked queue; status: running; notes: Build 3 marked 1378bda Ready for Codex Review for Round B2; Build 4 and Build 5 idle without new Ready markers; starting Round B2 repair-verification.
+2026-06-01 02:30 -06:00 - Codex Reviews B checked queue; status: idle; notes: Round B3 review performed on Build 3 774695f, Build 4 fd9224d/7b43848/9a4e6a4/18e2767, Build 5 a412e90/0629e0c — results recorded to Obsidian (`2026-06-01 Codex Reviews B Round B3 Result.md`); queue ledger updates rolled back by user/linter intent; 6/6 PASS (2 PASS-with-MEDIUM FileMap gaps for prime-status-console-cli-brief.md, bifrost-configurable-progress-surface-brief.md, non-orchestrator-surface-naming.md — pending Build 3 follow-up).
 
 ## Review Log
 
