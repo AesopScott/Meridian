@@ -9,6 +9,8 @@ Rules:
 - Always pull latest `origin/main` before editing.
 - Every time you check/read this file, add a timestamped entry to the Read Checks section.
 - Every time you modify this file or complete a task from it, add a timestamped entry to the Write/Completion Log section.
+- Every minute while idle, check for cross-check activity relevant to your slice: review notes, Codex findings, Aegis findings, failing tests, or Obsidian build log updates.
+- If cross-check activity affects your task, record it in this file's Cross-Check Activity section and address it before starting unrelated work.
 - Use local time with timezone when possible.
 - Own only the files listed in the active task.
 - Do not edit Build 2 or Build 3 live queue files.
@@ -25,6 +27,7 @@ Append entries here when this file is checked while idle.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
+2026-05-30 ~22:30 CDT - Build 1 checked queue; status: running (active task found)
 ```
 
 ## Write/Completion Log
@@ -33,6 +36,15 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
+2026-05-30 ~22:30 CDT - Build 1 completed Prompt Budget package API + FileMap; commit d18d651; tests 604 passed
+```
+
+## Cross-Check Activity
+
+Append entries here when you check or act on cross-check activity.
+
+```text
+YYYY-MM-DD HH:MM TZ - Build 1 cross-check: none/finding/fix; details: <short note>
 ```
 
 ## Active Task
