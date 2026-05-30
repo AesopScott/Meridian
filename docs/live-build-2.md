@@ -222,54 +222,13 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 2026-05-30 12:35 -06:00 - Build 2 Codex review result: fixed (2 repaired, 1 deferred — no blocking findings remain in allowed files)
 2026-05-30 16:55 -06:00 - Build 2 Codex review requested after commits 4be1117, bf15569, 46e4eb3 (PromptPacket note cleanup, is_valid claim repair, Relay policy note)
 2026-05-30 16:55 -06:00 - Build 2 Codex review result: APPROVE / no actionable findings; all three docs-only commits cleared.
+2026-05-31 07:35 -06:00 - Build 2 Codex review requested after commits d821106, e800c03, 989366f (Relay executor API policy note, V0 prime_wake CLI surface, V0 prime_status/prime_console CLI surface)
+2026-05-31 09:15 -06:00 - Build 2 Codex review repair: commit 9c3e1a3; cadence cleared
+2026-05-31 09:15 -06:00 - Build 2 Codex review result: pass; no blocking findings; cadence cleared after d821106, e800c03, 989366f
 ```
 
 ## Active Task
 
-Current Active Task (supersedes any stale idle text below):
+No active task. Build 2 is idle — polling every 10 minutes.
 
-Goal: implement the V0 `prime_status` and `prime_console` CLI visibility surface.
-
-Context:
-
-- `docs/v0-build-readiness-map.md` names `route_to_console()` + `prime_console` / `prime_status` as V0 gate item #2.
-- Build 2 already completed the `prime_wake` CLI surface in commit `e800c03`.
-- This slice should make Prime's current state visible without waiting for the V1 cockpit.
-- Keep this CLI-only. Do not build Bifrost UI or persistence in this slice.
-
-Allowed files only:
-
-- `meridian_core/cli.py`
-- `meridian_core/review_console.py` only if a tiny `route_to_console()` helper belongs there under the existing local pattern
-- `tests/test_cli.py` or a new focused CLI test file if that is the local pattern
-- `docs/live-build-2.md`
-
-Task:
-
-- Add CLI-accessible `prime_console` and `prime_status` surfaces using the existing CLI pattern.
-- It should:
-  - print current Review Console items in a deterministic, human-readable format
-  - include item id, item type, status, summary/title, and provenance/source when available
-  - make `prime_status` print a compact combined view: mission/wake identity if available, current progress/intention substitute if available, and open Review Console items
-  - add or expose a small `route_to_console(item_type, summary, provenance)` helper if the existing Review Console API lacks a clean Prime-facing entrypoint
-- If there is no durable console store yet, use the existing in-memory/sample/default pattern already present in tests or domain helpers. Do not invent database persistence.
-- If real portfolio/heartbeat state is not yet available, say so clearly in the CLI output instead of faking live data.
-- Do not build gate enforcement in this slice.
-- Do not edit FileMap.
-
-Tests:
-
-- Add focused tests for:
-  - `prime_console` output includes pending console items and statuses
-  - empty console output is deterministic and readable
-  - `prime_status` includes the Prime/wake/status header and console summary
-  - `route_to_console()` creates a Review Console item with the intended type, summary, and provenance if you add that helper
-- Run the focused CLI tests.
-- Run existing Review Console tests if touched.
-
-Completion:
-
-- Commit only this slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+Last completed: V0 `prime_status` and `prime_console` CLI surface; commit `989366f`; cadence cleared (commit `9c3e1a3`).
