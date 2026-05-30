@@ -147,6 +147,21 @@ class TestPromptPacketValidation:
         assert "empty" in msg
         assert "negative" in msg
 
+    def test_whitespace_only_prompt_raises(self):
+        with pytest.raises(PromptPacketValidationError, match="empty"):
+            build_prompt_packet(**_kwargs(serialized_prompt="   "))
+
+    def test_empty_packet_id_raises(self):
+        with pytest.raises(PromptPacketValidationError, match="Packet ID is empty"):
+            build_prompt_packet(**_kwargs(packet_id=""))
+
+    def test_zero_prompt_tokens_is_valid(self):
+        pkt = build_prompt_packet(**_kwargs(
+            prompt_tokens=0,
+            source_lineage={},
+        ))
+        assert pkt.prompt_tokens == 0
+
 
 # ---------------------------------------------------------------------------
 # Metadata hygiene — packet metadata never leaks into serialized_prompt

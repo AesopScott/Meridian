@@ -48,11 +48,14 @@ class PromptPacket:
 
         errors: list[str] = []
 
+        if not self.packet_id:
+            errors.append("Packet ID is empty")
+
         if not isinstance(self.serialized_prompt, str):
             errors.append(
                 f"Prompt must be a string, got {type(self.serialized_prompt).__name__}"
             )
-        elif not self.serialized_prompt:
+        elif not self.serialized_prompt.strip():
             errors.append("Prompt is empty or invalid type")
 
         if self.prompt_tokens < 0:
