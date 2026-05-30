@@ -22,7 +22,7 @@ from .intention import RiskTier
 from .mission import MissionLoadError, find_mission_file, load_mission
 from .models import Initiative
 from .objectives import get_mission_objectives
-from .review_console import ReviewConsoleQueue, ReviewConsoleSeverity, _CONSOLE
+from .review_console import ReviewConsoleAction, ReviewConsoleQueue, ReviewConsoleSeverity, _CONSOLE
 from .sample_state import make_sample_heartbeats, make_sample_portfolio
 from .wake import WakeStatus, build_wake_brief
 
@@ -112,6 +112,27 @@ def prime_console(console: ReviewConsoleQueue | None = None) -> None:
         print(f"  status: {item.status.value}  |  requires_response: {item.requires_response}")
     print()
 
+
+
+def prime_approve(item_id: str, *, console: ReviewConsoleQueue | None = None) -> None:
+    """Approve a pending Review Console gate item by id.
+
+    Uses the injected console if provided, otherwise falls back to the
+    process-local module-level _CONSOLE singleton from review_console.
+    Prints a confirmation line on success; a readable error on not-found or
+    items that do not support the APPROVE action.
+    """
+    q = console if console is not None else _CONSOLE
+    item = q.get(item_id)
+    if item is None:
+        print(f"  {_RED}Not found: no Review Console item with id {item_id!r}{_RESET}")
+        return
+    try:
+        q.respond(item_id, ReviewConsoleAction.APPROVE)
+    except ValueError as exc:
+        print(f"  {_RED}Cannot approve {item_id!r}: {exc}{_RESET}")
+        return
+    print(f"  {_GREEN}Approved:{_RESET} {_BOLD}{item_id}{_RESET}  [{item.status.value}]  {item.title}")
 
 def prime_status(
     mission_path: Path | None = None,
