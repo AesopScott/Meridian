@@ -1,4 +1,4 @@
-﻿"""
+"""
 Relay Routing -- deterministic model/session routing plan from risk tier.
 
 Relay is the Agent / Model Harness. This slice produces a structured
@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import cast
 
 from .council import CouncilPlan, council_plan_for_tier
 from .risk import RiskAssessment, RiskTier, assess_tier
@@ -59,7 +60,7 @@ class RelayRoute:
     requires_independence: bool
     requires_human_gate: bool
     risk_tier: int
-    council_plan: CouncilPlan = None  # type: ignore[assignment]
+    council_plan: CouncilPlan
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +136,11 @@ def route_from_assessment(
     when the caller has already decided (e.g. reuse_session after a healthy
     context check).
     """
-    row = _ROUTING_TABLE[assessment.tier]
+    if assessment.tier not in _ROUTING_TABLE:
+        raise ValueError(
+            f"Unknown risk tier {assessment.tier!r}; valid tiers are {sorted(_ROUTING_TABLE)}"
+        )
+    row = cast(dict, _ROUTING_TABLE[assessment.tier])
     return RelayRoute(
         mode=row["mode"],
         lanes=[RelayLane(l.role, l.preferred_model, l.independent) for l in row["lanes"]],

@@ -210,6 +210,12 @@ class TestRouteFromAssessment:
         for tier_num in range(5):
             assert route_from_tier(tier_num).reason
 
+    def test_unknown_assessment_tier_raises_value_error(self):
+        assessment = assess_tier(4)
+        assessment.tier = 99
+        with pytest.raises(ValueError, match="Unknown risk tier 99"):
+            route_from_assessment(assessment)
+
 
 # ---------------------------------------------------------------------------
 # Determinism
