@@ -60,7 +60,8 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | --- | --- | --- | --- | --- |
 | `meridian_core/risk.py` | Risk Tier Engine | First-class risk assessment and requirements for tiers 0-4. | `tests/test_risk.py` | Decision engine foundation. |
 | `meridian_core/council.py` | Council cognition | Structured Council cognition roles and deterministic role planning by risk tier. | `tests/test_council.py` | Consumed by Relay (RelayRoute.council_plan) and Compass (ProgressIntention). Domain-only; no model calls. |
-| `meridian_core/relay.py` | Relay routing | Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan via council_plan_for_tier(). | `tests/test_relay.py` | No real model calls yet. council_plan field populated for all tiers. |
+| `meridian_core/prompt_budget.py` | Prompt budget planning | Deterministic, tier-locked prompt budgets to prevent prompt drag. PromptBudgetTier enum, PromptBudget/PromptBudgetPlan dataclasses, prompt_budget_for_risk_tier() generator. | `tests/test_prompt_budget.py` | Domain-only; no integration with Relay yet. Will be consumed by RelayRoute in future integration. See `docs/relay-prompt-budget-integration-brief.md`. |
+| `meridian_core/relay.py` | Relay routing | Deterministic model/session routing plan from risk tier. Each RelayRoute carries a CouncilPlan via council_plan_for_tier(). Future integration: will also carry PromptBudgetPlan for token budget enforcement. | `tests/test_relay.py` | No real model calls yet. council_plan field populated for all tiers. See `docs/relay-prompt-budget-integration-brief.md` for future integration plan. |
 | `meridian_core/aegis.py` | Aegis / Proof harness | Proof harness: AegisEvidence, ProofTrail, and Review Console bridge for cross-check findings. | `tests/test_aegis.py` | Proof-blocking is severity + status aware; ESCALATED is always blocking. |
 | `meridian_core/review_console.py` | Review Console | Promptable review/gating surface for cross-check, proof, artifacts, plans, gates. | `tests/test_review_console.py` | Replaces "non-orchestrator window" name. |
 
@@ -83,6 +84,7 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | --- | --- | --- | --- | --- |
 | `docs/claude-handoff-completion-protocol.md` | Build process | Standard test/commit/push/Obsidian completion protocol for Claude handoffs. | n/a | Include in every build handoff unless local-only. |
 | `docs/package-api-surface-note.md` | Package API policy | Guidance for intentional root exports. | n/a | Keep root API deliberate. |
+| `docs/relay-prompt-budget-integration-brief.md` | Future Relay planning | Architectural integration of PromptBudgetPlan into RelayRoute, token budget enforcement, and prompt metrics. Planning only, no runtime changes yet. | n/a | Covers tier-to-budget mapping, CouncilPlan interaction, metrics pipeline, integration tests. |
 | `docs/cross-check-aegis-integration-brief.md` | Future Aegis planning | How automatic cross-check should feed Aegis and Review Console. | n/a | Planning only. |
 | `docs/build-next-aegis-cross-check-handoff.md` | Future handoff | Next slice after Review Console: Aegis cross-check evidence. | n/a | Do not run until Review Console is committed. |
 
