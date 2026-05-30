@@ -7,6 +7,9 @@ When idle, check this file every 30 seconds. If there is an active task below, e
 Rules:
 
 - Always pull latest `origin/main` before editing.
+- Every time you check/read this file, add a timestamped entry to the Read Checks section.
+- Every time you modify this file or complete a task from it, add a timestamped entry to the Write/Completion Log section.
+- Use local time with timezone when possible.
 - Own only the files listed in the active task.
 - Do not edit Build 1 or Build 3 live queue files.
 - Do not edit files owned by another active build task.
@@ -15,6 +18,22 @@ Rules:
 - Commit only your slice.
 - Push to `origin/main`.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+
+## Read Checks
+
+Append entries here when this file is checked while idle.
+
+```text
+YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
+```
+
+## Write/Completion Log
+
+Append entries here when this file is modified or an active task is completed.
+
+```text
+YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; tests <result>
+```
 
 ## Active Task
 
