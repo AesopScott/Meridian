@@ -39,6 +39,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 11:22 -06:00 - Build 4 checked queue; status: running; Active Task = update capabilities map (Prompt Packet maturity + Polaris Q button note); origin/main up to date at 951a6ed
 2026-05-30 11:25 -06:00 - Build 4 checked queue; status: idle; prior Active Task already completed (1db1b23); no new task present; origin/main at 617645a
 2026-05-30 11:26 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at d1563dc
+2026-05-30 11:27 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 1db1b23); no new task; origin/main at 6f554d4
 ```
 
 ## Write/Completion Log
@@ -61,6 +62,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:23 -06:00 - Build 4 cross-check: finding (informational); Build 1 landed model_payload() dispatch boundary (111a975) and Build 2 exported PromptPacket API (f2f69ff); no action required on Build 4 owned files; confirms map accuracy
 2026-05-30 11:25 -06:00 - Build 4 cross-check: none; Build 1 (b9179a8) and Build 2 (617645a) both idle polling; no new findings affecting Build 4 slice
 2026-05-30 11:26 -06:00 - Build 4 cross-check: finding (informational); 73c9628 (FileMap) added entries for docs/meridian-capabilities-architecture-map.md and prompt_packet.py; no action required on Build 4 files; map is now indexed in FileMap
+2026-05-30 11:27 -06:00 - Build 4 cross-check: none; Build 3 FileMap task complete and polling resumed (3458256); all other lanes idle; no findings affecting Build 4 slice
 ```
 
 ## Codex Review Cadence
