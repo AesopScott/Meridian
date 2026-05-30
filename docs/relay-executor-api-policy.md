@@ -1,75 +1,71 @@
 # Relay Executor — Package API Policy Note
 
-**Status:** Provisional — `relay_executor.py` not yet landed (Build 1 in progress)
-**Decision owner:** Build 2
+**Status:** Resolved — `relay_executor.py` has landed; concrete export decision below
+**Decision owner:** Build 2 (Codex cadence repair, 2026-05-31)
 **Reference:** `docs/package-api-surface-note.md`, `docs/relay-package-api-policy-note.md`
 
 ---
 
 ## Summary
 
-This note establishes the policy for how Relay execution helpers should reach the `meridian_core` package root once Build 1 lands `relay_executor.py`. It does not preemptively export anything — root exports require a real module to audit against.
+`meridian_core/relay_executor.py` has landed and defines the execution boundary for a `RelayDispatchPlan`. This note documents the concrete export decision for names in that module.
 
 ---
 
-## What Belongs at `from meridian_core import ...`
+## What `relay_executor.py` Defines
 
-A name belongs at the package root when all three conditions hold:
+The module defines five names:
 
-1. **External caller need** — Prime or another top-level surface (Compass, a reporting harness) directly constructs or inspects the object. If callers only see results produced by Relay, the name stays internal.
-2. **Stable domain shape** — The field set and semantics have survived at least one review cycle without breaking changes.
-3. **No undocumented internal dependencies** — The name must not couple unexported helpers that would force those helpers to be exported alongside it.
-
-Relay execution candidates that could satisfy these conditions once Build 1 stabilizes:
-
-- A top-level execution result type (e.g. `RelayExecutionResult` or equivalent) — callers need to inspect outcomes.
-- A primary execution entry point (e.g. `execute_relay` or equivalent) — callers need to invoke execution.
-
----
-
-## What Should Remain Module-Local
-
-Names that are internal Relay plumbing and do not need to be directly constructed or inspected by Prime or Compass:
-
-- Internal step runners, retry logic, lane coordinators.
-- Vendor/account adapter implementations. Adapters implement a protocol; callers depend on the protocol, not on the concrete adapter. Concrete adapters never belong in the core executor API surface — they belong in the account layer or an adapter registry outside `meridian_core`.
-- Execution context builders and intermediate state objects (equivalent to `RelayDispatchLane` / `RelayDispatchPlan` — see `docs/relay-package-api-policy-note.md`).
-- Any helper that takes `count_tokens`, `RelayRoute`, or other non-exported names as parameters.
+| Name | Kind | Description |
+|------|------|-------------|
+| `ModelCallFn` | Protocol | Callable boundary: receives only a payload string, returns text |
+| `RelayExecutionResult` | frozen dataclass | Successful per-lane output (role, preferred_model, output) |
+| `RelayExecutionError` | frozen dataclass | Captured per-lane exception (role, preferred_model, error) |
+| `RelayExecutionSummary` | frozen dataclass | Immutable collection of results + errors from one plan execution |
+| `execute_relay_dispatch_plan` | function | Execute every lane in a plan via an injected model-call callable |
 
 ---
 
-## When Docs-Only Policy Should Wait for Implementation
+## Root Export Decision
 
-This note was written before `relay_executor.py` exists. The provisional export list below is a planning artifact only. Build 2 must not add names to `meridian_core.__all__` based on this note alone. The correct sequence:
+Applying the three conditions (external caller need, stable domain shape, no undocumented internal dependencies):
 
-1. Build 1 lands `relay_executor.py` and its tests pass on `main`.
-2. Build 2 reads the actual module, audits the public surface against the three conditions above.
-3. Build 2 proposes root exports in a concrete task (updating `meridian_core/__init__.py` and `docs/package-api-surface-note.md`).
-4. Codex reviews the export task before it merges.
+### Names that qualify for `from meridian_core import ...`
 
----
+**`RelayExecutionResult`** — qualifies.
+- Prime/Compass inspects per-lane output directly.
+- Stable frozen dataclass; no unexported dependencies.
+- Add to `__all__` and `docs/package-api-surface-note.md`.
 
-## How Build 2 Should React When Build 1 Lands `relay_executor.py`
+**`RelayExecutionSummary`** — qualifies.
+- Prime/Compass receives this as the outcome of a plan execution.
+- Stable frozen dataclass holding tuples of `RelayExecutionResult` and `RelayExecutionError`.
+- Add to `__all__` and `docs/package-api-surface-note.md`.
 
-When `relay_executor.py` appears on `main`:
+**`RelayExecutionError`** — qualifies (companion to `RelayExecutionSummary`).
+- Callers inspecting `summary.errors` need the type to pattern-match.
+- Stable frozen dataclass; no unexported dependencies.
+- Add to `__all__` and `docs/package-api-surface-note.md`.
 
-1. Read the module in full.
-2. Check for any type that Prime/Compass would construct directly or inspect for decisions.
-3. Apply the three conditions above to each candidate name.
-4. Update this note with the concrete export decision.
-5. Open an export task if names qualify; close this note as "resolved" if none do.
+### Names that should remain module-local
 
-Do not batch executor exports with unrelated changes. One export decision per task.
+**`execute_relay_dispatch_plan`** — stays internal for now.
+- Depends on `RelayDispatchPlan` (not yet a root export) and `ModelCallFn` (adapter protocol, never a root export).
+- Exporting the entry point before its parameter type is exported would force callers to import from two levels.
+- Revisit when `RelayDispatchPlan` is evaluated for root export.
+
+**`ModelCallFn`** — stays internal.
+- Adapter protocol; callers depend on the protocol through `execute_relay_dispatch_plan`, not by constructing it directly.
+- Concrete adapter implementations never belong in the core executor API.
 
 ---
 
 ## How Package Exports Interact with FileMap and Docs Discovery
 
-Per `docs/package-api-surface-note.md`, root exports are for stable domain objects and primary builder/loader functions. When a name is added to `__all__`:
-
-- Add it to the "Current Export Direction" table in `docs/package-api-surface-note.md`.
-- Do not add it to `FileMap` unless it has its own module entry; `FileMap` tracks files, not individual names.
-- If the name is a primary entry point (e.g. a top-level `execute_relay` function), a cross-reference in `docs/relay-package-api-policy-note.md` is appropriate.
+Per `docs/package-api-surface-note.md`, when names are added to `__all__`:
+- Add each name to the "Current Export Direction" table in `docs/package-api-surface-note.md`.
+- Do not add to `FileMap` unless a name has its own module entry; `FileMap` tracks files, not individual names.
+- Cross-reference in `docs/relay-package-api-policy-note.md` if the name is a primary Relay entry point.
 
 ---
 
@@ -81,18 +77,10 @@ Per `docs/package-api-surface-note.md`, root exports are for stable domain objec
 - Forces `meridian_core` to carry provider-specific dependencies.
 - Prevents the adapter layer from being swapped, mocked, or extended without touching core.
 
-Adapters belong in a separate account or adapter layer that depends on `meridian_core`, not the reverse. The executor should accept an abstract adapter protocol; concrete adapters are injected or resolved outside the core package.
+Adapters belong in a separate account or adapter layer that depends on `meridian_core`, not the reverse. The executor accepts `ModelCallFn` — a pure protocol; concrete implementations are injected outside the core package.
 
 ---
 
-## Provisional Export List (not active — awaiting Build 1)
+## Next Step
 
-The following names are plausible candidates once `relay_executor.py` lands. They are listed here for orientation only and carry no implementation commitment:
-
-```python
-# Provisional — do NOT add to __all__ until relay_executor.py is reviewed
-# from meridian_core import RelayExecutionResult   # if an execution result type exists
-# from meridian_core import execute_relay           # if a top-level executor entry point exists
-```
-
-These names will be confirmed, renamed, or dropped after Build 1's module is audited. No export task should be opened from this note alone.
+Open an export task to add `RelayExecutionResult`, `RelayExecutionSummary`, and `RelayExecutionError` to `meridian_core/__init__.py` and `docs/package-api-surface-note.md`. Codex should review that task before it merges. Do not batch with unrelated changes.

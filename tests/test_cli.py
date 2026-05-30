@@ -165,6 +165,14 @@ class TestPrimeStatus:
         out = capsys.readouterr().out
         assert "Pending approval" in out
 
+    def test_console_still_renders_after_mission_load_failure(self, tmp_path: Path, capsys) -> None:
+        q = ReviewConsoleQueue()
+        route_to_console(ReviewConsoleItemType.SYSTEM_FINDING, "Console item", console=q)
+        prime_status(mission_path=tmp_path / "MISSION.md", console=q)
+        out = capsys.readouterr().out
+        assert "Mission load failed" in out
+        assert "Review Console" in out
+
 
 class TestRouteToConsole:
     def test_creates_item_with_correct_type(self) -> None:

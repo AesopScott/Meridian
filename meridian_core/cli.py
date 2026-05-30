@@ -90,7 +90,11 @@ def _severity_color(severity_value: str) -> str:
 
 
 def prime_console(console: ReviewConsoleQueue | None = None) -> None:
-    """Print current Review Console items in human-readable format."""
+    """Print current Review Console items in human-readable format.
+
+    Uses the injected console if provided, otherwise falls back to the
+    process-local module-level _CONSOLE singleton from review_console.
+    """
     q = console if console is not None else _CONSOLE
     pending = q.pending()
 
