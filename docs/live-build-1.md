@@ -13,9 +13,10 @@ Rules:
 - Every time you modify this file or complete a task from it, add a timestamped entry to the Write/Completion Log section.
 - Every minute while idle, check for cross-check activity relevant to your slice: review notes, Codex findings, Aegis findings, failing tests, or Obsidian build log updates.
 - If cross-check activity affects your task, record it in this file's Cross-Check Activity section and address it before starting unrelated work.
-- After every three completed changes/commits from this build session, stop normal build work and request a Codex review check before taking another build task.
-- The Codex review check must automatically repair actionable findings in your owned files, rerun required tests, commit/push the repair slice, and report findings/fixes back in this file's heartbeat sections.
-- Record Codex review requests, findings, repairs, and outcomes in the Codex Review Cadence section.
+- After completing a task, mark the slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- Do not perform your own Codex review. A separate Codex Reviews lane owns independent review, findings, and repair routing.
+- If the Codex Reviews lane writes a repair task into this file, complete that repair before taking unrelated work.
+- After every three completed task-changing commits, pause normal build work until the Codex Reviews lane records a cadence review result.
 - Use local time with timezone when possible.
 - Own only the files listed in the active task.
 - Do not edit Build 2 or Build 3 live queue files.
@@ -25,6 +26,7 @@ Rules:
 - Commit only your slice.
 - Push to `origin/main`.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
 
@@ -54,6 +56,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 ~01:40 CDT - Build 1 checked queue; status: idle (no active task)
 2026-05-31 ~01:50 CDT - Build 1 checked queue; status: running (relay_packet.py assembly helper task)
 2026-05-31 ~02:00 CDT - Build 1 checked queue; status: idle (no active task)
+2026-05-31 ~02:10 CDT - Build 1 checked queue; status: running (relay_dispatch.py dispatch plan task)
 ```
 
 ## Write/Completion Log
@@ -78,6 +81,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 ~01:20 CDT - Build 1 completed count_tokens() token utility; commit 0de7129; tests 707 passed; Obsidian updated
 2026-05-30 11:37 -06:00 - Codex assigned Relay PromptPacket assembly helper; commit pending; tests pending
 2026-05-31 ~01:50 CDT - Build 1 completed assemble_relay_packet() helper; commit 6af04d4; tests 725 passed; Obsidian updated
+2026-05-31 ~02:10 CDT - Build 1 completed RelayDispatchPlan domain model; commit fd35a81; tests 748 passed; Obsidian updated
+2026-05-31 ~02:10 CDT - Build 1 slice ready for Codex Review: commit fd35a81; files: relay_dispatch.py, test_relay_dispatch.py; tests: 748 passed
 ```
 
 ## Cross-Check Activity
@@ -108,8 +113,9 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-31 ~01:50 CDT - Build 1 Codex review requested after commits 86dbb93, 0de7129, 6af04d4
 2026-05-31 ~01:50 CDT - Build 1 Codex review finding: LOW; test_tokens.py missing explicit ceil(len/4)-dominant branch test; no repair required
 2026-05-31 ~01:50 CDT - Build 1 Codex review result: pass; no CRITICAL or HIGH findings; all files clean
+2026-05-30 11:43 -06:00 - Build 1 Codex coordinator verification: targeted suite 147 passed; full suite 725 passed; next Relay dispatch-plan slice assigned
 ```
 
 ## Active Task
 
-No active task. Build 1 is idle and polling.
+No active task. Build 1 is idle — slice fd35a81 marked Ready for Codex Review; awaiting review result or next assignment.
