@@ -34,6 +34,7 @@ class FileArea:
     RISK_ENGINE      = "Risk Tier Engine"
     COUNCIL          = "Council cognition"
     RELAY_ROUTING    = "Relay routing"
+    RELAY_DISPATCH   = "Relay dispatch"
     PROMPT_BUDGET    = "Relay prompt budget"
     PROMPT_METRICS   = "Relay prompt metrics"
     PROMPT_PACKET    = "Relay prompt packet"
@@ -296,6 +297,13 @@ def make_default_map() -> FileMap:
             notes="Internal to Relay dispatch; not a package-root export.",
         ),
         FileMapEntry(
+            path="meridian_core/relay_dispatch.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Immutable dispatch plan mapping a RelayRoute and PromptPacket to per-lane model work. Pure domain structure; no model calls. RelayDispatchLane.payload is always packet.model_payload().",
+            related_tests=["tests/test_relay_dispatch.py"],
+            notes="Frozen dataclass. No metadata, lineage, or tokens sent to model.",
+        ),
+        FileMapEntry(
             path="meridian_core/prompt_budget.py",
             area=FileArea.PROMPT_BUDGET,
             purpose="Deterministic prompt token budget per risk tier. Prevents Relay prompt drag by bounding context sources and token limits per dispatch.",
@@ -345,6 +353,22 @@ def make_default_map() -> FileMap:
             purpose="Tracks Meridian build number plus per-harness build number and maturity state.",
             related_tests=["tests/test_builds.py"],
             notes="register() raises on duplicates; use upsert() for intentional replacement.",
+        ),
+
+        # -- Build process ----------------------------------------------
+        FileMapEntry(
+            path="docs/live-codex-reviews.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Standing queue for the Codex Reviews lane: independent review of completed build slices, repair routing, and checkpoint ledger. Prototype of Prime's future orchestration review loop.",
+            related_tests=[],
+            notes="Read before running or setting up a Codex review. Do not edit from build lanes.",
+        ),
+        FileMapEntry(
+            path="docs/prime-orchestration-harness-prototype.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Documents the live build queue pattern as the first working prototype of Prime's orchestration harness: slice assignment, lane routing, completion signals, and review coordination.",
+            related_tests=[],
+            notes="Strategic. Read before designing any orchestration harness slice.",
         ),
 
         # -- Bifrost / session harness ---------------------------------
