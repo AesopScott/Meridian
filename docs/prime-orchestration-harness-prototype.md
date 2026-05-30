@@ -20,6 +20,7 @@ Prime should own the coordination loop:
 - mark the slice ready for independent review
 - route review to a specialized review lane
 - dynamically spawn additional review lanes when review pressure becomes the bottleneck
+- keep builders moving for up to three task-changing slices per lane before a cadence review gate, unless risk or repair routing requires an earlier stop
 - hold checkpoints for what has and has not been reviewed
 - route repairs back to the original builder
 - clear lanes only after review or repair verification
@@ -55,6 +56,8 @@ The human should not need to watch every worker session. The human should talk t
 10. Markdown queues are scaffolding. The target is native orchestration state.
 11. Review capacity is elastic: Prime may spawn another review lane when existing reviewers become the bottleneck.
 12. Parallel review lanes must declare non-overlapping scope before reviewing.
+13. `Ready for Codex Review` is a signal, not always a stop sign.
+14. The normal throughput rhythm is three build slices per lane, then review, unless Prime escalates risk or a reviewer routes repair.
 
 ## What Must Become Native
 

@@ -32,6 +32,8 @@ This split is deliberate: Meridian must be able to dynamically spawn review sess
 - MEDIUM findings should usually be repaired before more work unless the finding is intentionally deferred by Codex.
 - LOW findings may be deferred, but must be recorded.
 - After every three task-changing commits from any one build lane, perform a cadence review before that lane receives more normal build work.
+- A single `Ready for Codex Review` marker is a review signal, not automatically a build stop. Normal build work may continue until the lane reaches three task-changing commits since its last checkpoint, unless a reviewer has routed a repair, marked the lane blocked, or Prime explicitly escalates the slice as high risk.
+- Reviews should catch up in parallel while builders keep moving. Prime's default throughput target is three build slices per active lane per review cadence.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build` when a review finds or clears important issues.
 
 ## Review Inputs
@@ -73,6 +75,7 @@ Checkpoint rules:
 - When the repair lands and passes verification, update `Last reviewed commit` to the repair commit and set `Review status` to `passed`.
 - Do not advance a lane's checkpoint just because a newer commit exists. Advance only after review.
 - If multiple commits land before the next review, review the full range from the checkpoint to the newest completed commit and record the range in `Last reviewed task`.
+- Do not use a pending review alone as a reason to stop a builder lane before the three-commit cadence threshold. Stop the lane only for cadence, routed repair, explicit block, or high-risk Prime escalation.
 
 ## Review Round Scope
 
