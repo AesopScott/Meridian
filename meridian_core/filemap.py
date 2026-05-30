@@ -40,6 +40,7 @@ class FileArea:
     PROMPT_PACKET    = "Relay prompt packet"
     AEGIS            = "Aegis / Proof harness"
     REVIEW_CONSOLE   = "Review Console"
+    BEACON           = "Beacon / liveness harness"
     BUILD_MATURITY   = "Build/maturity registry"
     FILE_MAP         = "File map / knowledge tracker"
     BUILD_PROCESS    = "Build process"
@@ -251,6 +252,13 @@ def make_default_map() -> FileMap:
             purpose="Builds structured wake brief from harness heartbeat state.",
             related_tests=["tests/test_wake.py"],
             notes="NASA-style Go calls are UI/audio concerns later.",
+        ),
+        FileMapEntry(
+            path="meridian_core/beacon.py",
+            area=FileArea.BEACON,
+            purpose="File-backed liveness checks that convert queue/sentinel freshness into Heartbeat objects.",
+            related_tests=["tests/test_beacon.py"],
+            notes="V0 Beacon slice only; process supervision and restart/resteer actions belong to later Prime runtime.",
         ),
         FileMapEntry(
             path="meridian_core/intention.py",

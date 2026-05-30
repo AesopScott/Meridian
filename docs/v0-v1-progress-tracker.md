@@ -10,9 +10,9 @@
 
 | Status | Count | Percent |
 |---|---:|---:|
-| Built core gate items | 3 | 50% |
+| Built core gate items | 4 | 67% |
 | Supporting slices in review | 1 | n/a |
-| Needs build core gate items | 3 | 50% |
+| Needs build core gate items | 2 | 33% |
 | Total V0 core gate items | 6 | 100% |
 
 ### Built
@@ -21,6 +21,7 @@
 - [x] **Prime + Review Console Harness:** `route_to_console()` + `prime_console` / `prime_status` CLI - built in `989366f`, repaired in `9c3e1a3`; Prime can place and show console items.
 - [x] **Prime + Review Console Harness:** `prime_approve <item-id>` CLI - implemented across `9d38314` / `d687b7f`; targeted CLI tests pass.
 - [x] **Relay Harness:** `relay_executor.py` provider-neutral executor skeleton - built in `190e527`; executor accepts an injected model-call function without vendor code.
+- [x] **Beacon Harness:** `beacon.py` file-backed liveness checks - built in `b575677`; queue/sentinel freshness now produces `Heartbeat` objects.
 
 ### In Progress / Review
 
@@ -29,7 +30,6 @@
 ### Needs Build
 
 - [ ] **Relay Harness:** real model/API dispatch through the existing Relay executor skeleton.
-- [ ] **Beacon Harness:** `beacon.py` - `check_harness_liveness()` from flat-file or sentinel.
 - [ ] **Relay Harness + Aegis Harness:** pre-dispatch proof gate enforcement for tier-3/4 lanes.
 
 ## V0 Review Queue

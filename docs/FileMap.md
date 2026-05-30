@@ -52,6 +52,7 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | --- | --- | --- | --- | --- |
 | `meridian_core/mission.py` | Mission boot | Loads/parses `MISSION.md` into native objects. | `tests/test_mission.py` | Required before Prime acts. |
 | `meridian_core/wake.py` | Wake sequence | Builds structured wake brief from harness heartbeat state. | `tests/test_wake.py` | NASA-style Go calls are UI/audio concerns later. |
+| `meridian_core/beacon.py` | Beacon / liveness harness | File-backed liveness checks that convert queue/sentinel freshness into `Heartbeat` objects. | `tests/test_beacon.py` | V0 Beacon slice only; process supervision and restart/resteer actions belong to later Prime runtime. |
 | `meridian_core/intention.py` | Progress Intention / Compass | Builds stage/objective/risk-tier view from portfolio and decision state. | `tests/test_intention.py` | Functional seed for Prime's work intention. |
 | `meridian_core/objectives.py` | Mission Objectives recall | Stable on-demand API for Compass-derived mission objectives. | `tests/test_objectives.py` | Future cockpit Mission Objectives button uses this. |
 

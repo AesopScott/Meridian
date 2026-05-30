@@ -15,6 +15,7 @@ _REQUIRED_PATHS = [
     "meridian_core/models.py",
     "meridian_core/mission.py",
     "meridian_core/wake.py",
+    "meridian_core/beacon.py",
     "meridian_core/intention.py",
     "meridian_core/objectives.py",
     "meridian_core/risk.py",
