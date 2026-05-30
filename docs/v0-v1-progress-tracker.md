@@ -11,7 +11,7 @@
 | Status | Count | Percent |
 |---|---:|---:|
 | Built core gate items | 5 | 83% |
-| Supporting slices in review | 2 | n/a |
+| Supporting slices in review | 1 | n/a |
 | Needs build core gate items | 1 | 17% |
 | Total V0 core gate items | 6 | 100% |
 
@@ -26,7 +26,6 @@
 
 ### In Progress / Review
 
-- [ ] **Relay Harness + Aegis Harness:** Relay execution summary to Aegis proof trail - built in `0e990df`; awaiting Codex Reviews C Round C2.
 - [ ] **Planning Harness + Council:** Council-shaped automated planning harness - built in `2c90247`; awaiting appropriate review sweep.
 
 ### Needs Build

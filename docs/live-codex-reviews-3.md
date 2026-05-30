@@ -56,7 +56,7 @@ Look for:
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 1 | 190e527 | V0 Relay executor skeleton (Round C1) | passed | none | continue polling for delegated work |
+| Build 1 | 7c75f43 | Relay execution proof trail + Aegis pre-dispatch gate (Round C2) | passed | none | continue polling for delegated work |
 | Build 2 | 989366f | V0 prime_console / prime_status / route_to_console (Round C1) | passed | LOW deferred: route_to_console type-vs-semantics doc note | Build 2 cadence cleared for three-commit window ending at 989366f; continue polling |
 
 ## Review Round Scope
@@ -101,6 +101,8 @@ Reason: delegated V0 runtime-gate review per Active Task in this file
 2026-05-30 13:58 MDT - Reviewed Build 1 commit 190e527; result: pass; tests: tests/test_relay_executor.py 26/26 pass; notes: executor forwards only lane.payload to injected callable; per-lane exceptions captured; no vendor/API code introduced
 2026-05-30 13:58 MDT - Reviewed Build 2 commit e800c03; result: pass; tests: tests/test_cli.py 24/24 pass; notes: mission load failure surfaces via "Mission load failed" line; output deterministic on repeat call; no persistence or UI introduced
 2026-05-30 13:58 MDT - Reviewed Build 2 commit 989366f; result: pass; tests: tests/test_cli.py 24/24 + tests/test_review_console.py 85/85 pass; notes: route_to_console is in-memory only (module-level ReviewConsoleQueue, no I/O), preserves PENDING status default and standard suggested_actions list; prime_console/prime_status deterministic on empty queue and injected queue
+2026-05-30 15:05 MDT - Reviewed Build 1 commit 0e990df; result: pass; tests: tests/test_relay_executor.py 37/37 pass and tests/test_aegis.py tests/test_relay_executor.py 124/124 pass; notes: RelayExecutionSummary converts successful outputs to non-blocking BUILD_OUTPUT evidence and lane errors to proof-blocking ERROR severity evidence; prompt payload and packet id are excluded from evidence text
+2026-05-30 15:05 MDT - Reviewed Build 1 commit 7c75f43; result: pass; tests: tests/test_relay_executor.py 37/37 pass and tests/test_aegis.py tests/test_relay_executor.py 124/124 pass; notes: tier-3+ dispatch checks ProofTrail.blocking() before model calls, raises RelayProofGateError with blocking evidence ids, and tier-2 remains unblocked
 ```
 
 ## Proof Log
@@ -112,6 +114,9 @@ Reason: delegated V0 runtime-gate review per Active Task in this file
 2026-05-30 13:58 MDT - Proof for Build 2 commit e800c03; proof type: reference; evidence: prime_wake uses only Path/print/load_mission/sample data + run_decision_loop + build_wake_brief — no file writes, no network, no Bifrost surface introduced; result: pass
 2026-05-30 13:58 MDT - Proof for Build 2 commit 989366f; proof type: diff+test; evidence: route_to_console preserves ReviewConsoleItem default status PENDING, uses canonical ReviewConsoleAction.ACKNOWLEDGE, routes through ReviewConsoleQueue.enqueue (sequence preserved); _CONSOLE is module-level in-memory ReviewConsoleQueue with no persistence path; prime_console reads via q.pending() in deterministic insertion order; TestPrimeConsole/TestPrimeStatus/TestRouteToConsole cover type/status/provenance/empty-queue determinism (all pass); tests/test_review_console.py 85 passed in 0.09s confirms underlying queue semantics intact; result: pass
 2026-05-30 13:58 MDT - Proof for Build 2 commit 989366f; proof type: manual; evidence: prime_status delegates to prime_wake + prime_console without new state; severity color mapping is a local pure helper; no durable persistence (no open()/sqlite/json.dump) introduced; result: pass
+2026-05-30 15:05 MDT - Proof for Build 1 commit 0e990df; proof type: diff+test; evidence: relay_execution_summary_to_proof_trail() adds AegisEvidence with EvidenceType.BUILD_OUTPUT, INFO severity for results, ERROR severity for errors, source relay_executor, and target role:model; tests assert clean summary is clean, errors are blocking, role/model target is present, and prompt/packet strings are absent; result: pass
+2026-05-30 15:05 MDT - Proof for Build 1 commit 7c75f43; proof type: diff+test; evidence: execute_relay_dispatch_plan() calls _assert_proof_gate_clear() before the lane loop; tests assert blocking tier-3 ProofTrail raises, no model call occurs, clean tier-3 ProofTrail dispatches, tier-2 is not blocked, and error message names proof-001; result: pass
+2026-05-30 15:05 MDT - Proof for Build 1 commits 0e990df/7c75f43; proof type: reference; evidence: meridian_core/relay_executor.py contains no httpx/requests/anthropic/openai/subprocess imports or calls; the only model boundary remains model_call(lane.payload); result: pass
 ```
 
 Minimum proof expectations:
@@ -128,17 +133,26 @@ Minimum proof expectations:
 2026-05-30 13:58 MDT - Build 1 commit 190e527; severity: none; file: meridian_core/relay_executor.py; finding: V0 gate intent satisfied — only lane.payload crosses boundary, per-lane exception isolation present, immutable summary; action: clear
 2026-05-30 13:58 MDT - Build 2 commit e800c03; severity: none; file: meridian_core/cli.py; finding: mission load failure path surfaces clearly via stdout without raising; deterministic output verified; no persistence/UI introduced; action: clear
 2026-05-30 13:58 MDT - Build 2 commit 989366f; severity: LOW; file: meridian_core/review_console.py; finding: route_to_console accepts any ReviewConsoleItemType but always creates a non-promptable, INFO-severity, ACKNOWLEDGE-only item regardless of type — callers passing APPROVAL_GATE or PLAN_REVIEW via this helper get an informational item, not the canonical gate semantics from make_approval_gate / make_plan_review_item. Acceptable for V0 visibility surface (helper is a router, not a gate factory) and Review Console queue invariants (promptable/requires_response/status) remain intact; recommend documenting in docstring or narrowing item_type to SYSTEM_FINDING in V1; action: defer
+2026-05-30 15:05 MDT - Build 1 commit 0e990df; severity: none; file: meridian_core/relay_executor.py; finding: Relay execution summary to Aegis proof trail is provider-neutral, prompt-lean, and proof-blocking for execution errors; action: clear
+2026-05-30 15:05 MDT - Build 1 commit 7c75f43; severity: none; file: meridian_core/relay_executor.py; finding: Aegis pre-dispatch proof gate blocks tier-3+ dispatch before model calls and leaves lower tiers unblocked; action: clear
 ```
 
 ## Repair Routing Log
 
 ```text
 2026-05-30 13:58 MDT - No repair routed for Round C1 — Build 1 190e527 clear; Build 2 e800c03 clear; Build 2 989366f cleared with LOW finding deferred to V1 (route_to_console type-vs-semantics doc note). Build 2 cadence cleared for three-commit window ending at 989366f.
+2026-05-30 15:05 MDT - No repair routed for Round C2 — Build 1 0e990df and 7c75f43 clear; targeted tests passed; no actionable findings.
 ```
 
 ## Active Task
 
 Current Active Task:
+
+Round C2 complete at 2026-05-30 15:05 MDT. Build 1 `0e990df` and `7c75f43` passed with no actionable findings.
+
+No active task. Codex Reviews C is idle - continue polling for Build 1/Build 2 runtime-gate review markers.
+
+Stale prior Round C2 task follows.
 
 Goal: perform Codex Reviews C Round C2 for Build 1 `0e990df` and `7c75f43`.
 
