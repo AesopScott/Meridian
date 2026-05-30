@@ -741,6 +741,10 @@ Default Obsidian locations:
 
 When Codex gives Scott a handoff to paste into Claude, it should be presented in a fenced text block so the UI provides a copy button.
 
+When Scott is running two Claude builder sessions simultaneously, Codex handoffs should be addressed explicitly as `Build 1` and `Build 2`.
+
+Build 1 and Build 2 handoffs should avoid editing the same files whenever possible. Each handoff should name its allowed file scope and should remind Claude to commit only its own slice files.
+
 Prime should also own routine review, rejection, retry, and verification loops.
 
 Scott should not be pulled into normal builder/reviewer/verifier coordination. If a review rejects work, Prime should route the correction back to the builder. If tests fail, Prime should retry or assign repair, then rerun review and verification. Dual-lane cognition and multimodal review should reduce the number of issues that require Scott at all.
