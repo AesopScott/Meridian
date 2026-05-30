@@ -46,6 +46,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-30 10:33 -06:00 - Codex assigned Relay Prompt Budget integration into RelayRoute; commit pending; tests pending
 2026-05-30 10:37 -06:00 - Codex strengthened polling contract; commit pending; tests not required
 2026-05-30 ~22:45 CDT - Build 1 completed Relay Prompt Budget integration into RelayRoute; commit 95bb942; tests 626 passed
+2026-05-30 10:39 -06:00 - Codex review cleared RelayRoute integration and assigned PromptBudgetPlan immutability repair; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -54,6 +55,7 @@ Append entries here when you check or act on cross-check activity.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 1 cross-check: none/finding/fix; details: <short note>
+2026-05-30 10:39 -06:00 - Build 1 cross-check finding: PromptBudgetPlan is frozen but allowed_sources is mutable list; repair before Prompt Packet runtime work.
 ```
 
 ## Codex Review Cadence
@@ -69,29 +71,28 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: integrate Prompt Budget into Relay routing without adding prompt drag.
+Goal: harden PromptBudgetPlan immutability.
 
 Allowed files only:
 
-- `meridian_core/relay.py`
+- `meridian_core/prompt_budget.py`
+- `tests/test_prompt_budget.py`
 - `tests/test_relay.py`
 
 Task:
 
-- Add a `prompt_budget` field to `RelayRoute`.
-- Populate it in `route_from_assessment()` using `prompt_budget_for_risk_tier(assessment.tier)`.
-- Preserve existing lane, model, session, and `council_plan` behavior.
-- Keep the integration deterministic and domain-only.
-- Do not assemble full prompts.
-- Do not add model calls.
-- Do not add UI.
-- Do not add persistence.
-- Do not insert long instructions into Relay output.
-- Add focused tests proving:
-  - every risk tier produces a matching Prompt Budget plan
-  - Relay routes still include the existing CouncilPlan
-  - budget integration does not mutate shared state between routes
-  - existing routing table behavior is unchanged
+- Codex review cleared Build 1 commit `95bb942` for RelayRoute integration.
+- One follow-up finding remains in the Prompt Budget domain:
+  - `PromptBudgetPlan` is declared `frozen=True`, but `allowed_sources` is a mutable `list[str]`.
+  - Current tests prove independent copies, but they also show mutation is possible.
+- Change `allowed_sources` to an immutable collection, preferably `tuple[str, ...]`.
+- Preserve ergonomic construction from lists.
+- Preserve existing tier mappings and Relay behavior.
+- Update tests that currently append to `allowed_sources` so they assert true immutability instead.
+- Keep the backward-compatible `PromptBudget` alias.
+- No UI.
+- No persistence.
+- No model calls.
 
 Tests:
 
