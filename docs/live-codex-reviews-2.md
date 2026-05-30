@@ -172,12 +172,21 @@ Scope trigger:
 Immediate scope available now:
 
 - Build 4 commit `fd9224d`.
+- Build 5 commit `a412e90` - Bifrost configurable progress and proof surface brief.
 
 Required proof for Build 4:
 
 - Inspect `docs/prime-status-console-cli-brief.md`.
 - Confirm the brief routes NASA/system/proof messages to the non-orchestrator/review surface and keeps Prime's conversational thread clean.
 - Confirm the proposed commands do not contradict existing Review Console, Wake Brief, Progress Intention, Beacon, or Bifrost docs.
+- Check whether the new doc needs FileMap registration. If yes, route the FileMap task to Build 3 instead of editing FileMap here.
+- Since this is docs-only, tests are not required; proof must be file inspection plus cross-reference checks.
+
+Required proof for Build 5:
+
+- Inspect `docs/bifrost-configurable-progress-surface-brief.md`.
+- Confirm it supports configurable progress/proof routing without dumping routine system messages into Prime's main conversation.
+- Confirm its message categories and user controls align with the Review Console, non-orchestrator prompt surface, and Bifrost cockpit direction.
 - Check whether the new doc needs FileMap registration. If yes, route the FileMap task to Build 3 instead of editing FileMap here.
 - Since this is docs-only, tests are not required; proof must be file inspection plus cross-reference checks.
 
