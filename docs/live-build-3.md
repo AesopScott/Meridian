@@ -44,6 +44,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 12:35 -06:00 - Build 3 checked queue; status: active task found (queue hygiene repair — add live-build-5.md); starting work
 2026-05-30 12:50 -06:00 - Build 3 checked queue; status: idle; Active Task section stale (repair done at ecc9fdf); awaiting new task assignment
 2026-05-30 13:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh for 7 new artifacts); starting work
+2026-05-30 13:20 -06:00 - Build 3 checked queue; status: idle; Active Task section stale (FileMap refresh done at 7ec16ac); awaiting new task assignment
 ```
 
 ## Write/Completion Log
