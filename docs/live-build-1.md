@@ -210,4 +210,52 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
+Current Active Task (supersedes any stale idle text below):
+
+Goal: build the V0 Relay executor skeleton.
+
+Context:
+
+- Build 1 commit `d2820d2` is still awaiting Review A, but that is not a stop sign under the three-slice cadence rule.
+- This slice should create the provider-neutral execution boundary without calling real Claude, OpenAI, OpenRouter, shell, or account-based automation.
+
+Allowed files only:
+
+- `meridian_core/relay_executor.py`
+- `tests/test_relay_executor.py`
+- `docs/live-build-1.md`
+
+Task:
+
+- Add a small Relay executor domain slice that can execute a `RelayDispatchPlan` through an injected model-call function.
+- Include:
+  - `RelayExecutionResult`
+  - `RelayExecutionError`
+  - a callable/protocol boundary that accepts only the lane payload and returns text
+  - `execute_relay_dispatch_plan(plan, model_call)`
+- Preserve the Relay prompt-efficiency constraint: only the lane payload should be passed to the model-call function unless a test proves otherwise.
+- Do not call external APIs.
+- Do not add vendor-specific model code.
+- Do not edit package exports unless Build 2 has already exposed the needed symbol and this file requires a tiny follow-up; if so, stop and record the need instead of editing outside your lane.
+
+Tests:
+
+- Add focused tests for:
+  - empty dispatch plan returns empty result collection
+  - one model-call per lane
+  - returned text captured per lane
+  - exception converted into execution error
+  - metadata is not passed into the model-call function
+- Run `python -m pytest tests/test_relay_executor.py -q`.
+- Also run the existing Relay dispatch/packet tests if practical.
+
+Completion:
+
+- Commit only this slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text follows.
+
 No active task. Build 1 is idle — slice d2820d2 marked Ready for Codex Review; awaiting review result or next assignment.

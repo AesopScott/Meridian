@@ -170,6 +170,48 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale text below):
 
+Goal: define the Prime status console and Review Console CLI bridge.
+
+Context:
+
+- Prime needs a command-center surface that can speak in the orchestrator window and route system/proof/status messages into the non-orchestrator/review surface.
+- This is a docs-only architecture slice for how the current markdown queue prototype becomes Prime-native commands.
+
+Allowed files only:
+
+- `docs/prime-status-console-cli-brief.md`
+- `docs/live-build-4.md`
+
+Task:
+
+- Write a concise architecture brief covering:
+  - `prime_status`
+  - `prime_console`
+  - `prime_approve <item-id>`
+  - `route_to_console(item_type, summary, provenance, status?)`
+  - how Mission Boot, Wake Brief, Progress Intention, Beacon, Review Console, and Aegis gates connect
+  - what belongs in the orchestrator conversation versus the non-orchestrator/review prompt window
+  - how proof summaries should be routed without polluting the main Prime conversation
+  - V0 markdown/CLI prototype versus V1 UI/runtime implementation
+- Include a short example transcript showing NASA-style system messages going to the review/system surface while Prime keeps the conversational thread clean.
+- Do not edit runtime code.
+- Do not edit FileMap.
+- Do not edit package exports.
+- Do not edit other live queues.
+
+Tests:
+
+- No tests required. This is docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text follows.
+
 Goal: define Prime orchestration harness state model.
 
 Allowed files only:

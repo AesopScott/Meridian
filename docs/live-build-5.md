@@ -137,6 +137,52 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale text below):
 
+Goal: design the configurable Bifrost progress and proof surface.
+
+Context:
+
+- Scott wants 10-minute progress reports and proof/review updates to appear in a configurable right-side/progress window, not dumped into the main orchestrator conversation.
+- The Codex review sessions also need to communicate proof status more clearly when they poll.
+
+Allowed files only:
+
+- `docs/bifrost-configurable-progress-surface-brief.md`
+- `docs/live-build-5.md`
+
+Task:
+
+- Write a concise product/architecture brief for the configurable progress surface.
+- Cover:
+  - right-side progress surface behavior
+  - Review Console tab/card routing
+  - Orchestrator Queue routing
+  - session-card diagnostic log routing
+  - external notifications later
+  - message categories: routine progress, blocker, review result, proof summary, repair routed, completion, human gate, system health
+  - user controls: pin, mute, collapse, filter, redirect, clear, severity threshold
+  - how Prime decides where a message goes
+  - how Scott can override routing
+  - how this relates to the non-orchestrator prompt window
+  - what V0 should intentionally leave out
+- Keep it design-only.
+- Do not edit runtime code.
+- Do not edit FileMap.
+- Do not edit package exports.
+- Do not edit other live queues.
+
+Tests:
+
+- No tests required. This is docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text follows.
+
 Goal: design the Harness dashboard surface for Bifrost V0.
 
 Allowed files only:

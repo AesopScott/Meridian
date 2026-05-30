@@ -195,4 +195,47 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
+Current Active Task (supersedes any stale idle text below):
+
+Goal: define the package/API exposure policy for the Relay executor and Prime-facing runtime helpers.
+
+Context:
+
+- Build 1 is building `meridian_core/relay_executor.py`.
+- Build 2 owns package API and surface notes.
+- This slice should prepare the package boundary without guessing at unfinished Build 1 symbols.
+
+Allowed files only:
+
+- `docs/relay-executor-api-policy.md`
+- `docs/live-build-2.md`
+
+Task:
+
+- Write a concise policy note for how Relay execution helpers should become package-root exports.
+- Cover:
+  - what belongs at `from meridian_core import ...`
+  - what should remain module-local
+  - when docs-only policy should wait for implementation
+  - how Build 2 should react when Build 1 lands `relay_executor.py`
+  - how package exports interact with FileMap and docs discovery
+  - why vendor/account adapters do not belong in the core executor API
+- Include a short proposed export list, clearly labeled as provisional until Build 1 lands.
+- Do not edit `meridian_core/__init__.py` in this slice.
+- Do not edit runtime code.
+- Do not edit FileMap.
+
+Tests:
+
+- No tests required. This is docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior text follows.
+
 No current active task. All previously listed tasks have been completed (last: Relay package API policy note, commit 46e4eb3, Codex cadence review cleared at 2026-05-30 16:55 -06:00). Polling.
