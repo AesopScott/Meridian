@@ -62,6 +62,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 16:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 17:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh for relay_dispatch, live-codex-reviews, prime-orchestration prototype, diagrams); starting work
 2026-05-30 17:35 -06:00 - Build 3 checked queue; status: idle; Active Task stale (relay_dispatch/codex-reviews refresh done at 4075ef4); awaiting new task
+2026-05-30 17:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting new task
 ```
 
 ## Write/Completion Log
@@ -79,9 +80,9 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:10 -06:00 - Build 3 Codex review requested; awaiting automated review and findings for owned files
 2026-05-30 11:18 -06:00 - Build 3 completed Prompt Packet Codex review checklist; commit d84bb0f; tests 644 passing; Obsidian updated; polling resumed
 2026-05-30 11:28 -06:00 - Build 3 completed FileMap update (prompt_packet.py + capabilities architecture map); commit 73c9628; tests 46 passing (test_filemap.py); Obsidian updated; polling resumed
+2026-05-30 11:37 -06:00 - Codex assigned FileMap refresh for new Relay/Bifrost/queue artifacts; commit pending; tests pending
 2026-05-30 12:32 -06:00 - Build 3 completed live queue hygiene note; commit 26dc597; tests not required (docs-only); Obsidian updated; 3 commits completed (d84bb0f, 73c9628, 26dc597) — Codex review required before next task
 2026-05-30 12:37 -06:00 - Build 3 completed queue hygiene repair (add live-build-5.md to lane set); commit ecc9fdf; tests not required (docs-only); Obsidian updated; polling resumed
-2026-05-30 11:37 -06:00 - Codex assigned FileMap refresh for new Relay/Bifrost/queue artifacts; commit pending; tests pending
 2026-05-30 13:08 -06:00 - Build 3 completed FileMap refresh (7 new artifacts); commit 7ec16ac; tests 46/46 filemap, 725 full suite; Obsidian updated; polling resumed
 2026-05-30 14:20 -06:00 - Build 3 completed FileMap Relay maturity repair; commit ef934b1; tests 46/46 filemap, 748 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 2026-05-30 17:20 -06:00 - Build 3 completed FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
