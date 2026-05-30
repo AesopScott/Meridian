@@ -252,13 +252,11 @@ Completion:
 - Update Obsidian.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
-Stale prior text:
-
 **Ready for Codex Review**
-- Commit: `1d17fa1`
-- Files: `docs/prime-orchestration-state-model.md`
+- Commit: `fd9224d`
+- Files: `docs/prime-status-console-cli-brief.md`
 - Tests: not required (docs-only)
 
-(Previous slice `3cbf336` `docs/v0-build-readiness-map.md` also pending Codex Reviews sweep.)
+(Previous slices `3cbf336` `docs/v0-build-readiness-map.md` and `1d17fa1` `docs/prime-orchestration-state-model.md` also pending Codex Reviews sweep.)
 
 No active task. Polling.
