@@ -4,6 +4,10 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
+## Q Polling Source of Truth
+
+When the Polaris `Q` button is enabled for **Codex Reviews A**, the session must read this file first and treat this file as its executable queue. Build queue files are review inputs only: inspect them for `Ready for Codex Review` markers, cadence triggers, commit hashes, and repair status, but do not execute build-lane Active Tasks from a review session.
+
 This queue is also a Prime prototype. The checkpoint ledger, review scope declaration, repair routing, and lane-clearing logic are not throwaway process. They are intended to become part of Meridian's orchestration harness: Prime should eventually own this loop natively instead of relying on humans to paste work between sessions.
 
 When idle, check this file every 30 seconds. Also inspect `docs/live-build-1.md` through `docs/live-build-5.md` for slices marked `Ready for Codex Review`, stale active tasks, or repair completions.

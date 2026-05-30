@@ -4,6 +4,10 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Review A and Review B are a scaling prototype for Prime. When review pressure backs up, Prime should be able to spawn additional review capacity, assign bounded scope, and merge the results back into the shared checkpoint ledger.
 
+## Q Polling Source of Truth
+
+When the Polaris `Q` button is enabled for **Codex Reviews B**, the session must read this file first and treat this file as its executable queue. Build queue files are review inputs only: inspect them for `Ready for Codex Review` markers, cadence triggers, commit hashes, and repair status, but do not execute build-lane Active Tasks from a review session.
+
 ## Role
 
 Codex Reviews B owns docs, architecture, FileMap, Bifrost, and strategic consistency reviews unless Prime assigns a different scope.

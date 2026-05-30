@@ -4,6 +4,10 @@ This file is the standing queue for a third specialized Codex Reviews session.
 
 Review C exists because review capacity became the bottleneck. It is a bounded specialist lane, not a duplicate of Review A or Review B.
 
+## Q Polling Source of Truth
+
+When the Polaris `Q` button is enabled for **Codex Reviews C**, the session must read this file first and treat this file as its executable queue. Build queue files are review inputs only: inspect them for `Ready for Codex Review` markers, cadence triggers, commit hashes, and repair status, but do not execute build-lane Active Tasks from a review session.
+
 ## Role
 
 Codex Reviews C owns V0 runtime-gate review slices assigned by Prime/Codex when Review A is overloaded.
