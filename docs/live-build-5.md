@@ -113,6 +113,7 @@ Append entries here when a completed slice is ready for the Codex Reviews lane t
 2026-05-30 11:39 -06:00 - Build 5 slice Ready for Codex Review; commit 818bb31; files: docs/bifrost-cockpit-queue-status-brief.md, docs/live-build-5.md; tests: none (docs-only)
 2026-05-30 11:46 -06:00 - Build 5 slice Ready for Codex Review; commit d1d32af; files: docs/bifrost-v0-cockpit-layout-brief.md; tests: none (docs-only); note: 3rd task-changing commit triggers cadence pause per rule 21 — Build 5 pauses normal build work until Codex Reviews lane records cadence review result
 2026-05-30 12:02 -06:00 - Build 5 slice Ready for Codex Review; commit 7c34566; files: docs/bifrost-harness-dashboard-brief.md, docs/live-build-5.md; tests: none (docs-only); note: 1st task-changing commit in new cadence window (after d1d32af was cleared by Codex Reviews Round 1)
+2026-05-30 13:09 -06:00 - Build 5 slice Ready for Codex Review; commit a412e90; files: docs/bifrost-configurable-progress-surface-brief.md, docs/live-build-5.md; tests: none (docs-only); note: 2nd task-changing commit in current cadence window (after d1d32af cleared)
 ```
 
 ## Cross-Check Activity
