@@ -224,6 +224,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-01 ~07:55 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~08:05 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~08:15 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
+2026-06-01 ~08:25 CDT - Build 1 checked queue; status: idle (Active Task section stale — model adapter slice 653488b already done and reviewed; awaiting fresh assignment)
 ```
 
 ## Write/Completion Log
