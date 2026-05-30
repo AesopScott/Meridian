@@ -15,9 +15,10 @@ Rules:
 - Every time you modify this file or complete a task from it, add a timestamped entry to the Write/Completion Log section.
 - Every minute while idle, check for cross-check activity relevant to your slice: review notes, Codex findings, Aegis findings, failing tests, or Obsidian build log updates.
 - If cross-check activity affects your task, record it in this file's Cross-Check Activity section and address it before starting unrelated work.
-- After every three completed changes/commits from this build session, stop normal build work and request a Codex review check before taking another task.
-- The Codex review check must automatically repair actionable findings in your owned files, rerun relevant tests if any, commit/push fixes, and report findings/fixes back in this file's heartbeat sections.
-- Record Codex review requests, findings, repairs, and outcomes in the Codex Review Cadence section.
+- After completing a task, mark the slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- Do not perform your own Codex review. A separate Codex Reviews lane owns independent review, findings, and repair routing.
+- If the Codex Reviews lane writes a repair task into this file, complete that repair before taking unrelated work.
+- After every three completed task-changing commits, pause normal build work until the Codex Reviews lane records a cadence review result.
 - Use local time with timezone when possible.
 - Own only the files listed in the active task.
 - Do not edit Build 1, Build 2, Build 3, or Build 4 live queue files.
@@ -28,6 +29,7 @@ Rules:
 - Commit only your slice.
 - Push to `origin/main`.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
 
@@ -41,6 +43,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 11:39 -06:00 - Build 5 checked queue; status: running; Active Task = design Bifrost cockpit queue status surface at docs/bifrost-cockpit-queue-status-brief.md; Cross-Check Activity: none; origin/main at 7792243
 2026-05-30 11:43 -06:00 - Build 5 checked queue; status: idle; Active Task = bifrost-cockpit-queue-status-brief (already complete at 818bb31 in Write/Completion Log; awaiting orchestrator reassignment); Cross-Check Activity: none; origin/main at d1d5619
 2026-05-30 11:44 -06:00 - Build 5 checked queue; status: idle; Active Task = bifrost-cockpit-queue-status-brief (still stale; complete at 818bb31); Cross-Check Activity: none; origin/main at ac0a5d3
+2026-05-30 11:46 -06:00 - Build 5 checked queue; status: running; rules 18-21 updated by orchestrator (no self-Codex review; Codex Reviews lane owns review/findings/repairs; pause after 3 task-changing commits); new Active Task = design V0 cockpit layout at docs/bifrost-v0-cockpit-layout-brief.md; Cross-Check Activity: none; origin/main at a37b3cb
 ```
 
 ## Write/Completion Log
@@ -53,6 +56,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:33 -06:00 - Build 5 completed Bifrost session queue activation brief at docs/bifrost-session-queue-activation-brief.md; commit pending; tests not required
 2026-05-30 11:37 -06:00 - Codex assigned Bifrost cockpit queue status brief; commit pending; tests not required
 2026-05-30 11:39 -06:00 - Build 5 completed Bifrost cockpit queue status surface brief at docs/bifrost-cockpit-queue-status-brief.md; commit pending; tests not required
+2026-05-30 11:46 -06:00 - Build 5 completed Bifrost V0 cockpit layout brief at docs/bifrost-v0-cockpit-layout-brief.md; commit pending; tests not required
 ```
 
 ## Cross-Check Activity
@@ -76,25 +80,25 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: design the Bifrost cockpit queue status surface.
+Goal: design the V0 cockpit layout around Prime and the Review Console.
 
 Allowed files only:
 
-- `docs/bifrost-cockpit-queue-status-brief.md`
+- `docs/bifrost-v0-cockpit-layout-brief.md`
 
 Task:
 
-- Write a concise product/architecture brief for how the Meridian cockpit should show queue-driven worker activity without recreating the Polaris worker-card wall.
+- Write a concise product/architecture brief for the V0 cockpit layout.
 - Cover:
-  - global queue activation state
-  - per-lane state for Build 1 through Build 5
-  - statuses: idle, polling, running, blocked, needs review, needs human gate, stale
-  - how Prime should decide what appears in the Orchestrator Queue versus the Review Console
-  - what a user can click or command from the cockpit
-  - what should be hidden until there is a problem
-  - how Beacon supplies liveness/staleness signals
-  - how Aegis/cross-check results surface without hijacking the main conversation
-  - what Polaris taught us about too many visible worker cards
+  - Prime as the dominant top/center relationship surface
+  - Orchestrator Queue and Review Console as tabbed prompt surfaces
+  - bottom or side instrumentation for Beacon, Relay, Aegis, Compass, Bifrost, queue state
+  - where the Harness button belongs and what it opens
+  - how much worker/session detail is visible by default
+  - how Mission Objectives can be called up on demand
+  - how the NASA-style Go sequence should appear visually without becoming noise
+  - how the layout scales from 3 lanes to 25 lanes
+  - what V0 should intentionally leave out
 - Keep it design-only.
 - Do not edit runtime code.
 - Do not edit FileMap; Build 3 owns FileMap.
@@ -110,4 +114,4 @@ Completion:
 - Commit only this docs slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash in your session.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.

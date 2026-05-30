@@ -29,6 +29,7 @@ Rules:
 - Commit only your slice.
 - Push to `origin/main`.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
 
@@ -132,4 +133,4 @@ Completion:
 - Commit only this docs slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash in your session.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.

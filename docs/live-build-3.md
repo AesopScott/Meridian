@@ -26,6 +26,7 @@ Rules:
 - Commit only your slice.
 - Push to `origin/main`.
 - Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
 
@@ -48,6 +49,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 13:20 -06:00 - Build 3 checked queue; status: idle; Active Task section stale (FileMap refresh done at 7ec16ac); awaiting new task assignment
 2026-05-30 13:35 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting new task assignment
 2026-05-30 13:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting new task assignment
+2026-05-30 14:05 -06:00 - Build 3 checked queue; status: active task found (repair stale FileMap Relay maturity claims); starting work
 ```
 
 ## Write/Completion Log
@@ -103,25 +105,25 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: refresh FileMap for the newest Meridian artifacts.
+Goal: repair stale FileMap Relay maturity claims.
 
 Allowed files only:
 
 - `docs/FileMap.md`
+- `meridian_core/filemap.py`
 - `tests/test_filemap.py`
 
 Task:
 
-- Add discoverability entries for the new files that sessions now need to find:
-  - `meridian_core/tokens.py`
-  - `tests/test_tokens.py`
-  - `docs/relay-prompt-packet-integration-plan.md`
-  - `docs/live-build-queue-hygiene.md`
-  - `docs/review-console-surface-contract.md`
-  - `docs/bifrost-session-queue-activation-brief.md`
-  - `docs/live-build-5.md`
-- Update required-path coverage only where it is useful for core Meridian discovery.
-- Keep descriptions short and practical: what the file is for, who owns it, and when a worker should read it.
+- Codex reviewed Build 3 commit `7ec16ac`.
+- Repair stale FileMap claims:
+  - `docs/FileMap.md` currently says PromptBudget has no Relay integration and RelayRoute will carry PromptBudgetPlan in the future.
+  - Current `meridian_core/relay.py` already carries `prompt_budget: PromptBudgetPlan`.
+  - Current Build 1 also added `meridian_core/relay_packet.py`.
+- Update both the human FileMap and `make_default_map()` so memory injection does not teach stale architecture.
+- Add `meridian_core/relay_packet.py` and `tests/test_relay_packet.py` to FileMap if missing.
+- Add `docs/bifrost-cockpit-queue-status-brief.md` to the human FileMap if missing.
+- Update required-path coverage if you add a core source file that should be guaranteed present.
 - Do not edit runtime code.
 - Do not edit package exports.
 - Do not edit other live queues.
@@ -138,4 +140,4 @@ Completion:
 - Commit only this FileMap slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash and test count in your session.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and test count.
