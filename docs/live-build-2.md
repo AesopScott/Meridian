@@ -43,6 +43,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-30 11:55 -06:00 - Build 2 checked queue; status: idle (task f2f69ff already complete; no new Active Task)
 2026-05-30 12:05 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 12:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
+2026-05-30 12:25 -06:00 - Build 2 checked queue; status: running (Active Task found — update package API surface note for PromptPacket)
 ```
 
 ## Write/Completion Log
@@ -91,34 +92,33 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: export PromptPacket package API after validation hardening.
+Goal: update the package API surface note for PromptPacket exports.
 
 Allowed files only:
 
-- `meridian_core/__init__.py`
-- `tests/test_package_api.py`
+- `docs/package-api-surface-note.md`
 
 Task:
 
-- Build 1 completed PromptPacket validation hardening in commit `0ce0cf9`.
-- The package-root API can now expose the PromptPacket domain safely.
-- Add root exports for:
+- Build 2 completed PromptPacket package-root exports in commit `f2f69ff`.
+- Update the package API policy note so it reflects current reality, not just the early ProgressIntention examples.
+- Add PromptPacket exports to the "Already exported" section:
   - `PromptPacket`
   - `PromptPacketValidationError`
   - `build_prompt_packet`
-- Add package API smoke tests proving those names import from `meridian_core`.
-- Do not export private helpers.
-- Do not edit PromptPacket implementation; Build 1 owns PromptPacket runtime behavior.
+- Add a short note explaining why these are safe public exports now:
+  - construction validates in `PromptPacket.__post_init__`
+  - source lineage is copied and immutable
+  - `model_payload()` exposes only serialized prompt text
+- Keep it concise and policy-oriented.
+- Do not edit package code.
+- Do not edit tests.
 - Do not edit FileMap; Build 3 owns FileMap.
-- Do not edit docs other than this live queue if needed.
-- Keep this package-boundary only.
+- Do not edit PromptPacket runtime code; Build 1 owns PromptPacket.
 
 Tests:
 
-```text
-python -m pytest tests/test_package_api.py -q
-python -m pytest -q
-```
+- No tests required. This is docs-only.
 
 Completion:
 

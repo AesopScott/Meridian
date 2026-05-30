@@ -44,6 +44,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 ~00:08 CDT - Build 1 checked queue; status: idle (awaiting next assignment)
 2026-05-31 ~00:20 CDT - Build 1 checked queue; status: idle (no new active task)
 2026-05-31 ~00:30 CDT - Build 1 checked queue; status: idle (no new active task)
+2026-05-31 ~00:40 CDT - Build 1 checked queue; status: running (Codex review pass on PromptPacket slice)
 ```
 
 ## Write/Completion Log
@@ -89,7 +90,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: add a PromptPacket model-dispatch boundary.
+Goal: run Build 1 Codex review pass for the PromptPacket slice.
 
 Allowed files only:
 
@@ -98,26 +99,35 @@ Allowed files only:
 
 Task:
 
-- Build 1 completed PromptPacket construction hardening in commit `0ce0cf9`.
-- Next, make the "only serialized_prompt goes to the model" rule executable.
-- Add a tiny method or helper that returns the model-facing prompt payload from a `PromptPacket`.
-- The returned value must contain only the serialized prompt text, not packet id, budget, source lineage, construction time, or metrics metadata.
-- Keep this domain-only.
+- Build 1 has completed three PromptPacket-related commits since the last major review:
+  - `b453e2e` Prompt Packet domain model
+  - `0ce0cf9` PromptPacket validation hardening
+  - `111a975` PromptPacket model_payload() dispatch boundary
+- Per the live queue cadence, stop normal build work and perform a Codex-style review pass on the Build 1-owned PromptPacket slice.
+- Review only:
+  - `meridian_core/prompt_packet.py`
+  - `tests/test_prompt_packet.py`
+  - related prompt budget assumptions only if needed for correctness
+- Look specifically for:
+  - invalid direct construction paths
+  - mutable metadata or lineage aliasing
+  - metadata leakage through `model_payload()`
+  - budget validation gaps
+  - unclear validation error aggregation
+  - missing or weak tests
+- Automatically repair actionable findings in the allowed files.
+- If there are no actionable findings, record that result in this queue and return to polling.
 - Do not edit Relay yet.
 - Do not edit package exports; Build 2 owns package API.
 - Do not edit FileMap; Build 3 owns FileMap.
 - No UI.
 - No persistence.
 - No model calls.
-- Add tests proving:
-  - the model-dispatch boundary returns exactly the serialized prompt
-  - packet metadata is not present in the returned payload
-  - existing validation and immutability behavior still works
 
 Tests:
 
 ```text
-python -m pytest tests/test_prompt_packet.py -q
+python -m pytest tests/test_prompt_packet.py tests/test_prompt_budget.py -q
 python -m pytest -q
 ```
 
