@@ -150,6 +150,52 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 
 ## Active Task
 
+Current Active Task:
+
+Goal: perform centralized Codex Review sweep Round 2.
+
+Allowed files:
+
+- `docs/live-codex-reviews.md`
+- `docs/live-build-1.md`
+- `docs/live-build-2.md`
+- `docs/live-build-3.md`
+- `docs/live-build-4.md`
+- `docs/live-build-5.md`
+
+Review scope to declare before deep review:
+
+- Build 1: review `d2820d2` (`WorkerLaneState` domain model) plus queue marker `13b4b48` as needed.
+- Build 2: review `46e4eb3` (Relay package API policy note) plus queue markers `c8f7a35`, `3e1de48`, and `37bcd7a` as needed.
+- Build 3: review `4075ef4` (FileMap refresh for `relay_dispatch.py`, live Codex Reviews, Prime prototype, and diagrams) plus queue marker `6879bd9` as needed.
+- Build 4: review `1d17fa1` (Prime orchestration state model) plus queue marker `14ae1e9` as needed.
+- Build 5: review `7c34566` (Bifrost Harness dashboard brief) plus queue marker `3026216` as needed.
+
+Required review process:
+
+1. Pull latest `origin/main`.
+2. Append a Round 2 entry under `## Review Round Scope` before reviewing deeply.
+3. Review only the target diffs and directly necessary supporting files.
+4. Run targeted tests:
+   - `python -m pytest tests/test_lane_state.py -q`
+   - `python -m pytest tests/test_filemap.py -q`
+   - Run broader `python -m pytest -q` only if review finds integration risk.
+5. Treat Build 2, Build 4, and Build 5 as docs-only unless their diffs touch runtime code.
+6. Update the Checkpoint Ledger, Review Log, Findings, and Repair Routing Log.
+7. If findings require repair, write the repair Active Task into the original build lane queue. Do not repair it in the Codex Reviews lane.
+8. Commit only review/queue file changes and push to `origin/main`.
+9. Update Obsidian if Round 2 finds or clears important issues.
+
+Completion marker:
+
+- Mark Round 2 complete, passed, repair routed, or blocked with exact commit hashes and tests run.
+
+Write log:
+
+- 2026-05-30 12:06 -06:00 - Coordinator queued Round 2 centralized review sweep for Build 1 through Build 5.
+
+Previous state:
+
 No active task. Round 1 centralized review sweep complete (2026-05-30 15:45 CDT).
 
 - Build 1 (6af04d4..fd35a81): passed
