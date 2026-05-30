@@ -52,6 +52,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 ~01:20 CDT - Build 1 checked queue; status: idle (tokens.py task complete, awaiting next assignment)
 2026-05-31 ~01:30 CDT - Build 1 checked queue; status: idle (no active task)
 2026-05-31 ~01:40 CDT - Build 1 checked queue; status: idle (no active task)
+2026-05-31 ~01:50 CDT - Build 1 checked queue; status: running (relay_packet.py assembly helper task)
 ```
 
 ## Write/Completion Log
@@ -74,6 +75,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 ~00:40 CDT - Build 1 Codex review repair: commit 9389563; tests 688 passed; whitespace prompt + empty packet_id validation added; Obsidian updated
 2026-05-31 ~01:00 CDT - Build 1 completed Relay PromptPacket integration plan; commit 86dbb93; tests N/A (docs-only); Obsidian updated
 2026-05-31 ~01:20 CDT - Build 1 completed count_tokens() token utility; commit 0de7129; tests 707 passed; Obsidian updated
+2026-05-30 11:37 -06:00 - Codex assigned Relay PromptPacket assembly helper; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -105,4 +107,39 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-No active task. Build 1 is idle and polling.
+Goal: add the Relay PromptPacket assembly helper.
+
+Allowed files only:
+
+- `meridian_core/relay_packet.py`
+- `tests/test_relay_packet.py`
+
+Task:
+
+- Build a small pure-domain helper that turns a `RelayRoute` plus a serialized prompt into a validated `PromptPacket`.
+- Keep this as Relay-owned runtime glue, not a package-root export.
+- The helper should:
+  - require an explicit `packet_id`
+  - read `route.prompt_budget`
+  - count prompt tokens with `count_tokens()`
+  - default source lineage to `{"direct_input": prompt_tokens}` when no lineage is supplied
+  - call `build_prompt_packet()` so existing PromptPacket validation remains the enforcement point
+  - return the resulting `PromptPacket`
+- Do not call any model, API, CLI, or session process.
+- Do not edit `meridian_core/__init__.py`; Build 2 owns package exports.
+- Do not edit FileMap; Build 3 owns FileMap.
+- Keep this helper lean so Relay does not become prompt drag.
+
+Tests:
+
+```text
+python -m pytest tests/test_relay_packet.py tests/test_prompt_packet.py tests/test_relay.py -q
+python -m pytest -q
+```
+
+Completion:
+
+- Commit only this slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Report commit hash and test count in your session.

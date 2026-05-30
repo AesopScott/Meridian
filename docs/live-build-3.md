@@ -43,6 +43,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 12:30 -06:00 - Build 3 checked queue; status: active task found (live queue hygiene note); starting work
 2026-05-30 12:35 -06:00 - Build 3 checked queue; status: active task found (queue hygiene repair — add live-build-5.md); starting work
 2026-05-30 12:50 -06:00 - Build 3 checked queue; status: idle; Active Task section stale (repair done at ecc9fdf); awaiting new task assignment
+2026-05-30 13:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh for 7 new artifacts); starting work
 ```
 
 ## Write/Completion Log
@@ -62,6 +63,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:28 -06:00 - Build 3 completed FileMap update (prompt_packet.py + capabilities architecture map); commit 73c9628; tests 46 passing (test_filemap.py); Obsidian updated; polling resumed
 2026-05-30 12:32 -06:00 - Build 3 completed live queue hygiene note; commit 26dc597; tests not required (docs-only); Obsidian updated; 3 commits completed (d84bb0f, 73c9628, 26dc597) — Codex review required before next task
 2026-05-30 12:37 -06:00 - Build 3 completed queue hygiene repair (add live-build-5.md to lane set); commit ecc9fdf; tests not required (docs-only); Obsidian updated; polling resumed
+2026-05-30 11:37 -06:00 - Codex assigned FileMap refresh for new Relay/Bifrost/queue artifacts; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -96,31 +98,39 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: repair live queue hygiene note after Codex review.
+Goal: refresh FileMap for the newest Meridian artifacts.
 
 Allowed files only:
 
-- `docs/live-build-queue-hygiene.md`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
 
 Task:
 
-- Codex reviewed Build 3 commit `26dc597`.
-- Finding: the final Summary says these rules apply to `docs/live-build-1.md` through `docs/live-build-4.md` and future lanes, but Build 5 now exists.
-- Repair the note so the current lane set explicitly includes `docs/live-build-5.md`.
-- Keep the change tiny and mechanical.
-- Record the repair in this queue's Cross-Check Activity and Codex Review Cadence sections.
-- Do not edit other live queue files.
+- Add discoverability entries for the new files that sessions now need to find:
+  - `meridian_core/tokens.py`
+  - `tests/test_tokens.py`
+  - `docs/relay-prompt-packet-integration-plan.md`
+  - `docs/live-build-queue-hygiene.md`
+  - `docs/review-console-surface-contract.md`
+  - `docs/bifrost-session-queue-activation-brief.md`
+  - `docs/live-build-5.md`
+- Update required-path coverage only where it is useful for core Meridian discovery.
+- Keep descriptions short and practical: what the file is for, who owns it, and when a worker should read it.
 - Do not edit runtime code.
-- Do not edit FileMap.
 - Do not edit package exports.
+- Do not edit other live queues.
 
 Tests:
 
-- No tests required. This is docs-only.
+```text
+python -m pytest tests/test_filemap.py -q
+python -m pytest -q
+```
 
 Completion:
 
-- Commit only this docs slice.
+- Commit only this FileMap slice.
 - Push to `origin/main`.
 - Update Obsidian.
-- Report commit hash in your session.
+- Report commit hash and test count in your session.

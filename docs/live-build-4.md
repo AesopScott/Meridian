@@ -54,6 +54,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:09 -06:00 - Build 4 completed Meridian capabilities architecture map (docs/meridian-capabilities-architecture-map.md); commit pending push; tests not required
 2026-05-30 11:23 -06:00 - Build 4 completed capabilities map update: Prompt Packet maturity domain slice (0ce0cf9), Polaris Q button note added to capability 3; commit pending; tests not required
 2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit pending; tests not required; this is doc commit 3 of 3 — Codex review to follow
+2026-05-30 11:37 -06:00 - Codex assigned Build 4 architecture review/finish pass; commit pending; tests not required
 ```
 
 ## Cross-Check Activity
@@ -89,28 +90,25 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: define the Review Console surface contract.
+Goal: finish the Build 4 architecture-map update and run a review pass.
 
 Allowed files only:
 
+- `docs/meridian-capabilities-architecture-map.md`
 - `docs/review-console-surface-contract.md`
 
 Task:
 
-- Write a strategic surface contract for the Review Console, the real replacement name for the old "non-orchestrator queue".
-- Cover:
-  - what belongs in the Orchestrator Queue versus the Review Console
-  - what Prime may place in the Review Console without asking Scott first
-  - what must become a human gate
-  - how Aegis proof, cross-check findings, worker outputs, and system Go calls should appear
-  - what actions Scott should be able to take from that surface
-  - how to avoid recreating the Polaris worker-card wall
-  - how this relates to Bifrost and Beacon
-- Keep it strategic and architectural.
-- Keep the doc strategic and architectural.
-- Do not write runtime code.
-- Do not edit FileMap; Build 3 owns FileMap.
-- Do not edit package exports; Build 2 owns package API.
+- If you already have local edits in `docs/meridian-capabilities-architecture-map.md`, finish and commit them as this slice.
+- Review the Build 4 architecture docs for consistency with the current codebase and recent slices:
+  - Prompt Budget / Prompt Packet / Prompt Metrics maturity
+  - Review Console naming and surface contract
+  - Bifrost queue activation as a design brief, not final runtime
+  - Build queue automation as a Polaris prototype feeding Meridian requirements
+- Fix stale claims or contradictions in the allowed files only.
+- Do not edit runtime code.
+- Do not edit FileMap.
+- Do not edit package exports.
 - Do not edit other live queues.
 
 Tests:

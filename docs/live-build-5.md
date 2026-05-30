@@ -38,6 +38,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 11:33 -06:00 - Build 5 checked queue; status: running; Active Task = create docs/bifrost-session-queue-activation-brief.md; origin/main up to date
 2026-05-30 11:35 -06:00 - Build 5 checked queue; status: idle; Active Task = bifrost-session-queue-activation-brief (already complete at 3b5435f in Write/Completion Log; awaiting orchestrator reassignment); origin/main at ecc9fdf
 2026-05-30 11:37 -06:00 - Build 5 checked queue; status: idle; Active Task = bifrost-session-queue-activation-brief (still stale; complete at 3b5435f); Cross-Check Activity: none; origin/main at 7792243
+2026-05-30 11:39 -06:00 - Build 5 checked queue; status: running; Active Task = design Bifrost cockpit queue status surface at docs/bifrost-cockpit-queue-status-brief.md; Cross-Check Activity: none; origin/main at 7792243
 ```
 
 ## Write/Completion Log
@@ -48,6 +49,7 @@ Append entries here when this file is modified or an active task is completed.
 YYYY-MM-DD HH:MM TZ - Build 5 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:30 -06:00 - Codex created Build 5 Bifrost/session-harness queue and assigned queue activation brief; commit pending; tests not required
 2026-05-30 11:33 -06:00 - Build 5 completed Bifrost session queue activation brief at docs/bifrost-session-queue-activation-brief.md; commit pending; tests not required
+2026-05-30 11:37 -06:00 - Codex assigned Bifrost cockpit queue status brief; commit pending; tests not required
 ```
 
 ## Cross-Check Activity
@@ -71,28 +73,26 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: create the Meridian session queue activation brief.
+Goal: design the Bifrost cockpit queue status surface.
 
 Allowed files only:
 
-- `docs/bifrost-session-queue-activation-brief.md`
+- `docs/bifrost-cockpit-queue-status-brief.md`
 
 Task:
 
-- Write a concise architecture/product brief for how Meridian should eventually turn queue polling on from the UI/session harness.
-- Treat the Polaris Q button as a prototype, not the final architecture.
+- Write a concise product/architecture brief for how the Meridian cockpit should show queue-driven worker activity without recreating the Polaris worker-card wall.
 - Cover:
-  - what a global queue activation control should do
-  - what per-session Q state should do
-  - how active sessions are discovered
-  - how the UI should show polling enabled/disabled/running/blocked
-  - how queue file assignment should work without guessing from card names
-  - how Prime should control this in Meridian instead of Scott manually clicking every worker card
-  - how Beacon should report liveness/stale polling
-  - how Bifrost should surface human-readable status without becoming the worker wall again
-  - how this differs from the current Polaris implementation
-- Include a small "do not build yet" section naming what should remain design-only until Meridian has a real session harness.
-- Keep this docs-only and strategic.
+  - global queue activation state
+  - per-lane state for Build 1 through Build 5
+  - statuses: idle, polling, running, blocked, needs review, needs human gate, stale
+  - how Prime should decide what appears in the Orchestrator Queue versus the Review Console
+  - what a user can click or command from the cockpit
+  - what should be hidden until there is a problem
+  - how Beacon supplies liveness/staleness signals
+  - how Aegis/cross-check results surface without hijacking the main conversation
+  - what Polaris taught us about too many visible worker cards
+- Keep it design-only.
 - Do not edit runtime code.
 - Do not edit FileMap; Build 3 owns FileMap.
 - Do not edit package exports; Build 2 owns package API.
