@@ -91,6 +91,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-30 19:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
+2026-05-30 19:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 ```
 
 ## Write/Completion Log
@@ -129,8 +130,8 @@ YYYY-MM-DD HH:MM TZ - Build 2 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:15 -06:00 - Build 2 cross-check: no blocking findings in commit 9c52688; targeted tests 95 passed (test_package_api.py + test_review_console.py).
 2026-05-30 11:20 -06:00 - Build 2 cross-check: no blocking findings in commit 9c52688; targeted tests 140 passed.
 2026-05-30 11:45 -06:00 - Build 2 cross-check: no blocking findings in commit f2f69ff; targeted tests 11 passed (test_package_api.py).
-2026-05-30 12:35 -06:00 - Build 2 cross-check: Codex found 3 MEDIUM findings in 88fbecb/f2f69ff/e73b840; repaired 2 (test __all__ membership, stale candidates text); 1 deferred (prompt-packet-package-api-note.md not in allowed files); commit 253e505; tests 688 passed.
 2026-05-30 11:43 -06:00 - Build 2 cross-check finding: docs/prompt-packet-package-api-note.md still says callers use is_valid and validation_errors, but PromptPacket raises PromptPacketValidationError and has no such public attributes.
+2026-05-30 12:35 -06:00 - Build 2 cross-check: Codex found 3 MEDIUM findings in 88fbecb/f2f69ff/e73b840; repaired 2 (test __all__ membership, stale candidates text); 1 deferred (prompt-packet-package-api-note.md not in allowed files); commit 253e505; tests 688 passed.
 ```
 
 ## Codex Review Cadence
@@ -154,67 +155,4 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Current Active Task (supersedes any stale text below):
-
-Goal: define package API policy for Relay internals.
-
-Allowed files only:
-
-- `docs/relay-package-api-policy-note.md`
-- `docs/package-api-surface-note.md`
-
-Task:
-
-- Build 1 has added Relay-owned helpers and domain objects (`relay_packet.py`, `relay_dispatch.py`) that are useful internally but may not all belong in the package root yet.
-- Write a concise policy note for what Relay names should remain module-level imports versus package-root exports.
-- Cover:
-  - `assemble_relay_packet()`
-  - `RelayDispatchPlan`
-  - `RelayDispatchLane`
-  - `build_relay_dispatch_plan()`
-  - why these should remain internal/module-level for now unless a later V0 surface needs them
-  - what proof would justify future root export
-- Update `docs/package-api-surface-note.md` with a short cross-reference to this Relay policy note.
-- Do not edit `meridian_core/__init__.py`.
-- Do not edit package tests.
-- Do not edit FileMap.
-
-Tests:
-
-- No tests required. This is docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
-
-Stale prior text:
-
-Goal: repair stale PromptPacket package API note claim.
-
-Allowed files only:
-
-- `docs/prompt-packet-package-api-note.md`
-
-Task:
-
-- Codex reviewed Build 2 commit `4be1117`.
-- Finding: the note says callers interact through `is_valid` and `validation_errors`, but the current PromptPacket contract raises `PromptPacketValidationError` during construction and does not expose those public attributes.
-- Repair the note so it accurately describes the current exception-based validation contract.
-- Keep the change narrow.
-- Do not edit `meridian_core/__init__.py`.
-- Do not edit package tests.
-- Do not edit FileMap.
-
-Tests:
-
-- No tests required. This is docs-only.
-
-Completion:
-
-- Commit only this docs slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+No current active task. All previously listed tasks have been completed (last: Relay package API policy note, commit 46e4eb3, Codex cadence review cleared at 2026-05-30 16:55 -06:00). Polling.
