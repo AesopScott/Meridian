@@ -385,6 +385,13 @@ def make_default_map() -> FileMap:
             notes="Strategic. Owner: Build 4. Read before planning any V0 milestone or capability integration slice.",
         ),
         FileMapEntry(
+            path="docs/v0-v1-progress-tracker.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Countable V0/V1 progress view for Prime, Codex, and Scott. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
+            related_tests=[],
+            notes="Update when a gate item status changes. Companion to v0-build-readiness-map.md.",
+        ),
+        FileMapEntry(
             path="docs/prime-orchestration-state-model.md",
             area=FileArea.ARCHITECTURE,
             purpose="Design bridge from the live build queue prototype to Python domain objects for Prime's state model. Names WorkerLane, TaskSlice, and other state objects with defined transitions.",

@@ -72,11 +72,11 @@ Each capability section uses this shape:
 - `meridian_core/relay_dispatch.py` — `RelayDispatchPlan`, `RelayDispatchLane`, `build_relay_dispatch_plan()` maps route + packet to per-lane work specs; tests passing (Build 1, `0282b3a`)
 
 **Missing for V0:**
-- Nothing executes the dispatch. `build_relay_dispatch_plan()` returns a plan object; no code calls a model API with it.
+- The executor skeleton exists (`meridian_core/relay_executor.py` built in `190e527`) but does not yet make real Claude API calls — `build_relay_dispatch_plan()` returns a plan object and the executor accepts it, but no live vendor/model API dispatch happens yet.
 - Budget enforcement at dispatch time: the token ceiling exists in `PromptBudgetPlan` but Relay does not enforce it when making actual calls.
 - Metrics are not emitted or persisted during dispatch.
 
-**Next smallest slice:** `meridian_core/relay_executor.py` — takes a `RelayDispatchPlan` and makes a real Claude API call for each lane (single-lane first), returning raw text. This is the first moment Prime dispatches to a model through Meridian's own harness stack rather than a flat-file queue.
+**Next smallest slice:** wire real Claude API dispatch into the existing `meridian_core/relay_executor.py` skeleton — single-lane first, taking a `RelayDispatchPlan` and returning raw text. This is the first moment Prime dispatches to a model through Meridian's own harness stack rather than a flat-file queue.
 
 ---
 
@@ -151,7 +151,7 @@ Full Bifrost cockpit is V1+ scope. V0 is CLI-only.
 
 **Missing for V0:**
 - No live proof execution. `AegisEvidence` is constructed manually. No harness runs tests, takes screenshots, or captures logs into evidence automatically.
-- Gate enforcement: `is_proof_blocking()` exists but `relay_executor.py` (not yet built) does not consult it. A tier-3/4 action can today be "dispatched" without Aegis OK, because dispatch itself doesn't exist yet.
+- Gate enforcement: `is_proof_blocking()` exists but `relay_executor.py` (skeleton built in `190e527`; no live API dispatch yet) does not consult it. A tier-3/4 action can today be "dispatched" without Aegis OK, because dispatch itself doesn't yet make real API calls.
 - Waiver audit trail: the waiver path is in the domain model but waiver records are not logged to any durable store.
 
 **Next smallest slice:** Wire `is_proof_blocking()` into `relay_executor.py` — before dispatching a tier-3/4 lane, check the `ProofTrail` and raise if any evidence is blocking. Live proof execution (running actual tests into evidence) can follow. The gate wire is the V0 critical path item.
@@ -187,12 +187,12 @@ Full Bifrost cockpit is V1+ scope. V0 is CLI-only.
 - `meridian_core/injections.py` — `SessionInjection` factory ready
 
 **Missing for V0:**
-- No `relay_executor.py`. The dispatch plan has no executor. The flat-file queue is the only live coordination mechanism and it is human-in-the-loop.
+- Executor skeleton exists: `meridian_core/relay_executor.py` built in `190e527`. No live API dispatch yet — the executor does not yet make real Claude API calls. The flat-file queue remains the primary live coordination mechanism and it is human-in-the-loop.
 - No session lifecycle management — no spawn, steer, wait, or terminate.
 - No queue-to-session automation: Prime cannot read a queue file, identify the next task, build a dispatch plan, and launch a session without Scott's manual intervention.
 - No structured session output capture. Worker results today are commits to flat files; no output flows into Review Console automatically.
 
-**Next smallest slice:** `relay_executor.py` (shared dependency with items 3 and 7 above). Once a single Claude API call can be dispatched through `RelayDispatchPlan`, the flat-file queue can route to it instead of waiting for a human to paste instructions. Session lifecycle and output routing to Review Console follow after.
+**Next smallest slice:** wire real Claude API dispatch into the existing `relay_executor.py` skeleton (shared dependency with items 3 and 7 above). Once a single Claude API call can be dispatched through `RelayDispatchPlan`, the flat-file queue can route to it instead of waiting for a human to paste instructions. Session lifecycle and output routing to Review Console follow after.
 
 ---
 

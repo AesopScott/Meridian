@@ -35,6 +35,7 @@ _REQUIRED_PATHS = [
     "docs/bifrost-v0-cockpit-layout-brief.md",
     "docs/bifrost-harness-dashboard-brief.md",
     "docs/live-codex-reviews-2.md",
+    "docs/v0-v1-progress-tracker.md",
 ]
 
 
