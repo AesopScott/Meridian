@@ -32,6 +32,7 @@ Append entries here when this file is checked while idle.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
+2026-05-30 10:38 -06:00 - Build 2 checked queue; status: running (Active Task found — Prompt Metrics package exposure)
 ```
 
 ## Write/Completion Log
@@ -42,6 +43,8 @@ Append entries here when this file is modified or an active task is completed.
 YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; tests <result>
 2026-05-30 10:33 -06:00 - Codex assigned Prompt Metrics package API + FileMap exposure; commit pending; tests pending
 2026-05-30 10:37 -06:00 - Codex strengthened polling contract; commit pending; tests not required
+2026-05-30 10:42 -06:00 - Build 2 completed Prompt Metrics package exposure; commit 6d51710; tests 627 passed
+2026-05-30 10:42 -06:00 - Codex review cleared Prompt Metrics package/FileMap exposure and assigned Review Console visibility bridge; commit pending; tests pending
 ```
 
 ## Cross-Check Activity
@@ -50,6 +53,7 @@ Append entries here when you check or act on cross-check activity.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 cross-check: none/finding/fix; details: <short note>
+2026-05-30 10:42 -06:00 - Build 2 cross-check: no actionable findings in commit 6d51710; targeted tests 103 passed.
 ```
 
 ## Codex Review Cadence
@@ -65,36 +69,40 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: expose Prompt Metrics as a stable package capability and FileMap entry.
+Goal: surface Prompt Metrics summaries as Review Console system findings.
 
 Allowed files only:
 
-- `meridian_core/__init__.py`
-- `tests/test_package_api.py`
-- `meridian_core/filemap.py`
-- `tests/test_filemap.py`
-- `docs/FileMap.md`
+- `meridian_core/review_console.py`
+- `tests/test_review_console.py`
 
 Context:
 
-- Prompt Metrics domain code already exists in `meridian_core/prompt_metrics.py`.
-- `docs/FileMap.md` already has a Prompt Metrics row.
-- Root package exports currently include Prompt Budget but not Prompt Metrics.
+- Codex review cleared Build 2 commit `6d51710`.
+- Prompt Metrics are now exported and FileMap-visible.
+- The next step is visibility, not prompt injection.
+- The non-orchestrator surface should receive system-level findings such as prompt drag health.
 
 Task:
 
-- Export these stable Prompt Metrics names from package root:
-  - `PromptMetricSample`
-  - `PromptMetricSummary`
-  - `PromptPerformanceStatus`
-  - `summarize_prompt_metrics`
-- Add package API import smoke coverage.
-- Ensure FileMap required-path coverage includes:
-  - `meridian_core/prompt_metrics.py`
-  - `docs/relay-prompt-metrics-integration-brief.md`
-- Keep exactly one `meridian_core/prompt_metrics.py` row in `docs/FileMap.md`.
-- If the FileMap already contains the row, refine only if needed.
-- No runtime behavior changes.
+- Add a factory/helper in `review_console.py` that converts a `PromptMetricSummary` into a `ReviewConsoleItem`.
+- Suggested name: `make_prompt_metrics_finding(...)`.
+- It should create a `SYSTEM_FINDING`.
+- It should be automatic.
+- It should not require a response.
+- It should not be promptable.
+- Severity mapping:
+  - `HEALTHY` -> `INFO`
+  - `WATCH` -> `WARNING`
+  - `DEGRADED` -> `ERROR`
+- Content should be concise and human-readable:
+  - sample count
+  - average prompt tokens
+  - average construction time
+  - average total response time
+  - average overhead delta when available
+- Do not add prompt text for worker sessions.
+- Do not edit Prompt Metrics internals.
 - No Relay edits.
 - No UI.
 - No persistence.
@@ -102,7 +110,7 @@ Task:
 Tests:
 
 ```text
-python -m pytest tests/test_package_api.py tests/test_filemap.py -q
+python -m pytest tests/test_review_console.py tests/test_prompt_metrics.py -q
 python -m pytest -q
 ```
 
