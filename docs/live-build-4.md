@@ -53,6 +53,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 12:04 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Codex Reviews Round 1 cleared Build 5 (c57bd12) but Build 4 3cbf336 not yet reviewed; origin/main at a07d2d8
 2026-05-30 12:07 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0312079
 2026-05-30 12:12 -06:00 - Build 4 checked queue; status: running; Active Task = Prime orchestration state model (docs/prime-orchestration-state-model.md); origin/main at 0ebc84d
+2026-05-30 12:18 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 1d17fa1); no new task; origin/main at 37bcd7a
 ```
 
 ## Write/Completion Log
@@ -87,6 +88,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:57 -06:00 - Build 4 cross-check: finding (informational); 2caa89e added missing Meridian engineering diagrams (not Build 4 owned files); Build 1 and Build 3 idle polling; no findings affecting Build 4 docs
 2026-05-30 12:00 -06:00 - Build 4 cross-check: finding (informational); 5bd55f8 — Build 5 cadence pause cleared by Codex Reviews (d1d32af passed); no findings affecting Build 4 docs; all lanes idle or awaiting assignment
 2026-05-30 12:04 -06:00 - Build 4 cross-check: finding (informational); c57bd12 — Codex Reviews confirmed both Build 5 slices passed with zero findings; no impact on Build 4 docs; Build 4 V0 readiness map (3cbf336) still pending review
+2026-05-30 12:18 -06:00 - Build 4 cross-check: finding (informational); 3e1de48 — Build 2 Codex cadence review passed (4be1117..46e4eb3); b3728e7 — Build 1 has d2820d2 awaiting Codex review; Codex Reviews lane active; Build 4 slices 3cbf336 and 1d17fa1 still pending sweep
 ```
 
 ## Codex Review Cadence
