@@ -44,6 +44,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 10:37 -06:00 - Codex strengthened polling contract; commit pending; tests not required
 2026-05-30 10:39 -06:00 - Codex reassigned Build 3 to Haiku-sized Prompt Packet design brief; commit pending; tests not required
 2026-05-30 10:48 -06:00 - Build 3 completed Prompt Packet design brief; commit 34792fb; tests 627 passing; Obsidian updated; polling resumed
+2026-05-30 10:51 -06:00 - Codex review cleared Prompt Packet design brief and assigned Haiku-sized implementation checklist; commit pending; tests not required
 ```
 
 ## Cross-Check Activity
@@ -52,6 +53,7 @@ Append entries here when you check or act on cross-check activity.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 3 cross-check: none/finding/fix; details: <short note>
+2026-05-30 10:51 -06:00 - Build 3 cross-check: no blocking findings in commit 34792fb; brief is acceptable as design planning.
 ```
 
 ## Codex Review Cadence
@@ -67,25 +69,26 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Goal: create a simple Prompt Packet design brief.
+Goal: create a simple Prompt Packet implementation checklist.
 
 Allowed files only:
 
-- `docs/prompt-packet-design-brief.md`
+- `docs/prompt-packet-implementation-checklist.md`
 
 Task:
 
-- Write a short design brief for the future Prompt Packet domain model.
+- Write a short implementation checklist for a future stronger build lane.
 - Keep it simple and concrete.
 - Cover only:
-  - what a Prompt Packet is
-  - why it exists
-  - what fields it should eventually contain
-  - what validations it should eventually perform
-  - how it relates to Prompt Budget
-  - how it prevents Relay prompt drag
-  - what must stay out of worker prompts
-  - a small future test checklist
+  - files the future implementation should touch
+  - files it should not touch
+  - first tests to write
+  - smallest domain model shape
+  - validation rules
+  - how it should connect to Prompt Budget
+  - how it should later feed Prompt Metrics
+  - what should remain out of worker prompts
+  - open questions for Codex review
 - Do not write runtime code.
 - Do not edit package exports.
 - Do not edit FileMap.
