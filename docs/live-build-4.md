@@ -377,7 +377,7 @@ Completion:
 - Tests: not required (docs-only)
 
 **Ready for Codex Review**
-- Commit: (pending — see commit below)
+- Commit: `18e2767`
 - Files: `docs/v3-parking-lot.md`
 - Tests: not required (docs-only)
 
