@@ -248,6 +248,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-01 ~11:38 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~11:48 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~11:58 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
+2026-06-01 ~12:08 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 ```
 
 ## Write/Completion Log
@@ -322,6 +323,55 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
+
+Current Active Task (supersedes stale idle/completed text below):
+
+Goal: build an env-gated HTTP JSON Model Harness transport for V0 Relay dispatch.
+
+Context:
+
+- Provider-neutral Model Harness adapter contract exists in `653488b`.
+- Relay adapter registry and lane dispatch bridge exists in `0560eb4` and has been independently reviewed by Codex with no findings.
+- V0 still needs a real API transport path before Relay can dispatch through Meridian instead of flat-file queues.
+- Keep this provider-neutral and SDK-free: use standard-library HTTP only, with tests mocking transport/HTTP behavior and no live network calls in tests.
+- Preserve the prompt-drag rule: the outbound request body may include provider config fields and the approved payload text, but must not include queue history, proof trails, Council notes, packet metadata, role metadata, or FileMap context unless already present in the approved lane payload.
+- Before editing, verify this session is operating in its own unique worktree/path and is not sharing the same working tree as another active Build or Review session. Record the resolved path in this queue. If the session is not on a unique worktree, stop and report the worktree collision instead of editing.
+
+Allowed files only:
+
+- `meridian_core/model_adapter.py`
+- `tests/test_model_adapter.py`
+- `docs/live-build-1.md`
+
+Task:
+
+- Pull latest `origin/main` in your unique worktree before editing.
+- Add an env-gated HTTP JSON adapter or transport helper that can perform a real official-API-style POST using only the standard library.
+- The config must require provider name, model name, API key environment variable, and endpoint URL.
+- The adapter must fail clearly before any network call if API key or endpoint config is missing/blank.
+- The adapter must build a minimal request from only approved payload text plus provider/model/config fields.
+- Do not add vendor SDK dependencies.
+- Do not add account-based desktop automation.
+- Do not edit Relay executor, package exports, FileMap, or other live queues in this slice.
+
+Tests:
+
+- Add focused tests proving missing API key fails before HTTP transport, missing/blank endpoint fails before HTTP transport, request payload includes only approved prompt payload plus model/config fields, Authorization/API-key header is built from env config but not echoed into response/error text, and a fake HTTP transport response returns model text deterministically.
+- Run `python -m pytest tests/test_model_adapter.py -q`.
+- If practical, run `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`.
+
+Completion:
+
+- Commit only this slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Write log:
+
+- 2026-05-30 16:34 -06:00 - Coordinator assigned env-gated HTTP JSON Model Harness transport; commit pending; tests pending.
+
+Stale prior text follows.
 
 **No active task.** Build 1 is idle — awaiting next assignment from the coordinator.
 
