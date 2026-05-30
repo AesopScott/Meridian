@@ -236,6 +236,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-01 ~09:55 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~10:05 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-01 ~10:15 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
+2026-06-01 ~10:25 CDT - Build 1 checked queue; status: blocked-on-worktree-collision (Active Task found: V0 Relay adapter registry; stopped per task pre-edit rule — shared main worktree; allowed code files have uncommitted edits from a parallel session)
+2026-06-01 ~10:28 CDT - Build 1 hygiene note: commit 9dc351f absorbed unintended coordinator restructuring (date corrections, Completed Slices heading) authored by a parallel session whose edits re-entered working tree between my Edit and git add; my Read Checks heartbeat for 10:25 was lost in that commit; this is the corrected heartbeat addition.
 ```
 
 ## Write/Completion Log
