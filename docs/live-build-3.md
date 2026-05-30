@@ -113,7 +113,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 13:08 -06:00 - Build 3 completed FileMap refresh (7 new artifacts); commit 7ec16ac; tests 46/46 filemap, 725 full suite; Obsidian updated; polling resumed
 2026-05-30 14:20 -06:00 - Build 3 completed FileMap Relay maturity repair; commit ef934b1; tests 46/46 filemap, 748 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 2026-05-30 17:20 -06:00 - Build 3 completed FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
-2026-05-31 00:35 -06:00 - Build 3 completed FileMap refresh (4 uncatalogued docs: v0-build-readiness-map, prime-orchestration-state-model, bifrost-v0-cockpit-layout-brief, bifrost-harness-dashboard-brief); commit PENDING; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
+2026-05-31 00:35 -06:00 - Build 3 completed FileMap refresh (4 uncatalogued docs: v0-build-readiness-map, prime-orchestration-state-model, bifrost-v0-cockpit-layout-brief, bifrost-harness-dashboard-brief); commit 1378bda; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 ```
 
 ## Cross-Check Activity
@@ -190,10 +190,10 @@ Out of scope:
 
 Completion marker: Ready for Codex Review with commit hash, files changed, tests run. Reviews B will verify in Round B2.
 
-**COMPLETED 2026-05-31 00:35 -06:00. Commit: PENDING. Tests: 46/46 filemap, 785/785 full suite. Ready for Codex Review — Reviews B Round B2.**
+**COMPLETED 2026-05-31 00:35 -06:00. Commit: 1378bda. Tests: 46/46 filemap, 785/785 full suite. Ready for Codex Review — Reviews B Round B2.**
 
 **No active task. Build 3 is idle.**
 
-Last completed: FileMap refresh (4 uncatalogued docs from Round B1); commit PENDING; 2026-05-31 00:35 -06:00. Ready for Codex Review.
+Last completed: FileMap refresh (4 uncatalogued docs from Round B1); commit 1378bda; 2026-05-31 00:35 -06:00. Ready for Codex Review.
 
 Poll every 30 seconds. When a new task is written here, begin immediately.
