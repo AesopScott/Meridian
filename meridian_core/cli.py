@@ -71,6 +71,35 @@ def _bullet(label: str, value: str, color: str = "") -> str:
     return f"  {_DIM}*{_RESET} {_BOLD}{label}:{_RESET} {color}{value}{_RESET if color else ''}"
 
 
+def prime_wake(mission_path: Path | None = None) -> None:
+    """Print mission identity and harness Go/degraded/blocked lines for the non-orchestrator surface."""
+    try:
+        path = mission_path or find_mission_file(Path(__file__).parent.parent)
+        mission = load_mission(path)
+    except MissionLoadError as exc:
+        print(f"{_RED}Mission load failed: {exc}{_RESET}")
+        return
+
+    portfolio = make_sample_portfolio()
+    heartbeats = make_sample_heartbeats()
+    result = run_decision_loop(portfolio, heartbeats)
+    brief = build_wake_brief(portfolio, heartbeats, result)
+
+    print(f"Mission: {mission.current_objective}")
+    print(f"{_BOLD}{brief.title}{_RESET}")
+    for line in brief.lines:
+        color = _WAKE_STATUS_COLOR.get(line.status, "")
+        print(f"{color}{line.message}{_RESET}")
+    print()
+    print(f"  {brief.summary}")
+    if brief.bottlenecks:
+        for bn in brief.bottlenecks:
+            print(f"  {_YELLOW}!{_RESET} {bn}")
+    if brief.recommended_actions:
+        for action in brief.recommended_actions:
+            print(f"  {_GREEN}>>{_RESET} {action}")
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")

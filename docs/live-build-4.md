@@ -138,6 +138,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:52 -06:00 - Build 4 completed V0 build readiness map (docs/v0-build-readiness-map.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 12:12 -06:00 - Build 4 completed Prime orchestration state model (docs/prime-orchestration-state-model.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 15:08 -06:00 - Build 4 completed Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-30 21:29 -06:00 - Build 4 completed Meridian V1 capability plan (docs/v1-capability-plan.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
@@ -315,6 +316,11 @@ Completion:
 - Files: `docs/prime-status-console-cli-brief.md`
 - Tests: not required (docs-only)
 
-(Previous slices `3cbf336` `docs/v0-build-readiness-map.md` and `1d17fa1` `docs/prime-orchestration-state-model.md` also pending Codex Reviews sweep.)
+**Ready for Codex Review**
+- Commit: (pending — see commit below)
+- Files: `docs/v1-capability-plan.md`
+- Tests: not required (docs-only)
+
+(Previous slices `3cbf336` `docs/v0-build-readiness-map.md`, `1d17fa1` `docs/prime-orchestration-state-model.md`, and `fd9224d` `docs/prime-status-console-cli-brief.md` also pending Codex Reviews sweep.)
 
 No active task. Polling.
