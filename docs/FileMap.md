@@ -126,6 +126,8 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | `bifrost/__init__.py` | Bifrost / session harness | Bifrost package init: re-exports CockpitViewModel, render_cockpit_html, sample_cockpit_view_model, and related types from bifrost.cockpit. | `tests/test_bifrost_cockpit.py` | Public surface of the Bifrost package. Import from here, not from bifrost.cockpit directly. |
 | `bifrost/cockpit.py` | Bifrost / session harness | Static HTML renderer for the Bifrost cockpit: CockpitViewModel dataclass, render_cockpit_html returning a self-contained HTML document, XSS-safe escaping, and sample_cockpit_view_model for deterministic previews. | `tests/test_bifrost_cockpit.py` | Dependency-free (stdlib only). Owner: Build 5. Read before adding any cockpit rendering, nav, or panel logic. |
 | `bifrost/static/cockpit.css` | Bifrost / session harness | Cockpit CSS: V1 dark-mode palette, layout rules for Prime panel, lane strip, progress surface, and instrument band. Inlined into the HTML output by render_cockpit_html. | n/a | Loaded at render time via Path(__file__).parent / 'static' / 'cockpit.css'. Edit here to change cockpit visual style. |
+| `tests/test_bifrost_cockpit.py` | Bifrost / session harness | 49-test suite for the V1 Bifrost cockpit scaffold (bifrost/cockpit.py and bifrost/__init__.py). Covers rendering, HTML structure, XSS safety, and sample view model. | n/a | Build 5 commit d13f1d1. |
+| `tests/test_cockpit_state.py` | Bifrost / session harness | Test suite for meridian_core/cockpit_state.py cockpit snapshot domain types: CockpitStatus, LaneSummary, PrimeCockpitSnapshot, sort_lanes, filter_events. | n/a | Build 1 commit f56af55. |
 
 ## Visual Assets
 

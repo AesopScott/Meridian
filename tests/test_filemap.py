@@ -54,6 +54,8 @@ _REQUIRED_PATHS = [
     "bifrost/__init__.py",
     "bifrost/cockpit.py",
     "bifrost/static/cockpit.css",
+    "tests/test_bifrost_cockpit.py",
+    "tests/test_cockpit_state.py",
 ]
 
 

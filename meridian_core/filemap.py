@@ -550,6 +550,20 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Loaded at render time via Path(__file__).parent / 'static' / 'cockpit.css'. Edit here to change cockpit visual style.",
         ),
+        FileMapEntry(
+            path="tests/test_bifrost_cockpit.py",
+            area=FileArea.BIFROST,
+            purpose="49-test suite for the V1 Bifrost cockpit scaffold (bifrost/cockpit.py and bifrost/__init__.py). Covers rendering, HTML structure, XSS safety, and sample view model.",
+            related_tests=[],
+            notes="Build 5 commit d13f1d1.",
+        ),
+        FileMapEntry(
+            path="tests/test_cockpit_state.py",
+            area=FileArea.BIFROST,
+            purpose="Test suite for meridian_core/cockpit_state.py cockpit snapshot domain types: CockpitStatus, LaneSummary, PrimeCockpitSnapshot, sort_lanes, filter_events.",
+            related_tests=[],
+            notes="Build 1 commit f56af55.",
+        ),
 
         # -- File map itself --------------------------------------------
         FileMapEntry(
