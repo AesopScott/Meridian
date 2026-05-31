@@ -2,6 +2,35 @@
 
 This file is the standing queue for a second specialized Codex Reviews session.
 
+## Active Task
+
+Goal: review Build 3 Bifrost V2 UI docs FileMap registration.
+
+Scope:
+
+- Build 3 commit `13f075e` - registers `docs/bifrost-v2-cockpit-extensions.md` and `docs/jarvis-ui-source-assessment.md` in runtime FileMap, docs/FileMap, required-path coverage, and marks Build 3 ready for review.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md` for provenance only.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Review expectations:
+
+- Verify both Bifrost V2 UI direction docs are present in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Verify both entries are under the Bifrost/session harness area.
+- Verify the entries do not claim runtime UI completion, provider routing authority, or decision ownership by Bifrost.
+- Verify Build 3 has a valid next candidate and is not left on read-check-only work.
+- If clean, record proof and clear the FileMap slice. If findings exist, route a focused repair back to Build 3.
+
+Completion: commit and push only `docs/live-codex-reviews-2.md` unless routing a repair.
+
 ## Queue Authority
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
