@@ -1,9 +1,5 @@
 # Live Build 1 Queue
 
-## Codex Review Repair Routed - Resolved (Already Applied)
-
-2026-05-31 15:24 -06:00 - Codex Reviews A routed a FileMap provenance repair. Resolved 2026-06-10: the FileMap registration completion marker already says `Commit: 9fa9cdf`. Fix applied before this task was read. The `pending coordinator commit` at line 705 is for restart/resteer (separate task). No action required.
-
 ## Codex Review Repair Completed / Verified
 
 2026-05-31 14:45 -06:00 - Codex Reviews A routed MEDIUM repairs from the V2 runtime/code review sweep.
@@ -76,7 +72,7 @@ Completion:
 
 Ready for Codex Review. Routed to Codex Reviews A in `29109e7`.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair and harden the Prime queue runway policy.
 
@@ -92,7 +88,54 @@ Task: revise `docs/prime-queue-runway-policy.md` so it matches the live Meridian
 - Unique worktrees, assigned queues, and branch-movement permission are hard invariants.
 - Include what Prime should do when a provider/model limit blocks a lane: reduce active lanes, switch allowed models/providers, or reassign non-model-bound docs/review work.
 
-Tests: none required, docs-only.
+Tests: not required (docs-only).
+
+Completion:
+
+- Coordinator completed this policy repair on 2026-05-31 15:42 -06:00.
+- Files changed: `docs/prime-queue-runway-policy.md`, `docs/live-build-1.md`.
+- Tests run: not required (docs-only).
+- Commit: `b13f10f`.
+
+Ready for Codex Review.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: write a short Echo/Atlas handoff review note.
+
+Allowed files only: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1.md`.
+
+Task: inspect the current Echo/Atlas V2 docs and runtime objects, then write a short note identifying gaps, follow-up runtime objects, and how Prime should use Echo vs Atlas differently. Keep it docs-only and do not edit Echo, Atlas, package exports, FileMap, or tests.
+
+Tests: not required (docs-only).
+
+Completion:
+
+- Build 1 completed this note in mainline commits `a350f7f` / `1c81d2b`.
+- Files changed: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1.md`.
+- Tests: not required (docs-only).
+- Ready for Codex Review. Routed to Codex Reviews B for docs/architecture review.
+
+## Coordinator Override - Active Now
+
+Goal: implement the Prime project-state next-action selector.
+
+Allowed files only: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-1.md`.
+
+Task: extend Prime Autonomy with a deterministic project-state selector that chooses the next Prime action from project/backlog/lane/tier/review-gate state without model calls. This completes the remaining Prime Autonomy V2 item after `PrimeNextAction`.
+
+Requirements:
+
+- Keep the implementation stdlib-only, deterministic, frozen/immutable where new data objects are introduced, and free of filesystem/network/session side effects.
+- Do not call Echo or Atlas directly; accept Echo/Atlas signal placeholders as plain data inputs if useful.
+- Include review gate, human gate, blockers, risk tier, queue state, and confidence in the selected `PrimeNextAction`.
+- Prefer safe `PAUSE_AND_WAIT` / `ESCALATE_ERROR` outcomes when required state is missing, blocked, review-gated, or human-gated.
+- Preserve the existing `PrimeNextAction`, `select_prime_next_action()`, and `make_prime_next_action()` behavior.
+- Add focused tests proving deterministic priority ordering, review-gate blocking, human-gate behavior, safe fallback on missing state, and no regression to existing executability semantics.
+
+Tests:
+
+- `python -m pytest tests/test_prime_autonomy.py -q`
 
 Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
@@ -104,7 +147,7 @@ Allowed files: to be assigned by Prime/Codex after review.
 
 Task: wire the prompt payload snapshot into the Relay dispatch surface and Bifrost prompt visibility panel without increasing prompt drag.
 
-## Next Candidate Task
+## Archived Prior Candidate - Promoted Above
 
 Goal: write a short Echo/Atlas handoff review note.
 
@@ -158,8 +201,6 @@ Rules:
 Append entries here when this file is checked (approximately every 10 minutes while idle, or on status change).
 
 ```text
-2026-06-10 17:00 UTC - Build 1 checked queue; status: running (Active Task: Codex Review Repair resolved already-applied + Coordinator Override prime-queue-runway-policy revision; executing)
-2026-05-31 15:49 -06:00 - Build 1 checked queue; status: running (Active Task: prime-queue-runway-policy revision; executing)
 YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-30 ~22:30 CDT - Build 1 checked queue; status: running (active task found)
 2026-05-30 ~22:45 CDT - Build 1 checked queue; status: running (relay prompt budget integration task)
