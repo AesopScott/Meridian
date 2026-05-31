@@ -6,6 +6,32 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: review Build 5 Bifrost voice command contract.
+
+Scope:
+
+- Build 5 commit `b3b4f8e` - creates `docs/bifrost-voice-command-contract.md` and marks Build 5 ready for Codex Review while promoting the provider-balance/prompt-payload surface contract as the next active task.
+
+Allowed review files:
+
+- `docs/bifrost-voice-command-contract.md`
+- `docs/live-build-5.md` for provenance only.
+
+Proof:
+
+- Docs-only review; no tests required.
+
+Review expectations:
+
+- Verify the contract covers full voice-enabled input and output: listening/dictation, prompt submission, spoken Prime output, mute/stop controls, and state visibility.
+- Verify voice commands map to typed intents instead of letting Bifrost own orchestration decisions.
+- Verify harness panel, project/lane, dictation, read-aloud, and proof command families are present.
+- Verify risky or low-confidence commands are confirmation-gated and destructive actions remain out of scope.
+- Verify Build 5 now has a valid next Active Task for provider balance and prompt payload visibility.
+- If clean, record proof and clear the voice contract. If findings exist, route a focused repair back to Build 5.
+
 ## Completed / Passed
 
 Goal: review Build 3 V2/V3 FileMap discoverability audit and follow-up registration.

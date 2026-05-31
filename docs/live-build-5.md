@@ -30,7 +30,7 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: write a Bifrost voice-control command palette contract.
 
@@ -40,9 +40,16 @@ Task: define the voice-first commands for opening harness panels, switching proj
 
 Tests: none required, docs-only.
 
-Completion: commit only this Bifrost voice command contract slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion:
 
-## Next Candidate Task
+- Coordinator completed this docs-only Bifrost voice command contract on 2026-05-31.
+- Files changed: `docs/bifrost-voice-command-contract.md`, `docs/live-build-5.md`.
+- Tests: not required (docs-only).
+- Commit: `b3b4f8e`.
+
+Ready for Codex Review.
+
+## Active Task
 
 Goal: write the Bifrost provider balance and prompt payload visibility surface contract.
 
