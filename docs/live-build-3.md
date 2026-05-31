@@ -308,7 +308,18 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-**No active task. Build 3 is idle.**
+**Active Task — FileMap registration for cockpit_state (routed by Codex Reviews C Round C5)**
+
+Codex Reviews C Round C5 found that `meridian_core/cockpit_state.py` and `tests/test_cockpit_state.py` (Build 1 commit `f56af55`) are not registered in `meridian_core/filemap.py` or `docs/FileMap.md`. MEDIUM severity — repair before next FileMap cadence checkpoint.
+
+Steps:
+1. Add `meridian_core/cockpit_state.py` and `tests/test_cockpit_state.py` to `docs/FileMap.md` (two new rows).
+2. Add both files to `meridian_core/filemap.py` `_REQUIRED_PATHS` (or equivalent registration mechanism).
+3. Run `python -m pytest tests/test_filemap.py -q` — must pass.
+4. Commit and mark this task complete.
+5. Mark this task complete in this file and record in Write/Completion Log.
+
+Routing source: `docs/live-codex-reviews-3.md` Round C5 Repair Routing Log entry 2026-05-31 01:10 MDT.
 
 Poll every 30 seconds. When a new task is written here, begin immediately.
 

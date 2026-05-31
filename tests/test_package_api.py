@@ -151,3 +151,43 @@ def test_internal_helpers_are_not_root_exports():
     assert "_TIER_SEMANTICS" not in meridian_core.__all__
     assert "_ROUTING_TABLE" not in meridian_core.__all__
     assert "_SEVERITY_MAP" not in meridian_core.__all__
+
+
+def test_cockpit_state_exports():
+    from meridian_core import (
+        CockpitStatus,
+        EventSeverity,
+        LaneCockpitStatus,
+        LaneSummary,
+        ProgressEvent,
+        ProgressEventCategory,
+        PrimeCockpitSnapshot,
+        QueuePolicy,
+        filter_events,
+        lane_summary_counts,
+        sort_lanes,
+    )
+
+    assert CockpitStatus
+    assert EventSeverity
+    assert LaneCockpitStatus
+    assert LaneSummary
+    assert ProgressEvent
+    assert ProgressEventCategory
+    assert PrimeCockpitSnapshot
+    assert QueuePolicy
+    assert filter_events
+    assert lane_summary_counts
+    assert sort_lanes
+
+    for name in (
+        "CockpitStatus", "QueuePolicy", "ProgressEventCategory", "EventSeverity",
+        "LaneCockpitStatus", "LaneSummary", "ProgressEvent", "PrimeCockpitSnapshot",
+        "sort_lanes", "filter_events", "lane_summary_counts",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
+def test_cockpit_state_private_not_exported():
+    assert "_LANE_STATUS_ORDER" not in meridian_core.__all__
+
