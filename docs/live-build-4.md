@@ -32,13 +32,22 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write a Prime workflow/sub-agent usage checklist for harness offloading.
 
 Allowed files only: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
 
 Task: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.
+
+Completion:
+
+- Coordinator completed this docs-only checklist on 2026-05-31.
+- Files changed: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
+- Tests: not required (docs-only).
+- Commit: pending.
+
+Ready for Codex Review.
 
 ## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 08:55 -06:00)~~
 
@@ -57,13 +66,15 @@ Task: convert the workflow/sub-agent architecture note into an operational check
 - Files: `docs/workflows-subagent-harness-architecture.md`
 - Tests: not required (docs-only)
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: write the DeepSeek validation benchmark plan.
 
 Allowed files only: `docs/deepseek-validation-benchmark-plan.md`, `docs/live-build-4.md`.
 
 Task: define the benchmark plan Meridian will use before DeepSeek can move beyond candidate provider status. Cover direct API proof, Q-mode prompt-payload flatness, small coding tasks, docs tasks, failure modes, required Codex review proof, demotion triggers, and why DeepSeek cannot clear reviews, move branches, or receive autonomous coding authority until the gate passes.
+
+Completion: commit only this docs slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
 
 This file is the standing assignment queue for Build 4.
 
