@@ -124,6 +124,218 @@ def select_prime_next_action(
     )
 
 
+@dataclass(frozen=True)
+class ProjectState:
+    """Immutable snapshot of project/lane/queue state for Prime action selection.
+
+    Provides a deterministic input shape for select_prime_project_action()
+    without requiring Echo/Atlas/model calls. All fields are plain data;
+    no filesystem, network, or session side effects.
+    """
+
+    lane_id: str = ""
+    active_task: Optional[str] = None
+    next_candidate: Optional[str] = None
+    cadence_count: int = 0
+    cadence_limit: int = 3
+    review_gate_blocked: bool = False
+    human_gate_required: bool = False
+    blockers: FrozenSet[str] = field(default_factory=frozenset)
+    queue_state: str = "idle"  # idle, running, blocked, paused
+    risk_tier: PrimeActionRiskTier = PrimeActionRiskTier.SAFE
+    confidence: PrimeActionConfidence = PrimeActionConfidence.FALLBACK
+    target_harness: Optional[str] = None
+    target_lane: Optional[str] = None
+
+
+def select_prime_project_action(state: ProjectState) -> PrimeNextAction:
+    """Deterministic project-state → Prime action selector.
+
+    Chooses the next Prime action from project/backlog/lane/tier/review-gate
+    state without any model calls. Priority ordering:
+
+    1. Blockers present → ESCALATE_ERROR
+    2. Review gate blocked (cadence_count >= cadence_limit) → PAUSE_AND_WAIT
+    3. Human gate required → PAUSE_AND_WAIT
+    4. No active task AND no next candidate → ESCALATE_ERROR
+    5. Lane is blocked or paused → PAUSE_AND_WAIT
+    6. Active task present → ADVANCE_COGNITION (work ready)
+    7. Next candidate present but no active task → POLL_SESSION
+    8. Default safe fallback → PAUSE_AND_WAIT
+
+    Returns a fully-populated PrimeNextAction with rationale, evidence, risk,
+    confidence, blockers, and human-gate status reflecting the decision.
+    """
+
+    # Build evidence and rationale as we go
+    evidence_parts = []
+    rationale_parts = []
+
+    # 1. Blockers take absolute priority
+    if state.blockers:
+        evidence_parts.append(f"blockers:{','.join(sorted(state.blockers))}")
+        rationale_parts.append(
+            f"Blockers present: {', '.join(sorted(state.blockers))}"
+        )
+        return PrimeNextAction(
+            action_type=PrimeActionType.ESCALATE_ERROR,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=state.risk_tier,
+            source=PrimeActionSource.ERROR_RECOVERY,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=state.human_gate_required,
+            blockers=state.blockers,
+        )
+
+    # 2. Review gate blocks further work
+    if state.review_gate_blocked:
+        evidence_parts.append(
+            f"review_gate:blocked(cadence={state.cadence_count}/{state.cadence_limit})"
+        )
+        rationale_parts.append(
+            f"Review gate blocked: cadence {state.cadence_count}/{state.cadence_limit}"
+        )
+        return PrimeNextAction(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.COGNITION_POLICY,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=state.human_gate_required,
+            blockers=state.blockers,
+        )
+
+    # 2b. Cadence count >= limit (explicit check)
+    if state.cadence_count >= state.cadence_limit:
+        evidence_parts.append(
+            f"cadence:limit(cadence={state.cadence_count}/{state.cadence_limit})"
+        )
+        rationale_parts.append(
+            f"Cadence limit reached: {state.cadence_count}/{state.cadence_limit}"
+        )
+        return PrimeNextAction(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.COGNITION_POLICY,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=state.human_gate_required,
+            blockers=state.blockers,
+        )
+
+    # 3. Human gate
+    if state.human_gate_required:
+        evidence_parts.append("human_gate:pending")
+        rationale_parts.append("Human gate required — awaiting approval")
+        return PrimeNextAction(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.HUMAN_OVERRIDE,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=True,
+            blockers=state.blockers,
+        )
+
+    # 4. No active task and no next candidate → nothing to do
+    if not state.active_task and not state.next_candidate:
+        evidence_parts.append("queue:empty")
+        rationale_parts.append("No active task and no next candidate in queue")
+        return PrimeNextAction(
+            action_type=PrimeActionType.ESCALATE_ERROR,
+            confidence=PrimeActionConfidence.MEDIUM,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=False,
+            blockers=state.blockers,
+        )
+
+    # 5. Lane is blocked or paused
+    if state.queue_state in ("blocked", "paused"):
+        evidence_parts.append(f"queue_state:{state.queue_state}")
+        rationale_parts.append(f"Lane is {state.queue_state}")
+        return PrimeNextAction(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.MEDIUM,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=state.human_gate_required,
+            blockers=state.blockers,
+        )
+
+    # 6. Active task present — work is ready
+    if state.active_task:
+        evidence_parts.append(f"active_task:present")
+        rationale_parts.append(
+            f"Active task ready: {state.active_task[:80]}{'...' if len(state.active_task or '') > 80 else ''}"
+        )
+        return PrimeNextAction(
+            action_type=PrimeActionType.ADVANCE_COGNITION,
+            confidence=state.confidence,
+            risk_tier=state.risk_tier,
+            source=PrimeActionSource.COGNITION_POLICY,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=state.human_gate_required,
+            blockers=state.blockers,
+        )
+
+    # 7. Next candidate present but no active task — poll for promotion
+    if state.next_candidate:
+        evidence_parts.append("next_candidate:present")
+        rationale_parts.append("Next candidate task awaiting promotion")
+        return PrimeNextAction(
+            action_type=PrimeActionType.POLL_SESSION,
+            confidence=PrimeActionConfidence.MEDIUM,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness=state.target_harness,
+            target_lane=state.target_lane,
+            rationale="; ".join(rationale_parts),
+            evidence=frozenset(evidence_parts),
+            human_gate_required=state.human_gate_required,
+            blockers=state.blockers,
+        )
+
+    # 8. Default safe fallback
+    evidence_parts.append("fallback:default")
+    rationale_parts.append("No matching condition — defaulting to safe pause")
+    return PrimeNextAction(
+        action_type=PrimeActionType.PAUSE_AND_WAIT,
+        confidence=PrimeActionConfidence.FALLBACK,
+        risk_tier=PrimeActionRiskTier.SAFE,
+        source=PrimeActionSource.ERROR_RECOVERY,
+        target_harness=state.target_harness,
+        target_lane=state.target_lane,
+        rationale="; ".join(rationale_parts),
+        evidence=frozenset(evidence_parts),
+        human_gate_required=False,
+        blockers=state.blockers,
+    )
+
+
 def make_prime_next_action(
     action_type: PrimeActionType,
     confidence: PrimeActionConfidence,
