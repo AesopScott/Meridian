@@ -118,6 +118,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 10:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 11:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 11:20 -06:00 - Build 3 checked queue; status: active task found (FileMap repair — live-codex-reviews-2.md, Round B2); starting work
+2026-05-31 06:45 UTC - Build 3 checked queue; status: idle; Active Task (V2 queue/runway FileMap registration) already complete (commit 3921354); cadence 2/3 since Round B5; awaiting next assignment
 2026-05-31 11:35 -06:00 - Build 3 checked queue; status: idle; Round B2 repair closed (intercepted by 45497b1); awaiting new task assignment
 2026-05-31 11:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 12:05 -06:00 - Build 3 checked queue; status: idle; Round B2 repair closed (45497b1); awaiting Reviews B Round B3 verification and next assignment
