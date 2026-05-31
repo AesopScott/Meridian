@@ -1,69 +1,145 @@
-# V2 Package API Surface Note
+﻿# V2 Package API Surface Note
 
-Meridian V2 introduces four new harnesses (Echo, Atlas, Session Lifecycle, Bifrost) plus Prime Autonomy extensions. Each harness has stable domain objects that should eventually become root package exports once their implementation and proof contracts mature.
+\\\Status:\\\ V2 first-wave package API policy — defines which domain objects should eventually be public \meridian_core\ root exports once their runtime slices are built and review-cleared.
 
-## Surface Design Principles
+\\\Purpose:\\\ Guide Build 1 (runtime) and Build 2 (package API decisions) on what becomes root-exported public surface vs. module-level imports for V2 harnesses.
 
-V2 objects follow the same export criteria as V0/V1:
-- stable domain objects callers directly instantiate or receive
-- primary loader/builder functions
-- small enums that are part of public decision contracts
+---
 
-Experimental internals, dispatch mechanics, and harness-internal helpers remain module-level imports until proof review is complete.
+## Principle
 
-## Proposed V2 Public Surface
+V2 harnesses introduce new domain objects. These objects should be root-exportable only after:
 
-### Echo Harness
+1. The runtime implementation is built and unit-tested.
+2. The contract is complete and review-cleared.
+3. Cross-harness integration has been proven (e.g., Echo hits flowing to Atlas, Atlas hits flowing to Relay/Aegis).
 
-**Intended public exports:**
-- `MemoryRecord` — domain object representing a single episode of conversation, action, or observation
-- `MemoryQuery` — domain object for querying the memory store
-- `MemoryHit` — domain object representing a memory match result
+Until then, they live as module-level imports. This protects the public API from churn and ensures that callers of \meridian_core\ see only stable, proven surfaces.
 
-**Rationale:** Echo callers (Prime, Relay, Session) need to reason about what the memory system knows. These objects form the contract boundary between Echo and the rest of the system.
+---
 
-**Status:** awaiting implementation and proof review (see `docs/v2-progress-tracker.md`)
+## Echo Harness (Durable Memory)
 
-### Atlas Harness
+\\\Contract:\\\ \docs/echo-memory-contract.md\ (complete; runtime implementation pending).
 
-**Intended public exports:**
-- `AtlasQuery` — domain object for spatial/semantic queries
-- `AtlasHit` — domain object representing a spatial match result
-- `AtlasResult` — aggregate result from a query (collection of hits)
+\\\Intended public surface (once built and cleared):\\\
 
-**Rationale:** Callers instantiate `AtlasQuery` to ask spatial questions and consume `AtlasHit`/`AtlasResult` to interpret responses. These form the harness boundary.
+- \MemoryRecord\ — immutable durable memory entry with summary, body, source, importance, pinning, supersession.
+- \MemoryQuery\ — typed query with project, kinds, tags, since, limit, include_superseded.
+- \MemoryHit\ — ranked result with record, score, reason.
+- \MemoryKind\ enum — DECISION, FACT, PLAN, GATE_OUTCOME, STANDING_INSTRUCTION, NOTE.
+- \MemorySource\ enum — PRIME, SCOTT, REVIEW_CONSOLE, WORKER, IMPORT.
 
-**Status:** awaiting implementation and proof review (see `docs/v2-progress-tracker.md`)
+\\\Why public:\\\ Prime, Atlas, Bifrost, and Aegis all consume these objects. A stable, public typing is load-bearing for V2.
 
-### Prime Autonomy
+\\\Stability guarantee:\\\ Once Echo's runtime lands and cross-harness proof is complete, these names should be frozen. Changes to MemoryRecord fields or MemoryKind values are breaking changes.
 
-**Intended public exports:**
-- `PrimeNextAction` — domain object representing Prime's decision about what to do next
+\\\Current location:\\\ Will be in \meridian_core/echo.py\ with public exports via \meridian_core/__init__.py\ after Build 1 builds it and Build 2 routes the exports.
 
-**Rationale:** Relay and workflow dispatch use `PrimeNextAction` to understand Prime's guidance. This is the output contract of Prime's autonomy layer.
+\\\Candidates for deferral:\\\ Private repository methods and internal validators stay in the module; only the domain classes and public query/result types become root exports.
 
-**Status:** awaiting implementation and proof review (see `docs/v2-progress-tracker.md`)
+---
 
-### Session Lifecycle Harness
+## Atlas Harness (Retrieval / RAG)
 
-**Intended public exports:** TBD after harness implementation begins. Likely candidates include session state and transition contracts.
+\\\Contract:\\\ \docs/atlas-retrieval-contract.md\ (complete; runtime implementation pending).
 
-**Status:** blocked on harness design (see `docs/v2-progress-tracker.md`)
+\\\Intended public surface (once built and cleared):\\\
 
-### Workflow Dispatch
+- \AtlasHit\ — single retrieval result with path, title, reason, excerpt, source, score.
+- \AtlasQuery\ — typed query with terms, areas, required_paths, include_echo, project, limit.
+- \AtlasResult\ — full response with hits, missing_paths, truncated.
+- \AtlasSource\ enum — FILEMAP, DOC, ECHO.
 
-**Intended public exports:** TBD after workflow model is finalized. Likely candidates include dispatch requests and action routing contracts.
+\\\Why public:\\\ Prime calls Atlas directly. Bifrost renders hits. Aegis reviews hit excerpts. These objects form the public interface.
 
-**Status:** blocked on design phase (see `docs/v2-detailed-build-plan.md`)
+\\\Stability guarantee:\\\ Once Atlas's runtime lands and FileMap integration is proven, these names should be frozen. Changes to AtlasHit fields or AtlasSource values are breaking.
 
-## What Stays Internal (V2)
+\\\Current location:\\\ Will be in \meridian_core/atlas.py\ with public exports via \meridian_core/__init__.py\ after Build 1 builds it and Build 2 routes the exports.
 
-**Harness internals** — Echo indexing strategies, Atlas spatial algorithms, Prime decision reasoning paths, Session state machines, and Workflow routing logic all remain module-level imports. Expose only the domain objects callers need to reason about decisions, not the machinery that makes them.
+\\\Candidates for deferral:\\\ The optional Echo integration in Atlas lives as an internal implementation detail initially. The public surface assumes \include_echo=False\ in the first slice. When Echo folding is enabled, the return shape does not change — only the internals.
 
-**Sub-agent orchestration** — any V2 workflow sub-agent framework internals stay internal until the framework pattern is proven across at least two harnesses.
+---
 
-## Timeline
+## Prime Autonomy (Next-Action Selection)
 
-Public surface export decisions for each harness will be made during that harness's proof review cycle (rule 23 of v2-detailed-build-plan.md). Until then, all V2 exports remain candidates pending evidence.
+\\\Contract:\\\ \docs/prime-autonomy-v2-contract.md\ (not yet written; referenced in v2-detailed-build-plan.md).
 
-See `docs/v2-progress-tracker.md` for harness-by-harness build status and `docs/package-api-surface-note.md` for V0/V1 export history and rationale.
+\\\Intended public surface (once contract and implementation land):\\\
+
+- \PrimeNextAction\ — domain object capturing proposed action, confidence, blockers, human-gate requirements, and reasoning summary.
+
+\\\Why public:\\\ Prime's autonomy depends on a stable, typed representation of "what should I do next?" Callers should not have to parse prose or infer structure.
+
+\\\Stability guarantee:\\\ Once Prime Autonomy's implementation is built and validated against real project state, the \PrimeNextAction\ shape should be frozen.
+
+\\\Current location:\\\ Will be in \meridian_core/prime_autonomy.py\ with public exports via \meridian_core/__init__.py\ after Build 1 builds it and Build 2 routes the exports.
+
+---
+
+## Session Lifecycle Harness (Spawn, Watch, Steer, Recover)
+
+\\\Contract:\\\ \docs/session-lifecycle-v2-contract.md\ (not yet written).
+
+\\\Intended public surface (once contract and implementation land):\\\
+
+- \SessionLifecycleState\ — immutable snapshot of current session state with timestamps, branch/worktree info, heartbeat history, and permission context.
+- \SessionCommandPlan\ — typed command to a session (spawn, watch, steer, stop, transfer, archive, stale_recovery, restart_request).
+
+\\\Why public:\\\ Prime coordinates session lifecycle. Scott views session state in Bifrost.
+
+\\\Stability guarantee:\\\ Once Session Lifecycle is built, the command vocabulary and state enum should be frozen.
+
+\\\Current location:\\\ Will be in \meridian_core/session_lifecycle.py\ with public exports via \meridian_core/__init__.py\ after Build 1 builds it and Build 2 routes the exports.
+
+---
+
+## Workflow Sub-Agent Harness (Dispatch, Heartbeat, Result)
+
+\\\Contract:\\\ \docs/workflow-subagent-harness-contract.md\ (complete; runtime implementation pending).
+
+\\\Intended public surface (once built and cleared):\\\
+
+- \WorkflowWorkOrder\ — complete, self-contained instruction to a workflow sub-agent.
+- \WorkflowInputPacket\ — context given to the sub-agent.
+- \WorkflowHeartbeat\ — periodic status update.
+- \WorkflowResultSummary\ — successful result.
+- \WorkflowErrorSummary\ — error result.
+- \WorkflowResteerRequest\ — suggestion to Prime for a modified work order.
+- \WorkflowHarness\ enum — ECHO, ATLAS, AEGIS, RELAY, BIFROST, BEACON, SESSION_LIFECYCLE.
+- \WorkflowPhase\ enum — STARTED, WORKING, WAITING_FOR_TOOL, WAITING_FOR_GATE, WARNING, FINALIZING.
+- \WorkflowFailureKind\ enum — TIMEOUT, TOOL_DENIED, INPUT_INVALID, PROOF_UNAVAILABLE, GATE_REQUIRED, INTERNAL_ERROR, RESTEER_REQUESTED.
+
+\\\Why public:\\\ Prime issues work orders directly. Every harness that does bounded work consumes the work-order shape.
+
+\\\Stability guarantee:\\\ Workflow dispatch is the contract between Prime and sub-agent harnesses. Changes are breaking.
+
+\\\Current location:\\\ Will be in \meridian_core/workflow_dispatch.py\ with public exports via \meridian_core/__init__.py\ after Build 1 builds the sub-agent spawn/watch infrastructure and Build 2 routes the exports.
+
+---
+
+## Integration with V0/V1
+
+Echo, Atlas, Prime Autonomy, Session Lifecycle, and Workflow dispatch are additive. They do not change existing public exports (Mission, RiskTier, RelayRoute, PromptPacket, Aegis*, Bifrost*, etc.). Those remain stable.
+
+---
+
+## Review and Deferral Conditions
+
+These exports are deferred until:
+
+1. The runtime module is built (Build 1).
+2. The module is tested (unit tests passing, ≥80% coverage).
+3. The Build 2 + Build 1 integration is proven (cross-module imports succeed, package API tests pass).
+4. Codex review is complete and no blocking findings remain.
+
+---
+
+## Next Steps
+
+1. Build 1 implements Echo, Atlas, Prime Autonomy, Session Lifecycle.
+2. Build 2 exports these to \meridian_core.__init__\ with comprehensive package API tests.
+3. Build 1 ensures Workflow dispatch infrastructure is complete.
+4. Build 2 exports Workflow types to \meridian_core.__init__\.
+
+This note is living documentation. As each harness is built, update with actual field names, integration discoveries, and stability guarantees.
