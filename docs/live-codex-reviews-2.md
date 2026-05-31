@@ -10,12 +10,12 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Goal: review Build 3 V2/V3 FileMap discoverability audit and follow-up registration.
 
-Status: passed by Codex Reviews B on 2026-05-31 after a coordinator repair. Initial review found stale audit wording that still described `docs/workflows-subagent-harness-architecture.md` as unresolved after it had been registered; repair commit `b16998a` corrected the audit and queue provenance. No further repair routed.
+Status: passed by Codex Reviews B on 2026-05-31 after a coordinator repair. Initial review found stale audit wording that still described `docs/workflows-subagent-harness-architecture.md` as unresolved after it had been registered; repair commit `9ff982a` corrected the audit and queue provenance. No further repair routed.
 
 Scope:
 
 - Build 3 commit `3c6f647` - creates `docs/filemap-v2-v3-discoverability-audit.md`, registers `docs/workflows-subagent-harness-architecture.md` and `docs/filemap-v2-v3-discoverability-audit.md` in runtime FileMap and required-path coverage, and marks Build 3 ready for review.
-- Repair commit `b16998a` - updates the audit so the workflow architecture registration is listed as resolved and pending upstream outputs remain distinct from current FileMap misses.
+- Repair commit `9ff982a` - updates the audit so the workflow architecture registration is listed as resolved and pending upstream outputs remain distinct from current FileMap misses.
 
 Allowed review files:
 
