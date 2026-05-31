@@ -72,18 +72,9 @@ Proof:
 
 Completion: Build 3 cadence cleared. No repair routed.
 
-## Next Candidate Review Scope
+## Active Task
 
-Goal: clear Build 3's FileMap cadence pause and then review coordinator V2 contract wave commit `e37030e`.
-
-Immediate Build 3 scope:
-
-- Review Build 3 recent FileMap cadence window ending with the Coordinator Override completion recorded as commit `67a75dc` plus completion marker `b3316b6`.
-- Verify recent FileMap registrations did not introduce stale paths, wrong owners, or broken required-path coverage.
-- Required proof: `python -m pytest tests/test_filemap.py -q`.
-- If clear, record Build 3 cadence clearance so Build 3 can register the new V2 contract-wave docs.
-
-Then review coordinator V2 contract wave commit `e37030e`.
+Goal: review coordinator V2 contract wave commit `e37030e`.
 
 Contract wave scope:
 
