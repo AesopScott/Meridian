@@ -186,6 +186,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 07:05 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 07:15 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 07:25 -06:00 - Build 2 checked queue; status: running (Active Task found — V0 prime_status and prime_console CLI)
+2026-05-31 08:50 -06:00 - Build 2 checked queue; Active Task found: V2 harness maturity/build-number policy (Coordinator Override); executing
 2026-06-01 02:30 -06:00 - Build 2 checked queue; status: idle (tasks 989366f + 9c3e1a3 complete, cadence cleared; Active Task section stale — awaiting orchestrator update; polling)
 2026-06-01 10:15 -06:00 - Build 2 checked queue; Active Task found: V2 CognitionPolicy package API surface; executing
 2026-06-01 10:20 -06:00 - Build 2 checked queue; status: idle (task e08e598 complete; returning to polling)
@@ -329,6 +330,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-05 00:00 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 2 of 3; polling)
 2026-06-05 00:10 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; cadence 2 of 3; maintaining pause per rule 19)
 2026-06-05 00:20 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; cadence 2 of 3; maintaining pause per rule 19)
+2026-06-05 00:30 -06:00 - Build 2 checked queue; Active Task found: V2 harness maturity/build-number policy (Coordinator Override); executing
 ```
 
 ## Write/Completion Log
