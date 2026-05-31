@@ -2,6 +2,18 @@
 
 ## Coordinator Override - Active Now
 
+Goal: write the public exports readiness checklist.
+
+Allowed files only: `docs/public-exports-readiness-checklist.md`, `docs/live-build-2.md`.
+
+Task: create a docs-only checklist for deciding when V2 harness objects become package-root exports. Cover runtime stability, tests, docs, FileMap registration, public naming, and backward-compatibility risk. This supersedes completed package/API and harness maturity policy tasks.
+
+Tests: none required, docs-only.
+
+Completion: commit only this readiness checklist slice, push, update Obsidian, and mark Ready for Codex Review.
+
+## Superseded Task
+
 Goal: write the V2 harness maturity/build-number policy.
 
 Allowed files only: `docs/harness-maturity-build-policy.md`, `docs/live-build-2.md`.

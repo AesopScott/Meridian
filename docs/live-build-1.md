@@ -2,15 +2,15 @@
 
 ## Coordinator Override - Active Now
 
-Goal: write a short Echo/Atlas handoff review note.
+Goal: define the V2 queue-runway runtime object.
 
-Allowed files only: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1.md`.
+Allowed files only: `docs/queue-runway-runtime-object.md`, `docs/live-build-1.md`.
 
-Task: inspect the current Echo/Atlas handoff work if present, then write a short note identifying gaps, follow-up runtime objects, and how Prime should use Echo vs Atlas differently. This supersedes the completed Prime queue runway policy slice.
+Task: write the contract for the structured runtime object that will replace markdown polling: lane id, worktree path, active task, next candidate, cadence status, review gate, last read/write time, and escalation state. This supersedes the completed Echo/Atlas review note.
 
 Tests: none required, docs-only.
 
-Completion: commit only this review note slice, push, update Obsidian, and mark Ready for Codex Review.
+Completion: commit only this runtime-object contract slice, push, update Obsidian, and mark Ready for Codex Review.
 
 ## Next Candidate Task
 
