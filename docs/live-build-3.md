@@ -88,7 +88,7 @@ Allowed files only: `docs/live-build-3.md`.
 
 Task: no executable FileMap implementation task is currently assigned. Continue polling and do not create read-check-only commits. If a new V2/V3 doc lands without FileMap coverage, record the gap in the Cross-Check Activity section and wait for Prime/Codex to assign the exact registration slice.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: register the Bifrost voice command contract in FileMap.
 
@@ -104,6 +104,23 @@ Requirements:
 - Keep the change mechanical and small.
 
 Tests: `python -m pytest tests/test_filemap.py -q`.
+
+Completion:
+
+- Coordinator completed this FileMap registration on 2026-05-31.
+- Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+- Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed).
+- Commit: `06f0325`.
+
+Ready for Codex Review.
+
+## Active Task
+
+Goal: await next FileMap assignment.
+
+Allowed files only: `docs/live-build-3.md`.
+
+Task: no executable FileMap implementation task is currently assigned. Continue polling and do not create read-check-only commits. If a new V2/V3 doc lands without FileMap coverage, record the gap in the Cross-Check Activity section and wait for Prime/Codex to assign the exact registration slice.
 
 This file is the standing assignment queue for Build 3.
 

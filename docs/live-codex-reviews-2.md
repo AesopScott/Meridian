@@ -6,6 +6,31 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: review Build 3 Bifrost voice command FileMap registration.
+
+Scope:
+
+- Build 3 commit `06f0325` - registers `docs/bifrost-voice-command-contract.md` in runtime FileMap and required-path coverage, then marks Build 3 ready for review.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md` for provenance only.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Review expectations:
+
+- Verify `docs/bifrost-voice-command-contract.md` is present in both `make_default_map()` and `_REQUIRED_PATHS`.
+- Verify the FileMap entry is under the Bifrost area and does not claim runtime speech implementation.
+- Verify Build 3 is not left with an executable stale implementation task after completion.
+- If clean, record proof and clear the FileMap slice. If findings exist, route a focused repair back to Build 3.
+
 ## Completed / Passed With Follow-Up
 
 Goal: review Build 5 Bifrost voice command contract.

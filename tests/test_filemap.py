@@ -24,6 +24,7 @@ _REQUIRED_PATHS = [
     "docs/session-lifecycle-v2-contract.md",
     "docs/federation-harness-horizon.md",
     "docs/session-card-queue-activation-contract.md",
+    "docs/bifrost-voice-command-contract.md",
     "docs/deepseek-provider-validation-gate.md",
     "meridian_core/models.py",
     "meridian_core/mission.py",

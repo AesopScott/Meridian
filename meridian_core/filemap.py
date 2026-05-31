@@ -688,6 +688,13 @@ def make_default_map() -> FileMap:
             notes="Read before adding Q controls, polling UI, queue state display, or session-card lifecycle wiring.",
         ),
         FileMapEntry(
+            path="docs/bifrost-voice-command-contract.md",
+            area=FileArea.BIFROST,
+            purpose="Bifrost voice command contract: voice input/output states, typed command intents, harness panel commands, dictation, read-aloud controls, and proof/status commands.",
+            related_tests=[],
+            notes="UI/product contract only. Read before adding microphone, dictation, spoken Prime output, or voice-command cockpit behavior.",
+        ),
+        FileMapEntry(
             path="docs/v1-bifrost-cockpit-implementation-brief.md",
             area=FileArea.BIFROST,
             purpose="V1 Bifrost cockpit implementation brief: what V1 builds, what it omits, and which UI slices land first. Turns V0's domain capabilities into a Prime-centered, browser-rendered cockpit surface.",
