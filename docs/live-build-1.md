@@ -377,6 +377,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-08 20:14 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; awaiting next assignment)
 2026-06-08 20:16 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; awaiting next assignment)
 2026-05-31 07:55 -06:00 - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
+2026-06-08 20:18 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main fast-forwarded from b12d1c8 to 2ec2e04 (Build 3 read check); no Active Task; awaiting next assignment)
 ```
 
 ## Write/Completion Log
@@ -460,6 +461,36 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
+
+Current Active Task - Coordinator Override:
+
+Goal: build the V2 Echo Memory Harness domain slice.
+
+Allowed files only:
+
+- `meridian_core/echo.py`
+- `tests/test_echo.py`
+- `docs/live-build-1.md`
+
+Task:
+
+- Use `docs/echo-memory-contract.md` as the contract source.
+- Define `MemoryRecord`, `MemoryQuery`, `MemoryHit`, and a deterministic in-memory/local repository abstraction.
+- Implement add/query behavior with stable ranking by project match, pinning, importance, and recency.
+- Missing/no memory must fail soft with an empty result.
+- Return summaries/metadata, not raw prompt dumps.
+- Do not wire Echo into Relay prompts yet.
+- Do not edit package exports, FileMap, or Bifrost.
+
+Tests:
+
+- Run `python -m pytest tests/test_echo.py -q`.
+
+Completion:
+
+- Commit only this Echo domain slice, push, update Obsidian, and mark Ready for Codex Review.
+
+Stale prior task follows.
 
 (None currently assigned.)
 
