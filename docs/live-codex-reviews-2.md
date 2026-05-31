@@ -56,7 +56,7 @@ Look for:
 | --- | --- | --- | --- | --- | --- |
 | Build 3 | 1378bda | FileMap repair — register 4 uncatalogued docs (Round B2) | passed | Round B1 MEDIUM repair verified closed; 1 new MEDIUM finding (live-codex-reviews-2.md still uncatalogued); 2 LOW prose-divergence carryovers from Round B1 still deferred | route 1-row FileMap follow-up to Build 3 for `docs/live-codex-reviews-2.md`; verify in Round B3 |
 | Build 4 | 1d17fa1 | Prime orchestration state model (Round B1) | passed | LOW severity-ladder design question recorded | clarify FindingSeverity↔EvidenceSeverity mapping when Build 4 next picks up state-model implementation slice |
-| Build 5 | 9328272 | V1 Harness Dashboard implementation | pending Round B8 | final V1 cockpit item ready for review | run Round B8 proof and clear or route repair |
+| Build 5 | 9328272 | V1 Harness Dashboard implementation | passed Round B8 | no findings; final V1 cockpit item cleared | V1 cockpit build is review-cleared |
 
 ## Review Round Scope
 
@@ -156,6 +156,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-31 10:20 -06:00 - Reviewed Build 3 commit 1378bda (Round B2 repair verification); result: pass-with-findings; tests: `python -m pytest tests/test_filemap.py -q` → 46/46 passed in 0.12s; notes: all 4 routed docs (`docs/v0-build-readiness-map.md`, `docs/prime-orchestration-state-model.md`, `docs/bifrost-v0-cockpit-layout-brief.md`, `docs/bifrost-harness-dashboard-brief.md`) registered in both docs/FileMap.md and meridian_core/filemap.py with matching purpose/notes prose (no new divergence introduced); FileArea taxonomy correct (ARCHITECTURE for state model + V0 readiness map; BIFROST for both Bifrost briefs); all 4 paths added to `_REQUIRED_PATHS`. Round B1 MEDIUM repair closed. NEW MEDIUM finding: `docs/live-codex-reviews-2.md` was created since 4075ef4 (commit `3de9c74`) and remains uncatalogued; Build 3 did not note it in cross-check despite the Active Task's instruction to flag any other new docs there. Round B1 LOW prose-divergence findings on the existing `live-codex-reviews.md` and `prime-orchestration-harness-prototype.md` entries remain deferred (Build 3 did not opportunistically fold them in; permitted by task scope).
 
 2026-05-31 03:11 -06:00 - Reviewed Build 5 commit e1bf9db (Round B7 cadence review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 97/97 passed in 0.13s; notes: progress events remain render-only and deterministic, no queue/log/env/prompt reads, no JavaScript, no persistence; category/severity/source/timestamp/summary/drilldown are escaped; severity counts and CSS hooks are stable; snapshot mapping preserves typed category/severity.
+2026-05-31 03:41 -06:00 - Reviewed Build 5 commit 9328272 (Round B8 final V1 cockpit review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 104/104 passed in 0.13s; notes: Harness Dashboard is static, view-only, grouped, and escaped; no queue/log/env/prompt reads, no JavaScript, no persistence, and no mutation controls; existing Bifrost files are already registered so no FileMap repair is required.
 
 ## Proof Log
 
@@ -180,6 +181,7 @@ Minimum proof expectations:
 - Repair verification: original finding, repair commit, and test/reference evidence that the finding is closed.
 
 2026-05-31 03:11 -06:00 - Proof for Build 5 commit e1bf9db; proof type: test/diff/manual; evidence: `git show --stat --oneline e1bf9db -- bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py docs/live-build-5.md` shows the bounded Build 5 progress-surface slice; `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 97/97 passed; manual inspection confirms no live reads, no JavaScript, escaped metadata, stable severity count hooks, and typed snapshot category/severity mapping; result: pass.
+2026-05-31 03:41 -06:00 - Proof for Build 5 commit 9328272; proof type: test/diff/manual; evidence: `git show --stat --oneline 9328272 -- bifrost/__init__.py bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py docs/live-build-5.md` shows a bounded Bifrost Harness Dashboard slice; `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 104/104 passed; manual inspection confirms view-only grouped cards, capability chips, planned placeholders, attention/status hooks, escaped harness text, and no new file paths requiring FileMap registration; result: pass.
 
 ## Findings
 
