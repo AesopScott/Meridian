@@ -414,3 +414,27 @@ Write log:
 - Repair proof: `python -m pytest tests/test_filemap.py tests/test_cockpit_provider.py -q` -> 69/69 passed.
 - Build 5 proof: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 94/94 passed.
 - Combined proof: `python -m pytest tests/test_filemap.py tests/test_cockpit_provider.py tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 163/163 passed.
+
+## Coordinator Addendum - Round B7 Review Scope Queued
+
+2026-05-31 02:58 MDT - Round B7 scope queued by coordinator.
+
+- Build 5: `e1bf9db` V1 configurable progress/proof surface implementation.
+- Cadence: this is Build 5's third task-changing commit after `d13f1d1` and `5c89e87`; Build 5 should pause normal implementation until this cadence review clears.
+- Files:
+  - `bifrost/cockpit.py`
+  - `bifrost/static/cockpit.css`
+  - `tests/test_bifrost_cockpit.py`
+  - `docs/live-build-5.md` for provenance only.
+- Required proof:
+  - Inspect `git show e1bf9db -- bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py docs/live-build-5.md`.
+  - Run `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q`.
+  - Confirm progress events remain render-only and deterministic: no queue/log/env/prompt reads, no JavaScript, and no persistence.
+  - Confirm category, severity, source, timestamp, summary, and optional drilldown reference are escaped before rendering.
+  - Confirm the severity summary/counts and CSS hooks are stable enough for the V1 cockpit UI.
+  - Confirm snapshot mapping preserves typed progress category/severity from `PrimeCockpitSnapshot`.
+- Output:
+  - Declare Round B7 scope.
+  - Update Review Ledger, Review Log, Proof Log, Findings, and Repair Routing Log.
+  - If clean, mark Build 5 `e1bf9db` passed and clear the Build 5 cadence pause.
+  - If actionable findings exist, route repairs to Build 5.

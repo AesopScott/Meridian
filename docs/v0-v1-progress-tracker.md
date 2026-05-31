@@ -46,9 +46,9 @@
 
 | Status | Count | Percent |
 |---|---:|---:|
-| Built | 10 | 83% |
+| Built | 11 | 92% |
 | In Progress | 0 | 0% |
-| Planned / designed | 2 | 17% |
+| Planned / designed | 1 | 8% |
 | Needs planning | 0 | 0% |
 | Total V1 cockpit items | 12 | 100% |
 
@@ -64,10 +64,10 @@
 - [x] **Prime + Bifrost Harness:** Prime cockpit provider package API surface - built in `14315b3`, cadence closed in `f66bbde`.
 - [x] **Bifrost Harness + Prime:** `PrimeCockpitSnapshot` to `CockpitViewModel` mapping - built in `5c89e87`.
 - [x] **Bifrost Harness + Prime:** runtime acceptance checklist - built in `ec66081`.
+- [x] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - built in `e1bf9db`; pending cadence review.
 
 ### Planned / Designed
 
-- [ ] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - brief built in `a412e90`.
 - [ ] **Bifrost Harness:** harness dashboard - brief built in `7c34566`.
 
 ### In Progress

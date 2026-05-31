@@ -227,6 +227,7 @@ Append entries here when a completed slice is ready for the Codex Reviews lane t
 2026-05-30 13:32 -06:00 - Build 5 slice Ready for Codex Review; commit 0629e0c; files: docs/v1-bifrost-cockpit-implementation-brief.md, docs/live-build-5.md; tests: none (docs-only); note: 3rd task-changing commit in current cadence window — Build 5 pauses normal build work per rule 21 until Codex Reviews lane records a cadence review result
 2026-05-31 12:15 -06:00 - Build 5 slice Ready for Codex Review; commit d13f1d1; files: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 49 passed (tests/test_bifrost_cockpit.py), 965 passed full suite; note: 1st task-changing commit in new cadence window (cadence cleared by Reviews B Round B3)
 2026-05-31 17:30 -06:00 - Build 5 slice Ready for Codex Review; commit 5c89e87; files: bifrost/cockpit.py, bifrost/__init__.py, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 69 passed (tests/test_bifrost_cockpit.py), 1012 passed full suite; note: 2nd task-changing commit in current cadence window
+2026-05-31 02:58 -06:00 - Build 5 slice Ready for Codex Review; commit e1bf9db; files: bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 72 passed (tests/test_bifrost_cockpit.py), 97 passed (tests/test_bifrost_cockpit.py tests/test_cockpit_state.py); note: 3rd task-changing commit in current cadence window - Build 5 pauses normal build work until Codex Reviews lane records cadence review result
 ```
 
 ## Cross-Check Activity
@@ -250,6 +251,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review requested after commits <hash1>, <has
 YYYY-MM-DD HH:MM TZ - Build 5 Codex review finding: <severity>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 5 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/fixed; details: <short note>
+2026-05-31 02:58 -06:00 - Build 5 Codex review requested after commits d13f1d1, 5c89e87, e1bf9db
 ```
 
 ## Active Task
