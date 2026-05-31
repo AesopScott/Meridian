@@ -76,6 +76,8 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | `docs/review-console-surface-contract.md` | Review Console | Surface contract for the Review Console: what belongs there, how Prime populates it, what actions Scott can take, and how Bifrost/Beacon should render it. | n/a | Domain slice exists; Bifrost UI rendering and live Prime routing are planned. Owner: Build 4. |
 | `meridian_core/aegis.py` | Aegis / Proof harness | Proof harness: AegisEvidence, ProofTrail, and Review Console bridge for cross-check findings. | `tests/test_aegis.py` | Proof-blocking is severity + status aware; ESCALATED is always blocking. |
 | `meridian_core/review_console.py` | Review Console | Promptable review/gating surface for cross-check, proof, artifacts, plans, gates. | `tests/test_review_console.py` | Replaces "non-orchestrator window" name. |
+| `docs/prime-status-console-cli-brief.md` | Review Console | Prime Status Console and Review Console CLI bridge: routes NASA-style mission logs and system messages to the Review Console surface, keeping Prime's conversational thread clean. | n/a | Architecture note, no runtime code. Owner: Build 4. Read before designing any Prime to Review Console message routing. |
+| `docs/non-orchestrator-surface-naming.md` | Review Console | Naming rationale for the Review Console surface: establishes 'Review Console' as the canonical product-ready name, replacing the 'non-orchestrator window' placeholder. | n/a | Vocabulary doc. Read before writing docs or code that names this surface. |
 
 ## Build And Maturity
 
@@ -117,6 +119,7 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | `docs/bifrost-v0-cockpit-layout-brief.md` | Bifrost / session harness | V0 cockpit layout brief: where each surface lives on screen, what is dominant vs. supportive, and what V0 omits to achieve the Prime-centered command center inversion. | n/a | Design-only. Owner: Build 5. Companion to bifrost-cockpit-queue-status-brief.md and bifrost-session-queue-activation-brief.md. |
 | `docs/bifrost-harness-dashboard-brief.md` | Bifrost / session harness | Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0. | n/a | Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md. |
 | `docs/v1-bifrost-cockpit-implementation-brief.md` | Bifrost / session harness | V1 Bifrost cockpit implementation brief: what V1 builds, what it omits, and which UI slices land first. Turns V0's domain capabilities into a Prime-centered, browser-rendered cockpit surface. | n/a | Owner: Build 5. Read before implementing any V1 cockpit UI slice. Source briefs: bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md, bifrost-cockpit-queue-status-brief.md. |
+| `docs/bifrost-configurable-progress-surface-brief.md` | Bifrost / session harness | Bifrost configurable progress and proof surface brief: how routine build-lane events, progress updates, and Aegis/Codex proof items are routed to a non-Prime surface, keeping the cockpit uncluttered. | n/a | Design-only. Owner: Build 5. Read before designing cockpit progress/proof routing. |
 
 ## Visual Assets
 
