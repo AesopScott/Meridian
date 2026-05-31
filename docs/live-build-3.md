@@ -242,6 +242,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-01 10:10 -06:00 - Build 3 checked queue; status: active tasks found (Codex Reviews C cockpit_state + Coordinator Override Bifrost scaffold FileMap); executing combined registration
 2026-05-31 00:57 -06:00 - Build 3 checked queue; status: active tasks found (Round C5 + Coordinator Override — 8-entry FileMap registration); executed; commit e89df81; cadence 3/3 since Round B3 — awaiting Codex review
 2026-06-01 20:35 -06:00 - Build 3 checked queue; status: idle; stale "commit pending" markers resolved to ca6f55f + e89df81; cadence 3/3 since Round B3 — Codex review (Round B5) required before next task
+2026-05-31 01:11 -06:00 - Build 3 checked queue; status: idle; cadence 3/3 since Round B3 — paused pending Round B5 Codex review result; no active task
 ```
 
 ## Write/Completion Log
