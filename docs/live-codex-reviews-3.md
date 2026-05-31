@@ -314,9 +314,9 @@ Minimum proof expectations:
 2026-05-31 01:10 MDT - MEDIUM repair routed for Round C5 - Build 1 f56af55 clear on V0 domain shape; MEDIUM: cockpit_state.py and tests/test_cockpit_state.py not registered in FileMap; repair task written to Build 3 (live-build-3.md Active Task).
 ```
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
-Current Active Task:
+Prior active task, already superseded by later review records and tracker state:
 
 Goal: perform Codex Reviews C Round C6 for Build 1 `3cdc74d`.
 
