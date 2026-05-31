@@ -6,13 +6,16 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Passed
 
 Goal: review Build 3 V2/V3 FileMap discoverability audit and follow-up registration.
+
+Status: passed by Codex Reviews B on 2026-05-31 after a coordinator repair. Initial review found stale audit wording that still described `docs/workflows-subagent-harness-architecture.md` as unresolved after it had been registered; repair commit `b16998a` corrected the audit and queue provenance. No further repair routed.
 
 Scope:
 
 - Build 3 commit `3c6f647` - creates `docs/filemap-v2-v3-discoverability-audit.md`, registers `docs/workflows-subagent-harness-architecture.md` and `docs/filemap-v2-v3-discoverability-audit.md` in runtime FileMap and required-path coverage, and marks Build 3 ready for review.
+- Repair commit `b16998a` - updates the audit so the workflow architecture registration is listed as resolved and pending upstream outputs remain distinct from current FileMap misses.
 
 Allowed review files:
 
@@ -32,6 +35,18 @@ Review expectations:
 - Verify the entries are classified under sensible FileMap areas and do not claim runtime implementation.
 - Verify Build 3 is not left with an executable stale task after completion.
 - If clean, record proof and clear the docs/FileMap slice. If findings exist, route a focused repair back to Build 3.
+
+Review result:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `docs/workflows-subagent-harness-architecture.md` and `docs/filemap-v2-v3-discoverability-audit.md` are present in both `make_default_map()` and `_REQUIRED_PATHS`.
+- The audit now accurately distinguishes resolved FileMap coverage from pending upstream outputs that do not exist yet.
+- FileMap entries are architecture/FileMap scoped and do not claim runtime implementation.
+- Build 3 is not left with an executable stale implementation task; it is explicitly awaiting the next FileMap assignment and should not create read-check-only commits.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` only after repair. No Build 3 repair remains open.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Completed / Passed
 
