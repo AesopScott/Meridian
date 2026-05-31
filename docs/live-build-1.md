@@ -380,6 +380,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 07:55 -06:00 - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-08 20:18 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main fast-forwarded from b12d1c8 to 2ec2e04 (Build 3 read check); no Active Task; awaiting next assignment)
 2026-05-31 08:42 -06:00 - Build 1 checked queue; status: idle (Active Task body was refilled by coordinator 97cf44d to "build the V2 Echo Memory Harness domain slice", but that slice is already in Completed Slices at commit 2bccb55 and the rules say "Do not re-execute any entry below"; verified locally — meridian_core/echo.py and tests/test_echo.py exist on HEAD, 27 tests pass; treating Active Task as stale; cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment)
+2026-05-31 08:52 -06:00 - Build 1 checked queue; status: idle (Active Task unchanged — still names the V2 Echo Memory Harness slice already completed at 2bccb55; no fresh assignment from coordinator; origin/main fast-forwarded to bc08884; cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment)
 ```
 
 ## Write/Completion Log
