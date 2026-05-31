@@ -305,3 +305,4 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 
 2026-06-01 21:35 -06:00 - Build 3 completed FileMap registration (docs/v2-detailed-build-plan.md); commit b48b5c3; files changed: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; Obsidian update pending; Ready for Codex Review
 2026-06-01 21:40 -06:00 - Build 3 checked queue; status: idle; Active Task already complete (e0d7c08 + c7b43d1 pushed); cadence 1/3 since Round B5; awaiting next task assignment
+2026-06-02 00:00 UTC - Build 3 checked queue; status: idle; Active Task stale (V2 FileMap complete at e0d7c08/c7b43d1); cadence 1/3 since Round B5; awaiting next task assignment
