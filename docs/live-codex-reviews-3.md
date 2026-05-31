@@ -230,6 +230,45 @@ Proof:
 - Diff inspection confirmed HTTP JSON transport is env-gated, stdlib-only, SDK-free, and account-automation-free.
 - Repair `f353c8d` corrected the default HTTP helper to send provider/model/input JSON and parse response `text`.
 
+Current Active Task:
+
+Goal: perform Codex Reviews C Round C5 for Build 1 cockpit-state domain shape.
+
+Scope trigger:
+
+- Build 1 completed the Prime cockpit snapshot/event domain shape for V1 Bifrost.
+
+Immediate scope:
+
+- Build 1 commit `f56af55` - `meridian_core/cockpit_state.py` and `tests/test_cockpit_state.py`.
+- Build 1 queue marker `7e81bf6` is provenance only; do not review it as product code.
+
+Allowed review files:
+
+- `meridian_core/cockpit_state.py`
+- `tests/test_cockpit_state.py`
+- `docs/live-build-1.md` for provenance only.
+
+Required proof:
+
+- Inspect `git show f56af55 -- meridian_core/cockpit_state.py tests/test_cockpit_state.py`.
+- Run or verify:
+  - `python -m pytest tests/test_cockpit_state.py -q`
+  - `python -m pytest -q`
+- Confirm the module is dependency-free, frozen/immutable where appropriate, and has no filesystem, CLI, browser, or prompt-injection behavior.
+- Confirm lane sorting, progress filtering, and summary counts match the V1 cockpit need for typed summaries rather than raw queue-file/log content.
+- Confirm the tests cover sorting, filtering, immutability, and summary counts.
+- Check whether `meridian_core/cockpit_state.py` and `tests/test_cockpit_state.py` need FileMap registration. If yes, route a Build 3 FileMap task instead of editing FileMap here.
+
+Output:
+
+- Declare Round C5 scope.
+- Update Review Log, Proof Log, Findings, and Active Task status.
+- If clean, mark Build 1 commit `f56af55` passed and Build 1 unblocked.
+- If actionable findings exist, route repair work to Build 1.
+
+Stale prior idle status:
+
 No active task. Codex Reviews C is idle - continue polling for Build 1/Build 2 runtime-gate review markers.
 
 Stale prior Round C3 task follows.
