@@ -10,6 +10,7 @@ from bifrost.cockpit import (
     InstrumentBand,
     LaneRow,
     ProgressEvent,
+    ProjectCard,
     render_cockpit_html,
     sample_cockpit_view_model,
     view_model_from_snapshot,
@@ -32,7 +33,7 @@ from meridian_core.cockpit_state import (
 def test_sample_view_model_has_project_and_bearing():
     vm = sample_cockpit_view_model()
     assert vm.project == "Meridian"
-    assert vm.bearing == "V1 Cockpit"
+    assert vm.bearing == "Prime command surface"
 
 
 def test_sample_view_model_has_five_lanes():
@@ -40,11 +41,17 @@ def test_sample_view_model_has_five_lanes():
     assert len(vm.lanes) >= 5
 
 
-def test_sample_view_model_lanes_include_b1_through_b5():
+def test_sample_view_model_lanes_are_project_named():
     vm = sample_cockpit_view_model()
     names = {lane.name for lane in vm.lanes}
-    for expected in ("B1", "B2", "B3", "B4", "B5"):
+    for expected in ("Cockpit UI", "Preview Shell", "Voice Layer"):
         assert expected in names
+
+
+def test_sample_view_model_has_project_cards():
+    vm = sample_cockpit_view_model()
+    assert len(vm.projects) >= 3
+    assert vm.projects[0].sessions
 
 
 def test_sample_view_model_has_prime_messages():
@@ -98,53 +105,14 @@ def test_render_includes_title_with_project():
     assert "<title>" in doc
 
 
-# ── Nav bar ─────────────────────────────────────────────────────────────────
+# ── Top navigation removal ───────────────────────────────────────────────────
 
 
-def test_render_nav_settings():
+def test_render_has_no_permanent_top_navigation():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Settings" in doc
-
-
-def test_render_nav_projects():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Projects" in doc
-
-
-def test_render_nav_reset():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Reset" in doc
-
-
-def test_render_nav_close():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Close" in doc
-
-
-def test_render_nav_cross_check():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Cross Check" in doc
-
-
-def test_render_nav_backlog():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Backlog" in doc
-
-
-def test_render_nav_skills():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Skills" in doc
-
-
-def test_render_nav_balance():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Balance" in doc
-    assert 'data-action="balance"' in doc
-
-
-def test_render_nav_harness():
-    doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Harness" in doc
+    assert "cockpit-nav" not in doc
+    for label in ("Settings", "Reset", "Close", "Cross Check", "Backlog", "Skills"):
+        assert label not in doc
 
 
 
@@ -156,14 +124,14 @@ def test_render_prime_panel_class_present():
     assert "prime-panel" in doc
 
 
-def test_render_orchestrator_queue_tab():
+def test_render_no_orchestrator_queue_tab():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Orchestrator Queue" in doc
+    assert "Orchestrator Queue" not in doc
 
 
-def test_render_review_console_tab():
+def test_render_no_review_console_tab():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Review Console" in doc
+    assert "Review Console" not in doc
 
 
 def test_render_prime_messages():
@@ -173,12 +141,12 @@ def test_render_prime_messages():
         assert msg in doc
 
 
-def test_render_review_badge_when_nonzero():
+def test_render_no_review_badge_even_when_nonzero():
     vm = sample_cockpit_view_model()
     vm.review_count = 5
     doc = render_cockpit_html(vm)
-    assert 'class="review-badge"' in doc
-    assert ">5<" in doc
+    assert 'class="review-badge"' not in doc
+    assert ">5<" not in doc
 
 
 def test_render_no_review_badge_when_zero():
@@ -191,10 +159,17 @@ def test_render_no_review_badge_when_zero():
 def test_render_prime_input_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
     assert "prime-prompt" in doc
-    assert "Prime Command Bay" in doc
+    assert "Command Bay" in doc
     assert "<textarea" in doc
     assert "Mission Objectives" in doc
     assert 'data-action="voice"' in doc
+
+
+def test_render_voice_first_states_present():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    for expected in ("mic armed", "thinking idle", "speaker ready", "boot audio standby"):
+        assert expected in doc
+    assert 'data-action="mute"' in doc
 
 
 def test_render_hud_command_core_present():
@@ -212,6 +187,15 @@ def test_render_hud_command_core_is_quiet():
         "Prompt Payload",
         "Delegation Map",
         "Claude / OpenAI / DeepSeek",
+        "Claude",
+        "OpenAI",
+        "DeepSeek",
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5",
+        "ABH",
     )
     for label in noisy_center_labels:
         assert label not in doc
@@ -226,17 +210,25 @@ def test_render_hud_command_core_is_quiet():
 def test_render_harness_dashboard_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
     assert "Harness Dashboard" in doc
-    assert "View only" in doc
+    assert "on demand" in doc
     assert 'aria-label="Harness Dashboard"' in doc
 
 
-def test_render_harness_dashboard_groups_and_cards():
+def test_render_harness_dashboard_consoles():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Cognition" in doc
-    assert "Knowledge &amp; Memory" in doc
-    assert "Coordination / UI" in doc
-    for expected in ("Prime", "Bifrost", "Relay", "Beacon", "Aegis", "Compass", "FileMap", "Codex Reviews"):
+    assert 'class="harness-console"' in doc
+    for expected in (
+        "Prime", "Bifrost", "Relay", "Beacon", "Aegis", "Echo", "Atlas",
+        "Session Lifecycle", "Workflow", "Federation",
+    ):
         assert expected in doc
+
+
+def test_render_harness_dashboard_scoped_prompts():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Prime scoped prompt" in doc
+    assert "Ask Echo about this subsystem only..." in doc
+    assert 'class="harness-prompt"' in doc
 
 
 def test_render_harness_dashboard_planned_placeholders():
@@ -268,22 +260,23 @@ def test_render_harness_dashboard_attention_hook():
     assert 'data-attention="true"' in doc
 
 
-# ── Lane strip ───────────────────────────────────────────────────────────────
+# ── Project strip ────────────────────────────────────────────────────────────
 
 
-def test_render_lane_strip_class_present():
+def test_render_project_strip_class_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "lane-strip" in doc
+    assert "project-strip" in doc
+    assert "lane-strip" not in doc
 
 
-def test_render_all_sample_lanes():
+def test_render_all_sample_projects():
     vm = sample_cockpit_view_model()
     doc = render_cockpit_html(vm)
-    for lane in vm.lanes:
-        assert lane.name in doc
+    for project in vm.projects:
+        assert project.name in doc
 
 
-def test_render_lane_status_attribute():
+def test_render_project_status_attribute():
     vm = sample_cockpit_view_model()
     doc = render_cockpit_html(vm)
     assert 'data-status="running"' in doc
@@ -291,11 +284,19 @@ def test_render_lane_status_attribute():
     assert 'data-status="blocked"' in doc
 
 
-def test_render_lane_summary_totals():
+def test_render_project_summary_totals():
     vm = sample_cockpit_view_model()
     doc = render_cockpit_html(vm)
-    total = len(vm.lanes)
-    assert f"{total} tot." in doc
+    total = len(vm.projects)
+    assert f"{total} projects" in doc
+
+
+def test_render_project_drilldown_sessions():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert "project-drilldown" in doc
+    assert "session-list" in doc
+    assert "Prime command bay" in doc
 
 
 # ── Progress surface ─────────────────────────────────────────────────────────
@@ -353,6 +354,12 @@ def test_render_progress_filter_present():
     assert "(all)" in doc
 
 
+def test_render_progress_surface_is_mission_feed():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Mission Feed" in doc
+    assert "Review Console" not in doc
+
+
 # ── Instrument band ──────────────────────────────────────────────────────────
 
 
@@ -387,10 +394,10 @@ def test_render_instrument_queue_state():
     assert f"Queue {vm.instrument.queue_state}" in doc
 
 
-def test_render_instrument_version():
+def test_render_instrument_version_is_not_visible():
     vm = sample_cockpit_view_model()
     doc = render_cockpit_html(vm)
-    assert vm.instrument.version in doc
+    assert vm.instrument.version not in doc
 
 
 def test_render_instrument_clock():
@@ -429,9 +436,29 @@ def test_escapes_xss_in_prime_messages():
 def test_escapes_xss_in_lane_name():
     vm = sample_cockpit_view_model()
     vm.lanes = [LaneRow('<script>bad</script>', "idle", "idl")]
+    vm.projects = []
     doc = render_cockpit_html(vm)
     assert "<script>bad</script>" not in doc
     assert "&lt;script&gt;" in doc
+
+
+def test_escapes_xss_in_project_card():
+    vm = sample_cockpit_view_model()
+    vm.projects = [
+        ProjectCard(
+            '<script>Project</script>',
+            '<b>running</b>',
+            '<img src=x>',
+            [LaneRow('<i>session</i>', "idle", '<em>x</em>')],
+        )
+    ]
+    doc = render_cockpit_html(vm)
+    assert "<script>Project</script>" not in doc
+    assert "<img src=x>" not in doc
+    assert "<i>session</i>" not in doc
+    assert "&lt;script&gt;" in doc
+    assert "&lt;img" in doc
+    assert "&lt;i&gt;" in doc
 
 
 def test_escapes_xss_in_progress_source():
@@ -479,11 +506,9 @@ def test_escapes_xss_in_harness_dashboard():
     ]
     doc = render_cockpit_html(vm)
     assert "<script>Relay</script>" not in doc
-    assert "<b>Group</b>" not in doc
     assert "<img src=x>" not in doc
     assert "<span>cap</span>" not in doc
     assert "&lt;script&gt;" in doc
-    assert "&lt;b&gt;" in doc
     assert "&lt;img" in doc
     assert "&lt;span&gt;" in doc
 
@@ -524,13 +549,11 @@ def test_custom_view_model_rendered():
     assert "TestProject" in doc
     assert "Alpha" in doc
     assert "Hello from Prime." in doc
-    assert 'class="review-badge"' in doc
     assert "X1" in doc
     assert "X3" in doc
     assert "TestLane" in doc
     assert "task completed" in doc
     assert "PAUSED" in doc
-    assert "v0.9" in doc
     assert "09:01" in doc
 
 

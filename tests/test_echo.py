@@ -293,3 +293,68 @@ class TestLimits:
     def test_empty_store_returns_empty(self, repo):
         hits = repo.query(MemoryQuery(project="meridian"))
         assert len(hits) == 0
+
+
+class TestFailureSoftCorruptRecords:
+    def test_query_normalizes_naive_created_at(self, repo):
+        naive_created = datetime.fromisoformat("2026-05-31T12:00:00")
+        aware_created = datetime.fromisoformat("2026-05-31T13:00:00+00:00")
+        repo.add(
+            MemoryRecord(
+                record_id="naive",
+                project="meridian",
+                kind=MemoryKind.DECISION,
+                summary="Naive timestamp",
+                body="...",
+                source=MemorySource.IMPORT,
+                created_at=naive_created,
+                importance=3,
+                pinned=False,
+                tags=(),
+            )
+        )
+        repo.add(
+            MemoryRecord(
+                record_id="aware",
+                project="meridian",
+                kind=MemoryKind.DECISION,
+                summary="Aware timestamp",
+                body="...",
+                source=MemorySource.PRIME,
+                created_at=aware_created,
+                importance=3,
+                pinned=False,
+                tags=(),
+            )
+        )
+
+        hits = repo.query(MemoryQuery(project="meridian"))
+
+        assert [hit.record.record_id for hit in hits] == ["aware", "naive"]
+
+    def test_query_since_handles_naive_created_at(self, repo):
+        naive_created = datetime.fromisoformat("2026-05-31T12:00:00")
+        repo.add(
+            MemoryRecord(
+                record_id="naive",
+                project="meridian",
+                kind=MemoryKind.DECISION,
+                summary="Naive timestamp",
+                body="...",
+                source=MemorySource.IMPORT,
+                created_at=naive_created,
+                importance=3,
+                pinned=False,
+                tags=(),
+            )
+        )
+
+        hits = repo.query(
+            MemoryQuery(
+                project="meridian",
+                since=datetime.fromisoformat("2026-05-31T11:00:00+00:00"),
+            )
+        )
+
+        assert len(hits) == 1
+        assert hits[0].reason.endswith("recent")

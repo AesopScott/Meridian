@@ -1,6 +1,6 @@
 ﻿# Live Build 5 Queue
 
-## Active Task
+## Completed Task - Ready For Codex Review
 
 Goal: write the session-card queue activation product contract.
 
@@ -22,15 +22,25 @@ Cover:
 
 Tests: none required, docs-only.
 
-Completion: commit only this session-card queue activation contract slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion: coordinator completed this session-card queue activation contract slice in `e37030e`.
 
-## Next Candidate Task
+Ready for Codex Review:
+
+- Files: `docs/session-card-queue-activation-contract.md`, `docs/live-build-5.md`
+- Tests: not required (docs-only)
+- Commit: `e37030e`
+
+## Active Task
 
 Goal: write a Bifrost voice-control command palette contract.
 
-Allowed files later: `docs/bifrost-voice-command-contract.md`, `docs/live-build-5.md`.
+Allowed files only: `docs/bifrost-voice-command-contract.md`, `docs/live-build-5.md`.
 
-Task later: define the voice-first commands for opening harness panels, switching projects, focusing prompt/harness windows, starting/stopping dictation, and reading Prime output aloud. Keep it UI contract only.
+Task: define the voice-first commands for opening harness panels, switching projects, focusing prompt/harness windows, starting/stopping dictation, and reading Prime output aloud. Keep it UI contract only.
+
+Tests: none required, docs-only.
+
+Completion: commit only this Bifrost voice command contract slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
 ## ~~Codex Repair - Active Now~~ (COMPLETED 2026-05-31 13:54 -06:00)
 

@@ -54,6 +54,26 @@ class TestPromptPayloadSnapshot:
         )
         assert snapshot.budget_percent == 0.0
 
+    def test_budget_percent_zero_budget_fails_soft(self):
+        """Return 0 for malformed zero budgets instead of crashing."""
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=0,
+            estimated_tokens=0,
+            budget_tokens=0,
+        )
+        assert snapshot.budget_percent == 0.0
+        assert snapshot.status == PayloadStatus.HEALTHY
+
+    def test_budget_percent_negative_budget_fails_soft(self):
+        """Return 0 for invalid negative budgets instead of crashing."""
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=1000,
+            estimated_tokens=250,
+            budget_tokens=-1,
+        )
+        assert snapshot.budget_percent == 0.0
+        assert snapshot.status == PayloadStatus.HEALTHY
+
     def test_growth_tokens_calculation(self):
         """Calculate token growth from prior snapshot."""
         snapshot = PromptPayloadSnapshot(

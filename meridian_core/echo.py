@@ -131,8 +131,13 @@ class EchoRepository:
         """
         hits: list[MemoryHit] = []
         now = datetime.now(timezone.utc)
+        query_since = self._aware_datetime(query.since) if query.since else None
 
         for record in self._records.values():
+            record_created_at = self._aware_datetime(record.created_at)
+            if record_created_at is None:
+                continue
+
             # Hard filters: project, supersession, kind, tags, recency
             if record.project != query.project:
                 continue
@@ -147,12 +152,12 @@ class EchoRepository:
                 if not all(tag in record.tags for tag in query.tags):
                     continue
 
-            if query.since and record.created_at < query.since and not record.pinned:
+            if query_since and record_created_at < query_since and not record.pinned:
                 continue
 
             # Score deterministically
-            score = self._score_record(record, query, now)
-            reason = self._rank_reason(record, query)
+            score = self._score_record(record, query, now, record_created_at)
+            reason = self._rank_reason(record, query, record_created_at, query_since)
             hits.append(MemoryHit(record=record, score=score, reason=reason))
 
         # Sort by score desc, then break ties
@@ -161,7 +166,7 @@ class EchoRepository:
                 -h.score,
                 -int(h.record.pinned),
                 -h.record.importance,
-                -h.record.created_at.timestamp(),
+                -self._sort_timestamp(h.record.created_at),
                 h.record.record_id,
             )
         )
@@ -174,7 +179,11 @@ class EchoRepository:
         return tuple(hits[:limit])
 
     def _score_record(
-        self, record: MemoryRecord, query: MemoryQuery, now: datetime
+        self,
+        record: MemoryRecord,
+        query: MemoryQuery,
+        now: datetime,
+        record_created_at: datetime,
     ) -> float:
         """Compute deterministic score in [0.0, 1.0].
 
@@ -189,7 +198,7 @@ class EchoRepository:
         # Recency boost: linear decay over 30 days (configurable window)
         recency_boost = 0.0
         if query.since is None:
-            age_seconds = (now - record.created_at).total_seconds()
+            age_seconds = (now - record_created_at).total_seconds()
             window_seconds = 30 * 24 * 3600
             if age_seconds < window_seconds:
                 recency_boost = (1.0 - age_seconds / window_seconds) * 0.2
@@ -197,12 +206,32 @@ class EchoRepository:
         score = min(1.0, base + importance_boost + recency_boost)
         return score
 
-    def _rank_reason(self, record: MemoryRecord, query: MemoryQuery) -> str:
+    def _rank_reason(
+        self,
+        record: MemoryRecord,
+        query: MemoryQuery,
+        record_created_at: datetime,
+        query_since: Optional[datetime],
+    ) -> str:
         """Short explanation of why record matched and ranked."""
         reasons = []
         if record.pinned:
             reasons.append("pinned")
         reasons.append(f"importance={record.importance}")
-        if query.since and record.created_at >= query.since:
+        if query_since and record_created_at >= query_since:
             reasons.append("recent")
         return " + ".join(reasons)
+
+    def _aware_datetime(self, value: Optional[datetime]) -> Optional[datetime]:
+        """Normalize datetimes to UTC so corrupt/naive records fail soft."""
+        if value is None or not isinstance(value, datetime):
+            return None
+        if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
+
+    def _sort_timestamp(self, value: datetime) -> float:
+        normalized = self._aware_datetime(value)
+        if normalized is None:
+            return 0.0
+        return normalized.timestamp()

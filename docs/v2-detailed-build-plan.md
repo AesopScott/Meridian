@@ -138,6 +138,7 @@ First wave deliverable:
 - Keep provider-neutral HTTP transport as the stable base.
 - Treat **Claude, OpenAI, and DeepSeek** as first-class primary providers in the Model Harness, not optional one-off integrations.
 - Add a DeepSeek direct-API adapter target for V4 models (`deepseek-v4-pro` default, `deepseek-v4-flash` fast lane) so Prime can route high-volume build work away from Claude when capacity or cost requires it.
+- Gate DeepSeek coding authority through `docs/deepseek-provider-validation-gate.md`: DeepSeek starts as a candidate provider, may be used for bounded Q-mode/build planning, and must prove coding reliability before Prime can route autonomous implementation or review-clearing work through it.
 - Bring forward Polaris's **Balance button** pattern: Bifrost exposes provider balances, token/cost telemetry, and model spend visibility for Claude, OpenAI, DeepSeek, and any aggregator routes.
 - Bring forward Polaris's **visible prompt payload meter** pattern: every Relay dispatch must expose the final prompt payload size, budget percentage, and growth delta so Prime/Scott can catch additive prompt replay before it becomes latency, quota, or cost drag.
 
@@ -149,6 +150,7 @@ First wave deliverable:
 - `tests/test_model_adapter.py`
 - `tests/test_relay_dispatch.py`
 - `docs/model-harness-v2-contract.md`
+- `docs/deepseek-provider-validation-gate.md`
 
 **Proof/test expectation:**
 
@@ -157,6 +159,7 @@ First wave deliverable:
 - Tests that each dispatch produces a visible prompt-size label such as `(under 1k)` or `(12.4k)` from structured prompt metrics, not scraped transcript text.
 - Tests that queue/Q-mode prompt payloads do not grow across polls unless the task packet itself changed; unexpected growth is a DEGRADED prompt-drag finding.
 - Tests that DeepSeek provider metadata resolves through the same adapter contract as Claude/OpenAI and never bypasses Relay/Aegis policy checks.
+- Tests that DeepSeek starts below autonomous coding trust and cannot receive implementation, review-clearing, or branch/worktree authority until validation metadata records the required proof level.
 - Tests that Balance surface data is derived from structured usage/provider telemetry rather than scraped card text.
 
 **Out-of-scope guardrails:**
