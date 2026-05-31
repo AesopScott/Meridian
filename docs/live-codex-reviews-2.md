@@ -12,7 +12,7 @@ Goal: review Build 5 Bifrost voice command contract.
 
 Scope:
 
-- Build 5 commit `b3b4f8e` - creates `docs/bifrost-voice-command-contract.md` and marks Build 5 ready for Codex Review while promoting the provider-balance/prompt-payload surface contract as the next active task.
+- Build 5 commit `d04b441` - creates `docs/bifrost-voice-command-contract.md` and marks Build 5 ready for Codex Review while promoting the provider-balance/prompt-payload surface contract as the next active task.
 
 Allowed review files:
 

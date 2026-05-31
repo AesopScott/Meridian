@@ -45,7 +45,7 @@ Completion:
 - Coordinator completed this docs-only Bifrost voice command contract on 2026-05-31.
 - Files changed: `docs/bifrost-voice-command-contract.md`, `docs/live-build-5.md`.
 - Tests: not required (docs-only).
-- Commit: `b3b4f8e`.
+- Commit: `d04b441`.
 
 Ready for Codex Review.
 
