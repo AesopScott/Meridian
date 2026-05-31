@@ -1,5 +1,5 @@
-"""
-File Map Knowledge Tracker — living registry of important Meridian files.
+﻿"""
+File Map Knowledge Tracker â€” living registry of important Meridian files.
 
 Allows Prime, Echo, Atlas, and worker sessions to look up key files by path
 or architecture area without rediscovering the codebase each session.
@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 
 # ---------------------------------------------------------------------------
-# Known area labels — use these constants for consistency; arbitrary strings
+# Known area labels â€” use these constants for consistency; arbitrary strings
 # are also accepted.
 # ---------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ class FileMap:
         return entry
 
     # ------------------------------------------------------------------
-    # Filtered views — stable sort order: path alphabetically
+    # Filtered views â€” stable sort order: path alphabetically
     # ------------------------------------------------------------------
 
     def all_entries(self) -> list[FileMapEntry]:
@@ -122,7 +122,7 @@ class FileMap:
         entries = self.by_area(area) if area else self.all_entries()
         if not entries:
             return "(no file map entries)"
-        lines: list[str] = ["# Meridian File Map — Key Files"]
+        lines: list[str] = ["# Meridian File Map â€” Key Files"]
         current_area: str | None = None
         for e in entries:
             if e.area != current_area:
@@ -138,7 +138,7 @@ class FileMap:
 
 
 # ---------------------------------------------------------------------------
-# Default map — deterministic sample of current important Meridian files
+# Default map â€” deterministic sample of current important Meridian files
 # ---------------------------------------------------------------------------
 
 def make_default_map() -> FileMap:
@@ -477,7 +477,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v1-capability-plan.md",
             area=FileArea.ARCHITECTURE,
-            purpose="V1 capability plan: defines V1 as the Bifrost cockpit release — Prime's intention, harness liveness, Review Console, Relay session state, Aegis findings, and build progress visible without CLI commands.",
+            purpose="V1 capability plan: defines V1 as the Bifrost cockpit release â€” Prime's intention, harness liveness, Review Console, Relay session state, Aegis findings, and build progress visible without CLI commands.",
             related_tests=[],
             notes="Owner: Build 4. V1 = cockpit UI live, wired to V0 domain. Read before planning any V1 capability or Bifrost integration.",
         ),
@@ -491,14 +491,14 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v2-horizon-plan.md",
             area=FileArea.ARCHITECTURE,
-            purpose="V2 horizon plan: persistent memory via Echo, context retrieval via Atlas, stronger Prime autonomy, richer model harnesses. Not active V1 scope — start detailed V2 planning only after V1 cockpit is locked.",
+            purpose="V2 horizon plan: persistent memory via Echo, context retrieval via Atlas, stronger Prime autonomy, richer model harnesses. Not active V1 scope â€” start detailed V2 planning only after V1 cockpit is locked.",
             related_tests=[],
             notes="Horizon only. Do not pull V2 work into V0 or V1 build.",
         ),
         FileMapEntry(
             path="docs/v3-parking-lot.md",
             area=FileArea.ARCHITECTURE,
-            purpose="V3 parking lot: horizon ideas for external reach, federation, and deeper distribution. Not active scope — do not pull V3 effort during V0, V1, or V2.",
+            purpose="V3 parking lot: horizon ideas for external reach, federation, and deeper distribution. Not active scope â€” do not pull V3 effort during V0, V1, or V2.",
             related_tests=[],
             notes="Parking lot, not a roadmap. Owner: Build 4. Ideas only until V2 closes.",
         ),
@@ -514,7 +514,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-cockpit-queue-status-brief.md",
             area=FileArea.BIFROST,
-            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
+            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity â€” display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
             related_tests=[],
             notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
         ),
@@ -528,7 +528,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-harness-dashboard-brief.md",
             area=FileArea.BIFROST,
-            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
+            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button â€” observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
             related_tests=[],
             notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
         ),
@@ -556,14 +556,14 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v1-bifrost-integration-sequence.md",
             area=FileArea.BIFROST,
-            purpose="V1 Bifrost cockpit integration sequence: ordered steps from scaffold to live Prime-driven cockpit — build order, dependency contracts, and gate conditions for each integration slice.",
+            purpose="V1 Bifrost cockpit integration sequence: ordered steps from scaffold to live Prime-driven cockpit â€” build order, dependency contracts, and gate conditions for each integration slice.",
             related_tests=[],
             notes="Owner: Build 4. Read before planning or executing any V1 Bifrost integration slice.",
         ),
         FileMapEntry(
             path="meridian_core/cockpit_state.py",
             area=FileArea.BIFROST,
-            purpose="Prime cockpit snapshot and event domain types for V1 Bifrost: CockpitStatus, CockpitSnapshot, CockpitEvent, and lane/harness state models. Pure immutable data — no filesystem, CLI, or UI code.",
+            purpose="Prime cockpit snapshot and event domain types for V1 Bifrost: CockpitStatus, CockpitSnapshot, CockpitEvent, and lane/harness state models. Pure immutable data â€” no filesystem, CLI, or UI code.",
             related_tests=["tests/test_cockpit_state.py"],
             notes="Owner: Build 1. Read before designing any Prime-state-to-cockpit data flow.",
         ),
@@ -617,6 +617,42 @@ def make_default_map() -> FileMap:
             notes="Build 1 commit 6c9a397.",
         ),
 
+        # -- V1 Electron cockpit app -----------------------------------
+        FileMapEntry(
+            path="package.json",
+            area=FileArea.BIFROST,
+            purpose="V1 Electron cockpit app shell package manifest: dependencies, entry point (electron/main.js), build scripts, and distribution configuration.",
+            related_tests=[],
+            notes="Electron app root. Do not edit unless updating dependencies or build config.",
+        ),
+        FileMapEntry(
+            path="electron/main.js",
+            area=FileArea.BIFROST,
+            purpose="V1 Electron main process: window creation, lifecycle management, and IPC bridge between Electron and web renderer for cockpit state sync.",
+            related_tests=[],
+            notes="Electron main thread. Do not edit unless adding new IPC channels or window lifecycle behavior.",
+        ),
+        FileMapEntry(
+            path="bifrost/preview.py",
+            area=FileArea.BIFROST,
+            purpose="Preview renderer and demo mode for Bifrost cockpit: sample_cockpit_view_model() integration, HTML pre-render validation, and dev-time cockpit preview without Prime.",
+            related_tests=["tests/test_bifrost_preview.py"],
+            notes="Development tool. Safe to edit for preview/demo behavior only.",
+        ),
+        FileMapEntry(
+            path="tests/test_bifrost_preview.py",
+            area=FileArea.BIFROST,
+            purpose="Test suite for bifrost/preview.py: covers preview rendering, sample data generation, and HTML structure validation.",
+            related_tests=[],
+            notes="Preview dev-time tool tests.",
+        ),
+        FileMapEntry(
+            path="docs/prime-queue-reconciliation-requirement.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Prime queue reconciliation requirement: defines state-reconciliation guarantees for Prime's live-queue polling, lane state consistency, and task-completion signal safety when Prime coordinates worker sessions.",
+            related_tests=[],
+            notes="Architecture spec for V1. Required reading before implementing Prime's task-routing loop or queue-state safety gates.",
+        ),
         # -- File map itself --------------------------------------------
         FileMapEntry(
             path="meridian_core/filemap.py",
@@ -631,4 +667,5 @@ def make_default_map() -> FileMap:
         fm.add(entry)
 
     return fm
+
 

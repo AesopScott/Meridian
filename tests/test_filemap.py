@@ -1,4 +1,4 @@
-"""Tests for the File Map Knowledge Tracker (meridian_core/filemap.py)."""
+﻿"""Tests for the File Map Knowledge Tracker (meridian_core/filemap.py)."""
 
 from __future__ import annotations
 
@@ -62,6 +62,11 @@ _REQUIRED_PATHS = [
     "bifrost/static/cockpit.css",
     "tests/test_bifrost_cockpit.py",
     "tests/test_cockpit_state.py",
+    "package.json",
+    "electron/main.js",
+    "bifrost/preview.py",
+    "tests/test_bifrost_preview.py",
+    "docs/prime-queue-reconciliation-requirement.md",
     "tests/test_cockpit_provider.py",
 ]
 
@@ -102,7 +107,7 @@ class TestFileMapEntry:
 
 
 # ---------------------------------------------------------------------------
-# FileMap — add and lookup
+# FileMap â€” add and lookup
 # ---------------------------------------------------------------------------
 
 
@@ -142,7 +147,7 @@ class TestFileMapAddAndGet:
 
 
 # ---------------------------------------------------------------------------
-# FileMap — filtered views
+# FileMap â€” filtered views
 # ---------------------------------------------------------------------------
 
 
@@ -205,7 +210,7 @@ class TestInjectionSummary:
         fm.add(FileMapEntry(
             path="meridian_core/risk.py",
             area=FileArea.RISK_ENGINE,
-            purpose="Risk assessment for tiers 0–4.",
+            purpose="Risk assessment for tiers 0â€“4.",
             related_tests=["tests/test_risk.py"],
             notes="Decision engine foundation.",
         ))
@@ -253,7 +258,7 @@ class TestInjectionSummary:
 
 
 # ---------------------------------------------------------------------------
-# Default map — required files present
+# Default map â€” required files present
 # ---------------------------------------------------------------------------
 
 
@@ -350,4 +355,5 @@ class TestDefaultMap:
         entry = fm.require("meridian_core/relay.py")
         assert "council_plan" in entry.notes, \
             "relay.py notes should reference the council_plan field"
+
 

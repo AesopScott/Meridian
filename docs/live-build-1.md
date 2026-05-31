@@ -1,16 +1,8 @@
 # Live Build 1 Queue
 
-## Coordinator Override - Active Now
+## Active Task
 
-Goal: write the V2 Echo-to-Atlas retrieval handoff contract.
-
-Allowed files only: `docs/echo-atlas-handoff-contract.md`, `docs/live-build-1.md`.
-
-Task: create `docs/echo-atlas-handoff-contract.md`. Define how Echo memory records and Atlas retrieval results should cooperate without collapsing into one harness. Cover query inputs, source ranking, memory freshness, retrieval confidence, no-result behavior, stale-context warnings, and how Prime should ask Echo and Atlas for different answers before making a decision. Keep it docs-only and Haiku-sized.
-
-Tests: none required, docs-only.
-
-Completion: commit only this handoff contract slice, push, update Obsidian, and mark Ready for Codex Review.
+(None currently assigned.)
 
 ## Next Candidate Task
 
@@ -453,6 +445,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-08 23:52 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 2026-06-09 00:02 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 2026-05-31 11:22 -06:00 - Build 1 checked queue; status: idle; Active Task "(None currently assigned.)"; origin/main fast-forwarded through 9964acc/480161b/f6ba22d (Build 2 V2 package/API surface policy expanded for Echo/Atlas/Prime Autonomy/Session Lifecycle/Workflow dispatch — informational); cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
+2026-06-09 00:12 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 ```
 
 ## Write/Completion Log
