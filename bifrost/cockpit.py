@@ -33,7 +33,7 @@ def _e(s: object) -> str:
 
 
 def _status_glyph(status: str) -> str:
-    return {"ok": "✓", "warn": "⚠", "error": "✗"}.get(status, "?")
+    return {"ok": "GO", "warn": "CHECK", "error": "NO GO"}.get(status, "CHECK")
 
 
 @dataclass
@@ -287,10 +287,15 @@ def _render_nav() -> str:
     )
     return (
         '<nav class="cockpit-nav">'
+        '<div class="brand-block">'
+        '<span class="brand-kicker">MERIDIAN</span>'
+        '<strong>Prime Cockpit</strong>'
+        '<span>Your AI Command Center</span>'
+        "</div>"
         '<div class="nav-buttons">'
         f"{buttons}"
         '<button class="nav-btn nav-harness">'
-        'Harness <span class="harness-dot">●</span>'
+        'Harness <span class="harness-dot">ON</span>'
         "</button>"
         "</div>"
         "</nav>"
@@ -300,13 +305,15 @@ def _render_nav() -> str:
 def _render_prime_panel(vm: CockpitViewModel) -> str:
     header = (
         '<div class="prime-header">'
-        f'<span class="prime-project">{_e(vm.project)}</span>'
-        '<span class="prime-sep">·</span>'
+        "<div>"
+        '<span class="prime-eyebrow">Prime, Meridian orchestrator</span>'
+        f"<h1>{_e(vm.project)}</h1>"
+        "</div>"
+        '<div class="prime-bearing-stack">'
         f'<span class="prime-bearing">{_e(vm.bearing)}</span>'
-        '<span class="prime-sep">·</span>'
         f'<span class="prime-tier">Tier {_e(vm.instrument.tier)}</span>'
-        '<span class="prime-sep">·</span>'
         '<span class="prime-status">Prime: online</span>'
+        "</div>"
         "</div>"
     )
 
@@ -323,12 +330,17 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
     )
 
     messages = "".join(
-        f'<p class="prime-msg">{_e(m)}</p>' for m in vm.prime_messages
+        f'<p class="prime-msg"><span class="msg-source">Prime</span>{_e(m)}</p>'
+        for m in vm.prime_messages
     )
 
     return (
         '<section class="prime-panel">'
         f"{header}"
+        '<div class="wake-line">'
+        "<span>Relay GO</span><span>Bifrost GO</span>"
+        "<span>Beacon GO</span><span>Aegis GO</span>"
+        "</div>"
         f"{tabs}"
         f'<div class="prime-messages">{messages}</div>'
         '<div class="prime-input">'
@@ -336,7 +348,6 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
         "</div>"
         "</section>"
     )
-
 
 def _render_harness_dashboard(harnesses: list[HarnessCard]) -> str:
     grouped: dict[str, list[HarnessCard]] = {}
@@ -398,8 +409,9 @@ def _render_lane_strip(lanes: list[LaneRow]) -> str:
     attn = sum(1 for lane in lanes if lane.status in ("blocked", "paused"))
     return (
         '<aside class="lane-strip">'
+        '<div class="rail-title">Build Lanes</div>'
         f'<div class="lane-rows">{rows}</div>'
-        f'<div class="lane-summary">{total} tot. · {attn} attn</div>'
+        f'<div class="lane-summary">{total} tot. / {attn} attn</div>'
         "</aside>"
     )
 
@@ -437,7 +449,7 @@ def _render_progress_surface(events: list[ProgressEvent]) -> str:
     return (
         '<aside class="progress-surface">'
         '<div class="progress-header">'
-        'Progress <span class="progress-filter">(all) ▾</span>'
+        'Review Console <span class="progress-filter">(all)</span>'
         f'<div class="progress-counts">{counts}</div>'
         "</div>"
         f'<div class="progress-cards">{cards}</div>'
@@ -455,6 +467,7 @@ def _render_instrument_band(inst: InstrumentBand) -> str:
 
     return (
         '<footer class="instrument-band">'
+        '<span class="instr-title">Systems</span>'
         f"{chip('Beacon', inst.beacon)}"
         f"{chip('Relay', inst.relay)}"
         f"{chip('Aegis', inst.aegis)}"
@@ -494,16 +507,18 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"<style>\n{css}\n</style>\n"
         "</head>\n"
         "<body>\n"
+        '<div class="cockpit-shell">\n'
         f"{nav}\n"
         '<div class="cockpit-content">\n'
+        f"{lanes}\n"
         '<main class="cockpit-main">\n'
         f"{prime}\n"
         f"{harness_dashboard}\n"
         "</main>\n"
-        f"{lanes}\n"
         f"{progress}\n"
         "</div>\n"
         f"{instrument}\n"
+        "</div>\n"
         "</body>\n"
         "</html>"
     )
