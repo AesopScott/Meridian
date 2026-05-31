@@ -325,6 +325,52 @@ Poll every 30 seconds. When a new task is written here, begin immediately.
 
 Last completed: Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 rows added to docs/FileMap.md); commit c388f47; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 
+## Coordinator Override - Active Task
+
+Current Active Task:
+
+Goal: register the new V1 Bifrost cockpit scaffold and integration docs in FileMap.
+
+Context:
+
+- Build 5 completed the first Bifrost cockpit scaffold in commit `d13f1d1`.
+- Build 4 completed the V1 Bifrost cockpit integration sequence in commit `ed0fb75`.
+- Prior Build 4 V1 live-data contract commit `56f626d` also remains uncatalogued.
+- Build 3 owns FileMap, so do not let Bifrost or Build 4 edit FileMap directly.
+
+Allowed files only:
+
+- `docs/FileMap.md`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Task:
+
+- Add FileMap coverage for:
+  - `bifrost/__init__.py`
+  - `bifrost/cockpit.py`
+  - `bifrost/static/cockpit.css`
+  - `tests/test_bifrost_cockpit.py`
+  - `docs/v1-bifrost-live-data-contract.md`
+  - `docs/v1-bifrost-integration-sequence.md`
+- Use the existing FileMap taxonomy. Bifrost runtime/static files should be under the Bifrost area. The integration docs should be architecture/Bifrost planning entries, matching local conventions.
+- Add required-path coverage in `tests/test_filemap.py` for the new files if that is the established pattern.
+- Do not edit Bifrost runtime code, tests, or Build 4 docs content.
+- Preserve the untracked `docs/assets/diagrams/Master.png`; do not include it.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+- If practical, also run `python -m pytest tests/test_bifrost_cockpit.py tests/test_filemap.py -q`
+
+Completion:
+
+- Commit only this FileMap slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
 ## Completed Task Archive
 
 Historical record for reference. Authoritative detail is in the Write/Completion Log above.

@@ -190,6 +190,49 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 
 ## Active Task
 
+Current Active Task (supersedes stale Round B4 text below):
+
+Goal: perform Codex Reviews B Round B5 for the current V1 Bifrost startup wave.
+
+Scope trigger:
+
+- Build 5 completed the static Bifrost cockpit scaffold and marked commit `d13f1d1` Ready for Codex Review.
+- Build 4 completed the V1 Bifrost cockpit integration sequence and marked commit `ed0fb75` Ready for Codex Review.
+- Build 4's earlier live-data contract commit `56f626d` is still in this queue's active text and should be swept in the same docs/architecture round if not already cleared.
+
+Immediate scope:
+
+- Build 5 commit `d13f1d1` - first Bifrost cockpit scaffold.
+- Build 4 commit `ed0fb75` - V1 Bifrost cockpit integration sequence.
+- Build 4 commit `56f626d` - V1 Bifrost live-data integration contract, if no pass result is already recorded.
+
+Files:
+
+- `bifrost/__init__.py`
+- `bifrost/cockpit.py`
+- `bifrost/static/cockpit.css`
+- `tests/test_bifrost_cockpit.py`
+- `docs/v1-bifrost-integration-sequence.md`
+- `docs/v1-bifrost-live-data-contract.md`
+- `docs/live-build-4.md` and `docs/live-build-5.md` for provenance only.
+
+Required proof:
+
+- Inspect the target commit diffs with `git show`.
+- Run `python -m pytest tests/test_bifrost_cockpit.py -q`.
+- Confirm the scaffold is cockpit-first, dependency-free, escapes dynamic text, contains the requested nav buttons plus Harness, and exposes Prime/Review Console/lane/progress/instrument surfaces.
+- Confirm the integration sequence keeps V1 scoped to Bifrost cockpit UI plus wiring existing V0/domain capabilities, and leaves Echo, Atlas, federation, public/provider strategy, and write-back actions out of V1.
+- Confirm both docs preserve typed summaries rather than raw queue files/full logs/prompt-drag context.
+- Check whether the new Bifrost files/docs need FileMap registration. If yes, route/verify Build 3 FileMap work rather than editing FileMap here.
+- Record any rendering or mojibake/encoding concerns as findings with severity.
+
+Output:
+
+- Declare Round B5 scope.
+- Update Review Ledger, Review Log, Proof Log, Findings, and Repair Routing Log.
+- If clean, mark the Build 5 scaffold and Build 4 integration docs passed and unblock their next V1 wiring assignments.
+- If actionable findings exist, route repairs to Build 5 for cockpit code/CSS, Build 4 for docs/architecture, or Build 3 for FileMap.
+
 ## Coordinator Addendum - Model Adapter FileMap Clearance
 
 2026-05-30 16:11 MDT - Reviewed Build 3 commit `be34fea` plus queue marker `93d92ee`.
