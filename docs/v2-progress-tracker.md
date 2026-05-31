@@ -17,8 +17,8 @@
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Session Lifecycle Harness | 1 | 0 | 1 | 2 | 4 | 50% |
 | Bifrost Harness | 0 | 0 | 2 | 7 | 9 | 0% |
-| Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **10** | **0** | **7** | **17** | **34** | **29% Clear + 0% Awaiting + 21% Baseline** |
+| Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
+| **Total V2** | **11** | **0** | **7** | **16** | **34** | **32% Clear + 0% Awaiting + 21% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -49,6 +49,10 @@
 ### Session Lifecycle Harness
 
 - [x] **Prime + Session Lifecycle:** `restart_resteer.py` domain objects and deterministic evaluator for empty build queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates - built in `8b4c8ac`, repaired in `40def3d`; contract baseline in `27e1b1f`; review cleared by Reviews A on 2026-05-31.
+
+### Federation Harness
+
+- [x] **Federation Harness + Planning:** `docs/federation-harness-horizon.md` defines the planning-only multi-Meridian boundary, consent model, typed handoff packets, unsafe shared-state exclusions, Bifrost panel implication, and V2 out-of-scope limits - built in `e37030e`; review cleared by Reviews B on 2026-05-31.
 
 ## Built But Awaiting Review
 
@@ -115,10 +119,6 @@
 - [ ] **Bifrost + Voice I/O Surface:** visible microphone input, spoken Prime output, NASA-style boot/status audio state, mute controls, and listening/thinking/speaking indicators; runtime speech plumbing may follow the initial surface.
 - [ ] **Bifrost + Cockpit Render:** static render tests and HTML escaping tests for new V2 view-model fields.
 - [ ] **Bifrost + FileMap Integration:** FileMap registration of Bifrost cockpit extension surface by Build 3.
-
-### Federation Harness
-
-- [ ] **Federation Harness + Planning:** multi-Meridian/multi-user collaboration architecture (planning phase only) - document: `docs/federation-harness-horizon.md`; no network protocol or permission model implementation in V2 first wave.
 
 ## Review Gates for V2
 
