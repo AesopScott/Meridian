@@ -397,3 +397,16 @@ Write log:
 - Echo, Atlas, federation, public/provider strategy, and cockpit write-back remain out of V1.
 - FileMap now covers Bifrost scaffold files, cockpit-state domain/test files, and the V1 Bifrost contract/sequence docs.
 - Build 3 cadence is cleared. Build 4 and Build 5 are unblocked for the next V1 cockpit wiring slices.
+
+## Coordinator Addendum - Round B6 Review Scope Queued
+
+2026-05-31 02:18 MDT - Round B6 scope queued by coordinator.
+
+- Build 3: `c1ba27b` Prime cockpit provider FileMap registration.
+- Build 4: `ec66081` V1 Bifrost cockpit runtime acceptance checklist.
+- Build 2 context: `14315b3` package API export plus `f66bbde` cadence closure/format repair are runtime/API-shaped, so Reviews C may own detailed API review; Reviews B should note the V1 tracker impact only.
+- Required proof for Build 3: `python -m pytest tests/test_filemap.py tests/test_cockpit_provider.py -q`; confirm `meridian_core/cockpit_provider.py` and `tests/test_cockpit_provider.py` are registered in `docs/FileMap.md`, `meridian_core/filemap.py`, and `_REQUIRED_PATHS`.
+- Required proof for Build 4: inspect `docs/v1-bifrost-runtime-acceptance-checklist.md`; confirm it is V1-scoped, organized by Prime/harness ownership, includes proof expectations, and keeps Echo, Atlas, federation, public/account strategy, and vendor-specific model presets out of V1.
+- If clean, mark both passed and keep Build 3/4 unblocked.
+- Initial proof found a MEDIUM FileMap miss: `tests/test_cockpit_provider.py` was in `_REQUIRED_PATHS` and docs/FileMap.md but absent from `make_default_map()`. Coordinator repaired the missing `FileMapEntry`; rerun required proof before closing Round B6.
+- Repair proof: `python -m pytest tests/test_filemap.py tests/test_cockpit_provider.py -q` -> 69/69 passed.

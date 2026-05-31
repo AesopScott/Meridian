@@ -46,8 +46,8 @@
 
 | Status | Count | Percent |
 |---|---:|---:|
-| Built | 6 | 50% |
-| In Progress | 4 | 33% |
+| Built | 8 | 67% |
+| In Progress | 2 | 17% |
 | Planned / designed | 2 | 17% |
 | Needs planning | 0 | 0% |
 | Total V1 cockpit items | 12 | 100% |
@@ -60,6 +60,8 @@
 - [x] **Bifrost Harness + Prime:** live-data integration contract - built in `56f626d`.
 - [x] **Bifrost Harness + Prime:** Bifrost integration sequence - built in `ed0fb75`.
 - [x] **Prime + Bifrost Harness:** cockpit-state package API surface - built in `e656027` + `b314b5b`.
+- [x] **FileMap Harness:** Prime cockpit provider FileMap registration - built in `c1ba27b`.
+- [x] **Prime + Bifrost Harness:** Prime cockpit provider package API surface - built in `14315b3`, cadence closed in `f66bbde`.
 
 ### Planned / Designed
 
@@ -68,9 +70,7 @@
 
 ### In Progress
 
-- [ ] **FileMap Harness:** Prime cockpit provider FileMap registration - assigned to Build 3.
 - [ ] **Bifrost Harness + Prime:** `PrimeCockpitSnapshot` to `CockpitViewModel` mapping - assigned to Build 5.
-- [ ] **Prime + Bifrost Harness:** Prime cockpit provider package API surface - assigned to Build 2.
 - [ ] **Bifrost Harness + Prime:** runtime acceptance checklist - assigned to Build 4.
 
 ### Needs Planning

@@ -571,6 +571,13 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Build 1 commit f56af55.",
         ),
+        FileMapEntry(
+            path="tests/test_cockpit_provider.py",
+            area=FileArea.BIFROST,
+            purpose="Test suite for meridian_core/cockpit_provider.py: covers build_snapshot() validation, lane sorting, immutability, and demo_snapshot() determinism.",
+            related_tests=[],
+            notes="Build 1 commit 6c9a397.",
+        ),
 
         # -- File map itself --------------------------------------------
         FileMapEntry(
