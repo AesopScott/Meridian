@@ -8,7 +8,7 @@ Goal: review Build 4 workflow/sub-agent usage checklist.
 
 Scope:
 
-- Build 4 commit `0bf573f` - creates `docs/workflow-subagent-usage-checklist.md` and advances Build 4 to the DeepSeek validation benchmark plan.
+- Build 4 commit `ac9cef8` - creates `docs/workflow-subagent-usage-checklist.md` and advances Build 4 to the DeepSeek validation benchmark plan.
 
 Allowed review files:
 

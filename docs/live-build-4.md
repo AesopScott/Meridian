@@ -45,7 +45,7 @@ Completion:
 - Coordinator completed this docs-only checklist on 2026-05-31.
 - Files changed: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
 - Tests: not required (docs-only).
-- Commit: `0bf573f`.
+- Commit: `ac9cef8`.
 
 Ready for Codex Review.
 
