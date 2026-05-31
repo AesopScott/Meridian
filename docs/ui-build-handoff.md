@@ -1,12 +1,18 @@
 # Meridian UI Build Handoff
 
-**Owner lane:** UI / Bifrost cockpit session
+**Owner lane:** UI / Bifrost interface session
 
-**Objective:** Redesign the Bifrost preview toward the last approved Meridian HUD interface direction, not the older cinematic spaceship cockpit mockup. Keep it browser-first HTML/CSS for now; Electron is optional packaging later.
+**Objective:** Redesign the Bifrost preview toward the last approved Meridian HUD interface direction: the dark multi-panel Meridian command grid Scott provided in chat. This is not a spaceship cockpit build. Keep it browser-first HTML/CSS for now; Electron is optional packaging later.
+
+## Hard Correction
+
+Scott's controlling direction is: **"I don't want the cockpit. I want the last image we had worked on as the UI."**
+
+This handoff must not be interpreted as permission to continue the old spaceship-window cockpit direction. The correct UI target is the dark 10-panel `MERIDIAN` HUD/dashboard reference image Scott posted, where multiple rectangular HUD panels surround circular radar/orb elements. Meridian should adapt that look into a real working interface with a large central prompt, project lanes, harness viewers, and voice controls.
 
 ## Primary Visual Reference
 
-Use the **last user-approved UI reference from the thread**, not the older `06-meridian-prime-cockpit-single-view.png` spaceship cockpit asset.
+Use the **last user-approved UI reference from the thread**, not the older `06-meridian-prime-cockpit-single-view.png` spaceship cockpit asset and not the current command-bay preview screenshot.
 
 The correct reference is the dark Meridian HUD interface image with:
 
@@ -18,11 +24,17 @@ The correct reference is the dark Meridian HUD interface image with:
 - harness/system viewers around the central surface,
 - minimal permanent top navigation.
 
-Important: the repository currently does **not** contain a local copy of this latest UI reference image. The UI session should ask Scott/Codex to attach or save that exact image into:
+Important: the repository currently does **not** contain a local copy of this latest UI reference image. The UI session must not silently substitute another asset. Save or request the exact dark 10-panel Meridian HUD grid image into:
 
 ```text
 C:\Users\scott\Code\Meridian\docs\assets\diagrams\meridian-v2-ui-reference-hud-grid.png
 ```
+
+Known wrong/insufficient references:
+
+- `C:\Users\scott\AppData\Local\Temp\bifrost-command-bay-preview.png` is only the current preview proof; it is not the target.
+- `C:\Users\scott\Pictures\Screenshots\Screenshot 2026-05-31 152532.png` is a generic JARVIS screenshot; it is mood only, not the target.
+- `C:\Users\scott\Code\Meridian\docs\assets\diagrams\06-meridian-prime-cockpit-single-view.png` is the older cockpit asset; it is explicitly rejected as the layout target.
 
 Do **not** use this older generated cockpit image as the primary reference:
 
@@ -30,7 +42,7 @@ Do **not** use this older generated cockpit image as the primary reference:
 C:\Users\scott\Code\Meridian\docs\assets\diagrams\06-meridian-prime-cockpit-single-view.png
 ```
 
-That older image is useful only as background mood for “high-production cockpit/HUD polish”; it is not the layout target.
+That older image is useful only as background mood for high-production HUD polish; it is not the layout target.
 
 The current browser preview is:
 
@@ -44,7 +56,7 @@ http://127.0.0.1:8765/bifrost/preview.html
 - Remove visual noise. Do not waste top space with repeated labels such as `V1 cockpit`, `tier two`, `Prime Online`, `Prime Meridian Orchestrator`, version numbers, decorative panel numbers, or repeated `Meridian` labels.
 - The central Prime HUD should be quiet: show `PRIMED` and the central circle/orb only. The circle should pulse when Prime is speaking/thinking.
 - Remove all of this from the central Prime window: Provider Balance, Claude, OpenAI, DeepSeek, Prompt Payload, Queue, Proof, Prime, B1, B2, B3, B4, B5, ABH.
-- Keep real controls where useful, but the cockpit should not become a wall of labels.
+- Keep real controls where useful, but the interface should not become a wall of labels.
 - HTML/browser preview is acceptable and preferred for fast iteration. Do not force Electron unless a desktop-only feature requires it.
 - Meridian must be fully voice-enabled in design: voice input, voice output, listening/thinking/speaking states, mute controls, and spoken Prime responses.
 
@@ -56,7 +68,7 @@ The center is Prime and the prompt.
 
 - A large central prompt / conversation surface.
 - A quiet `PRIMED` orb/pulse area.
-- The prompt should feel like the ship's command channel, not a sidebar widget.
+- The prompt should feel like the primary command channel, not a sidebar widget.
 - Use the dark cyan HUD-panel style from the latest grid image, but do not bury the prompt in decorative clutter.
 
 ### Left Lane
@@ -65,7 +77,7 @@ The left lane should show **project names**, not build session names by default.
 
 Behavior:
 
-- Each project row is a compact cockpit control.
+- Each project row is a compact HUD control.
 - Clicking a project row expands it and everything else in that lane disappears/collapses.
 - The expanded project view shows the individual sessions running for that project.
 - This must scale to many projects. Do not use 25 always-visible tabs.
@@ -74,7 +86,7 @@ Behavior:
 
 Remove the heavy top navigation system.
 
-Scott can verbally ask Prime to open panels. The visual UI should rely on cockpit surfaces and voice/command invocation, not a permanent top nav taking space.
+Scott can verbally ask Prime to open panels. The visual UI should rely on HUD surfaces and voice/command invocation, not a permanent top nav taking space.
 
 ### Harness Dashboard / Systems
 
@@ -104,7 +116,7 @@ Use real, clickable UI controls where they are natural:
 
 Target feel:
 
-- JARVIS/HUD command interface, closer to the latest dark Meridian multi-panel HUD image than the older spaceship-window cockpit.
+- JARVIS/HUD command interface, matching the latest dark Meridian multi-panel HUD image rather than the older spaceship-window cockpit.
 - Dark glass, cyan instrument lines, selective amber/red/green state.
 - Spacious central command surface.
 - Fewer words, stronger hierarchy.
@@ -119,6 +131,7 @@ Avoid:
 - Tiny prompt boxes.
 - Provider/model telemetry in the Prime orb.
 - Treating `06-meridian-prime-cockpit-single-view.png` as the layout source.
+- Saying "cockpit" as shorthand for the old visual direction.
 
 ## Files To Start With
 
