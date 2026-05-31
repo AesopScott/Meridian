@@ -360,7 +360,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-30 16:45 -06:00 - Codex review repair for env-gated HTTP JSON Model Harness transport; commit f353c8d; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 72 targeted adapter/executor passed, 916 full passed; added provider to request body and parsed standard-library HTTP JSON response text.
 2026-06-02 ~21:40 CDT - Build 1 completed Prime cockpit snapshot/event domain shape; commit f56af55; files: meridian_core/cockpit_state.py, tests/test_cockpit_state.py; tests: 25 targeted cockpit_state passed, 941 full passed; Obsidian pending; Ready for Codex Review.
 2026-05-31 05:02 -06:00 - Coordinator assigned V2 Aegis CognitionPolicy domain model; commit pending; tests pending (`python -m pytest tests/test_cognition_policy.py -q`)
-2026-05-31 05:54 -06:00 - Coordinator completed V2 Aegis CognitionPolicy domain model; commit 431f5d5; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py, docs/live-build-1.md; tests: 15 cognition_policy passed, 102 aegis+cognition_policy passed; Ready for Codex Review.
+2026-05-31 05:54 -06:00 - Coordinator completed V2 Aegis CognitionPolicy domain model; commit 3cdc74d; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py, docs/live-build-1.md; tests: 15 cognition_policy passed, 102 aegis+cognition_policy passed; Ready for Codex Review.
 ```
 
 ## Cross-Check Activity
@@ -408,13 +408,13 @@ Current Active Task:
 
 None. Poll for next assignment.
 
-Last completed: V2 Aegis CognitionPolicy domain model; commit `431f5d5`; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py, docs/live-build-1.md; tests: 15 cognition_policy passed, 102 aegis+cognition_policy passed; Ready for Codex Review.
+Last completed: V2 Aegis CognitionPolicy domain model; commit `3cdc74d`; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py, docs/live-build-1.md; tests: 15 cognition_policy passed, 102 aegis+cognition_policy passed; Ready for Codex Review.
 
 ## Completed Slices
 
 Historical record of Build 1 V0 completed slices (most recent first). Do not re-execute any entry below.
 
-[COMPLETED 2026-05-31 05:54 -06:00] V2 Aegis CognitionPolicy domain model - commit `431f5d5`; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py; tests: 15 targeted passed, 102 Aegis+cognition_policy passed; Ready for Codex Review.
+[COMPLETED 2026-05-31 05:54 -06:00] V2 Aegis CognitionPolicy domain model - commit `3cdc74d`; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py; tests: 15 targeted passed, 102 Aegis+cognition_policy passed; Ready for Codex Review.
 
 [COMPLETED 2026-06-02 ~21:40 CDT] Prime cockpit snapshot/event domain shape — commit `f56af55`; files: meridian_core/cockpit_state.py, tests/test_cockpit_state.py; tests: 25 targeted passed, 941 full passed; Ready for Codex Review.
 
