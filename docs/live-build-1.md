@@ -1,5 +1,33 @@
 # Live Build 1 Queue
 
+## Codex Review Repair Routed - Active Before Other Work
+
+2026-05-31 14:43 -06:00 - Codex Reviews A routed a MEDIUM repair from the V2 runtime/code review sweep.
+
+Goal: make the prompt payload meter failure-soft for a zero-token budget edge case.
+
+Allowed files only: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `docs/live-build-1.md`.
+
+Finding: `PromptPayloadSnapshot(raw_prompt_chars=0, estimated_tokens=0, budget_tokens=0).status` raises `ZeroDivisionError` through `budget_percent`, so the helper can crash on a malformed/zero budget instead of returning deterministic status or validating the snapshot.
+
+Required fix:
+
+- Add validation or guard logic so zero/invalid budgets cannot crash `budget_percent` or `status`.
+- Add regression coverage for `budget_tokens=0` and any chosen invalid-budget behavior.
+- Preserve the existing frozen dataclass shape, deterministic status semantics, and no-model/no-filesystem/no-network boundary.
+
+Tests:
+
+- `python -m pytest tests/test_prompt_payload_meter.py -q`
+- `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q`
+- `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q`
+
+Completion:
+
+- Commit and push only the allowed repair files.
+- Mark the repair Ready for Codex Review with commit hash, files changed, and tests run.
+- Do not start unrelated active work until this repair is complete or superseded by the coordinator.
+
 ## Coordinator Override - Active Now
 
 Goal: register the new V2 prompt payload and Prime autonomy modules in the FileMap.
