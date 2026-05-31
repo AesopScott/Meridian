@@ -343,6 +343,13 @@ def make_default_map() -> FileMap:
             notes="Public/private provider implementations stay outside Relay core; adapter receives only approved payload text.",
         ),
         FileMapEntry(
+            path="docs/deepseek-provider-validation-gate.md",
+            area=FileArea.MODEL_HARNESS,
+            purpose="DeepSeek provider validation gate: proof requirements before DeepSeek can become a trusted primary provider for Q-mode build work.",
+            related_tests=[],
+            notes="DeepSeek remains candidate-gated until direct API, prompt-payload flatness, benchmark, and Codex review proof pass.",
+        ),
+        FileMapEntry(
             path="meridian_core/restart_resteer.py",
             area=FileArea.DOMAIN_MODEL,
             purpose="Prime restart/resteer domain objects and evaluator: detects empty queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates.",
@@ -489,6 +496,20 @@ def make_default_map() -> FileMap:
             notes="V2 entry-point. Read before implementing or extending Atlas harness or Prime's context query logic.",
         ),
         FileMapEntry(
+            path="meridian_core/atlas.py",
+            area=FileArea.FILE_MAP,
+            purpose="Atlas runtime harness: deterministic FileMap/docs-first retrieval with source-aware ranking for Prime context selection.",
+            related_tests=["tests/test_atlas.py"],
+            notes="Pure retrieval/ranking helper; no embeddings, network calls, or live filesystem mutation.",
+        ),
+        FileMapEntry(
+            path="tests/test_atlas.py",
+            area=FileArea.FILE_MAP,
+            purpose="Test suite for Atlas deterministic retrieval, source-aware ranking, and failure-soft behavior.",
+            related_tests=[],
+            notes="Run before changing meridian_core/atlas.py or Atlas FileMap behavior.",
+        ),
+        FileMapEntry(
             path="docs/echo-memory-contract.md",
             area=FileArea.ARCHITECTURE,
             purpose="Echo memory contract: persistent memory interface for V2. Defines storage structure, session isolation, recall guarantees, and integration with Prime's long-term decision making.",
@@ -496,11 +517,39 @@ def make_default_map() -> FileMap:
             notes="V2 entry-point. Read before implementing or extending Echo harness or Prime's persistent state logic.",
         ),
         FileMapEntry(
+            path="meridian_core/echo.py",
+            area=FileArea.PRODUCT_RECALL,
+            purpose="Echo runtime harness: deterministic memory records, query filters, and ranking for Prime recall without model calls.",
+            related_tests=["tests/test_echo.py"],
+            notes="Pure in-memory repository/domain slice; durable storage integration remains future work.",
+        ),
+        FileMapEntry(
+            path="tests/test_echo.py",
+            area=FileArea.PRODUCT_RECALL,
+            purpose="Test suite for Echo memory records, query ranking, pinning, recency, and corrupt-record failure-soft behavior.",
+            related_tests=[],
+            notes="Run before changing meridian_core/echo.py or Echo ranking semantics.",
+        ),
+        FileMapEntry(
             path="docs/workflow-subagent-harness-contract.md",
             area=FileArea.ARCHITECTURE,
             purpose="Workflow subagent harness contract: expanded harness framework for V2. Defines multi-step workflows, tool orchestration, decision parallelism, and integration with Prime's stronger autonomy.",
             related_tests=[],
             notes="V2 entry-point. Read before designing or implementing new harness types or multi-step workflow orchestration.",
+        ),
+        FileMapEntry(
+            path="docs/session-lifecycle-v2-contract.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Session Lifecycle V2 contract: typed state and command-plan responsibilities for spawning, watching, steering, recovering, and handing off sessions.",
+            related_tests=[],
+            notes="Read before implementing meridian_core/session_lifecycle.py or any live session orchestration controls.",
+        ),
+        FileMapEntry(
+            path="docs/federation-harness-horizon.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Federation harness horizon plan: multi-Meridian and multi-user collaboration concepts, permission boundaries, and Prime-to-Prime handoff vocabulary.",
+            related_tests=[],
+            notes="Planning only; V2 architecture entry point for later V3 federation runtime.",
         ),
 
         FileMapEntry(
@@ -616,6 +665,13 @@ def make_default_map() -> FileMap:
             purpose="Session queue activation brief: how the Bifrost harness activates and manages worker sessions from the live build queue. Covers queue polling, lane state tracking, and session lifecycle.",
             related_tests=[],
             notes="Design brief. Owner: Build 5. Companion to bifrost-cockpit-queue-status-brief.md.",
+        ),
+        FileMapEntry(
+            path="docs/session-card-queue-activation-contract.md",
+            area=FileArea.BIFROST,
+            purpose="Session-card queue activation product contract: Meridian Q-mode behavior, queue routing, heartbeat status, and degraded-state visibility.",
+            related_tests=[],
+            notes="Read before adding Q controls, polling UI, queue state display, or session-card lifecycle wiring.",
         ),
         FileMapEntry(
             path="docs/v1-bifrost-cockpit-implementation-brief.md",
