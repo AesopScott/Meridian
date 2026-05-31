@@ -162,6 +162,8 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 07:15 -06:00 - Build 2 checked queue; status: idle (task e800c03 complete; no new Active Task; polling)
 2026-05-31 07:25 -06:00 - Build 2 checked queue; status: running (Active Task found — V0 prime_status and prime_console CLI)
 2026-06-01 02:30 -06:00 - Build 2 checked queue; status: idle (tasks 989366f + 9c3e1a3 complete, cadence cleared; Active Task section stale — awaiting orchestrator update; polling)
+2026-06-01 10:15 -06:00 - Build 2 checked queue; Active Task found: V2 CognitionPolicy package API surface; executing
+2026-06-01 10:20 -06:00 - Build 2 checked queue; status: idle (task e08e598 complete; returning to polling)
 2026-05-30 19:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
@@ -252,6 +254,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-05-30 16:03 -06:00 - Build 2 completed V0 prime_approve CLI gate-disposition surface; commits 9d38314 (meridian_core/cli.py) + d687b7f (tests/test_cli.py) [committed by Build 3/4 sessions in read check bundles — anomaly, but code correct]; tests 31 passed; cadence count: 1 of 3 since 9c3e1a3; Ready for Codex Review
 2026-05-31 01:45 -06:00 - Build 2 completed cockpit_state package API surface; commits e656027 (meridian_core/__init__.py, Build 4) + b314b5b (tests/test_package_api.py, Build 3) [committed by other sessions before Build 2 executed — anomaly, code correct and verified]; tests 992 passed; cadence count: 2 of 3 since 9c3e1a3; Ready for Codex Review
 2026-05-31 09:30 -06:00 - Build 2 completed V1 cockpit_provider package API surface; commit 14315b3 (Build 1 — anomaly, code correct); files changed: meridian_core/__init__.py, tests/test_package_api.py; tests 1036 passed; cadence count: 3 of 3 since 9c3e1a3; Ready for Codex Review
+2026-06-01 10:20 -06:00 - Build 2 completed V2 CognitionPolicy package API surface; commit e08e598 (merged to main as b04c465); files changed: meridian_core/__init__.py, tests/test_package_api.py; tests 32 passed (cognition_policy + package_api); cadence count: 1 of 3 since 9c3e1a3; Ready for Codex Review
 ```
 
 ## Cross-Check Activity
