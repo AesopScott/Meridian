@@ -40,7 +40,9 @@ Review expectations:
 - If clean, record proof and mark the V2 tracker implication as review-cleared.
 - If findings exist, route a focused repair back to the owning build lane with allowed files and tests.
 
-Completion: commit and push only `docs/live-codex-reviews.md` unless routing a repair or updating tracker implication after a clean pass.
+Completion: committed and pushed `docs/live-codex-reviews.md` plus `docs/v2-progress-tracker.md` tracker implication.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Coordinator Override - Completed / Passed
 
@@ -546,6 +548,7 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-05-31 13:30 -06:00 - Routed repair to Build 5; queue: docs/live-build-5.md; finding: remove stale lower `## Active Task` / old `docs/bifrost-v2-extensions-contract.md` path contradiction and align `docs/v2-detailed-build-plan.md` with `docs/bifrost-v2-cockpit-extensions.md`; status: pending.
 2026-05-31 14:45 -06:00 - Routed repair to Build 1; queue: docs/live-build-1.md; finding: prompt payload meter must handle `budget_tokens=0` and Echo must not crash on corrupt/naive `created_at` records; status: pending.
 2026-05-31 14:57 -06:00 - Verified Build 1 repair commit `8e8c87b`; queue: docs/live-build-1.md; finding: prompt payload meter zero/invalid budget and Echo naive timestamp failure-soft repairs; status: passed, no further Build 1 repair routed.
+2026-05-31 15:12 -06:00 - Cleared Build 1 restart/resteer review; queue: docs/live-build-1.md; finding: none; status: passed, no repair routed.
 ```
 
 ## Coordinator Addendum - Planning Harness Review
@@ -703,7 +706,7 @@ Round 6 write log:
 - 2026-05-31 15:07 -06:00 - Codex Reviews A completed idle queue read and queue-only cadence check after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff 43a704e..HEAD -- docs/live-codex-reviews.md`. Commit: `8edeb19`; status-update commit: `6c254c7`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
 - 2026-05-31 15:08 -06:00 - Codex Reviews A completed idle queue read after origin/main inspection. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `792e354`; status-update commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 15:11 -06:00 - Codex Reviews A completed idle queue read after origin/main fast-forward. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `261f1a0`. Push status: superseded by later origin/main queue routing in `7005e0e`. Obsidian update status: not updated; no new review finding or clearance.
-- 2026-05-31 15:12 -06:00 - Codex Reviews A completed V2 Prime Session Lifecycle restart/resteer review. Files changed: `docs/live-codex-reviews.md`, `docs/v2-progress-tracker.md`. Tests run: `python -m pytest tests/test_restart_resteer.py -q` (16 passed); `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q` (62 passed). Commit: pending. Push status: pending. Obsidian update status: not updated; tracker implication recorded in repo docs only.
+- 2026-05-31 15:12 -06:00 - Codex Reviews A completed V2 Prime Session Lifecycle restart/resteer review. Files changed: `docs/live-codex-reviews.md`, `docs/v2-progress-tracker.md`. Tests run: `python -m pytest tests/test_restart_resteer.py -q` (16 passed); `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q` (62 passed). Commit: `85337ff`; status-update commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; tracker implication recorded in repo docs only.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
