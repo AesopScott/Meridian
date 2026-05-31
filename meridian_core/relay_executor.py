@@ -17,6 +17,7 @@ from .aegis import (
     EvidenceType,
     ProofTrail,
 )
+from .cognition_policy import evaluate_cognition_policy
 from .model_adapter import AdapterRegistry, MissingAdapterError, ModelAdapter  # noqa: F401
 from .relay import ModelRole
 from .relay_dispatch import RelayDispatchPlan
@@ -182,6 +183,34 @@ def execute_relay_plan_with_registry(
         results=tuple(results),
         errors=tuple(errors),
     )
+
+
+def execute_relay_dispatch_plan_with_policy(
+    plan: RelayDispatchPlan,
+    model_call: ModelCallFn,
+    proof_trail: ProofTrail | None = None,
+    human_gate_approved: bool = False,
+) -> RelayExecutionSummary:
+    """
+    Execute a plan after evaluating V2 CognitionPolicy against the risk tier.
+
+    Evaluates cognition_policy for plan.route.risk_tier before any model call.
+    If policy blocks dispatch, raises RelayProofGateError with blocking reasons
+    before calling model_call. Otherwise delegates to execute_relay_dispatch_plan.
+    """
+    policy_result = evaluate_cognition_policy(
+        plan.route.risk_tier,
+        proof_trail=proof_trail,
+        human_gate_approved=human_gate_approved,
+    )
+
+    if not policy_result.can_dispatch:
+        reasons = "; ".join(policy_result.blocking_reasons)
+        raise RelayProofGateError(
+            f"Relay dispatch blocked by cognition policy: {reasons}"
+        )
+
+    return execute_relay_dispatch_plan(plan, model_call, proof_trail)
 
 
 def _assert_proof_gate_clear(

@@ -14,12 +14,14 @@ from meridian_core.aegis import (
 from meridian_core.model_adapter import AdapterRegistry, FakeModelAdapter, MissingAdapterError
 from meridian_core.relay import ModelRole, route_from_tier
 from meridian_core.relay_dispatch import RelayDispatchLane, RelayDispatchPlan
+from meridian_core.cognition_policy import evaluate_cognition_policy
 from meridian_core.relay_executor import (
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
     RelayProofGateError,
     execute_relay_dispatch_plan,
+    execute_relay_dispatch_plan_with_policy,
     execute_relay_plan_with_registry,
     relay_execution_summary_to_proof_trail,
 )
@@ -541,3 +543,64 @@ class TestRegistryDispatch:
         plan = _make_plan(1)
         summary = execute_relay_dispatch_plan(plan, _constant_model_call("still works"))
         assert summary.results[0].output == "still works"
+
+
+class TestExecuteRelayDispatchPlanWithPolicy:
+    def test_tier3_missing_proof_blocks_before_model_call(self):
+        plan = _make_plan(3)
+        calls: list[str] = []
+
+        def recording_call(payload: str) -> str:
+            calls.append(payload)
+            return "response"
+
+        with pytest.raises(RelayProofGateError):
+            execute_relay_dispatch_plan_with_policy(plan, recording_call, proof_trail=None)
+
+        assert calls == []
+
+    def test_tier3_clean_proof_allows_dispatch(self):
+        plan = _make_plan(3)
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            _constant_model_call("ok"),
+            proof_trail=ProofTrail(),
+        )
+        assert len(summary.results) == len(plan.lanes)
+
+    def test_tier4_clean_proof_without_human_approval_blocks_before_model_call(self):
+        plan = _make_plan(4)
+        calls: list[str] = []
+
+        def recording_call(payload: str) -> str:
+            calls.append(payload)
+            return "response"
+
+        with pytest.raises(RelayProofGateError, match="human gate approval required"):
+            execute_relay_dispatch_plan_with_policy(
+                plan,
+                recording_call,
+                proof_trail=ProofTrail(),
+                human_gate_approved=False,
+            )
+
+        assert calls == []
+
+    def test_tier4_clean_proof_with_human_approval_allows_dispatch(self):
+        plan = _make_plan(4)
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            _constant_model_call("ok"),
+            proof_trail=ProofTrail(),
+            human_gate_approved=True,
+        )
+        assert len(summary.results) == len(plan.lanes)
+
+    def test_tier2_still_dispatches_without_proof(self):
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            _constant_model_call("ok"),
+            proof_trail=None,
+        )
+        assert len(summary.results) == len(plan.lanes)
