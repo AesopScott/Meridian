@@ -2,25 +2,7 @@
 
 ## Coordinator Override - Active Now
 
-Goal: build the V2 Relay prompt payload meter domain helper.
-
-Allowed files only: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `docs/live-build-1.md`.
-
-Task: create a small deterministic Relay helper that can report prompt payload size before every model dispatch. This is the Polaris-style prompt-size visibility Scott asked to carry into Meridian.
-
-Required shape:
-
-- Define a frozen dataclass such as `PromptPayloadSnapshot`.
-- Include fields for raw prompt characters, estimated tokens, optional budget tokens, budget percent, prior estimated tokens, growth tokens, growth percent, queue/Q-mode flag, status, and display label.
-- Status must be deterministic and cheap: healthy/ watch/ degraded is enough.
-- Display label should support the Polaris-style labels Scott recognizes: `(under 1k)` for small prompts and `(12.4k)` style for larger prompts.
-- Queue/Q-mode prompt growth across polls should produce a degraded finding when growth is meaningful.
-- Keep this module vendor-neutral. No API calls. No filesystem reads. No model calls. No UI rendering.
-- Do not edit package exports, FileMap, Bifrost, or Relay executor code in this slice. Those are follow-up integration tasks.
-
-Tests: add focused tests for label formatting, budget percent, growth deltas, queue-mode growth degradation, and budget-pressure status.
-
-Completion: commit only this prompt payload meter slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
+(Task moved to Completed Slices; see entry below.)
 
 ## Next Candidate Task
 
@@ -493,6 +475,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-09 00:42 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; Next Candidate Task staged but not Active; cadence 2/3 since Reviews C5; awaiting next assignment)
 2026-06-09 00:52 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main at c1c6b84; Next Candidate Task staged but not Active; cadence 2/3 since Reviews C5; awaiting next assignment)
 2026-06-09 01:02 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main at 4e16390 (Build 3 heartbeat); no Cross-Check Activity affecting Build 1; cadence 2/3 since Reviews C5; awaiting next assignment)
+2026-06-09 00:15 -05:00 - Build 1 completed V2 Relay prompt payload meter domain helper (Coordinator Override task); commit `638117f`; files: meridian_core/prompt_payload_meter.py, tests/test_prompt_payload_meter.py; tests: 23 passed; Ready for Codex Review
 2026-06-09 01:12 -05:00 - Build 1 checked queue; status: running (Active Task found: Prime queue runway policy; executing task)
 2026-05-31 11:52 -06:00 - Build 1 checked queue; status: idle; Coordinator Override "Active Now" task = "create docs/prime-queue-runway-policy.md" already completed by parallel session at commit b5bbab8 (file exists at 136 lines, covers no-empty-queue invariant, cadence gating, review gating, idle fallback, lane ownership, unique worktrees, local-only polling state, read-check-commit policy); treating as stale per "Do not re-execute" rule; origin/main fast-forwarded through b5bbab8/3aa16fe/c7fa444/c8b4738 (Build 4 V2 Prime Autonomy contract — informational); cadence 2/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
 2026-05-31 12:02 -06:00 - Build 1 checked queue; status: idle; Coordinator Override "Active Now" still names completed runway policy (b5bbab8) — stale; promote-next-work commit e1aee24 touched Build 2/5 queues only, not Build 1; origin/main fast-forwarded through 18a3419/506a42a/cb9f66b/e1aee24/b850958 (Reviews B Round B14 doc, Build 3/4 read checks, Build 2 read check — informational); cadence 2/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh Active Task promotion
@@ -605,6 +588,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 ## Completed Slices
 
 Historical record of Build 1 V0 completed slices (most recent first). Do not re-execute any entry below.
+
+[COMPLETED 2026-06-09 00:15 -05:00] V2 Relay prompt payload meter domain helper — commit `638117f`; files: meridian_core/prompt_payload_meter.py, tests/test_prompt_payload_meter.py; tests: 23 passed; PromptPayloadSnapshot frozen dataclass with PayloadStatus enum (healthy/watch/degraded); Polaris-style display labels `(under 1k)` / `(N.Nk)` format; budget percent tracking; token growth delta/percent; queue-mode growth detection (5-10% watch, >10% degraded); deterministic status logic prioritizing budget pressure; vendor-neutral, no API/filesystem/model calls; Ready for Codex Review.
 
 [COMPLETED 2026-06-08 20:51 -05:00] V2 Atlas Harness retrieval domain slice — commit `7e95ede`; files: meridian_core/atlas.py, tests/test_atlas.py; tests: 33 passed; AtlasQuery, AtlasHit, AtlasResult frozen dataclasses; AtlasSource enum (FILEMAP, DOC, ECHO); deterministic retrieval over FileMap/doc allowlist with source-aware ranking; failure-soft on missing inputs, no embeddings/broad crawl; Ready for Codex Review.
 
