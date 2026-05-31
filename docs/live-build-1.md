@@ -38,7 +38,7 @@ Completion:
 
 Only the first `Coordinator Override - Active Now` block in this file is executable unless a future repair block is explicitly marked active above it. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: register the new V2 prompt payload and Prime autonomy modules in the FileMap.
 
@@ -65,10 +65,32 @@ Tests:
 
 Completion:
 
-- Commit only the allowed FileMap slice.
-- Push to `origin/main`.
-- Update Obsidian.
-- Mark Ready for Codex Review with commit hash, files changed, and tests run.
+- Coordinator completed this FileMap slice on 2026-05-31 15:21 -06:00.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed).
+- Commit: `9fa9cdf`.
+
+Ready for Codex Review. Routed to Codex Reviews A in `29109e7`.
+
+## Coordinator Override - Active Now
+
+Goal: repair and harden the Prime queue runway policy.
+
+Allowed files only: `docs/prime-queue-runway-policy.md`, `docs/live-build-1.md`.
+
+Task: revise `docs/prime-queue-runway-policy.md` so it matches the live Meridian orchestration lessons:
+
+- Every build queue must maintain an executable Active Task and at least one Next Candidate Task unless explicitly cadence-paused, review-gated, or human-gated.
+- Prime must assign runway ahead of completion; it does not wait for Scott or for a lane to become visibly idle before preparing the next task.
+- Read-check-only commits are not valid substitute work and must not spam `main`; queue heartbeat/read evidence belongs in session state, UI status, or a bounded coordinator note.
+- Review gates are real gates: after every three task-changing commits per lane, route Codex review before more risky implementation, but Prime should still prepare non-conflicting candidate tasks.
+- Stale top tasks must be closed, archived, or superseded so Q polling does not re-run old work.
+- Unique worktrees, assigned queues, and branch-movement permission are hard invariants.
+- Include what Prime should do when a provider/model limit blocks a lane: reduce active lanes, switch allowed models/providers, or reassign non-model-bound docs/review work.
+
+Tests: none required, docs-only.
+
+Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
 ## Next Candidate Task
 
@@ -90,7 +112,7 @@ Task: inspect the current Echo/Atlas handoff work if present, then write a short
 
 (None currently assigned.)
 
-## Next Candidate Task
+## Archived Prior Candidate - Promoted Above
 
 Goal: define the Prime queue runway policy.
 
