@@ -303,7 +303,7 @@ Round 5 complete (2026-05-31 13:04 -06:00).
 - Findings: no CRITICAL/HIGH/MEDIUM findings. LOW process note only: `40def3d` also carries Build 2 Prime Autonomy product files, left unreviewed in Round 5 and deferred to Build 2's Ready marker.
 - Proofs: `tests/test_restart_resteer.py` 16 passed; `tests/test_filemap.py tests/test_restart_resteer.py` 62 passed.
 - Files changed by Reviews A after Round 5: `docs/live-codex-reviews.md`.
-- Commit: `0e9ec75`.
+- Commit: `a7f03bb`.
 - Push: complete (`origin/main`).
 - Obsidian status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
 
@@ -338,7 +338,7 @@ Round 4 write log:
 
 Round 5 write log:
 
-- 2026-05-31 13:04 -06:00 - Codex Reviews A completed Build 1 repair verification. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_restart_resteer.py -q` (16 passed), `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q` (62 passed). Commit: `0e9ec75`. Push status: pushed to `origin/main`. Obsidian update status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
+- 2026-05-31 13:04 -06:00 - Codex Reviews A completed Build 1 repair verification. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_restart_resteer.py -q` (16 passed), `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q` (62 passed). Commit: `a7f03bb`. Push status: pushed to `origin/main`. Obsidian update status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
