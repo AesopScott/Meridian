@@ -381,6 +381,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-08 20:18 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main fast-forwarded from b12d1c8 to 2ec2e04 (Build 3 read check); no Active Task; awaiting next assignment)
 2026-05-31 08:42 -06:00 - Build 1 checked queue; status: idle (Active Task body was refilled by coordinator 97cf44d to "build the V2 Echo Memory Harness domain slice", but that slice is already in Completed Slices at commit 2bccb55 and the rules say "Do not re-execute any entry below"; verified locally — meridian_core/echo.py and tests/test_echo.py exist on HEAD, 27 tests pass; treating Active Task as stale; cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment)
 2026-05-31 08:52 -06:00 - Build 1 checked queue; status: idle (Active Task unchanged — still names the V2 Echo Memory Harness slice already completed at 2bccb55; no fresh assignment from coordinator; origin/main fast-forwarded to bc08884; cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment)
+2026-06-08 20:22 -05:00 - Build 1 checked queue; status: cleared stale task (merged Active Task body reappeared from upstream; was already cleared as complete at 2bccb55; cleared again; Active Task now "(None currently assigned.); awaiting next assignment)
 ```
 
 ## Write/Completion Log
@@ -464,36 +465,6 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
-
-Current Active Task - Coordinator Override:
-
-Goal: build the V2 Echo Memory Harness domain slice.
-
-Allowed files only:
-
-- `meridian_core/echo.py`
-- `tests/test_echo.py`
-- `docs/live-build-1.md`
-
-Task:
-
-- Use `docs/echo-memory-contract.md` as the contract source.
-- Define `MemoryRecord`, `MemoryQuery`, `MemoryHit`, and a deterministic in-memory/local repository abstraction.
-- Implement add/query behavior with stable ranking by project match, pinning, importance, and recency.
-- Missing/no memory must fail soft with an empty result.
-- Return summaries/metadata, not raw prompt dumps.
-- Do not wire Echo into Relay prompts yet.
-- Do not edit package exports, FileMap, or Bifrost.
-
-Tests:
-
-- Run `python -m pytest tests/test_echo.py -q`.
-
-Completion:
-
-- Commit only this Echo domain slice, push, update Obsidian, and mark Ready for Codex Review.
-
-Stale prior task follows.
 
 (None currently assigned.)
 
