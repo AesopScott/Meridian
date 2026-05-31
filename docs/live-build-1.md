@@ -141,11 +141,15 @@ Completion: commit only the allowed files, push to `origin/main`, update Obsidia
 
 ## Next Candidate Task
 
-Goal: integrate prompt payload meter into Relay/Bifrost after Codex review clears this domain helper and FileMap registration.
+Goal: add Model Harness metadata fields for provider capability and prompt-drag telemetry.
 
-Allowed files: to be assigned by Prime/Codex after review.
+Allowed files only: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
 
-Task: wire the prompt payload snapshot into the Relay dispatch surface and Bifrost prompt visibility panel without increasing prompt drag.
+Task: extend the provider-neutral Model Harness adapter contract with structured metadata needed by Relay and Bifrost: provider name, model name, capability tier, context budget, prompt payload budget, trust state, and whether external review is required. Keep it provider-neutral and do not add live vendor calls. Include DeepSeek candidate-state metadata without granting autonomous coding, branch movement, or review-clearing authority.
+
+Tests:
+
+- `python -m pytest tests/test_model_adapter.py -q`
 
 ## Archived Prior Candidate - Promoted Above
 
