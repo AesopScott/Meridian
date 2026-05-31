@@ -644,6 +644,14 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Ready for Codex Review
 
+2026-05-31 14:55 -06:00 - Build 1 V2 runtime repair ready for Codex Review.
+
+- Scope: Codex Reviews A V2 runtime/code sweep repair for prompt payload zero/invalid budgets and Echo naive timestamp handling.
+- Files changed: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `meridian_core/echo.py`, `tests/test_echo.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_echo.py -q` (23 passed); `python -m pytest tests/test_prompt_payload_meter.py -q` (25 passed); `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q` (136 passed); `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q` (157 passed).
+- Commit: pending coordinator commit.
+- Notes: `PromptPayloadSnapshot` now treats zero/negative budgets as no usable budget instead of crashing; Echo normalizes naive datetimes to UTC for deterministic query/filter/ranking behavior.
+
 2026-05-31 13:01 -06:00 - Build 1 repair ready for Codex Review.
 
 - Scope: Codex Reviews A Round 4 repair for restart/resteer lane-role gating and contract signature.

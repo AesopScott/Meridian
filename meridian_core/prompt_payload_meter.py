@@ -49,7 +49,7 @@ class PromptPayloadSnapshot:
         Returns:
             Percentage (0-100+) or 0 if no budget set.
         """
-        if self.budget_tokens is None:
+        if self.budget_tokens is None or self.budget_tokens <= 0:
             return 0.0
         return (self.estimated_tokens / self.budget_tokens) * 100
 
@@ -85,7 +85,7 @@ class PromptPayloadSnapshot:
         - HEALTHY: otherwise
         """
         # Budget pressure takes priority
-        if self.budget_tokens is not None:
+        if self.budget_tokens is not None and self.budget_tokens > 0:
             if self.estimated_tokens > self.budget_tokens:
                 return PayloadStatus.DEGRADED
             if self.budget_percent >= 80:
