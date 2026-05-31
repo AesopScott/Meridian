@@ -113,10 +113,10 @@ When listing items, prefix each with the owner:
 - **Session Lifecycle Harness**
 - **Federation Harness**
 
-## V2 Horizon
+## V2 Progress Tracker
 
-**V2 trigger:** Start detailed V2 planning after V1 cockpit scope is locked.
+**V2 tracking:** For V2 progress reporting, totals, and per-harness build status, see **`docs/v2-progress-tracker.md`** — the canonical V2 progress tracker.
 
-**V2 direction by owner:** Echo Harness memory, Atlas Harness retrieval, Prime autonomy, Model Harness hardening, Session Lifecycle Harness, and eventual Federation Harness.
+**V2 direction by owner:** Prime Autonomy, Echo Harness memory, Atlas Harness retrieval, Relay/Model Harness hardening, Aegis gated cognition, Session Lifecycle Harness, Bifrost V2 extensions, and eventual Federation Harness.
 
-**Canonical horizon doc:** `docs/v2-horizon-plan.md`
+**Detailed V2 build plan:** `docs/v2-detailed-build-plan.md`
