@@ -34,6 +34,10 @@ Completion:
 - Mark the repair Ready for Codex Review with commit hash, files changed, and tests run.
 - Do not start unrelated active work until this repair is complete or superseded by the coordinator.
 
+## Queue Authority
+
+The repair block above is executable before all other work. After any active repair is complete, only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
+
 ## Coordinator Override - Active Now
 
 Goal: register the new V2 prompt payload and Prime autonomy modules in the FileMap.
@@ -82,7 +86,7 @@ Allowed files only: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1
 
 Task: inspect the current Echo/Atlas handoff work if present, then write a short note identifying gaps, follow-up runtime objects, and how Prime should use Echo vs Atlas differently.
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
 (None currently assigned.)
 
@@ -634,7 +638,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-31 ~01:10 CDT - Build 1 Codex review result (Reviews C Round C5): cleared cadence; commit f56af55 (cockpit_state domain shape) reviewed; MEDIUM FileMap gap routed to Build 3; repair e89df81 confirmed closed; tests 25 targeted + 941 full passed
 ```
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
 (None currently assigned.)
 

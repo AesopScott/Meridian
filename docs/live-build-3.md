@@ -1,5 +1,9 @@
 ﻿# Live Build 3 Queue
 
+## Queue Authority
+
+Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
+
 ## Active Task
 
 Goal: register current V2 queue/runway documents in FileMap.
@@ -270,7 +274,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 2026-06-01 21:15 -06:00 - Build 3 Codex review result (Round B5): cadence cleared; 5e0facb, c388f47, ca6f55f + e89df81 pass; cadence reset to 0/3 since Round B5
 ```
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
 Current Active Task - COMPLETED:
 
