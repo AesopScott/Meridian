@@ -302,32 +302,11 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-**Round B4 FileMap repair — add 3 missing rows to `docs/FileMap.md`**
+**No active task. Build 3 is idle.**
 
-Routed by: Codex Reviews B, 2026-06-01, Round B4.
+Poll every 30 seconds. When a new task is written here, begin immediately.
 
-Finding: Commit `5e0facb` registered 3 docs in `meridian_core/filemap.py` and `_REQUIRED_PATHS` but did not update `docs/FileMap.md`. The human-readable registry is incomplete. This is a MEDIUM finding.
-
-**Task:** Add the following 3 rows to `docs/FileMap.md` only. Do not edit `meridian_core/filemap.py` or `tests/test_filemap.py` (those are already correct from `5e0facb`).
-
-Row 1 and Row 2 — insert after the `meridian_core/review_console.py` row in the **Risk, Relay, Aegis, Review** section (currently the last row before `## Build And Maturity`):
-
-```
-| `docs/prime-status-console-cli-brief.md` | Review Console | Prime Status Console and Review Console CLI bridge: routes NASA-style mission logs and system messages to the Review Console surface, keeping Prime's conversational thread clean. | n/a | Architecture note, no runtime code. Owner: Build 4. Read before designing any Prime to Review Console message routing. |
-| `docs/non-orchestrator-surface-naming.md` | Review Console | Naming rationale for the Review Console surface: establishes 'Review Console' as the canonical product-ready name, replacing the 'non-orchestrator window' placeholder. | n/a | Vocabulary doc. Read before writing docs or code that names this surface. |
-```
-
-Row 3 — insert after the `docs/v1-bifrost-cockpit-implementation-brief.md` row in the Bifrost / session harness section (currently the last Bifrost row before `## Visual Assets`):
-
-```
-| `docs/bifrost-configurable-progress-surface-brief.md` | Bifrost / session harness | Bifrost configurable progress and proof surface brief: how routine build-lane events, progress updates, and Aegis/Codex proof items are routed to a non-Prime surface, keeping the cockpit uncluttered. | n/a | Design-only. Owner: Build 5. Read before designing cockpit progress/proof routing. |
-```
-
-**Proof required:** Run `python -m pytest tests/test_filemap.py -q` — must still pass 46/46 (no code changes, just verifying docs/FileMap.md edit didn't break anything). Confirm the 3 new rows are present in `docs/FileMap.md` with correct area labels.
-
-**Completion:** Append to the Write/Completion Log and mark `Ready for Codex Review`. Cadence: 2/3 since Round B3.
-
-Last completed: FileMap refresh (v1-capability-plan, v1-bifrost-cockpit-implementation-brief, v2-horizon-plan, v3-parking-lot); 2026-05-31 21:05 -06:00; commit 330f200; tests 46/46 filemap; cadence 2/3 since Round B2; Ready for Codex Review.
+Last completed: Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 rows added to docs/FileMap.md); commit c388f47; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 
 ## Completed Task Archive
 
@@ -339,4 +318,5 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 - **COMPLETED 2026-05-31 00:35 -06:00** — FileMap refresh (4 uncatalogued docs from Round B1: v0-build-readiness-map.md, prime-orchestration-state-model.md, bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md); commit 1378bda; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 17:20 -06:00** — FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:07 -06:00** — FileMap repair (Round B3 — prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review.
+- **COMPLETED 2026-05-31 00:48 -06:00** — Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 missing rows added to docs/FileMap.md only); commit c388f47; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:03 -06:00** — FileMap refresh (model_adapter.py); commit be34fea; tests 46/46 filemap; Ready for Codex Review. Codex review cleared 2026-05-30 16:11 -06:00 (Reviews B; no findings; cadence window 774695f, 330f200, be34fea clear).
