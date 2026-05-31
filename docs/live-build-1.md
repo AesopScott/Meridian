@@ -1,5 +1,43 @@
 # Live Build 1 Queue
 
+## Codex Review Repair Routed - Active Before Other Work
+
+2026-05-31 14:45 -06:00 - Codex Reviews A routed MEDIUM repairs from the V2 runtime/code review sweep.
+
+Goal: make the V2 runtime helpers failure-soft for malformed edge inputs found by Codex review.
+
+Allowed files only: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `meridian_core/echo.py`, `tests/test_echo.py`, `docs/live-build-1.md`.
+
+Findings:
+
+- `PromptPayloadSnapshot(raw_prompt_chars=0, estimated_tokens=0, budget_tokens=0).status` raises `ZeroDivisionError` through `budget_percent`, so the helper can crash on a malformed/zero budget instead of returning deterministic status or validating the snapshot.
+- `EchoRepository.query()` promises failure-soft behavior for corrupt records, but a record with a naive `created_at` timestamp raises `TypeError: can't subtract offset-naive and offset-aware datetimes` in `_score_record()` instead of skipping/normalizing the corrupt record.
+
+Required fix:
+
+- Add validation or guard logic so zero/invalid budgets cannot crash `budget_percent` or `status`.
+- Add regression coverage for `budget_tokens=0` and any chosen invalid-budget behavior.
+- Add validation, normalization, or skip behavior so Echo queries cannot crash on naive or otherwise invalid `created_at` values.
+- Add Echo regression coverage for the malformed timestamp case and preserve deterministic query ordering for valid records.
+- Preserve the existing frozen dataclass shape, deterministic status semantics, and no-model/no-filesystem/no-network boundary.
+
+Tests:
+
+- `python -m pytest tests/test_echo.py -q`
+- `python -m pytest tests/test_prompt_payload_meter.py -q`
+- `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q`
+- `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q`
+
+Completion:
+
+- Commit and push only the allowed repair files.
+- Mark the repair Ready for Codex Review with commit hash, files changed, and tests run.
+- Do not start unrelated active work until this repair is complete or superseded by the coordinator.
+
+## Queue Authority
+
+The repair block above is executable before all other work. After any active repair is complete, only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
+
 ## Coordinator Override - Active Now
 
 Goal: register the new V2 prompt payload and Prime autonomy modules in the FileMap.
@@ -48,7 +86,7 @@ Allowed files only: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1
 
 Task: inspect the current Echo/Atlas handoff work if present, then write a short note identifying gaps, follow-up runtime objects, and how Prime should use Echo vs Atlas differently.
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
 (None currently assigned.)
 
@@ -600,7 +638,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-31 ~01:10 CDT - Build 1 Codex review result (Reviews C Round C5): cleared cadence; commit f56af55 (cockpit_state domain shape) reviewed; MEDIUM FileMap gap routed to Build 3; repair e89df81 confirmed closed; tests 25 targeted + 941 full passed
 ```
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
 (None currently assigned.)
 

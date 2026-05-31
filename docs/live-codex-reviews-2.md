@@ -2,6 +2,10 @@
 
 This file is the standing queue for a second specialized Codex Reviews session.
 
+## Queue Authority
+
+Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
+
 ## Active Task
 
 Goal: review the recent Bifrost browser-first cockpit UI commits after Scott's declutter steering.
@@ -246,7 +250,7 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-05-30 23:30 -06:00 - Routed repair to Build 3; queue: docs/live-build-3.md; finding: register four uncatalogued docs in FileMap.md and filemap.py — `docs/v0-build-readiness-map.md`, `docs/prime-orchestration-state-model.md`, `docs/bifrost-v0-cockpit-layout-brief.md`, `docs/bifrost-harness-dashboard-brief.md`. Opportunistically reconcile LOW prose-divergence findings on the Build 3 4075ef4 entries; status: closed in Round B2 (Build 3 commit 1378bda — 4 docs registered, tests 46/46; LOW reconciliation deferred).
 2026-05-31 10:20 -06:00 - Routed repair to Build 3; queue: docs/live-build-3.md; finding: register `docs/live-codex-reviews-2.md` in FileMap.md and meridian_core/filemap.py (one row + one FileMapEntry under FileArea.BUILD_PROCESS, parallel to the existing `docs/live-codex-reviews.md` entry) and add the path to `_REQUIRED_PATHS` in tests/test_filemap.py. Opportunistically (still permitted, not required) reconcile the two LOW prose-divergence carryovers on the existing `live-codex-reviews.md` and `prime-orchestration-harness-prototype.md` entries; status: pending.
 
-## Active Task
+## Archived Prior Active Task - Do Not Execute
 
 Current Active Task - Coordinator Override:
 
