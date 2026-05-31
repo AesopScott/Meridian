@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Passed
 
 Goal: review Build 3 V2 contract-wave and Echo/Atlas FileMap registration.
+
+Status: passed by Codex Reviews B on 2026-05-31. The V2 contract-wave docs and Echo/Atlas runtime/test files are discoverable through the runtime FileMap and required-path test coverage. No repair routed.
 
 Scope:
 
@@ -32,6 +34,18 @@ Review expectations:
 - Verify the contract docs are discoverable under sensible architecture/build/model/Bifrost areas.
 - Verify Build 3 no longer has the completed FileMap registration as an executable Active Task and now has a valid next Active Task.
 - If clean, record proof and clear the FileMap slice. If findings exist, route a focused repair back to Build 3.
+
+Review result:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- All eight required paths are present in both `make_default_map()` and `_REQUIRED_PATHS`: `docs/session-lifecycle-v2-contract.md`, `docs/federation-harness-horizon.md`, `docs/session-card-queue-activation-contract.md`, `docs/deepseek-provider-validation-gate.md`, `meridian_core/echo.py`, `tests/test_echo.py`, `meridian_core/atlas.py`, and `tests/test_atlas.py`.
+- Echo/Atlas entries are scoped as pure deterministic domain helpers and do not claim persistence, embeddings, network calls, or live filesystem mutation.
+- Contract docs are discoverable under model, build-process, architecture, and Bifrost areas.
+- Build 3 now has a valid next Active Task: `docs/filemap-v2-v3-discoverability-audit.md`.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` plus tracker reconciliation. No Build 3 repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Completed / Passed
 

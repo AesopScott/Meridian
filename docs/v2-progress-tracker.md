@@ -11,14 +11,14 @@
 | Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
 |---|---:|---:|---:|---:|---:|---:|
 | Prime Autonomy | 1 | 0 | 0 | 1 | 2 | 50% |
-| Echo Harness | 1 | 0 | 2 | 0 | 3 | 100% |
-| Atlas Harness | 1 | 0 | 1 | 1 | 3 | 67% |
-| Relay/Model Harness | 2 | 0 | 1 | 4 | 7 | 43% |
+| Echo Harness | 2 | 0 | 2 | 0 | 4 | 100% |
+| Atlas Harness | 2 | 0 | 1 | 0 | 3 | 100% |
+| Relay/Model Harness | 2 | 0 | 1 | 6 | 9 | 33% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
-| Session Lifecycle Harness | 1 | 0 | 1 | 1 | 3 | 67% |
+| Session Lifecycle Harness | 1 | 0 | 1 | 2 | 4 | 50% |
 | Bifrost Harness | 0 | 0 | 0 | 7 | 7 | 0% |
 | Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **8** | **0** | **5** | **15** | **28** | **29% Clear + 0% Awaiting + 18% Baseline** |
+| **Total V2** | **10** | **0** | **5** | **17** | **32** | **31% Clear + 0% Awaiting + 16% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -39,10 +39,12 @@
 ### Echo Harness
 
 - [x] **Echo + Runtime:** `MemoryRecord`, `MemoryQuery`, `MemoryHit` domain objects with deterministic ranking by project/recency/importance/pinning - built in `2bccb55`, repaired in `8e8c87b`; review cleared by Reviews A on 2026-05-31.
+- [x] **Echo + FileMap Integration:** `meridian_core/echo.py` and `tests/test_echo.py` registered in runtime FileMap and required-path coverage - built in `a138b1d`; review cleared by Reviews B on 2026-05-31.
 
 ### Atlas Harness
 
 - [x] **Atlas + Ranking:** deterministic file/docs-first retrieval using `AtlasQuery`, `AtlasHit`, `AtlasResult`, source-aware ranking, and failure-soft behavior - built in `7e95ede`; review cleared by Reviews A on 2026-05-31 with `tests/test_atlas.py` passing.
+- [x] **Atlas + FileMap Integration:** `meridian_core/atlas.py` and `tests/test_atlas.py` registered in runtime FileMap and required-path coverage - built in `a138b1d`; review cleared by Reviews B on 2026-05-31.
 
 ### Session Lifecycle Harness
 
@@ -84,14 +86,6 @@
 ### Prime Autonomy
 
 - [ ] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - integrates Echo memory query and Atlas retrieval hits as input placeholders.
-
-### Echo Harness
-
-- [ ] **Echo + FileMap Integration:** FileMap registration of memory storage location by Build 3.
-
-### Atlas Harness
-
-- [ ] **Atlas + FileMap Integration:** FileMap registration of Atlas query surface by Build 3.
 
 ### Relay / Model Harness
 
