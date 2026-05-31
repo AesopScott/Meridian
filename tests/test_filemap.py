@@ -32,6 +32,7 @@ _REQUIRED_PATHS = [
     "meridian_core/relay_packet.py",
     "meridian_core/relay_dispatch.py",
     "meridian_core/model_adapter.py",
+    "meridian_core/restart_resteer.py",
     "docs/relay-prompt-metrics-integration-brief.md",
     "docs/planning-harness-council-brief.md",
     "docs/prime-planning-harness-answers.md",
@@ -75,6 +76,7 @@ _REQUIRED_PATHS = [
     "tests/test_bifrost_preview.py",
     "docs/prime-queue-reconciliation-requirement.md",
     "tests/test_cockpit_provider.py",
+    "tests/test_restart_resteer.py",
 ]
 
 

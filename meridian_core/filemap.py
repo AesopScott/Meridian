@@ -342,6 +342,13 @@ def make_default_map() -> FileMap:
             notes="Public/private provider implementations stay outside Relay core; adapter receives only approved payload text.",
         ),
         FileMapEntry(
+            path="meridian_core/restart_resteer.py",
+            area=FileArea.DOMAIN_MODEL,
+            purpose="Prime restart/resteer domain objects and evaluator: detects empty queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates.",
+            related_tests=["tests/test_restart_resteer.py"],
+            notes="V2 Session Lifecycle / Prime recovery slice. Pure deterministic logic only; no live process control, branch movement, or file mutation.",
+        ),
+        FileMapEntry(
             path="meridian_core/prompt_budget.py",
             area=FileArea.PROMPT_BUDGET,
             purpose="Deterministic prompt token budget per risk tier. Prevents Relay prompt drag by bounding context sources and token limits per dispatch.",
@@ -664,6 +671,13 @@ def make_default_map() -> FileMap:
             purpose="Test suite for meridian_core/cockpit_provider.py: covers build_snapshot() validation, lane sorting, immutability, and demo_snapshot() determinism.",
             related_tests=[],
             notes="Build 1 commit 6c9a397.",
+        ),
+        FileMapEntry(
+            path="tests/test_restart_resteer.py",
+            area=FileArea.BIFROST,
+            purpose="Test suite for meridian_core/restart_resteer.py: covers empty queue, shared/main worktree, wrong queue, cadence, quota, proof, launch, and Obsidian divergence recovery decisions.",
+            related_tests=[],
+            notes="V2 Session Lifecycle / Prime recovery proof coverage.",
         ),
 
         # -- V1 Electron cockpit app -----------------------------------

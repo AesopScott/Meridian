@@ -15,10 +15,10 @@
 | Atlas Harness | 0 | 0 | 1 | 2 | 3 | 33% |
 | Relay/Model Harness | 1 | 0 | 0 | 3 | 4 | 25% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
-| Session Lifecycle Harness | 0 | 0 | 1 | 2 | 3 | 33% |
+| Session Lifecycle Harness | 0 | 1 | 1 | 1 | 3 | 33% |
 | Bifrost Harness | 0 | 0 | 0 | 3 | 3 | 0% |
 | Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **3** | **1** | **4** | **13** | **21** | **19% Clear + 5% Awaiting + 19% Baseline** |
+| **Total V2** | **3** | **2** | **4** | **12** | **21** | **19% Clear + 10% Awaiting + 19% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -36,6 +36,10 @@
 ### Echo Harness
 
 - [ ] **Echo + Runtime:** `MemoryRecord`, `MemoryQuery`, `MemoryHit` domain objects with deterministic ranking by project/recency/importance/pinning - built and tested; awaiting Codex review gate clearance before marked fully complete.
+
+### Session Lifecycle Harness
+
+- [ ] **Prime + Session Lifecycle:** `restart_resteer.py` domain objects and deterministic evaluator for empty queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates - built and tested; awaiting Codex review gate clearance before marked fully complete.
 
 ## Contract Baselines Complete (Not Runtime Implementation)
 
@@ -86,7 +90,7 @@
 ### Session Lifecycle Harness
 
 - [ ] **Session Lifecycle + Implementation:** `SessionLifecycleState` and `SessionCommandPlan` domain objects - module: `meridian_core/session_lifecycle.py`; tests: `tests/test_session_lifecycle.py`; models spawn/watch/steer/stop/transfer/archive/stale/recover actions; builds on contract baseline `docs/session-lifecycle-v2-contract.md`.
-- [ ] **Session Lifecycle + Permissions:** branch/worktree movement requires Scott or Prime permission object; stale recovery recommendation logic.
+- [ ] **Session Lifecycle + Permissions:** wire the restart/resteer evaluator into Prime/Beacon runtime state; branch/worktree movement still requires Scott or Prime permission object before live execution.
 
 ### Bifrost Harness
 
