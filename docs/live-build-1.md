@@ -459,6 +459,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 Historical record of Build 1 V0 completed slices (most recent first). Do not re-execute any entry below.
 
+[COMPLETED 2026-05-31 07:50 -06:00] V2 Echo Memory Harness domain slice — commit `2bccb55`; files: meridian_core/echo.py, tests/test_echo.py; tests: 27 passed; MemoryRecord, MemoryQuery, MemoryHit frozen dataclasses; deterministic ranking by project/pinning/importance/recency; failure-soft on missing store/unknown project/corrupt records; Ready for Codex Review.
+
 [COMPLETED 2026-06-03 19:31 -05:00] V2 policy-aware Relay executor wrapper — commit `b99ce1d`; files: meridian_core/relay_executor.py, tests/test_relay_executor.py; tests: 50 relay_executor, 15 cognition_policy, 92 aegis (157 total) passed; Ready for Codex Review.
 
 [COMPLETED 2026-05-31 05:54 -06:00] V2 Aegis CognitionPolicy domain model - commit `3cdc74d`; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py; tests: 15 targeted passed, 102 Aegis+cognition_policy passed; Ready for Codex Review.
