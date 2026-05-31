@@ -2,6 +2,7 @@
 
 from .cockpit import (
     CockpitViewModel,
+    HarnessCard,
     InstrumentBand,
     LaneRow,
     ProgressEvent,
@@ -12,6 +13,7 @@ from .cockpit import (
 
 __all__ = [
     "CockpitViewModel",
+    "HarnessCard",
     "InstrumentBand",
     "LaneRow",
     "ProgressEvent",

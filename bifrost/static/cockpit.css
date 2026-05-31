@@ -67,6 +67,14 @@ body {
 
 .cockpit-content > * { background: var(--bg); overflow: auto; }
 
+.cockpit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cockpit-main > * { background: var(--bg); }
+
 /* ── Prime panel ──────────────────────────────────── */
 
 .prime-panel {
@@ -74,6 +82,7 @@ body {
   flex-direction: column;
   padding: 12px;
   gap: 8px;
+  min-height: 220px;
 }
 
 .prime-header {
@@ -130,6 +139,85 @@ body {
   border-radius: 4px;
   font-family: inherit;
   font-size: 13px;
+}
+
+.harness-dashboard {
+  border-top: 1px solid var(--border);
+  padding: 12px;
+}
+
+.harness-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.harness-dashboard h2 { font-size: 13px; margin: 0; }
+
+.harness-dashboard-mode {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
+
+.harness-group { margin-bottom: 10px; }
+
+.harness-group h3 {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0 0 5px;
+}
+
+.harness-cards {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.harness-card {
+  background: var(--surface);
+  border-left: 3px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.harness-card[data-status="online"],
+.harness-card[data-status="stable"] { border-left-color: var(--success); }
+.harness-card[data-status="busy"] { border-left-color: var(--warning); }
+.harness-card[data-status="blocked"],
+.harness-card[data-status="failed"],
+.harness-card[data-status="degraded"],
+.harness-card[data-status="stale"] { border-left-color: var(--danger); }
+.harness-card[data-status="planned"] { opacity: 0.72; }
+.harness-card[data-attention="true"] { outline: 1px solid rgba(248,81,73,0.45); }
+
+.harness-card-head,
+.harness-meta,
+.harness-capabilities {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.harness-card-head { justify-content: space-between; }
+.harness-name { font-weight: 700; }
+.harness-status { color: var(--accent); font-size: 10px; text-transform: uppercase; }
+.harness-role,
+.harness-event { font-size: 11px; line-height: 1.4; margin: 5px 0; }
+.harness-meta { color: var(--muted); font-size: 10px; }
+
+.harness-chip {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  padding: 1px 5px;
 }
 
 /* ── Lane strip ───────────────────────────────────── */

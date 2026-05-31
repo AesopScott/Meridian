@@ -6,6 +6,7 @@ import pytest
 
 from bifrost.cockpit import (
     CockpitViewModel,
+    HarnessCard,
     InstrumentBand,
     LaneRow,
     ProgressEvent,
@@ -54,6 +55,11 @@ def test_sample_view_model_has_prime_messages():
 def test_sample_view_model_has_progress_events():
     vm = sample_cockpit_view_model()
     assert len(vm.progress_events) >= 1
+
+
+def test_sample_view_model_has_harness_cards():
+    vm = sample_cockpit_view_model()
+    assert len(vm.harnesses) >= 10
 
 
 def test_sample_view_model_instrument_queue_on():
@@ -178,6 +184,54 @@ def test_render_no_review_badge_when_zero():
 def test_render_prime_input_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
     assert "prime-prompt" in doc
+
+
+# ── Harness dashboard ────────────────────────────────────────────────────────
+
+
+def test_render_harness_dashboard_present():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Harness Dashboard" in doc
+    assert "View only" in doc
+    assert 'aria-label="Harness Dashboard"' in doc
+
+
+def test_render_harness_dashboard_groups_and_cards():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Cognition" in doc
+    assert "Knowledge &amp; Memory" in doc
+    assert "Coordination / UI" in doc
+    for expected in ("Prime", "Bifrost", "Relay", "Beacon", "Aegis", "Compass", "FileMap", "Codex Reviews"):
+        assert expected in doc
+
+
+def test_render_harness_dashboard_planned_placeholders():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Echo" in doc
+    assert "Atlas" in doc
+    assert 'data-status="planned"' in doc
+
+
+def test_render_harness_dashboard_capability_chips():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "proof" in doc
+    assert "heartbeat" in doc
+    assert "review" in doc
+    assert 'class="harness-chip"' in doc
+
+
+def test_render_harness_dashboard_attention_hook():
+    vm = sample_cockpit_view_model()
+    vm.harnesses = [
+        HarnessCard(
+            "Relay", "Cognition", "dispatches work", "blocked",
+            "integrated", "v1", "now", "blocked by proof", ["dispatch"],
+            attention=True,
+        )
+    ]
+    doc = render_cockpit_html(vm)
+    assert 'data-status="blocked"' in doc
+    assert 'data-attention="true"' in doc
 
 
 # ── Lane strip ───────────────────────────────────────────────────────────────
@@ -377,6 +431,27 @@ def test_escapes_xss_in_progress_metadata():
     assert "&lt;script&gt;" in doc
     assert "&lt;b&gt;" in doc
     assert "&lt;img" in doc
+
+
+def test_escapes_xss_in_harness_dashboard():
+    vm = sample_cockpit_view_model()
+    vm.harnesses = [
+        HarnessCard(
+            '<script>Relay</script>', '<b>Group</b>', '<img src=x>',
+            '<i>bad</i>', '<u>planned</u>', '<em>v</em>',
+            '<strong>now</strong>', '<script>event</script>',
+            ['<span>cap</span>'],
+        )
+    ]
+    doc = render_cockpit_html(vm)
+    assert "<script>Relay</script>" not in doc
+    assert "<b>Group</b>" not in doc
+    assert "<img src=x>" not in doc
+    assert "<span>cap</span>" not in doc
+    assert "&lt;script&gt;" in doc
+    assert "&lt;b&gt;" in doc
+    assert "&lt;img" in doc
+    assert "&lt;span&gt;" in doc
 
 
 def test_escapes_xss_in_queue_state():

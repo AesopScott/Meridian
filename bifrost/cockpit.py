@@ -54,6 +54,20 @@ class ProgressEvent:
 
 
 @dataclass
+class HarnessCard:
+    name: str
+    family: str
+    role: str
+    status: str
+    maturity: str
+    version: str
+    heartbeat: str
+    recent_event: str
+    capabilities: list[str] = field(default_factory=list)
+    attention: bool = False
+
+
+@dataclass
 class InstrumentBand:
     beacon: str       # "ok" | "warn" | "error"
     relay: str        # "ok" | "warn" | "error"
@@ -73,6 +87,7 @@ class CockpitViewModel:
     review_count: int = 0
     lanes: list[LaneRow] = field(default_factory=list)
     progress_events: list[ProgressEvent] = field(default_factory=list)
+    harnesses: list[HarnessCard] = field(default_factory=list)
     instrument: InstrumentBand = field(
         default_factory=lambda: InstrumentBand(
             beacon="ok", relay="ok", aegis="ok", compass="ok",
@@ -110,6 +125,58 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             ProgressEvent(
                 "12:48", "Aegis", "proof 47/47; no gaps",
                 "proof summary", "info", "aegis:proof",
+            ),
+        ],
+        harnesses=[
+            HarnessCard(
+                "Prime", "Cognition", "Local orchestrator and decision engine",
+                "online", "integrated", "v1.0", "now", "bearing: V1 cockpit",
+                ["plan", "prioritize", "coordinate"],
+            ),
+            HarnessCard(
+                "Bifrost", "Coordination / UI", "Cockpit and user visibility surface",
+                "online", "domain slice", "v1.0", "now", "rendering static cockpit",
+                ["cockpit", "dashboard", "review console"],
+            ),
+            HarnessCard(
+                "Relay", "Cognition", "Dispatches model work through adapter lanes",
+                "stable", "integrated", "v0.8", "1m", "provider-neutral dispatch ready",
+                ["route", "dispatch", "budget"],
+            ),
+            HarnessCard(
+                "Beacon", "Coordination / UI", "Aggregates harness liveness and freshness",
+                "stable", "integrated", "v0.6", "1m", "all known lanes fresh",
+                ["heartbeat", "freshness", "stale checks"],
+            ),
+            HarnessCard(
+                "Aegis", "Cognition", "Proof gates and review evidence",
+                "busy", "integrated", "v0.5", "2m", "tier gates available",
+                ["proof", "validate", "block"],
+            ),
+            HarnessCard(
+                "Compass", "Coordination / UI", "Mission bearing and objective focus",
+                "online", "domain slice", "v0.4", "2m", "bearing: V1 dashboard",
+                ["objectives", "priority", "stage"],
+            ),
+            HarnessCard(
+                "FileMap", "Knowledge & Memory", "Canonical important-file registry",
+                "stable", "integrated", "v0.5", "3m", "registry in sync",
+                ["discover", "register", "required paths"],
+            ),
+            HarnessCard(
+                "Codex Reviews", "Queue / Review", "Independent review and repair routing",
+                "online", "integrated", "v0.7", "now", "Round B7 cleared",
+                ["review", "findings", "repair routing"],
+            ),
+            HarnessCard(
+                "Echo", "Knowledge & Memory", "Long-term memory injection harness",
+                "planned", "planned", "-", "-", "placeholder visible",
+                ["memory", "ranking"],
+            ),
+            HarnessCard(
+                "Atlas", "Knowledge & Memory", "Retrieval and knowledge graph harness",
+                "planned", "planned", "-", "-", "placeholder visible",
+                ["retrieval", "knowledge"],
             ),
         ],
         instrument=InstrumentBand(
@@ -271,6 +338,54 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
     )
 
 
+def _render_harness_dashboard(harnesses: list[HarnessCard]) -> str:
+    grouped: dict[str, list[HarnessCard]] = {}
+    for harness in harnesses:
+        grouped.setdefault(harness.family, []).append(harness)
+
+    sections = []
+    for family, cards in grouped.items():
+        card_html = "".join(
+            f'<article class="harness-card" data-status="{_e(card.status)}" '
+            f'data-attention="{_e(str(card.attention).lower())}">'
+            '<div class="harness-card-head">'
+            f'<span class="harness-name">{_e(card.name)}</span>'
+            f'<span class="harness-status">{_e(card.status)}</span>'
+            "</div>"
+            f'<p class="harness-role">{_e(card.role)}</p>'
+            '<div class="harness-meta">'
+            f'<span>{_e(card.maturity)}</span>'
+            f'<span>{_e(card.version)}</span>'
+            f'<span>{_e(card.heartbeat)}</span>'
+            "</div>"
+            f'<p class="harness-event">{_e(card.recent_event)}</p>'
+            '<div class="harness-capabilities">'
+            + "".join(
+                f'<span class="harness-chip">{_e(cap)}</span>'
+                for cap in card.capabilities
+            )
+            + "</div>"
+            + "</article>"
+            for card in cards
+        )
+        sections.append(
+            '<section class="harness-group">'
+            f'<h3>{_e(family)}</h3>'
+            f'<div class="harness-cards">{card_html}</div>'
+            "</section>"
+        )
+
+    return (
+        '<section class="harness-dashboard" aria-label="Harness Dashboard">'
+        '<div class="harness-dashboard-header">'
+        '<h2>Harness Dashboard</h2>'
+        '<span class="harness-dashboard-mode">View only</span>'
+        "</div>"
+        + "".join(sections)
+        + "</section>"
+    )
+
+
 def _render_lane_strip(lanes: list[LaneRow]) -> str:
     rows = "".join(
         f'<div class="lane-row" data-status="{_e(lane.status)}">'
@@ -364,6 +479,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
 
     nav = _render_nav()
     prime = _render_prime_panel(vm)
+    harness_dashboard = _render_harness_dashboard(vm.harnesses)
     lanes = _render_lane_strip(vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
@@ -380,7 +496,10 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         "<body>\n"
         f"{nav}\n"
         '<div class="cockpit-content">\n'
+        '<main class="cockpit-main">\n'
         f"{prime}\n"
+        f"{harness_dashboard}\n"
+        "</main>\n"
         f"{lanes}\n"
         f"{progress}\n"
         "</div>\n"
