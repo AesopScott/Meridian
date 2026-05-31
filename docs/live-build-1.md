@@ -411,6 +411,9 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-05-31 10:12 -06:00 - Build 1 checked queue; status: idle; Active Task "(None currently assigned.)"; origin/main fast-forwarded through 3279886/83db7d7/0432607/ca73324 (Build 1 parallel heartbeat, Build 2/4 read checks — informational); cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
 2026-05-31 10:22 -06:00 - Build 1 checked queue; status: idle; Active Task "(None currently assigned.)"; origin/main fast-forwarded through 47eeb89/0ae48de/930732c/2777cc4/960a1b4 (V2 progress tracker refresh with Build 4 contract baselines, Build 2/3/4 read checks — informational); cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
 2026-05-31 10:32 -06:00 - Build 1 checked queue; status: idle; Active Task "(None currently assigned.)"; origin/main fast-forwarded through 7e95ede (parallel session landed V2 Atlas Harness retrieval domain slice at meridian_core/atlas.py + tests/test_atlas.py — informational, not Build 1 scope here)/bb60aa2/23f32da/f0ec755; cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
+2026-06-08 20:50 -05:00 - Build 1 checked queue; status: running (V2 Atlas Harness retrieval domain slice task); executing
+2026-06-08 20:51 -05:00 - Build 1 checked queue; status: idle (V2 Atlas Harness domain slice completed; commit 7e95ede; Ready for Codex Review)
+2026-06-08 20:52 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; cadence 1/3 since Reviews C5; awaiting next assignment)
 ```
 
 ## Write/Completion Log
@@ -452,6 +455,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 05:02 -06:00 - Coordinator assigned V2 Aegis CognitionPolicy domain model; commit pending; tests pending (`python -m pytest tests/test_cognition_policy.py -q`)
 2026-05-31 05:54 -06:00 - Coordinator completed V2 Aegis CognitionPolicy domain model; commit 3cdc74d; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py, docs/live-build-1.md; tests: 15 cognition_policy passed, 102 aegis+cognition_policy passed; Ready for Codex Review.
 2026-06-03 19:31 -05:00 - Build 1 completed V2 policy-aware Relay executor wrapper; commit b99ce1d; files: meridian_core/relay_executor.py, tests/test_relay_executor.py, docs/live-build-1.md; tests: 50 relay_executor, 15 cognition_policy, 92 aegis (157 total) passed; Ready for Codex Review.
+2026-06-08 20:51 -05:00 - Build 1 completed V2 Atlas Harness retrieval domain slice; commit 7e95ede; files: meridian_core/atlas.py, tests/test_atlas.py, docs/live-build-1.md; tests: 33 Atlas tests passed; AtlasQuery, AtlasHit, AtlasResult frozen dataclasses; deterministic FileMap/DOC retrieval with source-aware ranking; failure-soft on missing inputs; Ready for Codex Review.
 ```
 
 ## Cross-Check Activity
@@ -500,6 +504,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 ## Completed Slices
 
 Historical record of Build 1 V0 completed slices (most recent first). Do not re-execute any entry below.
+
+[COMPLETED 2026-06-08 20:51 -05:00] V2 Atlas Harness retrieval domain slice — commit `7e95ede`; files: meridian_core/atlas.py, tests/test_atlas.py; tests: 33 passed; AtlasQuery, AtlasHit, AtlasResult frozen dataclasses; AtlasSource enum (FILEMAP, DOC, ECHO); deterministic retrieval over FileMap/doc allowlist with source-aware ranking; failure-soft on missing inputs, no embeddings/broad crawl; Ready for Codex Review.
 
 [COMPLETED 2026-05-31 07:50 -06:00] V2 Echo Memory Harness domain slice — commit `2bccb55`; files: meridian_core/echo.py, tests/test_echo.py; tests: 27 passed; MemoryRecord, MemoryQuery, MemoryHit frozen dataclasses; deterministic ranking by project/pinning/importance/recency; failure-soft on missing store/unknown project/corrupt records; Ready for Codex Review.
 
