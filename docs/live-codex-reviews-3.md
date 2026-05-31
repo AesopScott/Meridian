@@ -56,7 +56,7 @@ Look for:
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 1 | 653488b | Provider-neutral Model Harness adapter contract (Round C3) | passed | none | Build 3 should register `meridian_core/model_adapter.py` and `tests/test_model_adapter.py` in FileMap |
+| Build 1 | f56af55 | Prime cockpit snapshot/event domain shape (Round C5) | passed | MEDIUM: cockpit_state.py + test_cockpit_state.py FileMap registration missing — repair routed to Build 3 | Await next Ready for Codex Review marker |
 | Build 2 | 989366f | V0 prime_console / prime_status / route_to_console (Round C1) | passed | LOW deferred: route_to_console type-vs-semantics doc note | Build 2 cadence cleared for three-commit window ending at 989366f; continue polling |
 
 ## Review Round Scope
@@ -100,6 +100,20 @@ Out of scope:
   - package API exports
   - real vendor SDK implementation
 Reason: Build 1 marked provider-neutral Model Harness adapter contract Ready for Codex Review
+
+2026-05-31 01:07 MDT - Round C5 scope
+Build lanes: Build 1
+Commit range(s): Build 1 f56af55; queue marker 7e81bf6 for provenance only
+Allowed review files:
+  - meridian_core/cockpit_state.py
+  - tests/test_cockpit_state.py
+  - docs/live-build-1.md for provenance only
+Tests to run:
+  - python -m pytest tests/test_cockpit_state.py -q
+  - python -m pytest -q
+Out of scope:
+  - Build 2/3/4/5 work; FileMap edits (route to Build 3); CLI or Bifrost surface code
+Reason: Build 1 marked cockpit_state domain shape Ready for Codex Review; delegated via commit 537ca6c
 ```
 
 ## Read Checks
@@ -159,6 +173,8 @@ Reason: Build 1 marked provider-neutral Model Harness adapter contract Ready for
 2026-05-31 00:50 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main now at 3b8e4b4; Reviews B Round B4 complete (commit 5e0facb PASS-WITH-MEDIUM; MEDIUM repair routed to Build 3 for FileMap.md rows); no Review C delegation in live-codex-reviews.md or live-codex-reviews-2.md; Active Task still "No active task. Codex Reviews C is idle"; no executable task
 2026-05-31 01:00 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main now at 7e81bf6; Build 1 commit f56af55 (feat(cockpit_state): Prime cockpit snapshot/event domain shape for V1 Bifrost) marked Ready for Codex Review in live-build-1.md (files: meridian_core/cockpit_state.py, tests/test_cockpit_state.py; 25 targeted + 941 full passed); no Active Task written to this queue delegating f56af55 to Review C; no executable task — awaiting explicit delegation
 2026-05-31 01:05 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main now at f3ca90c (Build 4 idle check 12:15 -06:00; Round B4 FileMap repair c388f47 also landed); Build 1 f56af55 cockpit_state marker confirmed in live-build-1.md; no Review C delegation for f56af55 or prime_approve in live-codex-reviews.md; Active Task still "No active task. Codex Reviews C is idle"; no executable task
+2026-05-31 01:07 MDT - Codex Reviews C checked queue; status: running; notes: Active Task found (commit 537ca6c) - Round C5 for Build 1 f56af55 cockpit_state; starting review
+2026-05-31 01:10 MDT - Codex Reviews C checked queue; status: complete; notes: Round C5 complete - f56af55 passed; 25/25 targeted + 941 full passed; MEDIUM FileMap gap routed to Build 3
 ```
 
 ## Review Log
@@ -170,6 +186,7 @@ Reason: Build 1 marked provider-neutral Model Harness adapter contract Ready for
 2026-05-30 15:05 MDT - Reviewed Build 1 commit 0e990df; result: pass; tests: tests/test_relay_executor.py 37/37 pass and tests/test_aegis.py tests/test_relay_executor.py 124/124 pass; notes: RelayExecutionSummary converts successful outputs to non-blocking BUILD_OUTPUT evidence and lane errors to proof-blocking ERROR severity evidence; prompt payload and packet id are excluded from evidence text
 2026-05-30 15:05 MDT - Reviewed Build 1 commit 7c75f43; result: pass; tests: tests/test_relay_executor.py 37/37 pass and tests/test_aegis.py tests/test_relay_executor.py 124/124 pass; notes: tier-3+ dispatch checks ProofTrail.blocking() before model calls, raises RelayProofGateError with blocking evidence ids, and tier-2 remains unblocked
 2026-05-30 15:51 MDT - Reviewed Build 1 commit 653488b; result: pass; tests: tests/test_model_adapter.py tests/test_relay_executor.py 46/46 pass and tests/test_aegis.py tests/test_relay_executor.py 126/126 pass; notes: ModelAdapter protocol is payload-only, FakeModelAdapter records only prompt payloads, EnvConfiguredModelAdapter fails on missing API env before transport, Relay executor still aliases ModelCallFn to the payload-only adapter boundary
+2026-05-31 01:10 MDT - Reviewed Build 1 commit f56af55; result: pass (MEDIUM deferred - FileMap registration missing); tests: tests/test_cockpit_state.py 25/25 pass; full suite 941/941 pass; notes: cockpit_state.py is stdlib-only, all dataclasses frozen=True with tuple collections, helpers return new objects, no I/O or prompt-injection surface; tests cover sorting (7), filtering (7), counts (6), immutability (5); FileMap not registered - MEDIUM repair routed to Build 3
 ```
 
 ## Proof Log
@@ -188,6 +205,9 @@ Reason: Build 1 marked provider-neutral Model Harness adapter contract Ready for
 2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: test; evidence: python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q -> 126 passed; result: pass
 2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: reference; evidence: rg for provider SDK and account automation terms in model_adapter.py and relay_executor.py found no provider SDK or automation code; only explanatory docstrings mention account/session details staying outside Relay; result: pass
 2026-05-30 15:51 MDT - Proof for Build 1 commit 653488b; proof type: diff; evidence: EnvConfiguredModelAdapter.__call__ invokes config.require_api_key() before transport; test_missing_config_fails_before_transport_call asserts transport calls remain empty when config is missing; Relay executor still calls model_call(lane.payload); result: pass
+2026-05-31 01:10 MDT - Proof for Build 1 commit f56af55; proof type: test; evidence: python -m pytest tests/test_cockpit_state.py -q -> 25 passed in 0.07s; python -m pytest -q -> 941 passed in 0.71s; result: pass
+2026-05-31 01:10 MDT - Proof for Build 1 commit f56af55; proof type: diff; evidence: cockpit_state.py imports only dataclasses/enum/typing; LaneSummary/ProgressEvent/PrimeCockpitSnapshot all @dataclass(frozen=True) with tuple collections; sort_lanes returns new list; filter_events returns new list without mutating snapshot; lane_summary_counts returns dict; no open()/subprocess/network/CLI code; result: pass
+2026-05-31 01:10 MDT - Proof for Build 1 commit f56af55; proof type: reference; evidence: cockpit_state.py and tests/test_cockpit_state.py not found in meridian_core/filemap.py or docs/FileMap.md; MEDIUM finding - FileMap registration missing; result: MEDIUM (repair routed to Build 3)
 ```
 
 Minimum proof expectations:
@@ -208,6 +228,8 @@ Minimum proof expectations:
 2026-05-30 15:05 MDT - Build 1 commit 7c75f43; severity: none; file: meridian_core/relay_executor.py; finding: Aegis pre-dispatch proof gate blocks tier-3+ dispatch before model calls and leaves lower tiers unblocked; action: clear
 2026-05-30 15:51 MDT - Build 1 commit 653488b; severity: none; file: meridian_core/model_adapter.py; finding: Provider-neutral Model Adapter contract is payload-only, env-safe before live transport, and has no vendor/account automation; action: clear
 2026-05-30 15:51 MDT - Build 1 commit 653488b; severity: none; file: meridian_core/relay_executor.py; finding: Relay executor preserves payload-only dispatch and Aegis pre-dispatch blocking with the adapter boundary; action: clear
+2026-05-31 01:10 MDT - Build 1 commit f56af55; severity: none; file: meridian_core/cockpit_state.py; finding: cockpit_state domain shape is stdlib-only, immutable, dependency-free, no I/O or prompt-injection surface; lane sorting, event filtering, summary counts all correct; action: clear
+2026-05-31 01:10 MDT - Build 1 commit f56af55; severity: MEDIUM; file: meridian_core/cockpit_state.py + tests/test_cockpit_state.py; finding: neither file registered in meridian_core/filemap.py or docs/FileMap.md; action: route to Build 3 FileMap repair
 ```
 
 ## Repair Routing Log
@@ -215,23 +237,23 @@ Minimum proof expectations:
 ```text
 2026-05-30 13:58 MDT - No repair routed for Round C1 — Build 1 190e527 clear; Build 2 e800c03 clear; Build 2 989366f cleared with LOW finding deferred to V1 (route_to_console type-vs-semantics doc note). Build 2 cadence cleared for three-commit window ending at 989366f.
 2026-05-30 15:05 MDT - No repair routed for Round C2 — Build 1 0e990df and 7c75f43 clear; targeted tests passed; no actionable findings.
+2026-05-31 01:10 MDT - MEDIUM repair routed for Round C5 - Build 1 f56af55 clear on V0 domain shape; MEDIUM: cockpit_state.py and tests/test_cockpit_state.py not registered in FileMap; repair task written to Build 3 (live-build-3.md Active Task).
 ```
 
 ## Active Task
 
-Current Active Task:
-
-Round C4 complete at 2026-05-30 16:45 MDT. Build 1 `0560eb4`, `869faa4`, and repair `f353c8d` passed after repair with no remaining actionable findings.
+Round C5 complete at 2026-05-31 01:10 MDT. Build 1 `f56af55` passed with MEDIUM deferred to Build 3 FileMap.
 
 Proof:
 
-- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` -> 72 passed.
-- `python -m pytest -q` -> 916 passed.
-- Diff inspection confirmed `AdapterRegistry`/`execute_relay_plan_with_registry()` preserve payload-only dispatch.
-- Diff inspection confirmed HTTP JSON transport is env-gated, stdlib-only, SDK-free, and account-automation-free.
-- Repair `f353c8d` corrected the default HTTP helper to send provider/model/input JSON and parse response `text`.
+- `python -m pytest tests/test_cockpit_state.py -q` -> 25 passed in 0.07s.
+- `python -m pytest -q` -> 941 passed in 0.71s.
+- Diff inspection confirmed cockpit_state.py is stdlib-only, frozen dataclasses, helpers return new objects, no I/O surface.
+- MEDIUM: cockpit_state.py and tests/test_cockpit_state.py not registered in FileMap - repair task routed to Build 3.
 
-Current Active Task:
+No active task. Codex Reviews C is idle - continue polling for Build 1/Build 2 runtime-gate review markers.
+
+Stale Round C5 task follows.
 
 Goal: perform Codex Reviews C Round C5 for Build 1 cockpit-state domain shape.
 
