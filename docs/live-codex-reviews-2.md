@@ -2,9 +2,11 @@
 
 This file is the standing queue for a second specialized Codex Reviews session.
 
-## Active Task
+## Completed / Passed
 
 Goal: review Build 3 Bifrost V2 UI docs FileMap registration.
+
+Status: passed by Codex Reviews B on 2026-05-31. The active Bifrost V2 cockpit/JARVIS source docs are discoverable through runtime FileMap, docs/FileMap, and required-path coverage. No repair routed.
 
 Scope:
 
@@ -29,7 +31,17 @@ Review expectations:
 - Verify Build 3 has a valid next candidate and is not left on read-check-only work.
 - If clean, record proof and clear the FileMap slice. If findings exist, route a focused repair back to Build 3.
 
-Completion: commit and push only `docs/live-codex-reviews-2.md` unless routing a repair.
+Review result:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `docs/bifrost-v2-cockpit-extensions.md` and `docs/jarvis-ui-source-assessment.md` are present in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Both entries are under the Bifrost/session harness area.
+- The entries are scoped as source/contract discoverability and do not claim completed runtime UI implementation, provider routing authority, or Bifrost-owned decision logic.
+- Build 3 has a valid next candidate for registering completed Session Lifecycle / Workflow / DeepSeek docs after they land, and should not create read-check-only commits.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` plus tracker reconciliation. No Build 3 repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Queue Authority
 

@@ -16,9 +16,9 @@
 | Relay/Model Harness | 2 | 0 | 1 | 6 | 9 | 33% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Session Lifecycle Harness | 1 | 0 | 1 | 2 | 4 | 50% |
-| Bifrost Harness | 0 | 0 | 2 | 7 | 9 | 0% |
+| Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **11** | **0** | **7** | **16** | **34** | **32% Clear + 0% Awaiting + 21% Baseline** |
+| **Total V2** | **12** | **0** | **7** | **15** | **34** | **35% Clear + 0% Awaiting + 21% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -53,6 +53,10 @@
 ### Federation Harness
 
 - [x] **Federation Harness + Planning:** `docs/federation-harness-horizon.md` defines the planning-only multi-Meridian boundary, consent model, typed handoff packets, unsafe shared-state exclusions, Bifrost panel implication, and V2 out-of-scope limits - built in `e37030e`; review cleared by Reviews B on 2026-05-31.
+
+### Bifrost Harness
+
+- [x] **Bifrost + FileMap Integration:** active Bifrost V2 cockpit direction docs (`docs/bifrost-v2-cockpit-extensions.md`, `docs/jarvis-ui-source-assessment.md`) registered in runtime FileMap, `docs/FileMap.md`, and required-path coverage - built in `d496472`; review cleared by Reviews B on 2026-05-31.
 
 ## Built But Awaiting Review
 
@@ -118,8 +122,6 @@
 - [ ] **Bifrost + Prompt Payload Visibility:** surface Relay prompt payload size, budget pressure, and growth/flat status next to model dispatch and queue-poll events so Scott and Prime can see prompt drag in real time.
 - [ ] **Bifrost + Voice I/O Surface:** visible microphone input, spoken Prime output, NASA-style boot/status audio state, mute controls, and listening/thinking/speaking indicators; runtime speech plumbing may follow the initial surface.
 - [ ] **Bifrost + Cockpit Render:** static render tests and HTML escaping tests for new V2 view-model fields.
-- [ ] **Bifrost + FileMap Integration:** FileMap registration of Bifrost cockpit extension surface by Build 3.
-
 ## Review Gates for V2
 
 - Every V2 domain slice must include unit tests and pass before marked built.
