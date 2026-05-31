@@ -262,7 +262,7 @@ sending only the task packet.
 - `bifrost/static/cockpit.css`
 - `tests/test_bifrost_cockpit.py`
 - `docs/jarvis-ui-source-assessment.md`
-- `docs/bifrost-v2-extensions-contract.md`
+- `docs/bifrost-v2-cockpit-extensions.md`
 
 **Proof/test expectation:**
 
