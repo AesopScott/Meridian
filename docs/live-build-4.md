@@ -1,4 +1,4 @@
-# Live Build 4 Queue
+﻿# Live Build 4 Queue
 
 ## Queue Authority
 
@@ -32,13 +32,22 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Coordinator Override - Active Now
+## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 16:26 -06:00)~~
 
-Goal: write a Prime workflow/sub-agent usage checklist for harness offloading.
+~~Goal: write a Prime workflow/sub-agent usage checklist for harness offloading.~~
 
-Allowed files only: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
+~~Allowed files only: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.~~
 
-Task: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.
+~~Task: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.~~
+
+~~Tests: none required, docs-only.~~
+
+~~Completion: commit only this checklist slice, push, update Obsidian, and mark Ready for Codex Review.~~
+
+**Ready for Codex Review**
+- Commit: <pending>
+- Files: `docs/workflow-subagent-usage-checklist.md`
+- Tests: not required (docs-only)
 
 ## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 08:55 -06:00)~~
 
@@ -310,6 +319,8 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:57 -06:00 - Build 4 checked queue; status: idle (cadence-paused); Claude Workflows sub-agent architecture note complete (17d8d90); Ready for Codex Review block backfilled with real hash; Next Candidate Task (Prime restart/resteer logic contract) sits below override block awaiting coordinator promotion; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe, 17d8d90 (7) still pending Codex Reviews sweep; origin/main at 17d8d90
 2026-05-31 08:58 -06:00 - Build 4 checked queue; status: idle (cadence cleared); Codex Reviews B Round B15 documented at d43cb34 — Workflows architecture note (0115581/17d8d90) PASS-WITH-FINDINGS; sole MEDIUM is consolidated 5-entry FileMap registration routed to Build 3 (not a Build 4 repair); prior rounds B11/B13/B14 cleared Echo/Atlas (7eb5ae1), Workflow sub-agent contract (1448642), and Prime Autonomy contract (3aa16fe) — all V2 first-wave Build 4 slices now reviewed; remaining pending sweep: pre-V2 slices 3cbf336, 1d17fa1, fd9224d only; Next Candidate Task still awaits coordinator promotion; origin/main at d43cb34
 2026-05-31 09:02 -06:00 - Build 4 checked queue; status: idle; no Active Task; Build 1 paused cadence 3/3 awaiting Codex clear (fab3ce0); Build 3 idle awaiting next assignment (f2e88ec); Next Candidate Task (Prime restart/resteer logic contract) still awaits coordinator promotion; origin/main at f1b03b1
+
+2026-05-31 16:26 -06:00 - Build 4 checked queue; status: running; Active Task = Prime workflow/sub-agent usage checklist (docs/workflow-subagent-usage-checklist.md); pulled origin/main to 0078999; worktree C:/Users/scott/AppData/Local/Temp/polaris-wt/s_1780256820022 (unique)
 ```
 
 ## Write/Completion Log
@@ -340,6 +351,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-31 08:02 -06:00 - Build 4 completed Workflow Sub-Agent Harness contract (docs/workflow-subagent-harness-contract.md) per Coordinator Override; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:45 -06:00 - Build 4 completed V2 Prime Autonomy contract (docs/prime-autonomy-v2-contract.md) per Coordinator Override (Active Now); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:55 -06:00 - Build 4 completed Claude Workflows sub-agent architecture note (docs/workflows-subagent-harness-architecture.md) per Coordinator Override (Active Now); narrative companion to docs/workflow-subagent-harness-contract.md; commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-31 16:26 -06:00 - Build 4 completed Prime workflow/sub-agent usage checklist (docs/workflow-subagent-usage-checklist.md) per Coordinator Override (Active Now); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
