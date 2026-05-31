@@ -124,6 +124,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 2026-06-01 08:35 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; Build 3 5e0facb still pending Round B4 verification.
 2026-06-01 08:50 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; Build 3 5e0facb still pending Round B4 verification.
 2026-06-01 09:05 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; Build 3 5e0facb still pending Round B4 verification.
+2026-06-01 09:20 -06:00 - Codex Reviews B Round B4 executed; status: PASS-WITH-MEDIUM-FINDING; commit reviewed: 5e0facb; tests: python -m pytest tests/test_filemap.py -q → 46/46 in 0.09s; finding: 3 docs registered in filemap.py and _REQUIRED_PATHS but absent from docs/FileMap.md (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); repair task written to Build 3 Active Task; results in Obsidian (2026-06-01 Codex Reviews B Round B4 Result.md); cadence 2/3 since Round B3; awaiting Round B5 trigger.
 
 ## Review Log
 
@@ -205,6 +206,38 @@ Proof:
 Build 3 cadence window `774695f`, `330f200`, `be34fea` is clear for this FileMap slice.
 
 Current Active Task:
+
+Goal: perform Codex Reviews B Round B4 for the new V1 Bifrost live-data contract.
+
+Scope trigger:
+
+- Build 4 completed `docs/v1-bifrost-live-data-contract.md` and marked the slice Ready for Codex Review.
+
+Immediate scope:
+
+- Build 4 commit `56f626d` - V1 Bifrost live-data integration contract.
+- Files:
+  - `docs/v1-bifrost-live-data-contract.md`
+  - `docs/live-build-4.md` for provenance only.
+
+Required proof:
+
+- Inspect `git show 56f626d -- docs/v1-bifrost-live-data-contract.md docs/live-build-4.md`.
+- Confirm the contract keeps V1 scoped to Bifrost cockpit live-data wiring and does not pull Echo, Atlas, federation, or public/provider strategy into V1.
+- Confirm it preserves the "typed objects and summaries, not raw queue files/full logs/prompt-drag context" rule.
+- Confirm each cockpit surface names an owner, current source, V1 domain object expectation, cadence, stale/degraded behavior, and prompt-exclusion rule.
+- Cross-check against `docs/v1-bifrost-cockpit-implementation-brief.md`, `docs/v1-capability-plan.md`, and `docs/v0-v1-progress-tracker.md` for contradictions.
+- Check whether `docs/v1-bifrost-live-data-contract.md` needs FileMap registration. If yes, route a Build 3 FileMap task instead of editing FileMap here.
+- Since this is docs-only, no pytest is required unless a FileMap repair is routed.
+
+Output:
+
+- Declare Round B4 scope.
+- Update Review Ledger, Review Log, Proof Log, Findings, and Repair Routing Log.
+- If clean, mark Build 4 commit `56f626d` passed and Build 4 unblocked.
+- If actionable findings exist, route a repair task to Build 4.
+
+Stale prior active task follows.
 
 Goal: perform Codex Reviews B Round B3 when the next docs/architecture slice is ready.
 
