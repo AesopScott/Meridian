@@ -19,6 +19,7 @@ Task: inspect current FileMap registrations and add missing entries for the new 
 - `docs/session-lifecycle-v2-contract.md`
 - `docs/federation-harness-horizon.md`
 - `docs/session-card-queue-activation-contract.md`
+- `docs/deepseek-provider-validation-gate.md`
 
 Keep this mechanical and small. Do not edit the documents themselves. Add or update tests only for required-path/default-map coverage.
 
