@@ -46,29 +46,36 @@
 
 | Status | Count | Percent |
 |---|---:|---:|
-| Built | 0 | 0% |
-| In Progress | 3 | 33% |
-| Planned / designed | 4 | 44% |
-| Needs planning | 2 | 22% |
-| Total V1 cockpit items | 9 | 100% |
+| Built | 6 | 50% |
+| In Progress | 4 | 33% |
+| Planned / designed | 2 | 17% |
+| Needs planning | 0 | 0% |
+| Total V1 cockpit items | 12 | 100% |
+
+### Built
+
+- [x] **Bifrost Harness:** first static cockpit scaffold - built in `d13f1d1`.
+- [x] **Prime + Bifrost Harness:** cockpit snapshot/event domain shape - built in `f56af55`.
+- [x] **Prime + Bifrost Harness:** Prime cockpit snapshot provider/factory - built in `6c9a397`.
+- [x] **Bifrost Harness + Prime:** live-data integration contract - built in `56f626d`.
+- [x] **Bifrost Harness + Prime:** Bifrost integration sequence - built in `ed0fb75`.
+- [x] **Prime + Bifrost Harness:** cockpit-state package API surface - built in `e656027` + `b314b5b`.
 
 ### Planned / Designed
 
-- [ ] **Bifrost Harness:** cockpit shell - design briefs exist; no UI code.
 - [ ] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - brief built in `a412e90`.
 - [ ] **Bifrost Harness:** harness dashboard - brief built in `7c34566`.
-- [ ] **Prime + Review Console Harness:** status / review console CLI bridge - brief built in `fd9224d`.
 
 ### In Progress
 
-- [ ] **Bifrost Harness:** first static cockpit scaffold - assigned to Build 5 on 2026-05-31 00:42 -06:00.
-- [ ] **Prime + Bifrost Harness:** cockpit snapshot/event domain shape - assigned to Build 1 on 2026-05-31 00:42 -06:00.
-- [ ] **Bifrost Harness + Prime:** live-data integration contract - assigned to Build 4 on 2026-05-31 00:42 -06:00.
+- [ ] **FileMap Harness:** Prime cockpit provider FileMap registration - assigned to Build 3.
+- [ ] **Bifrost Harness + Prime:** `PrimeCockpitSnapshot` to `CockpitViewModel` mapping - assigned to Build 5.
+- [ ] **Prime + Bifrost Harness:** Prime cockpit provider package API surface - assigned to Build 2.
+- [ ] **Bifrost Harness + Prime:** runtime acceptance checklist - assigned to Build 4.
 
 ### Needs Planning
 
-- [ ] **Bifrost Harness:** live UI implementation - cockpit shell, Prime conversation, queue panel, review console, progress surface.
-- [ ] **Bifrost Harness + Prime:** UI integration wiring - plug V0 Mission/Wake, Review Console, Beacon status, Relay session state, and Aegis proof/gate state into the cockpit.
+- [x] **Bifrost Harness:** V1 cockpit scope is locked enough to build; V2 planning can start after the active V1 wiring wave lands.
 
 ## Reporting Format
 

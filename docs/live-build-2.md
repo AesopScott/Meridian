@@ -293,13 +293,14 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 Current Active Task:
 
-Goal: expose the V1 cockpit-state domain objects through the package root.
+Goal: expose the V1 Prime cockpit provider through the package root.
 
 Context:
 
-- Build 1 completed `meridian_core/cockpit_state.py` in commit `f56af55`.
+- Build 1 completed `meridian_core/cockpit_provider.py` in commit `6c9a397`.
+- The cockpit-state package API surface is already complete in `e656027` + `b314b5b`; do not repeat that stale task.
 - Build 2 owns package/API surface work.
-- Bifrost and downstream integration code should be able to import the stable cockpit-state types from `meridian_core`, not only from the submodule.
+- Bifrost and downstream integration code should be able to import the stable provider helpers from `meridian_core`, not only from the submodule.
 
 Allowed files only:
 
@@ -309,31 +310,24 @@ Allowed files only:
 
 Task:
 
-- Import the public cockpit-state types/helpers from `.cockpit_state` in `meridian_core/__init__.py`.
+- Import the public Prime cockpit provider helpers from `.cockpit_provider` in `meridian_core/__init__.py`.
 - Add them to `__all__`.
 - Add a focused package API smoke test in `tests/test_package_api.py`.
-- Export only intentional public names. Do not export private ordering tables or helper constants.
-- Do not edit `meridian_core/cockpit_state.py` unless a package-export test reveals an unavoidable issue; if that happens, stop and report instead of broadening scope.
+- Export only intentional public names. Do not export private helpers or implementation constants.
+- Do not edit `meridian_core/cockpit_provider.py` unless a package-export test reveals an unavoidable issue; if that happens, stop and report instead of broadening scope.
 - Do not edit FileMap; Build 3 owns FileMap.
 - Do not edit Bifrost UI files; Build 5 owns those.
 
 Likely public names to export:
 
-- `CockpitStatus`
-- `QueuePolicy`
-- `LaneStatus`
-- `ProgressEventCategory`
-- `ProgressSeverity`
-- `CockpitLaneSummary`
-- `CockpitProgressEvent`
-- `CockpitLaneCounts`
-- `PrimeCockpitSnapshot`
+- `build_snapshot`
+- `demo_snapshot`
 
 Tests:
 
 - `python -m pytest tests/test_package_api.py -q`
-- `python -m pytest tests/test_cockpit_state.py tests/test_package_api.py -q`
-- `python -m pytest -q`
+- `python -m pytest tests/test_cockpit_provider.py tests/test_package_api.py -q`
+- Run the full suite only if the package export touches shared imports in a risky way.
 
 Completion:
 

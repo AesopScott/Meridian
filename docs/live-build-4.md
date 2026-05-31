@@ -266,7 +266,53 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-No active task. Polling.
+Current Active Task:
+
+Goal: write the V1 Bifrost cockpit runtime acceptance checklist.
+
+Context:
+
+- V1 cockpit startup is underway.
+- Build 5 owns the Bifrost UI implementation and currently has the `PrimeCockpitSnapshot` to `CockpitViewModel` mapping task.
+- Build 1 completed the Prime cockpit provider/factory in `6c9a397`.
+- Build 2 is being assigned the package API surface for the provider helpers.
+- Build 3 owns FileMap registration for new V1 files.
+- Build 4 owns architecture, acceptance gates, and integration sequencing.
+
+Allowed files only:
+
+- `docs/v1-bifrost-runtime-acceptance-checklist.md`
+- `docs/live-build-4.md`
+
+Task:
+
+- Create a concise acceptance checklist for declaring the V1 cockpit runtime "ready to use."
+- Organize the checklist by harness owner:
+  - **Prime:** snapshot/provider source and current intention visibility.
+  - **Bifrost Harness:** cockpit render, tabs, shell controls, and local preview path.
+  - **Review Console Harness:** human-gate panel visibility and action routing.
+  - **Beacon Harness:** liveness/staleness indicators.
+  - **Relay Harness:** lane/session status without prompt drag.
+  - **Aegis Harness:** proof/gate status and failed-check visibility.
+  - **FileMap Harness:** discovery coverage for new UI/runtime files.
+- Include proof expectations for each item: targeted tests, browser/manual visual checks, FileMap checks, and review gates.
+- Include what remains explicitly out of V1: Echo memory engine, Atlas/RAG, multi-user federation, public/account adapter strategy, and vendor-specific model presets.
+- Include stop conditions for stale data, shared-worktree collision, failed proof gate, or UI rendering regression.
+- Keep this docs-only and implementation-facing.
+- Do not edit runtime code.
+- Do not edit FileMap.
+- Do not edit other live queues.
+
+Tests:
+
+- No tests required. Docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 ---
 
