@@ -10,16 +10,18 @@ Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex 
 
 ## Active Task
 
-Goal: register new V2 contract-wave documents and Atlas runtime files in FileMap.
+Goal: register new V2 contract-wave documents plus Echo/Atlas runtime files in FileMap.
 
 Allowed files only: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/live-build-3.md`.
 
-Task: inspect current FileMap registrations and add missing entries for the new V2 contract-wave documents and Atlas runtime files only if they are not already discoverable:
+Task: inspect current FileMap registrations and add missing entries for the new V2 contract-wave documents plus Echo/Atlas runtime files only if they are not already discoverable:
 
 - `docs/session-lifecycle-v2-contract.md`
 - `docs/federation-harness-horizon.md`
 - `docs/session-card-queue-activation-contract.md`
 - `docs/deepseek-provider-validation-gate.md`
+- `meridian_core/echo.py`
+- `tests/test_echo.py`
 - `meridian_core/atlas.py`
 - `tests/test_atlas.py`
 
