@@ -164,6 +164,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 02:30 -06:00 - Build 2 checked queue; status: idle (tasks 989366f + 9c3e1a3 complete, cadence cleared; Active Task section stale — awaiting orchestrator update; polling)
 2026-06-01 10:15 -06:00 - Build 2 checked queue; Active Task found: V2 CognitionPolicy package API surface; executing
 2026-06-01 10:20 -06:00 - Build 2 checked queue; status: idle (task e08e598 complete; returning to polling)
+2026-06-01 10:25 -06:00 - Build 2 checked queue; status: idle (task e08e598 already complete as of 10:20; Active Task section not yet updated; awaiting orchestrator assignment; polling)
 2026-05-30 19:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
