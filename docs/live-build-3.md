@@ -76,6 +76,7 @@ Completion:
 - Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`.
 - Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed).
 - Commit: `3c6f647`.
+- Audit wording repaired by coordinator after review caught stale unresolved-follow-up language; repair commit pending.
 
 Ready for Codex Review.
 

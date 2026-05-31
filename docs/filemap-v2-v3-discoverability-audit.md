@@ -20,12 +20,12 @@ Every V2/V3 architecture file that changes Prime behavior, harness ownership, pr
 - [x] `docs/session-card-queue-activation-contract.md` - Q-mode/session card product contract.
 - [x] `docs/deepseek-provider-validation-gate.md` - DeepSeek provider trust gate.
 
-## Follow-Up FileMap Tasks
+## Resolved FileMap Tasks
 
-- [ ] Register `docs/workflows-subagent-harness-architecture.md`.
+- [x] Register `docs/workflows-subagent-harness-architecture.md`.
   - Reason: this is the architecture note for using workflow/sub-agent contexts to prevent Prime's orchestrator context from filling with harness working memory.
-  - Recommended owner: Build 3.
-  - Recommended files: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/filemap-v2-v3-discoverability-audit.md`, and optionally `docs/FileMap.md` if the human-readable mirror is in scope.
+  - Owner: Build 3.
+  - Resolution: registered in `meridian_core/filemap.py` and `_REQUIRED_PATHS` in `tests/test_filemap.py`.
 
 ## Pending Upstream Outputs
 
@@ -39,8 +39,8 @@ These files are expected from queued work but do not exist yet, so they are not 
 
 ## Prime Wake Implication
 
-Until the follow-up FileMap task is complete, Prime can still find the workflow contract baseline, but it may miss the newer architecture note that explains why harness work should move into bounded workflow/sub-agent contexts. That is a V2 orchestration-quality gap, not a runtime blocker.
+Prime can now find both the workflow contract baseline and the newer architecture note that explains why harness work should move into bounded workflow/sub-agent contexts. The remaining items in this audit are pending upstream outputs, not current FileMap misses.
 
 ## Completion Criteria
 
-This audit is complete when it is committed, review-routed, and followed by a small Build 3 FileMap registration task for the listed miss. Do not silently bundle future missing files into unrelated runtime work.
+This audit is complete when it is committed, review-routed, and the listed current miss is registered. Future missing files should be added as explicit Build 3 FileMap tasks after their source documents exist. Do not silently bundle future missing files into unrelated runtime work.
