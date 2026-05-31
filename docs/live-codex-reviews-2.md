@@ -12,8 +12,8 @@ Goal: review Build 3 V2 contract-wave and Echo/Atlas FileMap registration.
 
 Scope:
 
-- Implementation commit `c5572c5` - registers V2 contract-wave documents plus Echo/Atlas runtime/test files in `meridian_core/filemap.py` and `tests/test_filemap.py`.
-- Queue provenance commit `8cfbaa6` - marks the Build 3 slice ready for Codex Review and promotes the next Build 3 candidate so the lane is not empty.
+- Implementation commit `a138b1d` - registers V2 contract-wave documents plus Echo/Atlas runtime/test files in `meridian_core/filemap.py` and `tests/test_filemap.py`.
+- Queue provenance commit `dc9b58e` - marks the Build 3 slice ready for Codex Review and promotes the next Build 3 candidate so the lane is not empty.
 
 Allowed review files:
 
