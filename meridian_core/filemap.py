@@ -524,6 +524,13 @@ def make_default_map() -> FileMap:
             notes="Architecture only; no runtime code. Owner: Build 4. Read before implementing Prime orchestration Python domain objects.",
         ),
         FileMapEntry(
+            path="docs/prime-restart-resteer-contract.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Prime restart/resteer contract: typed detection and recovery contract for stale lanes, wrong queues, shared worktrees, quota blocks, launch failures, proof blocks, and empty queue runway.",
+            related_tests=[],
+            notes="V2 entry-point. Read before implementing Prime recovery, session lifecycle restart logic, or queue runway automation.",
+        ),
+        FileMapEntry(
             path="docs/v2-package-api-surface-note.md",
             area=FileArea.ARCHITECTURE,
             purpose="V2 package API surface note: extends the core Meridian package surface for V2 harnesses, Echo integration, and Atlas context retrieval.",
