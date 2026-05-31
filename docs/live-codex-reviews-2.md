@@ -55,7 +55,7 @@ Look for:
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
 | Build 3 | 1378bda | FileMap repair — register 4 uncatalogued docs (Round B2) | passed | Round B1 MEDIUM repair verified closed; 1 new MEDIUM finding (live-codex-reviews-2.md still uncatalogued); 2 LOW prose-divergence carryovers from Round B1 still deferred | route 1-row FileMap follow-up to Build 3 for `docs/live-codex-reviews-2.md`; verify in Round B3 |
-| Build 4 | 1d17fa1 | Prime orchestration state model (Round B1) | passed | LOW severity-ladder design question recorded | clarify FindingSeverity↔EvidenceSeverity mapping when Build 4 next picks up state-model implementation slice |
+| Build 4 | 1aa770d | Workflow Sub-Agent Harness contract (Round B13) | passed-with-findings | MEDIUM: 3 V2 architecture contracts need FileMap registration (echo-memory-contract.md, atlas-retrieval-contract.md, workflow-subagent-harness-contract.md — from Round B11 + B13 findings) | route consolidated 3-entry FileMap repair to Build 3; verify in next Build 3 cadence review |
 | Build 5 | 9328272 | V1 Harness Dashboard implementation | passed Round B8 | no findings; final V1 cockpit item cleared | V1 cockpit build is review-cleared |
 
 ## Review Round Scope
