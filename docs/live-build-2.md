@@ -268,6 +268,51 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
+Coordinator Override - Current Active Task (supersedes stale CognitionPolicy export task below):
+
+Goal: write the Bifrost Electron/preview package surface policy note.
+
+Context:
+
+- Build 5 owns the actual Electron app shell and `bifrost/preview.py` implementation.
+- Build 2 owns package/API surface decisions and should keep public imports intentional.
+- The existing Bifrost package already exports renderer/view-model names from `bifrost/__init__.py`.
+- The new Electron shell will introduce preview-generation and app-entry concepts; these should not automatically become `meridian_core` root exports.
+- This is a Haiku-sized docs/API policy slice. Do not implement the Electron app.
+
+Allowed files only:
+
+- `docs/package-api-surface-note.md`
+- `docs/bifrost-preview-package-api-note.md`
+- `docs/live-build-2.md`
+
+Task:
+
+- Create `docs/bifrost-preview-package-api-note.md`.
+- Explain the intended public surface for Bifrost preview/app entrypoints:
+  - Bifrost package imports should stay under `bifrost`, not `meridian_core`.
+  - `render_cockpit_html`, `sample_cockpit_view_model`, and future preview helpers are Bifrost UI harness surface.
+  - Electron app commands belong to `package.json` / app shell, not Python package-root exports.
+  - Preview generation should expose a small stable helper only after Build 5 lands it.
+  - Avoid exporting file-writing helpers from `meridian_core.__all__`.
+- Update `docs/package-api-surface-note.md` with a short Bifrost section that points to the new note.
+- Do not edit `bifrost/`, `package.json`, `electron/`, `meridian_core/__init__.py`, FileMap, or other queues.
+
+Tests:
+
+- No tests required. Docs-only.
+- Optional sanity check: `python -m pytest tests/test_package_api.py -q` if you touch package API wording that references current exports.
+
+Completion:
+
+- Commit only this docs/API policy slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- Return to polling `docs/live-build-2.md` every 30 seconds.
+
+Stale prior task follows.
+
 Current Active Task:
 
 Goal: expose the V2 CognitionPolicy API through the package root.
