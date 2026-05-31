@@ -1,16 +1,21 @@
 # Live Build 4 Queue
 
-## Coordinator Override - Active Now
+## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 08:45 -06:00)~~
 
-Goal: write the V2 Prime Autonomy contract.
+~~Goal: write the V2 Prime Autonomy contract.~~
 
-Allowed files only: `docs/prime-autonomy-v2-contract.md`, `docs/v2-detailed-build-plan.md`, `docs/live-build-4.md`.
+~~Allowed files only: `docs/prime-autonomy-v2-contract.md`, `docs/v2-detailed-build-plan.md`, `docs/live-build-4.md`.~~
 
-Task: create `docs/prime-autonomy-v2-contract.md`. Define `PrimeNextAction` and its first V2 autonomy surface: action type/category, project/objective reference, confidence, risk tier, blockers, required human gate status, Echo inputs, Atlas inputs, Aegis/CognitionPolicy result, and Session Lifecycle command recommendation. Specify deterministic selection rules for backlog priority, stale lanes, open review gates, failed proofs, human gates, and prompt-drag avoidance. Include proof/test expectations for later runtime work in `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py`. Include stop conditions where Prime routes to Review Console instead of acting.
+~~Task: create `docs/prime-autonomy-v2-contract.md`. Define `PrimeNextAction` and its first V2 autonomy surface: action type/category, project/objective reference, confidence, risk tier, blockers, required human gate status, Echo inputs, Atlas inputs, Aegis/CognitionPolicy result, and Session Lifecycle command recommendation. Specify deterministic selection rules for backlog priority, stale lanes, open review gates, failed proofs, human gates, and prompt-drag avoidance. Include proof/test expectations for later runtime work in `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py`. Include stop conditions where Prime routes to Review Console instead of acting.~~
 
-Tests: none required, docs-only.
+~~Tests: none required, docs-only.~~
 
-Completion: commit only this architecture slice, push, update Obsidian, and mark Ready for Codex Review.
+~~Completion: commit only this architecture slice, push, update Obsidian, and mark Ready for Codex Review.~~
+
+**Ready for Codex Review**
+- Commit: `<pending>`
+- Files: `docs/prime-autonomy-v2-contract.md`
+- Tests: not required (docs-only)
 
 ## Next Candidate Task
 
@@ -257,6 +262,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:36 -06:00 - Build 4 checked queue; status: idle (cadence-paused); no new Active Task; Build 1 idle polling (31a6aec); Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642 still pending Codex Reviews sweep; origin/main at 31a6aec
 2026-05-31 08:38 -06:00 - Build 4 checked queue; status: idle (cadence-paused); no new Active Task; Build 1/2 idle polling (752520a, 5dc8284 V2 package API surface task complete cadence 2/3); Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642 still pending Codex Reviews sweep; origin/main at 752520a
 2026-05-31 08:40 -06:00 - Build 4 checked queue; status: idle (cadence-paused); no new Active Task; Build 2 landed V2 package/API surface policy for Echo, Atlas, Prime Autonomy, Session Lifecycle, Workflow dispatch (f6ba22d) — derived from Build 4 V2 contracts; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642 still pending Codex Reviews sweep; origin/main at f6ba22d
+2026-05-31 08:45 -06:00 - Build 4 checked queue; status: running; new Coordinator Override (Active Now) at top of file = V2 Prime Autonomy contract (docs/prime-autonomy-v2-contract.md); runway refill commit 2743366 added it and a Next Candidate slot; override authorizes work despite cadence pause; origin/main at 806a328
 ```
 
 ## Write/Completion Log
@@ -285,6 +291,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-31 05:02 -06:00 - Coordinator assigned V2 first-wave Echo/Atlas contract docs; commit pending; tests not required (docs-only)
 2026-05-31 07:37 -06:00 - Build 4 completed V2 first-wave contracts: docs/echo-memory-contract.md and docs/atlas-retrieval-contract.md; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:02 -06:00 - Build 4 completed Workflow Sub-Agent Harness contract (docs/workflow-subagent-harness-contract.md) per Coordinator Override; commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-31 08:45 -06:00 - Build 4 completed V2 Prime Autonomy contract (docs/prime-autonomy-v2-contract.md) per Coordinator Override (Active Now); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
 ## Cross-Check Activity
