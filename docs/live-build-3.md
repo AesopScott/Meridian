@@ -1,5 +1,25 @@
 ﻿# Live Build 3 Queue
 
+## Active Task
+
+Goal: register current V2 queue/runway documents in FileMap.
+
+Allowed files only: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: inspect current FileMap registrations and add missing entries for queue/runway, V2, and framework documents only if they are not already discoverable. Keep this mechanical and small. Do not edit the documents themselves. Add or update tests only for required-path/default-map coverage.
+
+Tests: `python -m pytest tests/test_filemap.py -q`.
+
+Completion: commit only this FileMap registration slice, push, update Obsidian, and mark Ready for Codex Review.
+
+## Next Candidate Task
+
+Goal: add a lightweight FileMap audit note for V2/V3 discoverability.
+
+Allowed files only: `docs/filemap-v2-v3-discoverability-audit.md`, `docs/live-build-3.md`.
+
+Task: create a short docs-only audit listing which V2/V3 architecture files must be discoverable by Prime at wake. Mark any missing registrations as follow-up tasks rather than editing runtime code.
+
 This file is the standing assignment queue for Build 3.
 
 When idle, check this file every 30 seconds. If there is an active task below, execute it. If the task is complete, commit and push your slice, update Obsidian, then report completion in your session and return to polling this file.
@@ -355,3 +375,5 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 2026-06-08 20:45 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 1/3 since Round B5; awaiting next assignment
 2026-06-08 21:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 1/3 since Round B5; awaiting next assignment
 2026-06-08 21:15 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 1/3 since Round B5; awaiting next assignment
+
+2026-06-10 06:45 UTC - Build 3 checked queue; Coordinator Override task verified complete (commit 67a75dc); completion marker added (b3316b6); Obsidian note created; cadence 3/3 since Round B5 — paused pending Codex review before next assignment
