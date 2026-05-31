@@ -351,6 +351,11 @@ Completion:
 
 **Ready for Codex Review**
 - Commit: `pending`
+- Files: `docs/v1-bifrost-integration-sequence.md`
+- Tests: not required (docs-only)
+
+**Ready for Codex Review**
+- Commit: `56f626d`
 - Files: `docs/v1-bifrost-live-data-contract.md`
 - Tests: not required (docs-only)
 
