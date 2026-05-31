@@ -1,6 +1,6 @@
 # Live Build 5 Queue
 
-## Codex Repair - Active Now
+## ~~Codex Repair - Active Now~~ (COMPLETED 2026-05-31 13:54 -06:00)
 
 Goal: fix the Bifrost V2 contract queue/path contradictions found by Codex Reviews A for coordinator commit `39c9ac8`.
 
@@ -17,7 +17,7 @@ Tests: none required, docs-only.
 
 Completion: commit only the allowed repair files, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
-Stale displaced task follows for reference only; do not execute it until the repair above is complete and the queue is cleaned.
+Repair complete. Stale displaced task follows for reference only; do not execute it unless reassigned as a fresh active task.
 
 ## Coordinator Override - Paused Pending Repair
 
@@ -248,6 +248,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 completed <task>; commit <hash>; tests <result>
 2026-05-31 02:58 -06:00 - Codex coordinator took over stalled Build 5 progress/proof surface implementation slice; commit pending; tests: 72 passed (tests/test_bifrost_cockpit.py), 97 passed (tests/test_bifrost_cockpit.py tests/test_cockpit_state.py)
 2026-05-31 03:31 -06:00 - Codex coordinator took over stalled Build 5 Harness Dashboard implementation slice; commit pending; tests: 79 passed (tests/test_bifrost_cockpit.py), 104 passed (tests/test_bifrost_cockpit.py tests/test_cockpit_state.py)
 2026-05-31 18:45 -06:00 - Build 5 completed openable V1 Electron cockpit app shell at bifrost/preview.py, electron/main.js, package.json, tests/test_bifrost_preview.py, docs/v0-v1-progress-tracker.md; commit 6b3e652; tests: 107 passed (tests/test_bifrost_preview.py + tests/test_bifrost_cockpit.py), 1095 passed full suite
+2026-05-31 13:54 -06:00 - Build 5 completed Codex repair for Bifrost V2 queue/path contradictions; commit 4558cf1; files changed: docs/live-build-5.md; files verified: docs/v2-detailed-build-plan.md; tests: not run (docs-only); push status: pushed to origin/main; Obsidian update: completed (`Meridian_Build/2026-05-31 Build 5 Bifrost V2 Queue Path Repair.md`)
 ```
 
 ## Ready for Codex Review
@@ -266,6 +267,7 @@ Append entries here when a completed slice is ready for the Codex Reviews lane t
 2026-05-31 02:58 -06:00 - Build 5 slice Ready for Codex Review; commit e1bf9db; files: bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 72 passed (tests/test_bifrost_cockpit.py), 97 passed (tests/test_bifrost_cockpit.py tests/test_cockpit_state.py); note: 3rd task-changing commit in current cadence window - Build 5 pauses normal build work until Codex Reviews lane records cadence review result
 2026-05-31 03:31 -06:00 - Build 5 slice Ready for Codex Review; commit 9328272; files: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 79 passed (tests/test_bifrost_cockpit.py), 104 passed (tests/test_bifrost_cockpit.py tests/test_cockpit_state.py); note: final V1 cockpit item
 2026-05-31 18:45 -06:00 - Build 5 slice Ready for Codex Review; commit 6b3e652; files: bifrost/preview.py, electron/main.js, package.json, tests/test_bifrost_preview.py, docs/v0-v1-progress-tracker.md; tests: 107 passed (tests/test_bifrost_preview.py + tests/test_bifrost_cockpit.py), 1095 passed full suite; note: openable V1 Electron cockpit app shell — V1 cockpit count now 13/13 in docs/v0-v1-progress-tracker.md; 3rd task-changing commit in current cadence window after d13f1d1 and 5c89e87, so Build 5 pauses normal build work per rule 21 until Codex Reviews lane records a cadence review result
+2026-05-31 13:54 -06:00 - Build 5 slice Ready for Codex Review; commit 4558cf1; files changed: docs/live-build-5.md; files verified: docs/v2-detailed-build-plan.md; tests: not run (docs-only); Obsidian update: completed (`Meridian_Build/2026-05-31 Build 5 Bifrost V2 Queue Path Repair.md`); note: Codex repair archived stale lower Active Task block and verified V2 likely-files path is aligned with docs/bifrost-v2-cockpit-extensions.md
 ```
 
 ## Cross-Check Activity
@@ -325,7 +327,7 @@ This task was displaced by the JARVIS-source runway and preserved only as histor
 
 Stale prior task follows.
 
-Current Active Task (supersedes any stale text below):
+Archived prior active task (completed; do not execute unless reassigned):
 
 Goal: implement the V1 Harness Dashboard surface in Bifrost.
 
