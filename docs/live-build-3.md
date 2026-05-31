@@ -302,3 +302,5 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 - **COMPLETED 2026-05-30 17:20 -06:00** — FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:07 -06:00** — FileMap repair (Round B3 — prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:03 -06:00** — FileMap refresh (model_adapter.py); commit be34fea; tests 46/46 filemap; Ready for Codex Review. Codex review cleared 2026-05-30 16:11 -06:00 (Reviews B; no findings; cadence window 774695f, 330f200, be34fea clear).
+
+2026-06-01 21:35 -06:00 - Build 3 completed FileMap registration (docs/v2-detailed-build-plan.md); commit b48b5c3; files changed: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; Obsidian update pending; Ready for Codex Review
