@@ -13,7 +13,7 @@
 ~~Completion: commit only this architecture slice, push, update Obsidian, and mark Ready for Codex Review.~~
 
 **Ready for Codex Review**
-- Commit: `<pending>`
+- Commit: `17d8d90`
 - Files: `docs/workflows-subagent-harness-architecture.md`
 - Tests: not required (docs-only)
 
@@ -267,6 +267,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:48 -06:00 - Build 4 checked queue; status: idle (cadence-paused); no Active Task (Coordinator Override completed; Next Candidate Task still awaits promotion); Build 2/3 idle (879e875 cadence 2/3, 90f9404); Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe (6) still pending Codex Reviews sweep; origin/main at 676779c
 2026-05-31 08:50 -06:00 - Build 4 checked queue; status: idle (cadence-paused); no Active Task; promote-next-work commit e1aee24 touched live-build-2.md and live-build-5.md only — Build 4 Next Candidate not promoted to active; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe (6) still pending Codex Reviews sweep; origin/main at b850958
 2026-05-31 08:55 -06:00 - Build 4 checked queue; status: running; promote-completed-lane-work commit a175dae rotated Build 4 queue — new Coordinator Override (Active Now) = Claude Workflows sub-agent architecture note (docs/workflows-subagent-harness-architecture.md); Next Candidate = Prime restart/resteer logic contract; override authorizes work despite cadence pause; origin/main at d5b3d91
+2026-05-31 08:57 -06:00 - Build 4 checked queue; status: idle (cadence-paused); Claude Workflows sub-agent architecture note complete (17d8d90); Ready for Codex Review block backfilled with real hash; Next Candidate Task (Prime restart/resteer logic contract) sits below override block awaiting coordinator promotion; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe, 17d8d90 (7) still pending Codex Reviews sweep; origin/main at 17d8d90
 ```
 
 ## Write/Completion Log
