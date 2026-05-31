@@ -13,12 +13,12 @@
 | Prime Autonomy | 0 | 0 | 0 | 2 | 2 | 0% |
 | Echo Harness | 0 | 1 | 2 | 0 | 3 | 67% |
 | Atlas Harness | 0 | 0 | 1 | 2 | 3 | 33% |
-| Relay/Model Harness | 1 | 0 | 0 | 3 | 4 | 25% |
+| Relay/Model Harness | 1 | 0 | 0 | 4 | 5 | 20% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Session Lifecycle Harness | 0 | 1 | 1 | 1 | 3 | 33% |
 | Bifrost Harness | 0 | 0 | 0 | 3 | 3 | 0% |
 | Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **3** | **2** | **4** | **12** | **21** | **19% Clear + 10% Awaiting + 19% Baseline** |
+| **Total V2** | **3** | **2** | **4** | **13** | **22** | **14% Clear + 9% Awaiting + 18% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -83,6 +83,7 @@
 ### Relay / Model Harness
 
 - [ ] **Model Harness + Metadata:** capability metadata and prompt-drag telemetry fields - module: `meridian_core/model_adapter.py`; contract: `docs/model-harness-v2-contract.md`.
+- [ ] **Model Harness + DeepSeek Primary Provider:** DeepSeek direct-API adapter metadata and routing preset - default `deepseek-v4-pro`, fast lane `deepseek-v4-flash`; must route through Relay/Aegis like Claude and OpenAI, not as a bypass.
 - [ ] **Relay + Model Adapter:** route capability/tier/budget metadata binding - no vendor-specific presets in first slice.
 - [ ] **Relay + Dispatch Hardening:** provider-neutral HTTP transport envelope updates for metadata pass-through.
 - [ ] **Relay + PromptPacket:** proof metadata integration into dispatch (prompt_packet.py already v1 complete; v2 adds budget/proof bindings).

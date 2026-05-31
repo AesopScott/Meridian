@@ -136,6 +136,8 @@ First wave deliverable:
 - Add model capability metadata and prompt-drag telemetry fields.
 - Let Relay know a route's intended risk tier, context budget, and adapter capability needs.
 - Keep provider-neutral HTTP transport as the stable base.
+- Treat **Claude, OpenAI, and DeepSeek** as first-class primary providers in the Model Harness, not optional one-off integrations.
+- Add a DeepSeek direct-API adapter target for V4 models (`deepseek-v4-pro` default, `deepseek-v4-flash` fast lane) so Prime can route high-volume build work away from Claude when capacity or cost requires it.
 
 **Likely files/modules/docs:**
 
@@ -150,10 +152,11 @@ First wave deliverable:
 
 - Tests for capability matching and missing-capability failures.
 - Tests that prompt budget metadata is copied without inflating prompt content.
+- Tests that DeepSeek provider metadata resolves through the same adapter contract as Claude/OpenAI and never bypasses Relay/Aegis policy checks.
 
 **Out-of-scope guardrails:**
 
-- No vendor-specific presets until the metadata contract is stable.
+- No vendor-specific presets beyond the explicit primary-provider plan (Claude, OpenAI, DeepSeek) until the metadata contract is stable.
 - No account-based automation public path.
 - No hidden prompt expansion.
 

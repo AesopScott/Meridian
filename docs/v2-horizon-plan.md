@@ -69,6 +69,7 @@ V2 scope candidates:
 
 - API-first public adapter path
 - compartmentalized account-based automation path
+- DeepSeek as a primary direct-API provider beside Claude and OpenAI, with `deepseek-v4-pro` as the default high-capability route and `deepseek-v4-flash` as the fast/high-volume route
 - model capability registry
 - prompt drag telemetry
 - adapter health checks

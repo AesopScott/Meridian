@@ -26,7 +26,7 @@ No item leaves this checklist unless it has a named owner: Prime or a harness.
 
 ## Key Technologies
 
-- [x] **LLMs** — **Model Harness / Relay Harness:** Provider-neutral model adapter contract exists; live provider-specific strategy remains future hardening.
+- [x] **LLMs** — **Model Harness / Relay Harness:** Provider-neutral model adapter contract exists; primary provider set is Claude + OpenAI + DeepSeek, with DeepSeek direct API now a V2 build requirement.
 - [x] **Transformers** — **Model Harness:** Treated as underlying model architecture, not something Meridian builds directly.
 - [x] **Attention mechanisms** — **Model Harness / Council:** Treated as underlying model capability; Meridian's equivalent control surface is selective attention through Atlas/Echo retrieval and prompt-budgeted context.
 - [x] **Transfer learning** — **Model Harness:** Vendor/model capability, not Meridian-owned runtime behavior.
@@ -43,7 +43,7 @@ No item leaves this checklist unless it has a named owner: Prime or a harness.
 
 ## Deep Learning Layer
 
-- [x] **Large Language Models** — **Model Harness:** Accessed through adapters and Relay dispatch.
+- [x] **Large Language Models** — **Model Harness:** Accessed through adapters and Relay dispatch; DeepSeek is treated as a primary high-volume provider beside Claude and OpenAI.
 - [x] **Attention mechanisms** — **Atlas / Echo / Relay:** Meridian's operational answer is ranked retrieval and prompt-budget control.
 - [x] **Transfer learning** — **Model Harness:** External model capability.
 - [x] **Transformers** — **Model Harness:** External model architecture.
