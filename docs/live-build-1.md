@@ -1,5 +1,17 @@
 # Live Build 1 Queue
 
+## Coordinator Override - Active Now
+
+Goal: build the V2 Atlas Harness retrieval domain slice.
+
+Allowed files only: `meridian_core/atlas.py`, `tests/test_atlas.py`, `docs/live-build-1.md`.
+
+Task: implement deterministic Atlas retrieval objects aligned to `docs/atlas-retrieval-contract.md`: `AtlasQuery`, `AtlasHit`, `AtlasResult`, and a cheap source-aware ranking/query helper over supplied FileMap-style entries or source records. Return path, title/label, reason, and short excerpt/summary. Fail soft on no results or unavailable inputs. Do not read the whole filesystem, add embeddings/vector DB, edit FileMap, or edit package exports.
+
+Tests: `python -m pytest tests/test_atlas.py -q`.
+
+Completion: commit only this Atlas slice, push, update Obsidian, and mark Ready for Codex Review.
+
 This file is the standing assignment queue for Build 1.
 
 When idle, check this file every 30 seconds. If there is an active task below, execute it. If the task is complete, commit and push your slice, update Obsidian, then report completion in your session and return to polling this file.
