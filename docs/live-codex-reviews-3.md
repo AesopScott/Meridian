@@ -56,7 +56,7 @@ Look for:
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 1 | f56af55 | Prime cockpit snapshot/event domain shape (Round C5) | passed | MEDIUM: cockpit_state.py + test_cockpit_state.py FileMap registration missing — repair routed to Build 3 | Await next Ready for Codex Review marker |
+| Build 1 | f56af55 | Prime cockpit snapshot/event domain shape (Round C5) | passed | MEDIUM closed (e89df81): cockpit_state.py + test_cockpit_state.py registered in filemap.py:526/561 and FileMap.md | Await next Ready for Codex Review marker |
 | Build 2 | 989366f | V0 prime_console / prime_status / route_to_console (Round C1) | passed | LOW deferred: route_to_console type-vs-semantics doc note | Build 2 cadence cleared for three-commit window ending at 989366f; continue polling |
 
 ## Review Round Scope
@@ -260,7 +260,7 @@ Proof:
 - `python -m pytest tests/test_cockpit_state.py -q` -> 25 passed in 0.07s.
 - `python -m pytest -q` -> 941 passed in 0.71s.
 - Diff inspection confirmed cockpit_state.py is stdlib-only, frozen dataclasses, helpers return new objects, no I/O surface.
-- MEDIUM: cockpit_state.py and tests/test_cockpit_state.py not registered in FileMap - repair task routed to Build 3.
+- MEDIUM closed (e89df81): cockpit_state.py and tests/test_cockpit_state.py registered in FileMap (filemap.py:526/561 and FileMap.md).
 
 No active task. Codex Reviews C is idle - continue polling for Build 1/Build 2 runtime-gate review markers.
 
