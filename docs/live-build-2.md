@@ -2,23 +2,24 @@
 
 ## Coordinator Override - Active Now
 
-Goal: build the V2 Prime next-action domain object.
+Goal: write the V2 Bifrost integration contract for Prime next action and prompt payload telemetry.
 
-Allowed files only: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`.
+Allowed files only: `docs/bifrost-v2-prime-relay-integration-contract.md`, `docs/live-build-2.md`.
 
-Task: create a small deterministic Prime Autonomy domain module for representing Prime's next action before UI/runtime integration.
+Task: create a concise implementation contract for wiring the new V2 domain slices into Bifrost without putting decision logic inside the UI.
 
-Required shape:
+Cover:
 
-- Define frozen dataclasses/enums such as `PrimeActionType`, `PrimeActionConfidence`, `PrimeNextAction`, and optionally `PrimeActionSource`.
-- Represent action type, target harness/lane/project, confidence, risk tier, blockers, human-gate requirement, rationale, and evidence/proof references.
-- Include a deterministic helper such as `select_prime_next_action(...)` or `make_prime_next_action(...)` that can choose a safe fallback action from simple inputs.
-- Do not call models, read files, move branches, spawn sessions, or mutate queues.
-- Do not edit package exports, FileMap, Bifrost, or Relay code in this slice. Those are follow-up integration tasks.
+- How Bifrost should display `PrimeNextAction` from `meridian_core/prime_autonomy.py`.
+- How Bifrost should display `PromptPayloadSnapshot` from `meridian_core/prompt_payload_meter.py`.
+- Which fields belong in the cockpit snapshot/view model.
+- Which fields are status/proof only and must not become UI-owned decision logic.
+- How Aegis/Relay warnings should surface when prompt payload growth is degraded.
+- What remains out of scope until the runtime integration slice.
 
-Tests: add focused tests for default/fallback action selection, human-gate propagation, blocker handling, immutability, and confidence/risk mapping.
+Tests: none required, docs-only.
 
-Completion: commit only this Prime next-action slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
+Completion: commit only this Bifrost integration contract slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
 
 ## Next Candidate Task
 

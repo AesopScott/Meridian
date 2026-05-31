@@ -2,11 +2,39 @@
 
 ## Coordinator Override - Active Now
 
-(Task moved to Completed Slices; see entry below.)
+Goal: register the new V2 prompt payload and Prime autonomy modules in the FileMap.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-1.md`.
+
+Task: add FileMap coverage for the newly built V2 runtime modules and tests:
+
+- `meridian_core/prompt_payload_meter.py`
+- `tests/test_prompt_payload_meter.py`
+- `meridian_core/prime_autonomy.py`
+- `tests/test_prime_autonomy.py`
+
+Requirements:
+
+- Keep entries concise and useful to Prime/Echo/Atlas.
+- Assign each file to the right harness owner: Relay/Model Harness for prompt payload, Prime Autonomy for next action.
+- Update required-path coverage in `tests/test_filemap.py`.
+- Do not edit the runtime modules or their tests.
+- Do not edit Build 2 or review queue files.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion:
+
+- Commit only the allowed FileMap slice.
+- Push to `origin/main`.
+- Update Obsidian.
+- Mark Ready for Codex Review with commit hash, files changed, and tests run.
 
 ## Next Candidate Task
 
-Goal: integrate prompt payload meter into Relay/Bifrost after Codex review clears this domain helper.
+Goal: integrate prompt payload meter into Relay/Bifrost after Codex review clears this domain helper and FileMap registration.
 
 Allowed files: to be assigned by Prime/Codex after review.
 
