@@ -1,5 +1,35 @@
 # Live Build 4 Queue
 
+## Coordinator Override - Active Now
+
+Goal: write the Federation Harness horizon plan as the V2 planning entry point for later multi-Meridian and multi-user collaboration.
+
+Allowed files only: `docs/federation-harness-horizon.md`, `docs/live-build-4.md`.
+
+Task: create `docs/federation-harness-horizon.md`.
+
+Cover:
+
+- Why Federation is horizon/V3 runtime but belongs in V2 planning.
+- How one Meridian should discover another Meridian without sharing unsafe state by default.
+- User/project permission boundaries for collaboration.
+- Prime-to-Prime handoff concepts: project summary, task request, proof packet, review result, and refusal/blocker.
+- Shared work principles: no silent branch movement, no shared worktree, no hidden account-based automation, explicit project/user consent before cross-Meridian action.
+- Future UI implication: Federation appears as a harness panel, not as permanent top navigation.
+- Out of V2 scope: network protocol, auth implementation, shared mutable project state, and public marketplace.
+
+Tests: none required, docs-only.
+
+Completion: commit only this Federation planning slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
+## Next Candidate Task
+
+Goal: write a Prime workflow/sub-agent usage checklist for harness offloading.
+
+Allowed files later: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
+
+Task later: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.
+
 ## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 08:55 -06:00)~~
 
 ~~Goal: write the Claude Workflows sub-agent architecture note.~~
@@ -270,7 +300,6 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:57 -06:00 - Build 4 checked queue; status: idle (cadence-paused); Claude Workflows sub-agent architecture note complete (17d8d90); Ready for Codex Review block backfilled with real hash; Next Candidate Task (Prime restart/resteer logic contract) sits below override block awaiting coordinator promotion; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe, 17d8d90 (7) still pending Codex Reviews sweep; origin/main at 17d8d90
 2026-05-31 08:58 -06:00 - Build 4 checked queue; status: idle (cadence cleared); Codex Reviews B Round B15 documented at d43cb34 — Workflows architecture note (0115581/17d8d90) PASS-WITH-FINDINGS; sole MEDIUM is consolidated 5-entry FileMap registration routed to Build 3 (not a Build 4 repair); prior rounds B11/B13/B14 cleared Echo/Atlas (7eb5ae1), Workflow sub-agent contract (1448642), and Prime Autonomy contract (3aa16fe) — all V2 first-wave Build 4 slices now reviewed; remaining pending sweep: pre-V2 slices 3cbf336, 1d17fa1, fd9224d only; Next Candidate Task still awaits coordinator promotion; origin/main at d43cb34
 2026-05-31 09:02 -06:00 - Build 4 checked queue; status: idle; no Active Task; Build 1 paused cadence 3/3 awaiting Codex clear (fab3ce0); Build 3 idle awaiting next assignment (f2e88ec); Next Candidate Task (Prime restart/resteer logic contract) still awaits coordinator promotion; origin/main at f1b03b1
-2026-05-31 13:49 -06:00 - Build 4 checked queue; status: idle; no executable Active Task (all Active Task entries crossed out as COMPLETED; latest Coordinator Override = Workflow Sub-Agent Harness contract, completed 08:02 2026-05-31 at 1448642); Next Candidate Task (Prime restart/resteer logic contract) still awaits coordinator promotion; origin/main at 313bf91
 ```
 
 ## Write/Completion Log

@@ -6,6 +6,56 @@ The build lanes build. Review lanes review.
 
 ## Coordinator Override - Active Review Scope
 
+Goal: review and clear or repair the current V2 runtime/code backlog so the V2 tracker can stop undercounting built work.
+
+Scope:
+
+- Build 1 V2 Echo Memory Harness domain slice: commit `2bccb55`
+- Build 1 V2 Atlas Harness retrieval domain slice: commit `7e95ede`
+- Build 1 V2 Relay prompt payload meter domain helper: commit `638117f`
+- Build 1 V2 policy-aware Relay executor wrapper: commit `b99ce1d`
+- Build 1 V2 queue-runway runtime-object contract: commit `57ed79a` (docs contract, include for cadence gating context only)
+
+Allowed review files:
+
+- `meridian_core/echo.py`
+- `tests/test_echo.py`
+- `meridian_core/atlas.py`
+- `tests/test_atlas.py`
+- `meridian_core/prompt_payload_meter.py`
+- `tests/test_prompt_payload_meter.py`
+- `meridian_core/relay_executor.py`
+- `tests/test_relay_executor.py`
+- `docs/queue-runway-runtime-object.md`
+- `docs/live-build-1.md` for provenance only
+- `docs/v2-progress-tracker.md` for tracker implication only
+
+Proof commands:
+
+- `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q`
+- `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q`
+
+Review expectations:
+
+- Findings first, severity ordered.
+- Verify each runtime helper is deterministic, frozen/typed where appropriate, failure-soft where promised, and does not call models or expand prompts.
+- Verify Relay/Aegis policy enforcement remains intact.
+- Verify queue-runway contract does not weaken the no-empty-queue invariant or turn read-check commits into a substitute for executable work.
+- If clear, update checkpoint/proof logs and mark the relevant Build 1 V2 slices review-cleared so the tracker can be reconciled next.
+- If findings exist, route repair back to Build 1 with allowed files and tests.
+
+Out of scope:
+
+- Bifrost UI commits `12e7966` and `2bee5ab` are assigned to Reviews B.
+- Do not execute build-lane Active Tasks.
+- Do not implement product code in this review lane.
+
+Completion: commit and push only `docs/live-codex-reviews.md` unless routing a repair into `docs/live-build-1.md`.
+
+## Completed / Stale Prior Scope
+
+## Coordinator Override - Active Review Scope
+
 Round 7 complete (2026-05-31 13:30 -06:00).
 
 - Scope: coordinator commit `39c9ac8` covering Prime human-gate repair and Bifrost source-first cockpit runway docs.
@@ -137,7 +187,7 @@ This is the review lane's cursor. Update it after every review pass so the next 
 | Build 2 | 40def3d | V2 Prime next-action domain object (`prime_autonomy.py`) | repair routed | MEDIUM: `PrimeNextAction.is_executable()` ignores `human_gate_required`, making human-gated high-risk actions executable when no blockers exist | Build 2 repair task written in `docs/live-build-2.md` |
 | Build 3 | ef934b1 | FileMap refresh + FileMap Relay maturity repair (7ec16ac..ef934b1) | passed | observational: next FileMap refresh should add `meridian_core/relay_dispatch.py` (introduced by Build 1 fd35a81 after this commit) | await next Ready for Codex Review marker |
 | Build 4 | 736b6af | architecture consistency pass — Q button reference + cadence closure | passed | none | await next Ready for Codex Review marker |
-| Build 5 | d5579f8 | Round 7 repair verification (stale Active Task path + v2 plan alignment) | passed | none — Round 7 repair verified in Round 8 | await next Ready for Codex Review marker |
+| Build 5 | d1d32af | Bifrost cockpit queue status brief + V0 cockpit layout brief (818bb31..d1d32af) | passed | none — Build 5 cadence pause cleared by this review | await next Ready for Codex Review marker |
 
 Checkpoint rules:
 
@@ -201,14 +251,6 @@ Allowed review files: `meridian_core/prime_autonomy.py`, `tests/test_prime_auton
 Tests to run: python -m pytest tests/test_prime_autonomy.py -q; python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q
 Out of scope: re-reviewing Build 1 restart/resteer repair already cleared in Round 5; Bifrost integration contract Active Task execution
 Reason: Build 2 Ready marker for V2 Prime next-action domain object commit 40def3d
-
-2026-05-31 14:05 -06:00 - Round 8 scope (Codex Reviews A — Build 5 repair verification)
-Build lanes: Build 5
-Commit range(s): 4558cf1..d5579f8 (repair verification against Round 7 finding on 39c9ac8)
-Allowed review files: docs/live-build-5.md, docs/v2-detailed-build-plan.md
-Tests to run: none (docs-only repair verification)
-Out of scope: executing Build 5 product Active Tasks; re-reviewing prior scope already cleared in Round 7
-Reason: Build 5 marked Round 7 repair Ready for Codex Review at 4558cf1/d5579f8
 ```
 
 Scope rules:
@@ -272,7 +314,24 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-05-31 13:59 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; Build 5 repair completion remains unassigned for Reviews A execution.
 2026-05-31 14:01 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
 2026-05-31 14:03 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
-2026-05-31 14:05 -06:00 - Codex Reviews A checked queue; status: running; notes: Build 5 repair commits 4558cf1/d5579f8 found Ready for Codex Review; executing Round 8 repair verification.
+2026-05-31 14:04 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned. Queue-only cadence check found no actionable findings.
+2026-05-31 14:05 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:07 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:08 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned. Queue-only cadence check found no actionable findings.
+2026-05-31 14:09 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:11 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:12 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:13 -06:00 - Codex Reviews A checked queue; status: idle; notes: three-change queue-only cadence check reviewed recent read/write-log diffs and found no actionable findings.
+2026-05-31 14:15 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:17 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:18 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned. Queue-only cadence check found no actionable findings.
+2026-05-31 14:21 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:23 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:26 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned. Queue-only cadence check found no actionable findings.
+2026-05-31 14:29 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:34 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:36 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned. Queue-only cadence check found no actionable findings.
+2026-05-31 14:40 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
 ```
 
 ## Review Log
@@ -297,7 +356,6 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-31 13:04 -06:00 - Reviewed Build 1 repair commit 40def3d; result: pass with LOW process note; tests: `python -m pytest tests/test_restart_resteer.py -q` 16 passed; `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q` 62 passed; notes: repair closes Round 4 findings by gating `EMPTY_QUEUE` to `LaneRole.BUILD`, adding idle-review-lane regression coverage, and updating contract signature to `choose_recovery_action(frame, findings)`; Prime Autonomy files in the same commit were out of Round 5 scope and not reviewed here.
 2026-05-31 13:06 -06:00 - Reviewed Build 2 commit 40def3d; result: finding/repair-routed; tests: `python -m pytest tests/test_prime_autonomy.py -q` 30 passed; `python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q` 76 passed; notes: PrimeNextAction model is immutable and deterministic, but `is_executable()` ignores `human_gate_required` despite the field documenting that approval must happen before execution; repair routed to Build 2.
 2026-05-31 13:30 -06:00 - Reviewed coordinator commit 39c9ac8; result: finding/repair-routed; tests: `python -m pytest tests/test_prime_autonomy.py tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` 137 passed; `python -m pytest tests/test_filemap.py tests/test_prompt_metrics.py -q` 94 passed; notes: Prime human-gate repair passed; JARVIS-source runway direction is present, but Build 5 has contradictory stale active-task/path references that could send the builder to the old contract file; repair routed to Build 5.
-2026-05-31 14:05 -06:00 - Reviewed Build 5 repair commits 4558cf1..d5579f8; result: pass; tests: none required (docs-only repair verification); notes: repair closes Round 7 finding. Stale docs/bifrost-v2-extensions-contract.md Active Task now quarantined under Archived header with displacement note. docs/v2-detailed-build-plan.md already references docs/bifrost-v2-cockpit-extensions.md (line 269). JARVIS-source requirement preserved.
 ```
 
 ## Proof Log
@@ -328,7 +386,6 @@ YYYY-MM-DD HH:MM TZ - Proof for Build <n> commit <hash>; proof type: diff/test/r
 2026-05-31 13:51 -06:00 - Proof for Reviews A idle queue cadence check; proof type: diff/manual; evidence: `git diff 4c980f9..HEAD -- docs/live-codex-reviews.md` shows only idle read-check/write-log updates since the prior cadence checkpoint; recent `pending` scan found no unresolved pending write status before this checkpoint; result: pass.
 2026-05-31 13:54 -06:00 - Proof for Reviews A idle queue cadence check; proof type: diff/manual; evidence: `git diff c11ba9d..HEAD -- docs/live-codex-reviews.md` shows only idle read-check/write-log updates since the prior cadence checkpoint; recent `pending` scan found no unresolved pending write status before this checkpoint; result: pass.
 2026-05-31 13:59 -06:00 - Proof for Reviews A idle queue cadence check; proof type: diff/manual; evidence: `git diff aec8dc9..HEAD -- docs/live-codex-reviews.md` shows idle read/write checkpoints plus Build 5 repair-observation notes, while the queue top still says no active task; recent `pending` scan found no unresolved pending write status before this checkpoint; result: pass.
-2026-05-31 14:05 -06:00 - Proof for Build 5 repair commits 4558cf1..d5579f8; proof type: reference/diff; evidence: git grep confirms docs/v2-detailed-build-plan.md line 269 uses docs/bifrost-v2-cockpit-extensions.md (correct path); docs/live-build-5.md stale Active Task now under Archived stale task header with do-not-execute displacement note; no executable path to old bifrost-v2-extensions-contract.md remains; result: pass.
 ```
 
 Minimum proof expectations:
@@ -366,7 +423,6 @@ YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LO
 2026-05-31 13:51 -06:00 - Reviews A idle queue cadence check; severity: LOW/none; file: docs/live-codex-reviews.md; finding: no actionable findings in the recent queue-only read-check/status updates; action: clear, no repair task written.
 2026-05-31 13:54 -06:00 - Reviews A idle queue cadence check; severity: LOW/none; file: docs/live-codex-reviews.md; finding: no actionable findings in the recent queue-only read-check/status updates; action: clear, no repair task written.
 2026-05-31 13:59 -06:00 - Reviews A idle queue cadence check; severity: LOW/none; file: docs/live-codex-reviews.md; finding: no actionable findings in the recent queue-only read-check/status updates or Build 5 repair-observation notes; action: clear, no repair task written.
-2026-05-31 14:05 -06:00 - Build 5 repair commits 4558cf1..d5579f8; severity: none; file: docs/live-build-5.md, docs/v2-detailed-build-plan.md; finding: no CRITICAL/HIGH/MEDIUM/LOW findings. Round 7 repair verified — stale Active Task archived; v2 plan aligned with docs/bifrost-v2-cockpit-extensions.md; action: clear, repair verified.
 ```
 
 ## Repair Routing Log
@@ -382,7 +438,7 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-05-31 12:55 -06:00 - Routed repair to Build 1; queue: docs/live-build-1.md; finding: `EMPTY_QUEUE` must be build-lane-only and restart/resteer contract must match `choose_recovery_action(frame, findings)` runtime signature; status: pending
 2026-05-31 13:04 -06:00 - Verified Build 1 repair commit 40def3d; queue: docs/live-build-1.md; finding: Round 4 `EMPTY_QUEUE` lane-role gating + contract signature mismatch; status: passed, no further Build 1 repair routed.
 2026-05-31 13:06 -06:00 - Routed repair to Build 2; queue: docs/live-build-2.md; finding: `PrimeNextAction.is_executable()` must respect `human_gate_required`; status: pending.
-2026-05-31 13:30 -06:00 - Routed repair to Build 5; queue: docs/live-build-5.md; finding: remove stale lower `## Active Task` / old `docs/bifrost-v2-extensions-contract.md` path contradiction and align `docs/v2-detailed-build-plan.md` with `docs/bifrost-v2-cockpit-extensions.md`; status: passed (verified 2026-05-31 14:05 -06:00 in Round 8).
+2026-05-31 13:30 -06:00 - Routed repair to Build 5; queue: docs/live-build-5.md; finding: remove stale lower `## Active Task` / old `docs/bifrost-v2-extensions-contract.md` path contradiction and align `docs/v2-detailed-build-plan.md` with `docs/bifrost-v2-cockpit-extensions.md`; status: pending.
 ```
 
 ## Coordinator Addendum - Planning Harness Review
@@ -509,6 +565,24 @@ Round 6 write log:
 - 2026-05-31 13:59 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff aec8dc9..HEAD -- docs/live-codex-reviews.md`. Commit: `bc73f1d`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
 - 2026-05-31 14:01 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `e0553cd`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 14:03 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `7994449`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:04 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff bc73f1d..HEAD -- docs/live-codex-reviews.md`. Commit: `8c7109f`; status-update commit: `e665c15`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:05 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `f903b65`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:07 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `29429f6`; status-update commit: `dc10a75`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:08 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff e665c15..HEAD -- docs/live-codex-reviews.md`. Commit: `92d4cd1`; status-update commit: `d9b37cc`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:09 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `3f7632d`; status-update commit: `aa061ba`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:11 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `936c4f3`; status-update commit: `ba41d6e`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:12 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `d1d8918`; status-update commit: `346aa62`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:13 -06:00 - Codex Reviews A completed three-change queue-only cadence check over recent idle read/write-log diffs. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff d9b37cc..HEAD -- docs/live-codex-reviews.md`. Commit: `5bffff1`; status-update commit: `7cd5887`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:15 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `015edd6`; status-update commit: `7bac53f`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:17 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `92f384b`; status-update commit: `fbbc454`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:18 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff 63d983d..HEAD -- docs/live-codex-reviews.md`. Commit: `ec66f68`; status-update commit: `5d7064c`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:21 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `db5cb0b`; status-update commit: `1653425`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:23 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `bea4e81`; status-update commit: `5fb47e7`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:26 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff ee0c668..HEAD -- docs/live-codex-reviews.md`. Commit: `fd5cef5`; status-update commit: `e16a182`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:29 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `288a8bb`; status-update commit: `da1eefc`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:34 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `6e29b03`; status-update commit: `6f0ee7b`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:36 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff e16a182..HEAD -- docs/live-codex-reviews.md`. Commit: `b0c59fc`; status-update commit: `a567020`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:40 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `286181e`; status-update commit: `ffed1e8`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 

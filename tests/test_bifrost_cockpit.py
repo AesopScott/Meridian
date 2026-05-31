@@ -201,24 +201,22 @@ def test_render_hud_command_core_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
     assert "hud-stage" in doc
     assert "Prime HUD command core" in doc
-    assert "PRIME" in doc
-    assert "ONLINE" in doc
+    assert "PRIMED" in doc
+    assert "ONLINE" not in doc
 
 
-def test_render_hud_source_reference_surfaces():
+def test_render_hud_command_core_is_quiet():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert "Provider Balance" in doc
-    assert "Prompt Payload" in doc
-    assert "Voice I/O" in doc
-    assert "Delegation Map" in doc
-
-
-def test_render_hud_lane_nodes():
-    vm = sample_cockpit_view_model()
-    doc = render_cockpit_html(vm)
-    for lane in vm.lanes:
-        assert f"delegation-{lane.status}" in doc
-        assert lane.name in doc
+    noisy_center_labels = (
+        "Provider Balance",
+        "Prompt Payload",
+        "Delegation Map",
+        "Claude / OpenAI / DeepSeek",
+    )
+    for label in noisy_center_labels:
+        assert label not in doc
+    for class_name in ("delegation-node", "hud-metric", "hud-micro-panel"):
+        assert class_name not in doc
 
 
 

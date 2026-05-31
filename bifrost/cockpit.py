@@ -330,44 +330,13 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
         for m in vm.prime_messages
     )
 
-    active_lanes = sum(1 for lane in vm.lanes if lane.status == "running")
-    blocked_lanes = sum(1 for lane in vm.lanes if lane.status in ("blocked", "paused"))
-    lane_nodes = "".join(
-        f'<span class="delegation-node delegation-{_e(lane.status)}">'
-        f"{_e(lane.name)}"
-        "</span>"
-        for lane in vm.lanes
-    )
     hud_core = (
         '<div class="hud-stage" aria-label="Prime HUD command core">'
-        '<div class="hud-left-stack">'
-        '<div class="hud-micro-panel"><span>Queue</span>'
-        f'<em>{_e(active_lanes)} active / {len(vm.lanes)} lanes</em></div>'
-        '<div class="hud-micro-panel"><span>Proof</span>'
-        f'<em>{_e(vm.review_count)} review gates</em></div>'
-        '<div class="hud-micro-panel"><span>Payload</span>'
-        '<em>(under 1k) stable</em></div>'
-        "</div>"
         '<div class="hud-core">'
         '<div class="hud-ring hud-ring-outer"></div>'
         '<div class="hud-ring hud-ring-mid"></div>'
         '<div class="hud-ring hud-ring-inner"></div>'
-        '<div class="hud-orb"><span>PRIME</span><strong>ONLINE</strong></div>'
-        '<span class="hud-marker hud-marker-a">A</span>'
-        '<span class="hud-marker hud-marker-b">B</span>'
-        '<span class="hud-marker hud-marker-c">C</span>'
-        '<span class="hud-marker hud-marker-h">H</span>'
-        "</div>"
-        '<div class="hud-right-stack">'
-        '<div class="hud-metric"><span>Provider Balance</span><strong>Claude / OpenAI / DeepSeek</strong><em>routing visible</em></div>'
-        '<div class="hud-metric"><span>Prompt Payload</span><strong>(under 1k)</strong><em>growth flat</em></div>'
-        '<div class="hud-metric"><span>Voice I/O</span><strong>mic + speaker</strong><em>wake audio armed</em></div>'
-        '<div class="hud-metric"><span>Attention</span>'
-        f'<strong>{_e(blocked_lanes)} lanes</strong><em>need review</em></div>'
-        "</div>"
-        '<div class="delegation-map" aria-label="Delegation Map">'
-        '<span class="prime-node">Prime</span>'
-        f'<div class="delegation-nodes">{lane_nodes}</div>'
+        '<div class="hud-orb"><strong>PRIMED</strong></div>'
         "</div>"
         "</div>"
     )
