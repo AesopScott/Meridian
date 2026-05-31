@@ -1,5 +1,25 @@
 # Live Build 5 Queue
 
+## Coordinator Override - Active Now
+
+Goal: write the Bifrost V2 cockpit extensions contract.
+
+Allowed files only: `docs/bifrost-v2-cockpit-extensions.md`, `docs/live-build-5.md`.
+
+Task: create `docs/bifrost-v2-cockpit-extensions.md`. Define how the openable Electron cockpit should grow from V1 into V2: Prime command center, configurable progress panel, review console tab, queue runway visibility, harness status strip, mission objectives call-up, and model/workflow dispatch indicators. Keep it implementation-ready but docs-only.
+
+Tests: none required, docs-only.
+
+Completion: commit only this Bifrost contract slice, push, update Obsidian, and mark Ready for Codex Review.
+
+## Next Candidate Task
+
+Goal: write the session-card queue activation product contract.
+
+Allowed files only: `docs/session-card-queue-activation-contract.md`, `docs/live-build-5.md`.
+
+Task: create a product contract for the Q button behavior Meridian should inherit from Polaris: when enabled, a session card polls only its assigned queue, avoids review/build queue mixups, shows last read/write time, shows active/next task, and never spams main with read-check-only commits.
+
 This file is the standing assignment queue for Build 5.
 
 Build 5 is the Bifrost / session-harness product lane. It should work on UI behavior briefs, session queue activation, cockpit interaction contracts, and user-facing workflow design. It should not implement runtime code unless Codex explicitly assigns a code slice later.

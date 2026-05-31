@@ -2,6 +2,18 @@
 
 ## Coordinator Override - Active Now
 
+Goal: write the V2 harness maturity/build-number policy.
+
+Allowed files only: `docs/harness-maturity-build-policy.md`, `docs/live-build-2.md`.
+
+Task: create `docs/harness-maturity-build-policy.md`. Define how Meridian tracks overall build number, per-harness build number, maturity level, review status, and whether a harness is contract-only, runtime-ready, UI-visible, or production-ready. Include Prime, Bifrost, Relay, Aegis, Beacon, Echo, Atlas, and Workflow. This supersedes any stale lower package/API task.
+
+Tests: none required, docs-only.
+
+Completion: commit only this maturity policy slice, push, update Obsidian, and mark Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
 Goal: write the V2 package/API surface policy for Echo, Atlas, and Prime Autonomy.
 
 Allowed files only: `docs/package-api-surface-note.md`, `docs/v2-package-api-surface-note.md`, `docs/live-build-2.md`.
