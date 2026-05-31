@@ -515,6 +515,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-05-31 15:32 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current at `4f13375`; no executable Reviews A Active Task; Build 1 has a build-lane Active Now task, not executed by review lane.
 2026-05-31 15:34 -06:00 - Codex Reviews A checked queue; status: running; notes: origin/main fast-forwarded to `3563139`; active Build 1 Prime queue runway policy repair review found for commit `b13f10f` with provenance commit `b5724ba`.
 2026-05-31 15:34 -06:00 - Codex Reviews A checked queue; status: running; notes: earlier idle read at `b5724ba` was superseded when origin/main advanced to `3563139` with the active Build 1 policy repair review scope.
+2026-05-31 15:39 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current at `f9f65b6`; top Reviews A task is completed/passed and no executable Active Task remains.
 ```
 
 ## Review Log
@@ -815,6 +816,7 @@ Round 6 write log:
 - 2026-05-31 15:34 -06:00 - Codex Reviews A completed Build 1 Prime queue runway policy repair review after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (docs-only review). Commit: `3a87407`; status-update commit: `a206847`; push-status commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue records clearance only.
 - 2026-05-31 15:34 -06:00 - Codex Reviews A idle queue read was superseded by the active Build 1 policy repair review scope after origin/main advanced to `3563139`. Files changed: `docs/live-codex-reviews.md`. Tests run: not run for the superseded read-check. Commit: `34b783d`; status-update commit: `62b6cda`; push-status commit: `aa15941`. Push status: pushed to `origin/main`. Obsidian update status: not updated; superseded by active review clearance above.
 - 2026-05-31 15:37 -06:00 - Codex Reviews A corrected the superseded idle-read entry after active policy review clearance. Files changed: `docs/live-codex-reviews.md`. Tests run: `git diff --check b5724ba..HEAD -- docs/live-codex-reviews.md` (passed); docs diff review found no actionable findings. Commit: `bf61889`; status-update commit: `d4fe54a`; push-status commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; queue bookkeeping correction only.
+- 2026-05-31 15:39 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: pending. Push status: pending. Obsidian update status: not updated; no active review task or durable review finding.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
