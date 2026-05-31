@@ -247,6 +247,53 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale text below):
 
+Goal: map `PrimeCockpitSnapshot` into the Bifrost `CockpitViewModel`.
+
+Context:
+
+- Build 5 completed the first static Bifrost cockpit scaffold in `d13f1d1`.
+- Codex Reviews B Round B5 cleared the scaffold and FileMap coverage.
+- Build 1 completed the Prime cockpit snapshot provider in `6c9a397`.
+- Bifrost owns the view-model adapter and rendering concerns.
+
+Allowed files only:
+
+- `bifrost/cockpit.py`
+- `bifrost/__init__.py`
+- `tests/test_bifrost_cockpit.py`
+- `docs/live-build-5.md`
+
+Task:
+
+- Add a public function such as `view_model_from_snapshot(snapshot: PrimeCockpitSnapshot) -> CockpitViewModel`.
+- Import only stable public cockpit-state types from `meridian_core`.
+- Map:
+  - `snapshot.project` -> `CockpitViewModel.project`
+  - `snapshot.bearing` -> `CockpitViewModel.bearing`
+  - `snapshot.review_gate_count` -> `review_count`
+  - `snapshot.lanes` -> `LaneRow` list
+  - `snapshot.progress_events` -> Bifrost `ProgressEvent` list using typed timestamp/category/message fields
+  - `snapshot.queue_policy` and `snapshot.risk_tier` -> `InstrumentBand`
+- Keep this read-only and deterministic.
+- Do not read queue files, logs, environment variables, or prompts.
+- Keep all dynamic HTML escaping behavior intact.
+- Update `bifrost/__init__.py` exports.
+
+Tests:
+
+- Add focused tests for snapshot-to-view-model mapping.
+- Keep existing cockpit tests passing.
+- Run `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion:
+
+- Commit only this Bifrost mapping slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior task follows.
+
 Goal: start V1 by building the first Bifrost cockpit scaffold.
 
 Context:

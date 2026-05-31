@@ -79,6 +79,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 00:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 00:35 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — 4 uncatalogued docs from Round B1); starting work
 2026-05-31 00:43 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
+2026-05-31 00:45 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
 2026-05-31 00:46 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
 2026-05-31 00:47 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
 2026-05-31 00:48 -06:00 - Build 3 checked queue; status: active task found (Round B4 FileMap repair — 3 missing rows); starting work
@@ -238,11 +239,48 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 2026-05-30 12:37 -06:00 - Build 3 Codex review result: fixed (lane set); 2 LOW findings deferred pending future task assignment to allowed files
 2026-05-30 16:03 -06:00 - Build 3 Codex review requested after commits 774695f, 330f200, be34fea
 2026-05-30 16:07 -06:00 - Build 3 Codex review result (Round B3, from Obsidian): 774695f PASS; 330f200 and be34fea sweep to Round B4; 2 MEDIUM FileMap gaps routed back to Build 3 (prime-status-console-cli-brief.md, bifrost-configurable-progress-surface-brief.md, non-orchestrator-surface-naming.md); cadence reset; repair executing now
+2026-06-01 10:10 -06:00 - Build 3 Codex review requested after commits 5e0facb, c388f47, ca6f55f + e89df81 (Round B5); cadence 3/3 since Round B3 — awaiting review result before next task
+2026-06-01 21:15 -06:00 - Build 3 Codex review result (Round B5): cadence cleared; 5e0facb, c388f47, ca6f55f + e89df81 pass; cadence reset to 0/3 since Round B5
 ```
 
 ## Active Task
 
-**No active task. Build 3 is idle — Round B5 cleared cadence after ca6f55f + e89df81; ready for next FileMap assignment when new files land.**
+Current Active Task:
+
+Goal: register the new Prime cockpit provider files in FileMap.
+
+Context:
+
+- Build 1 completed the V1 Prime cockpit snapshot provider/factory in commit `6c9a397`.
+- New files are not yet registered in FileMap.
+- Build 3 owns FileMap registration.
+
+Allowed files only:
+
+- `docs/FileMap.md`
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Task:
+
+- Add FileMap coverage for:
+  - `meridian_core/cockpit_provider.py`
+  - `tests/test_cockpit_provider.py`
+- Use the established Bifrost/Prime cockpit taxonomy near `meridian_core/cockpit_state.py`.
+- Add required-path coverage in `tests/test_filemap.py` if needed.
+- Do not edit the provider implementation or tests.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py tests/test_cockpit_provider.py -q`
+
+Completion:
+
+- Commit only this FileMap slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Poll every 30 seconds. When a new task is written here, begin immediately.
 

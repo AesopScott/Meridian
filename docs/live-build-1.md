@@ -391,46 +391,9 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-Current Active Task:
+No active task. Polling for next assignment.
 
-Goal: build the Prime cockpit snapshot provider/factory for V1.
-
-Context:
-
-- V1 cockpit state domain exists in `meridian_core/cockpit_state.py` (`f56af55`).
-- Package exports and FileMap registration are complete.
-- Bifrost now has a static cockpit scaffold. The next runtime step is a deterministic Prime-owned provider that creates a `PrimeCockpitSnapshot` from typed inputs.
-- This slice should not read queue files, logs, the filesystem, or session state directly. It is a pure provider/factory boundary for later live wiring.
-
-Allowed files only:
-
-- `meridian_core/cockpit_provider.py`
-- `tests/test_cockpit_provider.py`
-- `docs/live-build-1.md`
-
-Task:
-
-- Create a small stdlib-only provider/factory module for building `PrimeCockpitSnapshot`.
-- Accept explicit typed inputs only: project, bearing, risk tier, prime status, queue policy, lane summaries, progress events, review gate count.
-- Provide a deterministic sample/demo snapshot function for Bifrost preview wiring.
-- Sort lanes using the existing `sort_lanes` helper.
-- Store lanes and progress events as tuples in the returned snapshot.
-- Validate obvious bad inputs with clear `ValueError` messages: blank project, blank bearing, negative review gate count.
-- Do not read live queue files or logs in this slice.
-- Do not edit Bifrost files; Build 5 owns Bifrost mapping/rendering.
-- Do not edit FileMap; Build 3 owns FileMap.
-
-Tests:
-
-- `python -m pytest tests/test_cockpit_provider.py tests/test_cockpit_state.py -q`
-- If practical, `python -m pytest -q`
-
-Completion:
-
-- Commit only this Prime provider slice.
-- Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
-- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+Last completed: V1 Prime cockpit snapshot provider/factory; commit `6c9a397`; files: meridian_core/cockpit_provider.py, tests/test_cockpit_provider.py, docs/live-build-1.md; tests: 48 targeted passed (test_cockpit_provider.py + test_cockpit_state.py); Ready for Codex Review.
 
 ## Completed Slices
 
