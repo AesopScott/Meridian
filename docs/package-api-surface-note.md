@@ -1,4 +1,4 @@
-# Package API Surface Note
+﻿# Package API Surface Note
 
 Meridian should expose stable, intentional package-root imports from `meridian_core.__init__`.
 
@@ -64,18 +64,24 @@ from meridian_core import PromptPacket, PromptPacketValidationError, build_promp
 
 Three properties make `PromptPacket`, `PromptPacketValidationError`, and `build_prompt_packet` safe public surface:
 
-1. **Validated on construction** — all validation runs in `PromptPacket.__post_init__`, so a successfully constructed object is always in a valid state. Invalid inputs raise `PromptPacketValidationError` before the object exists.
-2. **Immutable lineage** — `source_lineage` is copied to a `MappingProxyType` on construction; callers cannot mutate internal state through the original dict.
-3. **Clean payload boundary** — `model_payload()` exposes only `serialized_prompt`. Packet metadata (tokens, lineage, construction time, tier) never leaks into the text sent to a model.
+1. **Validated on construction** â€” all validation runs in `PromptPacket.__post_init__`, so a successfully constructed object is always in a valid state. Invalid inputs raise `PromptPacketValidationError` before the object exists.
+2. **Immutable lineage** â€” `source_lineage` is copied to a `MappingProxyType` on construction; callers cannot mutate internal state through the original dict.
+3. **Clean payload boundary** â€” `model_payload()` exposes only `serialized_prompt`. Packet metadata (tokens, lineage, construction time, tier) never leaks into the text sent to a model.
 
 ## What Stays Internal
 
 Private validation helpers (`_validate_*`) and sub-exception types should remain module-level imports, not root exports, until their hierarchy is stable across a review cycle.
 
-**Relay dispatch internals** — `assemble_relay_packet`, `RelayDispatchLane`, `RelayDispatchPlan`, and `build_relay_dispatch_plan` are module-level imports only. See `docs/relay-package-api-policy-note.md` for the full reasoning and the proof required before any root export.
+**Relay dispatch internals** â€” `assemble_relay_packet`, `RelayDispatchLane`, `RelayDispatchPlan`, and `build_relay_dispatch_plan` are module-level imports only. See `docs/relay-package-api-policy-note.md` for the full reasoning and the proof required before any root export.
+
+## V2 Package Surface
+
+V2 introduces four new harnesses (Echo, Atlas, Session Lifecycle, Bifrost) plus Prime Autonomy. Each harness will have stable domain objects that become root exports once proof review is complete.
+
+For V2 export roadmap and status, see docs/v2-package-api-surface-note.md.
 
 ## Candidates for Future Export
 
-No names are currently pending export. All known stable domain objects are already in `__all__`.
+No V0/V1 names are currently pending export. All known stable domain objects are already in `__all__`.
 
 Review any new names as a deliberate public API decision before adding to `__all__`.
