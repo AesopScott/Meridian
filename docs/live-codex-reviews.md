@@ -329,9 +329,9 @@ Round 6 complete (2026-05-31 13:06 -06:00).
 - Findings: no CRITICAL/HIGH findings. One MEDIUM behavior finding: `PrimeNextAction.is_executable()` ignores `human_gate_required`.
 - Repair routing: Build 2 repair Active Task written to `docs/live-build-2.md`.
 - Proofs: `tests/test_prime_autonomy.py` 30 passed; `tests/test_prime_autonomy.py tests/test_filemap.py` 76 passed.
-- Files changed by Reviews A after Round 6: `docs/live-codex-reviews.md`, `docs/live-build-2.md`.
-- Commit: pending.
-- Push: pending.
+- Queue repair commit: `752d4a3` routed the Build 2 repair task in `docs/live-build-2.md`.
+- Review log commit: `edb97bd`.
+- Push: complete (`origin/main`).
 - Obsidian status: updated `Meridian_Build/2026-05-31 Prime Autonomy Human Gate Review Finding.md`.
 
 Stale prior status follows.
