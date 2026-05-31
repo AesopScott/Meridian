@@ -1,4 +1,4 @@
-﻿# Live Build 3 Queue
+# Live Build 3 Queue
 
 This file is the standing assignment queue for Build 3.
 
@@ -52,9 +52,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 14:05 -06:00 - Build 3 checked queue; status: active task found (repair stale FileMap Relay maturity claims); starting work
 2026-05-30 14:35 -06:00 - Build 3 checked queue; status: idle; Active Task stale (Relay maturity repair done at ef934b1); awaiting Codex review result and new task
 2026-05-30 14:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
-2026-05-30 15:05 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 15:20 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
-2026-05-30 15:35 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 15:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 16:03 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — model_adapter.py); task complete in commit be34fea; recording completion marker; cadence 3/3 — Codex review required
 2026-05-30 16:05 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
@@ -63,20 +61,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 16:19 -06:00 - Build 3 checked queue; status: idle; Round B3 repair complete (5e0facb); cadence 1/3 since Round B3; no active task; awaiting next task assignment
 2026-05-30 16:20 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 16:22 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:24 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:25 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:26 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:27 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:29 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:31 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:32 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 16:33 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:34 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:35 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:37 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:39 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:40 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:42 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 16:43 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 16:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 17:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh for relay_dispatch, live-codex-reviews, prime-orchestration prototype, diagrams); starting work
@@ -84,41 +69,27 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 17:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting new task
 2026-05-30 18:05 -06:00 - Build 3 checked queue; status: idle; Active Task cleared by orchestrator; awaiting next assignment
 2026-05-30 18:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 18:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 18:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 19:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 19:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 19:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 19:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 20:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 20:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 20:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 20:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 21:01 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:02 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:04 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:05 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 21:06 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:07 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:09 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:10 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 21:11 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 21:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 21:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 21:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 22:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 22:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 22:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 22:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 23:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 23:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 23:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 23:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-31 00:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 00:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 00:35 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — 4 uncatalogued docs from Round B1); starting work
+2026-05-31 00:43 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
+2026-05-31 00:46 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
+2026-05-31 00:47 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
+2026-05-31 00:48 -06:00 - Build 3 checked queue; status: active task found (Round B4 FileMap repair — 3 missing rows); starting work
 2026-05-31 00:50 -06:00 - Build 3 checked queue; status: idle; last task complete (1378bda); awaiting next assignment
+2026-05-31 00:51 -06:00 - Build 3 checked queue; status: idle; Round B4 FileMap repair already complete (c388f47); cadence 2/3 since Round B3; awaiting next task assignment
+2026-05-31 00:55 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next task assignment
+2026-05-31 00:56 -06:00 - Build 3 checked queue; status: idle; no active task; Bifrost cockpit FileMap gap noted; cadence 2/3 since Round B3; awaiting next task assignment
+2026-05-31 00:57 -06:00 - Build 3 checked queue; status: active tasks found (Round C5 + Coordinator Override — 8-entry FileMap registration); executed; commit e89df81; cadence 3/3 since Round B3 — awaiting Codex review
 2026-05-31 01:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
+2026-05-31 01:11 -06:00 - Build 3 checked queue; status: idle; cadence 3/3 since Round B3 — paused pending Round B5 Codex review result; no active task
+2026-05-31 01:16 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — paused pending Round B5 Codex review result
 2026-05-31 01:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 01:35 -06:00 - Build 3 checked queue; status: idle; Active Task FileMap refresh already complete (1378bda); awaiting Reviews B Round B2 verification and next assignment
 2026-05-31 01:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
@@ -184,7 +155,6 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 17:05 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 17:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 17:35 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
-2026-05-31 17:50 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 18:05 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 18:20 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 18:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
@@ -194,7 +164,6 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 19:35 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 19:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-31 20:05 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
-2026-05-31 20:20 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 20:35 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 20:50 -06:00 - Build 3 checked queue; status: idle; FileMap hygiene task complete (774695f + 6f3d474); awaiting Reviews B Round B3 verification and next assignment
 2026-05-31 21:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh — v1-capability-plan, v1-bifrost-cockpit-implementation-brief, v2-horizon-plan, v3-parking-lot); starting work
@@ -220,34 +189,19 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-01 02:05 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
 2026-06-01 02:20 -06:00 - Build 3 checked queue; status: idle; latest FileMap refresh complete (330f200); cadence 2/3 since Round B3; awaiting Reviews B Round B3 verification and next assignment
 2026-06-01 02:35 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-06-01 02:50 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-06-01 03:05 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-06-01 03:20 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
 2026-06-01 03:35 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-06-01 04:11 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-06-01 04:12 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
 2026-06-01 04:27 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-05-31 00:43 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
-2026-05-31 00:45 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
-2026-05-31 00:46 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
-2026-05-31 00:47 -06:00 - Build 3 checked queue; status: idle; no active task; Round B4 Codex review pending; awaiting review result and next assignment
-2026-05-31 00:48 -06:00 - Build 3 checked queue; status: active task found (Round B4 FileMap repair — 3 missing rows); starting work
 2026-06-01 09:25 -06:00 - Build 3 checked queue; status: Round B4 FileMap repair task present but already complete (c388f47); clearing Active Task; cadence 2/3 since Round B3; Ready for Codex Review standing
-2026-05-31 00:51 -06:00 - Build 3 checked queue; status: idle; Round B4 FileMap repair already complete (c388f47); cadence 2/3 since Round B3; awaiting next task assignment
 2026-06-01 09:35 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
-2026-05-31 00:55 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next task assignment
 2026-06-01 09:45 -06:00 - Build 3 checked queue; status: idle; no active task; new Bifrost cockpit scaffold landed (d13f1d1 — bifrost/cockpit.py, bifrost/__init__.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py); FileMap gap noted in cross-check; cadence 2/3 since Round B3; awaiting next assignment
-2026-05-31 00:56 -06:00 - Build 3 checked queue; status: idle; no active task; Bifrost cockpit FileMap gap noted; cadence 2/3 since Round B3; awaiting next task assignment
 2026-06-01 10:00 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B3; awaiting next assignment
 2026-06-01 10:10 -06:00 - Build 3 checked queue; status: active tasks found (Codex Reviews C cockpit_state + Coordinator Override Bifrost scaffold FileMap); executing combined registration
-2026-05-31 00:57 -06:00 - Build 3 checked queue; status: active tasks found (Round C5 + Coordinator Override — 8-entry FileMap registration); executed; commit e89df81; cadence 3/3 since Round B3 — awaiting Codex review
 2026-06-01 20:35 -06:00 - Build 3 checked queue; status: idle; stale "commit pending" markers resolved to ca6f55f + e89df81; cadence 3/3 since Round B3 — Codex review (Round B5) required before next task
-2026-05-31 01:11 -06:00 - Build 3 checked queue; status: idle; cadence 3/3 since Round B3 — paused pending Round B5 Codex review result; no active task
 2026-06-01 20:40 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — Codex review (Round B5) required before next task
 2026-06-01 20:45 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
-2026-06-01 20:50 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
 2026-06-01 20:55 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
-2026-06-01 21:00 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
+2026-06-01 21:05 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
+2026-06-01 21:10 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
 ```
 
 ## Write/Completion Log
@@ -274,11 +228,11 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-30 16:07 -06:00 - Build 3 completed FileMap repair (Round B3 — prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py. Cadence: 1/3 since Round B3.
 2026-05-30 17:20 -06:00 - Build 3 completed FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
 2026-05-31 00:35 -06:00 - Build 3 completed FileMap refresh (4 uncatalogued docs: v0-build-readiness-map, prime-orchestration-state-model, bifrost-v0-cockpit-layout-brief, bifrost-harness-dashboard-brief); commit 1378bda; tests 46/46 filemap, 785 full suite; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
+2026-05-31 00:48 -06:00 - Build 3 completed Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 missing rows added to docs/FileMap.md only); commit c388f47; tests 46/46 filemap; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md. Cadence: 2/3 since Round B3.
+2026-05-31 00:57 -06:00 - Build 3 completed FileMap registration (8 entries: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, tests/test_cockpit_state.py, meridian_core/cockpit_state.py, docs/v1-bifrost-live-data-contract.md, docs/v1-bifrost-integration-sequence.md); commits ca6f55f + e89df81 (via concurrent lane merge); tests 95/95 (46 filemap + 49 bifrost_cockpit); Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py. Cadence: 3/3 since Round B3 — Codex review required before next task.
 2026-05-31 11:20 -06:00 - Build 3 FileMap repair (Round B2 — live-codex-reviews-2.md + A-lane label + prose-divergence fixes) intercepted: work already present in commit 45497b1 (Build 1 cross-lane repair); local edits verified identical to HEAD; tests 46/46 filemap; no new commit required; task closed
 2026-05-31 16:05 -06:00 - Build 3 completed FileMap hygiene (register v0-v1-progress-tracker.md; fix stale relay_executor claims in v0-build-readiness-map.md); commit 774695f; tests 46/46 filemap; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py, docs/v0-v1-progress-tracker.md, docs/v0-build-readiness-map.md
 2026-05-31 21:05 -06:00 - Build 3 completed FileMap refresh (v1-capability-plan, v1-bifrost-cockpit-implementation-brief, v2-horizon-plan, v3-parking-lot); commit 330f200; tests 46/46 filemap; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py
-2026-05-31 00:48 -06:00 - Build 3 completed Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 missing rows added to docs/FileMap.md only); commit c388f47; tests 46/46 filemap; Obsidian updated; Ready for Codex Review — files: docs/FileMap.md. Cadence: 2/3 since Round B3.
-2026-05-31 00:57 -06:00 - Build 3 completed FileMap registration (8 entries: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, tests/test_cockpit_state.py, meridian_core/cockpit_state.py, docs/v1-bifrost-live-data-contract.md, docs/v1-bifrost-integration-sequence.md); commits ca6f55f + e89df81 (via concurrent lane merge); tests 95/95 (46 filemap + 49 bifrost_cockpit); Obsidian updated; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py. Cadence: 3/3 since Round B3 — Codex review required before next task.
 ```
 
 ## Cross-Check Activity
@@ -292,8 +246,8 @@ YYYY-MM-DD HH:MM TZ - Build 3 cross-check: none/finding/fix; details: <short not
 2026-05-30 12:32 -06:00 - Build 3 cross-check: Codex review finding LOW — PromptPacketError should be PromptPacketValidationError in implementation-checklist and codex-review-checklist; deferred (not in this task's allowed files)
 2026-05-30 12:32 -06:00 - Build 3 cross-check: Codex review finding LOW — test count 13 vs 14 in codex-review-checklist; deferred (not in this task's allowed files)
 2026-05-31 00:35 -06:00 - Build 3 cross-check: Codex Reviews B Round B1 finding — four docs exist on disk but absent from FileMap (v0-build-readiness-map.md, prime-orchestration-state-model.md, bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md); Build 4/5 disclaim edits to these owners; repair assigned to Build 3; executing now
-2026-06-01 09:45 -06:00 - Build 3 cross-check: new Bifrost cockpit scaffold d13f1d1 adds bifrost/cockpit.py, bifrost/__init__.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py — none registered in docs/FileMap.md or meridian_core/filemap.py; FileMap gap; no active task assigned yet; awaiting Codex Reviews routing
 2026-05-31 11:20 -06:00 - Build 3 cross-check: Round B2 repair (live-codex-reviews-2.md + A-lane label + prose-divergence) already present in HEAD via Build 1 commit 45497b1; no duplicate commit; task closed
+2026-06-01 09:45 -06:00 - Build 3 cross-check: new Bifrost cockpit scaffold d13f1d1 adds bifrost/cockpit.py, bifrost/__init__.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py — none registered in docs/FileMap.md or meridian_core/filemap.py; FileMap gap; no active task assigned yet; awaiting Codex Reviews routing
 ```
 
 ## Codex Review Cadence
@@ -318,22 +272,22 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-**No active task. Build 3 is idle — cadence 3/3 since Round B3, Codex review required before next task.**
+**No active task. Build 3 is idle — Round B5 cleared cadence after ca6f55f + e89df81; ready for next FileMap assignment when new files land.**
 
 Poll every 30 seconds. When a new task is written here, begin immediately.
 
-Last completed: FileMap registration (Bifrost cockpit scaffold + integration docs + cockpit_state); commits ca6f55f + e89df81; tests 95/95; cadence 3/3 since Round B3; Ready for Codex Review.
+Last completed: FileMap registration (Bifrost cockpit scaffold + integration docs + cockpit_state); commits ca6f55f + e89df81; tests 95/95; cleared by Codex Reviews B Round B5.
 
 ## Completed Task Archive
 
 Historical record for reference. Authoritative detail is in the Write/Completion Log above.
 
+- **COMPLETED 2026-06-01 10:10 -06:00** — FileMap registration (Bifrost scaffold + integration docs + cockpit_state: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, meridian_core/cockpit_state.py, docs/v1-bifrost-live-data-contract.md, docs/v1-bifrost-integration-sequence.md, tests/test_bifrost_cockpit.py, tests/test_cockpit_state.py); commits ca6f55f + e89df81 (via concurrent lane merge); tests 95/95 (46 filemap + 49 bifrost_cockpit); cadence 3/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-31 21:05 -06:00** — FileMap refresh (v1-capability-plan, v1-bifrost-cockpit-implementation-brief, v2-horizon-plan, v3-parking-lot); commit 330f200; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-31 16:05 -06:00** — FileMap hygiene (v0-v1-progress-tracker.md + relay_executor stale text); commit 774695f; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review — files: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py, docs/v0-v1-progress-tracker.md, docs/v0-build-readiness-map.md.
 - **COMPLETED 2026-05-31 11:20 -06:00** — FileMap repair Round B2 (live-codex-reviews-2.md + A-lane label + prose-divergence); work present in Build 1 commit 45497b1; no new commit; task closed.
+- **COMPLETED 2026-05-31 00:48 -06:00** — Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 missing rows added to docs/FileMap.md only); commit c388f47; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-31 00:35 -06:00** — FileMap refresh (4 uncatalogued docs from Round B1: v0-build-readiness-map.md, prime-orchestration-state-model.md, bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md); commit 1378bda; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 17:20 -06:00** — FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:07 -06:00** — FileMap repair (Round B3 — prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review.
-- **COMPLETED 2026-06-01 10:10 -06:00** — FileMap registration (Bifrost scaffold + integration docs + cockpit_state: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, meridian_core/cockpit_state.py, docs/v1-bifrost-live-data-contract.md, docs/v1-bifrost-integration-sequence.md, tests/test_bifrost_cockpit.py, tests/test_cockpit_state.py); commits ca6f55f + e89df81 (via concurrent lane merge); tests 95/95 (46 filemap + 49 bifrost_cockpit); cadence 3/3 since Round B3; Ready for Codex Review.
-- **COMPLETED 2026-05-31 00:48 -06:00** — Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 missing rows added to docs/FileMap.md only); commit c388f47; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:03 -06:00** — FileMap refresh (model_adapter.py); commit be34fea; tests 46/46 filemap; Ready for Codex Review. Codex review cleared 2026-05-30 16:11 -06:00 (Reviews B; no findings; cadence window 774695f, 330f200, be34fea clear).
