@@ -19,6 +19,7 @@ When idle, check this file every 30 seconds. If there is an active task below, e
 Rules:
 
 - This session must behave as a live worker, not a one-shot handoff. After completing a task, return to this file and keep polling every 30 seconds.
+- Before editing any task file, verify you are in your own unique worktree. If you are in `C:\Users\scott\Code\Meridian` main worktree or sharing a worktree with another lane, stop and report the worktree violation instead of editing.
 - If there is no Active Task, do not stop. Append a Read Checks entry, wait 30 seconds, pull latest, and check again.
 - Always pull latest `origin/main` before editing.
 - Add a timestamped Read Checks entry approximately every 10 minutes while idle, or immediately on any status change. Polling continues every 30 seconds between log entries.
@@ -448,6 +449,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-09 00:12 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 2026-06-09 00:12 -05:00 - Build 1 checked queue; status: complete (V2 Echo-to-Atlas handoff contract completed at commit 2d1bab1; Ready for Codex Review; Obsidian update pending)
 2026-05-31 11:32 -06:00 - Build 1 checked queue; status: idle; Active Task at both queue positions = "(None currently assigned.)"; a new "Next Candidate Task" was added at the top of the file (Prime queue runway policy at docs/prime-queue-runway-policy.md) but is staged as a candidate, not promoted to Active; origin/main fast-forwarded through 2d1bab1 (parallel session landed V2 Echo-to-Atlas handoff contract — informational, not Build 1 scope here)/67a75dc/efbd363/2743366/806a328; cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting Active Task promotion
+2026-06-09 00:22 -05:00 - Build 1 checked queue; status: idle (no active task; Next Candidate Task staged at top (Prime queue runway policy) but not promoted to Active; origin/main up to date; cadence 1/3 since Reviews C5; awaiting Active Task promotion or new assignment)
 ```
 
 ## Write/Completion Log
