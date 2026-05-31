@@ -243,6 +243,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-31 00:57 -06:00 - Build 3 checked queue; status: active tasks found (Round C5 + Coordinator Override — 8-entry FileMap registration); executed; commit e89df81; cadence 3/3 since Round B3 — awaiting Codex review
 2026-06-01 20:35 -06:00 - Build 3 checked queue; status: idle; stale "commit pending" markers resolved to ca6f55f + e89df81; cadence 3/3 since Round B3 — Codex review (Round B5) required before next task
 2026-05-31 01:11 -06:00 - Build 3 checked queue; status: idle; cadence 3/3 since Round B3 — paused pending Round B5 Codex review result; no active task
+2026-06-01 20:40 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — Codex review (Round B5) required before next task
 ```
 
 ## Write/Completion Log
@@ -317,7 +318,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 Poll every 30 seconds. When a new task is written here, begin immediately.
 
-Last completed: FileMap registration (Bifrost cockpit scaffold + integration docs + cockpit_state); commit pending; tests 95/95; cadence 3/3 since Round B3; Ready for Codex Review.
+Last completed: FileMap registration (Bifrost cockpit scaffold + integration docs + cockpit_state); commits ca6f55f + e89df81; tests 95/95; cadence 3/3 since Round B3; Ready for Codex Review.
 
 ## Completed Task Archive
 
@@ -329,6 +330,6 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 - **COMPLETED 2026-05-31 00:35 -06:00** — FileMap refresh (4 uncatalogued docs from Round B1: v0-build-readiness-map.md, prime-orchestration-state-model.md, bifrost-v0-cockpit-layout-brief.md, bifrost-harness-dashboard-brief.md); commit 1378bda; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 17:20 -06:00** — FileMap refresh (relay_dispatch, live-codex-reviews, prime-orchestration prototype); commit 4075ef4; tests 46/46 filemap, 785/785 full suite; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:07 -06:00** — FileMap repair (Round B3 — prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review.
-- **COMPLETED 2026-06-01 10:10 -06:00** — FileMap registration (Bifrost scaffold + integration docs + cockpit_state: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, meridian_core/cockpit_state.py, docs/v1-bifrost-live-data-contract.md, docs/v1-bifrost-integration-sequence.md); commit pending; tests 95/95 (46 filemap + 49 bifrost_cockpit); cadence 3/3 since Round B3; Ready for Codex Review.
+- **COMPLETED 2026-06-01 10:10 -06:00** — FileMap registration (Bifrost scaffold + integration docs + cockpit_state: bifrost/__init__.py, bifrost/cockpit.py, bifrost/static/cockpit.css, meridian_core/cockpit_state.py, docs/v1-bifrost-live-data-contract.md, docs/v1-bifrost-integration-sequence.md, tests/test_bifrost_cockpit.py, tests/test_cockpit_state.py); commits ca6f55f + e89df81 (via concurrent lane merge); tests 95/95 (46 filemap + 49 bifrost_cockpit); cadence 3/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-31 00:48 -06:00** — Round B4 FileMap repair (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md — 3 missing rows added to docs/FileMap.md only); commit c388f47; tests 46/46 filemap; cadence 2/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:03 -06:00** — FileMap refresh (model_adapter.py); commit be34fea; tests 46/46 filemap; Ready for Codex Review. Codex review cleared 2026-05-30 16:11 -06:00 (Reviews B; no findings; cadence window 774695f, 330f200, be34fea clear).
