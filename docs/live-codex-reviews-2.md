@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Passed With Follow-Up
 
 Goal: review Build 5 Bifrost balance and prompt payload surface contract.
+
+Status: passed by Codex Reviews B on 2026-05-31. The contract covers provider balance, prompt payload visibility, Q-mode prompt drag, DeepSeek route/trust warnings, and keeps routing decisions outside Bifrost. FileMap follow-up routed to Build 3 because the new doc exists and is not yet discoverable.
 
 Scope:
 
@@ -32,6 +34,20 @@ Review expectations:
 - Verify Bifrost displays structured Relay/Model Harness telemetry but does not make routing decisions.
 - Verify Build 5 is not left with a stale executable task after completion.
 - If clean, record proof and clear the contract. If findings exist, route a focused repair back to Build 5.
+
+Review result:
+
+- Docs-only review; no tests required.
+- Contract covers Claude, OpenAI, DeepSeek, future adapters, provider health, trust state, context/prompt budgets, payload label, budget percent, growth delta, cost/quota pressure, and evidence source.
+- Q-mode rules explicitly catch additive prompt growth and mark DeepSeek degraded when Q-mode payloads grow unexpectedly.
+- DeepSeek direct API vs OpenRouter/aggregator route mismatch is visible, and candidate-state DeepSeek cannot clear reviews, move branches, or receive autonomous coding authority.
+- Bifrost displays Relay/Model Harness telemetry and does not make provider routing decisions.
+- Build 5 is back to awaiting the next Bifrost assignment and should not create read-check-only commits.
+- Follow-up routed to Build 3: register `docs/bifrost-balance-payload-surface-contract.md` in FileMap and required-path coverage.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` plus Build 3 follow-up routing. No Build 5 repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Completed / Passed
 
