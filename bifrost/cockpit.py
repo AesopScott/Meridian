@@ -44,6 +44,14 @@ class LaneRow:
 
 
 @dataclass
+class ProjectCard:
+    name: str
+    status: str
+    summary: str
+    sessions: list[LaneRow] = field(default_factory=list)
+
+
+@dataclass
 class ProgressEvent:
     timestamp: str
     source: str
@@ -86,6 +94,7 @@ class CockpitViewModel:
     prime_messages: list[str] = field(default_factory=list)
     review_count: int = 0
     lanes: list[LaneRow] = field(default_factory=list)
+    projects: list[ProjectCard] = field(default_factory=list)
     progress_events: list[ProgressEvent] = field(default_factory=list)
     harnesses: list[HarnessCard] = field(default_factory=list)
     instrument: InstrumentBand = field(
@@ -100,82 +109,127 @@ def sample_cockpit_view_model() -> CockpitViewModel:
     """Return deterministic sample data for previewing the cockpit."""
     return CockpitViewModel(
         project="Meridian",
-        bearing="V1 Cockpit",
+        bearing="Prime command surface",
         prime_messages=[
-            "Good morning, Scott.",
-            "Three items in the Review Console; one needs your judgment.",
+            "Command channel open.",
+            "Say the panel name and I will bring it forward.",
         ],
         review_count=3,
         lanes=[
-            LaneRow("B1", "running", "run"),
-            LaneRow("B2", "idle",    "pol"),
-            LaneRow("B3", "blocked", "blk"),
-            LaneRow("B4", "idle",    "idl"),
-            LaneRow("B5", "running", "run"),
+            LaneRow("Cockpit UI", "running", "hud"),
+            LaneRow("Preview Shell", "idle", "html"),
+            LaneRow("Voice Layer", "paused", "vox"),
+            LaneRow("Harness Console", "running", "sub"),
+            LaneRow("Mission Memory", "idle", "mem"),
+        ],
+        projects=[
+            ProjectCard(
+                "Meridian Cockpit",
+                "running",
+                "Prime command surface, project drill-in, and harness consoles.",
+                [
+                    LaneRow("Prime command bay", "running", "hud"),
+                    LaneRow("Voice affordance pass", "paused", "vox"),
+                    LaneRow("Harness focus panels", "running", "sub"),
+                ],
+            ),
+            ProjectCard(
+                "Meridian Core",
+                "idle",
+                "Cockpit state snapshots and lifecycle adapters.",
+                [
+                    LaneRow("Snapshot mapper", "idle", "map"),
+                    LaneRow("Session lifecycle", "idle", "life"),
+                ],
+            ),
+            ProjectCard(
+                "Knowledge Fabric",
+                "blocked",
+                "Echo and Atlas surfaces waiting for runtime wiring.",
+                [
+                    LaneRow("Echo memory lane", "blocked", "mem"),
+                    LaneRow("Atlas retrieval lane", "idle", "kg"),
+                ],
+            ),
         ],
         progress_events=[
             ProgressEvent(
-                "13:32", "Build 5", "V1 cockpit scaffold committed",
-                "completion", "info", "commit:d13f1d1",
+                "13:32", "Bifrost", "Prime cockpit surface refreshed",
+                "completion", "info", "surface:bifrost",
             ),
             ProgressEvent(
-                "13:09", "Reviews B", "a412e90 PASS; Round B3 complete",
-                "review result", "info", "review:B3",
+                "13:09", "Prime", "Project sessions available on drill-in",
+                "mission state", "info", "project:sessions",
             ),
             ProgressEvent(
-                "12:48", "Aegis", "proof 47/47; no gaps",
+                "12:48", "Aegis", "Proof lane quiet; no active gate",
                 "proof summary", "info", "aegis:proof",
             ),
         ],
         harnesses=[
             HarnessCard(
                 "Prime", "Cognition", "Local orchestrator and decision engine",
-                "online", "integrated", "v1.0", "now", "bearing: V1 cockpit",
+                "online", "integrated", "command", "now", "voice command scope ready",
                 ["plan", "prioritize", "coordinate"],
             ),
             HarnessCard(
                 "Bifrost", "Coordination / UI", "Cockpit and user visibility surface",
-                "online", "domain slice", "v1.0", "now", "rendering static cockpit",
-                ["cockpit", "dashboard", "review console"],
+                "online", "domain slice", "cockpit", "now", "rendering static cockpit",
+                ["cockpit", "hud", "panels"],
             ),
             HarnessCard(
                 "Relay", "Cognition", "Dispatches model work through adapter lanes",
-                "stable", "integrated", "v0.8", "1m", "provider-neutral dispatch ready",
+                "stable", "integrated", "dispatch", "1m", "provider-neutral dispatch ready",
                 ["route", "dispatch", "budget"],
             ),
             HarnessCard(
                 "Beacon", "Coordination / UI", "Aggregates harness liveness and freshness",
-                "stable", "integrated", "v0.6", "1m", "all known lanes fresh",
+                "stable", "integrated", "liveness", "1m", "all known lanes fresh",
                 ["heartbeat", "freshness", "stale checks"],
             ),
             HarnessCard(
                 "Aegis", "Cognition", "Proof gates and review evidence",
-                "busy", "integrated", "v0.5", "2m", "tier gates available",
+                "busy", "integrated", "proof", "2m", "gate evidence available",
                 ["proof", "validate", "block"],
             ),
             HarnessCard(
                 "Compass", "Coordination / UI", "Mission bearing and objective focus",
-                "online", "domain slice", "v0.4", "2m", "bearing: V1 dashboard",
+                "online", "domain slice", "bearing", "2m", "mission bearing ready",
                 ["objectives", "priority", "stage"],
             ),
             HarnessCard(
                 "FileMap", "Knowledge & Memory", "Canonical important-file registry",
-                "stable", "integrated", "v0.5", "3m", "registry in sync",
+                "stable", "integrated", "registry", "3m", "registry in sync",
                 ["discover", "register", "required paths"],
             ),
             HarnessCard(
                 "Codex Reviews", "Queue / Review", "Independent review and repair routing",
-                "online", "integrated", "v0.7", "now", "Round B7 cleared",
+                "online", "integrated", "review", "now", "review lane quiet",
                 ["review", "findings", "repair routing"],
             ),
             HarnessCard(
+                "Session Lifecycle", "Runtime", "Session registration and restart posture",
+                "stable", "planned", "lifecycle", "now", "session state surface reserved",
+                ["register", "restart", "recover"],
+            ),
+            HarnessCard(
+                "Workflow", "Runtime", "Sub-agent and workflow coordination surface",
+                "planned", "planned", "sub-agent", "-", "workflow prompt reserved",
+                ["sub-agent", "handoff", "sequence"],
+            ),
+            HarnessCard(
+                "Federation", "Runtime", "Future cross-instance Meridian coordination",
+                "planned", "planned", "future", "-", "federation panel reserved",
+                ["federate", "sync"],
+            ),
+            HarnessCard(
                 "Echo", "Knowledge & Memory", "Long-term memory injection harness",
-                "planned", "planned", "-", "-", "placeholder visible",
+                "planned", "planned", "memory", "-", "memory-only prompt reserved",
                 ["memory", "ranking"],
             ),
             HarnessCard(
                 "Atlas", "Knowledge & Memory", "Retrieval and knowledge graph harness",
-                "planned", "planned", "-", "-", "placeholder visible",
+                "planned", "planned", "retrieval", "-", "retrieval prompt reserved",
                 ["retrieval", "knowledge"],
             ),
         ],
@@ -269,38 +323,20 @@ def view_model_from_snapshot(snapshot: PrimeCockpitSnapshot) -> CockpitViewModel
         bearing=snapshot.bearing,
         review_count=snapshot.review_gate_count,
         lanes=lanes,
+        projects=[
+            ProjectCard(
+                snapshot.project,
+                "running" if lanes else "idle",
+                snapshot.bearing,
+                lanes,
+            )
+        ],
         progress_events=events,
         instrument=instrument,
     )
 
 
 # ── Private render helpers ──────────────────────────────────────────────────
-
-
-def _render_nav() -> str:
-    nav_labels = [
-        "Settings", "Projects", "Reset", "Close",
-        "Cross Check", "Backlog", "Skills", "Balance",
-    ]
-    buttons = "".join(
-        f'<button class="nav-btn" type="button" data-action="{_e(label.lower().replace(" ", "-"))}">{label}</button>'
-        for label in nav_labels
-    )
-    return (
-        '<nav class="cockpit-nav">'
-        '<div class="brand-block">'
-        '<span class="brand-kicker">MERIDIAN</span>'
-        '<strong>Prime Cockpit</strong>'
-        '<span>Your AI Command Center</span>'
-        "</div>"
-        '<div class="nav-buttons">'
-        f"{buttons}"
-        '<button class="nav-btn nav-harness" type="button" data-action="harness">'
-        'Harness <span class="harness-dot">ON</span>'
-        "</button>"
-        "</div>"
-        "</nav>"
-    )
 
 
 def _render_prime_panel(vm: CockpitViewModel) -> str:
@@ -310,18 +346,6 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
         f"<h1>{_e(vm.project)}</h1>"
         f'<span class="sr-only cockpit-bearing">{_e(vm.bearing)}</span>'
         "</div>"
-        "</div>"
-    )
-
-    badge = (
-        f'<span class="review-badge">{_e(vm.review_count)}</span>'
-        if vm.review_count
-        else ""
-    )
-    tabs = (
-        '<div class="prime-tabs">'
-        '<button class="tab tab-active">Orchestrator Queue</button>'
-        f'<button class="tab">Review Console{badge}</button>'
         "</div>"
     )
 
@@ -341,91 +365,103 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
         "</div>"
     )
 
+    voice = (
+        '<div class="voice-strip" aria-label="Voice I/O state">'
+        '<span class="voice-state voice-listening">mic armed</span>'
+        '<span class="voice-state voice-thinking">thinking idle</span>'
+        '<span class="voice-state voice-speaking">speaker ready</span>'
+        '<span class="voice-state voice-boot">boot audio standby</span>'
+        '<button type="button" class="icon-btn" data-action="mute" title="Mute voice output">Mute</button>'
+        "</div>"
+    )
+
     return (
         '<section class="prime-panel">'
         f"{header}"
-        '<div class="wake-line">'
-        "<span>Relay GO</span><span>Bifrost GO</span>"
-        "<span>Beacon GO</span><span>Aegis GO</span>"
-        "</div>"
-        f"{hud_core}"
-        f"{tabs}"
         '<div class="prime-input" aria-label="Prime command prompt">'
-        '<div class="prompt-head"><span>Prime Command Bay</span><em>voice + text armed</em></div>'
-        '<textarea placeholder="&gt; Tell Prime what to build, approve, reroute, or inspect..." class="prime-prompt"></textarea>'
+        '<div class="prompt-head"><span>Command Bay</span><em>voice + text</em></div>'
+        '<textarea placeholder="Open harness panel, show project sessions, show mission objectives..." class="prime-prompt"></textarea>'
         '<div class="prompt-actions">'
-        '<button type="button" class="prompt-btn" data-action="voice">Voice</button>'
+        '<button type="button" class="prompt-btn" data-action="voice">Mic</button>'
         '<button type="button" class="prompt-btn" data-action="send">Send</button>'
         '<button type="button" class="prompt-btn prompt-primary" data-action="mission-objectives">Mission Objectives</button>'
         "</div>"
         "</div>"
+        f"{voice}"
+        f"{hud_core}"
         f'<div class="prime-messages">{messages}</div>'
         "</section>"
     )
 
 def _render_harness_dashboard(harnesses: list[HarnessCard]) -> str:
-    grouped: dict[str, list[HarnessCard]] = {}
-    for harness in harnesses:
-        grouped.setdefault(harness.family, []).append(harness)
-
-    sections = []
-    for family, cards in grouped.items():
-        card_html = "".join(
-            f'<article class="harness-card" data-status="{_e(card.status)}" '
+    consoles = []
+    for card in harnesses:
+        capabilities = "".join(
+            f'<span class="harness-chip">{_e(cap)}</span>'
+            for cap in card.capabilities
+        )
+        consoles.append(
+            f'<details class="harness-console" data-status="{_e(card.status)}" '
             f'data-attention="{_e(str(card.attention).lower())}">'
-            '<div class="harness-card-head">'
+            '<summary>'
             f'<span class="harness-name">{_e(card.name)}</span>'
             f'<span class="harness-status">{_e(card.status)}</span>'
-            "</div>"
+            "</summary>"
+            '<div class="harness-window">'
             f'<p class="harness-role">{_e(card.role)}</p>'
-            '<div class="harness-meta">'
-            f'<span>{_e(card.maturity)}</span>'
-            f'<span>{_e(card.version)}</span>'
-            f'<span>{_e(card.heartbeat)}</span>'
-            "</div>"
             f'<p class="harness-event">{_e(card.recent_event)}</p>'
-            '<div class="harness-capabilities">'
-            + "".join(
-                f'<span class="harness-chip">{_e(cap)}</span>'
-                for cap in card.capabilities
-            )
-            + "</div>"
-            + "</article>"
-            for card in cards
-        )
-        sections.append(
-            '<section class="harness-group">'
-            f'<h3>{_e(family)}</h3>'
-            f'<div class="harness-cards">{card_html}</div>'
-            "</section>"
+            f'<div class="harness-capabilities">{capabilities}</div>'
+            '<label class="harness-prompt-label">'
+            f'<span>{_e(card.name)} scoped prompt</span>'
+            f'<textarea class="harness-prompt" placeholder="Ask {_e(card.name)} about this subsystem only..."></textarea>'
+            "</label>"
+            "</div>"
+            "</details>"
         )
 
     return (
         '<section class="harness-dashboard" aria-label="Harness Dashboard">'
         '<div class="harness-dashboard-header">'
-        '<h2>Harness Dashboard</h2>'
-        '<span class="harness-dashboard-mode">View only</span>'
+        '<h2>Systems</h2>'
+        '<span class="harness-dashboard-mode">on demand</span>'
         "</div>"
-        + "".join(sections)
+        '<div class="harness-consoles">'
+        + "".join(consoles)
+        + "</div>"
         + "</section>"
     )
 
 
-def _render_lane_strip(lanes: list[LaneRow]) -> str:
-    rows = "".join(
-        f'<div class="lane-row" data-status="{_e(lane.status)}">'
-        f'<span class="lane-name">{_e(lane.name)}</span>'
-        f'<span class="lane-label">{_e(lane.label)}</span>'
-        "</div>"
-        for lane in lanes
-    )
-    total = len(lanes)
-    attn = sum(1 for lane in lanes if lane.status in ("blocked", "paused"))
+def _render_project_strip(projects: list[ProjectCard], fallback_lanes: list[LaneRow]) -> str:
+    if not projects and fallback_lanes:
+        projects = [ProjectCard("Active Sessions", "running", "Live sessions", fallback_lanes)]
+
+    rows = []
+    for project in projects:
+        sessions = "".join(
+            f'<li class="session-row" data-status="{_e(session.status)}">'
+            f'<span>{_e(session.name)}</span>'
+            f'<em>{_e(session.label)}</em>'
+            "</li>"
+            for session in project.sessions
+        )
+        rows.append(
+            f'<details class="project-node" data-status="{_e(project.status)}">'
+            f'<summary><span class="project-name">{_e(project.name)}</span>'
+            f'<span class="project-state">{_e(project.status)}</span>'
+            f'<span class="project-summary">{_e(project.summary)}</span></summary>'
+            '<div class="project-drilldown">'
+            f'<ul class="session-list">{sessions}</ul>'
+            "</div>"
+            "</details>"
+        )
+    total = len(projects)
+    attn = sum(1 for project in projects if project.status in ("blocked", "paused"))
     return (
-        '<aside class="lane-strip">'
-        '<div class="rail-title">Build Lanes</div>'
-        f'<div class="lane-rows">{rows}</div>'
-        f'<div class="lane-summary">{total} tot. / {attn} attn</div>'
+        '<aside class="project-strip" aria-label="Projects">'
+        '<div class="rail-title">Projects</div>'
+        f'<div class="project-rows">{"".join(rows)}</div>'
+        f'<div class="lane-summary">{total} projects / {attn} attention</div>'
         "</aside>"
     )
 
@@ -463,7 +499,7 @@ def _render_progress_surface(events: list[ProgressEvent]) -> str:
     return (
         '<aside class="progress-surface">'
         '<div class="progress-header">'
-        'Review Console <span class="progress-filter">(all)</span>'
+        'Mission Feed <span class="progress-filter">(all)</span>'
         f'<div class="progress-counts">{counts}</div>'
         "</div>"
         f'<div class="progress-cards">{cards}</div>'
@@ -481,14 +517,12 @@ def _render_instrument_band(inst: InstrumentBand) -> str:
 
     return (
         '<footer class="instrument-band">'
-        '<span class="instr-title">Systems</span>'
+        '<span class="instr-title">Status</span>'
         f"{chip('Beacon', inst.beacon)}"
         f"{chip('Relay', inst.relay)}"
         f"{chip('Aegis', inst.aegis)}"
         f"{chip('Compass', inst.compass)}"
         f'<span class="instr-queue">Queue {_e(inst.queue_state)}</span>'
-        f'<span class="instr-tier">Tier {_e(inst.tier)}</span>'
-        f'<span class="instr-version">{_e(inst.version)}</span>'
         f'<span class="instr-clock">{_e(inst.clock)}</span>'
         "</footer>"
     )
@@ -504,10 +538,9 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     """
     css = _load_css()
 
-    nav = _render_nav()
     prime = _render_prime_panel(vm)
     harness_dashboard = _render_harness_dashboard(vm.harnesses)
-    lanes = _render_lane_strip(vm.lanes)
+    projects = _render_project_strip(vm.projects, vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
 
@@ -522,9 +555,8 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         "</head>\n"
         "<body>\n"
         '<div class="cockpit-shell">\n'
-        f"{nav}\n"
         '<div class="cockpit-content">\n'
-        f"{lanes}\n"
+        f"{projects}\n"
         '<main class="cockpit-main">\n'
         f"{prime}\n"
         f"{harness_dashboard}\n"
