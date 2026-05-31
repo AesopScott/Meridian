@@ -8,7 +8,7 @@ Goal: review Build 3 Bifrost V2 UI docs FileMap registration.
 
 Scope:
 
-- Build 3 commit `13f075e` - registers `docs/bifrost-v2-cockpit-extensions.md` and `docs/jarvis-ui-source-assessment.md` in runtime FileMap, docs/FileMap, required-path coverage, and marks Build 3 ready for review.
+- Build 3 commit `d496472` - registers `docs/bifrost-v2-cockpit-extensions.md` and `docs/jarvis-ui-source-assessment.md` in runtime FileMap, docs/FileMap, required-path coverage, and marks Build 3 ready for review.
 
 Allowed review files:
 
