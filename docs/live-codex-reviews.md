@@ -6,6 +6,56 @@ The build lanes build. Review lanes review.
 
 ## Coordinator Override - Active Review Scope
 
+Goal: review and clear or repair the current V2 runtime/code backlog so the V2 tracker can stop undercounting built work.
+
+Scope:
+
+- Build 1 V2 Echo Memory Harness domain slice: commit `2bccb55`
+- Build 1 V2 Atlas Harness retrieval domain slice: commit `7e95ede`
+- Build 1 V2 Relay prompt payload meter domain helper: commit `638117f`
+- Build 1 V2 policy-aware Relay executor wrapper: commit `b99ce1d`
+- Build 1 V2 queue-runway runtime-object contract: commit `57ed79a` (docs contract, include for cadence gating context only)
+
+Allowed review files:
+
+- `meridian_core/echo.py`
+- `tests/test_echo.py`
+- `meridian_core/atlas.py`
+- `tests/test_atlas.py`
+- `meridian_core/prompt_payload_meter.py`
+- `tests/test_prompt_payload_meter.py`
+- `meridian_core/relay_executor.py`
+- `tests/test_relay_executor.py`
+- `docs/queue-runway-runtime-object.md`
+- `docs/live-build-1.md` for provenance only
+- `docs/v2-progress-tracker.md` for tracker implication only
+
+Proof commands:
+
+- `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q`
+- `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q`
+
+Review expectations:
+
+- Findings first, severity ordered.
+- Verify each runtime helper is deterministic, frozen/typed where appropriate, failure-soft where promised, and does not call models or expand prompts.
+- Verify Relay/Aegis policy enforcement remains intact.
+- Verify queue-runway contract does not weaken the no-empty-queue invariant or turn read-check commits into a substitute for executable work.
+- If clear, update checkpoint/proof logs and mark the relevant Build 1 V2 slices review-cleared so the tracker can be reconciled next.
+- If findings exist, route repair back to Build 1 with allowed files and tests.
+
+Out of scope:
+
+- Bifrost UI commits `12e7966` and `2bee5ab` are assigned to Reviews B.
+- Do not execute build-lane Active Tasks.
+- Do not implement product code in this review lane.
+
+Completion: commit and push only `docs/live-codex-reviews.md` unless routing a repair into `docs/live-build-1.md`.
+
+## Completed / Stale Prior Scope
+
+## Coordinator Override - Active Review Scope
+
 Round 7 complete (2026-05-31 13:30 -06:00).
 
 - Scope: coordinator commit `39c9ac8` covering Prime human-gate repair and Bifrost source-first cockpit runway docs.
