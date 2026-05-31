@@ -48,6 +48,12 @@ _REQUIRED_PATHS = [
     "docs/prime-status-console-cli-brief.md",
     "docs/non-orchestrator-surface-naming.md",
     "docs/bifrost-configurable-progress-surface-brief.md",
+    "docs/v1-bifrost-live-data-contract.md",
+    "docs/v1-bifrost-integration-sequence.md",
+    "meridian_core/cockpit_state.py",
+    "bifrost/__init__.py",
+    "bifrost/cockpit.py",
+    "bifrost/static/cockpit.css",
 ]
 
 

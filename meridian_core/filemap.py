@@ -508,6 +508,48 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Design-only. Owner: Build 5. Read before designing cockpit progress/proof routing.",
         ),
+        FileMapEntry(
+            path="docs/v1-bifrost-live-data-contract.md",
+            area=FileArea.BIFROST,
+            purpose="V1 Bifrost live-data integration contract: how CockpitViewModel fields are populated from live Prime, Beacon, and Relay state at runtime. Bridges the static scaffold to real domain data.",
+            related_tests=[],
+            notes="Owner: Build 4. Read before wiring any live domain data into render_cockpit_html.",
+        ),
+        FileMapEntry(
+            path="docs/v1-bifrost-integration-sequence.md",
+            area=FileArea.BIFROST,
+            purpose="V1 Bifrost cockpit integration sequence: ordered steps from scaffold to live Prime-driven cockpit — build order, dependency contracts, and gate conditions for each integration slice.",
+            related_tests=[],
+            notes="Owner: Build 4. Read before planning or executing any V1 Bifrost integration slice.",
+        ),
+        FileMapEntry(
+            path="meridian_core/cockpit_state.py",
+            area=FileArea.BIFROST,
+            purpose="Prime cockpit snapshot and event domain types for V1 Bifrost: CockpitStatus, CockpitSnapshot, CockpitEvent, and lane/harness state models. Pure immutable data — no filesystem, CLI, or UI code.",
+            related_tests=["tests/test_cockpit_state.py"],
+            notes="Owner: Build 1. Read before designing any Prime-state-to-cockpit data flow.",
+        ),
+        FileMapEntry(
+            path="bifrost/__init__.py",
+            area=FileArea.BIFROST,
+            purpose="Bifrost package init: re-exports CockpitViewModel, render_cockpit_html, sample_cockpit_view_model, and related types from bifrost.cockpit.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="Public surface of the Bifrost package. Import from here, not from bifrost.cockpit directly.",
+        ),
+        FileMapEntry(
+            path="bifrost/cockpit.py",
+            area=FileArea.BIFROST,
+            purpose="Static HTML renderer for the Bifrost cockpit: CockpitViewModel dataclass, render_cockpit_html returning a self-contained HTML document, XSS-safe escaping, and sample_cockpit_view_model for deterministic previews.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="Dependency-free (stdlib only). Owner: Build 5. Read before adding any cockpit rendering, nav, or panel logic.",
+        ),
+        FileMapEntry(
+            path="bifrost/static/cockpit.css",
+            area=FileArea.BIFROST,
+            purpose="Cockpit CSS: V1 dark-mode palette, layout rules for Prime panel, lane strip, progress surface, and instrument band. Inlined into the HTML output by render_cockpit_html.",
+            related_tests=[],
+            notes="Loaded at render time via Path(__file__).parent / 'static' / 'cockpit.css'. Edit here to change cockpit visual style.",
+        ),
 
         # -- File map itself --------------------------------------------
         FileMapEntry(
