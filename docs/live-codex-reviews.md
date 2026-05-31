@@ -236,6 +236,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-05-31 13:35 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch and ff-only merge; no executable Active Task; Build 5 repair remains routed and awaiting builder completion.
 2026-05-31 13:38 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch and ff-only merge; no executable Active Task; Build 5 repair remains routed and awaiting builder completion.
 2026-05-31 13:40 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch and ff-only merge; no executable Active Task; Build 5 repair remains routed and awaiting builder completion.
+2026-05-31 13:42 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after pull; no executable Active Task; Build 5 repair remains routed and awaiting builder completion.
 ```
 
 ## Review Log
@@ -443,6 +444,7 @@ Round 6 write log:
 - 2026-05-31 13:35 -06:00 - Codex Reviews A completed idle queue read after origin/main fetch and ff-only merge. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `523fce2`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 13:38 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check after origin/main fetch and ff-only merge. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff 9869e08..HEAD -- docs/live-codex-reviews.md docs/live-build-5.md`. Commit: `cc5ec74`; status-update commit: `b1576af`; cadence-record commit: `daea7b1`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
 - 2026-05-31 13:40 -06:00 - Codex Reviews A completed idle queue read after origin/main fetch and ff-only merge. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `ceefdf4`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 13:42 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: pending. Push status: pending. Obsidian update status: not updated; no new review finding or clearance.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
