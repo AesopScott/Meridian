@@ -38,13 +38,54 @@ Completion:
 
 Ready for Codex Review. Routed to Codex Reviews B by coordinator.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: add a lightweight FileMap audit note for V2/V3 discoverability.
 
 Allowed files only: `docs/filemap-v2-v3-discoverability-audit.md`, `docs/live-build-3.md`.
 
 Task: create a short docs-only audit listing which V2/V3 architecture files must be discoverable by Prime at wake. Mark any missing registrations as follow-up tasks rather than editing runtime code.
+
+Completion:
+
+- Coordinator completed this docs-only audit on 2026-05-31.
+- File changed: `docs/filemap-v2-v3-discoverability-audit.md`.
+- Tests: not required (docs-only).
+- Finding: `docs/workflows-subagent-harness-architecture.md` exists but is not registered in `meridian_core/filemap.py`.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
+Goal: register the workflow/sub-agent architecture note and this audit in FileMap.
+
+Allowed files only: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: add FileMap coverage for:
+
+- `docs/workflows-subagent-harness-architecture.md`
+- `docs/filemap-v2-v3-discoverability-audit.md`
+
+Keep this mechanical. Do not edit either document. Add/update required-path coverage only.
+
+Tests: `python -m pytest tests/test_filemap.py -q`.
+
+Completion:
+
+- Coordinator completed this FileMap registration on 2026-05-31.
+- Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`.
+- Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed).
+- Commit: `9f053f8`.
+
+Ready for Codex Review.
+
+## Active Task
+
+Goal: await next FileMap assignment.
+
+Allowed files only: `docs/live-build-3.md`.
+
+Task: no executable FileMap implementation task is currently assigned. Continue polling and do not create read-check-only commits. If a new V2/V3 doc lands without FileMap coverage, record the gap in the Cross-Check Activity section and wait for Prime/Codex to assign the exact registration slice.
 
 This file is the standing assignment queue for Build 3.
 

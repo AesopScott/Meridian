@@ -538,6 +538,13 @@ def make_default_map() -> FileMap:
             notes="V2 entry-point. Read before designing or implementing new harness types or multi-step workflow orchestration.",
         ),
         FileMapEntry(
+            path="docs/workflows-subagent-harness-architecture.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Workflow/sub-agent harness architecture note: explains how harness work should run in bounded workflow contexts so Prime's orchestrator context stays lean.",
+            related_tests=[],
+            notes="Read before designing Prime workflow delegation, harness offloading, or context-window protection behavior.",
+        ),
+        FileMapEntry(
             path="docs/session-lifecycle-v2-contract.md",
             area=FileArea.BUILD_PROCESS,
             purpose="Session Lifecycle V2 contract: typed state and command-plan responsibilities for spawning, watching, steering, recovering, and handing off sessions.",
@@ -600,6 +607,13 @@ def make_default_map() -> FileMap:
             purpose="V3 parking lot: horizon ideas for external reach, federation, and deeper distribution. Not active scope â€” do not pull V3 effort during V0, V1, or V2.",
             related_tests=[],
             notes="Parking lot, not a roadmap. Owner: Build 4. Ideas only until V2 closes.",
+        ),
+        FileMapEntry(
+            path="docs/filemap-v2-v3-discoverability-audit.md",
+            area=FileArea.FILE_MAP,
+            purpose="V2/V3 FileMap discoverability audit: identifies architecture and horizon docs Prime must find at wake, plus follow-up FileMap registration gaps.",
+            related_tests=[],
+            notes="Build 3 audit. Update after new V2/V3 architecture docs land.",
         ),
         FileMapEntry(
             path="docs/prime-orchestration-state-model.md",
