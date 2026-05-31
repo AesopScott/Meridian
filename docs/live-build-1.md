@@ -275,6 +275,8 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-02 ~21:00 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-02 ~21:10 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
 2026-06-02 ~21:20 CDT - Build 1 checked queue; status: idle (no active task; awaiting next assignment)
+2026-06-02 ~21:30 CDT - Build 1 checked queue; status: running (Active Task: Prime cockpit snapshot/event domain shape; executing)
+2026-06-02 ~21:40 CDT - Build 1 checked queue; status: idle (cockpit_state slice f56af55 complete; awaiting next assignment or Codex review result)
 ```
 
 ## Write/Completion Log
@@ -312,6 +314,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-06-01 ~10:30 CDT - Build 1 completed Relay adapter registry and lane dispatch bridge; commit 0560eb4; files: meridian_core/model_adapter.py, meridian_core/relay_executor.py, tests/test_model_adapter.py, tests/test_relay_executor.py; tests: 67 targeted adapter/executor passed, 137 Aegis/executor passed, 911 full passed; Ready for Codex Review.
 2026-06-01 ~16:50 CDT - Build 1 completed env-gated HTTP JSON Model Harness transport; commit 869faa4; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 72 targeted adapter/executor passed, 916 full passed; Ready for Codex Review.
 2026-05-30 16:45 -06:00 - Codex review repair for env-gated HTTP JSON Model Harness transport; commit f353c8d; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 72 targeted adapter/executor passed, 916 full passed; added provider to request body and parsed standard-library HTTP JSON response text.
+2026-06-02 ~21:40 CDT - Build 1 completed Prime cockpit snapshot/event domain shape; commit f56af55; files: meridian_core/cockpit_state.py, tests/test_cockpit_state.py; tests: 25 targeted cockpit_state passed, 941 full passed; Obsidian pending; Ready for Codex Review.
 ```
 
 ## Cross-Check Activity
@@ -401,6 +404,8 @@ Completion:
 ## Completed Slices
 
 Historical record of Build 1 V0 completed slices (most recent first). Do not re-execute any entry below.
+
+[COMPLETED 2026-06-02 ~21:40 CDT] Prime cockpit snapshot/event domain shape — commit `f56af55`; files: meridian_core/cockpit_state.py, tests/test_cockpit_state.py; tests: 25 targeted passed, 941 full passed; Ready for Codex Review.
 
 [COMPLETED 2026-06-01 ~16:50 CDT] Env-gated HTTP JSON Model Harness transport — commit `869faa4`; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 72 targeted adapter/executor passed, 916 full passed; Ready for Codex Review.
 
