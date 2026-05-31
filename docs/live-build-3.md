@@ -250,7 +250,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 Current Active Task - Coordinator Override:
 
-Goal: register the V1 Electron cockpit app shell and preview files in FileMap.
+Goal: register the V1 Electron cockpit app shell, preview files, and Prime queue reconciliation requirement in FileMap.
 
 Allowed files only:
 
@@ -261,8 +261,9 @@ Allowed files only:
 
 Task:
 
-- Register `package.json`, `electron/main.js`, `bifrost/preview.py`, and `tests/test_bifrost_preview.py`.
+- Register `package.json`, `electron/main.js`, `bifrost/preview.py`, `tests/test_bifrost_preview.py`, and `docs/prime-queue-reconciliation-requirement.md`.
 - Use `FileArea.BIFROST`.
+- Use `FileArea.ARCHITECTURE` for the Prime queue reconciliation requirement.
 - Add required-path coverage in `tests/test_filemap.py`.
 - Do not edit Electron app code, Bifrost renderer code, or package API.
 
