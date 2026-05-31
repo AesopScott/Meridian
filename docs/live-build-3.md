@@ -202,6 +202,8 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-01 20:55 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
 2026-06-01 21:05 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
 2026-06-01 21:10 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 3/3 since Round B3 — awaiting Round B5 Codex review result before next task
+
+2026-06-01 21:15 -06:00 - Build 3 checked queue; status: idle; Round B5 cleared cadence; no active task assigned yet — cadence reset to 0/3; ready for next FileMap assignment
 ```
 
 ## Write/Completion Log
