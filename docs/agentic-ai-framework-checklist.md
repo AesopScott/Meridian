@@ -2,6 +2,7 @@
 
 **Source:** User-provided "Agentic AI: A Complete Framework" image.
 **Purpose:** Convert the framework into a Meridian checklist so Prime can verify that every major agentic-AI concern has an answer, owner, or explicit gap.
+**Roadmap role:** This is the entry point into V3. V3 planning starts by resolving this checklist.
 **Rule:** Every Meridian answer should map to Prime or a harness. Avoid loose capability names.
 
 Legend:
@@ -9,6 +10,19 @@ Legend:
 - `[x]` Answer exists in Meridian architecture or code.
 - `[~]` Partial answer exists; needs V2/V3 buildout.
 - `[ ]` Gap or later horizon.
+
+## V3 Intake Rule
+
+When V2 closes, Prime must use this checklist as the first V3 intake gate.
+
+Every `[~]` and `[ ]` item must be resolved into one of these outcomes before V3 implementation specs are written:
+
+- **Promote to V3** as a Prime-owned or harness-owned roadmap item.
+- **Move earlier** if the item is actually required for V2 autonomy.
+- **Park for later** as V4+ or public/product horizon.
+- **Reject** as intentionally out of scope for Meridian.
+
+No item leaves this checklist unless it has a named owner: Prime or a harness.
 
 ## Key Technologies
 
