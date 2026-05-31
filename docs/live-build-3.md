@@ -173,6 +173,29 @@ Tests:
 
 Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
+## Next Candidate Task
+
+Goal: register the next completed V2 checklist/benchmark docs in FileMap after they land.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: when Build 2 and/or Build 4 complete their current docs, register only the files that exist and are not already discoverable:
+
+- `docs/session-lifecycle-implementation-checklist.md`
+- `docs/workflow-subagent-usage-checklist.md`
+- `docs/deepseek-validation-benchmark-plan.md`
+
+Requirements:
+
+- Do not create the docs; only register completed docs after they exist.
+- Keep the registration mechanical and small.
+- Add required-path coverage for each registered file.
+- If none of the files exist when this candidate is promoted, stop and report that there is no valid FileMap target instead of inventing placeholder work.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+
 This file is the standing assignment queue for Build 3.
 
 When idle, check this file every 30 seconds. If there is an active task below, execute it. If the task is complete, commit and push your slice, update Obsidian, then report completion in your session and return to polling this file.

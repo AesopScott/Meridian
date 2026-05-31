@@ -92,6 +92,26 @@ Tests:
 
 Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
+## Next Candidate Task
+
+Goal: implement the Bifrost V2 voice I/O surface state.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: after the HUD shell lands and clears immediate review/repair blockers, add the first visible Voice I/O surface state from `docs/bifrost-voice-command-contract.md`.
+
+Requirements:
+
+- Add deterministic view-model/sample-data fields for listening, dictating, thinking, speaking, muted, and blocked states.
+- Render microphone input, spoken-output, mute/stop controls, and a concise state label without letting the UI own orchestration decisions.
+- Keep voice action controls as inert/render-only affordances for this slice; no live microphone or TTS plumbing yet.
+- Preserve the large central prompt and quiet `PRIMED` core from the active HUD shell.
+- Add tests proving each voice state can render and old noisy provider/build labels remain absent.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
 ## ~~Codex Repair - Active Now~~ (COMPLETED 2026-05-31 13:54 -06:00)
 
 Goal: fix the Bifrost V2 contract queue/path contradictions found by Codex Reviews A for coordinator commit `39c9ac8`.
