@@ -472,6 +472,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-05-31 15:20 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; no executable Active Task remains. Queue-only cadence check found no actionable findings.
 2026-05-31 15:21 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; no executable Active Task in Reviews A queue. Three-change queue-only cadence check found no actionable findings.
 2026-05-31 15:24 -06:00 - Codex Reviews A checked queue; status: running; notes: origin/main current in detached review worktree; active FileMap registration review scope found for Build 1 commit `9fa9cdf`.
+2026-05-31 15:32 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current at `4f13375`; no executable Reviews A Active Task; Build 1 has a build-lane Active Now task, not executed by review lane.
 ```
 
 ## Review Log
@@ -764,6 +765,7 @@ Round 6 write log:
 - 2026-05-31 15:20 -06:00 - Codex Reviews A completed idle queue read and queue-only cadence check after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff 920d28f..HEAD -- docs/live-codex-reviews.md`. Commit: `0b87cf6`; status-update commit: `db99d18`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
 - 2026-05-31 15:21 -06:00 - Codex Reviews A completed idle queue read and three-change queue-only cadence check after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof commands: `git diff --check ce0e3fa..HEAD -- docs/live-codex-reviews.md`, `git diff ce0e3fa..HEAD -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings, no repair needed. Commit: `21d60ca`; status-update commits: `ffdd4dd`, this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
 - 2026-05-31 15:24 -06:00 - Codex Reviews A completed Build 1 FileMap registration review after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed). Commit: `5529bdf`; status-update commits: `49d3b6c`, `9deb3d7`, `d40b221`, `152386e`, `dd02192`, this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 15:32 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: pending. Push status: pending. Obsidian update status: not updated; no active review task or durable review finding.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
