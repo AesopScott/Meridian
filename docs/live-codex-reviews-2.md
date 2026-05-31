@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Passed
 
 Goal: review the recent Bifrost browser-first cockpit UI commits after Scott's declutter steering.
+
+Status: passed by Codex Reviews B on 2026-05-31 15:52 -06:00. The browser-first cockpit review clears commits `12e7966` and `2bee5ab`: focused Bifrost tests pass, the central HUD core renders only the `PRIMED` orb, the prompt surface remains present, and the prohibited provider/build labels are absent from rendered HTML. No repair routed.
 
 Review commits:
 
@@ -40,20 +42,41 @@ Out of scope:
 - Do not implement UI changes.
 - Do not review non-Bifrost runtime/API work.
 
-Completion: record scope, proof, findings, and checkpoint updates in this file. If repair is needed, route it to the Bifrost UI owner / Build 5 queue rather than editing runtime/UI files here. Commit and push only this review queue unless routing a repair.
+Review result:
 
-## Next Candidate Review Scope
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed with 108 tests.
+- Rendered HUD core contains the `PRIMED` orb and does not contain Provider Balance, Claude, OpenAI, DeepSeek, Prompt Payload, B1-B5, or ABH labels.
+- Rendered cockpit HTML does not contain the previously rejected top-noise strings: V1 cockpit, tier two, Prime Online, Prime Meridian Orchestrator, Zero-two-one-four, five systems, or 03 Meridian.
+- Prompt text area remains present.
+- Preview remains browser-first; Electron is not required for the scoped tests.
 
-Goal: clear Build 3's FileMap cadence pause and then review coordinator V2 contract wave commit `e37030e`.
+Completion: committed and pushed `docs/live-codex-reviews-2.md` only. No repair routed.
 
-Immediate Build 3 scope:
+## Completed / Passed
 
-- Review Build 3 recent FileMap cadence window ending with the Coordinator Override completion recorded as commit `67a75dc` plus completion marker `b3316b6`.
-- Verify recent FileMap registrations did not introduce stale paths, wrong owners, or broken required-path coverage.
-- Required proof: `python -m pytest tests/test_filemap.py -q`.
-- If clear, record Build 3 cadence clearance so Build 3 can register the new V2 contract-wave docs.
+Goal: clear Build 3's FileMap cadence pause for commit `67a75dc` plus completion marker `b3316b6`.
 
-Then review coordinator V2 contract wave commit `e37030e`.
+Status: passed by Codex Reviews B on 2026-05-31 15:52 -06:00. Build 3 FileMap cadence is clear: focused FileMap tests pass, the Electron/preview/queue reconciliation entries are present in the runtime FileMap, and required-path coverage includes the same paths. Build 3 may resume with the V2 contract-wave FileMap registration task.
+
+Scope:
+
+- Build 3 commit `67a75dc`.
+- Completion marker `b3316b6`.
+- Allowed files: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Proof:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `meridian_core/filemap.py` contains `package.json`, `electron/main.js`, `bifrost/preview.py`, `tests/test_bifrost_preview.py`, and `docs/prime-queue-reconciliation-requirement.md`.
+- `tests/test_filemap.py` required-path coverage includes the same five paths.
+
+Completion: Build 3 cadence cleared. No repair routed.
+
+## Completed / Passed
+
+Goal: review coordinator V2 contract wave commit `e37030e`.
+
+Status: passed by Codex Reviews B on 2026-05-31 15:50 -06:00. The V2 contract wave preserves the core Prime invariants and does not introduce unsafe runtime claims. No repair routed.
 
 Contract wave scope:
 
@@ -75,6 +98,22 @@ Review expectations:
 - Route FileMap registration gaps to Build 3 after review.
 
 Proof: docs-only diff/reference review for the contract wave; run tests only if the review touches runtime files or package exports.
+
+Review result:
+
+- `git show --stat --oneline e37030e -- <contract-wave scope>` confirmed a docs/queue-only contract wave; no runtime files, package exports, or tests changed.
+- `docs/session-lifecycle-v2-contract.md` preserves unique worktrees, assigned queue routing, Scott/Prime branch permission, proof requirements, non-executable human gates, and workflow/sub-agent context offload.
+- `docs/federation-harness-horizon.md` is planning-only for V2 and explicitly excludes network protocol, auth implementation, marketplace/public registry, shared mutable project state, and cross-account automation.
+- `docs/session-card-queue-activation-contract.md` captures Polaris Q-mode lessons while forbidding read-check-only commit spam and treating wrong queues, stale tasks, shared worktrees, provider limits, failed pull/push, review blocks, lost heartbeat, and prompt payload growth as degraded states.
+- `docs/deepseek-provider-validation-gate.md` keeps DeepSeek in candidate state until direct API, prompt payload, bounded Q-mode, benchmark, and external review proof exist; it forbids review-clearing, autonomous commits without external review, branch movement, worktree mutation authority, and OpenRouter fallback when direct DeepSeek behavior is required.
+- Build 2 has a valid next active task: `docs/session-lifecycle-implementation-checklist.md`.
+- Build 4 has a valid next active task: `docs/workflow-subagent-usage-checklist.md`.
+- Build 5 has a valid next active task: `docs/bifrost-voice-command-contract.md`.
+- FileMap registration for the new V2 contract-wave documents is already routed to Build 3 as the current Active Task.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` only. No repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 Review A and Review B are a scaling prototype for Prime. When review pressure backs up, Prime should be able to spawn additional review capacity, assign bounded scope, and merge the results back into the shared checkpoint ledger.
 
@@ -126,11 +165,13 @@ Look for:
 
 ## Checkpoint Ledger
 
+Latest ledger note: as of 2026-05-31 15:50 -06:00, commit `e37030e` is review-cleared for Build 4/Build 5 contract-wave scope, Build 3 owns the FileMap registration follow-up for the contract-wave documents, and no repair is routed.
+
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 3 | 1378bda | FileMap repair — register 4 uncatalogued docs (Round B2) | passed | Round B1 MEDIUM repair verified closed; 1 new MEDIUM finding (live-codex-reviews-2.md still uncatalogued); 2 LOW prose-divergence carryovers from Round B1 still deferred | route 1-row FileMap follow-up to Build 3 for `docs/live-codex-reviews-2.md`; verify in Round B3 |
+| Build 3 | 67a75dc | FileMap registration for V1 Electron/preview/queue reconciliation entries | passed | none - FileMap tests passed and runtime map/required paths include package.json, electron/main.js, bifrost/preview.py, tests/test_bifrost_preview.py, and prime-queue-reconciliation-requirement.md | active task: register V2 contract-wave docs in FileMap |
 | Build 4 | 0115581 | Workflows architecture note (Round B15) | passed-with-findings | MEDIUM: 5 V2 architecture docs need FileMap registration (echo-memory-contract.md, atlas-retrieval-contract.md, workflow-subagent-harness-contract.md, prime-autonomy-v2-contract.md, workflows-subagent-harness-architecture.md — from Rounds B11+B13+B14+B15 findings) | route consolidated 5-entry FileMap repair to Build 3; verify in next Build 3 cadence review |
-| Build 5 | 9328272 | V1 Harness Dashboard implementation | passed Round B8 | no findings; final V1 cockpit item cleared | V1 cockpit build is review-cleared |
+| Build 5 | 2bee5ab | Bifrost browser-first declutter / PRIMED HUD core | passed | none - focused tests pass and rendered HUD core is quiet with prohibited provider/build labels absent | await next Build 5 Ready marker |
 
 ## Review Round Scope
 
