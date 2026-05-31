@@ -365,7 +365,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/relay-prompt-metrics-integration-brief.md",
             area=FileArea.PROMPT_METRICS,
-            purpose="Architectural plan for wiring PromptMetricSample collection into the Relay dispatch path and surfacing status in Compass.",
+            purpose="Architectural plan for wiring PromptMetricSample collection into Relay dispatch, including Polaris-style visible prompt payload size, budget pressure, and growth/flat status in Bifrost/Compass surfaces.",
             related_tests=[],
             notes="Planning only; no runtime changes yet.",
         ),

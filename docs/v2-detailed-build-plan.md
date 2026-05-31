@@ -139,6 +139,7 @@ First wave deliverable:
 - Treat **Claude, OpenAI, and DeepSeek** as first-class primary providers in the Model Harness, not optional one-off integrations.
 - Add a DeepSeek direct-API adapter target for V4 models (`deepseek-v4-pro` default, `deepseek-v4-flash` fast lane) so Prime can route high-volume build work away from Claude when capacity or cost requires it.
 - Bring forward Polaris's **Balance button** pattern: Bifrost exposes provider balances, token/cost telemetry, and model spend visibility for Claude, OpenAI, DeepSeek, and any aggregator routes.
+- Bring forward Polaris's **visible prompt payload meter** pattern: every Relay dispatch must expose the final prompt payload size, budget percentage, and growth delta so Prime/Scott can catch additive prompt replay before it becomes latency, quota, or cost drag.
 
 **Likely files/modules/docs:**
 
@@ -153,6 +154,8 @@ First wave deliverable:
 
 - Tests for capability matching and missing-capability failures.
 - Tests that prompt budget metadata is copied without inflating prompt content.
+- Tests that each dispatch produces a visible prompt-size label such as `(under 1k)` or `(12.4k)` from structured prompt metrics, not scraped transcript text.
+- Tests that queue/Q-mode prompt payloads do not grow across polls unless the task packet itself changed; unexpected growth is a DEGRADED prompt-drag finding.
 - Tests that DeepSeek provider metadata resolves through the same adapter contract as Claude/OpenAI and never bypasses Relay/Aegis policy checks.
 - Tests that Balance surface data is derived from structured usage/provider telemetry rather than scraped card text.
 
@@ -234,6 +237,13 @@ First wave deliverable:
 
 **Balance button requirement:** Bifrost must expose the Meridian version of Polaris's Balance button. It should show provider/account health, remaining credits where available, token usage by provider/model, estimated spend, and cost pressure warnings that Prime can use when routing work across Claude, OpenAI, DeepSeek, and future adapters.
 
+**Prompt payload visibility requirement:** Bifrost must expose the Meridian version
+of Polaris's per-prompt payload indicator. Every model dispatch should show the
+payload-size label and budget pressure in the system/progress surface. Queue/Q-mode
+lanes should also show whether the latest prompt was flat or grew against the prior
+dispatch, because unexpected growth means Relay is replaying history instead of
+sending only the task packet.
+
 **First vertical slice:**
 
 - Add view-model placeholders for:
@@ -242,6 +252,7 @@ First wave deliverable:
   - Atlas retrieval hits
   - session lifecycle command preview
   - Aegis cognition policy result
+  - prompt payload size / budget / growth indicator
 
 **Likely files/modules/docs:**
 

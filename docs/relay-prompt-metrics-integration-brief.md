@@ -17,6 +17,12 @@ Relay dispatch currently executes without observability into prompt performance:
 
 **Principle:** *Relay Must Not Become Prompt Drag* — measure overhead, make it visible, act on it.
 
+**Polaris lesson carried forward:** Polaris exposed the approximate prompt
+payload size every time it sent a model prompt, for example `(12.4k)` or
+`(under 1k)`. That visible payload meter is how Scott caught DeepSeek queue
+prompts growing additively across polls. Meridian must preserve this as a
+first-class Bifrost/Relay diagnostic, not just as an internal metric.
+
 ---
 
 ## Dispatch Lifecycle with Metrics
@@ -121,6 +127,57 @@ construction_time_ms = now_ms() - start_ms
 ```python
 prompt_tokens = len(tokenizer.encode(serialized_prompt))
 assert prompt_tokens <= budget_plan.max_context_tokens
+```
+
+### 2a. Visible Prompt Payload Meter
+
+**What to show:** A compact user-visible payload size indicator every time
+Prime/Relay sends a prompt to any model-backed session.
+
+**Minimum display:** `(<tokens/1000 rounded to 0.1>k)` or `(under 1k)`.
+
+**Where to show it:** Bifrost session/progress surfaces, near the dispatch or
+queue-poll event that triggered the model call. The display belongs in the
+system/progress surface, not inside the worker prompt.
+
+**Why it matters:**
+- It lets Scott and Prime catch additive context growth immediately.
+- It makes prompt drag visible before it becomes a quota or latency incident.
+- It gives the Balance surface and prompt metrics a concrete per-dispatch value.
+- It provides a simple proof that Q-mode/queue-mode prompts are stateless and
+  file-grounded rather than transcript-replay based.
+
+**Required fields:**
+- `prompt_tokens`
+- `prompt_size_label`
+- `budget_tokens`
+- `budget_percent`
+- `dispatch_id`
+- `provider`
+- `model`
+- `lane_id`
+- `risk_tier`
+- `queue_mode` / `session_mode`
+- `previous_prompt_tokens` when the lane has a prior dispatch
+- `growth_tokens`
+- `growth_percent`
+
+**Status thresholds:**
+- `HEALTHY`: within budget and growth is expected for the session mode.
+- `WATCH`: prompt grew unexpectedly, or `budget_percent >= 80`.
+- `DEGRADED`: prompt exceeds budget, or queue/Q-mode prompt grows across
+  dispatches when it should be stateless.
+
+**Q-mode rule:** Queue-mode prompts should be flat. If a queue worker's prompt
+payload grows because prior prompt/response history is being replayed, Relay
+must flag the dispatch as `DEGRADED` and Prime must stop assigning more queue
+work to that lane until the prompt assembly path is corrected.
+
+```python
+prompt_tokens = count_tokens(serialized_prompt)
+prompt_size_label = f"({prompt_tokens / 1000:.1f}k)" if prompt_tokens >= 1000 else "(under 1k)"
+growth_tokens = prompt_tokens - previous_prompt_tokens if previous_prompt_tokens is not None else 0
+budget_percent = prompt_tokens / budget.max_context_tokens
 ```
 
 **Integration with Budget:**
