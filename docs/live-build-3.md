@@ -1,4 +1,4 @@
-﻿# Live Build 3 Queue
+# Live Build 3 Queue
 
 This file is the standing assignment queue for Build 3.
 
@@ -75,7 +75,9 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 16:35 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 16:37 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 16:39 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:35 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
+2026-05-30 16:40 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 16:42 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 16:43 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 16:50 -06:00 - Build 3 checked queue; status: idle; Active Task still stale; awaiting Codex review result and new task
 2026-05-30 17:05 -06:00 - Build 3 checked queue; status: active task found (FileMap refresh for relay_dispatch, live-codex-reviews, prime-orchestration prototype, diagrams); starting work
 2026-05-30 17:35 -06:00 - Build 3 checked queue; status: idle; Active Task stale (relay_dispatch/codex-reviews refresh done at 4075ef4); awaiting new task
@@ -92,7 +94,15 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-05-30 20:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 20:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 20:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
-2026-05-30 21:05 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
+2026-05-30 21:01 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:02 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:04 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:05 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:06 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:07 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:09 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:10 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
+2026-05-30 21:11 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 2026-05-30 21:20 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 21:35 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
 2026-05-30 21:50 -06:00 - Build 3 checked queue; status: idle; no active task; awaiting next assignment
@@ -217,17 +227,6 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-01 04:11 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 2026-06-01 04:12 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
 2026-06-01 04:27 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 2/3 since Round B2; awaiting next assignment
-2026-05-30 16:40 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:42 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 16:43 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:01 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:02 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:04 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:06 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:07 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:09 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:10 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
-2026-05-30 21:11 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 1/3 since Round B3; awaiting next task assignment
 ```
 
 ## Write/Completion Log
