@@ -187,6 +187,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-31 16:00 -06:00 - Build 5 checked queue; status: idle (cleared); no change — Active Task still stale (cockpit scaffold d13f1d1 complete); Build 1 heartbeats landed (f487d4f/4f03885/61762b7), not Build 5 scope; no repair routed, no new Cross-Check Activity; cadence 1/3; awaiting orchestrator reassignment; origin/main at 6159417
 2026-05-31 16:10 -06:00 - Build 5 checked queue; status: idle (cleared); no change — Active Task still stale (cockpit scaffold d13f1d1 complete); Build 1 (e03f2a4) and Build 3 (ed54725) heartbeats landed, not Build 5 scope; no repair routed, no new Cross-Check Activity; cadence 1/3; awaiting orchestrator reassignment; origin/main at e03f2a4
 2026-05-31 16:20 -06:00 - Build 5 checked queue; status: idle (cleared); no change — Active Task still stale (cockpit scaffold d13f1d1 complete); Reviews C cadence clearances and Build 1 merge activity landed (5128d54 etc.), not Build 5 scope; no repair routed, no new Cross-Check Activity; cadence 1/3; awaiting orchestrator reassignment; origin/main at 5b8a048
+2026-05-31 16:30 -06:00 - Build 5 checked queue; status: idle (cleared); no change — Active Task still stale (cockpit scaffold d13f1d1 complete); Build 1 cadence cleared (65102d5), not Build 5 scope; no repair routed, no new Cross-Check Activity; cadence 1/3; awaiting orchestrator reassignment; origin/main at 7e29f78
 ```
 
 ## Write/Completion Log
