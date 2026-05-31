@@ -695,6 +695,13 @@ def make_default_map() -> FileMap:
             notes="UI/product contract only. Read before adding microphone, dictation, spoken Prime output, or voice-command cockpit behavior.",
         ),
         FileMapEntry(
+            path="docs/bifrost-balance-payload-surface-contract.md",
+            area=FileArea.BIFROST,
+            purpose="Bifrost provider balance and prompt payload surface contract: provider health, trust state, prompt-size visibility, Q-mode prompt drag, and DeepSeek route/trust warnings.",
+            related_tests=[],
+            notes="UI/product contract only. Bifrost displays Relay/Model Harness telemetry but does not choose provider routing.",
+        ),
+        FileMapEntry(
             path="docs/v1-bifrost-cockpit-implementation-brief.md",
             area=FileArea.BIFROST,
             purpose="V1 Bifrost cockpit implementation brief: what V1 builds, what it omits, and which UI slices land first. Turns V0's domain capabilities into a Prime-centered, browser-rendered cockpit surface.",
