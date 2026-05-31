@@ -359,6 +359,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-06-01 ~16:50 CDT - Build 1 completed env-gated HTTP JSON Model Harness transport; commit 869faa4; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 72 targeted adapter/executor passed, 916 full passed; Ready for Codex Review.
 2026-05-30 16:45 -06:00 - Codex review repair for env-gated HTTP JSON Model Harness transport; commit f353c8d; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 72 targeted adapter/executor passed, 916 full passed; added provider to request body and parsed standard-library HTTP JSON response text.
 2026-06-02 ~21:40 CDT - Build 1 completed Prime cockpit snapshot/event domain shape; commit f56af55; files: meridian_core/cockpit_state.py, tests/test_cockpit_state.py; tests: 25 targeted cockpit_state passed, 941 full passed; Obsidian pending; Ready for Codex Review.
+2026-05-31 05:02 -06:00 - Coordinator assigned V2 Aegis CognitionPolicy domain model; commit pending; tests pending (`python -m pytest tests/test_cognition_policy.py -q`)
 ```
 
 ## Cross-Check Activity
@@ -402,7 +403,54 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-No active task. Polling for next assignment.
+Current Active Task:
+
+Goal: implement the V2 Aegis CognitionPolicy domain model.
+
+Context:
+
+- V2 is active. The detailed V2 plan is commit `71b8d5f` and coordinator-reviewed clean.
+- This is First Implementation Wave item 1: Prime + Aegis policy before more autonomy.
+- Build 1 owns runtime/domain code.
+- Keep the slice deterministic and model-free.
+
+Allowed files only:
+
+- `meridian_core/cognition_policy.py`
+- `tests/test_cognition_policy.py`
+- `docs/live-build-1.md`
+
+Task:
+
+- Define a typed `CognitionPolicy` domain model that maps action type and risk tier to:
+  - required cognition lanes
+  - proof requirement
+  - review requirement
+  - human gate requirement
+  - Aegis block/allow decision before Relay dispatch
+- Include stable types/enums only where useful; prefer small, explicit dataclasses.
+- Cover at least these expectations:
+  - tier 1: single-lane, no human gate by default
+  - tier 2: normal review/proof requirement
+  - tier 3: dual-lane + proof required
+  - tier 4: human gate required
+  - missing proof blocks model dispatch when policy requires proof
+- Do not call models.
+- Do not edit Relay dispatch/executor yet.
+- Do not export from package root yet; Build 2 owns package API after this domain object lands.
+- Do not edit FileMap; Build 3 owns FileMap.
+
+Tests:
+
+- `python -m pytest tests/test_cognition_policy.py -q`
+- If imports touch Aegis unexpectedly, also run `python -m pytest tests/test_aegis.py tests/test_cognition_policy.py -q`
+
+Completion:
+
+- Commit only this domain slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Last completed: V1 Prime cockpit snapshot provider/factory; commit `6c9a397`; files: meridian_core/cockpit_provider.py, tests/test_cockpit_provider.py, docs/live-build-1.md; tests: 48 targeted passed (test_cockpit_provider.py + test_cockpit_state.py); Ready for Codex Review.
 

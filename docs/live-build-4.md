@@ -228,6 +228,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-31 10:45 -06:00 - Build 4 completed V1 Bifrost live-data integration contract (docs/v1-bifrost-live-data-contract.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 02:00 -06:00 - Build 4 completed V1 Bifrost cockpit runtime acceptance checklist (docs/v1-bifrost-runtime-acceptance-checklist.md); commit ec66081; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 04:21 -06:00 - Codex coordinator completed V2 detailed build plan (docs/v2-detailed-build-plan.md); commit 71b8d5f; tests not required (docs-only); Ready for Codex Review
+2026-05-31 05:02 -06:00 - Coordinator assigned V2 first-wave Echo/Atlas contract docs; commit pending; tests not required (docs-only)
 ```
 
 ## Cross-Check Activity
@@ -276,46 +277,43 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes stale text below):
 
-Goal: write the detailed V2 build plan.
+Goal: write V2 first-wave contract docs for Echo Memory and Atlas Retrieval.
 
 Context:
 
-- V0 is complete.
-- V1 cockpit is complete and review-cleared at 12/12 built.
-- `docs/v2-horizon-plan.md` is the horizon source, but it is intentionally high level.
-- Scott asked for V2 planning once V1 is locked.
-- V2 should be organized by Prime/harness ownership, not loose feature names.
-- V2 should not reopen V1 cockpit scope unless a V2 track explicitly depends on a cockpit extension.
+- V2 is active. The detailed V2 plan is commit `71b8d5f` and coordinator-reviewed clean.
+- Build 1 now owns the first runtime slice: `CognitionPolicy`.
+- Build 3 owns FileMap registration for new docs.
+- Build 4 owns high-level architecture/planning docs.
+- This slice prepares the next two harnesses in the V2 first wave without touching runtime code.
 
 Allowed files only:
 
-- `docs/v2-detailed-build-plan.md`
+- `docs/echo-memory-contract.md`
+- `docs/atlas-retrieval-contract.md`
 - `docs/live-build-4.md`
 
 Task:
 
-- Create `docs/v2-detailed-build-plan.md`.
-- Define the V2 success test in plain terms.
-- Split V2 into harness-owned tracks:
-  - Prime autonomy
-  - Echo memory
-  - Atlas retrieval/RAG
-  - Relay + Model Harness hardening
-  - Aegis gated cognition
-  - Session Lifecycle Harness
-  - Bifrost cockpit extensions needed to operate V2
-  - Federation as future/optional unless justified
-- For each track, include:
-  - objective
-  - why it matters
-  - first vertical slice
-  - likely files/modules/docs to touch
-  - proof/test expectation
-  - out-of-scope guardrails
-- Recommend the first V2 implementation wave and explain why.
-- Keep it docs-only and implementation-facing.
+- Create `docs/echo-memory-contract.md` covering:
+  - Echo's role as the durable memory harness
+  - `MemoryRecord`, `MemoryQuery`, and `MemoryHit`
+  - ranking inputs: project, recency, importance, pinning
+  - deterministic local repository expectations
+  - failure-soft behavior when no memory is available
+  - prompt-drag guardrails and what must not be injected raw
+  - first tests Build 1/other runtime lane should implement later
+- Create `docs/atlas-retrieval-contract.md` covering:
+  - Atlas's role as FileMap/docs-first retrieval
+  - `AtlasHit` shape: path, title, reason, excerpt/summary, source
+  - deterministic ranking over path, area, purpose, notes, required path presence
+  - no broad filesystem crawl and no embeddings/vector store in first slice
+  - how Atlas differs from Echo and how Prime uses both together
+  - first tests Build 1/other runtime lane should implement later
+- Keep both docs concise and implementation-facing.
 - Do not edit runtime code.
 - Do not edit FileMap.
+- Do not edit package exports.
 - Do not edit other live queues.
 
 Tests:
@@ -328,6 +326,8 @@ Completion:
 - Push to `origin/main`.
 - Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+~~Previous Active Task (COMPLETED 2026-05-31 04:21 -06:00): write the detailed V2 build plan. Commit `71b8d5f`; coordinator review passed; FileMap follow-up routed to Build 3.~~
 
 ---
 
