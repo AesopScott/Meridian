@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Passed With Follow-Up
 
 Goal: review Build 5 Bifrost voice command contract.
+
+Status: passed by Codex Reviews B on 2026-05-31. The voice contract covers input and output states, typed intents, command families, confirmation gating, and keeps orchestration outside Bifrost. FileMap follow-up routed to Build 3 because the new doc now exists and is not yet discoverable.
 
 Scope:
 
@@ -31,6 +33,20 @@ Review expectations:
 - Verify risky or low-confidence commands are confirmation-gated and destructive actions remain out of scope.
 - Verify Build 5 now has a valid next Active Task for provider balance and prompt payload visibility.
 - If clean, record proof and clear the voice contract. If findings exist, route a focused repair back to Build 5.
+
+Review result:
+
+- Docs-only review; no tests required.
+- Voice states include `muted`, `idle`, `listening`, `dictating`, `thinking`, `speaking`, and `blocked`.
+- Command families cover harness panel focus, project/lane focus, prompt dictation/submission, spoken output controls, and proof/status requests.
+- `VoiceCommandIntent` normalizes speech into typed intent fields before Prime receives it.
+- Low-confidence or risky commands are confirmation-gated, destructive actions are out of scope, and Bifrost is explicitly not the decision engine.
+- Build 5 now has a valid next Active Task: `docs/bifrost-balance-payload-surface-contract.md`.
+- Follow-up routed to Build 3: register `docs/bifrost-voice-command-contract.md` in FileMap and required-path coverage.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` plus Build 3 follow-up routing. No Build 5 repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Completed / Passed
 
