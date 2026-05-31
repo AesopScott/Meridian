@@ -8,29 +8,59 @@
 
 ## V2 Progress Summary
 
-| Owner | Built | In Progress | Needs Build | Total | Percent Complete |
-|---|---:|---:|---:|---:|---:|
-| Prime Autonomy | 0 | 0 | 2 | 2 | 0% |
-| Echo Harness | 0 | 0 | 3 | 3 | 0% |
-| Atlas Harness | 0 | 0 | 3 | 3 | 0% |
-| Relay/Model Harness | 0 | 0 | 4 | 4 | 0% |
-| Aegis Harness | 1 | 0 | 1 | 2 | 50% |
-| Session Lifecycle Harness | 0 | 0 | 3 | 3 | 0% |
-| Bifrost Harness | 0 | 0 | 3 | 3 | 0% |
-| Federation Harness | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **1** | **0** | **20** | **21** | **4.8%** |
+| Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
+|---|---:|---:|---:|---:|---:|---:|
+| Prime Autonomy | 0 | 0 | 0 | 2 | 2 | 0% |
+| Echo Harness | 0 | 1 | 2 | 0 | 3 | 67% |
+| Atlas Harness | 0 | 0 | 1 | 2 | 3 | 33% |
+| Relay/Model Harness | 1 | 0 | 0 | 3 | 4 | 25% |
+| Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
+| Session Lifecycle Harness | 0 | 0 | 1 | 2 | 3 | 33% |
+| Bifrost Harness | 0 | 0 | 0 | 3 | 3 | 0% |
+| Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
+| **Total V2** | **3** | **1** | **4** | **13** | **21** | **19% Clear + 5% Awaiting + 19% Baseline** |
 
-## Built V2 Capabilities
+## Built and Review-Cleared V2 Capabilities
 
 ### Aegis Harness
 
-- [x] **Aegis + Prime:** `CognitionPolicy` domain model with action-type/lane/decision enums and policy tier mapping - built in `e08e598`; exposes `CognitionPolicy`, `CognitionPolicyResult`, `cognition_policy_for_tier()`, `evaluate_cognition_policy()` through package root for Relay binding.
+- [x] **Aegis + Prime:** `CognitionPolicy` domain model with action-type/lane/decision enums and policy tier mapping - built in `3cdc74d`; exposes `CognitionPolicy`, `CognitionPolicyResult`, `cognition_policy_for_tier()`, `evaluate_cognition_policy()` through package root for Relay binding; review cleared.
+- [x] **Relay + Aegis:** policy-aware Relay executor wrapper with `execute_relay_dispatch_plan_with_policy` - built in `b99ce1d`; evaluates cognition_policy against route tier before model calls, blocks dispatch with proof gate requirements; 157 tests passing (relay_executor, cognition_policy, aegis); review cleared.
+
+### Relay/Model Harness
+
+- [x] **Relay + CognitionPolicy Integration:** dispatching with proof gate enforcement - see Aegis entry above, commit `b99ce1d`; review cleared.
+
+## Built But Awaiting Review
+
+### Echo Harness
+
+- [ ] **Echo + Runtime:** `MemoryRecord`, `MemoryQuery`, `MemoryHit` domain objects with deterministic ranking by project/recency/importance/pinning - built and tested; awaiting Codex review gate clearance before marked fully complete.
+
+## Contract Baselines Complete (Not Runtime Implementation)
+
+### Echo Harness
+
+- [x] **Echo + Memory Contract:** `docs/echo-memory-contract.md` - architecture and interface contract defined; runtime implementation awaiting.
+- [x] **Echo + Repository Integration:** contract defined for local storage abstraction and query interface.
+
+### Atlas Harness
+
+- [x] **Atlas + Retrieval Contract:** `docs/atlas-retrieval-contract.md` - file/docs-first RAG interface contract defined; source-aware ranking principles established; runtime implementation awaiting.
+
+### Session Lifecycle Harness
+
+- [x] **Session Lifecycle + Workflow Contract:** `docs/workflow-subagent-harness-contract.md` - workflow/sub-agent dispatch contract for bounded harness work defined; Prime work order and heartbeat interface specified; runtime implementation awaiting.
 
 ## In Progress / Stabilizing
 
 - None currently. V2 domain slices enter full build queue after Codex cadence review completes.
 
-## Needs Build: First Wave
+## V3 Scope Note
+
+**Future capability planning:** `docs/agentic-ai-framework-checklist.md` documents V3 horizon architecture (multi-agent federation, cross-system coordination, adaptive autonomy). V2 focuses on single-Meridian Prime autonomy, memory, retrieval, and session lifecycle. V3 entry point is separate.
+
+## Needs Build: Remaining V2 Items
 
 ### Prime Autonomy
 
@@ -39,14 +69,11 @@
 
 ### Echo Harness
 
-- [ ] **Echo + Memory Contract:** `MemoryRecord`, `MemoryQuery`, `MemoryHit` domain objects - module: `meridian_core/echo.py`; tests: `tests/test_echo.py`; contract: `docs/echo-memory-contract.md`; ranked by project/recency/importance/pinning.
-- [ ] **Echo + Repository:** simple local storage abstraction for memory records - deterministic query function for Prime.
 - [ ] **Echo + FileMap Integration:** FileMap registration of memory storage location by Build 3.
 
 ### Atlas Harness
 
-- [ ] **Atlas + Retrieval Contract:** file/docs-first RAG over FileMap entries and Meridian docs - module: `meridian_core/atlas.py`; tests: `tests/test_atlas.py`; contract: `docs/atlas-retrieval-contract.md`; returns source-aware `AtlasHit` records.
-- [ ] **Atlas + Ranking:** deterministic, cheap ranking by path/area/purpose/notes - no embeddings in first slice.
+- [ ] **Atlas + Ranking:** deterministic, cheap ranking by path/area/purpose/notes - no embeddings in first slice; builds on contract baseline from `docs/atlas-retrieval-contract.md`.
 - [ ] **Atlas + FileMap Integration:** FileMap registration of Atlas query surface by Build 3.
 
 ### Relay / Model Harness
@@ -56,14 +83,9 @@
 - [ ] **Relay + Dispatch Hardening:** provider-neutral HTTP transport envelope updates for metadata pass-through.
 - [ ] **Relay + PromptPacket:** proof metadata integration into dispatch (prompt_packet.py already v1 complete; v2 adds budget/proof bindings).
 
-### Aegis Harness (Remaining)
-
-- [ ] **Aegis + Runtime:** proof requirement enforcement at dispatch time using `CognitionPolicy` decisions - gates high-risk actions in runtime Relay invocation.
-
 ### Session Lifecycle Harness
 
-- [ ] **Session Lifecycle + Contract:** `SessionLifecycleState` and `SessionCommandPlan` domain objects - module: `meridian_core/session_lifecycle.py`; tests: `tests/test_session_lifecycle.py`; contract: `docs/session-lifecycle-v2-contract.md`; models spawn/watch/steer/stop/transfer/archive/stale/recover actions.
-- [ ] **Session Lifecycle + Workflow:** workflow/sub-agent dispatch contract for bounded harness work - contract: `docs/workflow-subagent-harness-contract.md`; Prime issues typed work orders, receives heartbeats/proof/results.
+- [ ] **Session Lifecycle + Implementation:** `SessionLifecycleState` and `SessionCommandPlan` domain objects - module: `meridian_core/session_lifecycle.py`; tests: `tests/test_session_lifecycle.py`; models spawn/watch/steer/stop/transfer/archive/stale/recover actions; builds on contract baseline `docs/session-lifecycle-v2-contract.md`.
 - [ ] **Session Lifecycle + Permissions:** branch/worktree movement requires Scott or Prime permission object; stale recovery recommendation logic.
 
 ### Bifrost Harness
