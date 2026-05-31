@@ -209,7 +209,7 @@ Completion:
 - Registered file: `docs/workflow-subagent-usage-checklist.md`.
 - Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
 - Tests run: `python -m pytest tests/test_filemap.py -q`.
-- Commit: pending.
+- Commit: `a9d6a33`.
 
 Ready for Codex Review.
 
