@@ -4,7 +4,7 @@
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the V2 Session Lifecycle contract so Prime can spawn, watch, steer, recover, and hand off sessions through typed state instead of ad hoc UI supervision.
 
@@ -24,15 +24,21 @@ Cover:
 
 Tests: none required, docs-only.
 
-Completion: commit only this contract slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion: coordinator completed this contract slice; commit pending.
 
-## Next Candidate Task
+Ready for Codex Review:
 
-Goal: implement the V2 Session Lifecycle domain objects after this contract is written and reviewed.
+- Files: `docs/session-lifecycle-v2-contract.md`, `docs/live-build-2.md`
+- Tests: not required (docs-only)
+- Commit: pending coordinator commit
 
-Allowed files later: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+## Coordinator Override - Active Now
 
-Task later: build frozen dataclasses/enums for `SessionLifecycleState` and `SessionCommandPlan` with deterministic legality/executability helpers. Do not start until this docs contract is complete and no repair is routed.
+Goal: write the Session Lifecycle implementation checklist so the runtime slice is bounded before code begins.
+
+Allowed files only: `docs/session-lifecycle-implementation-checklist.md`, `docs/live-build-2.md`.
+
+Task: convert `docs/session-lifecycle-v2-contract.md` into a code-ready implementation checklist. Include enum/dataclass names, fields, legality helpers, executability helpers, proof expectations, tests to write, and what must remain out of runtime execution until later. Do not implement `meridian_core/session_lifecycle.py` until the contract is reviewed.
 
 ## ~~Codex Repair Active Task - Reviews A Round 6~~
 

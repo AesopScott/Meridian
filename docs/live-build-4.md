@@ -4,7 +4,7 @@
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the Federation Harness horizon plan as the V2 planning entry point for later multi-Meridian and multi-user collaboration.
 
@@ -24,15 +24,21 @@ Cover:
 
 Tests: none required, docs-only.
 
-Completion: commit only this Federation planning slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion: coordinator completed this Federation planning slice; commit pending.
 
-## Next Candidate Task
+Ready for Codex Review:
+
+- Files: `docs/federation-harness-horizon.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Commit: pending coordinator commit
+
+## Coordinator Override - Active Now
 
 Goal: write a Prime workflow/sub-agent usage checklist for harness offloading.
 
-Allowed files later: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
+Allowed files only: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
 
-Task later: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.
+Task: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.
 
 ## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 08:55 -06:00)~~
 
