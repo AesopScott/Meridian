@@ -4,9 +4,11 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
-## Coordinator Override - Active Review Scope
+## Coordinator Override - Completed / Passed
 
 Goal: verify Build 1 repair commit `8e8c87b` closes the V2 runtime/code MEDIUM findings.
+
+Status: passed by Codex Reviews A on 2026-05-31 14:57 -06:00. Build 1 repair commit `8e8c87b` closes the prompt payload meter zero/invalid budget finding and Echo naive timestamp finding; V2 tracker reconciliation can treat Echo and prompt payload meter as review-cleared for this repair.
 
 Scope:
 
@@ -221,7 +223,7 @@ This is the review lane's cursor. Update it after every review pass so the next 
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 1 | 57ed79a | V2 runtime/code sweep (`2bccb55`, `7e95ede`, `638117f`, `b99ce1d`, `57ed79a`) | repair routed | MEDIUM: prompt payload zero budget raises `ZeroDivisionError`; MEDIUM: Echo corrupt/naive `created_at` raises `TypeError` instead of failure-soft query behavior | Build 1 repair task written in `docs/live-build-1.md` |
+| Build 1 | 8e8c87b | V2 runtime failure-soft repair verification for Echo + prompt payload meter | passed | none - prompt payload zero/negative budgets and Echo naive `created_at` handling verified | await next Build 1 Ready marker |
 | Build 2 | 40def3d | V2 Prime next-action domain object (`prime_autonomy.py`) | repair routed | MEDIUM: `PrimeNextAction.is_executable()` ignores `human_gate_required`, making human-gated high-risk actions executable when no blockers exist | Build 2 repair task written in `docs/live-build-2.md` |
 | Build 3 | ef934b1 | FileMap refresh + FileMap Relay maturity repair (7ec16ac..ef934b1) | passed | observational: next FileMap refresh should add `meridian_core/relay_dispatch.py` (introduced by Build 1 fd35a81 after this commit) | await next Ready for Codex Review marker |
 | Build 4 | 736b6af | architecture consistency pass — Q button reference + cadence closure | passed | none | await next Ready for Codex Review marker |
@@ -402,6 +404,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-31 13:06 -06:00 - Reviewed Build 2 commit 40def3d; result: finding/repair-routed; tests: `python -m pytest tests/test_prime_autonomy.py -q` 30 passed; `python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q` 76 passed; notes: PrimeNextAction model is immutable and deterministic, but `is_executable()` ignores `human_gate_required` despite the field documenting that approval must happen before execution; repair routed to Build 2.
 2026-05-31 13:30 -06:00 - Reviewed coordinator commit 39c9ac8; result: finding/repair-routed; tests: `python -m pytest tests/test_prime_autonomy.py tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` 137 passed; `python -m pytest tests/test_filemap.py tests/test_prompt_metrics.py -q` 94 passed; notes: Prime human-gate repair passed; JARVIS-source runway direction is present, but Build 5 has contradictory stale active-task/path references that could send the builder to the old contract file; repair routed to Build 5.
 2026-05-31 14:45 -06:00 - Reviewed Build 1 V2 runtime/code commits `2bccb55`, `7e95ede`, `638117f`, `b99ce1d`, and docs contract `57ed79a`; result: finding/repair-routed; tests: `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q` 132 passed; `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q` 157 passed; notes: Atlas, Relay policy/Aegis enforcement, and queue-runway contract review passed; Echo and prompt payload meter each have one MEDIUM failure-soft edge finding; repair routed to Build 1.
+2026-05-31 14:57 -06:00 - Reviewed Build 1 repair commit `8e8c87b`; result: pass; tests: `python -m pytest tests/test_echo.py -q` 25 passed; `python -m pytest tests/test_prompt_payload_meter.py -q` 23 passed; `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q` 136 passed; `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q` 157 passed; notes: repair adds Echo datetime normalization/skip behavior plus prompt payload zero/negative budget guards and regression tests; no remaining CRITICAL/HIGH/MEDIUM/LOW findings in this repair scope.
 ```
 
 ## Proof Log
@@ -434,6 +437,7 @@ YYYY-MM-DD HH:MM TZ - Proof for Build <n> commit <hash>; proof type: diff/test/r
 2026-05-31 13:59 -06:00 - Proof for Reviews A idle queue cadence check; proof type: diff/manual; evidence: `git diff aec8dc9..HEAD -- docs/live-codex-reviews.md` shows idle read/write checkpoints plus Build 5 repair-observation notes, while the queue top still says no active task; recent `pending` scan found no unresolved pending write status before this checkpoint; result: pass.
 2026-05-31 14:45 -06:00 - Proof for Build 1 V2 runtime/code review; proof type: test/diff/manual; evidence: scoped commit/file inspection stayed within allowed review files; targeted suites passed 132 and 157 tests; manual edge proof `PromptPayloadSnapshot(raw_prompt_chars=0, estimated_tokens=0, budget_tokens=0).status` raised `ZeroDivisionError` via `prompt_payload_meter.py:91` -> `budget_percent`; manual edge proof with `MemoryRecord(created_at=datetime(2026, 5, 31, 12, 0, 0))` raised `TypeError: can't subtract offset-naive and offset-aware datetimes` through `echo.py:192`; result: fail-repair-routed.
 2026-05-31 14:55 -06:00 - Proof for Reviews A idle queue cadence check; proof type: diff/manual; evidence: `git diff a567020..HEAD -- docs/live-codex-reviews.md docs/live-build-1.md` shows the already-routed Build 1 repair plus idle read/write checkpoints; queue top still says no active task; result: pass.
+2026-05-31 14:57 -06:00 - Proof for Build 1 repair commit `8e8c87b`; proof type: test/diff/manual; evidence: all four assigned pytest commands passed (25 echo, 23 prompt payload, 136 combined runtime, 157 policy/Aegis/Relay); diff inspection confirmed `PromptPayloadSnapshot.budget_percent` returns 0 for `None`/zero/negative budgets and `status` ignores invalid budgets without crashing; diff inspection confirmed `EchoRepository.query()` normalizes naive datetimes before filtering/scoring/sorting; manual edge proof returned Echo hits without raising and zero/negative prompt budgets returned `healthy`; result: pass.
 ```
 
 Minimum proof expectations:
@@ -474,6 +478,7 @@ YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LO
 2026-05-31 14:45 -06:00 - Build 1 commit 638117f; severity: MEDIUM; file: meridian_core/prompt_payload_meter.py; finding: `PromptPayloadSnapshot(..., budget_tokens=0).status` raises `ZeroDivisionError` through `budget_percent`, so a malformed/zero budget can crash the helper instead of returning deterministic status or validating the snapshot; action: repair-task-written to `docs/live-build-1.md`.
 2026-05-31 14:45 -06:00 - Build 1 commit 2bccb55; severity: MEDIUM; file: meridian_core/echo.py; finding: `EchoRepository.query()` promises failure-soft behavior for corrupt records, but a naive `created_at` timestamp raises `TypeError` during recency scoring instead of skipping/normalizing the bad record; action: repair-task-written to `docs/live-build-1.md`.
 2026-05-31 14:55 -06:00 - Reviews A idle queue cadence check; severity: LOW/none; file: docs/live-codex-reviews.md; finding: no actionable findings in the recent queue-only read-check/status updates or already-routed Build 1 repair record; action: clear, no repair task written.
+2026-05-31 14:57 -06:00 - Build 1 repair commit `8e8c87b`; severity: none; file: meridian_core/echo.py and meridian_core/prompt_payload_meter.py; finding: no CRITICAL, HIGH, MEDIUM, or LOW findings remain in the scoped repair verification; action: clear, no repair task written.
 ```
 
 ## Repair Routing Log
@@ -491,6 +496,7 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-05-31 13:06 -06:00 - Routed repair to Build 2; queue: docs/live-build-2.md; finding: `PrimeNextAction.is_executable()` must respect `human_gate_required`; status: pending.
 2026-05-31 13:30 -06:00 - Routed repair to Build 5; queue: docs/live-build-5.md; finding: remove stale lower `## Active Task` / old `docs/bifrost-v2-extensions-contract.md` path contradiction and align `docs/v2-detailed-build-plan.md` with `docs/bifrost-v2-cockpit-extensions.md`; status: pending.
 2026-05-31 14:45 -06:00 - Routed repair to Build 1; queue: docs/live-build-1.md; finding: prompt payload meter must handle `budget_tokens=0` and Echo must not crash on corrupt/naive `created_at` records; status: pending.
+2026-05-31 14:57 -06:00 - Verified Build 1 repair commit `8e8c87b`; queue: docs/live-build-1.md; finding: prompt payload meter zero/invalid budget and Echo naive timestamp failure-soft repairs; status: passed, no further Build 1 repair routed.
 ```
 
 ## Coordinator Addendum - Planning Harness Review
@@ -641,6 +647,7 @@ Round 6 write log:
 - 2026-05-31 14:52 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `1b78484`; status-update commit: `9d427f4`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 14:53 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `7c9caa8`; status-update commit: `1d58165`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 14:55 -06:00 - Codex Reviews A completed idle queue read and queue-only cadence check after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff a567020..HEAD -- docs/live-codex-reviews.md docs/live-build-1.md`. Commit: `d3a69f6`; status-update commit: `e2ef32d`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-05-31 14:57 -06:00 - Codex Reviews A completed Build 1 V2 runtime repair verification. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_echo.py -q` (25 passed); `python -m pytest tests/test_prompt_payload_meter.py -q` (23 passed); `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q` (136 passed); `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q` (157 passed). Commit: pending. Push status: pending. Obsidian update status: not updated; review queue records tracker implication only.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
