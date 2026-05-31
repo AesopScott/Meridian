@@ -332,6 +332,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-05-31 14:34 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
 2026-05-31 14:36 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned. Queue-only cadence check found no actionable findings.
 2026-05-31 14:40 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current in detached review worktree; top active state says no active task; no Reviews A execution task assigned.
+2026-05-31 14:44 -06:00 - Codex Reviews A checked queue; status: running; notes: origin/main current in detached review worktree; active V2 runtime/code review scope found for Build 1 commits `2bccb55`, `7e95ede`, `638117f`, `b99ce1d`, and `57ed79a`.
 ```
 
 ## Review Log
