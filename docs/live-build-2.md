@@ -188,6 +188,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 13:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; polling)
 2026-06-01 14:05 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; polling)
 2026-06-01 14:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; polling)
+<<<<<<< HEAD
 2026-06-01 14:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; polling)
 2026-05-30 19:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-30 19:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
@@ -247,6 +248,23 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 04:55 -06:00 - Build 2 checked queue; status: idle (cockpit_state task already complete; awaiting new orchestrator assignment)
 2026-05-31 05:05 -06:00 - Build 2 checked queue; status: idle (cockpit_state task already complete; awaiting new orchestrator assignment)
 2026-05-31 09:30 -06:00 - Build 2 checked queue; Active Task found: V1 cockpit_provider package API surface; committed by Build 1 (14315b3) — anomaly, code correct; executing completion log
+=======
+2026-06-01 14:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; awaiting orchestrator assignment; polling)
+2026-06-01 14:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; cadence 1 of 3; awaiting orchestrator assignment; polling)
+2026-06-01 14:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; cadence 1 of 3; awaiting orchestrator assignment; polling)
+2026-06-02 15:05 -06:00 - Build 2 checked queue; Active Task found: Bifrost Electron/preview package surface policy note (Coordinator Override); executing
+2026-06-02 15:15 -06:00 - Build 2 checked queue; status: idle (Bifrost preview policy task complete, commit e9062d9; no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 07:40 -06:00 - Build 2 checked queue; status: idle (Bifrost task already complete; no new Active Task; cadence count: 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 07:50 -06:00 - Build 2 checked queue; status: idle (conflict resolved in bifrost note, commit 7d2907e; no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 14:05 -06:00 - Build 2 checked queue; status: idle (no new Active Task; Bifrost task complete; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 14:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 14:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 14:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 14:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 14:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; both listed tasks already complete; cadence 2 of 3; awaiting orchestrator assignment; polling)
+2026-06-04 15:05 -06:00 - Build 2 checked queue; status: idle (no new Active Task; awaiting orchestrator assignment; cadence 2 of 3; polling)
+2026-06-04 15:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; awaiting orchestrator assignment; cadence 2 of 3; polling)
+>>>>>>> 9660d40d23a88ddb2888144a2b309a0c86a415f8
 ```
 
 ## Write/Completion Log
@@ -280,6 +298,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-05-31 01:45 -06:00 - Build 2 completed cockpit_state package API surface; commits e656027 (meridian_core/__init__.py, Build 4) + b314b5b (tests/test_package_api.py, Build 3) [committed by other sessions before Build 2 executed — anomaly, code correct and verified]; tests 992 passed; cadence count: 2 of 3 since 9c3e1a3; Ready for Codex Review
 2026-05-31 09:30 -06:00 - Build 2 completed V1 cockpit_provider package API surface; commit 14315b3 (Build 1 — anomaly, code correct); files changed: meridian_core/__init__.py, tests/test_package_api.py; tests 1036 passed; cadence count: 3 of 3 since 9c3e1a3; Ready for Codex Review
 2026-06-01 10:20 -06:00 - Build 2 completed V2 CognitionPolicy package API surface; commit e08e598 (merged to main as b04c465); files changed: meridian_core/__init__.py, tests/test_package_api.py; tests 32 passed (cognition_policy + package_api); cadence count: 1 of 3 since 9c3e1a3; Ready for Codex Review
+2026-06-02 15:10 -06:00 - Build 2 completed Bifrost Electron/preview package surface policy note; commit e9062d9; files changed: docs/bifrost-preview-package-api-note.md, docs/package-api-surface-note.md, docs/live-build-2.md; tests 17 passed (package_api sanity check); cadence count: 2 of 3 since 9c3e1a3; Ready for Codex Review
 ```
 
 ## Cross-Check Activity
@@ -323,6 +342,92 @@ YYYY-MM-DD HH:MM TZ - Build 2 Codex review result: pass/no actionable findings/f
 ```
 
 ## Active Task
+
+Current Active Task - Coordinator Override:
+
+Goal: create the V2 progress tracker so V2 becomes countable in progress reports.
+
+Context:
+
+- V0 and V1 are complete.
+- `docs/v2-detailed-build-plan.md` exists and defines the V2 tracks.
+- Scott wants progress reports to show total items built, total left, and percentages.
+- Every tracker item must be framed as Prime or harness ownership. No loose feature names.
+- This is a Haiku-safe docs/accounting slice. Do not implement runtime code.
+
+Allowed files only:
+
+- `docs/v2-progress-tracker.md`
+- `docs/v0-v1-progress-tracker.md`
+- `docs/live-build-2.md`
+
+Task:
+
+- Create `docs/v2-progress-tracker.md`.
+- Convert the V2 detailed plan into countable checklist items grouped by owner: Prime Autonomy, Echo Harness, Atlas Harness, Relay/Model Harness, Aegis Harness, Session Lifecycle Harness, Bifrost Harness, FileMap Harness, and Review/Codex Harness.
+- Include totals table with Built / In Progress / Needs Build / Total / Percent.
+- Mark already-built V2 items accurately: CognitionPolicy domain model, policy-aware Relay executor wrapper, Echo/Atlas contract docs, and workflow sub-agent architecture principle if represented as an architecture/contract baseline.
+- Mark first-wave tasks still needed, including Echo runtime, Atlas runtime, PrimeNextAction, SessionLifecycleState, Bifrost V2 extensions, and FileMap follow-ups.
+- Update `docs/v0-v1-progress-tracker.md` to point V2 reporting at the new tracker.
+- Do not edit runtime code or FileMap.
+
+Tests:
+
+- No tests required. Docs-only.
+
+Completion:
+
+- Commit only this tracker slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+
+Stale prior task follows.
+
+Coordinator Override - Current Active Task (supersedes stale CognitionPolicy export task below):
+
+Goal: write the Bifrost Electron/preview package surface policy note.
+
+Context:
+
+- Build 5 owns the actual Electron app shell and `bifrost/preview.py` implementation.
+- Build 2 owns package/API surface decisions and should keep public imports intentional.
+- The existing Bifrost package already exports renderer/view-model names from `bifrost/__init__.py`.
+- The new Electron shell will introduce preview-generation and app-entry concepts; these should not automatically become `meridian_core` root exports.
+- This is a Haiku-sized docs/API policy slice. Do not implement the Electron app.
+
+Allowed files only:
+
+- `docs/package-api-surface-note.md`
+- `docs/bifrost-preview-package-api-note.md`
+- `docs/live-build-2.md`
+
+Task:
+
+- Create `docs/bifrost-preview-package-api-note.md`.
+- Explain the intended public surface for Bifrost preview/app entrypoints:
+  - Bifrost package imports should stay under `bifrost`, not `meridian_core`.
+  - `render_cockpit_html`, `sample_cockpit_view_model`, and future preview helpers are Bifrost UI harness surface.
+  - Electron app commands belong to `package.json` / app shell, not Python package-root exports.
+  - Preview generation should expose a small stable helper only after Build 5 lands it.
+  - Avoid exporting file-writing helpers from `meridian_core.__all__`.
+- Update `docs/package-api-surface-note.md` with a short Bifrost section that points to the new note.
+- Do not edit `bifrost/`, `package.json`, `electron/`, `meridian_core/__init__.py`, FileMap, or other queues.
+
+Tests:
+
+- No tests required. Docs-only.
+- Optional sanity check: `python -m pytest tests/test_package_api.py -q` if you touch package API wording that references current exports.
+
+Completion:
+
+- Commit only this docs/API policy slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- Return to polling `docs/live-build-2.md` every 30 seconds.
+
+Stale prior task follows.
 
 Current Active Task:
 
