@@ -255,6 +255,57 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale text below):
 
+Goal: implement the V1 configurable progress/proof surface in Bifrost.
+
+Context:
+
+- V1 is now 10/12 built in `docs/v0-v1-progress-tracker.md`.
+- Build 5 completed the static cockpit scaffold in `d13f1d1`.
+- Build 5 completed `PrimeCockpitSnapshot` to `CockpitViewModel` mapping in `5c89e87`.
+- `docs/bifrost-configurable-progress-surface-brief.md` defines the Progress Surface behavior.
+- This is Build 5's third task-changing commit in the current cadence window after `d13f1d1` and `5c89e87`; after this slice, pause for Codex Reviews.
+
+Allowed files only:
+
+- `bifrost/cockpit.py`
+- `bifrost/__init__.py`
+- `bifrost/static/cockpit.css`
+- `tests/test_bifrost_cockpit.py`
+- `docs/live-build-5.md`
+
+Task:
+
+- Extend the Bifrost cockpit view model so progress entries can carry typed surface metadata without introducing JavaScript or external dependencies.
+- Add a small render-friendly type or fields for:
+  - category
+  - severity
+  - source
+  - timestamp
+  - summary
+  - optional drilldown reference
+- Render Progress Surface cards with category/severity/source/timestamp/summary and stable CSS hooks.
+- Add a compact Progress Surface header summary with counts by severity or category.
+- Preserve the existing static HTML contract and escaping behavior.
+- Do not read queue files, logs, environment variables, or prompts.
+- Do not implement persistence, user settings storage, or live routing in this slice.
+- Do not edit Prime, FileMap, package exports, or review queues.
+
+Tests:
+
+- Add focused tests for progress/proof metadata rendering, escaping, and summary counts.
+- Keep existing cockpit tests passing.
+- Run `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion:
+
+- Commit only this Bifrost progress-surface slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- Because this will be the third Build 5 task-changing commit in the cadence window, request Codex Reviews before taking another Build 5 implementation task.
+
+Stale prior task follows.
+
 Goal: map `PrimeCockpitSnapshot` into the Bifrost `CockpitViewModel`.
 
 Context:
