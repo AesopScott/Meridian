@@ -43,7 +43,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 11:26 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at d1563dc
 2026-05-30 11:27 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 1db1b23); no new task; origin/main at 6f554d4
 2026-05-30 11:28 -06:00 - Build 4 checked queue; status: idle; no new Active Task; origin/main at 0246d1b
-2026-05-30 11:29 -06:00 - Build 4 checked queue; status: running; Active Task = Review Console surface contract; origin/main at 27db0e2; this is doc commit 3 of 3 â€” Codex review follows completion
+2026-05-30 11:29 -06:00 - Build 4 checked queue; status: running; Active Task = Review Console surface contract; origin/main at 27db0e2; this is doc commit 3 of 3 — Codex review follows completion
 2026-05-30 11:41 -06:00 - Build 4 checked queue; status: running; new Active Task = consistency review pass (capabilities map + Review Console contract); Codex review repairs already committed as 7792243
 2026-05-30 11:47 -06:00 - Build 4 checked queue; status: idle; Active Task section stale (task completed 736b6af); no new task; origin/main at c6acc6e
 2026-05-30 11:52 -06:00 - Build 4 checked queue; status: running; Active Task = V0 build readiness map (docs/v0-build-readiness-map.md); origin/main at 0282b3a
@@ -90,7 +90,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 14:28 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (dff15e5); origin/main at dff15e5
 2026-05-30 14:29 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 7f87226
 2026-05-30 14:30 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 92c139e
-2026-05-30 14:32 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews B Round B1 scope declared (4019a94) â€” may cover Build 4 slices 3cbf336 and 1d17fa1; origin/main at 4019a94
+2026-05-30 14:32 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews B Round B1 scope declared (4019a94) — may cover Build 4 slices 3cbf336 and 1d17fa1; origin/main at 4019a94
 2026-05-30 14:33 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Reviews B Round B1 still pending (0818bcc); origin/main at 0818bcc
 2026-05-30 14:34 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Reviews B Round B1 still pending; origin/main at 3890603
 2026-05-30 14:35 -06:00 - Build 4 checked queue; status: idle; no new Active Task; 05254b3 clarified review cadence throughput (live-codex-reviews.md + harness-prototype.md, not Build 4 owned); Reviews B Round B1 still pending; origin/main at 5601c46
@@ -149,7 +149,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-30 20:52 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ee7e8a4
 2026-05-30 21:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; Build 1 idle polling (ba50f1b); Build 4 slices 3cbf336, 1d17fa1, fd9224d still pending Codex Reviews sweep; origin/main at ba50f1b
 2026-05-30 21:29 -06:00 - Build 4 checked queue; status: running; new Active Task = Meridian V1 capability plan (docs/v1-capability-plan.md); origin/main at 9965720
-2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated â€” V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
+2026-05-30 22:40 -06:00 - Build 4 checked queue; status: running; Active Task updated — V1 redefined as cockpit UI only; rewriting v1-capability-plan.md; origin/main at 35ed57b
 2026-05-30 23:13 -06:00 - Build 4 checked queue; status: idle; V1 plan revision complete (7b43848/9a4e6a4); no new Active Task; origin/main at 9dafd9c
 2026-05-30 23:45 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at 0861a97
 2026-05-31 00:17 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle; origin/main at e972c70
@@ -178,7 +178,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 11:04 -06:00 - Codex created Build 4 Opus high-level queue and assigned Meridian capabilities architecture map; commit pending; tests not required
 2026-05-30 11:09 -06:00 - Build 4 completed Meridian capabilities architecture map (docs/meridian-capabilities-architecture-map.md); commit pending push; tests not required
 2026-05-30 11:23 -06:00 - Build 4 completed capabilities map update: Prompt Packet maturity domain slice (0ce0cf9), Polaris Q button note added to capability 3; commit pending; tests not required
-2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit d29cca6; tests not required; this is doc commit 3 of 3 â€” Codex review to follow
+2026-05-30 11:31 -06:00 - Build 4 completed Review Console surface contract (docs/review-console-surface-contract.md); commit d29cca6; tests not required; this is doc commit 3 of 3 — Codex review to follow
 2026-05-30 11:37 -06:00 - Codex assigned Build 4 architecture review/finish pass; commit pending; tests not required
 2026-05-30 11:41 -06:00 - Build 4 completed consistency review pass: updated Q button note to reference bifrost-session-queue-activation-brief.md, closed Codex cadence; commit pending; tests not required
 2026-05-30 11:47 -06:00 - Build 4 idle read check logged; cross-check complete; no new task; commit c6acc6e is latest origin/main
@@ -187,7 +187,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-30 15:08 -06:00 - Build 4 completed Prime status console and Review Console CLI bridge (docs/prime-status-console-cli-brief.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 16:01 -06:00 - Build 4 completed Prime restart/resteer logic (docs/prime-restart-resteer-logic.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-30 21:29 -06:00 - Build 4 completed Meridian V1 capability plan (docs/v1-capability-plan.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
-2026-05-30 22:40 -06:00 - Build 4 revised V1 capability plan (docs/v1-capability-plan.md) â€” cockpit UI scope per Scott clarification; commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-05-30 22:40 -06:00 - Build 4 revised V1 capability plan (docs/v1-capability-plan.md) — cockpit UI scope per Scott clarification; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 01:48 -06:00 - Build 4 completed V3 parking lot (docs/v3-parking-lot.md); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 ```
 
@@ -204,13 +204,13 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 11:28 -06:00 - Build 4 cross-check: finding (informational); Build 5 live queue added (b180d55); Build 1 Codex review cadence complete (0246d1b); Codex repair landed whitespace/empty packet_id fixes (9389563); none affect Build 4 owned files
 2026-05-30 11:47 -06:00 - Build 4 cross-check: finding (informational); bf15569 (Build 2) repaired stale is_valid/validation_errors claim in PromptPacket note; no impact on Build 4 docs; all other lanes (Build 1, 3, 5) idle polling; no findings affecting capabilities map or review-console contract
 2026-05-30 11:57 -06:00 - Build 4 cross-check: finding (informational); 2caa89e added missing Meridian engineering diagrams (not Build 4 owned files); Build 1 and Build 3 idle polling; no findings affecting Build 4 docs
-2026-05-30 12:00 -06:00 - Build 4 cross-check: finding (informational); 5bd55f8 â€” Build 5 cadence pause cleared by Codex Reviews (d1d32af passed); no findings affecting Build 4 docs; all lanes idle or awaiting assignment
-2026-05-30 12:04 -06:00 - Build 4 cross-check: finding (informational); c57bd12 â€” Codex Reviews confirmed both Build 5 slices passed with zero findings; no impact on Build 4 docs; Build 4 V0 readiness map (3cbf336) still pending review
-2026-05-30 12:18 -06:00 - Build 4 cross-check: finding (informational); 3e1de48 â€” Build 2 Codex cadence review passed (4be1117..46e4eb3); b3728e7 â€” Build 1 has d2820d2 awaiting Codex review; Codex Reviews lane active; Build 4 slices 3cbf336 and 1d17fa1 still pending sweep
-2026-05-30 12:22 -06:00 - Build 4 cross-check: finding (informational); f344cc0 â€” Codex Reviews round 2 queued; likely includes Build 4 slices 3cbf336 and 1d17fa1; no action until findings posted
-2026-05-30 12:27 -06:00 - Build 4 cross-check: finding (informational); 9941ecb â€” orchestrator cleared Build 3 queue; Build 5 awaiting reassignment (e9e11ed); all other lanes idle; no findings affecting Build 4 docs
-2026-05-30 13:42 -06:00 - Build 4 cross-check: finding (informational); 3de9c74 â€” second Codex review lane added; may accelerate round 2 sweep of Build 4 slices 3cbf336 and 1d17fa1; no action required on Build 4 files
-2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); 22594ca â€” cross-lane staging contamination: live-build-3.md and live-codex-reviews-2.md picked up in Build 4 idle read check commit; content landed correctly per their owning lanes; same pattern as 7792243 incident; no corrective action needed (history intact, content correct)
+2026-05-30 12:00 -06:00 - Build 4 cross-check: finding (informational); 5bd55f8 — Build 5 cadence pause cleared by Codex Reviews (d1d32af passed); no findings affecting Build 4 docs; all lanes idle or awaiting assignment
+2026-05-30 12:04 -06:00 - Build 4 cross-check: finding (informational); c57bd12 — Codex Reviews confirmed both Build 5 slices passed with zero findings; no impact on Build 4 docs; Build 4 V0 readiness map (3cbf336) still pending review
+2026-05-30 12:18 -06:00 - Build 4 cross-check: finding (informational); 3e1de48 — Build 2 Codex cadence review passed (4be1117..46e4eb3); b3728e7 — Build 1 has d2820d2 awaiting Codex review; Codex Reviews lane active; Build 4 slices 3cbf336 and 1d17fa1 still pending sweep
+2026-05-30 12:22 -06:00 - Build 4 cross-check: finding (informational); f344cc0 — Codex Reviews round 2 queued; likely includes Build 4 slices 3cbf336 and 1d17fa1; no action until findings posted
+2026-05-30 12:27 -06:00 - Build 4 cross-check: finding (informational); 9941ecb — orchestrator cleared Build 3 queue; Build 5 awaiting reassignment (e9e11ed); all other lanes idle; no findings affecting Build 4 docs
+2026-05-30 13:42 -06:00 - Build 4 cross-check: finding (informational); 3de9c74 — second Codex review lane added; may accelerate round 2 sweep of Build 4 slices 3cbf336 and 1d17fa1; no action required on Build 4 files
+2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); 22594ca — cross-lane staging contamination: live-build-3.md and live-codex-reviews-2.md picked up in Build 4 idle read check commit; content landed correctly per their owning lanes; same pattern as 7792243 incident; no corrective action needed (history intact, content correct)
 2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); Reviews B Round B1 cleared Build 5 slice 7c34566; MEDIUM FileMap gap routed to Build 3; Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep
 ```
 
@@ -224,12 +224,12 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review finding: <severity>; details: <short 
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/fixed; details: <short note>
 2026-05-30 11:31 -06:00 - Build 4 Codex review requested after commits 951a6ed, 1db1b23, d29cca6
-2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; docs/meridian-capabilities-architecture-map.md claims Prompt Metrics "not built" â€” prompt_metrics.py exists with domain types; repair: reclassify as domain slice
-2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; capabilities map says RelayRoute does not carry budget field â€” relay.py already carries prompt_budget: PromptBudgetPlan; repair: correct claim
-2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; Review Console marked "planned" â€” review_console.py domain model exists; repair: reclassify as domain slice
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; docs/meridian-capabilities-architecture-map.md claims Prompt Metrics "not built" — prompt_metrics.py exists with domain types; repair: reclassify as domain slice
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; capabilities map says RelayRoute does not carry budget field — relay.py already carries prompt_budget: PromptBudgetPlan; repair: correct claim
+2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; Review Console marked "planned" — review_console.py domain model exists; repair: reclassify as domain slice
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: HIGH; surface contract card taxonomy mismatches review_console.py enums; repair: add domain-model alignment section to contract
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: HIGH; contract disposition actions (Defer, Override, Escalate) not in current domain model; repair: table distinguishing current vs. future actions added
-2026-05-30 11:37 -06:00 - Build 4 Codex review repair: commit 7792243 (piggy-backed on Build 1 read check â€” edits were staged and picked up); tests not required (docs-only); all 3 CRITICAL + 2 HIGH repaired
+2026-05-30 11:37 -06:00 - Build 4 Codex review repair: commit 7792243 (piggy-backed on Build 1 read check — edits were staged and picked up); tests not required (docs-only); all 3 CRITICAL + 2 HIGH repaired
 2026-05-30 11:41 -06:00 - Build 4 Codex review result: fixed; 3 CRITICAL + 2 HIGH addressed; capabilities map now accurately reflects domain slice state for all 10 capabilities; Review Console contract aligned to domain enums
 ```
 
@@ -243,7 +243,7 @@ No active task. Polling.
 - Tests: not required (docs-only)
 
 **Ready for Codex Review**
-- Commit: `7b43848` (cross-lane contamination â€” content correct, attributed to Build 3 commit)
+- Commit: `7b43848` (cross-lane contamination — content correct, attributed to Build 3 commit)
 - Files: `docs/v1-capability-plan.md` (cockpit UI scope revision)
 - Tests: not required (docs-only)
 
@@ -253,7 +253,7 @@ No active task. Polling.
 - Tests: not required (docs-only)
 
 **Ready for Codex Review**
-- Commit: `1fb9fff` (cross-lane contamination â€” content correct, attributed to Codex Reviews C read check commit)
+- Commit: `1fb9fff` (cross-lane contamination — content correct, attributed to Codex Reviews C read check commit)
 - Files: `docs/prime-restart-resteer-logic.md`
 - Tests: not required (docs-only)
 
