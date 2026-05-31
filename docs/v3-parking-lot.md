@@ -4,6 +4,7 @@
 **Owner lane:** Build 4 (Opus high-level thinking)
 **Source:** V0/V1/V2 planning sequence; Scott's product direction questions
 **Purpose:** Hold V3-horizon ideas without contaminating V0 Prime core, V1 Bifrost cockpit, or V2 Echo/Atlas/Prime autonomy execution.
+**V3 entry point:** `docs/agentic-ai-framework-checklist.md`
 
 ---
 
@@ -18,6 +19,23 @@ V3 planning does not begin until V2 is complete. V2 makes Prime genuinely smarte
 ## When V3 Begins
 
 V3 trigger: V2 closes. Prime can orchestrate work across days without Scott prompting it, retrieves context reliably, and passes proof gates autonomously. At that point, the question shifts from "can Prime do real work?" to "who else can use this, and how?"
+
+---
+
+## V3 Entry Point
+
+V3 starts with the Agentic AI Framework Checklist.
+
+Before V3 receives implementation specs, Prime and the review lanes must walk `docs/agentic-ai-framework-checklist.md` and turn every `[~]` or `[ ]` item into one of four outcomes:
+
+- **Promote to V3:** The item becomes a harness-owned V3 roadmap item.
+- **Move earlier:** The item is required for V2 autonomy and moves into `docs/v2-progress-tracker.md` or the relevant V2 contract.
+- **Park for later:** The item remains horizon-only and is explicitly tagged V4+ or public/product horizon.
+- **Reject:** The item is not a Meridian concern and stays documented as intentionally out of scope.
+
+The checklist is not just a reference image transcription. It is the V3 coverage gate: V3 is the release where Meridian is checked against the broader agentic-AI framework and decides what kind of complete system it intends to become.
+
+Every promoted item must name Prime or a harness owner before it can leave the checklist.
 
 ---
 
@@ -85,7 +103,8 @@ Every item below must be owned by Prime or a named harness. Items without an own
 1. Every item names an owner harness. No loose feature names.
 2. V3 items do not get implementation specs until V2 closes.
 3. Items that turn out to be needed for V2 Prime autonomy get moved to `docs/v2-horizon-plan.md`, not implemented from here.
-4. This list is reviewed once at the V2 planning kickoff. Items that do not survive that review are removed.
+4. `docs/agentic-ai-framework-checklist.md` is the first V3 intake document. Do not start a V3 roadmap without resolving its partial and gap items.
+5. This list is reviewed once at the V2 planning kickoff. Items that do not survive that review are removed.
 
 ---
 
@@ -94,4 +113,5 @@ Every item below must be owned by Prime or a named harness. Items without an own
 - V0/V1 tracker: `docs/v0-v1-progress-tracker.md`
 - V1 capability plan: `docs/v1-capability-plan.md`
 - V2 horizon: `docs/v2-horizon-plan.md`
+- V3 entry checklist: `docs/agentic-ai-framework-checklist.md`
 - Prime orchestration state model: `docs/prime-orchestration-state-model.md`
