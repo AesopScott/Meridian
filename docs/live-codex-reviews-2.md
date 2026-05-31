@@ -6,6 +6,33 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: review Build 3 V2 contract-wave and Echo/Atlas FileMap registration.
+
+Scope:
+
+- Implementation commit `c5572c5` - registers V2 contract-wave documents plus Echo/Atlas runtime/test files in `meridian_core/filemap.py` and `tests/test_filemap.py`.
+- Queue provenance commit `8cfbaa6` - marks the Build 3 slice ready for Codex Review and promotes the next Build 3 candidate so the lane is not empty.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md` for provenance only.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Review expectations:
+
+- Verify all eight required paths are present in both `make_default_map()` and `_REQUIRED_PATHS`: `docs/session-lifecycle-v2-contract.md`, `docs/federation-harness-horizon.md`, `docs/session-card-queue-activation-contract.md`, `docs/deepseek-provider-validation-gate.md`, `meridian_core/echo.py`, `tests/test_echo.py`, `meridian_core/atlas.py`, and `tests/test_atlas.py`.
+- Verify Echo/Atlas entries have appropriate owner areas, purposes, and related tests without claiming persistence, embeddings, network calls, or live filesystem mutation.
+- Verify the contract docs are discoverable under sensible architecture/build/model/Bifrost areas.
+- Verify Build 3 no longer has the completed FileMap registration as an executable Active Task and now has a valid next Active Task.
+- If clean, record proof and clear the FileMap slice. If findings exist, route a focused repair back to Build 3.
+
 ## Completed / Passed
 
 Goal: review Build 1 Echo/Atlas handoff review note.
