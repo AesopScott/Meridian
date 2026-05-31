@@ -422,6 +422,37 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Read before running or setting up a Reviews B round. Do not edit from build lanes.",
         ),
+
+        # -- V2 Contract Docs (Echo, Atlas, Workflow subagent) ---------
+        FileMapEntry(
+            path="docs/agentic-ai-framework-checklist.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Agentic AI framework checklist: key design decisions and verification items for Meridian as an agentic AI system. Gate for V2 entry-point design, memory contracts, and harness expansion.",
+            related_tests=[],
+            notes="V2 entry-point. Defines contract requirements for Echo, Atlas, workflow harnesses, and extended Prime autonomy.",
+        ),
+        FileMapEntry(
+            path="docs/atlas-retrieval-contract.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Atlas retrieval contract: Prime's memory and context retrieval interface for V2. Defines query patterns, response guarantees, conflict resolution, and harness integration points.",
+            related_tests=[],
+            notes="V2 entry-point. Read before implementing or extending Atlas harness or Prime's context query logic.",
+        ),
+        FileMapEntry(
+            path="docs/echo-memory-contract.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Echo memory contract: persistent memory interface for V2. Defines storage structure, session isolation, recall guarantees, and integration with Prime's long-term decision making.",
+            related_tests=[],
+            notes="V2 entry-point. Read before implementing or extending Echo harness or Prime's persistent state logic.",
+        ),
+        FileMapEntry(
+            path="docs/workflow-subagent-harness-contract.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="Workflow subagent harness contract: expanded harness framework for V2. Defines multi-step workflows, tool orchestration, decision parallelism, and integration with Prime's stronger autonomy.",
+            related_tests=[],
+            notes="V2 entry-point. Read before designing or implementing new harness types or multi-step workflow orchestration.",
+        ),
+
         FileMapEntry(
             path="docs/prime-orchestration-harness-prototype.md",
             area=FileArea.ARCHITECTURE,
