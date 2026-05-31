@@ -181,6 +181,7 @@ Reason: Build 1 marked cockpit_state domain shape Ready for Codex Review; delega
 2026-05-31 01:45 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main at e97941d; Build 4 read check notes "Build 2 cockpit_state complete" (new Build 2 work); Build 1 still "cadence pending (Reviews C clearance)"; Active Task unchanged "No active task. Codex Reviews C is idle"; no executable task
 2026-05-31 01:55 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main at e413422; Build 1 still "cadence pending (Reviews C clearance)"; Active Task unchanged "No active task. Codex Reviews C is idle"; no new Review C delegation; no executable task
 2026-05-31 02:05 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main at a6a76ae; Build 1 still "cadence pending (Reviews C clearance)" (00:20 CDT read check); Active Task unchanged; no new delegation; no executable task
+2026-05-31 02:15 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main at 51a01c5; Build 1 now "idle, no active task" (00:30 CDT — cadence-pending cleared); Active Task unchanged "No active task. Codex Reviews C is idle"; no new Review C delegation; no executable task
 ```
 
 ## Review Log
