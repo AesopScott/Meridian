@@ -46,8 +46,8 @@
 
 | Status | Count | Percent |
 |---|---:|---:|
-| Built | 8 | 67% |
-| In Progress | 2 | 17% |
+| Built | 10 | 83% |
+| In Progress | 0 | 0% |
 | Planned / designed | 2 | 17% |
 | Needs planning | 0 | 0% |
 | Total V1 cockpit items | 12 | 100% |
@@ -62,6 +62,8 @@
 - [x] **Prime + Bifrost Harness:** cockpit-state package API surface - built in `e656027` + `b314b5b`.
 - [x] **FileMap Harness:** Prime cockpit provider FileMap registration - built in `c1ba27b`.
 - [x] **Prime + Bifrost Harness:** Prime cockpit provider package API surface - built in `14315b3`, cadence closed in `f66bbde`.
+- [x] **Bifrost Harness + Prime:** `PrimeCockpitSnapshot` to `CockpitViewModel` mapping - built in `5c89e87`.
+- [x] **Bifrost Harness + Prime:** runtime acceptance checklist - built in `ec66081`.
 
 ### Planned / Designed
 
@@ -70,8 +72,7 @@
 
 ### In Progress
 
-- [ ] **Bifrost Harness + Prime:** `PrimeCockpitSnapshot` to `CockpitViewModel` mapping - assigned to Build 5.
-- [ ] **Bifrost Harness + Prime:** runtime acceptance checklist - assigned to Build 4.
+- [x] None. V1 active wiring wave is ready for review/follow-up assignment.
 
 ### Needs Planning
 
