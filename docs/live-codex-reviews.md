@@ -54,7 +54,7 @@ Completion: commit and push only `docs/live-codex-reviews.md` unless routing a r
 
 ## Completed / Stale Prior Scope
 
-## Coordinator Override - Active Review Scope
+## Archived Prior Review Scope - Do Not Execute
 
 Round 7 complete (2026-05-31 13:30 -06:00).
 
@@ -454,7 +454,7 @@ Proof:
 - Diff inspection: `meridian_core/planning.py` is deterministic/domain-only, Council-owned, package-exported, FileMap-registered, and has no file/network/vendor calls.
 - Documentation inspection: `docs/planning-harness-council-brief.md` names `mattpocock/skills` and `skills/engineering/grill-with-docs`; `docs/meridian-pillars.md` adds Pillar 15 requiring docs/code/context interrogation before durable plans.
 
-## Active Task
+## Archived Prior Active Review Task - Do Not Execute
 
 Round 4 complete (2026-05-31 12:58 -06:00).
 
@@ -582,7 +582,7 @@ Round 6 write log:
 - 2026-05-31 14:29 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `288a8bb`; status-update commit: `da1eefc`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 14:34 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `6e29b03`; status-update commit: `6f0ee7b`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 14:36 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff e16a182..HEAD -- docs/live-codex-reviews.md`. Commit: `b0c59fc`; status-update commit: `a567020`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
-- 2026-05-31 14:40 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `286181e`; status-update commit: `ffed1e8`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 14:40 -06:00 - Codex Reviews A completed idle queue read in detached review worktree after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `286181e`; status-update commit: `5e0126b`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
