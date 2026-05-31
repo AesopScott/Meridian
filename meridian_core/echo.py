@@ -76,7 +76,7 @@ class MemoryHit:
             raise ValueError(f"score must be in [0.0, 1.0], got {self.score}")
 
 
-class MemoryRepository:
+class EchoRepository:
     """Local filesystem-backed, append-only repository for durable memory.
 
     Stores records deterministically and ranks them by project, pinning,
