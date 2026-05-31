@@ -99,7 +99,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write a short Echo/Atlas handoff review note.
 
@@ -108,6 +108,34 @@ Allowed files only: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1
 Task: inspect the current Echo/Atlas V2 docs and runtime objects, then write a short note identifying gaps, follow-up runtime objects, and how Prime should use Echo vs Atlas differently. Keep it docs-only and do not edit Echo, Atlas, package exports, FileMap, or tests.
 
 Tests: not required (docs-only).
+
+Completion:
+
+- Build 1 completed this note in mainline commits `a350f7f` / `1c81d2b`.
+- Files changed: `docs/echo-atlas-handoff-review-note.md`, `docs/live-build-1.md`.
+- Tests: not required (docs-only).
+- Ready for Codex Review. Routed to Codex Reviews B for docs/architecture review.
+
+## Coordinator Override - Active Now
+
+Goal: implement the Prime project-state next-action selector.
+
+Allowed files only: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-1.md`.
+
+Task: extend Prime Autonomy with a deterministic project-state selector that chooses the next Prime action from project/backlog/lane/tier/review-gate state without model calls. This completes the remaining Prime Autonomy V2 item after `PrimeNextAction`.
+
+Requirements:
+
+- Keep the implementation stdlib-only, deterministic, frozen/immutable where new data objects are introduced, and free of filesystem/network/session side effects.
+- Do not call Echo or Atlas directly; accept Echo/Atlas signal placeholders as plain data inputs if useful.
+- Include review gate, human gate, blockers, risk tier, queue state, and confidence in the selected `PrimeNextAction`.
+- Prefer safe `PAUSE_AND_WAIT` / `ESCALATE_ERROR` outcomes when required state is missing, blocked, review-gated, or human-gated.
+- Preserve the existing `PrimeNextAction`, `select_prime_next_action()`, and `make_prime_next_action()` behavior.
+- Add focused tests proving deterministic priority ordering, review-gate blocking, human-gate behavior, safe fallback on missing state, and no regression to existing executability semantics.
+
+Tests:
+
+- `python -m pytest tests/test_prime_autonomy.py -q`
 
 Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
 
