@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Passed
 
 Goal: review Build 1 Echo/Atlas handoff review note.
+
+Status: passed by Codex Reviews B on 2026-05-31. The note correctly separates Echo memory from Atlas retrieval and keeps integration gaps visible. No repair routed to Build 1.
 
 Scope:
 
@@ -25,6 +27,21 @@ Review expectations:
 - If findings exist, route a focused docs repair back to Build 1. If clean, record proof and clear the docs/architecture slice.
 
 Proof: docs-only review; no tests required unless the review touches runtime code.
+
+Review result:
+
+- `docs/echo-atlas-handoff-review-note.md` accurately distinguishes Echo as decision/context memory and Atlas as file/doc retrieval.
+- The note identifies remaining Prime integration gaps instead of claiming Prime is already wired: persistence/lifecycle, live FileMap source provider, Prime composition, Relay context use, mismatch logging, and session-scoped caching.
+- The note's "operational" wording is acceptable for the domain objects because Reviews A already cleared Atlas commit `7e95ede` and Echo repair `8e8c87b`; however, the tracker and FileMap were stale.
+- Follow-up routed by coordinator: `docs/v2-progress-tracker.md` now counts Atlas ranking as built/review-cleared, and Build 3's active FileMap task now includes `meridian_core/atlas.py` and `tests/test_atlas.py`.
+
+Proof:
+
+- `python -m pytest tests/test_atlas.py -q` passed with 33 tests.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md`, `docs/v2-progress-tracker.md`, and `docs/live-build-3.md`. No Build 1 repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 ## Completed / Passed
 

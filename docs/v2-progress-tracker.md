@@ -12,13 +12,13 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Prime Autonomy | 1 | 0 | 0 | 1 | 2 | 50% |
 | Echo Harness | 1 | 0 | 2 | 0 | 3 | 100% |
-| Atlas Harness | 0 | 0 | 1 | 2 | 3 | 33% |
+| Atlas Harness | 1 | 0 | 1 | 1 | 3 | 67% |
 | Relay/Model Harness | 2 | 0 | 1 | 4 | 7 | 43% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Session Lifecycle Harness | 1 | 0 | 1 | 1 | 3 | 67% |
 | Bifrost Harness | 0 | 0 | 0 | 7 | 7 | 0% |
 | Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **7** | **0** | **5** | **16** | **28** | **25% Clear + 0% Awaiting + 18% Baseline** |
+| **Total V2** | **8** | **0** | **5** | **15** | **28** | **29% Clear + 0% Awaiting + 18% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -39,6 +39,10 @@
 ### Echo Harness
 
 - [x] **Echo + Runtime:** `MemoryRecord`, `MemoryQuery`, `MemoryHit` domain objects with deterministic ranking by project/recency/importance/pinning - built in `2bccb55`, repaired in `8e8c87b`; review cleared by Reviews A on 2026-05-31.
+
+### Atlas Harness
+
+- [x] **Atlas + Ranking:** deterministic file/docs-first retrieval using `AtlasQuery`, `AtlasHit`, `AtlasResult`, source-aware ranking, and failure-soft behavior - built in `7e95ede`; review cleared by Reviews A on 2026-05-31 with `tests/test_atlas.py` passing.
 
 ### Session Lifecycle Harness
 
@@ -87,7 +91,6 @@
 
 ### Atlas Harness
 
-- [ ] **Atlas + Ranking:** deterministic, cheap ranking by path/area/purpose/notes - no embeddings in first slice; builds on contract baseline from `docs/atlas-retrieval-contract.md`.
 - [ ] **Atlas + FileMap Integration:** FileMap registration of Atlas query surface by Build 3.
 
 ### Relay / Model Harness
