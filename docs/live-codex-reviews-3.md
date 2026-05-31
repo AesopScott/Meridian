@@ -175,6 +175,7 @@ Reason: Build 1 marked cockpit_state domain shape Ready for Codex Review; delega
 2026-05-31 01:05 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main now at f3ca90c (Build 4 idle check 12:15 -06:00; Round B4 FileMap repair c388f47 also landed); Build 1 f56af55 cockpit_state marker confirmed in live-build-1.md; no Review C delegation for f56af55 or prime_approve in live-codex-reviews.md; Active Task still "No active task. Codex Reviews C is idle"; no executable task
 2026-05-31 01:07 MDT - Codex Reviews C checked queue; status: running; notes: Active Task found (commit 537ca6c) - Round C5 for Build 1 f56af55 cockpit_state; starting review
 2026-05-31 01:10 MDT - Codex Reviews C checked queue; status: complete; notes: Round C5 complete - f56af55 passed; 25/25 targeted + 941 full passed; MEDIUM FileMap gap routed to Build 3
+2026-05-31 01:20 MDT - Codex Reviews C checked queue; status: idle; notes: origin/main at 9028f0f; Active Task "No active task. Codex Reviews C is idle"; no new Ready for Codex Review markers in Build 1/Build 2 since f56af55; Build 2 prime_approve (9d38314 + d687b7f) still awaiting delegation; no executable task
 ```
 
 ## Review Log
