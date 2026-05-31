@@ -95,9 +95,9 @@ Completion:
 - Coordinator completed this policy repair on 2026-05-31 15:42 -06:00.
 - Files changed: `docs/prime-queue-runway-policy.md`, `docs/live-build-1.md`.
 - Tests run: not required (docs-only).
-- Commit: pending coordinator commit.
+- Commit: `b13f10f`.
 
-Ready for Codex Review after commit.
+Ready for Codex Review.
 
 ## Coordinator Override - Active Now
 
