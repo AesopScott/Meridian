@@ -75,7 +75,7 @@ Completion:
 - Coordinator completed this FileMap registration on 2026-05-31.
 - Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`.
 - Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed).
-- Commit: `9f053f8`.
+- Commit: `3c6f647`.
 
 Ready for Codex Review.
 

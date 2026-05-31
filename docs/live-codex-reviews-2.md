@@ -12,7 +12,7 @@ Goal: review Build 3 V2/V3 FileMap discoverability audit and follow-up registrat
 
 Scope:
 
-- Build 3 commit `9f053f8` - creates `docs/filemap-v2-v3-discoverability-audit.md`, registers `docs/workflows-subagent-harness-architecture.md` and `docs/filemap-v2-v3-discoverability-audit.md` in runtime FileMap and required-path coverage, and marks Build 3 ready for review.
+- Build 3 commit `3c6f647` - creates `docs/filemap-v2-v3-discoverability-audit.md`, registers `docs/workflows-subagent-harness-architecture.md` and `docs/filemap-v2-v3-discoverability-audit.md` in runtime FileMap and required-path coverage, and marks Build 3 ready for review.
 
 Allowed review files:
 
