@@ -189,6 +189,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-31 16:20 -06:00 - Build 5 checked queue; status: idle (cleared); no change — Active Task still stale (cockpit scaffold d13f1d1 complete); Reviews C cadence clearances and Build 1 merge activity landed (5128d54 etc.), not Build 5 scope; no repair routed, no new Cross-Check Activity; cadence 1/3; awaiting orchestrator reassignment; origin/main at 5b8a048
 2026-05-31 16:30 -06:00 - Build 5 checked queue; status: idle (cleared); no change — Active Task still stale (cockpit scaffold d13f1d1 complete); Build 1 cadence cleared (65102d5), not Build 5 scope; no repair routed, no new Cross-Check Activity; cadence 1/3; awaiting orchestrator reassignment; origin/main at 7e29f78
 2026-05-31 17:30 -06:00 - Build 5 checked queue; status: running; new Active Task = map PrimeCockpitSnapshot into CockpitViewModel; origin/main at 3a94a66 (refill V1 cockpit build queues); implementing view_model_from_snapshot(); 1012 tests pass; origin/main at 3a94a66
+2026-05-31 17:45 -06:00 - Build 5 checked queue; status: idle (cleared); snapshot mapping committed at 5c89e87 (cadence 2/3); Build 1/4/Reviews C heartbeats landed, not Build 5 scope; no repair routed, no new Cross-Check Activity; awaiting orchestrator reassignment; origin/main at 59c9c92
 ```
 
 ## Write/Completion Log
