@@ -217,6 +217,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 07:57 -06:00 - Build 4 checked queue; status: idle; no new Active Task; all lanes idle (Build 1 b12d1c8, Build 2 awaiting Codex cadence review dc42f72, Build 3 awaiting task assignment 2ec2e04); Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1 still pending Codex Reviews sweep; origin/main at 2ec2e04
 2026-05-31 08:02 -06:00 - Build 4 checked queue; status: running; new Coordinator Override Active Task = Workflow Sub-Agent Harness contract (docs/workflow-subagent-harness-contract.md); workflow sub-agent principle landed in context.md + v2-detailed-build-plan.md via 135667d; origin/main at 6c30d1a
 2026-05-31 08:03 -06:00 - Build 4 checked queue; status: idle; Workflow Sub-Agent Harness contract complete (1448642); Ready for Codex Review block backfilled with real hash; no new Active Task; origin/main at 1448642
+2026-05-31 08:06 -06:00 - Build 4 checked queue; status: idle (cadence-paused); no new Active Task; Build 1 landed V2 Echo Memory Harness domain slice (3baee13) — runtime implementation of Build 4's echo-memory-contract; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642 pending Codex Reviews sweep (exceeds 3-commit cadence threshold — pausing normal build work); origin/main at 57f4536
 ```
 
 ## Write/Completion Log
@@ -268,6 +269,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-05-30 13:42 -06:00 - Build 4 cross-check: finding (informational); 3de9c74 — second Codex review lane added; may accelerate round 2 sweep of Build 4 slices 3cbf336 and 1d17fa1; no action required on Build 4 files
 2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); 22594ca — cross-lane staging contamination: live-build-3.md and live-codex-reviews-2.md picked up in Build 4 idle read check commit; content landed correctly per their owning lanes; same pattern as 7792243 incident; no corrective action needed (history intact, content correct)
 2026-05-30 14:37 -06:00 - Build 4 cross-check: finding (informational); Reviews B Round B1 cleared Build 5 slice 7c34566; MEDIUM FileMap gap routed to Build 3; Build 4 slices 3cbf336 and 1d17fa1 still pending Codex Reviews sweep
+2026-05-31 08:06 -06:00 - Build 4 cross-check: finding (informational); Build 1 landed V2 Echo Memory Harness domain slice (3baee13) — runtime implementation of Build 4's echo-memory-contract (7eb5ae1); no action required on Build 4 files; confirms contract uptake by runtime lane
 ```
 
 ## Codex Review Cadence
