@@ -66,13 +66,30 @@ Ready for Codex Review.
 - Files: `docs/workflows-subagent-harness-architecture.md`
 - Tests: not required (docs-only)
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the DeepSeek validation benchmark plan.
 
 Allowed files only: `docs/deepseek-validation-benchmark-plan.md`, `docs/live-build-4.md`.
 
 Task: define the benchmark plan Meridian will use before DeepSeek can move beyond candidate provider status. Cover direct API proof, Q-mode prompt-payload flatness, small coding tasks, docs tasks, failure modes, required Codex review proof, demotion triggers, and why DeepSeek cannot clear reviews, move branches, or receive autonomous coding authority until the gate passes.
+
+Completion:
+
+- Coordinator completed this docs-only benchmark plan on 2026-05-31.
+- Files changed: `docs/deepseek-validation-benchmark-plan.md`, `docs/live-build-4.md`.
+- Tests: not required (docs-only).
+- Commit: pending.
+
+Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
+Goal: write the Model Harness V2 metadata contract.
+
+Allowed files only: `docs/model-harness-v2-contract.md`, `docs/live-build-4.md`.
+
+Task: create the docs contract for provider capability metadata and prompt-drag telemetry fields that Build 1's `meridian_core/model_adapter.py` runtime slice should implement. Cover Claude, OpenAI, DeepSeek direct API, trust state, context/prompt budgets, route ownership, direct-vs-aggregator evidence, prompt payload snapshot references, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding.
 
 Completion: commit only this docs slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
 
