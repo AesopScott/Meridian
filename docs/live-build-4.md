@@ -273,7 +273,60 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-No active task. Polling.
+Current Active Task (supersedes stale text below):
+
+Goal: write the detailed V2 build plan.
+
+Context:
+
+- V0 is complete.
+- V1 cockpit is complete and review-cleared at 12/12 built.
+- `docs/v2-horizon-plan.md` is the horizon source, but it is intentionally high level.
+- Scott asked for V2 planning once V1 is locked.
+- V2 should be organized by Prime/harness ownership, not loose feature names.
+- V2 should not reopen V1 cockpit scope unless a V2 track explicitly depends on a cockpit extension.
+
+Allowed files only:
+
+- `docs/v2-detailed-build-plan.md`
+- `docs/live-build-4.md`
+
+Task:
+
+- Create `docs/v2-detailed-build-plan.md`.
+- Define the V2 success test in plain terms.
+- Split V2 into harness-owned tracks:
+  - Prime autonomy
+  - Echo memory
+  - Atlas retrieval/RAG
+  - Relay + Model Harness hardening
+  - Aegis gated cognition
+  - Session Lifecycle Harness
+  - Bifrost cockpit extensions needed to operate V2
+  - Federation as future/optional unless justified
+- For each track, include:
+  - objective
+  - why it matters
+  - first vertical slice
+  - likely files/modules/docs to touch
+  - proof/test expectation
+  - out-of-scope guardrails
+- Recommend the first V2 implementation wave and explain why.
+- Keep it docs-only and implementation-facing.
+- Do not edit runtime code.
+- Do not edit FileMap.
+- Do not edit other live queues.
+
+Tests:
+
+- No tests required. Docs-only.
+
+Completion:
+
+- Commit only this docs slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 ---
 
