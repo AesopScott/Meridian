@@ -1,8 +1,24 @@
 # Live Build 1 Queue
 
-## Coordinator Override - COMPLETED
+## Coordinator Override - Active Now
 
-V2 Atlas Harness retrieval domain slice was completed in a prior session (commit 7e95ede). All 33 tests pass. Marked Ready for Codex Review. Task is already executed; no action required.
+Goal: write the V2 Echo-to-Atlas retrieval handoff contract.
+
+Allowed files only: `docs/echo-atlas-handoff-contract.md`, `docs/live-build-1.md`.
+
+Task: create `docs/echo-atlas-handoff-contract.md`. Define how Echo memory records and Atlas retrieval results should cooperate without collapsing into one harness. Cover query inputs, source ranking, memory freshness, retrieval confidence, no-result behavior, stale-context warnings, and how Prime should ask Echo and Atlas for different answers before making a decision. Keep it docs-only and Haiku-sized.
+
+Tests: none required, docs-only.
+
+Completion: commit only this handoff contract slice, push, update Obsidian, and mark Ready for Codex Review.
+
+## Next Candidate Task
+
+Goal: define the Prime queue runway policy.
+
+Allowed files only: `docs/prime-queue-runway-policy.md`, `docs/live-build-1.md`.
+
+Task: create the policy that says every build queue must always contain at least one active executable task and one next candidate task. Include cadence gating, review gating, idle fallback, and why read-check-only commits are not a valid substitute for work.
 
 This file is the standing assignment queue for Build 1.
 
@@ -431,6 +447,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-08 23:02 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main at 8e61444; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 2026-06-08 23:12 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 2026-06-08 23:22 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main at 37de812 (merge, Coordinator Override section added); no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
+2026-06-08 23:32 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 ```
 
 ## Write/Completion Log
