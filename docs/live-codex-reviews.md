@@ -4,6 +4,36 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
+## Coordinator Override - Active Now
+
+Goal: review and clear Build 1 FileMap registration commit `9fa9cdf`.
+
+Scope:
+
+- Coordinator commit `9fa9cdf` - registers V2 prompt payload and Prime autonomy modules/tests in FileMap.
+- Queue provenance: `docs/live-build-1.md` completion marker for the FileMap registration slice.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `tests/test_filemap.py`
+- `docs/FileMap.md`
+- `docs/live-build-1.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Review expectations:
+
+- Verify `meridian_core/prompt_payload_meter.py` and `tests/test_prompt_payload_meter.py` are discoverable in `make_default_map()` and `_REQUIRED_PATHS`.
+- Verify `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py` are discoverable in `make_default_map()` and `_REQUIRED_PATHS`.
+- Verify the new FileMap area/name does not conflict with existing entries and the docs mirror the runtime map.
+- Verify the queue marker correctly points to commit `9fa9cdf` and does not leave Build 1 with a stale executable top task.
+- If clean, record proof and clear the FileMap registration. If findings exist, route a focused repair back to Build 1.
+
+Completion: commit and push only `docs/live-codex-reviews.md` unless routing a repair.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review and clear or repair the V2 Prime Session Lifecycle restart/resteer runtime slice.
