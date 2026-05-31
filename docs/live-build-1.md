@@ -2,22 +2,28 @@
 
 ## Codex Review Repair Routed - Active Before Other Work
 
-2026-05-31 14:43 -06:00 - Codex Reviews A routed a MEDIUM repair from the V2 runtime/code review sweep.
+2026-05-31 14:45 -06:00 - Codex Reviews A routed MEDIUM repairs from the V2 runtime/code review sweep.
 
-Goal: make the prompt payload meter failure-soft for a zero-token budget edge case.
+Goal: make the V2 runtime helpers failure-soft for malformed edge inputs found by Codex review.
 
-Allowed files only: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `docs/live-build-1.md`.
+Allowed files only: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `meridian_core/echo.py`, `tests/test_echo.py`, `docs/live-build-1.md`.
 
-Finding: `PromptPayloadSnapshot(raw_prompt_chars=0, estimated_tokens=0, budget_tokens=0).status` raises `ZeroDivisionError` through `budget_percent`, so the helper can crash on a malformed/zero budget instead of returning deterministic status or validating the snapshot.
+Findings:
+
+- `PromptPayloadSnapshot(raw_prompt_chars=0, estimated_tokens=0, budget_tokens=0).status` raises `ZeroDivisionError` through `budget_percent`, so the helper can crash on a malformed/zero budget instead of returning deterministic status or validating the snapshot.
+- `EchoRepository.query()` promises failure-soft behavior for corrupt records, but a record with a naive `created_at` timestamp raises `TypeError: can't subtract offset-naive and offset-aware datetimes` in `_score_record()` instead of skipping/normalizing the corrupt record.
 
 Required fix:
 
 - Add validation or guard logic so zero/invalid budgets cannot crash `budget_percent` or `status`.
 - Add regression coverage for `budget_tokens=0` and any chosen invalid-budget behavior.
+- Add validation, normalization, or skip behavior so Echo queries cannot crash on naive or otherwise invalid `created_at` values.
+- Add Echo regression coverage for the malformed timestamp case and preserve deterministic query ordering for valid records.
 - Preserve the existing frozen dataclass shape, deterministic status semantics, and no-model/no-filesystem/no-network boundary.
 
 Tests:
 
+- `python -m pytest tests/test_echo.py -q`
 - `python -m pytest tests/test_prompt_payload_meter.py -q`
 - `python -m pytest tests/test_echo.py tests/test_atlas.py tests/test_prompt_payload_meter.py tests/test_relay_executor.py -q`
 - `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py tests/test_relay_executor.py -q`
