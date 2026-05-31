@@ -263,6 +263,36 @@ Minimum proof expectations:
 
 ## Active Task
 
+Current Active Task:
+
+Goal: perform Codex Reviews C Round C6 for Build 1 `3cdc74d`.
+
+Scope trigger:
+
+- Coordinator completed the V2 Aegis CognitionPolicy domain model for Build 1.
+- Build 1 queue marks commit `3cdc74d` Ready for Codex Review.
+- Queue checkpoint commit `8826909` only stamps the review-ready marker; review the product slice in `3cdc74d`.
+
+Round C6 scope:
+
+- Build lane: Build 1
+- Commit under review: `3cdc74d`
+- Provenance/checkpoint commit: `8826909`
+- Files: `meridian_core/cognition_policy.py`, `tests/test_cognition_policy.py`, `docs/live-build-1.md`
+- Supporting files allowed for context only: `meridian_core/aegis.py`, `meridian_core/relay.py`, `meridian_core/risk.py`
+- Tests to run: `python -m pytest tests/test_cognition_policy.py tests/test_aegis.py -q`
+
+Review expectations:
+
+- Verify risk tiers map to the expected cognition lanes, proof requirements, review requirements, and human gate requirements.
+- Verify missing or blocking Aegis proof prevents Relay dispatch when proof is required.
+- Verify Tier 2 remains review-oriented without accidentally requiring a proof gate.
+- Verify the policy is deterministic and does not call models, mutate Relay executor behavior, export package API, or edit FileMap.
+- Record findings with severity. Route actionable repairs to Build 1 if needed.
+- If clean, mark Build 1 `3cdc74d` passed and leave package API/FileMap follow-ups to Build 2/Build 3.
+
+Stale prior Round C5 status follows.
+
 Round C5 complete at 2026-05-31 01:10 MDT. Build 1 `f56af55` passed with MEDIUM deferred to Build 3 FileMap.
 
 Proof:
