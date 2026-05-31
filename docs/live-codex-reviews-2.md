@@ -384,3 +384,16 @@ Write log:
 - 2026-05-30 12:22 -06:00 - Coordinator created Codex Reviews B and queued Round B1 for docs/architecture review scaling.
 - 2026-05-30 23:30 -06:00 - Round B1 completed by Codex Reviews B; result: 3 PASS (with 2 MEDIUM findings consolidated and routed to Build 3, 3 LOW findings recorded/deferred); tests: `python -m pytest tests/test_filemap.py -q` 46/46 (Build 3), docs-only (Build 4 and Build 5); ledger, review log, findings, and repair routing log updated.
 - 2026-05-31 10:20 -06:00 - Round B2 completed by Codex Reviews B; result: PASS-WITH-FINDINGS for Build 3 1378bda (Round B1 MEDIUM repair verified closed; 1 new MEDIUM finding routed for `docs/live-codex-reviews-2.md`; 2 LOW carryovers re-noted); tests: `python -m pytest tests/test_filemap.py -q` 46/46 in 0.12s; ledger, review log, proof log, findings, and repair routing log updated.
+
+## Coordinator Addendum - Round B5 V1 Cockpit Clearance
+
+2026-05-31 01:13 MDT - Codex Reviews B Round B5 complete.
+
+- Scope: Build 3 `ca6f55f` + `e89df81`; Build 4 `56f626d` + `ed0fb75`; Build 5 `d13f1d1`.
+- Result: pass. No actionable findings. No repairs routed.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py tests/test_filemap.py -q` -> 95/95 passed.
+- Bifrost scaffold is dependency-free, escapes dynamic strings, and exposes the required nav buttons plus Prime, Review Console, lane strip, progress, and instrument surfaces.
+- V1 Bifrost docs keep scope to cockpit UI plus live-data wiring from existing V0/domain capabilities.
+- Echo, Atlas, federation, public/provider strategy, and cockpit write-back remain out of V1.
+- FileMap now covers Bifrost scaffold files, cockpit-state domain/test files, and the V1 Bifrost contract/sequence docs.
+- Build 3 cadence is cleared. Build 4 and Build 5 are unblocked for the next V1 cockpit wiring slices.

@@ -388,3 +388,12 @@ Round C1 complete at 2026-05-30 13:58 MDT. All three commits passed:
 Build 2 cadence cleared for the three-commit window ending at `989366f`. No repairs routed. Idle — polling docs/live-build-1.md, docs/live-build-2.md, docs/live-codex-reviews.md every 30 seconds for next delegated assignment.
 
 Durable proof trail also captured in Obsidian: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\2026-05-30 Codex Reviews C Round C1 V0 Gate Clearance.md`.
+
+## Coordinator Addendum - Round C5 FileMap Repair Closed
+
+2026-05-31 02:35 MDT - Round C5 repair closure verified.
+
+- Original finding: Build 1 `f56af55` cockpit_state domain shape passed, but `meridian_core/cockpit_state.py` and `tests/test_cockpit_state.py` needed FileMap registration.
+- Closure: Build 3/FileMap work in `ca6f55f` + `e89df81` registers the cockpit_state module and its test file.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py tests/test_filemap.py -q` -> 95/95 passed.
+- Result: Build 1 `f56af55` remains passed; MEDIUM FileMap finding closed; no remaining Build 1 repair.
