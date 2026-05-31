@@ -72,9 +72,11 @@ Proof:
 
 Completion: Build 3 cadence cleared. No repair routed.
 
-## Active Task
+## Completed / Passed
 
 Goal: review coordinator V2 contract wave commit `e37030e`.
+
+Status: passed by Codex Reviews B on 2026-05-31 15:50 -06:00. The V2 contract wave preserves the core Prime invariants and does not introduce unsafe runtime claims. No repair routed.
 
 Contract wave scope:
 
@@ -96,6 +98,22 @@ Review expectations:
 - Route FileMap registration gaps to Build 3 after review.
 
 Proof: docs-only diff/reference review for the contract wave; run tests only if the review touches runtime files or package exports.
+
+Review result:
+
+- `git show --stat --oneline e37030e -- <contract-wave scope>` confirmed a docs/queue-only contract wave; no runtime files, package exports, or tests changed.
+- `docs/session-lifecycle-v2-contract.md` preserves unique worktrees, assigned queue routing, Scott/Prime branch permission, proof requirements, non-executable human gates, and workflow/sub-agent context offload.
+- `docs/federation-harness-horizon.md` is planning-only for V2 and explicitly excludes network protocol, auth implementation, marketplace/public registry, shared mutable project state, and cross-account automation.
+- `docs/session-card-queue-activation-contract.md` captures Polaris Q-mode lessons while forbidding read-check-only commit spam and treating wrong queues, stale tasks, shared worktrees, provider limits, failed pull/push, review blocks, lost heartbeat, and prompt payload growth as degraded states.
+- `docs/deepseek-provider-validation-gate.md` keeps DeepSeek in candidate state until direct API, prompt payload, bounded Q-mode, benchmark, and external review proof exist; it forbids review-clearing, autonomous commits without external review, branch movement, worktree mutation authority, and OpenRouter fallback when direct DeepSeek behavior is required.
+- Build 2 has a valid next active task: `docs/session-lifecycle-implementation-checklist.md`.
+- Build 4 has a valid next active task: `docs/workflow-subagent-usage-checklist.md`.
+- Build 5 has a valid next active task: `docs/bifrost-voice-command-contract.md`.
+- FileMap registration for the new V2 contract-wave documents is already routed to Build 3 as the current Active Task.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` only. No repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
 Review A and Review B are a scaling prototype for Prime. When review pressure backs up, Prime should be able to spawn additional review capacity, assign bounded scope, and merge the results back into the shared checkpoint ledger.
 
@@ -147,9 +165,11 @@ Look for:
 
 ## Checkpoint Ledger
 
+Latest ledger note: as of 2026-05-31 15:50 -06:00, commit `e37030e` is review-cleared for Build 4/Build 5 contract-wave scope, Build 3 owns the FileMap registration follow-up for the contract-wave documents, and no repair is routed.
+
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 3 | 67a75dc | FileMap registration for V1 Electron/preview/queue reconciliation entries | passed | none - FileMap tests passed and runtime map/required paths include package.json, electron/main.js, bifrost/preview.py, tests/test_bifrost_preview.py, and prime-queue-reconciliation-requirement.md | cadence cleared; proceed with V2 contract-wave FileMap registration |
+| Build 3 | 67a75dc | FileMap registration for V1 Electron/preview/queue reconciliation entries | passed | none - FileMap tests passed and runtime map/required paths include package.json, electron/main.js, bifrost/preview.py, tests/test_bifrost_preview.py, and prime-queue-reconciliation-requirement.md | active task: register V2 contract-wave docs in FileMap |
 | Build 4 | 0115581 | Workflows architecture note (Round B15) | passed-with-findings | MEDIUM: 5 V2 architecture docs need FileMap registration (echo-memory-contract.md, atlas-retrieval-contract.md, workflow-subagent-harness-contract.md, prime-autonomy-v2-contract.md, workflows-subagent-harness-architecture.md — from Rounds B11+B13+B14+B15 findings) | route consolidated 5-entry FileMap repair to Build 3; verify in next Build 3 cadence review |
 | Build 5 | 2bee5ab | Bifrost browser-first declutter / PRIMED HUD core | passed | none - focused tests pass and rendered HUD core is quiet with prohibited provider/build labels absent | await next Build 5 Ready marker |
 
