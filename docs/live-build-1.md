@@ -476,6 +476,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-09 00:52 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main at c1c6b84; Next Candidate Task staged but not Active; cadence 2/3 since Reviews C5; awaiting next assignment)
 2026-06-09 01:02 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main at 4e16390 (Build 3 heartbeat); no Cross-Check Activity affecting Build 1; cadence 2/3 since Reviews C5; awaiting next assignment)
 2026-06-09 01:12 -05:00 - Build 1 checked queue; status: running (Active Task found: Prime queue runway policy; executing task)
+2026-05-31 11:52 -06:00 - Build 1 checked queue; status: idle; Coordinator Override "Active Now" task = "create docs/prime-queue-runway-policy.md" already completed by parallel session at commit b5bbab8 (file exists at 136 lines, covers no-empty-queue invariant, cadence gating, review gating, idle fallback, lane ownership, unique worktrees, local-only polling state, read-check-commit policy); treating as stale per "Do not re-execute" rule; origin/main fast-forwarded through b5bbab8/3aa16fe/c7fa444/c8b4738 (Build 4 V2 Prime Autonomy contract — informational); cadence 2/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
 ```
 
 ## Write/Completion Log
