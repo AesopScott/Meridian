@@ -4,6 +4,39 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
+## Coordinator Override - Active Review Scope
+
+Goal: restart a real Codex review lane after Claude-based review sessions accidentally consumed the review work.
+
+Read this file first. Do not execute build-lane Active Tasks.
+
+Review scope:
+
+- Review recent Meridian commits since the last trusted Codex review checkpoint, prioritizing runtime/API/test slices and V2 scope changes:
+  - `e874d3e` Add visible prompt payload meter to V2 scope
+  - `8430040` Add Balance button to Meridian V2 scope
+  - `b158550` Add DeepSeek as primary Meridian provider
+  - `8b4c8ac` Add Prime restart resteer evaluator
+  - `27e1b1f` Document Prime restart and resteer contract
+  - `e5f3673` Harden cockpit Electron proof surface
+  - `7d82b79` Build Bifrost cockpit visual shell
+- Also inspect `docs/live-build-1.md` and `docs/live-build-2.md` for any newer `Ready for Codex Review` markers from the restarted Haiku Build 1/2 lanes.
+
+Rules:
+
+- Findings first, severity ordered: CRITICAL, HIGH, MEDIUM, LOW.
+- For code/runtime commits, inspect the diff and run targeted tests when tests exist.
+- For docs/scope commits, verify referenced files exist and check for contradictions or stale claims.
+- Do not implement product code.
+- If a repair is needed, route a repair Active Task back to the original build lane queue.
+- Record scope, proofs, findings, and checkpoint updates in this file.
+- Commit and push only `docs/live-codex-reviews.md` unless you explicitly route a repair into a build queue.
+
+Expected first proof commands:
+
+- `python -m pytest tests/test_filemap.py tests/test_prompt_metrics.py -q`
+- Add any narrower tests required by the reviewed diff.
+
 ## Q Polling Source of Truth
 
 When the Polaris `Q` button is enabled for **Codex Reviews A**, the session must read this file first and treat this file as its executable queue. Build queue files are review inputs only: inspect them for `Ready for Codex Review` markers, cadence triggers, commit hashes, and repair status, but do not execute build-lane Active Tasks from a review session.

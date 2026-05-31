@@ -2,15 +2,33 @@
 
 ## Coordinator Override - Active Now
 
-Goal: define the V2 queue-runway runtime object.
+Goal: build the V2 Relay prompt payload meter domain helper.
 
-Allowed files only: `docs/queue-runway-runtime-object.md`, `docs/live-build-1.md`.
+Allowed files only: `meridian_core/prompt_payload_meter.py`, `tests/test_prompt_payload_meter.py`, `docs/live-build-1.md`.
 
-Task: write the contract for the structured runtime object that will replace markdown polling: lane id, worktree path, active task, next candidate, cadence status, review gate, last read/write time, and escalation state. This supersedes the completed Echo/Atlas review note.
+Task: create a small deterministic Relay helper that can report prompt payload size before every model dispatch. This is the Polaris-style prompt-size visibility Scott asked to carry into Meridian.
 
-Tests: none required, docs-only.
+Required shape:
 
-Completion: commit only this runtime-object contract slice, push, update Obsidian, and mark Ready for Codex Review.
+- Define a frozen dataclass such as `PromptPayloadSnapshot`.
+- Include fields for raw prompt characters, estimated tokens, optional budget tokens, budget percent, prior estimated tokens, growth tokens, growth percent, queue/Q-mode flag, status, and display label.
+- Status must be deterministic and cheap: healthy/ watch/ degraded is enough.
+- Display label should support the Polaris-style labels Scott recognizes: `(under 1k)` for small prompts and `(12.4k)` style for larger prompts.
+- Queue/Q-mode prompt growth across polls should produce a degraded finding when growth is meaningful.
+- Keep this module vendor-neutral. No API calls. No filesystem reads. No model calls. No UI rendering.
+- Do not edit package exports, FileMap, Bifrost, or Relay executor code in this slice. Those are follow-up integration tasks.
+
+Tests: add focused tests for label formatting, budget percent, growth deltas, queue-mode growth degradation, and budget-pressure status.
+
+Completion: commit only this prompt payload meter slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
+
+## Next Candidate Task
+
+Goal: integrate prompt payload meter into Relay/Bifrost after Codex review clears this domain helper.
+
+Allowed files: to be assigned by Prime/Codex after review.
+
+Task: wire the prompt payload snapshot into the Relay dispatch surface and Bifrost prompt visibility panel without increasing prompt drag.
 
 ## Next Candidate Task
 

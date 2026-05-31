@@ -2,15 +2,31 @@
 
 ## Coordinator Override - Active Now
 
-Goal: write the public exports readiness checklist.
+Goal: build the V2 Prime next-action domain object.
 
-Allowed files only: `docs/public-exports-readiness-checklist.md`, `docs/live-build-2.md`.
+Allowed files only: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`.
 
-Task: create a docs-only checklist for deciding when V2 harness objects become package-root exports. Cover runtime stability, tests, docs, FileMap registration, public naming, and backward-compatibility risk. This supersedes completed package/API and harness maturity policy tasks.
+Task: create a small deterministic Prime Autonomy domain module for representing Prime's next action before UI/runtime integration.
 
-Tests: none required, docs-only.
+Required shape:
 
-Completion: commit only this readiness checklist slice, push, update Obsidian, and mark Ready for Codex Review.
+- Define frozen dataclasses/enums such as `PrimeActionType`, `PrimeActionConfidence`, `PrimeNextAction`, and optionally `PrimeActionSource`.
+- Represent action type, target harness/lane/project, confidence, risk tier, blockers, human-gate requirement, rationale, and evidence/proof references.
+- Include a deterministic helper such as `select_prime_next_action(...)` or `make_prime_next_action(...)` that can choose a safe fallback action from simple inputs.
+- Do not call models, read files, move branches, spawn sessions, or mutate queues.
+- Do not edit package exports, FileMap, Bifrost, or Relay code in this slice. Those are follow-up integration tasks.
+
+Tests: add focused tests for default/fallback action selection, human-gate propagation, blocker handling, immutability, and confidence/risk mapping.
+
+Completion: commit only this Prime next-action slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
+
+## Next Candidate Task
+
+Goal: integrate Prime next action into the Bifrost cockpit view model after Codex review clears this domain object.
+
+Allowed files: to be assigned by Prime/Codex after review.
+
+Task: expose Prime next action in the cockpit snapshot without letting Bifrost own decision logic.
 
 ## Superseded Task
 
