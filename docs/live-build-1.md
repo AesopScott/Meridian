@@ -446,6 +446,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-09 00:02 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
 2026-05-31 11:22 -06:00 - Build 1 checked queue; status: idle; Active Task "(None currently assigned.)"; origin/main fast-forwarded through 9964acc/480161b/f6ba22d (Build 2 V2 package/API surface policy expanded for Echo/Atlas/Prime Autonomy/Session Lifecycle/Workflow dispatch — informational); cadence 1/3 since Reviews C5; no Cross-Check Activity routed to Build 1; awaiting fresh assignment
 2026-06-09 00:12 -05:00 - Build 1 checked queue; status: idle (no active task; origin/main up to date; no Cross-Check Activity affecting Build 1; cadence 1/3 since Reviews C5; awaiting next assignment)
+2026-06-09 00:12 -05:00 - Build 1 checked queue; status: complete (V2 Echo-to-Atlas handoff contract completed at commit 2d1bab1; Ready for Codex Review; Obsidian update pending)
 ```
 
 ## Write/Completion Log
@@ -488,6 +489,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
 2026-05-31 05:54 -06:00 - Coordinator completed V2 Aegis CognitionPolicy domain model; commit 3cdc74d; files: meridian_core/cognition_policy.py, tests/test_cognition_policy.py, docs/live-build-1.md; tests: 15 cognition_policy passed, 102 aegis+cognition_policy passed; Ready for Codex Review.
 2026-06-03 19:31 -05:00 - Build 1 completed V2 policy-aware Relay executor wrapper; commit b99ce1d; files: meridian_core/relay_executor.py, tests/test_relay_executor.py, docs/live-build-1.md; tests: 50 relay_executor, 15 cognition_policy, 92 aegis (157 total) passed; Ready for Codex Review.
 2026-06-08 20:51 -05:00 - Build 1 completed V2 Atlas Harness retrieval domain slice; commit 7e95ede; files: meridian_core/atlas.py, tests/test_atlas.py, docs/live-build-1.md; tests: 33 Atlas tests passed; AtlasQuery, AtlasHit, AtlasResult frozen dataclasses; deterministic FileMap/DOC retrieval with source-aware ranking; failure-soft on missing inputs; Ready for Codex Review.
+2026-06-09 00:12 -05:00 - Build 1 completed V2 Echo-to-Atlas retrieval handoff contract; commit 2d1bab1; files: docs/echo-atlas-handoff-contract.md, docs/live-build-1.md; tests: none (docs-only); defines cooperation boundary between Echo decisions and Atlas file/doc retrieval; covers query inputs, source ranking, freshness guarantees, no-result behavior, composition patterns; Ready for Codex Review.
 ```
 
 ## Cross-Check Activity
