@@ -290,8 +290,8 @@ Round 4 complete (2026-05-31 12:58 -06:00).
 - Repair routing: Build 1 repair Active Task written to `docs/live-build-1.md`.
 - Proofs: filemap/prompt_metrics 94 passed; restart_resteer + Bifrost cockpit/preview 124 passed; `npm run proof:cockpit` 108 passed plus 0 high vulnerabilities.
 - Files changed by Reviews A: `docs/live-codex-reviews.md`, `docs/live-build-1.md`.
-- Commit: pending.
-- Push: pending.
+- Commit: `dfc2cbe`, `3e13891`, `f5b5c0f` recorded/routed Round 4; pushed to `origin/main`.
+- Push: complete.
 - Obsidian status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
 
 Stale prior status follows.
@@ -303,8 +303,8 @@ Round 5 complete (2026-05-31 13:04 -06:00).
 - Findings: no CRITICAL/HIGH/MEDIUM findings. LOW process note only: `40def3d` also carries Build 2 Prime Autonomy product files, left unreviewed in Round 5 and deferred to Build 2's Ready marker.
 - Proofs: `tests/test_restart_resteer.py` 16 passed; `tests/test_filemap.py tests/test_restart_resteer.py` 62 passed.
 - Files changed by Reviews A after Round 5: `docs/live-codex-reviews.md`.
-- Commit: pending.
-- Push: pending.
+- Commit: `0e9ec75`.
+- Push: complete (`origin/main`).
 - Obsidian status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
 
 Stale prior status follows.
@@ -335,6 +335,10 @@ Round 3 write log:
 Round 4 write log:
 
 - 2026-05-31 12:55 -06:00 - Codex Reviews A completed Round 4 queue update. Files changed: `docs/live-codex-reviews.md`, `docs/live-build-1.md`. Tests run: `python -m pytest tests/test_filemap.py tests/test_prompt_metrics.py tests/test_restart_resteer.py -q` (110 passed), `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` (108 passed), `npm audit --audit-level=high` (0 vulnerabilities). Commit: `dfc2cbe`. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue routing only, no durable build-knowledge change.
+
+Round 5 write log:
+
+- 2026-05-31 13:04 -06:00 - Codex Reviews A completed Build 1 repair verification. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_restart_resteer.py -q` (16 passed), `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q` (62 passed). Commit: pending this queue update. Push status: pending. Obsidian update status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
