@@ -95,7 +95,7 @@ No item leaves this checklist unless it has a named owner: Prime or a harness.
 - [~] **Self-improving agents** — **Prime / Echo / Aegis:** Bounded by memory, review, and proof. Not unconstrained self-modification.
 - [x] **Rollback mechanisms** — **Git Harness:** Git commits, worktrees, review repair, and explicit no-branch-movement without Prime/Scott.
 - [x] **Feedback loops and evaluators** — **Aegis / Codex Reviews:** Current review lanes are evaluators; proof logs become Aegis evidence.
-- [~] **Cost and resource management** — **Relay / Model Harness:** Prompt budget and prompt metrics exist; cost telemetry/model choice logic needs hardening.
+- [~] **Cost and resource management** — **Relay / Model Harness / Bifrost:** Prompt budget and prompt metrics exist; Polaris's Balance button becomes the Meridian provider balance/usage surface for Claude, OpenAI, DeepSeek, and future adapters.
 - [~] **Long-term autonomy and goal chaining** — **Prime / Compass / Echo:** Architecture exists; V2 Prime Autonomy builds the first runtime selector.
 - [x] **Governance, safety, and guardrails** — **Aegis / Prime Directives / Review Console:** Prime directives, proof gates, human gates, risk tiers.
 - [~] **Memory governance and retention policies** — **Echo Harness:** Need explicit retention and memory-edit policy in V2.

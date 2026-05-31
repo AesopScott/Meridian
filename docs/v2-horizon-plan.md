@@ -73,6 +73,7 @@ V2 scope candidates:
 - model capability registry
 - prompt drag telemetry
 - adapter health checks
+- provider balance/usage telemetry feeding Prime's routing decisions
 
 ### 6. Session Lifecycle Harness
 

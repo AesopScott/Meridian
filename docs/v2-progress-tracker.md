@@ -16,9 +16,9 @@
 | Relay/Model Harness | 1 | 0 | 0 | 4 | 5 | 20% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Session Lifecycle Harness | 0 | 1 | 1 | 1 | 3 | 33% |
-| Bifrost Harness | 0 | 0 | 0 | 3 | 3 | 0% |
+| Bifrost Harness | 0 | 0 | 0 | 4 | 4 | 0% |
 | Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **3** | **2** | **4** | **13** | **22** | **14% Clear + 9% Awaiting + 18% Baseline** |
+| **Total V2** | **3** | **2** | **4** | **14** | **23** | **13% Clear + 9% Awaiting + 17% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -96,6 +96,7 @@
 ### Bifrost Harness
 
 - [ ] **Bifrost + V2 Extensions:** view-model placeholders for Prime next action, Echo memory hits, Atlas retrieval hits, session lifecycle preview, Aegis policy result - module: `bifrost/cockpit.py` (extends v1 snapshot); tests: `tests/test_bifrost_cockpit.py`; contract: `docs/bifrost-v2-extensions-contract.md`.
+- [ ] **Bifrost + Balance Button:** Polaris-style provider balance and usage surface for Claude, OpenAI, DeepSeek, and aggregator/local adapters; must show provider health, remaining credit where available, token usage, estimated spend, and cost pressure warnings for Prime routing.
 - [ ] **Bifrost + Cockpit Render:** static render tests and HTML escaping tests for new V2 view-model fields.
 - [ ] **Bifrost + FileMap Integration:** FileMap registration of Bifrost cockpit extension surface by Build 3.
 

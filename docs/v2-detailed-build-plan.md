@@ -138,6 +138,7 @@ First wave deliverable:
 - Keep provider-neutral HTTP transport as the stable base.
 - Treat **Claude, OpenAI, and DeepSeek** as first-class primary providers in the Model Harness, not optional one-off integrations.
 - Add a DeepSeek direct-API adapter target for V4 models (`deepseek-v4-pro` default, `deepseek-v4-flash` fast lane) so Prime can route high-volume build work away from Claude when capacity or cost requires it.
+- Bring forward Polaris's **Balance button** pattern: Bifrost exposes provider balances, token/cost telemetry, and model spend visibility for Claude, OpenAI, DeepSeek, and any aggregator routes.
 
 **Likely files/modules/docs:**
 
@@ -153,6 +154,7 @@ First wave deliverable:
 - Tests for capability matching and missing-capability failures.
 - Tests that prompt budget metadata is copied without inflating prompt content.
 - Tests that DeepSeek provider metadata resolves through the same adapter contract as Claude/OpenAI and never bypasses Relay/Aegis policy checks.
+- Tests that Balance surface data is derived from structured usage/provider telemetry rather than scraped card text.
 
 **Out-of-scope guardrails:**
 
@@ -229,6 +231,8 @@ First wave deliverable:
 **Objective:** Extend the cockpit only where V2 capabilities need visible operation.
 
 **Why it matters:** V2 should not become invisible backend work. Scott should see Prime's memory, retrieval, autonomy, and lifecycle state.
+
+**Balance button requirement:** Bifrost must expose the Meridian version of Polaris's Balance button. It should show provider/account health, remaining credits where available, token usage by provider/model, estimated spend, and cost pressure warnings that Prime can use when routing work across Claude, OpenAI, DeepSeek, and future adapters.
 
 **First vertical slice:**
 
