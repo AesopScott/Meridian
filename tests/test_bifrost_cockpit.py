@@ -232,6 +232,34 @@ def test_render_progress_events_summary():
         assert ev.summary in doc
 
 
+def test_render_progress_metadata():
+    vm = sample_cockpit_view_model()
+    vm.progress_events = [
+        ProgressEvent(
+            "10:00", "Reviews B", "round clear",
+            "review result", "warning", "review:B6",
+        )
+    ]
+    doc = render_cockpit_html(vm)
+    assert 'data-category="review result"' in doc
+    assert 'data-severity="warning"' in doc
+    assert "review result" in doc
+    assert "warning" in doc
+    assert "review:B6" in doc
+
+
+def test_render_progress_summary_counts():
+    vm = sample_cockpit_view_model()
+    vm.progress_events = [
+        ProgressEvent("10:00", "Aegis", "proof passed", "proof summary", "info"),
+        ProgressEvent("10:01", "Aegis", "proof blocked", "proof summary", "error"),
+        ProgressEvent("10:02", "Reviews B", "repair routed", "repair routed", "info"),
+    ]
+    doc = render_cockpit_html(vm)
+    assert "info:2" in doc
+    assert "error:1" in doc
+
+
 def test_render_progress_filter_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
     assert "(all)" in doc
@@ -332,6 +360,23 @@ def test_escapes_xss_in_progress_summary():
     doc = render_cockpit_html(vm)
     assert "<script>x</script>" not in doc
     assert "&lt;script&gt;" in doc
+
+
+def test_escapes_xss_in_progress_metadata():
+    vm = sample_cockpit_view_model()
+    vm.progress_events = [
+        ProgressEvent(
+            "10:00", "src", "ok",
+            '<script>cat</script>', '<b>bad</b>', '<img src=x>',
+        )
+    ]
+    doc = render_cockpit_html(vm)
+    assert "<script>cat</script>" not in doc
+    assert "<b>bad</b>" not in doc
+    assert "<img src=x>" not in doc
+    assert "&lt;script&gt;" in doc
+    assert "&lt;b&gt;" in doc
+    assert "&lt;img" in doc
 
 
 def test_escapes_xss_in_queue_state():
@@ -476,7 +521,11 @@ def test_snapshot_maps_progress_events():
     assert vm.progress_events[0].timestamp == "14:00"
     assert vm.progress_events[0].source == "completion"
     assert vm.progress_events[0].summary == "task done"
+    assert vm.progress_events[0].category == "completion"
+    assert vm.progress_events[0].severity == "info"
     assert vm.progress_events[1].source == "blocker"
+    assert vm.progress_events[1].category == "blocker"
+    assert vm.progress_events[1].severity == "error"
 
 
 def test_snapshot_instrument_queue_state_on():

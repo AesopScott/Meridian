@@ -48,6 +48,9 @@ class ProgressEvent:
     timestamp: str
     source: str
     summary: str
+    category: str = "routine progress"
+    severity: str = "info"
+    drilldown_ref: str = ""
 
 
 @dataclass
@@ -96,9 +99,18 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             LaneRow("B5", "running", "run"),
         ],
         progress_events=[
-            ProgressEvent("13:32", "Build 5",   "V1 cockpit scaffold committed"),
-            ProgressEvent("13:09", "Reviews B",  "a412e90 PASS; Round B3 complete"),
-            ProgressEvent("12:48", "Aegis",      "proof 47/47; no gaps"),
+            ProgressEvent(
+                "13:32", "Build 5", "V1 cockpit scaffold committed",
+                "completion", "info", "commit:d13f1d1",
+            ),
+            ProgressEvent(
+                "13:09", "Reviews B", "a412e90 PASS; Round B3 complete",
+                "review result", "info", "review:B3",
+            ),
+            ProgressEvent(
+                "12:48", "Aegis", "proof 47/47; no gaps",
+                "proof summary", "info", "aegis:proof",
+            ),
         ],
         instrument=InstrumentBand(
             beacon="ok",
@@ -161,6 +173,8 @@ def view_model_from_snapshot(snapshot: PrimeCockpitSnapshot) -> CockpitViewModel
             timestamp=ev.timestamp,
             source=ev.category.value,
             summary=ev.message,
+            category=ev.category.value.replace("_", " "),
+            severity=ev.severity.value,
         )
         for ev in snapshot.progress_events
     ]
@@ -276,18 +290,40 @@ def _render_lane_strip(lanes: list[LaneRow]) -> str:
 
 
 def _render_progress_surface(events: list[ProgressEvent]) -> str:
+    severity_counts: dict[str, int] = {}
+    for ev in events:
+        severity_counts[ev.severity] = severity_counts.get(ev.severity, 0) + 1
+
+    counts = "".join(
+        f'<span class="progress-count progress-count-{_e(severity)}">'
+        f"{_e(severity)}:{_e(count)}"
+        "</span>"
+        for severity, count in sorted(severity_counts.items())
+    ) or '<span class="progress-count">none:0</span>'
+
     cards = "".join(
-        '<div class="progress-card">'
+        f'<div class="progress-card progress-{_e(ev.severity)}" '
+        f'data-category="{_e(ev.category)}" data-severity="{_e(ev.severity)}">'
+        '<div class="progress-card-meta">'
         f'<span class="progress-ts">{_e(ev.timestamp)}</span>'
         f'<span class="progress-source">{_e(ev.source)}</span>'
-        f'<p class="progress-summary">{_e(ev.summary)}</p>'
+        f'<span class="progress-category">{_e(ev.category)}</span>'
+        f'<span class="progress-severity">{_e(ev.severity)}</span>'
         "</div>"
+        f'<p class="progress-summary">{_e(ev.summary)}</p>'
+        + (
+            f'<span class="progress-drilldown">{_e(ev.drilldown_ref)}</span>'
+            if ev.drilldown_ref
+            else ""
+        )
+        + "</div>"
         for ev in events
     )
     return (
         '<aside class="progress-surface">'
         '<div class="progress-header">'
         'Progress <span class="progress-filter">(all) ▾</span>'
+        f'<div class="progress-counts">{counts}</div>'
         "</div>"
         f'<div class="progress-cards">{cards}</div>'
         "</aside>"

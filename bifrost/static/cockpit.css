@@ -186,6 +186,27 @@ body {
 
 .progress-filter { cursor: pointer; color: var(--accent); }
 
+.progress-counts {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.progress-count {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 5px;
+}
+
+.progress-count-info { color: var(--accent); border-color: rgba(88,166,255,0.35); }
+.progress-count-warning { color: var(--warning); border-color: rgba(240,136,62,0.35); }
+.progress-count-error,
+.progress-count-critical { color: var(--danger); border-color: rgba(248,81,73,0.35); }
+
 .progress-cards { display: flex; flex-direction: column; gap: 4px; overflow: auto; }
 
 .progress-card {
@@ -195,8 +216,28 @@ body {
   border-left: 2px solid var(--border);
 }
 
+.progress-card.progress-info { border-left-color: var(--accent); }
+.progress-card.progress-warning { border-left-color: var(--warning); }
+.progress-card.progress-error,
+.progress-card.progress-critical { border-left-color: var(--danger); }
+
+.progress-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .progress-ts     { font-size: 10px; color: var(--muted); margin-right: 6px; }
 .progress-source { font-size: 10px; color: var(--accent); font-weight: 600; }
+.progress-category,
+.progress-severity,
+.progress-drilldown {
+  color: var(--muted);
+  font-size: 10px;
+}
+.progress-severity { text-transform: uppercase; }
+.progress-drilldown { display: block; margin-top: 4px; }
 .progress-summary { margin: 3px 0 0; font-size: 11px; line-height: 1.4; }
 
 /* ── Instrument band ──────────────────────────────── */
