@@ -47,8 +47,8 @@
 | Status | Count | Percent |
 |---|---:|---:|
 | Built | 11 | 92% |
-| In Progress | 0 | 0% |
-| Planned / designed | 1 | 8% |
+| In Progress | 1 | 8% |
+| Planned / designed | 0 | 0% |
 | Needs planning | 0 | 0% |
 | Total V1 cockpit items | 12 | 100% |
 
@@ -66,13 +66,13 @@
 - [x] **Bifrost Harness + Prime:** runtime acceptance checklist - built in `ec66081`.
 - [x] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - built in `e1bf9db`; pending cadence review.
 
-### Planned / Designed
-
-- [ ] **Bifrost Harness:** harness dashboard - brief built in `7c34566`.
-
 ### In Progress
 
-- [x] None. V1 active wiring wave is ready for review/follow-up assignment.
+- [ ] **Bifrost Harness:** harness dashboard implementation - brief built in `7c34566`; active in Build 5.
+
+### Planned / Designed
+
+- [x] None. V1's final planned item is now assigned.
 
 ### Needs Planning
 

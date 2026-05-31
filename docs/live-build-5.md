@@ -259,6 +259,62 @@ YYYY-MM-DD HH:MM TZ - Build 5 Codex review result: pass/no actionable findings/f
 
 Current Active Task (supersedes any stale text below):
 
+Goal: implement the V1 Harness Dashboard surface in Bifrost.
+
+Context:
+
+- V1 is now 11/12 built in `docs/v0-v1-progress-tracker.md`.
+- Reviews B Round B7 cleared Build 5 commit `e1bf9db`; the Build 5 cadence pause is cleared.
+- `docs/bifrost-harness-dashboard-brief.md` defines the Harness dashboard behavior.
+- V1 should remain cockpit UI plus wiring existing Meridian capabilities into visible surfaces.
+- The Harness dashboard is observation-first: Scott can inspect harness state, maturity, recent events, and capabilities; V1 does not add mutation controls.
+
+Allowed files only:
+
+- `bifrost/cockpit.py`
+- `bifrost/__init__.py`
+- `bifrost/static/cockpit.css`
+- `tests/test_bifrost_cockpit.py`
+- `docs/live-build-5.md`
+
+Task:
+
+- Extend the Bifrost cockpit view model with a small render-friendly Harness Dashboard shape.
+- Include at least:
+  - harness name
+  - family/group
+  - role one-liner
+  - status
+  - maturity tag
+  - build/version label
+  - last heartbeat or freshness label
+  - recent event
+  - compact capability chips
+  - attention boolean or status-derived attention hook
+- Render a static Harness Dashboard section or surface with grouped harness cards.
+- Keep the top nav Harness button visible and make the rendered dashboard discoverable in the HTML.
+- Include cards for current/near-current harnesses: Prime, Bifrost, Relay, Beacon, Aegis, Compass, FileMap, Codex Reviews, plus planned Echo and Atlas placeholders.
+- Preserve the static HTML contract: no JavaScript, no persistence, no queue/log/env/prompt reads.
+- Keep this observation-only. Do not add restart, pause, resume, settings, threshold, or routing controls.
+- Escape all rendered harness text.
+- Do not edit Prime, FileMap, package exports outside Bifrost, review queues, or other live queues.
+
+Tests:
+
+- Add focused tests for Harness Dashboard rendering, grouping/cards, attention hooks, capability chips, planned placeholders, and escaping.
+- Keep existing cockpit tests passing.
+- Run `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion:
+
+- Commit only this Bifrost Harness Dashboard slice.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+- This should complete V1's 12/12 cockpit item count if tests pass and review routing is recorded.
+
+Stale prior task follows.
+
 Goal: implement the V1 configurable progress/proof surface in Bifrost.
 
 Context:
