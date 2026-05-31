@@ -56,7 +56,7 @@ Look for:
 | --- | --- | --- | --- | --- | --- |
 | Build 3 | 1378bda | FileMap repair — register 4 uncatalogued docs (Round B2) | passed | Round B1 MEDIUM repair verified closed; 1 new MEDIUM finding (live-codex-reviews-2.md still uncatalogued); 2 LOW prose-divergence carryovers from Round B1 still deferred | route 1-row FileMap follow-up to Build 3 for `docs/live-codex-reviews-2.md`; verify in Round B3 |
 | Build 4 | 1d17fa1 | Prime orchestration state model (Round B1) | passed | LOW severity-ladder design question recorded | clarify FindingSeverity↔EvidenceSeverity mapping when Build 4 next picks up state-model implementation slice |
-| Build 5 | 7c34566 | Bifrost Harness dashboard brief (Round B1) | passed | MEDIUM FileMap gap closed in Build 3 1378bda (Round B2) | no Build 5 follow-up required |
+| Build 5 | e1bf9db | V1 configurable progress/proof surface implementation | pending Round B7 | cadence review required after Build 5 commits d13f1d1, 5c89e87, e1bf9db | run Round B7 proof and clear or route repair |
 
 ## Review Round Scope
 
@@ -87,6 +87,14 @@ Allowed review files: diff files only — docs/FileMap.md, meridian_core/filemap
 Tests to run: `python -m pytest tests/test_filemap.py -q`.
 Out of scope: Build 4 and Build 5 (no new Ready for Codex Review markers since Round B1; their lanes are awaiting reassignment, not new review). Runtime/package-API/behavior reviews (owned by Review A). Build 1's `lane_state` slice marked Ready for Codex Review (`13b4b48`) is runtime/API scope, owned by Review A.
 Reason: Build 3 marked commit 1378bda Ready for Codex Review — Reviews B Round B2 in the Build 3 queue; this round verifies the Round B1-routed MEDIUM FileMap-gap repair is closed.
+
+2026-05-31 02:58 -06:00 - Round B7 scope
+Build lanes: Build 5
+Commit range(s): Build 5 e1bf9db (V1 configurable progress/proof surface implementation)
+Allowed review files: diff files only - bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/live-build-5.md for provenance.
+Tests to run: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q`.
+Out of scope: unrelated runtime/API changes, FileMap changes, and additional Bifrost feature implementation.
+Reason: Build 5 marked e1bf9db Ready for Codex Review; this is the third task-changing commit in the current Build 5 cadence window and must clear before more Build 5 implementation work.
 
 ## Read Checks
 
