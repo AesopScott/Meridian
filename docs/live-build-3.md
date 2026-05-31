@@ -8,7 +8,7 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex Reviews B on 2026-05-31 15:52 -06:00. FileMap tests passed (46 tests), and no repair was routed.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: register new V2 contract-wave documents plus Echo/Atlas runtime files in FileMap.
 
@@ -29,9 +29,16 @@ Keep this mechanical and small. Do not edit the documents themselves. Add or upd
 
 Tests: `python -m pytest tests/test_filemap.py -q`.
 
-Completion: commit only this FileMap registration slice, push, update Obsidian, and mark Ready for Codex Review.
+Completion:
 
-## Next Candidate Task
+- Coordinator completed this FileMap registration slice on 2026-05-31.
+- Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`.
+- Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed).
+- Implementation commit: `c5572c5`.
+
+Ready for Codex Review. Routed to Codex Reviews B by coordinator.
+
+## Active Task
 
 Goal: add a lightweight FileMap audit note for V2/V3 discoverability.
 
