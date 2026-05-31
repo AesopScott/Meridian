@@ -200,6 +200,9 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 07:25 -06:00 - Build 2 checked queue; status: running (Active Task found — V0 prime_status and prime_console CLI)
 2026-05-31 08:50 -06:00 - Build 2 checked queue; Active Task found: V2 harness maturity/build-number policy (Coordinator Override); executing
 2026-05-31 08:53 -06:00 - Build 2 checked queue; status: paused (task 34c21b4 complete, cadence 3 of 3 reached; awaiting Codex review before next task; pausing per rule 19)
+2026-05-31 08:52 -06:00 - Build 2 checked queue; Active Task found: public exports readiness checklist (Coordinator Override, new cadence 1 of 3); executing
+2026-05-31 08:54 -06:00 - Build 2 checked queue; status: idle (public exports readiness checklist task complete, commit 9a2e4e5; no new Active Task; cadence 1 of 3; awaiting next assignment; polling)
+2026-05-31 08:56 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 1 of 3; awaiting next assignment; polling)
 2026-06-01 02:30 -06:00 - Build 2 checked queue; status: idle (tasks 989366f + 9c3e1a3 complete, cadence cleared; Active Task section stale — awaiting orchestrator update; polling)
 2026-06-01 10:15 -06:00 - Build 2 checked queue; Active Task found: V2 CognitionPolicy package API surface; executing
 2026-06-01 10:20 -06:00 - Build 2 checked queue; status: idle (task e08e598 complete; returning to polling)
@@ -345,6 +348,8 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-05 00:20 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; cadence 2 of 3; maintaining pause per rule 19)
 2026-06-05 00:30 -06:00 - Build 2 checked queue; Active Task found: V2 harness maturity/build-number policy (Coordinator Override); executing
 2026-06-05 00:45 -06:00 - Build 2 checked queue; V2 harness maturity/build-number policy task complete; New Active Task found: public exports readiness checklist (Coordinator Override); executing
+2026-06-05 01:00 -06:00 - Build 2 checked queue; status: idle (V2 harness maturity and public exports readiness checklist tasks complete; cadence 1 of 3; awaiting next Active Task; polling)
+2026-06-05 01:10 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 1 of 3; polling)
 ```
 
 ## Write/Completion Log
@@ -384,6 +389,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-06-04 23:15 -06:00 - Build 2 completed V2 package/API surface policy (Coordinator Override); commits e9f6d5f (v2-package-api-surface-note.md) + 9c3564d (package-api-surface-note.md update); files changed: docs/v2-package-api-surface-note.md (new, defined public export roadmap for Echo/Atlas/Prime/Session/Workflow), docs/package-api-surface-note.md; tests none required (docs-only); cadence count: 2 of 3 since 47eeb89; Ready for Codex Review
 2026-06-05 00:15 -06:00 - Build 2 completed V2 package/API surface policy (Coordinator Override); commit f6ba22d; files changed: docs/v2-package-api-surface-note.md (new, comprehensive policy for Echo/Atlas/Prime Autonomy/Session Lifecycle/Workflow dispatch package exports); tests none required (docs-only); marked Echo/Atlas/Workflow surfaces as intended public exports post-implementation; flagged Prime/Session contracts as pending completion; cadence count: 2 of 3; Ready for Codex Review
 2026-05-31 08:52 -06:00 - Build 2 completed V2 harness maturity/build-number policy (Coordinator Override); commit 34c21b4; files changed: docs/harness-maturity-build-policy.md (new, defines build number tracking, maturity levels, review status, and readiness states for Prime/Bifrost/Relay/Aegis/Beacon/Echo/Atlas/Workflow), docs/live-build-2.md; tests none required (docs-only); cadence count: 3 of 3 since 47eeb89; Ready for Codex Review
+2026-05-31 08:54 -06:00 - Build 2 completed public exports readiness checklist (Coordinator Override); commit 9a2e4e5; files changed: docs/public-exports-readiness-checklist.md (new, 6-section checklist for export-readiness: runtime stability, tests, docs, registry, naming, safety/risk mitigation; per-harness status for Echo/Atlas/Prime/Session/Workflow), docs/live-build-2.md; tests none required (docs-only); cadence count: 1 of 3 (cadence reset after harness maturity policy); Ready for Codex Review
 ```
 
 ## Cross-Check Activity
