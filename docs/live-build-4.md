@@ -350,7 +350,7 @@ Completion:
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 **Ready for Codex Review**
-- Commit: `pending`
+- Commit: `ed0fb75`
 - Files: `docs/v1-bifrost-integration-sequence.md`
 - Tests: not required (docs-only)
 
