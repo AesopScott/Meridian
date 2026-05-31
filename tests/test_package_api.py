@@ -191,3 +191,15 @@ def test_cockpit_state_exports():
 def test_cockpit_state_private_not_exported():
     assert "_LANE_STATUS_ORDER" not in meridian_core.__all__
 
+def test_cockpit_provider_exports():
+    from meridian_core import build_snapshot, demo_snapshot
+
+    assert build_snapshot
+    assert demo_snapshot
+    assert "build_snapshot" in __import__("meridian_core").__all__
+    assert "demo_snapshot" in __import__("meridian_core").__all__
+
+    snap = demo_snapshot()
+    assert snap.project == "Meridian"
+    assert snap.bearing == "V1 Bifrost"
+

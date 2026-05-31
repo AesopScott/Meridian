@@ -133,6 +133,10 @@ from .cockpit_state import (
     filter_events,
     lane_summary_counts,
 )
+from .cockpit_provider import (
+    build_snapshot,
+    demo_snapshot,
+)
 __all__ = [
     # -- Core domain models --------------------------------------------------
     "Portfolio",
@@ -270,4 +274,7 @@ __all__ = [
     "sort_lanes",
     "filter_events",
     "lane_summary_counts",
+    # -- Cockpit provider ----------------------------------------------------
+    "build_snapshot",
+    "demo_snapshot",
 ]
