@@ -370,7 +370,7 @@ Round 5 write log:
 
 Round 6 write log:
 
-- 2026-05-31 13:09 -06:00 - Codex Reviews A finalized Build 2 Prime Autonomy repair routing. Files changed: `docs/live-codex-reviews.md`, `docs/live-build-2.md`. Tests run: `python -m pytest tests/test_prime_autonomy.py -q` (30 passed), `python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q` (76 passed). Commit: `752d4a3` for `docs/live-build-2.md`; `edb97bd` and `8e7446f` for `docs/live-codex-reviews.md`. Push status: pushed to `origin/main`. Obsidian update status: updated `Meridian_Build/2026-05-31 Prime Autonomy Human Gate Review Finding.md`.
+- 2026-05-31 13:09 -06:00 - Codex Reviews A finalized Build 2 Prime Autonomy repair routing and idle read check. Files changed: `docs/live-codex-reviews.md`, `docs/live-build-2.md`. Tests run: `python -m pytest tests/test_prime_autonomy.py -q` (30 passed), `python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q` (76 passed). Commit: `752d4a3` for `docs/live-build-2.md`; `edb97bd`, `8e7446f`, and `39a68ee` for `docs/live-codex-reviews.md`. Push status: pushed to `origin/main`. Obsidian update status: updated `Meridian_Build/2026-05-31 Prime Autonomy Human Gate Review Finding.md`.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
