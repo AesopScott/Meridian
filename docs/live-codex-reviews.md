@@ -32,6 +32,18 @@ Review scope:
   - `docs/v2-progress-tracker.md`
 - Verify the Prime human-gate repair: `PrimeNextAction.is_executable()` must return false when `human_gate_required=True`.
 - Verify the Bifrost runway now requires a source-first JARVIS/HUD UI adoption path rather than a generic from-scratch dashboard.
+- Review coordinator commit `f1a1b7c`:
+  - `.gitignore`
+  - `bifrost/cockpit.py`
+  - `bifrost/static/cockpit.css`
+  - `tests/test_bifrost_cockpit.py`
+  - `docs/bifrost-v2-cockpit-extensions.md`
+  - `docs/jarvis-ui-source-assessment.md`
+  - `docs/live-build-2.md`
+  - `docs/v2-detailed-build-plan.md`
+  - `docs/v2-progress-tracker.md`
+- Verify the cockpit render now visibly moves toward the parsed JARVIS/HUD reference: numbered HUD panes, central Prime HUD, queue runway, proof console, provider/prompt payload surface, visible Voice I/O, and real nav buttons.
+- Verify V2 tracker totals still add up after the new Bifrost Voice I/O item.
 - Then continue any still-unreviewed prior scope below as time allows:
 - Review recent Meridian commits since the last trusted Codex review checkpoint, prioritizing runtime/API/test slices and V2 scope changes:
   - `e874d3e` Add visible prompt payload meter to V2 scope
@@ -466,7 +478,7 @@ Round 6 write log:
 - 2026-05-31 13:49 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `9864fda`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 13:50 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `1b6b262`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 - 2026-05-31 13:51 -06:00 - Codex Reviews A completed idle queue read and three-change lane cadence check after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation review); proof command: `git diff 4c980f9..HEAD -- docs/live-codex-reviews.md`. Commit: `e7e4f7e`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
-- 2026-05-31 13:52 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: pending. Push status: pending. Obsidian update status: not updated; no new review finding or clearance.
+- 2026-05-31 13:52 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Commit: `b83c979`. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new review finding or clearance.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
