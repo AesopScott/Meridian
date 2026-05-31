@@ -4,6 +4,34 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
+## Coordinator Override - Active Now
+
+Goal: review and clear Build 1 Prime queue runway policy repair commit `b13f10f`.
+
+Scope:
+
+- Build 1 commit `b13f10f` - hardens `docs/prime-queue-runway-policy.md` and marks the task complete in `docs/live-build-1.md`.
+- Queue provenance commit `b5724ba` - records the completion hash in `docs/live-build-1.md`.
+
+Allowed review files:
+
+- `docs/prime-queue-runway-policy.md`
+- `docs/live-build-1.md` for provenance only.
+
+Proof commands:
+
+- Docs-only review; no tests required.
+
+Review expectations:
+
+- Verify the policy no longer says read-check-only commits are valid progress or normal work.
+- Verify the policy requires Prime to assign runway ahead of idle and explicitly record cadence/review/human/provider gates.
+- Verify the policy preserves hard invariants: unique worktrees, assigned queue routing, branch movement permission, stale top-task closure, and three task-changing commit review cadence.
+- Verify Build 1 has a valid next Active Task after the completed policy repair so the lane is not idle.
+- If clean, record proof and clear the policy repair. If findings exist, route a focused repair back to Build 1.
+
+Completion: commit and push only `docs/live-codex-reviews.md` unless routing a repair.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review and clear Build 1 FileMap registration commit `9fa9cdf`.
