@@ -191,6 +191,8 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 14:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; awaiting orchestrator assignment; polling)
 2026-06-01 14:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; cadence 1 of 3; awaiting orchestrator assignment; polling)
 2026-06-01 14:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; V2 CognitionPolicy task already complete; cadence 1 of 3; awaiting orchestrator assignment; polling)
+2026-06-02 15:05 -06:00 - Build 2 checked queue; Active Task found: Bifrost Electron/preview package surface policy note (Coordinator Override); executing
+2026-06-02 15:15 -06:00 - Build 2 checked queue; status: idle (Bifrost preview policy task complete, commit e9062d9; no new Active Task; cadence 2 of 3; awaiting orchestrator assignment; polling)
 ```
 
 ## Write/Completion Log
