@@ -64,7 +64,7 @@
 - [x] **Prime + Bifrost Harness:** Prime cockpit provider package API surface - built in `14315b3`, cadence closed in `f66bbde`.
 - [x] **Bifrost Harness + Prime:** `PrimeCockpitSnapshot` to `CockpitViewModel` mapping - built in `5c89e87`.
 - [x] **Bifrost Harness + Prime:** runtime acceptance checklist - built in `ec66081`.
-- [x] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - built in `e1bf9db`; pending cadence review.
+- [x] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - built in `e1bf9db`; cleared by Reviews B Round B7.
 
 ### In Progress
 
