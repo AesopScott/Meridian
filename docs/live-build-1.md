@@ -590,7 +590,42 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 
 ## Active Task
 
-(None currently assigned.)
+Codex Reviews A Round 4 Repair - restart/resteer lane-role gating and contract signature.
+
+Goal: repair the committed restart/resteer evaluator finding from Codex Reviews A Round 4.
+
+Context:
+
+- Commit `8b4c8ac` added `meridian_core/restart_resteer.py`.
+- Codex Reviews A found that committed `evaluate_lane_frame()` emits `EMPTY_QUEUE` for any lane with no `active_task_id` and no `next_candidate_id`, even though the finding text and contract describe the empty-queue runway rule as a build-lane rule.
+- Review lanes may legitimately be idle with no active task and no next candidate; they should not receive a build-runway `QUEUE_NEXT_TASK` directive.
+- Codex Reviews A also found that `docs/prime-restart-resteer-contract.md` documents `choose_recovery_action(findings)` while the implemented function requires `choose_recovery_action(frame, findings)`.
+
+Allowed files only:
+
+- `meridian_core/restart_resteer.py`
+- `tests/test_restart_resteer.py`
+- `docs/prime-restart-resteer-contract.md`
+- `docs/live-build-1.md`
+
+Task:
+
+- Gate `EMPTY_QUEUE` finding creation to `LaneRole.BUILD` lanes only.
+- Add a focused test proving an idle review lane polling its assigned review queue does not get an `EMPTY_QUEUE` finding.
+- Update the contract doc so the documented `choose_recovery_action` signature matches the implemented API, or stop and report if you believe the runtime API should instead be changed.
+- Do not edit queue files other than `docs/live-build-1.md`.
+
+Tests:
+
+- `python -m pytest tests/test_restart_resteer.py -q`
+- `python -m pytest tests/test_filemap.py tests/test_restart_resteer.py -q`
+
+Completion:
+
+- Commit only the allowed repair files.
+- Push to `origin/main`.
+- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Mark this repair `Ready for Codex Review` with commit hash, files changed, tests run, and Obsidian status.
 
 ## Completed Slices
 
