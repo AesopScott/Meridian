@@ -8,7 +8,7 @@ Goal: review Build 4 DeepSeek validation benchmark plan.
 
 Scope:
 
-- Build 4 commit `6b7898f` - creates `docs/deepseek-validation-benchmark-plan.md` and advances Build 4 to the Model Harness V2 metadata contract.
+- Build 4 commit `a9695d1` - creates `docs/deepseek-validation-benchmark-plan.md` and advances Build 4 to the Model Harness V2 metadata contract.
 
 Allowed review files:
 
