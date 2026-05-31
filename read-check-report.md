@@ -190,3 +190,29 @@ Two lanes (Build 3, Build 5) have executable Active Tasks. This session (`s_1780
 ### Action
 **Reporting IDLE.** Two executable tasks exist (Build 3: FileMap registration; Build 5: Bifrost voice command contract). Awaiting lane/queue assignment from Prime/Scott.
 
+---
+
+## Read Check — 2025-07-16 ~22:35 UTC
+
+### Status: IDLE — No Lane Assignment
+
+### Pull
+- `git pull origin/main` — SUCCESS (already up to date)
+- HEAD: `a8b22a5` — "read check: s_1780252771590 idle — Build 3/5 executable; no lane assignment"
+
+### Full Five-Lane Queue Inspection (fresh reads from origin/main)
+
+| Lane | Active Task | Line | Output File / Target | Verdict |
+|------|------------|------|----------------------|---------|
+| Build 1 | "implement the Prime project-state next-action selector" | 119 | Code exists at `b7c8ad3` (Scott) | **STALE** — completed |
+| Build 2 | None — all blocks "Completed / Ready For Codex Review" | — | Session Lifecycle contract (`e37030e`) + checklist (`78d9bdd`) done | **NO ACTIVE TASK** |
+| Build 3 | "register new V2 contract-wave documents in FileMap" | 11 | `session-lifecycle-v2-contract.md` etc. NOT in `filemap.py` | **EXECUTABLE** — cadence clear, not completed |
+| Build 4 | All tasks struck through or completed | — | Workflow/sub-agent checklist exists (`dc86d68`) | **NO ACTIVE TASK** |
+| Build 5 | "write a Bifrost voice-control command palette contract" | 33 | `docs/bifrost-voice-command-contract.md` **MISSING** | **EXECUTABLE** — not completed |
+
+### Verdict
+Two lanes (Build 3, Build 5) have executable Active Tasks. Build 3: FileMap registration for four V2 contract docs. Build 5: Bifrost voice command contract (output file missing). This session (`s_1780252771590`) remains **unassigned** to any Build 1–5 lane. No `assigned_queue` field maps this session to a queue file. Cannot execute tasks without explicit lane assignment per `docs/session-card-queue-activation-contract.md` §4.4.
+
+### Action
+**Reporting IDLE.** Two executable tasks exist across Build 3/5. Awaiting lane/queue assignment from Prime/Scott.
+
