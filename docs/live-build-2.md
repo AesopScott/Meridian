@@ -126,6 +126,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-05-31 01:15 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-31 01:25 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-31 01:35 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
+2026-05-31 01:45 -06:00 - Build 2 checked queue; Active Task found: cockpit_state package API surface; executing
 2026-05-31 01:45 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-31 01:55 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
 2026-05-31 02:05 -06:00 - Build 2 checked queue; status: idle (no new Active Task; polling)
@@ -228,6 +229,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-05-31 07:35 -06:00 - Build 2 completed V0 prime_status and prime_console CLI surface; commit 989366f; files changed: meridian_core/cli.py, tests/test_cli.py; Ready for Codex Review
 2026-06-01 08:00 -06:00 - Cross-check repair: added missing 989366f completion entry to Write/Completion Log; Active Task section and Codex Cadence entries were already correct at time of repair
 2026-05-30 16:03 -06:00 - Build 2 completed V0 prime_approve CLI gate-disposition surface; commits 9d38314 (meridian_core/cli.py) + d687b7f (tests/test_cli.py) [committed by Build 3/4 sessions in read check bundles — anomaly, but code correct]; tests 31 passed; cadence count: 1 of 3 since 9c3e1a3; Ready for Codex Review
+2026-05-31 01:45 -06:00 - Build 2 completed cockpit_state package API surface; commits e656027 (meridian_core/__init__.py, Build 4) + b314b5b (tests/test_package_api.py, Build 3) [committed by other sessions before Build 2 executed — anomaly, code correct and verified]; tests 992 passed; cadence count: 2 of 3 since 9c3e1a3; Ready for Codex Review
 ```
 
 ## Cross-Check Activity
@@ -320,6 +322,8 @@ Completion:
 - Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
-Last completed: V0 `prime_approve` CLI gate-disposition surface; commits `9d38314` (meridian_core/cli.py) + `d687b7f` (tests/test_cli.py); 31 tests passed. Cadence count: 1 of 3 since cadence clear at `9c3e1a3`.
+Last completed: V1 cockpit-state package API surface; commits `e656027` (meridian_core/__init__.py) + `b314b5b` (tests/test_package_api.py); 992 tests passed. Cadence count: 2 of 3 since cadence clear at `9c3e1a3`.
 
 Anomaly note: the `prime_approve` code was committed by Build 3 and Build 4 sessions within their idle read check bundles rather than by a dedicated Build 2 completion commit. The implementation and tests are correct and verified. Flagged for orchestrator awareness.
+
+Anomaly note 2: the cockpit_state package API surface (meridian_core/__init__.py + tests/test_package_api.py) was also committed by Build 4 and Build 3 respectively before Build 2 could execute the task. The implementation is correct and complete (all 11 public cockpit-state names exported, 992 tests pass). Flagged for orchestrator awareness.
