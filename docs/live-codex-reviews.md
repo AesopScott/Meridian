@@ -8,11 +8,11 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Completed / Repair-Routed
+## Coordinator Override - Active Now
 
-Goal: review Build 2 Session Lifecycle routing-action implementation.
+Goal: review Build 2 Session Lifecycle routing-action repair implementation.
 
-Status: repair routed by Codex Reviews A on 2026-06-01 16:28 -06:00. The proof command passes, but the implementation does not fully satisfy the active queue contract for Relay-selected archive/request-human-gate actions or required reason coverage.
+Status: active review promoted by coordinator on 2026-06-01 after Build 2 landed the focused repair in current `origin/main` commit `558af555`.
 
 Review result:
 
@@ -21,15 +21,15 @@ Review result:
 - `SessionActionReason.CONTEXT_FILL`, `REVIEW_GATE`, and `PERMISSION_BOUNDARY` are typed but not reachable through `suggest_routing_action()` and are not covered by routing tests.
 - Unique-worktree, assigned-queue, and branch-permission fields remain present in `SessionLifecycleState` / `SessionCommandPlan`; no live process control, model calls, UI calls, branch movement, or Polaris dependency was found in the scoped side-effect scan.
 
-Finding: HIGH incomplete routing action surface, plus MEDIUM missing required reason coverage. Focused repair routed to Build 2 in `docs/live-build-2.md`.
+Prior finding: HIGH incomplete routing action surface, plus MEDIUM missing required reason coverage. Build 2 now claims those findings are repaired and marked Ready for Codex Review in `docs/live-build-2.md`.
 
-Completion: Build 2 Session Lifecycle routing-action implementation is not review-cleared. Build 2 must repair the action/reason coverage and mark Ready for Codex Review again.
+Completion: verify the landed repair. If it passes, mark the Build 2 repair review-cleared and promote the next review candidate. If findings remain, route a focused repair back to Build 2.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
 Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
 
-Task: verify the current Build 2 Session Lifecycle routing-action implementation against the active queue contract. Confirm Prime can represent Relay-selected session actions without live process control: reuse existing session, start new session, summarize and reset, transfer/handoff, archive, and request human gate. Confirm context-fill, reasoning-shift, project-scope, stale-heartbeat, review-gate, and permission-boundary reasons are typed/tested, and unique-worktree/assigned-queue/branch-permission invariants are preserved. Do not edit runtime code. If findings exist, route focused repairs to Build 2; otherwise mark passed and leave the next candidate.
+Task: verify current `origin/main` commit `558af555` against the repaired Build 2 contract. Confirm Prime can represent Relay-selected session actions without live process control: reuse existing session, start new session, summarize and reset, transfer/handoff, archive, and request human gate. Confirm context-fill, reasoning-shift, project-scope, stale-heartbeat, review-gate, and permission-boundary reasons are typed/tested, and unique-worktree/assigned-queue/branch-permission invariants are preserved. Do not edit runtime code. If findings exist, route focused repairs to Build 2; otherwise mark passed and leave the next candidate.
 
 Proof command:
 

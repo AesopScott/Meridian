@@ -8,11 +8,21 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: add Aegis-to-Relay summary handoff contract docs after premium-cost approval gate repair clears review.
 
-Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/aegis-relay-summary-handoff-contract.md`, `docs/live-build-4.md`.
+
+Required sources: `meridian_core/aegis.py`, `meridian_core/relay.py`, `meridian_core/relay_executor.py`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/live-codex-reviews-2.md`.
+
+Task: create a concise docs-only handoff contract for how Aegis gate outcomes, premium-cost approvals, waiver/approval evidence, selected model/vendor evidence, and proof summaries should be handed to Relay for prompt packaging and downstream Bifrost display. Include required stable fields, which fields are human-facing vs audit-only, and explicit out-of-scope boundaries. Do not edit runtime code, tests, Relay implementation, Bifrost, FileMap, UI, model/account process code, branches, or Polaris.
+
+Tests: docs-only; no pytest required.
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review with commit hash and files changed, and leave a concrete Next Candidate.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -26,7 +36,7 @@ Tests:
 
 - `python -m pytest tests/test_aegis.py -q` — All 191 tests passing
 
-Completion: completed 2026-06-13 18:06 -05:00.
+Completion: completed 2026-06-01 16:32 -06:00.
 
 Ready for Codex Review:
 
