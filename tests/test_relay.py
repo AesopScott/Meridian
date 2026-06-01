@@ -7,12 +7,17 @@ import pytest
 from meridian_core.council import CouncilPlan, CouncilRole
 from meridian_core.prompt_budget import PromptBudgetPlan, PromptBudgetTier
 from meridian_core.relay import (
+    AccessRouteClass,
     ContextStrategy,
     CostPosture,
     ModelRole,
     RelayLane,
     RelayRoute,
+    RelayRouteAudit,
+    RouteTrustState,
     RoutingMode,
+    SessionAction,
+    VendorRouteKind,
     route_from_assessment,
     route_from_tier,
 )
@@ -39,6 +44,13 @@ class TestTier0Route:
 
     def test_cost_posture_is_minimal(self):
         assert route_from_tier(0).cost_posture is CostPosture.MINIMAL
+
+    def test_audit_blocks_model_call(self):
+        audit = route_from_tier(0).audit
+        assert audit.route_kind is VendorRouteKind.NO_MODEL
+        assert audit.route_class is None
+        assert audit.session_action is SessionAction.NO_SESSION
+        assert "model_call_not_needed" in audit.fallback_blockers
 
 
 # ---------------------------------------------------------------------------
@@ -67,6 +79,13 @@ class TestTier1Route:
 
     def test_cost_posture_is_minimal(self):
         assert route_from_tier(1).cost_posture is CostPosture.MINIMAL
+
+    def test_account_session_route_is_first(self):
+        audit = route_from_tier(1).audit
+        assert audit.route_kind is VendorRouteKind.ACCOUNT_SESSION
+        assert audit.route_class is AccessRouteClass.ACCOUNT_SESSION
+        assert audit.route_precedence[0] is AccessRouteClass.ACCOUNT_SESSION
+        assert audit.route_precedence[-1] is AccessRouteClass.AGGREGATOR_API
 
 
 # ---------------------------------------------------------------------------
@@ -101,6 +120,12 @@ class TestTier2Route:
 
     def test_cost_posture_is_standard(self):
         assert route_from_tier(2).cost_posture is CostPosture.STANDARD
+
+    def test_audit_requires_meaningful_review_proof(self):
+        audit = route_from_tier(2).audit
+        assert audit.trust_state is RouteTrustState.CANDIDATE
+        assert "independent_review_when_meaningful" in audit.proof_required
+        assert "trust_state" in audit.telemetry_required
 
 
 # ---------------------------------------------------------------------------
@@ -137,6 +162,16 @@ class TestTier3Route:
     def test_cost_posture_is_thorough(self):
         assert route_from_tier(3).cost_posture is CostPosture.THOROUGH
 
+    def test_tier3_uses_distinct_model_lane_names(self):
+        lane_models = [lane.preferred_model for lane in route_from_tier(3).lanes]
+        assert len(lane_models) == len(set(lane_models))
+
+    def test_tier3_audit_blocks_authoritative_aggregator_fallback(self):
+        audit = route_from_tier(3).audit
+        assert "independent_dual_model_lanes" in audit.proof_required
+        assert "aggregator_cannot_be_authoritative" in audit.fallback_blockers
+        assert any("aggregator_api_rejected" in item for item in audit.alternatives_rejected)
+
 
 # ---------------------------------------------------------------------------
 # Tier 4 -- human gate required before execution
@@ -161,6 +196,12 @@ class TestTier4Route:
     def test_risk_tier_is_4(self):
         assert route_from_tier(4).risk_tier == 4
 
+    def test_tier4_audit_requires_human_gate(self):
+        audit = route_from_tier(4).audit
+        assert audit.trust_state is RouteTrustState.BLOCKED
+        assert "human_gate_approval" in audit.proof_required
+        assert "human_gate_required" in audit.fallback_blockers
+
 
 # ---------------------------------------------------------------------------
 # Default context strategy is focused packet
@@ -176,10 +217,19 @@ class TestContextStrategy:
         assessment = assess_tier(2)
         route = route_from_assessment(assessment, context_strategy=ContextStrategy.REUSE_SESSION)
         assert route.context_strategy is ContextStrategy.REUSE_SESSION
+        assert route.audit.session_action is SessionAction.REUSE
 
     def test_large_context_accepted(self):
         route = route_from_assessment(assess_tier(3), context_strategy=ContextStrategy.LARGE_CONTEXT)
         assert route.context_strategy is ContextStrategy.LARGE_CONTEXT
+        assert route.audit.session_action is SessionAction.START_NEW
+
+    def test_summarize_and_reset_maps_to_session_action(self):
+        route = route_from_assessment(
+            assess_tier(3),
+            context_strategy=ContextStrategy.SUMMARIZE_AND_RESET,
+        )
+        assert route.audit.session_action is SessionAction.SUMMARIZE_AND_RESET
 
 
 # ---------------------------------------------------------------------------
@@ -264,6 +314,21 @@ class TestShape:
 
     def test_cost_posture_is_enum(self):
         assert isinstance(route_from_tier(1).cost_posture, CostPosture)
+
+    def test_audit_is_relay_route_audit(self):
+        assert isinstance(route_from_tier(1).audit, RelayRouteAudit)
+
+    def test_audit_route_precedence_is_immutable_tuple(self):
+        audit = route_from_tier(1).audit
+        assert isinstance(audit.route_precedence, tuple)
+        with pytest.raises((AttributeError, TypeError)):
+            audit.route_precedence += (AccessRouteClass.DIRECT_API,)  # type: ignore[misc]
+
+    def test_audit_lists_are_immutable_tuples(self):
+        audit = route_from_tier(3).audit
+        assert isinstance(audit.proof_required, tuple)
+        assert isinstance(audit.telemetry_required, tuple)
+        assert isinstance(audit.fallback_blockers, tuple)
 
 
 # ---------------------------------------------------------------------------
