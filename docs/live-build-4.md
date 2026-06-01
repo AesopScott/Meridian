@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Relay-Aegis risk/proof gate contract contradictions found by Codex Reviews B.
 
@@ -22,7 +22,19 @@ Task: update `docs/relay-aegis-risk-proof-gates.md` so the runtime-test contract
 
 Tests: docs-only; no pytest required unless runtime files are changed.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave the existing Next Candidate intact.
+Completion: completed 2026-06-13 15:48 -05:00.
+
+Ready for Codex Review:
+
+- Commit: `0a5ed589` (merge) containing repair commit `30c62e90`
+- Files: `docs/relay-aegis-risk-proof-gates.md`
+- Tests: not required (docs-only)
+- Repairs applied:
+  1. Tier 2 Per-Tier table: updated DeepSeek from "validation pending allowed" to "requires PASSED"; updated Aggregator from "block" to "OK (with proof)"
+  2. Aggregator Authority Gate: clarified Tier 2 allowance with explicit proof (code review + metadata) and known selected_model; only Tier 3+ blocked unconditionally
+  3. Waiver/Approval Records section: added with JSON schema for waiver_record and approval_record, including required fields (actor, scope, timestamp, reason, optional expiration/evidence)
+  4. Integration section: added waiver_record and approval_record to Relay inputs
+- Internal consistency verified against relay-completeness-audit.md, relay-heartbeat-model-routing-logic.md, and model-harness-v2-contract.md
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -458,6 +470,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-01 15:28 -06:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = convert Aegis risk/proof gate contract into bounded runtime test cases (meridian_core/aegis.py + tests/test_aegis.py); pulled origin/main; now at c58aee40; beginning implementation of 9 gate validators with focused test coverage
 2026-06-01 15:30 -06:00 - Build 4 checked queue; status: idle; Active Task moved to Completed/Ready for Codex Review; implemented all 9 gates (GateDecision enum, GateResult type, 9 validator functions); 166 tests passed (73 legacy + 93 new); commit ad46acc3 includes implementation; worktree synced with origin/main; cadence 2/3
 2026-06-01 15:35 -06:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = repair Relay-Aegis risk/proof gate contract contradictions (Codex Reviews B findings); fixes: Tier 2 DeepSeek validation wording, Tier 2 aggregator authority wording, waiver/approval field semantics; worktree synced with origin/main; beginning repairs
+2026-06-13 15:48 -05:00 - Build 4 checked queue; status: idle; Active Task completed (repair task); commit 30c62e90 (pushed as 0a5ed589 merge); moved Coordinator Override - Active Now section to Completed / Ready For Codex Review; no new executable Active Task; Next Candidate Task (bind Aegis gate outputs into Relay decision-record proof) awaits coordinator promotion; origin/main synced; cadence 1/3
 ```
 
 ## Write/Completion Log
@@ -491,6 +504,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-06-01 15:23 -06:00 - Build 4 completed Relay-Aegis risk/proof gates contract (docs/relay-aegis-risk-proof-gates.md); commit a8a7aca8; files changed: docs/relay-aegis-risk-proof-gates.md; tests not required (docs-only); pushed to origin/main; Ready for Codex Review; cadence 1/3
 2026-06-01 15:30 -06:00 - Build 4 completed Aegis gate validators implementation (meridian_core/aegis.py + tests/test_aegis.py); commit ad46acc3 (parallel merge with other work); files changed: meridian_core/aegis.py (464 additions), tests/test_aegis.py (393 additions); tests: 166 passed; gates: 9 pure validators + GateDecision/GateResult types; Ready for Codex Review; cadence 2/3
 2026-06-01 15:36 -06:00 - Build 4 completed repair of Relay-Aegis risk/proof gate contract contradictions (Codex Reviews B findings); commit 07b53885 (worktree diverged from origin/main); files changed: docs/relay-aegis-risk-proof-gates.md; repairs: Tier 2 DeepSeek (requires PASSED), Tier 2 aggregator (allows with proof), waiver/approval fields (actor, scope, timestamp, reason, expiration/evidence); Ready for Codex Review; cadence 3/3 — PAUSE FOR CODEX REVIEW
+2026-06-13 15:48 -05:00 - Build 4 completed repair of Relay-Aegis risk/proof gate contract contradictions (RETAKE after queue verification); commit 30c62e90 (pushed as 0a5ed589 merge); files changed: docs/relay-aegis-risk-proof-gates.md; repairs applied: (1) Tier 2 Per-Tier table: updated DeepSeek from "validation pending allowed" to "requires PASSED", Aggregator from "block" to "OK (with proof)"; (2) Aggregator Authority Gate: clarified Tier 2 allowance with explicit proof + known selected_model; (3) Waiver/Approval Records section: added with JSON schema for waiver_record and approval_record; tests: docs-only; pushed to origin/main; Ready for Codex Review; cadence 1/3
 ```
 
 ## Cross-Check Activity
