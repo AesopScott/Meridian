@@ -794,3 +794,4 @@ Completion:
 - Update Obsidian.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 2026-06-01 05:00 -06:00 - Build 5 checked queue; status: running; Active Task = implement Bifrost V2 voice I/O surface state; origin/main at 58d981e; starting voice state view-model fields and render implementation
+2026-06-01 05:15 -06:00 - Build 5 completed Bifrost V2 voice I/O surface state implementation; commit ff4cb69 (merged to 3a6f237); files: bifrost/cockpit.py, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 93 passed (tests/test_bifrost_cockpit.py), 1270 passed full suite
