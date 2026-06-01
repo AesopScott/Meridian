@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair the remaining Relay decision-record vendor-unknown stop-condition gap from Codex Reviews A.
 
@@ -14,13 +14,18 @@ Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executo
 
 Task: make Tier 2+ Relay decision records treat missing safe vendor metadata as an explicit blocking stop condition, not only as `vendor="unknown"`. The reviewed commit `f0bb2bb6` populates vendor from adapter metadata and model_id from lane preferred_model, but a clean Tier 2 audited plan with no adapter metadata can still produce `vendor="unknown"`, `fallback_allowed=True`, and no fallback blocker. Add focused regression coverage for that clean-audit edge and repair `_build_decision_record()` so vendor/model identity unknowns become explicit fallback blockers before Tier 2+ dispatch is considered explainable. Preserve provider neutrality and do not add live vendor calls, CLI execution, UI rendering, branch movement, account probing, network access, or Polaris dependency.
 
-Required proof commands:
+Completion:
 
-- `python -m pytest tests/test_relay_executor.py -q`
+- Build 1 completed Relay vendor/model_id unknown stop-condition repair on 2026-06-01 15:55 -06:00.
+- Commit: `c3d91214` (feat: Relay decision-record vendor/model_id unknowns as explicit fallback blockers for Tier 2+).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (123 tests: 121 original + 2 new vendor/model_id edge case tests).
+- Implementation: Added "vendor_unknown" and "model_id_unknown" as explicit fallback blockers when vendor/model_id are unknown for Tier 2+ dispatch. Updated existing test to account for new blockers. Provider-neutral implementation with no vendor calls, CLI execution, UI rendering, or branch changes.
+- Push: successful to worktree branch; ready for merge.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Ready for Codex Review.
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: bind Aegis route-gate evidence into Relay decision records after the Aegis runtime gate slice lands.
 
