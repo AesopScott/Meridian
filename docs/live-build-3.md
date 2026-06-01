@@ -901,6 +901,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-12 07:53 UTC - Build 3 checked queue; status: idle; Bifrost FileMap registration complete (commit d48768b3); cadence 1/3 since next round; Active Task is monitoring task — awaiting Build 5/Build 2 follow-up slices before next registration work
 2026-06-01 15:47 -06:00 - Build 3 checked queue; status: active task found (Monitor Build 5/Build 2 FileMap gaps); found bifrost-right-panel-mode-contract.md unregistered; executing registration now
 2026-06-01 15:50 -06:00 - Build 3 checked queue; status: idle; Active Task is monitoring task (Build 5/Build 2 FileMap state); no new files from Build 5/Build 2 on origin/main; cadence 2/3 since Round B5; awaiting next assignment
+2026-06-01 15:53 -06:00 - Build 3 checked queue; status: active task found (Verify Aegis/Bifrost FileMap registration); executing audit now
 ```
 
 ## Write/Completion Log
@@ -963,6 +964,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 cross-check: none/finding/fix; details: <short not
 2026-06-01 09:45 -06:00 - Build 3 cross-check: new Bifrost cockpit scaffold d13f1d1 adds bifrost/cockpit.py, bifrost/__init__.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py â€” none registered in docs/FileMap.md or meridian_core/filemap.py; FileMap gap; no active task assigned yet; awaiting Codex Reviews routing
 2026-06-12 07:10 UTC - Build 3 cross-check: docs/ui-integration-checklist.md landed via Build 1 (merged at fccfa11d); not registered in meridian_core/filemap.py or docs/FileMap.md; FileMap gap noted; awaiting Active Task assignment from orchestrator
 2026-06-01 15:47 -06:00 - Build 3 completed FileMap registration (bifrost-right-panel-mode-contract.md); commit d252026d; tests 46/46 filemap; Obsidian update pending; files: meridian_core/filemap.py, docs/FileMap.md, tests/test_filemap.py; cadence 2/3 since Round B5; Ready for Codex Review
+2026-06-01 15:53 -06:00 - Build 3 completed Aegis FileMap verification and registration (meridian_core/aegis.py, tests/test_aegis.py); commit cf6e8c42; tests 46/46 filemap; Obsidian update pending; files: meridian_core/filemap.py, docs/FileMap.md, tests/test_filemap.py; cadence 3/3 since Round B5; Ready for Codex Review
 ```
 
 ## Codex Review Cadence
