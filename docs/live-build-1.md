@@ -116,28 +116,21 @@ Completion:
 - Tests: not required (docs-only).
 - Ready for Codex Review. Routed to Codex Reviews B for docs/architecture review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement the Prime project-state next-action selector.
 
 Allowed files only: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-1.md`.
 
-Task: extend Prime Autonomy with a deterministic project-state selector that chooses the next Prime action from project/backlog/lane/tier/review-gate state without model calls. This completes the remaining Prime Autonomy V2 item after `PrimeNextAction`.
+Completion:
 
-Requirements:
+- Build 1 completed this slice on 2026-06-09 00:15 -05:00.
+- Commit: `57aad9a`.
+- Files changed: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`.
+- Tests run: `python -m pytest tests/test_prime_autonomy.py -q` — 55 passed (35 existing regression + 20 new).
+- Obsidian: `2026-06-09 Build 1 Prime Project-State Selector.md` written.
 
-- Keep the implementation stdlib-only, deterministic, frozen/immutable where new data objects are introduced, and free of filesystem/network/session side effects.
-- Do not call Echo or Atlas directly; accept Echo/Atlas signal placeholders as plain data inputs if useful.
-- Include review gate, human gate, blockers, risk tier, queue state, and confidence in the selected `PrimeNextAction`.
-- Prefer safe `PAUSE_AND_WAIT` / `ESCALATE_ERROR` outcomes when required state is missing, blocked, review-gated, or human-gated.
-- Preserve the existing `PrimeNextAction`, `select_prime_next_action()`, and `make_prime_next_action()` behavior.
-- Add focused tests proving deterministic priority ordering, review-gate blocking, human-gate behavior, safe fallback on missing state, and no regression to existing executability semantics.
-
-Tests:
-
-- `python -m pytest tests/test_prime_autonomy.py -q`
-
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Ready for Codex Review.
 
 ## Next Candidate Task
 
