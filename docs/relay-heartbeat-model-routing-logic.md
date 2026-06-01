@@ -113,14 +113,12 @@ Use OpenAI direct routes when Codex/coding strength, professional reasoning, str
 
 ### DeepSeek Direct
 
-Use DeepSeek direct when cost-efficient reasoning, Q-mode flatness, and direct API validation are desired. DeepSeek direct must remain visibly distinct from DeepSeek through OpenRouter.
+Use DeepSeek direct when cost-efficient reasoning, Q-mode flatness, and direct API validation are desired. DeepSeek direct must remain visibly distinct from DeepSeek through OpenRouter. The dispatch ID for direct API calls is `deepseek-chat`; `v4-pro` and `v4-flash` are marketing/capability variants expressed as metadata, not dispatch keys.
 
-| Model | Primary Uses | Relay Logic | Risks / Gates |
+| Model (Dispatch ID) | Primary Uses | Relay Logic | Risks / Gates |
 |---|---|---|---|
-| `deepseek-v4-pro` | High-reasoning direct DeepSeek lane, comparison lane, cost-aware reasoning, structured outputs. | Candidate for Tier 1-2 reasoning/review; promote only after validation. | Candidate trust until external validation. Do not grant autonomous code authority without proof. |
-| `deepseek-v4-flash` | Fast/cheap direct DeepSeek lane, Q-mode checks, classification, bounded summaries. | Use for low-risk fast lane and heartbeat/Q-mode checks if prompt payload stays flat. | Watch prompt-drag. Candidate trust until validation. |
-| `deepseek-chat` | Compatibility alias only. | Do not choose for new routes; maps to non-thinking `deepseek-v4-flash`. | Deprecated on 2026-07-24. |
-| `deepseek-reasoner` | Compatibility alias only. | Do not choose for new routes; maps to thinking `deepseek-v4-flash`. | Deprecated on 2026-07-24. |
+| `deepseek-chat` | Direct DeepSeek API dispatch ID; supports both standard and extended-thinking modes. Variants: `v4-pro` (high-reasoning) and `v4-flash` (fast/cheap). | Use for cost-efficient reasoning, comparison lanes, and Q-mode checks. Promote to Tier 2+ only after external validation; candidate trust until proven. | Candidate trust. Do not grant autonomous code authority without proof. Watch prompt-drag on extended-thinking. |
+| `deepseek-reasoner` | Extended-thinking variant for reasoning-intensive work. | Candidate for Tier 1-2 reasoning/review when extended thinking is explicitly required. | Candidate trust until validation. Cost and latency higher than standard. |
 
 ### OpenRouter Aggregator
 
@@ -155,7 +153,7 @@ Before using a paid API or aggregator route, Relay evaluates the account/session
 
 **Step 2: Does the session have the right project scope, role, and tools?**
 - Yes → Proceed to Step 3
-- No → Direct API or aggregator (wrong session scope)
+- No → Start project-specific or role-matched session (wrong scope must be corrected, not bypassed)
 
 **Step 3: Is context health clean and under budget?**
 - Yes → Proceed to Step 4
@@ -179,7 +177,7 @@ Relay may fall through to API routes only when account/session is unavailable, u
 
 | Condition | Tier 1-2 Allowed | Tier 3+ Allowed | Fallback Action | Show to Prime |
 |---|---|---|---|---|
-| Account session missing/expired | ✓ (if proof ok) | ✗ (wait for auth) | Try direct API | "Session unavailable, switching to API" |
+| Account session missing/expired | ✓ (if proof ok) | ✓ (start/re-auth session, or direct API if proof/audit explicit) | Start/re-auth session or direct API | "Session unavailable, attempting re-auth or direct API" |
 | Session context full | ✓ (summarize first) | ✓ (with new session) | Start new session or API | "Context full, summarizing or using API" |
 | Session wrong project | ✗ | ✗ | Start project-specific session | "Wrong project session, starting fresh" |
 | Session wrong role | ✓ (if low-tier) | ✗ | Start role-matched session | "Role mismatch, starting new session" |
