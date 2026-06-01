@@ -622,6 +622,7 @@ def gate_aggregator_authority(
     trust_mode: str,
     risk_tier: int,
     proof_strength: str = "WEAK",
+    selected_model_evidence: str | None = None,
 ) -> GateResult:
     """
     Gate 7: Aggregator Authority Gate.
@@ -629,7 +630,8 @@ def gate_aggregator_authority(
     Trigger: trust_mode==AGGREGATOR and risk_tier >= 3.
     Logic:
     - If Tier >= 3 and aggregator, block.
-    - If Tier 0-2 and aggregator and proof_strength=WEAK, allow with warning.
+    - If Tier 2 and aggregator, require explicit selected model/vendor evidence.
+    - If Tier 0-1 and aggregator and proof_strength=WEAK, allow with warning.
     - If proof_strength=NONE, block.
     """
     if trust_mode != "AGGREGATOR":
@@ -653,10 +655,25 @@ def gate_aggregator_authority(
             reason="aggregator route with no proof not allowed",
         )
 
+    # Tier 2 aggregator routes require explicit selected model/vendor evidence
+    if risk_tier == 2:
+        if not selected_model_evidence or selected_model_evidence.strip() == "":
+            return GateResult(
+                gate_name="aggregator_authority",
+                decision=GateDecision.BLOCK,
+                reason="Tier 2: aggregator route requires explicit selected model/vendor evidence",
+            )
+        return GateResult(
+            gate_name="aggregator_authority",
+            decision=GateDecision.ALLOW,
+            reason=f"Tier 2: aggregator allowed with explicit model evidence ({selected_model_evidence!r})",
+        )
+
+    # Tier 0-1 aggregator routes
     return GateResult(
         gate_name="aggregator_authority",
         decision=GateDecision.ALLOW,
-        reason=f"Tier {risk_tier}: aggregator allowed for Tier 0-2",
+        reason=f"Tier {risk_tier}: aggregator allowed for Tier 0-1",
     )
 
 

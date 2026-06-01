@@ -892,8 +892,19 @@ class TestGateAggregatorAuthority:
         result = gate_aggregator_authority("AGGREGATOR", 1)
         assert result.decision is GateDecision.ALLOW
 
-    def test_aggregator_tier2_allows(self):
-        result = gate_aggregator_authority("AGGREGATOR", 2)
+    def test_aggregator_tier2_without_model_evidence_blocks(self):
+        # Tier 2 aggregator requires explicit selected_model_evidence
+        result = gate_aggregator_authority("AGGREGATOR", 2, selected_model_evidence=None)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_tier2_with_empty_model_evidence_blocks(self):
+        # Empty string model evidence is not allowed
+        result = gate_aggregator_authority("AGGREGATOR", 2, selected_model_evidence="")
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_tier2_with_model_evidence_allows(self):
+        # Tier 2 aggregator with explicit selected model evidence allows
+        result = gate_aggregator_authority("AGGREGATOR", 2, selected_model_evidence="claude-sonnet-4-6")
         assert result.decision is GateDecision.ALLOW
 
     def test_aggregator_tier3_blocks(self):
