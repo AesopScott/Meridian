@@ -172,6 +172,49 @@ class InstrumentBand:
 
 
 @dataclass
+class SessionItem:
+    session_id: str
+    session_name: str
+    project_name: str
+    status: str  # "live" | "hidden" | "waiting" | "blocked" | "done"
+
+
+@dataclass
+class UserSessionModeView:
+    sessions: list[SessionItem] = field(default_factory=list)
+    selected_session_id: str = ""
+    prompt_text: str = ""
+    response_text: str = ""
+
+
+@dataclass
+class SettingsItem:
+    setting_id: str
+    setting_name: str
+    setting_type: str  # "toggle" | "text" | "select" | "range"
+    value: str
+
+
+@dataclass
+class SettingsModeView:
+    settings: list[SettingsItem] = field(default_factory=list)
+
+
+@dataclass
+class HarnessItem:
+    item_id: str
+    item_name: str
+    item_type: str
+    description: str
+
+
+@dataclass
+class HarnessModeView:
+    harness_items: list[HarnessItem] = field(default_factory=list)
+    search_query: str = ""
+
+
+@dataclass
 class CockpitViewModel:
     project: str
     bearing: str
@@ -186,6 +229,10 @@ class CockpitViewModel:
     prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     session_lifecycle: SessionLifecycleView = field(default_factory=SessionLifecycleView)
     proof_state: ProofStateView = field(default_factory=ProofStateView)
+    user_session_mode: UserSessionModeView = field(default_factory=UserSessionModeView)
+    settings_mode: SettingsModeView = field(default_factory=SettingsModeView)
+    harness_mode: HarnessModeView = field(default_factory=HarnessModeView)
+    right_panel_active_mode: str = "user_session"  # "user_session" | "settings" | "harness"
     instrument: InstrumentBand = field(
         default_factory=lambda: InstrumentBand(
             beacon="ok", relay="ok", aegis="ok", compass="ok",
@@ -459,6 +506,89 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             waived_count=0,
             notes="One review finding open: performance profiling incomplete for DeepSeek route",
         ),
+        user_session_mode=UserSessionModeView(
+            sessions=[
+                SessionItem(
+                    session_id="session-1",
+                    session_name="Plan Session",
+                    project_name="Meridian",
+                    status="live",
+                ),
+                SessionItem(
+                    session_id="session-2",
+                    session_name="Review Session",
+                    project_name="Meridian",
+                    status="waiting",
+                ),
+                SessionItem(
+                    session_id="session-3",
+                    session_name="Debug Session",
+                    project_name="Polaris",
+                    status="hidden",
+                ),
+            ],
+            selected_session_id="session-1",
+            prompt_text="",
+            response_text="",
+        ),
+        settings_mode=SettingsModeView(
+            settings=[
+                SettingsItem(
+                    setting_id="project-focus",
+                    setting_name="Project Focus",
+                    setting_type="select",
+                    value="Meridian",
+                ),
+                SettingsItem(
+                    setting_id="quiet-mode",
+                    setting_name="Quiet Mode",
+                    setting_type="toggle",
+                    value="off",
+                ),
+                SettingsItem(
+                    setting_id="text-size",
+                    setting_name="Text Size",
+                    setting_type="range",
+                    value="14",
+                ),
+                SettingsItem(
+                    setting_id="risk-tier",
+                    setting_name="Risk Tier Override",
+                    setting_type="select",
+                    value="Tier 2",
+                ),
+            ],
+        ),
+        harness_mode=HarnessModeView(
+            harness_items=[
+                HarnessItem(
+                    item_id="gate-unknown-route",
+                    item_name="Unknown Route Class Gate",
+                    item_type="gate",
+                    description="Validates route_class is declared",
+                ),
+                HarnessItem(
+                    item_id="gate-missing-model",
+                    item_name="Missing Exact Model ID Gate",
+                    item_type="gate",
+                    description="Validates model_id is versioned",
+                ),
+                HarnessItem(
+                    item_id="finding-perf-profile",
+                    item_name="Performance Profiling Finding",
+                    item_type="finding",
+                    description="DeepSeek route lacks performance baseline",
+                ),
+                HarnessItem(
+                    item_id="waiver-tier-exception",
+                    item_name="Tier Override Waiver",
+                    item_type="waiver",
+                    description="Risk tier override requires Aegis waiver",
+                ),
+            ],
+            search_query="",
+        ),
+        right_panel_active_mode="user_session",
         instrument=InstrumentBand(
             beacon="ok",
             relay="ok",
@@ -931,6 +1061,92 @@ def _render_session_lifecycle(lifecycle: SessionLifecycleView) -> str:
     )
 
 
+def _render_user_session_mode(mode: UserSessionModeView) -> str:
+    if not mode.sessions:
+        return ""
+
+    session_options = []
+    for session in mode.sessions:
+        selected = " selected" if session.session_id == mode.selected_session_id else ""
+        status_label = f" ({session.status})" if session.status != "live" else ""
+        session_options.append(
+            f'<option value="{_e(session.session_id)}"{selected}>'
+            f'{_e(session.session_name)}{status_label}</option>'
+        )
+
+    return (
+        '<div class="right-panel-user-session" aria-label="User Session Mode">'
+        '<div class="right-panel-header">'
+        '<h3>User Session</h3>'
+        '<div class="sessions-dropdown">'
+        '<select aria-label="Select session">'
+        + "".join(session_options)
+        + "</select>"
+        "</div>"
+        "</div>"
+        '<div class="prompt-response-area">'
+        '<textarea class="prompt-input" placeholder="Enter prompt..."></textarea>'
+        '<div class="response-output"></div>'
+        "</div>"
+        "</div>"
+    )
+
+
+def _render_settings_mode(mode: SettingsModeView) -> str:
+    if not mode.settings:
+        return ""
+
+    settings_items = []
+    for setting in mode.settings:
+        settings_items.append(
+            f'<div class="settings-item" data-setting-id="{_e(setting.setting_id)}">'
+            f'<label>{_e(setting.setting_name)}</label>'
+            f'<input type="{_e(setting.setting_type)}" value="{_e(setting.value)}" />'
+            f"</div>"
+        )
+
+    return (
+        '<div class="right-panel-settings" aria-label="Settings Mode">'
+        '<div class="right-panel-header">'
+        '<h3>Configuration</h3>'
+        "</div>"
+        '<div class="settings-list">'
+        + "".join(settings_items)
+        + "</div>"
+        "</div>"
+    )
+
+
+def _render_harness_mode(mode: HarnessModeView) -> str:
+    if not mode.harness_items:
+        return ""
+
+    harness_items = []
+    for item in mode.harness_items:
+        item_type_class = f"harness-item-{_e(item.item_type)}"
+        harness_items.append(
+            f'<div class="harness-item {item_type_class}" data-item-id="{_e(item.item_id)}">'
+            f'<div class="harness-item-header">'
+            f'<span class="harness-item-name">{_e(item.item_name)}</span>'
+            f'<span class="harness-item-type">[{_e(item.item_type)}]</span>'
+            f"</div>"
+            f'<div class="harness-item-description">{_e(item.description)}</div>'
+            f"</div>"
+        )
+
+    return (
+        '<div class="right-panel-harness" aria-label="Harness Mode">'
+        '<div class="right-panel-header">'
+        '<h3>Harness Logic</h3>'
+        '<input type="text" class="harness-search" placeholder="Search harness items..." />'
+        "</div>"
+        '<div class="harness-items-list">'
+        + "".join(harness_items)
+        + "</div>"
+        "</div>"
+    )
+
+
 # ── Public API ──────────────────────────────────────────────────────────────
 
 
@@ -950,6 +1166,14 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     projects = _render_project_strip(vm.projects, vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
+
+    right_panel_content = ""
+    if vm.right_panel_active_mode == "user_session":
+        right_panel_content = _render_user_session_mode(vm.user_session_mode)
+    elif vm.right_panel_active_mode == "settings":
+        right_panel_content = _render_settings_mode(vm.settings_mode)
+    elif vm.right_panel_active_mode == "harness":
+        right_panel_content = _render_harness_mode(vm.harness_mode)
 
     return (
         "<!DOCTYPE html>\n"
@@ -972,6 +1196,9 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{provider_balance}\n"
         f"{prompt_payload}\n"
         "</main>\n"
+        '<aside class="right-panel">\n'
+        f"{right_panel_content}\n"
+        "</aside>\n"
         f"{progress}\n"
         "</div>\n"
         f"{instrument}\n"

@@ -7,14 +7,20 @@ import pytest
 from bifrost.cockpit import (
     CockpitViewModel,
     HarnessCard,
+    HarnessItem,
+    HarnessModeView,
     InstrumentBand,
     LaneRow,
     ProgressEvent,
     ProjectCard,
     ProofGateStatus,
     ProofStateView,
+    SessionItem,
     SessionLifecycleItem,
     SessionLifecycleView,
+    SettingsItem,
+    SettingsModeView,
+    UserSessionModeView,
     VoiceIOState,
     _render_proof_state,
     _e,
@@ -1182,3 +1188,182 @@ def test_proof_state_in_cockpit_main_not_core():
     doc = render_cockpit_html(vm)
     main_section = doc[doc.find('<main class="cockpit-main">'):doc.find('</main>')]
     assert 'class="proof-state"' in main_section
+
+
+# ── Right-Panel Mode Tests ──────────────────────────────────────────────────
+
+
+def test_user_session_mode_renders_with_data():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+    assert 'class="right-panel-user-session"' in doc
+
+
+def test_user_session_mode_has_prompt_window():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+    assert 'class="prompt-response-area"' in doc
+    assert 'class="prompt-input"' in doc
+
+
+def test_user_session_mode_shows_sessions_dropdown():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+    assert 'class="sessions-dropdown"' in doc
+    assert '<select' in doc
+    for session in vm.user_session_mode.sessions:
+        assert session.session_name in doc
+
+
+def test_user_session_mode_shows_selected_session():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.selected_session_id = "session-2"
+    doc = render_cockpit_html(vm)
+    assert 'value="session-2"' in doc and 'selected' in doc
+
+
+def test_settings_mode_renders_with_data():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "settings"
+    doc = render_cockpit_html(vm)
+    assert 'class="right-panel-settings"' in doc
+
+
+def test_settings_mode_has_no_prompt_window():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "settings"
+    doc = render_cockpit_html(vm)
+    assert 'class="prompt-response-area"' not in doc
+    assert 'class="prompt-input"' not in doc
+
+
+def test_settings_mode_shows_settings_items():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "settings"
+    doc = render_cockpit_html(vm)
+    assert 'class="settings-list"' in doc
+    for setting in vm.settings_mode.settings:
+        assert setting.setting_name in doc
+
+
+def test_settings_mode_shows_all_setting_types():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "settings"
+    doc = render_cockpit_html(vm)
+    for setting in vm.settings_mode.settings:
+        assert setting.setting_name in doc
+        assert setting.setting_type in doc
+
+
+def test_harness_mode_renders_with_data():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "harness"
+    doc = render_cockpit_html(vm)
+    assert 'class="right-panel-harness"' in doc
+
+
+def test_harness_mode_has_no_prompt_window():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "harness"
+    doc = render_cockpit_html(vm)
+    assert 'class="prompt-response-area"' not in doc
+    assert 'class="prompt-input"' not in doc
+
+
+def test_harness_mode_shows_harness_items():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "harness"
+    doc = render_cockpit_html(vm)
+    assert 'class="harness-items-list"' in doc
+    for item in vm.harness_mode.harness_items:
+        assert item.item_name in doc
+
+
+def test_harness_mode_shows_search_box():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "harness"
+    doc = render_cockpit_html(vm)
+    assert 'class="harness-search"' in doc
+
+
+def test_right_panel_includes_correct_mode_user_session():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+    assert 'class="right-panel-user-session"' in doc
+    assert 'class="right-panel-settings"' not in doc
+    assert 'class="right-panel-harness"' not in doc
+
+
+def test_right_panel_includes_correct_mode_settings():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "settings"
+    doc = render_cockpit_html(vm)
+    assert 'class="right-panel-settings"' in doc
+    assert 'class="right-panel-user-session"' not in doc
+    assert 'class="right-panel-harness"' not in doc
+
+
+def test_right_panel_includes_correct_mode_harness():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "harness"
+    doc = render_cockpit_html(vm)
+    assert 'class="right-panel-harness"' in doc
+    assert 'class="right-panel-user-session"' not in doc
+    assert 'class="right-panel-settings"' not in doc
+
+
+def test_user_session_mode_escapes_session_names():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    session = SessionItem(
+        session_id="test",
+        session_name="<script>xss</script>",
+        project_name="Test",
+        status="live",
+    )
+    vm.user_session_mode = UserSessionModeView(sessions=[session])
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "&lt;script&gt;" in doc
+
+
+def test_settings_mode_escapes_setting_names():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    setting = SettingsItem(
+        setting_id="test",
+        setting_name="<script>xss</script>",
+        setting_type="text",
+        value="test",
+    )
+    vm.settings_mode = SettingsModeView(settings=[setting])
+    vm.right_panel_active_mode = "settings"
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "&lt;script&gt;" in doc
+
+
+def test_harness_mode_escapes_item_names():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    item = HarnessItem(
+        item_id="test",
+        item_name="<script>xss</script>",
+        item_type="gate",
+        description="test",
+    )
+    vm.harness_mode = HarnessModeView(harness_items=[item])
+    vm.right_panel_active_mode = "harness"
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "&lt;script&gt;" in doc
+
+
+def test_right_panel_renders_in_aside_element():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert '<aside class="right-panel">' in doc
+    assert '</aside>' in doc
