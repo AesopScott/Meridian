@@ -172,26 +172,64 @@ def relay_execution_summary_to_proof_trail(
 def _build_decision_record(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
+    adapter_metadata: ModelHarnessMetadata | None = None,
 ) -> RelayDecisionRecord:
     """Generate a provider-neutral decision record from a dispatch plan.
 
     Exposes audit fields for Prime to understand route selection rationale:
     route class, session action, context health, dual-lane requirement,
     trust/proof blockers, account-vs-API precedence, cost/privacy, and
-    fallback blockers.
+    fallback blockers. Populates vendor/model_id from adapter metadata when
+    available, or marks as unknown stop conditions.
     """
     from .prompt_payload_meter import PayloadStatus
 
     route = plan.route
     audit = route.audit
     packet = plan.packet
+    lanes = plan.lanes
 
-    fallback_blockers = audit.fallback_blockers
+    fallback_blockers = list(audit.fallback_blockers)
     fallback_allowed = len(fallback_blockers) == 0
+
+    # Check for stop conditions
+    if audit.route_class is None and route.risk_tier >= 1:
+        fallback_blockers.append("unknown_route_class")
+        fallback_allowed = False
+
+    if audit.session_action is None and route.risk_tier >= 1:
+        fallback_blockers.append("unknown_session_action")
+        fallback_allowed = False
+
+    if route.risk_tier == 3 and route.requires_independence:
+        if not any(lane.independent for lane in lanes):
+            fallback_blockers.append("tier3_dual_lane_independence_missing")
+            fallback_allowed = False
+
+    if route.requires_human_gate and not audit.proof_required:
+        fallback_blockers.append("human_gate_proof_missing")
+        fallback_allowed = False
+
+    # Populate vendor from adapter metadata or mark unknown for nontrivial tiers
+    vendor = None
+    if adapter_metadata is not None:
+        vendor = adapter_metadata.provider_name
+    elif route.risk_tier >= 2:
+        vendor = "unknown"
+
+    # Populate model_id from preferred_model of first builder lane or mark unknown
+    model_id = None
+    if lanes:
+        for lane in lanes:
+            if lane.role.value == "builder":
+                model_id = lane.preferred_model
+                break
+    if model_id is None and route.risk_tier >= 2:
+        model_id = "unknown"
 
     lane_independence_reason = ""
     if route.requires_independence and len(fallback_blockers) > 0:
-        if "dual_lane_independence_required" in fallback_blockers:
+        if "dual_lane_independence_required" in fallback_blockers or "tier3_dual_lane_independence_missing" in fallback_blockers:
             lane_independence_reason = (
                 "Tier 3 dual-lane independence required for meaningful decisions"
             )
@@ -208,7 +246,8 @@ def _build_decision_record(
         f"Risk tier {route.risk_tier}: {route.reason}. "
         f"Route: {audit.route_class.value if audit.route_class else 'unknown'}. "
         f"Context: {route.context_health.value}. "
-        f"Session: {audit.session_action.value}."
+        f"Session: {audit.session_action.value}. "
+        f"Vendor: {vendor or 'not yet bound'}."
     )
 
     return RelayDecisionRecord(
@@ -220,21 +259,21 @@ def _build_decision_record(
         risk_tier=route.risk_tier,
         session_action=audit.session_action.value,
         route_class=audit.route_class.value if audit.route_class else None,
-        vendor=None,
-        model_id=None,
+        vendor=vendor,
+        model_id=model_id,
         account_or_api_source=account_or_api_source,
         context_health=route.context_health.value,
         prompt_payload_status=prompt_payload_status,
         dual_lane_required=route.requires_independence,
         lane_independence_reason=lane_independence_reason,
         trust_state=audit.trust_state.value,
-        proof_required=audit.proof_required,
+        proof_required=tuple(audit.proof_required),
         human_gate_required=route.requires_human_gate,
         cost_posture=route.cost_posture.value,
         latency_posture=route.latency_posture.value,
         privacy_notes=route.privacy_level.value,
         fallback_allowed=fallback_allowed,
-        fallback_blockers=fallback_blockers,
+        fallback_blockers=tuple(fallback_blockers),
         observability_fields=audit.telemetry_required,
         telemetry_required=audit.telemetry_required,
         explanation_for_prime=explanation,
@@ -355,7 +394,8 @@ def execute_relay_plan_with_registry(
     decision_record = None
     if include_decision_record:
         first_snapshot = snapshots[0] if snapshots else None
-        decision_record = _build_decision_record(plan, first_snapshot)
+        first_adapter_metadata = resolved_adapters[0].metadata if resolved_adapters else None
+        decision_record = _build_decision_record(plan, first_snapshot, first_adapter_metadata)
 
     return RelayExecutionSummary(
         results=tuple(results),

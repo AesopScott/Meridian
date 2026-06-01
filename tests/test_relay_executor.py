@@ -22,6 +22,7 @@ from meridian_core.relay_executor import (
     RelayExecutionResult,
     RelayExecutionSummary,
     RelayProofGateError,
+    _build_decision_record,
     execute_relay_dispatch_plan,
     execute_relay_dispatch_plan_with_policy,
     execute_relay_plan_with_registry,
@@ -1242,9 +1243,9 @@ class TestRelayDecisionRecord:
             assert "Tier 3" in summary.decision_record.lane_independence_reason
             assert "dual-lane independence" in summary.decision_record.lane_independence_reason
 
-    def test_decision_record_vendor_is_none_provider_neutral(self) -> None:
-        """Decision record vendor is None (provider-neutral)."""
-        for tier in (0, 1, 2, 3, 4):
+    def test_decision_record_vendor_none_for_tier0_1(self) -> None:
+        """Decision record vendor is None for Tier 0-1 (low-risk, no block)."""
+        for tier in (0, 1):
             plan = _make_plan(tier)
             summary = execute_relay_dispatch_plan(
                 plan,
@@ -1253,16 +1254,35 @@ class TestRelayDecisionRecord:
             )
             assert summary.decision_record.vendor is None
 
-    def test_decision_record_model_id_is_none_provider_neutral(self) -> None:
-        """Decision record model_id is None (provider-neutral)."""
-        for tier in (0, 1, 2, 3, 4):
+    def test_decision_record_vendor_unknown_for_tier2plus_without_metadata(self) -> None:
+        """Decision record vendor is 'unknown' for Tier 2+ without adapter metadata."""
+        for tier in (2, 3, 4):
             plan = _make_plan(tier)
             summary = execute_relay_dispatch_plan(
                 plan,
                 _constant_model_call("ok"),
                 include_decision_record=True,
             )
-            assert summary.decision_record.model_id is None
+            assert summary.decision_record.vendor == "unknown"
+
+    def test_decision_record_model_id_populated_from_preferred_model(self) -> None:
+        """Decision record model_id is populated from lane preferred_model when available."""
+        plan = _make_plan(1)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("ok"),
+            include_decision_record=True,
+        )
+        assert summary.decision_record.model_id == plan.lanes[0].preferred_model
+
+    def test_decision_record_model_id_unknown_for_empty_plan(self) -> None:
+        """Decision record model_id is 'unknown' for Tier 2+ with no lanes."""
+        plan = _make_plan(2)
+        # Manually create a plan with no lanes
+        from meridian_core.relay_dispatch import RelayDispatchPlan
+        empty_plan = RelayDispatchPlan(route=plan.route, packet=plan.packet, lanes=())
+        record = _build_decision_record(empty_plan)
+        assert record.model_id == "unknown"
 
     def test_decision_record_project_is_none_context_dependent(self) -> None:
         """Decision record project is None (context-dependent metadata)."""
@@ -1455,3 +1475,66 @@ class TestRelayDecisionRecord:
         assert isinstance(record.fallback_blockers, tuple)
         assert isinstance(record.observability_fields, tuple)
         assert isinstance(record.telemetry_required, tuple)
+
+    def test_decision_record_vendor_from_adapter_metadata(self) -> None:
+        """Decision record vendor populated from adapter metadata when available."""
+        plan = _make_plan(2)
+        registry = _make_registry_for_tier(2)
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            include_decision_record=True,
+        )
+        assert summary.decision_record.vendor == "fake"  # FakeModelAdapter.metadata.provider_name
+
+    def test_decision_record_model_id_from_lane_preferred_model(self) -> None:
+        """Decision record model_id extracted from builder lane preferred_model."""
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("ok"),
+            include_decision_record=True,
+        )
+        builder_lane = next(l for l in plan.lanes if l.role.value == "builder")
+        assert summary.decision_record.model_id == builder_lane.preferred_model
+
+    def test_decision_record_stop_condition_tier3_dual_lane_independence_missing(self) -> None:
+        """Decision record flags stop condition when Tier 3 dual-lane independence missing."""
+        from meridian_core.relay_dispatch import RelayDispatchLane, RelayDispatchPlan
+
+        plan = _make_plan(3)
+        # Create a plan variant with non-independent lanes
+        non_independent_lanes = tuple(
+            RelayDispatchLane(
+                role=lane.role,
+                preferred_model=lane.preferred_model,
+                independent=False,  # Override independence
+                payload=lane.payload,
+            )
+            for lane in plan.lanes
+        )
+        bad_plan = RelayDispatchPlan(route=plan.route, packet=plan.packet, lanes=non_independent_lanes)
+
+        record = _build_decision_record(bad_plan)
+        assert "tier3_dual_lane_independence_missing" in record.fallback_blockers
+        assert not record.fallback_allowed
+
+    def test_decision_record_explanation_includes_vendor_binding_status(self) -> None:
+        """Decision record explanation mentions vendor binding status."""
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("ok"),
+            include_decision_record=True,
+        )
+        assert "Vendor:" in summary.decision_record.explanation_for_prime
+
+    def test_decision_record_fallback_blockers_tuple_format(self) -> None:
+        """Decision record fallback_blockers is always tuple, even with additions."""
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("ok"),
+            include_decision_record=True,
+        )
+        assert isinstance(summary.decision_record.fallback_blockers, tuple)
