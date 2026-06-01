@@ -8,9 +8,23 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review current-main Build 2 Prime command-plan tests after coordinator provenance repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 17:32 -06:00. Current `origin/main` contains coordinator-scoped repair commit `17d70c9d`, and the required Session Lifecycle proof passes with the added Prime command-plan coverage.
+
+Review result:
+
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 34 tests.
+- `git merge-base --is-ancestor 17d70c9d HEAD` passed, proving the reviewed current-main repair commit is present.
+- `git diff-tree --no-commit-id --name-only -r 17d70c9d` shows the repair commit only changed `tests/test_session_lifecycle.py`.
+- `tests/test_session_lifecycle.py` now covers command-plan consumption for archive, request-human-gate, summarize/reset, transfer, context-fill, review-gate, and permission-boundary routing signals through typed helpers and command intents.
+- Scoped inspection found no live session spawning, model calls, process control, UI work, branch movement by the worker, or Polaris dependency in the reviewed commit.
+
+Finding: none. The prior HIGH review provenance/branch visibility finding is closed.
+
+Completion: Build 2 Prime command-plan test repair is review-cleared. Next Candidate: no executable Reviews A task remains; continue polling for the next coordinator-promoted Ready marker.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
