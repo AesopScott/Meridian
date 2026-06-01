@@ -510,6 +510,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-11 02:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; Session Lifecycle FileMap registration routed to Codex review; cadence 2/3 since Round B5; awaiting next assignment
 2026-06-11 02:15 UTC - Build 3 checked queue; status: idle; no executable Active Task; Session Lifecycle FileMap registration awaiting Codex review findings; cadence 2/3 since Round B5
 2026-06-11 02:45 UTC - Build 3 checked queue; status: idle; Active Task (FileMap repair) already complete (commit ba83a4c); cadence 3/3 since Round B5 — Codex review required before next task
+2026-06-11 03:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 3/3 since Round B5 — initiating Codex review for commits 23efaf7, 80ebea4, ba83a4c
 2026-05-31 02:00 -06:00 - Build 3 checked queue; status: active task found (FileMap registration -- cockpit_provider.py + tests/test_cockpit_provider.py); starting work
 ```
 
@@ -549,6 +550,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-06-11 00:45 UTC - Build 3 completed V2 FileMap audit; found and registered missing artifact: docs/model-harness-v2-contract.md; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; commit 23efaf7; tests 46/46 filemap passing; Ready for Codex Review; cadence 1/3 since Round B5
 2026-06-11 01:45 UTC - Build 3 completed Session Lifecycle implementation checklist FileMap registration; commit 80ebea4; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; tests 46/46 filemap passing; Ready for Codex Review; cadence 2/3 since Round B5
 2026-06-11 02:30 UTC - Build 3 completed FileMap repair (remove Session Lifecycle checklist registration pending file arrival); commit ba83a4c; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; tests 46/46 filemap passing; Ready for Codex Review; cadence 3/3 since Round B5
+2026-06-11 02:50 UTC - Build 3 repair Active Task superseded: Session Lifecycle checklist artifact (docs/session-lifecycle-implementation-checklist.md) arrived in commit e2f4078 along with runtime module (meridian_core/session_lifecycle.py) and tests (tests/test_session_lifecycle.py); FileMap already re-registered (filemap.py line 576); no repair needed; cadence 3/3 since Round B5 — awaiting Codex review cadence clearance before next task assignment
 ```
 
 ## Cross-Check Activity
@@ -575,6 +577,9 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review requested after commits <hash1>, <has
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review finding: <severity>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/fixed; details: <short note>
+2026-06-11 03:00 UTC - Build 3 Codex review requested after commits 23efaf7, 80ebea4, ba83a4c
+2026-06-11 03:05 UTC - Build 3 Codex review finding: HIGH; details: Session Lifecycle checklist removed from docs/FileMap.md only; entries in meridian_core/filemap.py and tests/test_filemap.py remain, registering non-existent file
+2026-06-11 03:05 UTC - Build 3 Codex review repair: auto-executing; removing session-lifecycle-implementation-checklist from filemap.py and test_filemap.py
 2026-05-30 11:10 -06:00 - Build 3 Codex review requested after commits 34792fb, 7b67c41, a996abc
 2026-05-30 12:32 -06:00 - Build 3 Codex review requested after commits d84bb0f, 73c9628, 26dc597
 2026-05-30 12:32 -06:00 - Build 3 Codex review finding: LOW; details: lane set omitted live-build-5.md in queue hygiene note Summary
@@ -701,3 +706,4 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 2026-06-10 14:30 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 3/3 since Round B5; awaiting Codex review findings and next assignment
 2026-06-10 18:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 3/3 since Round B5; awaiting Codex review clearance before next assignment
 2026-06-10 23:59 UTC - Build 3 checked queue; status: paused; cadence 3/3 since Round B5 complete; awaiting Codex review findings and next assignment
+2026-06-11 02:50 UTC - Build 3 checked queue; status: idle; pulled origin/main (e2f4078); Session Lifecycle checklist now exists; FileMap re-registered (filemap.py:576); repair Active Task superseded; cadence 3/3 since Round B5 — awaiting Codex review findings before next assignment

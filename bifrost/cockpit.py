@@ -86,6 +86,42 @@ class VoiceIOState:
 
 
 @dataclass
+class ProviderBalanceItem:
+    provider_id: str
+    display_name: str
+    model_name: str
+    trust_state: str
+    health: str
+    context_budget_tokens: int = 0
+    prompt_budget_tokens: int = 0
+    current_prompt_tokens: int = 0
+    prompt_budget_percent: float = 0.0
+    prompt_delta_tokens: int = 0
+    cost_pressure: str = "none"
+    quota_state: str = "unknown"
+    notes: str = ""
+
+
+@dataclass
+class ProviderBalanceView:
+    providers: list[ProviderBalanceItem] = field(default_factory=list)
+    selected_provider: str = ""
+    routing_owner: str = "unknown"
+    policy_state: str = "ok"
+
+
+@dataclass
+class PromptPayloadView:
+    size_label: str = ""
+    estimated_tokens: int = 0
+    budget_percent: float = 0.0
+    delta_tokens: int = 0
+    status: str = "flat"
+    source: str = ""
+    evidence_ref: str = ""
+
+
+@dataclass
 class InstrumentBand:
     beacon: str       # "ok" | "warn" | "error"
     relay: str        # "ok" | "warn" | "error"
@@ -108,6 +144,8 @@ class CockpitViewModel:
     progress_events: list[ProgressEvent] = field(default_factory=list)
     harnesses: list[HarnessCard] = field(default_factory=list)
     voice: VoiceIOState = field(default_factory=VoiceIOState)
+    provider_balance: ProviderBalanceView = field(default_factory=ProviderBalanceView)
+    prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     instrument: InstrumentBand = field(
         default_factory=lambda: InstrumentBand(
             beacon="ok", relay="ok", aegis="ok", compass="ok",
@@ -133,6 +171,67 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             speaking=False,
             muted=False,
             blocked=False,
+        ),
+        provider_balance=ProviderBalanceView(
+            providers=[
+                ProviderBalanceItem(
+                    provider_id="claude",
+                    display_name="Claude",
+                    model_name="claude-opus-4-7",
+                    trust_state="trusted",
+                    health="ok",
+                    context_budget_tokens=200000,
+                    prompt_budget_tokens=4000,
+                    current_prompt_tokens=1240,
+                    prompt_budget_percent=31.0,
+                    prompt_delta_tokens=0,
+                    cost_pressure="low",
+                    quota_state="available",
+                    notes="Primary provider ready",
+                ),
+                ProviderBalanceItem(
+                    provider_id="openai",
+                    display_name="OpenAI",
+                    model_name="gpt-4-turbo",
+                    trust_state="trusted",
+                    health="ok",
+                    context_budget_tokens=128000,
+                    prompt_budget_tokens=3000,
+                    current_prompt_tokens=890,
+                    prompt_budget_percent=29.7,
+                    prompt_delta_tokens=50,
+                    cost_pressure="medium",
+                    quota_state="available",
+                    notes="Secondary provider with minor growth",
+                ),
+                ProviderBalanceItem(
+                    provider_id="deepseek",
+                    display_name="DeepSeek",
+                    model_name="deepseek-v4-pro",
+                    trust_state="candidate",
+                    health="degraded",
+                    context_budget_tokens=256000,
+                    prompt_budget_tokens=5000,
+                    current_prompt_tokens=2450,
+                    prompt_budget_percent=49.0,
+                    prompt_delta_tokens=240,
+                    cost_pressure="high",
+                    quota_state="limited",
+                    notes="Q-mode prompt drag detected",
+                ),
+            ],
+            selected_provider="claude",
+            routing_owner="Relay",
+            policy_state="warning",
+        ),
+        prompt_payload=PromptPayloadView(
+            size_label="(1.2k)",
+            estimated_tokens=1240,
+            budget_percent=31.0,
+            delta_tokens=0,
+            status="flat",
+            source="relay",
+            evidence_ref="dispatch:latest",
         ),
         lanes=[
             LaneRow("Cockpit UI", "running", "hud"),
@@ -536,6 +635,72 @@ def _render_progress_surface(events: list[ProgressEvent]) -> str:
         "</div>"
         f'<div class="progress-cards">{cards}</div>'
         "</aside>"
+    )
+
+
+def _render_provider_balance(balance: ProviderBalanceView) -> str:
+    if not balance.providers:
+        return ""
+
+    provider_items = []
+    for provider in balance.providers:
+        status_class = f"provider-{_e(provider.health)}"
+        trust_label = f"[{_e(provider.trust_state)}]"
+        provider_items.append(
+            f'<div class="provider-item {status_class}" data-provider="{_e(provider.provider_id)}">'
+            f'<div class="provider-header">'
+            f'<span class="provider-name">{_e(provider.display_name)}</span>'
+            f'<span class="provider-trust">{trust_label}</span>'
+            f'<span class="provider-model">{_e(provider.model_name)}</span>'
+            f"</div>"
+            f'<div class="provider-metrics">'
+            f'<span class="metric">Budget: {provider.prompt_budget_percent:.0f}%</span>'
+            f'<span class="metric">Tokens: {provider.current_prompt_tokens}/{provider.prompt_budget_tokens}</span>'
+            f'<span class="metric">Pressure: {_e(provider.cost_pressure)}</span>'
+            f"</div>"
+            f'<span class="provider-notes">{_e(provider.notes)}</span>'
+            f"</div>"
+        )
+
+    return (
+        '<section class="provider-balance" aria-label="Provider Balance">'
+        '<div class="provider-header-main">'
+        '<h3>Provider Balance</h3>'
+        f'<span class="routing-owner">{_e(balance.routing_owner)}</span>'
+        f'<span class="policy-state policy-{_e(balance.policy_state)}">{_e(balance.policy_state)}</span>'
+        "</div>"
+        '<div class="provider-items">'
+        + "".join(provider_items)
+        + "</div>"
+        + "</section>"
+    )
+
+
+def _render_prompt_payload(payload: PromptPayloadView) -> str:
+    if not payload.size_label:
+        return ""
+
+    status_class = f"payload-{_e(payload.status)}"
+    delta_display = f"+{payload.delta_tokens}" if payload.delta_tokens > 0 else f"{payload.delta_tokens}"
+
+    return (
+        '<section class="prompt-payload" aria-label="Prompt Payload Visibility">'
+        '<div class="payload-header">'
+        f'<span class="payload-size">{_e(payload.size_label)}</span>'
+        f'<span class="payload-tokens">{payload.estimated_tokens} tokens</span>'
+        f'<span class="payload-budget">{payload.budget_percent:.0f}% budget</span>'
+        "</div>"
+        f'<div class="payload-status {status_class}">'
+        f'<span class="status-indicator">{_e(payload.status)}</span>'
+        f'<span class="delta">Delta: {delta_display}</span>'
+        f'<span class="source">From: {_e(payload.source)}</span>'
+        f"</div>"
+        + (
+            f'<span class="payload-warning">⚠ Prompt drag detected</span>'
+            if payload.status == "growing"
+            else ""
+        )
+        + "</section>"
     )
 
 
