@@ -83,6 +83,7 @@ _REQUIRED_PATHS = [
     "docs/bifrost-configurable-progress-surface-brief.md",
     "docs/v1-bifrost-live-data-contract.md",
     "docs/v1-bifrost-integration-sequence.md",
+    "docs/bifrost-right-panel-mode-contract.md",
     "docs/bifrost-preview-package-api-note.md",
     "docs/v1-bifrost-runtime-acceptance-checklist.md",
     "docs/live-build-queue-hygiene.md",

@@ -814,6 +814,13 @@ def make_default_map() -> FileMap:
             notes="Owner: Build 4. Build process gate. Read before declaring V1 cockpit runtime complete.",
         ),
         FileMapEntry(
+            path="docs/bifrost-right-panel-mode-contract.md",
+            area=FileArea.BIFROST,
+            purpose="Bifrost right-panel mode contract: defines three UI modes (User Session, Settings, Harness) for the right panel with interaction contracts with Prime, Sessions, and Harness logic.",
+            related_tests=[],
+            notes="Owner: Build 5. Product/UI contract only; do not implement runtime code here.",
+        ),
+        FileMapEntry(
             path="meridian_core/cockpit_state.py",
             area=FileArea.BIFROST,
             purpose="Prime cockpit snapshot and event domain types for V1 Bifrost: CockpitStatus, CockpitSnapshot, CockpitEvent, and lane/harness state models. Pure immutable data — no filesystem, CLI, or UI code.",
