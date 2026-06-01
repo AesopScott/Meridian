@@ -10,6 +10,38 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Repair-Routed
 
+Goal: review current-main Build 1 Relay proof payload negative-path tests after visibility repair.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 17:53 -06:00. Current `HEAD` and `origin/main` contain worker commit `26a71632` and merge commit `6de2c4d5`, and the required Relay executor proof passes, but one test collection gap remains in the landed negative-path test slice.
+
+Review result:
+
+- `git merge-base --is-ancestor 26a71632 HEAD` and `git merge-base --is-ancestor 26a71632 origin/main` passed.
+- `git merge-base --is-ancestor 6de2c4d5 origin/main` passed.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 151 tests.
+- `git diff-tree --no-commit-id --name-only -r 26a71632` shows the worker commit only changed `tests/test_relay_executor.py`.
+- The added tests cover empty evidence IDs, absent waiver default, demote/no blockers, empty explanation with a decision, no gate decision shape, and mixed empty/full evidence fields.
+
+Finding:
+
+- MEDIUM: `tests/test_relay_executor.py` defines `TestAegisGateEvidenceSummary.test_evidence_summary_to_dict_multiple_calls_identical` twice. The later existing definition shadows the newly added negative-path deterministic test, and `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q` collects only one method with that name. Required repair: Build 1 should rename the newly added deterministic negative-path test, or otherwise add a uniquely named test that proves deterministic immutable `to_dict()` output for incomplete/partial evidence. Keep the repair test-only unless coordinator expands scope.
+
+Completion: routed the focused test-collection repair to Build 1 in `docs/live-build-1.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 1 provides the repair target.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `tests/test_relay_executor.py`, `meridian_core/relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` containing Build 1 merge commit `6de2c4d5` and worker commit `26a71632` for the Relay proof payload negative-path tests. First verify `26a71632` is now an ancestor of current `HEAD` / `origin/main`, then run the proof command. Confirm the added tests cover incomplete/empty evidence ids, absent waiver/approval evidence, fallback blockers, no-gate/blocked decision shape, and deterministic immutable output for incomplete evidence. Confirm no Bifrost, Aegis, Session Lifecycle, FileMap, UI, process/model/account code, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 1; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate. Do not edit implementation files from the review worktree.
+
+## Coordinator Override - Completed / Repair-Routed
+
 Goal: review Build 1 Relay proof payload negative-path tests.
 
 Status: repair routed by Codex Reviews A on 2026-06-01 17:45 -06:00. The assigned worker commit `26a71632` exists, but it is not an ancestor of current `HEAD` / `origin/main`, so Reviews A cannot run the required proof command against the queued test slice on current main.
@@ -1318,6 +1350,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-06-01 17:45 -06:00 - Codex Reviews A checked queue; status: repair-routed; notes: origin/main current after fetch; active Build 1 Relay proof payload negative-path review found assigned commit `26a71632` is not an ancestor of current HEAD/origin/main, so the proof command cannot clear the queued slice.
 2026-06-01 17:48 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; top Build 1 visibility item remains completed/repair-routed and no executable Active Task remains in the assigned queue.
 2026-06-01 17:50 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; top Build 1 visibility item remains completed/repair-routed and no executable Active Task remains in the assigned queue.
+2026-06-01 17:53 -06:00 - Codex Reviews A checked queue; status: repair-routed; notes: active current-main Build 1 Relay proof payload negative-path review executed; proof passed but duplicate test method name shadows the new deterministic negative-path test, so a focused Build 1 repair was routed.
 ```
 
 ## Review Log
@@ -1834,6 +1867,7 @@ Round 6 write log:
 - 2026-06-01 17:45 -06:00 - Codex Reviews A completed Build 1 Relay proof payload negative-path test visibility review for assigned commit `26a71632` after origin/main fetch. Files changed: `docs/live-codex-reviews.md`, `docs/live-build-1.md`. Tests run: not run because the assigned commit is not an ancestor of current `HEAD` / `origin/main`; running the proof test here would not prove the queued slice. Proof commands: `git merge-base --is-ancestor 26a71632 HEAD` (failed), `git branch --contains 26a71632 --all`, `git show --stat --oneline --name-only 26a71632`, `git diff --stat 26a71632..HEAD -- tests/test_relay_executor.py meridian_core/relay_executor.py`, and `git diff --check -- docs/live-codex-reviews.md docs/live-build-1.md`. Findings/fixes: HIGH review provenance/branch visibility routed to Build 1; assigned commit `26a71632` is only on the Build 1 worktree branch/remotes and not current main. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue and Build 1 queue record repair routing only.
 - 2026-06-01 17:48 -06:00 - Codex Reviews A completed idle queue read after origin/main fetch. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Proof command: `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no new finding; no executable Active Task present after Build 1 visibility repair routing. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or durable review finding.
 - 2026-06-01 17:50 -06:00 - Codex Reviews A completed idle queue read after origin/main fetch. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Proof command: `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no new finding; no executable Active Task present after Build 1 visibility repair routing. Commit: local only. Push status: not pushed; `origin/main` advanced with Build 1 repair completion while the read-check commit was local, leaving `main` ahead/behind and requiring coordinator-approved branch cleanup before this queue-only entry can be published. Obsidian update status: not updated; no active review task or durable review finding.
+- 2026-06-01 17:53 -06:00 - Codex Reviews A completed current-main Build 1 Relay proof payload negative-path test review after origin/main fetch. Files changed: `docs/live-codex-reviews.md`, `docs/live-build-1.md`. Tests run: `python -m pytest tests/test_relay_executor.py -q` (151 passed). Proof commands: `git merge-base --is-ancestor 26a71632 HEAD`, `git merge-base --is-ancestor 26a71632 origin/main`, `git merge-base --is-ancestor 6de2c4d5 origin/main`, `git diff-tree --no-commit-id --name-only -r 26a71632`, `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q`, and `git diff --check -- docs/live-codex-reviews.md docs/live-build-1.md`. Findings/fixes: MEDIUM duplicate test method name shadows the newly added deterministic negative-path test; focused test-only repair routed to Build 1. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue and Build 1 queue record repair routing only.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
