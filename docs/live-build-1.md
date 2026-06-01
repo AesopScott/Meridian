@@ -821,3 +821,7 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 
 2026-05-31 22:25 -05:00 - Build 1 checked queue; status: running (Prompt payload snapshot metadata task — Active Now)
 2026-05-31 22:30 -05:00 - Build 1 checked queue; status: running (Prompt payload snapshot metadata into Relay dispatch evidence task)
+
+[COMPLETED 2026-05-31 ~23:00 -05:00] Prompt payload snapshot metadata into Relay dispatch evidence — commit `081c15f`; files: meridian_core/relay_executor.py, tests/test_relay_executor.py; tests: 89 total passed (64 relay_executor + 25 prompt_payload_meter); Ready for Codex Review.
+
+2026-05-31 23:05 -05:00 - Build 1 checked queue; status: idle (Prompt Payload Snapshot slice 081c15f complete; awaiting next assignment or Codex review result)
