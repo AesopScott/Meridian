@@ -40,7 +40,7 @@ Ready for Codex Review.
 - Next Candidate Task awaiting promotion from Prime/Codex
 - Build 1 idle and polling for next task assignment
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: harden Relay prompt payload snapshot metadata edge cases after the metadata-binding slice lands.
 
@@ -52,7 +52,21 @@ Tests:
 
 - `python -m pytest tests/test_relay_executor.py tests/test_prompt_payload_meter.py -q`
 
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews A routes a repair before this slice is committed, complete that repair first.
+Completion:
+
+- Build 1 completed Relay payload snapshot metadata hardening on 2026-06-01 05:00 -05:00.
+- Commit: `38ffb02` (main branch), `0857ab9` (worktree).
+- Files changed: `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py tests/test_prompt_payload_meter.py -q` (105 tests passed in worktree, 96 in main branch baseline).
+- Implementation: Added TestPayloadSnapshotEdgeCases class with 8 new tests covering: (1) evidence generation with None budget_tokens, (2) evidence generation with zero budget_tokens, (3) queue-mode growth status in payload evidence, (4) multiple lanes with mixed snapshot statuses, (5) partial snapshots tuple handling, (6) error lanes correctly exclude payload snapshot evidence, (7) snapshot severity mapping completeness. Tests verify evidence formatting robustness for boundary values, queue-mode transitions, and multi-lane evidence tracking per-lane status variations.
+- Push: successful to `origin/main`.
+
+Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-01 05:10 -05:00
+- Status: Relay payload snapshot hardening task completed and marked Ready for Codex Review
+- No executable Active Now task; Next Candidate Task (bind Relay metadata review findings) awaiting promotion
+- Build 1 idle and polling for next task assignment
 
 ## Next Candidate Task
 
