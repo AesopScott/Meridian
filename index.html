@@ -1405,8 +1405,7 @@ body {
 .session-window-right.is-relay-models .session-interface,
 .session-window-right.is-relay-models .session-prompt-input,
 .session-window-right.is-relay-models .session-response-output,
-.session-window-right.is-relay-models .session-model-status,
-.session-window-right.is-relay-models .session-text-slider {
+.session-window-right.is-relay-models .session-model-status {
   display: none;
 }
 
@@ -1563,6 +1562,7 @@ body {
   position: absolute;
   right: 12px;
   bottom: -11px;
+  z-index: 4;
   width: 138px;
   height: 24px;
   display: grid;
@@ -3673,6 +3673,7 @@ body {
       button.classList.add('is-selected');
       screen.classList.remove('session-theme-aqua');
       screen.classList.add('session-theme-green');
+      clearRelayModels();
       if (userTitle) userTitle.textContent = actionLabel || 'Spark';
       screen.classList.add('sessions-visible');
       openSpark();
