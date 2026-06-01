@@ -213,7 +213,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: implement Bifrost session lifecycle preview state.
 
@@ -225,9 +225,24 @@ Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews B routes a provider/payload repair before this session lifecycle preview is committed, complete that repair first.
+Completion:
 
-## Next Candidate Task
+- Build 5 completed this session lifecycle preview surface in `d638e8a`.
+- Files changed: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+- Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` = 112 passed.
+- Verification summary (2026-06-12 08:30):
+  - SessionLifecycleItem dataclass at line 125
+  - SessionLifecycleView dataclass at line 139
+  - Sample session lifecycle data in sample_cockpit_view_model() at lines 375-415
+  - _render_session_lifecycle() function at line 790 with 10 CSS state classes (session-active, session-status-*, session-health-*, session-role-*)
+  - Integration into render_cockpit_html() at line 850 with output at line 873
+  - Full rendering includes session names, project names, harness roles, status indicators, health states, queue read labels, review cadence states, proof states, and blocker summaries
+  - HTML escaping verified via _e() function for all dynamic content
+- Routed to Codex Reviews B for Bifrost/UI review.
+
+Ready for Codex Review.
+
+## Active Task
 
 Goal: add Bifrost review-gate and proof-state preview fields after session lifecycle preview lands.
 
@@ -238,6 +253,10 @@ Task: surface deterministic render-only Aegis/review-gate proof state in the coc
 Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
+## Next Candidate Task
 
 ## ~~Codex Repair - Active Now~~ (COMPLETED 2026-05-31 13:54 -06:00)
 
