@@ -1234,3 +1234,12 @@ Completion:
 - Tests: not required (docs-only)
 
 (Previous slices `3cbf336` `docs/v0-build-readiness-map.md`, `1d17fa1` `docs/prime-orchestration-state-model.md`, `fd9224d` `docs/prime-status-console-cli-brief.md`, `7b43848` `docs/v1-capability-plan.md`, and `18e2767` `docs/v3-parking-lot.md` also pending Codex Reviews sweep.)
+
+**Ready for Codex Review**
+- Commit: `88e5dc0a`
+- Files: `docs/relay-heartbeat-model-routing-logic.md`
+- Tests: not required (docs-only)
+- Repairs applied:
+  1. Fix account-first decision tree Step 2: changed wrong-scope branch from "Direct API or aggregator" to "Start project-specific or role-matched session"
+  2. Fix Tier 3+ account missing/expired fallback condition: changed from "? (wait for auth)" with fallback "Try direct API" to "? (start/re-auth session, or direct API if proof/audit explicit)"
+  3. Fix DeepSeek route table: established deepseek-chat as the exact dispatch ID per Model Harness registry, with 4-pro and 4-flash as marketing/capability variants described as metadata, not dispatch keys; updated preferred routing table rows 143-144 accordingly
