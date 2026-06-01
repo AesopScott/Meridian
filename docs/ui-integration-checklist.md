@@ -103,6 +103,101 @@ These are the first-pass settings subitems carried forward from Meridian's Polar
 | SET19 | Public CLI setup guidance | Exposes setup status/help for Codex and Max/Claude CLIs in public builds. | planned | Missing CLI/auth shows install/login guidance. |
 | SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | planned | Settings surface does not expose these controls. |
 
+### Models Surface Subitems
+
+The Models icon owns model visibility and manual override. It must not silently become Prime/Relay auto-routing before that harness logic exists.
+
+| ID | Models Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| MOD1 | Available backends | Shows detected Codex, Max/Claude, and future model backends. | partial | `/api/models` populates backend availability without raw CLI errors. |
+| MOD2 | Default backend | Defaults manual prompt sends to Codex until Prime/Relay auto-routing exists. | wired | Fresh page load selects Codex. |
+| MOD3 | Auto routing disabled state | Shows Auto as unavailable until Relay owns the decision logic. | wired | Auto option is disabled or clearly unavailable. |
+| MOD4 | Per-role mapping | Lists planned roles such as orchestrator, builder, reviewer, verifier, researcher, and release operator. | planned | Roles appear as mappings, not as provider-first choices. |
+| MOD5 | Manual role override | Allows user to pin a model for a role once role routing exists. | planned | Override persists and is visible in routing metadata. |
+| MOD6 | Provider setup status | Shows missing CLI/auth setup guidance for each backend. | partial | Missing backend gives install/login guidance. |
+| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | planned | Metadata comes from Model Harness, not hand-written UI claims. |
+| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | planned | Trust state comes from Aegis/Relay evidence. |
+| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | planned | Uses Relay prompt payload metrics, not transcript length guesses. |
+| MOD10 | Recent model calls | Shows recent call metadata without prompt text. | partial | Uses `/api/recent-calls`; no prompt content stored. |
+| MOD11 | Model label display | Response UI shows actual backend/model label when known. | partial | Send prompt; label appears below/near response. |
+| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | planned | Missing setup path is readable and non-technical enough to act on. |
+
+### Balance Surface Subitems
+
+The Balance icon owns provider balance, cost pressure, prompt payload, and routing pressure visibility. It observes; it does not secretly reroute work.
+
+| ID | Balance Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | planned | Health comes from bridge/harness checks. |
+| BAL2 | CLI/account readiness | Shows CLI installed/authenticated state for local backends. | partial | Codex and Max readiness match `/api/models`. |
+| BAL3 | Token usage | Shows token use when a backend reports it. | planned | Unknown usage displays as unknown, not zero. |
+| BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | planned | Missing data produces no fake cost. |
+| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | planned | Unknown quota displays as unavailable. |
+| BAL6 | Cost pressure warning | Warns when cost, quota, or budget pressure should influence routing. | planned | Warning is visible without changing routing by itself. |
+| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | planned | Uses `PromptPayloadSnapshot` style metrics. |
+| BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | planned | Growth warning appears from Relay metrics. |
+| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | planned | Comparison separates evidence from recommendation. |
+| BAL10 | Routing recommendation | Shows Prime/Relay recommendation once routing logic exists. | planned | Recommendation is labeled as recommendation, not automatic action. |
+| BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | planned | Override path is visible but does not bypass Relay policy. |
+| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | planned | Missing account state is user-readable. |
+
+### Backlog Surface Subitems
+
+The Backlog icon owns visible work intake, priority, and conversion into Prime-owned objectives/tasks.
+
+| ID | Backlog Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| BAK1 | Backlog list | Shows queued ideas/tasks/objectives for the active project. | planned | List is project-scoped and not fake-filled. |
+| BAK2 | Priority order | Shows priority and why an item is next. | planned | Priority rationale links to Compass/Prime state. |
+| BAK3 | Intake capture | Captures a new backlog item from user text. | planned | New item appears with source and timestamp. |
+| BAK4 | Modify item | Allows user or Prime to refine title, scope, and acceptance criteria. | planned | Edit is persisted and visible after reload. |
+| BAK5 | Approve item | Moves an item into active planning/build consideration. | planned | Approved item creates/updates objective/task state. |
+| BAK6 | Deny/defer item | Marks item rejected/deferred without deleting history. | planned | Deferred/rejected item remains auditable. |
+| BAK7 | Convert to task | Converts backlog item into executable task with proof expectation. | planned | Task includes owner/harness/proof fields. |
+| BAK8 | Link to project/initiative | Attaches backlog item to project, initiative, or venture. | planned | Item appears in the correct scoped view. |
+| BAK9 | Import candidate list | Holds Polaris-derived feature candidates for approve/deny/modify review. | planned | Candidate source is recorded without touching Polaris. |
+| BAK10 | Archive backlog item | Archives item intentionally without destructive deletion. | planned | Archived item can be inspected later. |
+| BAK11 | Search/filter backlog | Filters backlog by project, state, priority, owner, and blocked status. | planned | Filter state is session-only unless promoted to Settings. |
+| BAK12 | Prime recommendation | Prime can recommend next backlog item but must expose rationale. | planned | Recommendation appears with reason and proof/risk context. |
+
+### Crosscheck Surface Subitems
+
+The Crosscheck icon owns review, proof, Aegis findings, and independent validation. It should surface issues before normal work continues.
+
+| ID | Crosscheck Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| XCK1 | Run crosscheck | Starts a bounded review/check for current work or selected artifact. | planned | Crosscheck creates a review/proof event. |
+| XCK2 | Review findings | Shows current findings with severity, owner, and status. | planned | Findings are structured, not raw logs. |
+| XCK3 | Proof status | Shows pass/fail/waived proof state for active work. | planned | Proof state comes from Aegis/review data. |
+| XCK4 | Repair routing | Routes validated findings ahead of normal build work. | planned | Repair task points to target lane/owner. |
+| XCK5 | Approve finding | Allows user/Prime to accept a finding as valid. | planned | Finding status changes and records actor. |
+| XCK6 | Dismiss/waive finding | Allows explicit waiver with rationale. | planned | Waiver stores reason and scope. |
+| XCK7 | Re-run verification | Rechecks a repaired finding or proof item. | planned | Result links to prior finding. |
+| XCK8 | Compare model lanes | Shows independent model/reviewer disagreement where available. | planned | Disagreement is visible without dumping full transcripts. |
+| XCK9 | Gate irreversible actions | Sends public/financial/account-risking decisions through review gate. | planned | Action cannot proceed without required gate state. |
+| XCK10 | Recent review ledger | Shows recent reviews and repair routing history. | planned | Ledger is concise and chronological. |
+| XCK11 | Open evidence | Opens proof artifacts, commands, or summaries. | planned | Evidence opens without injecting raw logs into Prime prompt. |
+| XCK12 | Stop condition alert | Highlights active hard-stop conditions from this checklist. | planned | Stop condition blocks further UI wiring until cleared. |
+
+### Routines Surface Subitems
+
+The Routines icon owns recurring or repeatable work patterns. It should make routine automation visible without turning the user into the scheduler.
+
+| ID | Routine Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| ROU1 | Routine list | Shows configured routines for active project/system. | planned | List is real or empty; no fake routines. |
+| ROU2 | Create routine | Creates a new repeatable workflow or monitor with explicit scope. | planned | Routine has name, scope, cadence/trigger, and owner. |
+| ROU3 | Enable/disable routine | Toggles routine active state. | planned | Disabled routine does not run. |
+| ROU4 | Routine trigger | Supports manual run-now once routine execution exists. | planned | Run creates a visible event/result. |
+| ROU5 | Cadence/trigger view | Shows schedule, heartbeat, or event trigger. | planned | Display uses concrete time/trigger data. |
+| ROU6 | Last run result | Shows last run status, duration, and proof/evidence link. | planned | Failed run is visible and actionable. |
+| ROU7 | Next run preview | Shows next expected run or waiting condition. | planned | Unknown next run displays as unknown. |
+| ROU8 | Failure handling | Shows retry/escalation behavior for routine failures. | planned | Failure state does not silently disappear. |
+| ROU9 | Prime-owned routine review | Prime reviews routine outputs and only escalates meaningful user gates. | planned | Routine result can be accepted/routed without user micromanagement. |
+| ROU10 | Quiet routine mode | Routine noise respects Quiet mode while preserving blockers. | planned | Quiet mode suppresses normal success chatter. |
+| ROU11 | Routine archive/history | Shows previous runs and outcomes without cluttering main panels. | planned | History is inspectable by routine. |
+| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | planned | Missing permission/account gets readable setup state. |
+
 ### Speech / Voice
 
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
