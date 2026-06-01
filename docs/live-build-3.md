@@ -84,7 +84,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: register current Aegis runtime gate artifacts and Bifrost right-panel contract artifacts in FileMap.
 
@@ -92,7 +92,21 @@ Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_f
 
 Required sources: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/relay-aegis-risk-proof-gates.md`, `docs/bifrost-right-panel-mode-contract.md`, and current FileMap entries.
 
-Task: verify the Aegis runtime gate implementation/tests and the Bifrost right-panel mode contract are discoverable through runtime FileMap and mirrored in `docs/FileMap.md`. Add missing entries and required-path coverage only for files that exist. Keep this mechanical. Do not edit Aegis, Bifrost runtime, Relay, Session Lifecycle, or review queues.
+Task: verified the Aegis runtime gate implementation/tests and the Bifrost right-panel mode contract are discoverable through runtime FileMap and mirrored in `docs/FileMap.md`. Added missing entries and required-path coverage only for files that exist. Kept this mechanical; did not edit Aegis, Bifrost runtime, Relay, Session Lifecycle, or review queues.
+
+Tests: `python -m pytest tests/test_filemap.py -q`
+
+Completion: completed in `cf6e8c42`, queue/provenance updates through `5c56304a` and `51976cff`; marked Ready for Codex Review.
+
+## Active Task
+
+Goal: register Build 5 static/sample right-panel rendering artifacts after that runtime slice lands.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Required sources: Build 5 commit `80373a88`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/bifrost-right-panel-mode-contract.md`, and current FileMap entries.
+
+Task: verify the Build 5 right-panel mode runtime/test artifacts are discoverable through runtime FileMap and mirrored in `docs/FileMap.md`. Register only existing files that are missing. Keep this mechanical. Do not edit Bifrost runtime/CSS/tests, Relay, Aegis, Session Lifecycle, or review queues.
 
 Tests: `python -m pytest tests/test_filemap.py -q`
 
@@ -100,7 +114,7 @@ Completion: commit only allowed files, push to `origin/main`, mark Ready for Cod
 
 ## Next Candidate Task
 
-Goal: register Build 5 static/sample right-panel rendering artifacts after that runtime slice lands.
+Goal: audit FileMap coverage for Session Lifecycle routing-action files after Build 2 marks its current runtime slice Ready for Codex Review.
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
 

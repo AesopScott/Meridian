@@ -6,6 +6,28 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 4 Aegis repair and Build 5 Bifrost right-panel rendering.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `meridian_core/aegis.py`, `tests/test_aegis.py`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/bifrost-right-panel-mode-contract.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md` for provenance/routing only.
+
+Task: first verify Build 4 commit `a4826c14` / merge `d15c83e0` resolves the prior Aegis findings: no bare waiver booleans, no bare cost approval booleans, and structured waiver/approval evidence is required. Then verify Build 5 commit `80373a88` renders the three right-panel modes correctly: User Session has prompt/response and live-session selector affordances, Settings and Harness use full-panel non-prompt surfaces, and tests cover absence of prompt windows outside User Session. Do not edit runtime code. If findings exist, route focused repairs to Build 4 or Build 5; otherwise mark passed and promote the Build 3 FileMap registration review candidate.
+
+Proof commands:
+
+- `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
 ## Completed / Finding Routed
 
 Goal: review Build 4 Aegis runtime gate implementation and Build 3 FileMap registrations.
