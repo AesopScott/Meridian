@@ -107,6 +107,7 @@ _REQUIRED_PATHS = [
     "docs/relay-completeness-audit.md",
     "docs/relay-heartbeat-model-routing-logic.md",
     "docs/relay-aegis-risk-proof-gates.md",
+    "docs/relay-bifrost-proof-payload-contract.md",
     "meridian_core/aegis.py",
     "tests/test_aegis.py",
     "docs/ui-integration-checklist.md",
