@@ -8,29 +8,29 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Note - Current Finding
 
-Codex Reviews B has already identified the remaining current-main Build 4 blocker: `gate_cost_exposure()` still allows Tier 2+ premium cost from bare `cost_justified=True` before requiring structured `ApprovalRecord`. The focused repair is now Active in `docs/live-build-4.md`; continue the review lane on the current Active Now item below and route only new findings.
+Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
 ## Coordinator Override - Active Now
 
-Goal: review Build 4 premium-cost approval gate repair when marked Ready for Codex Review.
+Goal: poll for Build 3 FileMap registration for Build 5 right-panel rendering artifacts.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
-Allowed review files: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance/routing only.
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
 
-Task: poll `docs/live-build-4.md` and current `origin/main` for the focused Build 4 repair that removes the bare `cost_justified=True` Tier 2+ premium-cost allow path. When the repair is marked Ready for Codex Review, verify that Tier 2+ premium-cost routes require a valid structured `ApprovalRecord` and that `gate_cost_exposure("PREMIUM", True, 2)` blocks without approval. Confirm no Relay/Bifrost/FileMap/UI/model/account/process/Polaris changes were added. If the repair is not yet ready, append a read check and keep polling; do not mark idle.
+Task: poll `docs/live-build-3.md` and current `origin/main` for Build 3's FileMap registration of the Build 5 right-panel rendering artifacts. When that Build 3 slice is marked Ready for Codex Review, verify the FileMap registration covers the right-panel renderer, mode contracts, tests, and UI checklist artifacts without stale or missing paths. If the slice is not yet ready, append a read check and keep polling; do not mark idle.
 
 Proof command:
 
-- `python -m pytest tests/test_aegis.py -q`
+- `python -m pytest tests/test_filemap.py -q`
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
 
-## Next Candidate Task
+## Coordinator Override - Completed / Passed
 
-Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+Goal: review Build 4 premium-cost approval gate repair.
 
-Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+Status: passed by Codex Reviews B on 2026-06-01 16:33 -06:00. Current `origin/main` contains commit `f15e7ceb`; `python -m pytest tests/test_aegis.py -q` passed with 191 tests; Tier 2+ premium cost now blocks from bare `cost_justified=True` without a valid structured `ApprovalRecord`, while Tier 0 cost-justified behavior remains allowed.
 
 ## Completed / Finding Routed
 
