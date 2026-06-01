@@ -8,28 +8,29 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex Reviews B on 2026-05-31 15:52 -06:00. FileMap tests passed (46 tests), and no repair was routed.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: audit V2 FileMap drift and register any existing missing V2 artifacts.
 
+Task: compared `docs/v2-progress-tracker.md` against runtime FileMap. Found missing artifact: `docs/model-harness-v2-contract.md` (exists on disk, built/review-cleared contract baseline per v2-progress-tracker line 84, but not registered in FileMap).
+
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/filemap-v2-v3-discoverability-audit.md`, `docs/live-build-3.md`.
 
-Task: compare `docs/v2-progress-tracker.md`, current V2 queue files, and existing repository files against the runtime FileMap. Register only completed existing V2 docs/modules/tests that are missing from `make_default_map()`, `docs/FileMap.md`, or `_REQUIRED_PATHS`.
+Registration:
 
-Requirements:
+- Added `FileMapEntry` to `make_default_map()` in `meridian_core/filemap.py` with area `FileArea.MODEL_HARNESS`.
+- Added `docs/model-harness-v2-contract.md` to `_REQUIRED_PATHS` in `tests/test_filemap.py`.
+- Added row to `docs/FileMap.md` Model Harness section with purpose and notes.
+- Updated `docs/filemap-v2-v3-discoverability-audit.md` to add file to Current Coverage checklist.
 
-- Do not create product docs or runtime modules in this slice.
-- Do not edit Build 1, Build 2, Build 4, Build 5, or review queue files.
-- Do not register files that do not exist.
-- Do not register transient read-check reports, helper scratch scripts, local config, or worker worktree gitlinks.
-- If no missing existing V2 artifacts remain, update `docs/filemap-v2-v3-discoverability-audit.md` with the checked sources and result instead of creating read-check-only commits.
-- Keep changes mechanical and small.
+Completion:
 
-Tests:
+- Commit: `c90b05f`.
+- Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/FileMap.md`, `docs/filemap-v2-v3-discoverability-audit.md`, `docs/live-build-3.md`.
+- Tests run: `python -m pytest tests/test_filemap.py -q` — 46 passed.
+- Cadence: 1/3 since Round B5.
 
-- `python -m pytest tests/test_filemap.py -q`
-
-Completion: commit only this FileMap/audit slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Ready for Codex Review.
 
 ## Next Candidate Task
 
