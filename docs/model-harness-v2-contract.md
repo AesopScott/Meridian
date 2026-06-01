@@ -133,6 +133,25 @@ Not declared by the adapter — this is a Relay-side record produced *per model 
 
 ---
 
+## Model Identity Registry Resolution
+
+Exact model identifiers (`ProviderCapability.model`) are normative and must match the request field value sent to each provider's API. Provider marketing names, version codes, or aliases (e.g., "deepseek-v4-pro", "Claude 4", "GPT-5.3-Codex") are not exact IDs and must not be used as dispatch keys.
+
+### Model Identity Rules
+
+- **Exact ID is authoritative:** The `model` field in `ProviderCapability` is the value sent in the API request. For DeepSeek, this is `deepseek-chat` (not `deepseek-v4-pro`). For Claude, this is versioned release IDs like `claude-sonnet-4-20250514` (not `claude-sonnet` or `Claude 4`). For OpenAI, this is the released model name (e.g., `gpt-4o`, not `GPT-5.3-Codex`).
+- **Aliases are not accepted:** If a provider publishes compatibility aliases or variant names, adapters must not treat them as equivalent. Aliases may have different capabilities, costs, or underlying implementations.
+- **Version drift:** If a provider updates the exact model ID (e.g., DeepSeek releases v5), the normative registry and Relay routing docs are updated. Legacy aliases are marked deprecated with a sunset date.
+- **Relay dispatch uses exact ID:** Relay resolves `AdapterRegistry.by_model` using the exact model field. If Relay receives a request for a v4 or marketing name variant, it is treated as an unknown route and Aegis blocks dispatch.
+
+### Provider-Specific Registry Notes
+
+- **Anthropic:** Uses date-based versioning (`claude-opus-4-8-20250514`). Is the source of truth for current model IDs.
+- **OpenAI:** Uses base model names (`gpt-4o`, `gpt-4-turbo`) without version dates. Check OpenAI API docs for current deployable IDs.
+- **DeepSeek:** Uses `deepseek-chat` for the current stable endpoint. Marketing materials reference "v4-pro" / "v4-flash" but the API expects `deepseek-chat`. Future versions (v5, etc.) will update the registry and this contract.
+
+---
+
 ## Enum Definitions
 
 All enums follow existing `meridian_core` conventions. Names are normative.
