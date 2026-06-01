@@ -40,19 +40,25 @@ Completion: commit only review-queue/provenance updates, push to `origin/main`, 
 
 ## Coordinator Override - Active Now
 
-Goal: review Build 3 FileMap registration for Relay proof payload contract docs after Build 3 marks it Ready for Codex Review.
+Goal: review Build 1 Relay-Bifrost proof payload contract docs.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+Allowed review files: `docs/relay-bifrost-proof-payload-contract.md`, `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
 
-Task: poll `docs/live-build-3.md` and current `origin/main` for Build 3's FileMap registration of the Relay proof payload contract docs. When the Build 3 slice is marked Ready for Codex Review, verify the FileMap entry, docs mirror, required-path coverage, and tests. If the slice is not yet ready, append a read check and keep polling; do not mark idle.
+Task: review current `origin/main` commit `7cb80bbb` for the Relay-Bifrost proof payload contract docs landed from Build 1. Verify the contract accurately describes the stable `AegisGateEvidenceSummary.to_dict()` payload keys, immutable value expectations, downstream Bifrost display intent, FileMap registration guidance, and out-of-scope boundaries. Confirm it does not claim live Relay/Aegis/Bifrost calls, model/account/process control, UI implementation, branch movement, or Polaris dependency. If findings exist, route focused repair to Build 1; otherwise mark passed and promote Build 3 FileMap registration as the next review candidate.
 
 Proof command:
 
-- `python -m pytest tests/test_filemap.py -q`
+- `python -m pytest tests/test_relay_executor.py -q`
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Relay proof payload contract docs after Build 3 marks it Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
 
 ## Coordinator Override - Completed / Passed
 

@@ -10,7 +10,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
-## Coordinator Override - Active Now
+## Completed / Passed
 
 Goal: review Build 4 Aegis-to-Relay handoff contract field-shape repair when marked Ready for Codex Review.
 
@@ -24,7 +24,14 @@ Proof command:
 
 - `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`
 
-Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+Review result:
+
+- Passed. `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` passed with 336 tests.
+- The repaired contract documents `ApprovalRecord.expiration`, `WaiverRecord.expiration`, `WaiverRecord.evidence_url`, and `GateSummary.waiver_approval_status` with shapes matching current runtime.
+- The model-call boundary now distinguishes pure Aegis summary helpers and this handoff contract from Relay injected adapter/model-call execution.
+- Scope check: no runtime code, Relay behavior, Bifrost UI, FileMap, account/API/session routing, branch movement, or Polaris dependency changes were made by this review.
+
+Completion: Build 4 Aegis-to-Relay handoff contract field-shape repair is review-cleared. Build 3 FileMap registration for Build 5 right-panel rendering artifacts remains the next review candidate.
 
 ## Completed / Finding Routed
 
@@ -49,11 +56,21 @@ Review result:
 - Scope check: no runtime code was edited by this review; no Relay/Bifrost/FileMap/UI/model/account/process/Polaris changes were added.
 - Repair routed into `docs/live-build-4.md`. Next candidate remains Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
 
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
 Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Task: poll `docs/live-build-3.md` and current `origin/main` for Build 3's FileMap registration of the Build 5 right-panel rendering artifacts. When the Build 3 slice is marked Ready for Codex Review, verify the FileMap registration covers the right-panel renderer, mode contracts, tests, and UI checklist artifacts without stale or missing paths. If the slice is not yet ready, append a read check and keep polling; do not mark idle.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
 
 ## Coordinator Override - Completed / Passed
 
@@ -2203,3 +2220,37 @@ Tests: docs-only (narrative architecture, no pytest required)
 ## Write / Completion Log
 
 - 2026-06-01 16:49 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because Build 4 repair is not yet marked Ready for Codex Review. Commit hash: pending. Push status: pending. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 16:50 -06:00 — rechecked `docs/live-build-4.md` after `origin/main` advanced. Build 4 repair is now marked `Completed / Ready For Codex Review` for the Aegis-to-Relay handoff contract field-shape repair. Executed the active Reviews B task against current main.
+
+## Completed / Passed
+
+Goal: review Build 4 Aegis-to-Relay handoff contract field-shape repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/aegis-relay-summary-handoff-contract.md`, `meridian_core/aegis.py`, `meridian_core/relay.py`, `meridian_core/relay_executor.py`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Review result:
+
+- Passed. No repair findings.
+- `ApprovalRecord.expiration` documentation now matches runtime `str | None = None`.
+- `WaiverRecord.expiration` documentation now matches runtime `str | None = None`.
+- `WaiverRecord.evidence_url` is documented and matches runtime `str | None = None`.
+- `GateSummary.waiver_approval_status` documentation now matches runtime values: `none`, `waiver_present`, `approval_present`, and `waiver_approval_missing`.
+- Model-call boundary language now distinguishes pure Aegis summary helpers and the handoff contract from Relay's injected adapter/model-call execution boundary.
+- Scope check: no runtime code, Relay behavior, Bifrost UI, FileMap, account/API/session routing, branch movement, or Polaris dependency changes were made by this review.
+
+Proof:
+
+- `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` passed with 336 tests.
+
+Next Candidate:
+
+- Review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+
+## Write / Completion Log
+
+- 2026-06-01 16:50 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance and passed review disposition only. Tests run: `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` (336 passed). Commit hash: not created; local `main` has unrelated ahead commit `7cb80bbb` (`docs/relay-bifrost-proof-payload-contract.md`) that is outside Reviews B scope. Push status: blocked to avoid pushing unrelated lane work. Obsidian update status: not updated; queue provenance only.
