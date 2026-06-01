@@ -4,6 +4,40 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 ## Completed / Passed
 
+Goal: review Build 3 V2 FileMap drift audit registration for `docs/model-harness-v2-contract.md`.
+
+Status: passed by Codex Reviews B on 2026-06-01 21:45 -06:00. The Model Harness V2 contract is discoverable through runtime FileMap, docs/FileMap, and required-path coverage. No repair routed.
+
+Scope:
+
+- Build 3 commit `c90b05f` - registers `docs/model-harness-v2-contract.md` in runtime FileMap, docs/FileMap, required-path coverage, and the V2/V3 discoverability audit.
+- Queue marker commit `260227e` - marks the slice Ready for Codex Review.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/filemap-v2-v3-discoverability-audit.md`
+- `docs/live-build-3.md` for provenance only.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+
+Review result:
+
+- `docs/model-harness-v2-contract.md` exists on disk and is present in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- The FileMap entry is under `FileArea.MODEL_HARNESS` and describes provider metadata/trust telemetry discoverability without granting provider routing authority or claiming runtime implementation is complete.
+- The V2/V3 discoverability audit now lists the contract as covered.
+- Build 3 cadence is 1/3 since Round B5 and has a valid next candidate for Session Lifecycle checklist registration after that doc lands and clears review.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` only. No repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
+
+## Completed / Passed
+
 Goal: review Build 4 Model Harness V2 metadata contract.
 
 Status: passed by Codex Reviews B/coordinator on 2026-05-31 22:05 -06:00. The contract covers the required Model Harness metadata surface and keeps DeepSeek candidate-scoped without autonomous build/review/branch/worktree authority.
@@ -653,11 +687,11 @@ Look for:
 
 ## Checkpoint Ledger
 
-Latest ledger note: as of 2026-05-31 15:50 -06:00, commit `e37030e` is review-cleared for Build 4/Build 5 contract-wave scope, Build 3 owns the FileMap registration follow-up for the contract-wave documents, and no repair is routed.
+Latest ledger note: as of 2026-06-01 21:45 -06:00, commit `c90b05f` is review-cleared for Build 3 V2 FileMap drift audit registration of `docs/model-harness-v2-contract.md`; no repair is routed.
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 3 | 67a75dc | FileMap registration for V1 Electron/preview/queue reconciliation entries | passed | none - FileMap tests passed and runtime map/required paths include package.json, electron/main.js, bifrost/preview.py, tests/test_bifrost_preview.py, and prime-queue-reconciliation-requirement.md | active task: register V2 contract-wave docs in FileMap |
+| Build 3 | c90b05f | V2 FileMap drift audit registration for `docs/model-harness-v2-contract.md` | passed | none - FileMap tests passed and runtime map/docs/FileMap/required paths include the contract | next candidate: register Session Lifecycle implementation checklist after it lands and clears review |
 | Build 4 | 0115581 | Workflows architecture note (Round B15) | passed-with-findings | MEDIUM: 5 V2 architecture docs need FileMap registration (echo-memory-contract.md, atlas-retrieval-contract.md, workflow-subagent-harness-contract.md, prime-autonomy-v2-contract.md, workflows-subagent-harness-architecture.md — from Rounds B11+B13+B14+B15 findings) | route consolidated 5-entry FileMap repair to Build 3; verify in next Build 3 cadence review |
 | Build 5 | 2bee5ab | Bifrost browser-first declutter / PRIMED HUD core | passed | none - focused tests pass and rendered HUD core is quiet with prohibited provider/build labels absent | await next Build 5 Ready marker |
 
@@ -706,6 +740,14 @@ Allowed review files: diff files only - bifrost/__init__.py, bifrost/cockpit.py,
 Tests to run: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q`.
 Out of scope: runtime/live state harvesting, persistence, JavaScript, mutation controls, FileMap changes, and non-Bifrost package APIs.
 Reason: Build 5 marked 9328272 Ready for Codex Review; this is the final V1 cockpit item and should be reviewed before declaring V1 complete.
+
+2026-06-01 21:45 -06:00 - Round B16 scope
+Build lanes: Build 3
+Commit range(s): Build 3 c90b05f (V2 FileMap drift audit registration for docs/model-harness-v2-contract.md) plus queue marker 260227e.
+Allowed review files: diff files only - meridian_core/filemap.py, docs/FileMap.md, tests/test_filemap.py, docs/filemap-v2-v3-discoverability-audit.md; docs/live-build-3.md for provenance.
+Tests to run: `python -m pytest tests/test_filemap.py -q`.
+Out of scope: Model Harness runtime/API behavior, provider routing implementation, and unrelated Build 4/Build 5 active tasks.
+Reason: Build 3 marked c90b05f Ready for Codex Review after registering the review-cleared Model Harness V2 contract in FileMap.
 
 ## Read Checks
 
@@ -760,6 +802,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 
 2026-05-31 03:11 -06:00 - Reviewed Build 5 commit e1bf9db (Round B7 cadence review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 97/97 passed in 0.13s; notes: progress events remain render-only and deterministic, no queue/log/env/prompt reads, no JavaScript, no persistence; category/severity/source/timestamp/summary/drilldown are escaped; severity counts and CSS hooks are stable; snapshot mapping preserves typed category/severity.
 2026-05-31 03:41 -06:00 - Reviewed Build 5 commit 9328272 (Round B8 final V1 cockpit review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 104/104 passed in 0.13s; notes: Harness Dashboard is static, view-only, grouped, and escaped; no queue/log/env/prompt reads, no JavaScript, no persistence, and no mutation controls; existing Bifrost files are already registered so no FileMap repair is required.
+2026-06-01 21:45 -06:00 - Reviewed Build 3 commit c90b05f (+ queue marker 260227e); result: pass; tests: `python -m pytest tests/test_filemap.py -q` -> 46/46 passed in 0.25s; notes: `docs/model-harness-v2-contract.md` exists and is registered in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS` under Model Harness; audit checklist marks the path covered; no runtime/provider routing authority claimed.
 
 ## Proof Log
 
@@ -785,6 +828,7 @@ Minimum proof expectations:
 
 2026-05-31 03:11 -06:00 - Proof for Build 5 commit e1bf9db; proof type: test/diff/manual; evidence: `git show --stat --oneline e1bf9db -- bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py docs/live-build-5.md` shows the bounded Build 5 progress-surface slice; `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 97/97 passed; manual inspection confirms no live reads, no JavaScript, escaped metadata, stable severity count hooks, and typed snapshot category/severity mapping; result: pass.
 2026-05-31 03:41 -06:00 - Proof for Build 5 commit 9328272; proof type: test/diff/manual; evidence: `git show --stat --oneline 9328272 -- bifrost/__init__.py bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py docs/live-build-5.md` shows a bounded Bifrost Harness Dashboard slice; `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 104/104 passed; manual inspection confirms view-only grouped cards, capability chips, planned placeholders, attention/status hooks, escaped harness text, and no new file paths requiring FileMap registration; result: pass.
+2026-06-01 21:45 -06:00 - Proof for Build 3 commit c90b05f; proof type: test/diff/reference; evidence: `git show c90b05f -- meridian_core/filemap.py tests/test_filemap.py docs/FileMap.md docs/filemap-v2-v3-discoverability-audit.md` shows the single Model Harness contract registration across all FileMap surfaces; `rg model-harness-v2-contract ...` confirms runtime/docs/test/audit coverage; `python -m pytest tests/test_filemap.py -q` -> 46/46 passed; result: pass.
 
 ## Findings
 
