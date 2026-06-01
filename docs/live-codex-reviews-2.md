@@ -10,6 +10,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 4 Relay harness model-selection logic consistency repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Task: review current `origin/main` commit `a5144d42` for the focused Build 4 repair of the Relay routing logic consistency findings. Verify the Tier 3+ account/API fallback path no longer contradicts itself, wrong-project/wrong-role session scope starts the correct session or blocks before API/aggregator fallback, and exact DeepSeek/model identity rules are consistent between Relay routing logic, Model Harness metadata, and the DeepSeek handoff. Confirm no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 4; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- Docs/architecture review; no pytest required unless the review discovers runtime claims that need code proof.
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
 ## Stale Header - Completed / Finding Routed Below
 
 Goal: review Build 4 Relay harness model-selection logic depth.
@@ -2505,3 +2521,11 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 17:32 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 17:34 -06:00 — pulled latest `origin/main` (`Already up to date`) and read `docs/live-codex-reviews-2.md` plus `docs/live-build-4.md`. Reviews B has already completed/finding-routed the Build 4 Relay model-selection logic review; `docs/live-build-4.md` still has the focused consistency repair as its active task, not a `Completed / Ready For Codex Review` marker. No newly promoted executable Reviews B Active Task is present. Status: idle pending Build 4 repair completion.
+
+## Write / Completion Log
+
+- 2026-06-01 17:34 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
