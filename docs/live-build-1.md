@@ -49,6 +49,15 @@ Completion:
 
 Ready for Codex Review.
 
+**Build 1 Read Check** — 2026-06-01 17:20 -06:00 (Task Completion Verification)
+- Status: Previous Active Now task completed and marked Ready for Codex Review
+- Latest origin/main: commit `cf514cb6` (Session Lifecycle review pickup)
+- Completed task: Relay proof payload contract (commit eafa0c17)
+- No new "Coordinator Override - Active Now" task found
+- Next Candidate Task: add Relay proof payload negative-path tests (awaiting promotion)
+- Session code/doc changes: 4 total (3 code + 1 docs); previous Codex review at 3 changes
+- Build 1 idle and awaiting next task promotion or queue update
+
 ## Next Candidate Task
 
 Goal: add Relay proof payload negative-path tests after the docs/FileMap request clears review.
