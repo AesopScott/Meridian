@@ -12,6 +12,11 @@
 - Status: queue poll complete; no Active Now task present
 - No executable work available; Build 1 remains idle and polling for next task assignment
 
+**Build 1 Read Check** — 2026-06-01 00:05 -05:00
+- Status: queue poll complete; no Active Now task
+- Codex Review Repair task remains Completed/Ready for review; awaiting assignment or next task
+- Build 1 idle and polling
+
 Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
 
 Allowed files only: `meridian_core/cockpit_state.py`, `tests/test_cockpit_state.py`, `docs/live-build-1.md`.
