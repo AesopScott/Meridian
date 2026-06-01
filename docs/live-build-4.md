@@ -1,5 +1,9 @@
 # Live Build 4 Queue
 
+## Required First Command For Every New Task
+
+Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+
 ## Queue Authority
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
@@ -431,6 +435,14 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-06-01 04:08 -06:00 - Build 4 checked queue; status: idle; no Active Task; all lanes idle; origin/main at 39b15f4
 2026-06-01 04:26 -06:00 - Build 4 checked queue; status: idle; no Active Task; restored DeepSeek handoff (deleted by Reviews B idle read a48771d) and rotated DeepSeek Active Now to Completed/Ready For Codex Review; origin/main at 9d15dc2
 ## Codex Review Cadence
+
+2026-06-11 06:00 UTC - Build 4 checked queue; status: idle; no Active Task; origin/main at b3743bb (merge)
+
+2026-06-11 05:55 UTC - Build 4 checked queue; status: idle; no Active Task; origin/main at 1512237
+
+2026-06-11 05:50 UTC - Build 4 checked queue; status: idle; no Active Task; origin/main at 535b073 (merge)
+
+2026-06-11 05:39 UTC - Build 4 checked queue; status: idle; no Active Task; origin/main at fe95d78
 
 2026-06-11 05:15 UTC - Build 4 checked queue; status: idle; no Active Task; origin/main at 590d37b
 

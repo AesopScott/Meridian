@@ -1,5 +1,9 @@
 # Live Build 3 Queue
 
+## Required First Command For Every New Task
+
+Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+
 ## Queue Authority
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
@@ -540,6 +544,13 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-11 05:05 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
 2026-06-11 05:10 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
 2026-06-11 05:15 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:20 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:25 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:30 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:35 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:40 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:45 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 05:50 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
 ```
 
 ## Write/Completion Log

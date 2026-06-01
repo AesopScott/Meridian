@@ -1,5 +1,9 @@
 # Live Build 5 Queue
 
+## Required First Command For Every New Task
+
+Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+
 ## Active Task - Repair Routed By Codex Reviews B
 
 Goal: repair the Bifrost provider balance and prompt payload visibility surface from commit `06e1c5c`.
@@ -452,6 +456,11 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-06-03 08:45 -06:00 - Build 5 checked queue; status: idle; Active Task still unmodified (repair at 5309fb4 marked Ready for Codex Review); no new executable task assigned; Reviews A idle queue read merged; origin/main at 5755308; cadence 1/3; awaiting orchestrator reassignment
 2026-06-03 09:00 -06:00 - Build 5 checked queue; status: idle; Active Task unmodified (repair at 5309fb4 marked Ready for Codex Review); no new executable task; Reviews B idle metadata filled; origin/main at 87731da; cadence 1/3; awaiting orchestrator reassignment
 2026-06-03 09:15 -06:00 - Build 5 checked queue; status: idle; Active Task unmodified (repair complete at 5309fb4, marked Ready for Codex Review); no new executable task; Reviews A idle queue read merged; origin/main at 0cd6e89; cadence 1/3; awaiting orchestrator reassignment
+2026-06-03 09:30 -06:00 - Build 5 checked queue; status: idle; Active Task unmodified (repair at 5309fb4 marked Ready for Codex Review); no new executable task; Reviews B and A updates merged; origin/main at a377907c; cadence 1/3; awaiting orchestrator reassignment
+2026-06-03 09:45 -06:00 - Build 5 checked queue; status: idle; Active Task unmodified (repair at 5309fb4 marked Ready for Codex Review); no new executable task; Reviews B idle metadata filled; origin/main at 0d86a464; cadence 1/3; awaiting orchestrator reassignment
+2026-06-03 10:15 -06:00 - Build 5 checked queue; status: idle; Active Task unmodified (repair at 5309fb4 marked Ready for Codex Review); no new executable task; Reviews B idle metadata filled; origin/main at dba059ea; cadence 1/3; awaiting orchestrator reassignment
+2026-06-11 05:45 -06:00 - Build 5 checked queue; status: idle; Active Task unmodified (repair at 5309fb4 marked Ready for Codex Review, pending Codex Reviews assessment); no new executable task assigned; Reviews B/A updates merged; origin/main at 814207e9; cadence 1/3; awaiting orchestrator reassignment or Codex review result
+2026-06-11 16:22 -06:00 - Build 5 checked queue; status: idle; Active Task still unmodified (repair at 5309fb4 marked Ready for Codex Review at fd8798f); no new executable task assigned; origin/main already up to date at 814207e9; cadence 1/3; awaiting orchestrator reassignment or Codex Reviews B assessment of repair
 ```
 
 ## Write/Completion Log

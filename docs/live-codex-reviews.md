@@ -4,6 +4,10 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
+## Required First Command For Every New Task
+
+Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: verify Build 1 repair commit `19f4516` closes the PrimeCockpitSnapshot immutability finding.
@@ -817,6 +821,9 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-05-31 23:16 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only.
 2026-05-31 23:18 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only.
 2026-05-31 23:20 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only; three-change queue-only Codex review check found no actionable findings.
+2026-05-31 23:22 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only.
+2026-05-31 23:24 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only.
+2026-05-31 23:27 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only; three-change queue-only Codex review check found no actionable findings.
 ```
 
 ## Review Log
@@ -1237,6 +1244,9 @@ Round 6 write log:
 - 2026-05-31 23:16 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-05-31 23:18 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-05-31 23:20 -06:00 - Codex Reviews A completed idle queue read and three-change queue-only Codex review check after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation update); proof commands: `git diff --check -- docs/live-codex-reviews.md`, `git diff -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
+- 2026-05-31 23:22 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
+- 2026-05-31 23:24 -06:00 - Codex Reviews A completed idle queue read after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
+- 2026-05-31 23:27 -06:00 - Codex Reviews A completed idle queue read and three-change queue-only Codex review check after origin/main update. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation update); proof commands: `git diff --check -- docs/live-codex-reviews.md`, `git diff -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
