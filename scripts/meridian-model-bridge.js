@@ -6,6 +6,8 @@ const { spawn } = require('node:child_process');
 const HOST = process.env.MERIDIAN_MODEL_HOST || '127.0.0.1';
 const PORT = Number(process.env.MERIDIAN_MODEL_PORT || 8767);
 const DEFAULT_CWD = process.env.MERIDIAN_MODEL_CWD || process.cwd();
+const RECENT_CALLS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_CALLS || 40);
+const recentCalls = [];
 
 if (process.argv.includes('--self-test')) {
   const samples = [
@@ -124,6 +126,14 @@ function classifySetupError(backend, errorText) {
     return `${name} CLI is installed, but it is not logged in for this machine. ${installHint(backend)}`;
   }
   return text || `${name} CLI failed before returning a response. ${installHint(backend)}`;
+}
+
+function rememberCall(entry) {
+  recentCalls.push({
+    at: new Date().toISOString(),
+    ...entry,
+  });
+  while (recentCalls.length > RECENT_CALLS_LIMIT) recentCalls.shift();
 }
 
 function needsSetup(backend, errorText) {
@@ -255,6 +265,11 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && req.url === '/api/recent-calls') {
+    sendJson(res, 200, { ok: true, calls: recentCalls.slice().reverse() });
+    return;
+  }
+
   if (req.method === 'POST' && req.url === '/api/message') {
     try {
       const body = JSON.parse(await readBody(req));
@@ -268,10 +283,22 @@ const server = http.createServer(async (req, res) => {
         sendJson(res, 400, { ok: false, error: 'Missing prompt' });
         return;
       }
+      const started = Date.now();
       const result = await runModel({ backend, prompt, cwd });
       result.requestedBackend = requestedBackend;
       result.channel = channel;
       result.requestId = requestId;
+      result.durationMs = Date.now() - started;
+      rememberCall({
+        requestId,
+        channel,
+        requestedBackend,
+        backend,
+        model: result.model,
+        ok: result.ok,
+        setupRequired: Boolean(result.setupRequired),
+        durationMs: result.durationMs,
+      });
       sendJson(res, result.ok ? 200 : 500, result);
     } catch (error) {
       sendJson(res, 500, { ok: false, text: '', error: error.message });
