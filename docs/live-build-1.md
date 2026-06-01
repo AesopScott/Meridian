@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Relay-to-Bifrost proof payload contract tests.
 
@@ -16,11 +16,23 @@ Required sources: current `AegisGateEvidenceSummary`, `RelayExecutionSummary.aeg
 
 Task: add provider-neutral tests and minimal serialization hooks so Bifrost/Prime can consume Relay proof payload data without calling Relay internals directly. Cover stable keys for gate decision, severity, evidence ids, waiver presence, explanation, and Aegis fallback blockers. Preserve immutability and deterministic ordering. Do not call models, call Aegis validators, inspect accounts, edit Bifrost, edit UI, move branches, or touch Polaris.
 
-Tests:
+Completion:
 
-- `python -m pytest tests/test_relay_executor.py -q`
+- Build 1 completed Relay proof payload serialization hooks on 2026-06-01 16:55 -06:00.
+- Commit: `a41e3ddd` (feat: Add Relay proof payload serialization hooks for Bifrost/Prime).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (145 tests: 140 original + 5 new serialization tests).
+- Implementation: Added to_dict() method to AegisGateEvidenceSummary for stable dictionary serialization with immutable values. Exposes stable keys: gate_decision, severity, evidence_ids, waiver_present, explanation, fallback_blockers_from_aegis. All values immutable (None, str, bool, tuple). Deterministic output verified with multiple tests. Provider-neutral with no external calls or model invocations.
+- Push: successful to worktree branch; ready for merge.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-01 16:50 -06:00 (Active Task Found)
+- Status: Queue poll complete; Active Now task found: "add Relay-to-Bifrost proof payload contract tests"
+- Latest origin/main: commit `19685e62` (review metadata update)
+- Task: Implement provider-neutral tests and serialization hooks for Bifrost/Prime to consume Relay proof payload data
+- Scope: meridian_core/relay_executor.py, tests/test_relay_executor.py, docs/live-build-1.md
+- Beginning implementation
 
 ## Next Candidate Task
 
