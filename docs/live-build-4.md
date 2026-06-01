@@ -8,42 +8,6 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
-
-Goal: repair remaining Aegis premium-cost approval gate finding.
-
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
-
-Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
-
-Required sources: current `gate_cost_exposure()` implementation, `docs/relay-aegis-risk-proof-gates.md`, and Codex Reviews B finding routed on 2026-06-01 16:11 -06:00.
-
-Task: remove the remaining bare cost approval path from `gate_cost_exposure()`. Tier 2+ premium-cost routes must not return ALLOW from `cost_justified=True`; they must require a valid structured `ApprovalRecord` with actor, scope, timestamp, and reason. Keep Tier 0-1 premium cost behavior and Tier 4 quota/pressure blocking deterministic. Add or update tests so `gate_cost_exposure("PREMIUM", True, 2)` blocks without approval and Tier 2+ only allows with a valid `ApprovalRecord`. Do not edit Relay, Bifrost, FileMap, review queues, move branches, or touch Polaris.
-
-Tests:
-
-- `python -m pytest tests/test_aegis.py -q`
-
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave the aggregate route-gate summary tests task as the next candidate.
-
-## Routed / Paused Until Repair Clears Review
-
-Goal: add Aegis aggregate route-gate summary tests.
-
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
-
-Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
-
-Required sources: current Aegis gate summary helpers, route-gate validators, and `docs/relay-aegis-risk-proof-gates.md`.
-
-Task: add pure aggregate summary coverage for multi-gate route decisions. Prove mixed allow/demote/block/human-gate results produce deterministic ordered summaries, preserve highest severity, retain required evidence/waiver/approval/model-vendor status, and expose a downstream action that Relay/Bifrost can render. Keep this helper/test level only. Do not edit Relay, Bifrost, FileMap, review queues, move branches, or touch Polaris.
-
-Tests:
-
-- `python -m pytest tests/test_aegis.py -q`
-
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
-
 ## Next Candidate Task
 
 Goal: add Aegis-to-Relay summary handoff contract docs after aggregate summary tests clear review.
@@ -96,6 +60,31 @@ Ready for Codex Review:
 - Implementation: GateSummary dataclass, summarize_gate_result(), summarize_gate_results(), format_gate_summary_for_display()
 - Pure, deterministic, provider-neutral helpers with gate metadata for all 9 validators
 - Part of series with aggregator authority repair (20a4719c) — both ready for Codex Review
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: add Aegis aggregate route-gate summary tests.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: add pure aggregate summary coverage for multi-gate route decisions. Prove mixed allow/demote/block/human-gate results produce deterministic ordered summaries, preserve highest severity, retain required evidence/waiver/approval/model-vendor status, and expose a downstream action that Relay/Bifrost can render.
+
+Tests:
+
+- `python -m pytest tests/test_aegis.py -q` — All 190 tests passing
+
+Completion: completed 2026-06-13 17:50 -05:00.
+
+Ready for Codex Review:
+
+- Commit: `94cd1789` (feat: Add Aegis aggregate route-gate summary tests)
+- Merged into main as `c0ca5ce9`
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 190 passing (182 prior + 8 new aggregate summary tests)
+- Implementation: AggregateGateSummary dataclass with gate_count, highest_severity, aggregate_action, blocked_gates[], demoted_gates[], allowed_gates[], evidence_required[], waivers_present[], approvals_present[], gate_details[]; summarize_aggregate_route_gates() combining multiple gate results with deterministic ordering, severity hierarchy (error > warning > info), action priority (blocked > demoted > allowed); helper functions _highest_severity(), _aggregate_downstream_action(), _aggregate_evidence_status(); format_aggregate_summary_for_display() for human-readable output
+- Coverage: 8 new test cases covering empty summaries, all-allow, single-block, demotions, evidence aggregation, waiver/approval tracking, display format, deterministic ordering
+- Pure, deterministic, provider-neutral multi-gate display layer
+- Ready for Codex Review; awaiting review before proceeding to next candidate
 
 ## Archived Candidate - Promoted Above
 
