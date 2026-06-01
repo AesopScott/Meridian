@@ -7,6 +7,15 @@ const HOST = process.env.MERIDIAN_MODEL_HOST || '127.0.0.1';
 const PORT = Number(process.env.MERIDIAN_MODEL_PORT || 8767);
 const DEFAULT_CWD = process.env.MERIDIAN_MODEL_CWD || process.cwd();
 
+if (process.argv.includes('--self-test')) {
+  const samples = [
+    classifySetupError('codex', 'codex is not recognized as an internal or external command'),
+    classifySetupError('max', 'not authenticated, please login'),
+  ];
+  console.log(JSON.stringify({ ok: samples.every(Boolean), samples }, null, 2));
+  process.exit(0);
+}
+
 function sendJson(res, status, body) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -175,22 +184,29 @@ function runModel({ backend, prompt, cwd }) {
 
     let stdout = '';
     let stderr = '';
+    let settled = false;
+    let timeout = null;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      if (timeout) clearTimeout(timeout);
+      resolve(result);
+    };
     child.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
     child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
     if (command.stdin !== null && command.stdin !== undefined) {
       child.stdin.end(command.stdin);
     }
     child.on('error', (error) => {
-      resolve({ ok: false, text: stdout.trim(), error: classifySetupError(backend, error.message), model: command.model, setupRequired: true });
+      finish({ ok: false, text: stdout.trim(), error: classifySetupError(backend, error.message), model: command.model, setupRequired: true });
     });
-    const timeout = setTimeout(() => {
+    timeout = setTimeout(() => {
       child.kill();
-      resolve({ ok: false, text: stdout.trim(), error: 'Model call timed out', model: command.model });
+      finish({ ok: false, text: stdout.trim(), error: 'Model call timed out', model: command.model, setupRequired: false });
     }, Number(process.env.MERIDIAN_MODEL_TIMEOUT_MS || 60000));
 
     child.on('close', (code) => {
-      clearTimeout(timeout);
-      resolve({
+      finish({
         ok: code === 0,
         text: normalizeModelText(backend, stdout),
         error: code === 0 ? null : classifySetupError(backend, stderr.trim() || `Process exited with code ${code}`),
