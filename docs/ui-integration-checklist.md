@@ -26,7 +26,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SP1 | Prime panel | User types directly to Prime/orchestrator. | partial | Send prompt from left panel; response appears below prompt in left panel. |
-| SP2 | User panel | User interacts with what Prime routes to the user. | partial | Send prompt from right panel; response appears below prompt in right panel. |
+| SP2 | User panel | User interacts with the selected live session from the Sessions dropdown. | partial | Select session; panel title changes to session name and prompts route there. |
 | SP3 | Prime prompt input | Two-line scrollable prompt input. Enter sends; Shift+Enter newline. | wired | Type three lines; Enter sends and clears. |
 | SP4 | User prompt input | Same prompt behavior as Prime panel. | wired | Type three lines; Enter sends and clears. |
 | SP5 | Prime response window | Displays Prime/model output below Prime prompt. | partial | Prompt text remains yellow; response text appears below it. |
@@ -56,6 +56,26 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 |---|---|---|---|---|
 | SEL1 | Model selector | Manual model selection. Defaults to Codex. Auto stays disabled until Prime/Relay logic exists. | partial | Served page has Codex selected and Auto disabled. |
 | SEL2 | Projects selector | Selects active project context for the Prime panel. | planned | Changing project must not move layout or silently reroute model calls yet. |
+| SEL3 | User Sessions selector | Selects from all open live sessions, grouped alphabetically by project. | planned | Dropdown shows project groups, including hidden and test-waiting sessions, and selection routes User prompt immediately. |
+
+### User Sessions Selector Subitems
+
+The User panel needs a Sessions dropdown that mirrors the Prime panel's Projects dropdown. Prime selects project context; User selects the specific live session to interact with.
+
+| ID | User Sessions Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| USE1 | Sessions dropdown placement | Adds a Sessions dropdown to the User panel in the equivalent position to Prime's Projects dropdown. | planned | User panel shows Sessions selector without moving approved layout. |
+| USE2 | Live sessions only | Lists only currently open/live sessions. | planned | Archived/reloadable sessions do not appear here. |
+| USE3 | Hidden sessions included | Includes hidden live sessions and marks them as hidden. | planned | Hidden live session appears with hidden state label. |
+| USE4 | Test-waiting sessions included | Includes sessions waiting for user test/try-it-out state and marks that state. | planned | Test-waiting session appears with test/waiting label. |
+| USE5 | Project grouping | Groups sessions under project headers. | planned | Dropdown visually groups sessions by project. |
+| USE6 | Alphabetical project sort | Sorts project groups alphabetically by project name. | planned | Project group order is alphabetical. |
+| USE7 | Alphabetical session sort | Sorts sessions alphabetically within each project group. | planned | Session order inside project group is alphabetical. |
+| USE8 | Session title update | Changes the User panel title to the selected session name. | planned | Selecting a session updates the panel title immediately. |
+| USE9 | Immediate prompt routing | Selecting a session immediately sets that session as the User prompt target. | planned | Next User prompt is routed to selected session without extra confirmation. |
+| USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | planned | Reload/refresh behavior is explicit and does not silently route to stale session. |
+| USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | planned | Status is visible in selector label or row. |
+| USE12 | Stale target guard | If selected session closes or becomes unavailable, User prompt is blocked with a readable target warning. | planned | Sending to closed session shows setup/target error instead of disappearing. |
 
 ### Spark Ring Icons
 
