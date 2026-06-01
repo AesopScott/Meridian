@@ -6,6 +6,7 @@
   "main": "electron/main.js",
   "scripts": {
     "preview": "python -m bifrost.preview",
+    "model-bridge": "node scripts/meridian-model-bridge.js",
     "start": "npm run preview && electron .",
     "proof:cockpit": "python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q && npm audit --audit-level=high"
   },

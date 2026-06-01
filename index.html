@@ -1118,8 +1118,8 @@ body {
 
 .session-project-select {
   position: absolute;
-  right: 58px;
-  top: -45px;
+  right: 51px;
+  top: -33px;
   z-index: 3;
   width: 142px;
   height: 20px;
@@ -1139,6 +1139,32 @@ body {
 }
 
 .session-project-select:focus {
+  border-color: rgba(var(--session-electric-soft), 0.88);
+}
+
+.session-model-select {
+  position: absolute;
+  right: 51px;
+  top: -59px;
+  z-index: 3;
+  width: 142px;
+  height: 20px;
+  border: 1px solid rgba(var(--session-electric), 0.58);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.92);
+  color: rgba(var(--session-electric-soft), 0.94);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1px 22px 1px 7px;
+  outline: none;
+  box-shadow:
+    0 0 8px rgba(var(--session-electric), 0.28),
+    inset 0 0 8px rgba(var(--session-electric), 0.05);
+}
+
+.session-model-select:focus {
   border-color: rgba(var(--session-electric-soft), 0.88);
 }
 
@@ -1308,7 +1334,7 @@ body {
     linear-gradient(90deg, rgba(var(--session-electric), 0.06) 1px, transparent 1px),
     linear-gradient(180deg, rgba(var(--session-electric), 0.045) 1px, transparent 1px);
   background-size: 22px 22px;
-  opacity: 0.62;
+  opacity: 1;
 }
 
 .session-workspace::before,
@@ -1333,6 +1359,90 @@ body {
   bottom: -7px;
   border-right: 2px solid;
   border-bottom: 2px solid;
+}
+
+.session-interface {
+  position: absolute;
+  inset: 12px 12px 24px 34px;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 7px;
+  font-family: "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: var(--session-text-size, 16px);
+  line-height: 1.45;
+}
+
+.session-prompt-input,
+.session-response-output {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(var(--session-electric), 0.42);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.56);
+  color: rgba(var(--session-electric-soft), 0.96);
+  padding: 6px;
+  font: inherit;
+  outline: none;
+  box-shadow: inset 0 0 10px rgba(var(--session-electric), 0.035);
+}
+
+.session-prompt-input {
+  height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
+  min-height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
+  max-height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
+  resize: none;
+  overflow: auto;
+}
+
+.session-response-output {
+  min-height: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.session-output-entry {
+  margin: 0 0 12px;
+}
+
+.session-output-meta {
+  margin-top: 5px;
+  color: rgba(var(--session-electric-soft), 0.54);
+  font-size: 9px;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.session-output-entry-user {
+  color: #fff45c;
+  text-shadow: 0 0 7px rgba(255, 244, 92, 0.36);
+}
+
+.session-output-entry-error {
+  color: #ff5c5c;
+  text-shadow: 0 0 7px rgba(255, 92, 92, 0.38);
+}
+
+.session-output-entry-setup {
+  color: #ffb000;
+  text-shadow: 0 0 7px rgba(255, 176, 0, 0.4);
+}
+
+.session-output-path {
+  color: #ff8a00;
+  text-shadow: 0 0 7px rgba(255, 138, 0, 0.42);
+}
+
+.session-model-status {
+  min-height: 12px;
+  color: rgba(var(--session-electric-soft), 0.72);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(var(--session-electric), 0.42);
 }
 
 .session-text-slider {
@@ -2716,7 +2826,7 @@ body {
   border-radius: 0 !important;
   overflow: visible !important;
   isolation: isolate !important;
-  background: url("static/media/spark-center-final.png") center / contain no-repeat !important;
+  background: url("bifrost/static/media/spark-center-final.png") center / contain no-repeat !important;
   box-shadow: none !important;
   animation: spark-final-breathe 8.6s ease-in-out infinite !important;
   filter: none !important;
@@ -2858,7 +2968,7 @@ body {
 </style>
 </head>
 <body>
-<main class="harness-screen session-theme-aqua" aria-label="Meridian harness screen">
+<main class="harness-screen session-theme-aqua sessions-visible perf-stable" aria-label="Meridian harness screen">
 <section class="brand-lockup" aria-label="Meridian"><div class="brand-primary"><div class="brand-copy"><div class="brand-name">Meridian</div><div class="brand-tagline">Your AI Command Center</div></div></div></section>
 <div class="date-orb is-q1" aria-label="Date status" style="--date-hour-progress: 36.14 100; --date-hour-scale: 1.20;"><svg class="date-orb-svg" viewBox="0 0 120 120" aria-hidden="true"><circle class="date-orb-outer" cx="60" cy="60" r="43"></circle><circle class="date-orb-inner" cx="60" cy="60" r="31"></circle><circle class="date-orb-tick-ring" cx="60" cy="60" r="50"></circle><circle class="date-orb-hour-fill" cx="60" cy="60" r="43" pathLength="100"></circle><circle class="date-orb-slick-track" cx="60" cy="60" r="43" pathLength="100"></circle><text class="date-orb-hour" x="60" y="22">11</text><path class="date-orb-cut date-orb-cut-2" d="M105 60H94"></path><path class="date-orb-cut date-orb-cut-3" d="M60 110V99"></path><path class="date-orb-cut date-orb-cut-4" d="M15 60h11"></path></svg><div class="date-orb-copy" aria-hidden="true"><span class="date-orb-month">MAY</span><span class="date-orb-day">31</span></div></div>
 <button class="speech-mode-button" type="button" aria-label="Enable automatic speech mode" aria-pressed="false"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 24h21c6 0 10 4 10 10s-4 10-10 10H28l-10 8v-8c-5 0-9-4-9-10s4-10 9-10z"></path><path d="M47 20c4 3 7 8 7 14s-3 11-7 14"></path><path d="M39 28c2 1 4 3 4 6s-2 5-4 6"></path></svg></button>
@@ -2869,6 +2979,13 @@ body {
 </main>
 <script>
 (() => {
+  const cleanReloadMarker = () => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('meridian_reload')) return;
+    url.searchParams.delete('meridian_reload');
+    window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+  };
+  cleanReloadMarker();
   const orb = document.querySelector('.date-orb');
   const month = document.querySelector('.date-orb-month');
   const day = document.querySelector('.date-orb-day');
@@ -2922,6 +3039,227 @@ body {
       speechButton.setAttribute('aria-pressed', isOn ? 'false' : 'true');
     });
   }
+})();
+(() => {
+  const screen = document.querySelector('.harness-screen');
+  const primeWindow = document.querySelector('.session-window-left');
+  const sessionWindows = Array.from(document.querySelectorAll('.session-window'));
+  if (!screen || !sessionWindows.length) return;
+  if (primeWindow && !primeWindow.querySelector('.session-model-select')) {
+    primeWindow.insertAdjacentHTML('afterbegin', `
+      <select class="session-model-select" aria-label="Models">
+        <option value="codex" selected>Codex</option>
+        <option value="max">Max</option>
+        <option value="auto">Auto</option>
+      </select>
+    `);
+  }
+  sessionWindows.forEach((windowEl) => {
+    const workspace = windowEl.querySelector('.session-workspace');
+    if (!workspace || workspace.querySelector('.session-interface')) return;
+    workspace.removeAttribute('aria-hidden');
+    const isUser = windowEl.classList.contains('session-window-right');
+    workspace.insertAdjacentHTML('afterbegin', `
+      <div class="session-interface" aria-label="${isUser ? 'User' : 'Prime'} session interface">
+        <textarea class="session-prompt-input" aria-label="${isUser ? 'User prompt input' : 'Prime prompt input'}" spellcheck="false"></textarea>
+        <div class="session-response-output" aria-label="${isUser ? 'User response output' : 'Prime response output'}"></div>
+        <div class="session-model-status" aria-live="polite"></div>
+      </div>
+    `);
+  });
+
+  const textSliders = Array.from(document.querySelectorAll('.session-text-slider input[type="range"]'));
+  const setTextSize = (value) => {
+    const sliderValue = Number(value);
+    const fontSize = 10 + (sliderValue / 100) * 18;
+    screen.style.setProperty('--session-text-size', `${fontSize.toFixed(1)}px`);
+    textSliders.forEach((slider) => {
+      slider.value = String(sliderValue);
+    });
+  };
+  textSliders.forEach((slider) => {
+    slider.removeAttribute('tabindex');
+    slider.setAttribute('aria-label', 'Session text size');
+    slider.addEventListener('input', () => setTextSize(slider.value));
+  });
+  setTextSize(textSliders[0]?.value || 46);
+
+  const modelSelect = document.querySelector('.session-model-select');
+  if (modelSelect) {
+    const storedModel = localStorage.getItem('meridian.session.model');
+    modelSelect.value = storedModel === 'auto' ? 'codex' : (storedModel || modelSelect.value || 'codex');
+    if (storedModel === 'auto') localStorage.setItem('meridian.session.model', 'codex');
+    modelSelect.addEventListener('change', () => {
+      localStorage.setItem('meridian.session.model', modelSelect.value || 'codex');
+      updateModelReadiness();
+    });
+  }
+  let modelReadiness = [];
+  const pathPattern = /((?:[A-Za-z]:\\|\.{0,2}[\\/])(?:[\w .()@%+=~-]+[\\/])*[\w .()@%+=~-]+\.[A-Za-z0-9]{1,12}|(?:[\w@%+=~-]+[\\/])+(?:[\w .()@%+=~-]+)(?:\.[A-Za-z0-9]{1,12})?|\b[\w@%+=~-]+\.[A-Za-z0-9]{1,12}\b)/g;
+  const transcriptKey = (input) => {
+    const windowEl = input.closest('.session-window');
+    return `meridian.session.transcript.${windowEl?.classList.contains('session-window-right') ? 'user' : 'prime'}`;
+  };
+  const draftKey = (input) => {
+    const windowEl = input.closest('.session-window');
+    return `meridian.session.prompt.${windowEl?.classList.contains('session-window-right') ? 'user' : 'prime'}`;
+  };
+  const readTranscript = (input) => {
+    try {
+      return JSON.parse(localStorage.getItem(transcriptKey(input)) || '[]');
+    } catch {
+      return [];
+    }
+  };
+  const writeTranscript = (input, entries) => {
+    localStorage.setItem(transcriptKey(input), JSON.stringify(entries.slice(-80)));
+  };
+  const renderOutputFragments = (text) => {
+    const value = String(text || '');
+    const fragments = [];
+    let lastIndex = 0;
+    for (const match of value.matchAll(pathPattern)) {
+      if (match.index > lastIndex) fragments.push(document.createTextNode(value.slice(lastIndex, match.index)));
+      const span = document.createElement('span');
+      span.className = 'session-output-path';
+      span.textContent = match[0];
+      fragments.push(span);
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < value.length) fragments.push(document.createTextNode(value.slice(lastIndex)));
+    return fragments.length ? fragments : [document.createTextNode(value)];
+  };
+  const outputFor = (input) => input.closest('.session-window')?.querySelector('.session-response-output');
+  const statusFor = (input) => input.closest('.session-window')?.querySelector('.session-model-status');
+  const renderTranscript = (input) => {
+    const output = outputFor(input);
+    if (!output) return;
+    output.replaceChildren();
+    readTranscript(input).forEach((entry) => {
+      const row = document.createElement('div');
+      row.className = `session-output-entry session-output-entry-${entry.role || 'model'}`;
+      if (entry.role === 'user') row.textContent = entry.text || '';
+      else {
+        row.replaceChildren(...renderOutputFragments(entry.text));
+        if (entry.model) {
+          const meta = document.createElement('div');
+          meta.className = 'session-output-meta';
+          meta.textContent = entry.model;
+          row.append(meta);
+        }
+      }
+      output.append(row);
+    });
+    output.scrollTop = output.scrollHeight;
+  };
+  const pushEntry = (input, role, text, model = statusFor(input)?.textContent || '') => {
+    const entries = readTranscript(input);
+    entries.push({ role, text, at: new Date().toISOString(), model });
+    writeTranscript(input, entries);
+    renderTranscript(input);
+  };
+  const setStatus = (input, text) => {
+    const status = statusFor(input);
+    if (status) status.textContent = text || '';
+  };
+  const updateModelReadiness = async () => {
+    if (!modelSelect) return;
+    try {
+      const response = await fetch('http://127.0.0.1:8767/api/models');
+      const result = await response.json();
+      modelReadiness = Array.isArray(result.models) ? result.models : [];
+      if (modelSelect.value === 'auto') {
+        document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'Prime / Relay auto'));
+        return;
+      }
+      const selected = modelReadiness.find((item) => item.backend === modelSelect.value);
+      document.querySelectorAll('.session-prompt-input').forEach((input) => {
+        if (selected && !selected.installed) setStatus(input, `${selected.cli} setup required`);
+        else if (selected) setStatus(input, `${selected.label} ready`);
+      });
+    } catch {
+      document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'model bridge offline'));
+    }
+  };
+  const sendPrompt = async (input) => {
+    if (input.dataset.sessionSending === 'true') return;
+    const prompt = input.value.trim();
+    if (!prompt) return;
+    const selectedBackend = modelSelect?.value || 'codex';
+    const backend = selectedBackend === 'auto' ? 'codex' : selectedBackend;
+    input.dataset.sessionSending = 'true';
+    pushEntry(input, 'user', prompt);
+    input.value = '';
+    localStorage.setItem(draftKey(input), '');
+    setStatus(input, `${backend} running`);
+    try {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 180000);
+      const response = await fetch('http://127.0.0.1:8767/api/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          backend,
+          requestedBackend: selectedBackend,
+          prompt,
+          cwd: 'C:\\Users\\scott\\Code\\Meridian',
+        }),
+      });
+      window.clearTimeout(timeout);
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        throw new Error(`Bridge returned HTTP ${response.status}`);
+      }
+      const result = await response.json();
+      const modelLabel = result.model || backend;
+      setStatus(input, modelLabel);
+      pushEntry(input, result.ok ? 'model' : (result.setupRequired ? 'setup' : 'error'), result.ok ? (result.text || '(empty response)') : `Error: ${result.error || 'Model call failed'}`, modelLabel);
+    } catch (error) {
+      setStatus(input, backend);
+      pushEntry(input, 'error', error.name === 'AbortError'
+        ? 'Error: Model call timed out.'
+        : `Error: ${error.message || 'Meridian model bridge is not running on 127.0.0.1:8767.'}`);
+    } finally {
+      input.dataset.sessionSending = 'false';
+    }
+  };
+  const insertPromptToken = (input, token) => {
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const before = input.value.slice(0, start);
+    const after = input.value.slice(end);
+    const needsLeftSpace = before.length > 0 && !/\s$/.test(before);
+    const needsRightSpace = after.length > 0 && !/^\s/.test(after);
+    const insertion = `${needsLeftSpace ? ' ' : ''}${token}${needsRightSpace ? ' ' : ''}`;
+    input.value = `${before}${insertion}${after}`;
+    const cursor = before.length + insertion.length;
+    input.setSelectionRange(cursor, cursor);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  };
+
+  document.querySelectorAll('.session-prompt-input').forEach((input) => {
+    input.value = localStorage.getItem(draftKey(input)) || '';
+    renderTranscript(input);
+    input.addEventListener('input', () => localStorage.setItem(draftKey(input), input.value));
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendPrompt(input);
+      }
+    });
+  });
+  updateModelReadiness();
+  sessionWindows.forEach((windowEl) => {
+    const input = windowEl.querySelector('.session-prompt-input');
+    windowEl.querySelectorAll('.session-outside-icon').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!input) return;
+        const token = button.getAttribute('aria-label') || '';
+        insertPromptToken(input, token);
+      });
+    });
+  });
 })();
 (() => {
   const screen = document.querySelector('.harness-screen');
@@ -3100,13 +3438,38 @@ body {
     }
     if (nearSpark) openSpark(); else openHarness();
   };
+  const clearSessionWindows = () => {
+    [
+      'meridian.session.transcript.prime',
+      'meridian.session.transcript.user',
+      'meridian.session.prompt.prime',
+      'meridian.session.prompt.user',
+      'meridian.session.rw.prompt',
+      'meridian.session.rw.user-prompt',
+    ].forEach((key) => localStorage.removeItem(key));
+  };
+  const hardReloadUi = ({ clearSessions = false } = {}) => {
+    if (clearSessions) clearSessionWindows();
+    const url = new URL(window.location.href);
+    url.searchParams.set('meridian_reload', String(Date.now()));
+    window.location.replace(url.toString());
+  };
   buttons.forEach((button) => {
     button.addEventListener('click', () => {
+      const actionLabel = button.getAttribute('aria-label') || '';
+      if (actionLabel === 'Reset') {
+        hardReloadUi({ clearSessions: true });
+        return;
+      }
+      if (actionLabel === 'Reload') {
+        hardReloadUi();
+        return;
+      }
       buttons.forEach((item) => item.classList.remove('is-selected'));
       button.classList.add('is-selected');
       screen.classList.remove('session-theme-aqua');
       screen.classList.add('session-theme-green');
-      if (userTitle) userTitle.textContent = button.getAttribute('aria-label') || 'Spark';
+      if (userTitle) userTitle.textContent = actionLabel || 'Spark';
       screen.classList.add('sessions-visible');
       openSpark();
     });

@@ -56,6 +56,8 @@ pytest tests/ -v
 ## Not built yet
 
 - Real Claude / Codex / OpenRouter model integrations
+- Public model setup flow: Scott's local Max/Claude and Codex CLI logins are already configured for this development machine, but a public Meridian build must not assume that. If a selected model CLI is missing or not authenticated, Meridian should tell the user to install the relevant CLI and log in to their account instead of showing raw process errors.
+- Model routing intent: each project's Prime/orchestrator should normally choose the model automatically through Relay harness logic. Manual model selection may be exposed for direct use and testing, but the expected operating mode is automated Prime/Relay decision-making.
 - Real session injection (modeled only)
 - UI or Electron shell
 - SQLite or other persistence
