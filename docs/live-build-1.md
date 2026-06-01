@@ -1866,3 +1866,11 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 [COMPLETED 2026-05-31 ~22:15 -05:00] Model Harness metadata fields for provider capability and prompt-drag telemetry — commit `a8922c3`; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 31 targeted passed; Ready for Codex Review.
 
 [COMPLETED 2026-05-31 ~23:00 -05:00] Prompt payload snapshot metadata into Relay dispatch evidence — commit `081c15f`; files: meridian_core/relay_executor.py, tests/test_relay_executor.py; tests: 89 total passed (64 relay_executor + 25 prompt_payload_meter); Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-01 16:10:31 -06:00 (Codex Review Repair Complete)
+- Status: Codex review repair complete for Aegis gate decision blocking behavior (commit `f77c2a68`)
+- Repair: Added documentation comment clarifying human_gate_required field semantic (route base requirement vs. Aegis gate decisions)
+- Commit: `7dca8525` (fix: Add documentation clarifying human_gate_required semantic in Aegis test)
+- Tests: All 133 relay executor tests passing
+- Push: Successful to worktree branch
+- Next: Awaiting queue update or promotion of next Active Task
