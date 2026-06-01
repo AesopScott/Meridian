@@ -10,7 +10,7 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Active Now
 
-Goal: implement Session Lifecycle routing decisions for Relay-selected session actions.
+Goal: repair Session Lifecycle routing-action coverage found by Codex Reviews A.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
 
@@ -18,7 +18,12 @@ Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_li
 
 Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-implementation-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/relay-completeness-audit.md`.
 
-Task: extend the typed Session Lifecycle model so Prime can represent Relay session actions without live process control: reuse existing session, start new session, summarize and reset, transfer/handoff, archive, and request human gate. Include context-fill, reasoning-shift, project-scope, stale-heartbeat, review-gate, and permission-boundary reasons. Preserve unique-worktree, assigned-queue, and branch-permission invariants. Do not spawn processes, move branches, call models, edit UI, or touch Polaris.
+Review finding routed by Codex Reviews A on 2026-06-01 16:28 -06:00:
+
+- HIGH: `SessionAction` currently represents reuse/start/summarize/transfer/avoid, but not the required Relay-selected `archive` or `request_human_gate` actions (`meridian_core/session_lifecycle.py:87`).
+- MEDIUM: `SessionActionReason.CONTEXT_FILL`, `REVIEW_GATE`, and `PERMISSION_BOUNDARY` are typed but not exercised by `suggest_routing_action()` or tests; current routing tests cover context healthy, payload budget, stale heartbeat, reasoning shift, project scope, and transfer only (`meridian_core/session_lifecycle.py:199`, `tests/test_session_lifecycle.py:78`).
+
+Task: complete the typed Session Lifecycle model so Prime can represent Relay session actions without live process control: reuse existing session, start new session, summarize and reset, transfer/handoff, archive, and request human gate. Ensure context-fill, reasoning-shift, project-scope, stale-heartbeat, review-gate, and permission-boundary reasons are all reachable or otherwise explicitly represented and covered by tests. Preserve unique-worktree, assigned-queue, and branch-permission invariants. Do not spawn processes, move branches, call models, edit UI, or touch Polaris.
 
 Tests:
 
