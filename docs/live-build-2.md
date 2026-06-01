@@ -82,7 +82,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Paused Pending Checklist Repair
 
 Goal: implement the Session Lifecycle domain objects from the reviewed contract/checklist.
 

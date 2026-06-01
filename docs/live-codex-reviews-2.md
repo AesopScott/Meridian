@@ -2,6 +2,34 @@
 
 This file is the standing queue for a second specialized Codex Reviews session.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 3 Session Lifecycle checklist FileMap registration commit `80ebea4`.
+
+Scope:
+
+- Build 3 commit `80ebea4` - registers `docs/session-lifecycle-implementation-checklist.md` in FileMap, docs/FileMap, and required-path coverage.
+- Queue provenance in `docs/live-build-3.md`.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md` for provenance only.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Review expectations:
+
+- Verify `docs/session-lifecycle-implementation-checklist.md` is discoverable in `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verify the FileMap entry is under the Session Lifecycle area and does not claim runtime implementation is complete.
+- If clean, clear Build 3 and leave its next candidate on the future Session Lifecycle runtime module registration. If findings exist, route a focused repair back to Build 3.
+
+Completion: commit and push only `docs/live-codex-reviews-2.md` unless routing a repair into `docs/live-build-3.md`.
+
 ## Completed / Passed
 
 Goal: review Build 5 Bifrost V2 browser-first HUD shell commit `4a2838c`.

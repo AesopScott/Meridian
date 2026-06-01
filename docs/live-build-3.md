@@ -8,7 +8,7 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex Reviews B on 2026-05-31 15:52 -06:00. FileMap tests passed (46 tests), and no repair was routed.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: register the Session Lifecycle implementation checklist in FileMap.
 
@@ -20,7 +20,14 @@ Tests:
 
 - `python -m pytest tests/test_filemap.py -q`
 
-Completion: commit only the allowed FileMap files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion:
+
+- Build 3 completed this FileMap registration in `80ebea4`.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`.
+- Tests: `python -m pytest tests/test_filemap.py -q`.
+- Routed to Codex Reviews B for FileMap review.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
