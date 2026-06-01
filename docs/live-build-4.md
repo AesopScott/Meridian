@@ -8,29 +8,35 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Next Candidate Task
+
+Goal: add Aegis-to-Relay summary handoff contract docs after premium-cost approval gate repair clears review.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining Aegis premium-cost approval gate finding.
 
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
-
 Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
 
-Required sources: current `gate_cost_exposure()` implementation, `docs/relay-aegis-risk-proof-gates.md`, and Codex Reviews B finding routed on 2026-06-01 16:16 -06:00.
-
-Task: remove the remaining bare cost approval path from `gate_cost_exposure()`. Tier 2+ premium-cost routes must not return ALLOW from `cost_justified=True`; they must require a valid structured `ApprovalRecord` with actor, scope, timestamp, and reason. Keep Tier 0-1 premium cost behavior and Tier 4 quota/pressure blocking deterministic. Add or update tests so `gate_cost_exposure("PREMIUM", True, 2)` blocks without approval and Tier 2+ only allows with a valid `ApprovalRecord`. Do not edit Relay, Bifrost, FileMap, review queues, move branches, or touch Polaris.
+Task: remove the remaining bare cost approval path from `gate_cost_exposure()`. Tier 2+ premium-cost routes must not return ALLOW from `cost_justified=True`; they must require a valid structured `ApprovalRecord` with actor, scope, timestamp, and reason.
 
 Tests:
 
-- `python -m pytest tests/test_aegis.py -q`
+- `python -m pytest tests/test_aegis.py -q` — All 191 tests passing
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave the Aegis-to-Relay summary handoff contract docs task as the next candidate.
+Completion: completed 2026-06-13 18:00 -05:00.
 
-## Next Candidate Task
+Ready for Codex Review:
 
-Goal: add Aegis-to-Relay summary handoff contract docs after aggregate summary tests clear review.
-
-Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+- Commit: `29592bb2` (fix: Enforce ApprovalRecord for Tier 2+ premium-cost routes, not cost_justified alone)
+- Merged into main via worktree branch push (19685e62)
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 191 passing (190 prior + 1 new test)
+- Fix: gate_cost_exposure() now requires valid ApprovalRecord for Tier 2+ premium cost, even if cost_justified=True; Tier 0-1 can still use cost_justified; bare boolean approvals rejected
+- Proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 with cost_justified=True blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 cost_justified works
+- Ready for Codex Review; cadence 1/3
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -620,6 +626,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-13 17:56 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; aggregate summary tests marked Ready for Codex Review (commit e08313ca); Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date
 2026-06-13 18:00 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = repair remaining Aegis premium-cost approval gate finding; executor restarted with coordinator-promoted task; pulling origin/main in worktree; beginning implementation of ApprovalRecord enforcement for Tier 2+ premium cost
 2026-06-13 18:01 -05:00 - Build 4 checked queue; status: idle; premium-cost approval gate repair task completed; commit 29592bb2 merged to origin/main; all 191 tests passing (190 prior + 1 new test); task marked Ready for Codex Review (commit 9fd85c13); Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date; cadence 1/3
+2026-06-13 18:02 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; premium-cost approval gate task reorganized in queue file to Completed/Ready for Codex Review; Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date; cadence 1/3
 ```
 
 ## Write/Completion Log
