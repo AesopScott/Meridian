@@ -507,6 +507,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-13 16:12 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; all prior tasks completed and marked Ready for Codex Review; Next Candidate Task (bind Aegis gate outputs) awaits coordinator promotion; origin/main up to date; cadence 1/3
 2026-06-13 17:30 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; no change since last check; Next Candidate Task awaits coordinator promotion; origin/main up to date; cadence 1/3
 2026-06-13 17:35 -05:00 - Build 4 checked queue; status: idle; found Active Task (waiver/approval validation) completed in prior context; all 172 tests passed; implementation verified against spec; marking task Ready for Codex Review and documenting completion; origin/main synced; cadence 1/3
+2026-06-13 17:36 -05:00 - Build 4 checked queue; status: idle; no executable Active Task (waiver/approval task marked Completed/Ready for Codex Review, not Active Now); Next Candidate Task (gate summary helpers) awaits coordinator promotion; origin/main synced; cadence 1/3 — awaiting Codex review or task assignment
 ```
 
 ## Write/Completion Log
