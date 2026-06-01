@@ -47,6 +47,14 @@ Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executo
 - Next Candidate Task still awaiting promotion
 - Build 1 idle and polling for next task assignment
 
+**Build 1 Read Check** — 2026-06-01 16:45 -06:00 (Heartbeat Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: commit `9b1134d0` (Build 4 read checks)
+- Relay serialization task: Ready for Codex Review (awaiting review gate clearance)
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Code changes in session: 2 of 3 before Codex review threshold
+- Build 1 idle and polling for next task assignment
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Relay-side blocking behavior from Aegis gate evidence fields.
