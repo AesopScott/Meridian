@@ -31,6 +31,7 @@ _REQUIRED_PATHS = [
     "docs/jarvis-ui-source-assessment.md",
     "docs/deepseek-provider-validation-gate.md",
     "docs/deepseek-validation-benchmark-plan.md",
+    "docs/model-harness-v2-contract.md",
     "meridian_core/models.py",
     "meridian_core/mission.py",
     "meridian_core/wake.py",

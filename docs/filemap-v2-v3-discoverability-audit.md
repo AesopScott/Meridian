@@ -19,6 +19,7 @@ Every V2/V3 architecture file that changes Prime behavior, harness ownership, pr
 - [x] `docs/session-lifecycle-v2-contract.md` - session lifecycle contract baseline.
 - [x] `docs/session-card-queue-activation-contract.md` - Q-mode/session card product contract.
 - [x] `docs/deepseek-provider-validation-gate.md` - DeepSeek provider trust gate.
+- [x] `docs/model-harness-v2-contract.md` - model harness provider metadata and trust contract.
 
 ## Resolved FileMap Tasks
 

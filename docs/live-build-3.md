@@ -469,6 +469,8 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 
 2026-06-01 21:20 -06:00 - Build 3 checked queue; status: idle; no active task; cadence 0/3 since Round B5; ready for next FileMap assignment
 2026-05-31 02:00 -06:00 - Build 3 checked queue; status: active task found (FileMap registration -- cockpit_provider.py + tests/test_cockpit_provider.py); starting work
+2026-06-10 23:59 UTC - Build 3 checked queue; status: active task found (audit V2 FileMap drift); comparing v2-progress-tracker, queue files, and repository against runtime FileMap
+2026-06-11 00:15 UTC - Build 3 completed V2 FileMap audit; found missing artifact: docs/model-harness-v2-contract.md (built/review-cleared contract baseline); registered in make_default_map(), _REQUIRED_PATHS, and docs/FileMap.md; tests 46/46 filemap passing; Ready for Codex Review
 ```
 
 ## Write/Completion Log
@@ -633,6 +635,7 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 2026-06-08 15:00 UTC - Build 3 checked queue; status: active task found (Coordinator Override — 6-entry FileMap registration: V1 Electron cockpit + Prime queue reconciliation + agentic framework); starting work
 2026-06-08 15:15 UTC - Build 3 completed Coordinator Override FileMap registration (6 entries: electron/main.js, package.json, bifrost/preview.py, tests/test_bifrost_preview.py, prime-queue-reconciliation-requirement.md, agentic-ai-framework-checklist.md); commit 9eacf19; tests 46/46 passing; cadence 1/3 since Round B5; Ready for Codex Review
 2026-06-08 15:30 UTC - Build 3 checked queue; status: idle; Active Task (Coordinator Override 6-entry FileMap registration) already complete at 9eacf19; no new task assigned; cadence 1/3 since Round B5; awaiting next assignment
+2026-06-11 00:15 UTC - Build 3 completed V2 FileMap audit; found and registered missing artifact: docs/model-harness-v2-contract.md; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md, docs/filemap-v2-v3-discoverability-audit.md; tests 46/46 filemap passing; Ready for Codex Review; cadence 1/3 since Round B5
 2026-06-08 16:00 UTC - Build 3 checked queue; status: idle; Active Task (Coordinator Override FileMap registration) complete at 9eacf19; no new active task; cadence 1/3 since Round B5; awaiting next assignment
 2026-06-08 16:30 UTC - Build 3 checked queue; status: idle; Active Task (Coordinator Override) complete; no new active task; cadence 1/3 since Round B5; awaiting next assignment
 2026-06-08 17:00 UTC - Build 3 checked queue; status: idle; Active Task (Coordinator Override FileMap registration) complete at 9eacf19; no new active task; cadence 1/3 since Round B5; awaiting next assignment
