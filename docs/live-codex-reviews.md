@@ -68,6 +68,22 @@ Proof command:
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 3 repair for Relay-Bifrost proof payload contract FileMap registration.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Task: review current `origin/main` commit `f8424a07` for the Build 3 repair of the missing runtime FileMap entry for `docs/relay-bifrost-proof-payload-contract.md`. Verify the runtime `make_default_map()` entry exists, the `docs/FileMap.md` mirror row exists with consistent purpose/notes, `_REQUIRED_PATHS` contains the path, and `python -m pytest tests/test_filemap.py -q` passes. Also confirm the repair did not edit Relay runtime/tests, Bifrost, Aegis, Session Lifecycle, process/model/account code, branches, or Polaris. If clean, mark passed and leave a concrete next candidate; if not clean, route a focused repair to Build 3.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
 ## Coordinator Override - Completed / Repair-Routed
 
 Goal: review Build 3 FileMap registration for Relay proof payload contract docs after Build 3 marks it Ready for Codex Review.

@@ -58,6 +58,22 @@ Review result:
 
 ## Coordinator Override - Active Now
 
+Goal: review Build 3 duplicate `docs/ui-integration-checklist.md` FileMap mirror repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Task: review current `origin/main` commit `f8424a07` for the Build 3 repair of the duplicate `docs/ui-integration-checklist.md` row in `docs/FileMap.md`. Verify only one mirror row remains, its area/purpose matches the canonical runtime FileMap entry, `_REQUIRED_PATHS` still covers the UI checklist and Relay-Bifrost proof payload contract, and `python -m pytest tests/test_filemap.py -q` passes. Confirm no UI/runtime files, Relay, Aegis, Session Lifecycle, process/model/account code, branch movement, or Polaris dependency were changed. If clean, mark passed and promote the Build 4 Relay model-selection logic review candidate; if not clean, route the smallest focused repair to Build 3.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Archived Candidate - Superseded By Build 3 Duplicate-Row Repair
+
 Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
