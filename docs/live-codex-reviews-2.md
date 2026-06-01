@@ -2,6 +2,10 @@
 
 This file is the standing queue for a second specialized Codex Reviews session.
 
+## Required First Command For Every New Task
+
+Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+
 ## Completed / Finding Routed
 
 Goal: review Build 5 provider balance and prompt payload visibility surface commit `06e1c5c`.
@@ -1008,6 +1012,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 2026-05-31 23:20 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; no review scope opened.
 2026-05-31 23:22 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; no review scope opened.
 2026-05-31 23:24 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; latest Build 5/UI changes were not assigned to this review queue.
+2026-05-31 23:26 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; no review scope opened.
 
 ## Review Log
 
@@ -1350,6 +1355,7 @@ Write log:
 - 2026-05-31 23:20 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `9bb3c56` (metadata completed in `d57e50a`); push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
 - 2026-05-31 23:22 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `3b1f09e` (metadata completed in `0362aa8`); push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
 - 2026-05-31 23:24 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `f50de9f` (metadata completed in `0d86a46`); push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
+- 2026-05-31 23:26 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `e86db80`; push status: pending; Obsidian update status: not updated (no architecture finding or clearance).
 
 ## Coordinator Addendum - Round B5 V1 Cockpit Clearance
 
