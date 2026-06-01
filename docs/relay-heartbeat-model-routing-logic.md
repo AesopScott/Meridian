@@ -190,6 +190,13 @@ prompt_payload_budget
 telemetry_required
 ```
 
+Runtime checkpoint: `meridian_core/relay.py` now carries the first typed
+`RelayRouteAudit` slice for these answers. It records route kind/class,
+account-session-first precedence, session lifecycle action, trust state,
+alternatives rejected, fallback blockers, proof requirements, and telemetry
+requirements. It remains deterministic metadata only: it does not enable Auto
+routing, wire vendors, or add routing audit text to model payloads.
+
 ## Promotion Rules
 
 A model/vendor route can move from candidate to trusted only when:
