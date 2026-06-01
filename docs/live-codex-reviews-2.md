@@ -2437,3 +2437,11 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 17:24 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 17:26 -06:00 — pulled latest `origin/main` (`Already up to date`) and read `docs/live-codex-reviews-2.md`. The queue still has no newly promoted executable Reviews B Active Task; the header `Active Now` item is the already-completed Build 3 duplicate `docs/ui-integration-checklist.md` FileMap mirror repair with a passed disposition recorded at 2026-06-01 17:19 -06:00. Build 4 Relay harness model-selection logic remains `Next Candidate Task` only. Status: idle pending Reviews B Active Task promotion.
+
+## Write / Completion Log
+
+- 2026-06-01 17:26 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
