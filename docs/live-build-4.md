@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: repair current-main Aegis premium-cost approval gate mismatch found by Codex Reviews B.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: make current `origin/main` match the completed repair claim for premium-cost approval. `gate_cost_exposure("PREMIUM", True, 2)` must BLOCK unless a valid structured `ApprovalRecord` is supplied. Tier 2+ premium-cost routes must not return ALLOW from bare `cost_justified=True`; they must require a valid `ApprovalRecord` with actor, scope, timestamp, and reason. Update the existing contradictory test that currently asserts the bare boolean path allows, and preserve Tier 0-1 cost-justified behavior if still intended.
+
+Review finding: on 2026-06-01 16:28 -06:00, Codex Reviews B verified that `docs/live-build-4.md` claims commit `29592bb2` / merge `19685e62` landed this repair with 191 tests, but current `origin/main` still has `gate_cost_exposure()` returning ALLOW from `cost_justified=True` before checking `ApprovalRecord`, and `tests/test_aegis.py` still asserts `gate_cost_exposure("PREMIUM", True, 2)` allows. Required proof currently reports 190 tests, not 191.
+
+Proof command:
+
+- `python -m pytest tests/test_aegis.py -q`
+
+Completion: commit the repair, push to `origin/main`, and mark Ready for Codex Review with the actual commit hash, test count, and proof that Tier 2+ bare cost justification blocks without approval.
+
 ## Next Candidate Task
 
 Goal: add Aegis-to-Relay summary handoff contract docs after premium-cost approval gate repair clears review.
