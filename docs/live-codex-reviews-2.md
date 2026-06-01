@@ -10,6 +10,28 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B has already identified the remaining current-main Build 4 blocker: `gate_cost_exposure()` still allows Tier 2+ premium cost from bare `cost_justified=True` before requiring structured `ApprovalRecord`. The focused repair is now Active in `docs/live-build-4.md`; continue the review lane on the current Active Now item below and route only new findings.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 4 premium-cost approval gate repair when marked Ready for Codex Review.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance/routing only.
+
+Task: poll `docs/live-build-4.md` and current `origin/main` for the focused Build 4 repair that removes the bare `cost_justified=True` Tier 2+ premium-cost allow path. When the repair is marked Ready for Codex Review, verify that Tier 2+ premium-cost routes require a valid structured `ApprovalRecord` and that `gate_cost_exposure("PREMIUM", True, 2)` blocks without approval. Confirm no Relay/Bifrost/FileMap/UI/model/account/process/Polaris changes were added. If the repair is not yet ready, append a read check and keep polling; do not mark idle.
+
+Proof command:
+
+- `python -m pytest tests/test_aegis.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
 ## Completed / Finding Routed
 
 Goal: review current-main Build 4 Aegis and Build 5 Bifrost landing commits.
@@ -37,7 +59,7 @@ Review result:
 
 Completion: focused repair is active in `docs/live-build-4.md`. No Build 5 repair routed. Next candidate remains Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
 
-## Next Candidate Task
+## Archived Candidate - Promoted Above
 
 Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
 
