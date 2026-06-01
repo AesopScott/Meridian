@@ -4,6 +4,68 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
+## Coordinator Override - Active Now
+
+Goal: verify the Build 2 PrimeNextAction human-gate repair.
+
+Status: active. Build 2 marked the V2 Prime next-action domain object repair Ready for Codex Review after `PrimeNextAction.is_executable()` was tightened to return false while `human_gate_required` is true.
+
+Scope:
+
+- Original finding: Codex Reviews A Round 6 MEDIUM finding against Build 2 commit `40def3d`; `PrimeNextAction.is_executable()` ignored `human_gate_required`.
+- Repair commits: `594e0d9` changes runtime/test behavior; `631e764` merges the repair into main; `e738e5f` records the Build 2 queue provenance.
+- Inspect swept-in commit scope carefully: `594e0d9` also carried unrelated staged files from the shared main worktree. Review only the PrimeNextAction repair behavior for pass/fail, and separately flag any harmful unrelated scope drift if found.
+
+Allowed review files:
+
+- `meridian_core/prime_autonomy.py`
+- `tests/test_prime_autonomy.py`
+- `docs/live-build-2.md` for repair provenance only.
+- Supporting comparison only: original review finding text in `docs/live-codex-reviews.md`.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py -q`
+- Reference check that `PrimeNextAction.is_executable()` returns false when `human_gate_required=True`.
+- Diff review of `594e0d9` against the original finding to confirm the repair did not add live execution, UI approval workflows, package exports, or model/provider side effects.
+
+Review expectations:
+
+- Verify human-gated Prime actions are not executable before a later approval model exists.
+- Verify blocker semantics still make blocked actions non-executable.
+- Verify safe fallback actions without blockers or human gates remain executable.
+- Verify tests cover the human-gate executable predicate explicitly.
+- If clean, update the Build 2 checkpoint to passed and clear the routed MEDIUM finding. If findings remain, route a focused repair back to Build 2 before normal Session Lifecycle work proceeds.
+
+Completion: commit and push only `docs/live-codex-reviews.md` unless routing a repair into `docs/live-build-2.md`.
+
+## Next Candidate Review Task
+
+Goal: review Build 1 Prime project-state next-action selector commit `57aad9a`.
+
+Status: queued behind the Build 2 human-gate repair verification.
+
+Scope:
+
+- Build 1 commit `57aad9a` - extends `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py` with deterministic project-state next-action selection.
+- Queue provenance commit `a2b8cd0` - records the completion marker in `docs/live-build-1.md`.
+
+Allowed review files:
+
+- `meridian_core/prime_autonomy.py`
+- `tests/test_prime_autonomy.py`
+- `docs/live-build-1.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py -q`
+
+Review expectations:
+
+- Verify deterministic priority ordering, review-gate blocking, human-gate behavior, safe fallback on missing state, and no regression to existing executability semantics.
+- Verify no model calls, filesystem access, network access, live queue mutation, package export change, or approval workflow was added.
+- If clean, mark Build 1 `57aad9a` passed and leave the lane on its current Model Harness metadata Active Task. If findings exist, route a focused repair back to Build 1.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review and clear Build 1 Prime queue runway policy repair commit `b13f10f`.
