@@ -185,6 +185,8 @@ def _build_decision_record(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
     adapter_metadata: ModelHarnessMetadata | None = None,
+    aegis_gate_decision: str | None = None,
+    aegis_explanation: str = "",
 ) -> RelayDecisionRecord:
     """Generate a provider-neutral decision record from a dispatch plan.
 
@@ -193,6 +195,11 @@ def _build_decision_record(
     trust/proof blockers, account-vs-API precedence, cost/privacy, and
     fallback blockers. Populates vendor/model_id from adapter metadata when
     available, or marks as unknown stop conditions.
+
+    Optional Aegis gate evidence (aegis_gate_decision, aegis_explanation):
+    - "block" decision adds explicit fallback blocker and explanation
+    - "human_gate" decision adds human gate requirement blocker and explanation
+    - "demote" decision adds non-silent demotion note to explanation
     """
     from .prompt_payload_meter import PayloadStatus
 
@@ -252,6 +259,14 @@ def _build_decision_record(
                 "Tier 3 dual-lane independence required for meaningful decisions"
             )
 
+    # Handle Aegis gate evidence: block and human_gate add explicit fallback blockers
+    if aegis_gate_decision == "block":
+        fallback_blockers.append("aegis_gate_blocked")
+        fallback_allowed = False
+    elif aegis_gate_decision == "human_gate":
+        fallback_blockers.append("aegis_human_gate_required")
+        fallback_allowed = False
+
     prompt_payload_status = None
     if payload_snapshot is not None:
         prompt_payload_status = payload_snapshot.status.value
@@ -267,6 +282,13 @@ def _build_decision_record(
         f"Session: {audit.session_action.value}. "
         f"Vendor: {vendor or 'not yet bound'}."
     )
+
+    # Append Aegis gate explanation if provided
+    if aegis_gate_decision:
+        if aegis_gate_decision == "demote":
+            explanation += f" Aegis: demoted per gate decision (details: {aegis_explanation})."
+        elif aegis_gate_decision in ("block", "human_gate"):
+            explanation += f" Aegis: {aegis_gate_decision} gate decision ({aegis_explanation})."
 
     return RelayDecisionRecord(
         heartbeat_id=packet.packet_id,
@@ -295,6 +317,8 @@ def _build_decision_record(
         observability_fields=audit.telemetry_required,
         telemetry_required=audit.telemetry_required,
         explanation_for_prime=explanation,
+        aegis_gate_decision=aegis_gate_decision,
+        aegis_explanation=aegis_explanation,
     )
 
 

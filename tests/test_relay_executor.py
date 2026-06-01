@@ -1656,3 +1656,72 @@ class TestRelayDecisionRecord:
         assert hasattr(record, "aegis_explanation")
         # Defaults to empty string when not provided
         assert record.aegis_explanation == ""
+
+    def test_decision_record_aegis_block_gate_adds_fallback_blocker(self) -> None:
+        """Decision record treats Aegis 'block' gate decision as explicit fallback blocker."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="block",
+            aegis_explanation="security policy violation",
+        )
+        # block decision should add fallback blocker
+        assert "aegis_gate_blocked" in record.fallback_blockers
+        assert not record.fallback_allowed
+        # Aegis explanation should be stored
+        assert record.aegis_gate_decision == "block"
+        assert record.aegis_explanation == "security policy violation"
+        # Explanation should include Aegis context
+        assert "Aegis" in record.explanation_for_prime
+        assert "block" in record.explanation_for_prime
+
+    def test_decision_record_aegis_human_gate_adds_fallback_blocker(self) -> None:
+        """Decision record treats Aegis 'human_gate' decision as explicit fallback blocker."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="human_gate",
+            aegis_explanation="escalation required",
+        )
+        # human_gate decision should add fallback blocker
+        assert "aegis_human_gate_required" in record.fallback_blockers
+        assert not record.fallback_allowed
+        # Aegis explanation should be stored
+        assert record.aegis_gate_decision == "human_gate"
+        assert record.aegis_explanation == "escalation required"
+        # Explanation should include Aegis context
+        assert "Aegis" in record.explanation_for_prime
+        assert "human_gate" in record.explanation_for_prime
+
+    def test_decision_record_aegis_demote_adds_explanation_only(self) -> None:
+        """Decision record treats Aegis 'demote' decision as non-silent demotion."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="demote",
+            aegis_explanation="cost constraint triggered",
+        )
+        # demote decision should NOT add fallback blocker
+        assert "aegis_gate_blocked" not in record.fallback_blockers
+        assert "aegis_human_gate_required" not in record.fallback_blockers
+        # Aegis decision should be stored
+        assert record.aegis_gate_decision == "demote"
+        assert record.aegis_explanation == "cost constraint triggered"
+        # Explanation should note the demotion
+        assert "Aegis" in record.explanation_for_prime
+        assert "demoted" in record.explanation_for_prime or "demote" in record.explanation_for_prime
+
+    def test_decision_record_aegis_allow_decision_silent(self) -> None:
+        """Decision record handles Aegis 'allow' decision without adding blockers."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="allow",
+            aegis_explanation="policy satisfied",
+        )
+        # allow decision should not add fallback blockers (handles normally)
+        assert "aegis_gate_blocked" not in record.fallback_blockers
+        assert "aegis_human_gate_required" not in record.fallback_blockers
+        # Aegis decision should still be stored for audit
+        assert record.aegis_gate_decision == "allow"
+        assert record.aegis_explanation == "policy satisfied"
