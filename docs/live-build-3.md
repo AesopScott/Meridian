@@ -8,28 +8,28 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex Reviews B on 2026-05-31 15:52 -06:00. FileMap tests passed (46 tests), and no repair was routed.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: audit V2 FileMap drift and register any existing missing V2 artifacts.
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/filemap-v2-v3-discoverability-audit.md`, `docs/live-build-3.md`.
 
-Task: compare `docs/v2-progress-tracker.md`, current V2 queue files, and existing repository files against the runtime FileMap. Register only completed existing V2 docs/modules/tests that are missing from `make_default_map()`, `docs/FileMap.md`, or `_REQUIRED_PATHS`.
+Task: compared `docs/v2-progress-tracker.md` against runtime FileMap. Found missing artifact: `docs/model-harness-v2-contract.md` (exists on disk per commit 2bfaf6f, built/review-cleared contract baseline, but not registered in FileMap).
 
-Requirements:
+Registration:
 
-- Do not create product docs or runtime modules in this slice.
-- Do not edit Build 1, Build 2, Build 4, Build 5, or review queue files.
-- Do not register files that do not exist.
-- Do not register transient read-check reports, helper scratch scripts, local config, or worker worktree gitlinks.
-- If no missing existing V2 artifacts remain, update `docs/filemap-v2-v3-discoverability-audit.md` with the checked sources and result instead of creating read-check-only commits.
-- Keep changes mechanical and small.
+- Added `FileMapEntry` to `make_default_map()` in `meridian_core/filemap.py` with area `FileArea.MODEL_HARNESS`.
+- Added `docs/model-harness-v2-contract.md` to `_REQUIRED_PATHS` in `tests/test_filemap.py`.
+- Added row to `docs/FileMap.md` Model Harness section with purpose and V2 entry-point note.
 
-Tests:
+Completion:
 
-- `python -m pytest tests/test_filemap.py -q`
+- Commit: `23efaf7`.
+- Files changed: `meridian_core/filemap.py`, `tests/test_filemap.py`, `docs/FileMap.md`.
+- Tests run: `python -m pytest tests/test_filemap.py -q` — 46 passed.
+- Cadence: 1/3 since Round B5.
 
-Completion: commit only this FileMap/audit slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Ready for Codex Review.
 
 ## Next Candidate Task
 
@@ -504,6 +504,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-05-31 04:24 -06:00 - Coordinator assigned FileMap registration for `docs/v2-detailed-build-plan.md`; commit 123a1fe; tests pending (`python -m pytest tests/test_filemap.py -q`)
 2026-06-09 17:00 UTC - Build 3 completed FileMap registration (V2 contract docs: echo-memory-contract.md, atlas-retrieval-contract.md, workflow-subagent-harness-contract.md, agentic-ai-framework-checklist.md, v3-parking-lot refresh); commit d216d6a; files changed: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; Obsidian update pending; Ready for Codex Review; cadence 2/3 since Round B5
 2026-06-10 06:45 UTC - Build 3 completed Coordinator Override task (V1 Electron cockpit app shell + Prime queue reconciliation registration); commit 67a75dc; files changed: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; entries added: package.json, electron/main.js, bifrost/preview.py, tests/test_bifrost_preview.py, docs/prime-queue-reconciliation-requirement.md; Ready for Codex Review; cadence 3/3 since Round B5
+2026-06-11 00:45 UTC - Build 3 completed V2 FileMap audit; found and registered missing artifact: docs/model-harness-v2-contract.md; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; commit 23efaf7; tests 46/46 filemap passing; Ready for Codex Review; cadence 1/3 since Round B5
 ```
 
 ## Cross-Check Activity
