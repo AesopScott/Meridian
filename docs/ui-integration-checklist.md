@@ -10,6 +10,112 @@ This checklist is the gate for plugging live behavior into the Meridian UI. Use 
 
 The goal is simple: every visible UI piece must either work, clearly show that it is not available yet, or stay out of the interface.
 
+Show a compact checklist status roughly every three UI/build prompts while active UI integration work is underway, and immediately when a stop condition is hit.
+
+## Control Inventory
+
+Use this as the working UI checklist. Every visible icon, selector, session control, and harness button gets its own row. Status values:
+
+- `wired`: expected behavior exists and has at least one verification path.
+- `partial`: visible and partly interactive, but not fully connected to the intended feature.
+- `planned`: visible by design, but should not pretend to be complete.
+- `blocked`: do not advance until fixed.
+
+### Session Panels
+
+| ID | Control / Feature | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| SP1 | Prime panel | User types directly to Prime/orchestrator. | partial | Send prompt from left panel; response appears below prompt in left panel. |
+| SP2 | User panel | User interacts with what Prime routes to the user. | partial | Send prompt from right panel; response appears below prompt in right panel. |
+| SP3 | Prime prompt input | Two-line scrollable prompt input. Enter sends; Shift+Enter newline. | wired | Type three lines; Enter sends and clears. |
+| SP4 | User prompt input | Same prompt behavior as Prime panel. | wired | Type three lines; Enter sends and clears. |
+| SP5 | Prime response window | Displays Prime/model output below Prime prompt. | partial | Prompt text remains yellow; response text appears below it. |
+| SP6 | User response window | Displays routed session/model output below User prompt. | partial | Prompt text remains yellow; response text appears below it. |
+| SP7 | Prime text-size slider | Changes text size in both session panels and syncs both sliders. | wired | Drag Prime slider; both panel text sizes change. |
+| SP8 | User text-size slider | Changes text size in both session panels and syncs both sliders. | wired | Drag User slider; both panel text sizes change. |
+| SP9 | User prompt color | User-entered transcript text is bright yellow anywhere it appears. | wired | Send prompt from either panel; transcript prompt is yellow. |
+| SP10 | Path/file highlighting | File paths and filenames in output render bright orange. | wired | Ask model for working directory; path is orange. |
+| SP11 | Model/source label | Shows the model/source used for a response when known. | partial | Send prompt; confirm model label appears near/below response. |
+
+### Top Session Buttons
+
+| ID | Control / Feature | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| TB1 | Prime Confirm icon | Injects `Confirm` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB2 | Prime Continue icon | Injects `Continue` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB3 | Prime No icon | Injects `No` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB4 | Prime Yes icon | Injects `Yes` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB5 | User Yes icon | Injects `Yes` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB6 | User No icon | Injects `No` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB7 | User Continue icon | Injects `Continue` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+| TB8 | User Confirm icon | Injects `Confirm` into active prompt; does not submit. | wired | Click icon; word appears at cursor. |
+
+### Selectors
+
+| ID | Control / Feature | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| SEL1 | Model selector | Manual model selection. Defaults to Codex. Auto stays disabled until Prime/Relay logic exists. | partial | Served page has Codex selected and Auto disabled. |
+| SEL2 | Projects selector | Selects active project context for the Prime panel. | planned | Changing project must not move layout or silently reroute model calls yet. |
+
+### Spark Ring Icons
+
+| ID | Icon / Feature | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| SK1 | Spark center image | Visual voice/core of Prime; toggles session panel visibility through nearby core toggle. | partial | Center image remains visible after refresh. |
+| SK2 | Toggle session panels | Opens/closes or reveals session panel mode without changing session data. | partial | Click toggle; panels visibility changes predictably. |
+| SK3 | Settings | Opens settings surface for UI/model/project options. | planned | Until wired, it must not show fake settings. |
+| SK4 | Filter | Filters current visible work/session content. | planned | Until wired, it must not imply active filtering. |
+| SK5 | Models | Opens model selector/settings surface. | planned | Until wired, model selection remains in explicit selector. |
+| SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
+| SK7 | Skills | Opens skills/tool capability surface. | planned | Until wired, it must not show fake skills. |
+| SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
+| SK9 | Close | Closes the active overlay/panel, not the whole browser tab. | planned | Click closes only intended UI surface. |
+| SK10 | Archive | Archives or opens archive flow for selected item/session. | planned | Until wired, no destructive archive action. |
+| SK11 | Reset | Clears session prompts/transcripts and hard reloads UI. | partial | Send text, click Reset, confirm both panels empty after reload. |
+| SK12 | Reload | Hard reloads UI without promising to clear session state. | partial | Click Reload; page reloads with cache-bust. |
+| SK13 | Routines | Opens routine/automation surface. | planned | Until wired, no fake routine status. |
+| SK14 | Balance | Opens balance/provider/routing view. | planned | Until wired, it must not make routing claims. |
+
+### Speech / Voice
+
+| ID | Control / Feature | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| VO1 | Speech mode icon | Enables/disables voice or speech mode once voice layer exists. | planned | Until wired, must not imply live microphone/model speech is active. |
+
+### Harness Dock Buttons
+
+| ID | Harness Button | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| HN1 | Prime | Opens/focuses Prime core session surface. | partial | Click updates session title/focus without fake status text. |
+| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | partial | Click updates session title/focus without fake status text. |
+| HN3 | Relay | Opens/focuses model-routing surface. | partial | Click updates session title/focus; does not enable Auto routing yet. |
+| HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | partial | Click updates session title/focus without fake heartbeat details. |
+| HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon should become Security before wiring actions. |
+| HN6 | Aegis | Opens/focuses proof/cross-check surface. | partial | Click updates session title/focus without fake proof status. |
+| HN7 | Compass | Opens/focuses mission/project bearing surface. | partial | Click updates session title/focus. |
+| HN8 | Vulcan / Session Lifecycle | Opens/focuses session lifecycle controls. | partial | Click updates session title/focus; no live worker control until wired. |
+| HN9 | Atlas | Opens/focuses knowledge/context retrieval surface. | planned | Until wired, no fake retrieved context. |
+| HN10 | Charon / FileMap | Opens/focuses navigation/FileMap surface. | partial | Click updates session title/focus; future view should read FileMap. |
+| HN11 | Arbiter / Codex Reviews | Opens/focuses review queue surface. | partial | Click updates session title/focus; no fake review findings. |
+| HN12 | Workflow | Opens/focuses workflow/sub-agent surface. | planned | Until wired, no fake sub-agent state. |
+| HN13 | Federation | Opens/focuses federation/network surface. | planned | Until wired, no fake network state. |
+| HN14 | Echo | Opens/focuses memory surface. | planned | Until wired, no fake memory recall. |
+| HN15 | Ratchet / Tool | Opens/focuses tool execution surface. | planned | Until wired, no fake tool execution. |
+| HN16 | Source / Git | Opens/focuses git/source-control surface. | planned | Until wired, no branch movement from UI. |
+| HN17 | Vision / Browser | Opens/focuses browser/vision surface. | planned | Until wired, no fake browser state. |
+| HN18 | Autonomy / Release | Opens/focuses release/autonomy surface. | planned | Until wired, no public release action. |
+
+### Bridge / Backend Features
+
+| ID | Feature | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| BR1 | Meridian model bridge | Receives UI prompts and routes to selected local CLI backend. | wired | `/health` returns ok. |
+| BR2 | Codex backend | Sends selected prompts to Codex CLI. | wired | Select Codex; prompt returns Codex CLI response or readable setup error. |
+| BR3 | Max backend | Sends selected prompts to Claude CLI when available. | partial | Select Max; prompt returns Claude response or readable setup error. |
+| BR4 | CLI setup detection | Detects missing CLI/auth and gives install/login guidance. | wired | `/api/models` and failed calls return setup guidance. |
+| BR5 | Recent call diagnostics | Stores metadata only, never prompt text. | wired | `/api/recent-calls` returns request id/channel/backend/status only. |
+| BR6 | Prime/Relay Auto routing | Future: Prime chooses model through Relay harness logic. | planned | Auto remains disabled until this contract exists. |
+
 ## Integration Rules
 
 | # | Rule | Proof |
