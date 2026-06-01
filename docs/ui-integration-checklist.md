@@ -63,7 +63,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 |---|---|---|---|---|
 | SK1 | Spark center image | Visual voice/core of Prime; toggles session panel visibility through nearby core toggle. | partial | Center image remains visible after refresh. |
 | SK2 | Toggle session panels | Opens/closes or reveals session panel mode without changing session data. | partial | Click toggle; panels visibility changes predictably. |
-| SK3 | Settings | Opens settings surface for UI/model/project options. | planned | Until wired, it must not show fake settings. |
+| SK3 | Settings | Opens settings surface for UI/model/project/session options. | planned | Track `SET-*` subitems before wiring the surface. |
 | SK4 | Filter | Filters current visible work/session content. | planned | Until wired, it must not imply active filtering. |
 | SK5 | Models | Opens model selector/settings surface. | planned | Until wired, model selection remains in explicit selector. |
 | SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
@@ -75,6 +75,33 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | SK12 | Reload | Hard reloads UI without promising to clear session state. | partial | Click Reload; page reloads with cache-bust. |
 | SK13 | Routines | Opens routine/automation surface. | planned | Until wired, no fake routine status. |
 | SK14 | Balance | Opens balance/provider/routing view. | planned | Until wired, it must not make routing claims. |
+
+### Settings Surface Subitems
+
+These are the first-pass settings subitems carried forward from Meridian's Polaris-import notes and Bifrost configuration briefs. The Settings icon is not complete until these are either wired, explicitly deferred, or removed by product decision.
+
+| ID | Settings Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| SET1 | Project focus | Switches active project context across Prime panel, Review Console, lane/progress state, and instrumentation. | planned | Change project; all project-scoped surfaces update together. |
+| SET2 | Last project persistence | Remembers the last active project across UI sessions. | planned | Reload; previous project is restored. |
+| SET3 | Risk tier override | Lets Prime propose risk tier while user can pin/override for a session. | planned | Override appears in UI state and affects future routing/proof requirements. |
+| SET4 | Progress pin list | Persists pinned progress/session items. | planned | Pin item, reload, pin remains. |
+| SET5 | Progress mute list | Persists muted progress/session categories or items. | planned | Mute item/category, reload, muted state remains. |
+| SET6 | Progress collapse state | Persists collapsed progress surface state. | planned | Collapse surface, reload, collapse state remains. |
+| SET7 | Progress filter defaults | Configures default filter/severity visibility for progress items. | planned | New progress items respect chosen defaults. |
+| SET8 | Progress redirect defaults | Configures default routing by category when Prime surfaces progress or review items. | planned | Category route appears in routing metadata, not prompt text. |
+| SET9 | Progress retention window | Controls how long visible progress/proof items stay in the UI. | planned | Old items expire/archive according to setting. |
+| SET10 | Quiet mode | Reduces non-critical UI noise and routine progress surfacing. | planned | Routine updates are suppressed; blockers/proof gates still show. |
+| SET11 | Focus mode | Collapses portfolio noise to the active project. | planned | Only active project surfaces remain prominent. |
+| SET12 | Lane band side | Chooses lane/session band side when that band exists. | planned | Change side; layout moves without panel drift. |
+| SET13 | Bottom band visibility | Chooses which instrumentation cells are visible within a fixed cap. | planned | Toggle cells; layout remains stable and capped. |
+| SET14 | Role/model mapping | Shows role-to-model mapping and allows per-role override/pin. | planned | Builder/reviewer/etc. mapping persists and does not enable Auto without Relay logic. |
+| SET15 | Wake mode | Selects full wake, fast wake, or silent wake. | planned | Reload/start session; selected wake mode is used. |
+| SET16 | Quick reply order | Chooses which prompt macro buttons appear and their order. | planned | Buttons update order without changing injection semantics. |
+| SET17 | Session card defaults | Carries forward useful Polaris card defaults: hide/minimize/expand/pin/archive/transfer/rerun/size behavior. | planned | New session surfaces inherit defaults. |
+| SET18 | Diagnostic log visibility | Controls whether per-session diagnostic event logs are visible by default. | planned | Toggle setting; diagnostic log opens/closes without losing events. |
+| SET19 | Public CLI setup guidance | Exposes setup status/help for Codex and Max/Claude CLIs in public builds. | planned | Missing CLI/auth shows install/login guidance. |
+| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | planned | Settings surface does not expose these controls. |
 
 ### Speech / Voice
 
