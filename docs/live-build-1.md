@@ -222,7 +222,15 @@ Completion: commit only the allowed files, push to `origin/main`, update Obsidia
 
 ## Next Candidate Task
 
-(Will be assigned by Coordinator once current task completes and Codex review clears.)
+Goal: implement Relay model-adapter metadata binding.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: after the cockpit repair and Relay payload hardening work clear their immediate review gates, bind the Model Harness capability/budget metadata into Relay dispatch planning results so downstream Bifrost display work can consume structured provider-neutral route facts. Do not add vendor-specific presets, live model calls, network access, filesystem access, UI rendering, or Bifrost changes.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py tests/test_model_adapter.py -q`
 
 ## Archived Prior Candidate - Promoted Above
 

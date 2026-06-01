@@ -4,9 +4,11 @@ This file is the standing queue for Codex Reviews A, the runtime/code review ses
 
 The build lanes build. Review lanes review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Repair-Routed
 
 Goal: review Build 2 Session Lifecycle implementation checklist commit `0296525`.
+
+Status: repair routed by Codex Reviews A on 2026-05-31 22:17 -06:00. The checklist cannot be accepted because the declared artifact is missing from current `HEAD`, and commit `0296525` only updates queue provenance.
 
 Scope:
 
@@ -30,6 +32,25 @@ Review expectations:
 - Verify Build 2 has a valid follow-on runtime task and that any actionable checklist finding is routed back to Build 2 before the runtime slice is accepted.
 
 Completion: if clean, commit and push only `docs/live-codex-reviews.md` with the review result. If findings exist, route a focused repair into `docs/live-build-2.md` before normal work continues.
+
+Review result:
+
+- `docs/session-lifecycle-v2-contract.md` exists and defines the source contract.
+- `docs/session-lifecycle-implementation-checklist.md` is absent from current `HEAD`.
+- `git show --stat 0296525` shows only `docs/live-build-2.md` changed, despite the queue entry claiming the checklist file was created.
+- Earlier history contains a checklist artifact at `78d9bdd`, but commit `594e0d9` deletes it; the reviewed state therefore cannot support the follow-on runtime task.
+
+Proof:
+
+- Docs-only review; no tests required.
+- `Get-Content docs/session-lifecycle-implementation-checklist.md` failed because the file does not exist.
+- `git show --stat --oneline 0296525` showed one changed file: `docs/live-build-2.md`.
+
+Finding:
+
+- MEDIUM: the checklist Ready marker is stale/incomplete because the required `docs/session-lifecycle-implementation-checklist.md` artifact is missing from `HEAD`.
+
+Completion: routed focused repair to Build 2 in `docs/live-build-2.md`; runtime implementation remains blocked until the checklist artifact is restored and review-cleared.
 
 ## Coordinator Override - Completed / Repair-Routed
 
