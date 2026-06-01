@@ -4,6 +4,10 @@
 
 2026-05-31 22:09 -06:00 - Codex Reviews A routed a MEDIUM repair from the Build 1 runtime cadence review.
 
+**Build 1 Read Check** — 2026-05-31 23:25 -05:00
+- Status: Repair completed and pushed; awaiting Codex review/next task assignment
+- No Active Now task in queue; Build 1 is idle and polling
+
 Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
 
 Allowed files only: `meridian_core/cockpit_state.py`, `tests/test_cockpit_state.py`, `docs/live-build-1.md`.
