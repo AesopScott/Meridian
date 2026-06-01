@@ -893,6 +893,29 @@ def make_default_map() -> FileMap:
             related_tests=["tests/test_filemap.py"],
             notes="Feed to Echo/Atlas for session memory injection.",
         ),
+
+        # -- New Relay/UI docs (2026-06-12) --------------------------------
+        FileMapEntry(
+            path="docs/relay-completeness-audit.md",
+            area=FileArea.RELAY_ROUTING,
+            purpose="Active design audit: prevent Relay from being under-specified before Auto routing, model dispatch, or harness UI wiring.",
+            related_tests=[],
+            notes="Use before enabling Auto routing, adding a provider route, wiring Relay UI, or promoting a candidate route to trusted.",
+        ),
+        FileMapEntry(
+            path="docs/relay-heartbeat-model-routing-logic.md",
+            area=FileArea.RELAY_ROUTING,
+            purpose="First model/vendor routing logic for Meridian: answers what model, vendor/route, risks, and proof gates Relay needs when heartbeat directs Prime to model work.",
+            related_tests=[],
+            notes="Draft routing logic; not runtime code yet. Provides context for Relay route selection, vendor decisions, and proof requirements.",
+        ),
+        FileMapEntry(
+            path="docs/ui-integration-checklist.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Active UI integration gate: checklist for plugging live behavior into Meridian UI. Ensures every visible piece works, shows unavailability, or stays hidden.",
+            related_tests=[],
+            notes="Owner: Prime/Bifrost coordination. Use when adding or changing UI controls, session behavior, or harness integration.",
+        ),
     ]
 
     for entry in entries:

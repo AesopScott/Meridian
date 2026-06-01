@@ -99,6 +99,9 @@ _REQUIRED_PATHS = [
     "bifrost/preview.py",
     "tests/test_bifrost_preview.py",
     "docs/prime-queue-reconciliation-requirement.md",
+    "docs/relay-completeness-audit.md",
+    "docs/relay-heartbeat-model-routing-logic.md",
+    "docs/ui-integration-checklist.md",
     "tests/test_cockpit_provider.py",
     "tests/test_restart_resteer.py",
 ]
