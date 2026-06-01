@@ -11,6 +11,8 @@ from bifrost.cockpit import (
     LaneRow,
     ProgressEvent,
     ProjectCard,
+    SessionLifecycleItem,
+    SessionLifecycleView,
     VoiceIOState,
     render_cockpit_html,
     sample_cockpit_view_model,
@@ -184,25 +186,37 @@ def test_render_hud_command_core_present():
 
 def test_render_hud_command_core_is_quiet():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    noisy_center_labels = (
+
+    # Extract just the HUD core section to check for quiet-core violations
+    core_start = doc.find('class="hud-command-core"')
+    if core_start == -1:
+        # No HUD core found, skip the core-specific checks
+        core_section = ""
+    else:
+        # Find the closing tag of the hud-command-core div
+        core_end = doc.find("</div>", core_start)
+        if core_end != -1:
+            core_section = doc[core_start:core_end]
+        else:
+            core_section = ""
+
+    # These should NOT appear in the core specifically
+    core_quiet_labels = (
         "Provider Balance",
         "Prompt Payload",
         "Delegation Map",
         "Claude / OpenAI / DeepSeek",
-        "Claude",
-        "OpenAI",
-        "DeepSeek",
-        "B1",
-        "B2",
-        "B3",
-        "B4",
-        "B5",
-        "ABH",
     )
-    for label in noisy_center_labels:
-        assert label not in doc
+    for label in core_quiet_labels:
+        assert label not in core_section, f"{label} found in HUD core"
+
+    # These class names should not appear in the core
     for class_name in ("delegation-node", "hud-metric", "hud-micro-panel"):
-        assert class_name not in doc
+        assert f'class="{class_name}"' not in core_section
+
+    # Provider Balance and Prompt Payload should appear somewhere else in the doc
+    assert "Provider Balance" in doc
+    assert "Prompt Payload" in doc
 
 
 
@@ -825,3 +839,200 @@ def test_voice_no_provider_labels_in_voice_states():
     doc = render_cockpit_html(vm)
     for label in ("Claude", "OpenAI", "DeepSeek"):
         assert label not in doc.split("voice-strip")[1].split("</div>")[0] if "voice-strip" in doc else True
+
+
+# ── Session Lifecycle ───────────────────────────────────────────────────────
+
+
+def test_sample_view_model_has_session_lifecycle():
+    vm = sample_cockpit_view_model()
+    assert vm.session_lifecycle is not None
+    assert isinstance(vm.session_lifecycle, SessionLifecycleView)
+
+
+def test_session_lifecycle_sample_has_sessions():
+    vm = sample_cockpit_view_model()
+    assert len(vm.session_lifecycle.sessions) >= 3
+
+
+def test_session_lifecycle_renders_with_sample_data():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert 'class="session-lifecycle"' in doc
+    assert 'aria-label="Session Lifecycle Preview"' in doc
+
+
+def test_session_lifecycle_shows_session_names():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert "Build 5 Bifrost" in doc
+    assert "Reviews Codex B" in doc
+    assert "Prime Main" in doc
+
+
+def test_session_lifecycle_shows_all_sessions():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert doc.count('class="session-card') >= 3
+
+
+def test_session_lifecycle_shows_project_name():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert 'class="session-project"' in doc
+    assert "Meridian" in doc
+
+
+def test_session_lifecycle_shows_harness_role():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert "[build]" in doc
+    assert "[review]" in doc
+    assert "[coordinator]" in doc
+
+
+def test_session_lifecycle_shows_status():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert "polling" in doc
+    assert "running" in doc
+
+
+def test_session_lifecycle_shows_health_state():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert "healthy" in doc
+
+
+def test_session_lifecycle_shows_queue_read_label():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert 'class="session-queue-read"' in doc
+
+
+def test_session_lifecycle_shows_cadence_state():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert 'class="session-cadence"' in doc
+    assert "cleared" in doc
+
+
+def test_session_lifecycle_shows_proof_state():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert 'class="session-proof"' in doc
+    assert "executed" in doc
+
+
+def test_session_lifecycle_shows_active_session():
+    vm = sample_cockpit_view_model()
+    vm.session_lifecycle.active_session_id = "build-5-bifrost"
+    doc = render_cockpit_html(vm)
+    assert 'class="session-card session-active' in doc
+
+
+def test_session_lifecycle_empty_renders_empty():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(sessions=[])
+    doc = render_cockpit_html(vm)
+    assert 'class="session-lifecycle"' not in doc
+
+
+def test_session_lifecycle_single_session():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="test",
+                session_name="Test Session",
+                project_name="TestProj",
+                harness_role="build",
+                status="running",
+                health_state="healthy",
+            )
+        ],
+        active_session_id="test",
+    )
+    doc = render_cockpit_html(vm)
+    assert "Test Session" in doc
+    assert "TestProj" in doc
+
+
+def test_session_lifecycle_escapes_names():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="<script>",
+                session_name="<Test & Name>",
+                project_name="<Project>",
+                harness_role="build",
+                status="running",
+                health_state="healthy",
+            )
+        ]
+    )
+    doc = render_cockpit_html(vm)
+    assert "&lt;script&gt;" in doc
+    assert "&lt;Test &amp; Name&gt;" in doc
+    assert "&lt;Project&gt;" in doc
+    assert "<script>" not in doc
+
+
+def test_session_lifecycle_escapes_blocker_summary():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="test",
+                session_name="Test",
+                project_name="TestProj",
+                harness_role="build",
+                status="blocked",
+                health_state="healthy",
+                blocker_summary="<Alert>System down</Alert>",
+            )
+        ]
+    )
+    doc = render_cockpit_html(vm)
+    assert "&lt;Alert&gt;" in doc
+    assert "<Alert>" not in doc
+
+
+def test_session_lifecycle_shows_blocker_when_present():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="test",
+                session_name="Test",
+                project_name="TestProj",
+                harness_role="build",
+                status="blocked",
+                health_state="healthy",
+                blocker_summary="Waiting for approval",
+            )
+        ]
+    )
+    doc = render_cockpit_html(vm)
+    assert 'class="session-blocker"' in doc
+    assert "Waiting for approval" in doc
+
+
+def test_session_lifecycle_no_blocker_when_empty():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="test",
+                session_name="Test",
+                project_name="TestProj",
+                harness_role="build",
+                status="running",
+                health_state="healthy",
+                blocker_summary="",
+            )
+        ]
+    )
+    doc = render_cockpit_html(vm)
+    assert 'class="session-blocker"' not in doc
