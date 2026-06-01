@@ -272,7 +272,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: add Bifrost review-gate and proof-state preview styling and layout enhancements.
 
@@ -282,9 +282,25 @@ Task: after proof state preview structure lands, add CSS styling and layout for 
 
 Tests:
 
-- Visual verification in browser: `python -m http.server -d bifrost/static 8000`
+- Visual verification in browser: working — gate items display with correct status colors, findings badges render, responsive grids function properly
 
-Completion: commit only the allowed files, push to `origin/main`, and mark Ready for Codex Review with commit hash, files changed, and visual verification notes.
+Completion:
+
+- Build 5 completed this visibility surface CSS styling in `f0b754f4`.
+- Files changed: `bifrost/static/cockpit.css` (344 lines added).
+- Styling includes:
+  - Proof state surface: section layout, header with status badges, gate items with status-based borders (pass=green, warning=amber, block=red), findings summary, notes display
+  - Provider balance surface: item cards with health indicators, policy state badges, responsive grid layout
+  - Prompt payload surface: status indicators with color-coded backgrounds, payload header display, warning badges
+  - All surfaces use CSS variables for consistent theming and follow session-lifecycle pattern
+- Visual verification: Gate items render with correct left borders and background opacity, status indicators display proper colors, findings badges appear with appropriate styling, responsive grids function correctly on browser resize
+- Routed to Codex Reviews B for Bifrost/CSS review.
+
+Ready for Codex Review.
+
+## No Active Task
+
+No new executable task assigned. Awaiting orchestrator assignment or next candidate promotion.
 
 ## Next Candidate Task
 
