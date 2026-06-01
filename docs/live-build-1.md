@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Relay-side blocking behavior from Aegis gate evidence fields.
 
@@ -16,11 +16,16 @@ Required sources: `docs/relay-aegis-risk-proof-gates.md`, `meridian_core/aegis.p
 
 Task: add provider-neutral Relay behavior and tests so decision records with Aegis gate decisions of `block` or `human_gate` produce explicit fallback blockers and downstream explanation text. Aegis `demote` evidence must be represented as a non-silent demotion/constraint, not as an unexplained fallback. Keep this inside Relay decision-record construction; do not call Aegis validators, call models, inspect accounts, touch UI, move branches, edit Bifrost, or touch Polaris.
 
-Tests:
+Completion:
 
-- `python -m pytest tests/test_relay_executor.py -q`
+- Build 1 completed Relay Aegis gate decision blocking behavior on 2026-06-01 16:04 -06:00.
+- Commit: `f77c2a68` (feat: Implement Relay-side blocking behavior from Aegis gate evidence fields).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (133 tests: 129 original + 4 new Aegis gate decision tests).
+- Implementation: Updated _build_decision_record() to accept aegis_gate_decision and aegis_explanation parameters. When aegis_gate_decision is "block" or "human_gate", adds explicit fallback blockers ("aegis_gate_blocked" / "aegis_human_gate_required") and sets fallback_allowed=False. When "demote", adds non-silent demotion note to explanation. When "allow", stores decision for audit without blocking. All explanations include Aegis context. Provider-neutral with no external calls.
+- Push: successful to worktree branch; ready for merge.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Ready for Codex Review.
 
 ## Next Candidate Task
 
