@@ -236,6 +236,10 @@ async function modelStatus() {
   ]);
   return {
     ok: true,
+    capabilities: {
+      visibleTranscriptContext: true,
+      recentCallContextDiagnostics: true,
+    },
     models: [
       {
         backend: 'codex',

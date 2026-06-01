@@ -3214,6 +3214,7 @@ body {
     });
   }
   let modelReadiness = [];
+  let bridgeCapabilities = {};
   const pathPattern = /((?:[A-Za-z]:\\|\.{0,2}[\\/])(?:[\w .()@%+=~-]+[\\/])*[\w .()@%+=~-]+\.[A-Za-z0-9]{1,12}|(?:[\w@%+=~-]+[\\/])+(?:[\w .()@%+=~-]+)(?:\.[A-Za-z0-9]{1,12})?|\b[\w@%+=~-]+\.[A-Za-z0-9]{1,12}\b)/g;
   const transcriptKey = (input) => {
     const windowEl = input.closest('.session-window');
@@ -3296,13 +3297,15 @@ body {
       const response = await fetch('http://127.0.0.1:8767/api/models');
       const result = await response.json();
       modelReadiness = Array.isArray(result.models) ? result.models : [];
+      bridgeCapabilities = result.capabilities || {};
       if (modelSelect.value === 'auto') {
         document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'Prime / Relay auto'));
         return;
       }
       const selected = modelReadiness.find((item) => item.backend === modelSelect.value);
       document.querySelectorAll('.session-prompt-input').forEach((input) => {
-        if (selected && !selected.installed) setStatus(input, `${selected.cli} setup required`);
+        if (!bridgeCapabilities.visibleTranscriptContext) setStatus(input, 'model bridge restart required');
+        else if (selected && !selected.installed) setStatus(input, `${selected.cli} setup required`);
         else if (selected) setStatus(input, `${selected.label} ready`);
       });
     } catch {
@@ -3316,6 +3319,11 @@ body {
     const selectedBackend = modelSelect?.value || 'codex';
     const backend = selectedBackend === 'auto' ? 'codex' : selectedBackend;
     if (!modelReadiness.length) await updateModelReadiness();
+    if (!bridgeCapabilities.visibleTranscriptContext) {
+      setStatus(input, 'model bridge restart required');
+      pushEntry(input, 'error', 'Error: Restart the Meridian model bridge so follow-up prompts carry visible session context.', backend, { requestedBackend: selectedBackend });
+      return;
+    }
     const selectedReadiness = readinessForBackend(backend);
     if (selectedReadiness && !selectedReadiness.installed) {
       setStatus(input, `${selectedReadiness.cli} setup required`);
