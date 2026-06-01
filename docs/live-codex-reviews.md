@@ -8,9 +8,24 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review current-main Build 1 Relay proof payload serialization landing.
+
+Status: passed by Codex Reviews A on 2026-06-01 16:26 -06:00. Current `origin/main` contains Relay proof payload serialization commit `7079ceb8`, and the required Relay executor proof passes.
+
+Review result:
+
+- `python -m pytest tests/test_relay_executor.py -q` passed with 145 tests.
+- `git merge-base --is-ancestor 7079ceb8 HEAD` passed, proving the reviewed landing commit is in current main.
+- `AegisGateEvidenceSummary.to_dict()` exposes stable keys for gate decision, severity, evidence ids, waiver presence, explanation, and Aegis fallback blockers.
+- Serialized values remain deterministic and immutable-provider-neutral: scalar values plus tuple evidence ids and tuple fallback blockers, with repeated calls producing identical output.
+- Scoped side-effect scan found no live Aegis/model/vendor/account/UI/process/branch/Polaris calls in `meridian_core/relay_executor.py` or `tests/test_relay_executor.py`.
+- Local commits after `7079ceb8` do not modify the scoped Relay executor/test files, so the proof covers the reviewed Relay payload serialization state.
+
+Finding: none. No CRITICAL, HIGH, MEDIUM, or LOW findings in the scoped review.
+
+Completion: Build 1 Relay proof payload serialization is review-cleared. Build 2 Session Lifecycle routing-action implementation remains the next review candidate.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
@@ -1095,6 +1110,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-06-01 15:55 -06:00 - Reviewed Build 1 Relay stop-condition repair commit `f0bb2bb6`; result: finding/repair-routed; tests: `python -m pytest tests/test_relay_executor.py -q` 121 passed; notes: registry metadata populates vendor and lane preferred model populates model_id, but Tier 2+ no-adapter vendor unknown can remain `fallback_allowed=True` with no explicit blocker; repair routed to Build 1.
 2026-06-01 16:04 -06:00 - Reviewed Build 1 Relay repair commits `c3d91214` and `69e9ff55`; result: finding/repair-routed; tests: `python -m pytest tests/test_relay_executor.py -q` 121 passed against current checkout; notes: both target commits exist locally but are not ancestors of current `HEAD`/`origin/main`, so the Ready marker cannot be accepted and the proof did not exercise their vendor/model blocker or Aegis evidence changes.
 2026-06-01 16:20 -06:00 - Reviewed Build 1 Relay summary serialization landing commit `ff6893c6`; result: pass; tests: `python -m pytest tests/test_relay_executor.py -q` 140 passed; notes: commit is ancestor of current `HEAD`, AegisGateEvidenceSummary and RelayExecutionSummary.aegis_gate_evidence_summary() expose gate decision, severity, evidence ids, waiver presence, explanation, and Aegis-derived blockers without live Aegis/model/vendor/account side effects.
+2026-06-01 16:26 -06:00 - Reviewed Build 1 Relay proof payload serialization landing commit `7079ceb8`; result: pass; tests: `python -m pytest tests/test_relay_executor.py -q` 145 passed; notes: `AegisGateEvidenceSummary.to_dict()` exposes stable gate decision/severity/evidence ids/waiver/explanation/Aegis blocker keys, preserves immutable deterministic values, and scoped side-effect scan found no live Aegis/model/vendor/account/UI/process/branch/Polaris calls.
 ```
 
 ## Proof Log
@@ -1161,6 +1177,7 @@ YYYY-MM-DD HH:MM TZ - Proof for Build <n> commit <hash>; proof type: diff/test/r
 2026-06-01 16:04 -06:00 - Proof for Build 1 Relay repair commits `c3d91214` and `69e9ff55`; proof type: test/reference; evidence: `python -m pytest tests/test_relay_executor.py -q` -> 121 passed, but `git merge-base --is-ancestor 69e9ff55 HEAD` and `git merge-base --is-ancestor c3d91214 HEAD` both reported NOT ancestor of HEAD; current `RelayDecisionRecord` lacks the Aegis fields from `69e9ff55`; result: fail-repair-routed.
 2026-06-01 16:10 -06:00 - Proof for Reviews A idle queue cadence check; proof type: diff/manual; evidence: `git diff --check 12255ddb..HEAD -- docs/live-codex-reviews.md docs/live-build-1.md` and `git diff 12255ddb..HEAD -- docs/live-codex-reviews.md docs/live-build-1.md` show Reviews A repair/provenance entries, idle bookkeeping, and Build 1 queue readiness/provenance notes since the 16:01 cadence checkpoint; Reviews A queue top remains completed/repair-routed with no executable Active Task; result: pass.
 2026-06-01 16:20 -06:00 - Proof for Build 1 Relay summary serialization landing commit `ff6893c6`; proof type: test/diff/reference; evidence: `python -m pytest tests/test_relay_executor.py -q` -> 140 passed; `git merge-base --is-ancestor ff6893c6 HEAD` passed; scoped diff/inspection found frozen `AegisGateEvidenceSummary`, `RelayExecutionSummary.aegis_gate_evidence_summary()`, gate decision/severity/evidence ids/waiver/explanation/blocker coverage, and prior vendor/model/Aegis blocker tests still present; side-effect scan found no live Aegis/model/vendor/account/UI/process/branch/Polaris calls; result: pass.
+2026-06-01 16:26 -06:00 - Proof for Build 1 Relay proof payload serialization landing commit `7079ceb8`; proof type: test/diff/reference; evidence: `python -m pytest tests/test_relay_executor.py -q` -> 145 passed; `git merge-base --is-ancestor 7079ceb8 HEAD` passed; scoped diff/inspection found `AegisGateEvidenceSummary.to_dict()` stable-key serialization and regression tests for empty/data/stable-key/immutable/deterministic output; side-effect scan found no live Aegis/model/vendor/account/UI/process/branch/Polaris calls; result: pass.
 ```
 
 Minimum proof expectations:
@@ -1216,6 +1233,7 @@ YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LO
 2026-06-01 16:04 -06:00 - Build 1 commits `c3d91214` and `69e9ff55`; severity: HIGH; file: review provenance/current branch; finding: Ready-for-review commits are not ancestors of current `HEAD`/`origin/main`, so the required test proof ran against unrepaired Relay code and cannot clear the vendor/model blocker or Aegis evidence changes; action: repair-task-written to `docs/live-build-1.md`.
 2026-06-01 16:10 -06:00 - Reviews A idle queue cadence check; severity: LOW/none; file: docs/live-codex-reviews.md and docs/live-build-1.md; finding: no actionable findings in the recent Reviews A queue/provenance updates since the 16:01 cadence checkpoint; action: clear, no repair task written.
 2026-06-01 16:20 -06:00 - Build 1 commit `ff6893c6`; severity: none; file: meridian_core/relay_executor.py and tests/test_relay_executor.py; finding: no CRITICAL, HIGH, MEDIUM, or LOW findings in the scoped Relay summary serialization review; action: clear, no repair task written.
+2026-06-01 16:26 -06:00 - Build 1 commit `7079ceb8`; severity: none; file: meridian_core/relay_executor.py and tests/test_relay_executor.py; finding: no CRITICAL, HIGH, MEDIUM, or LOW findings in the scoped Relay proof payload serialization review; action: clear, no repair task written.
 ```
 
 ## Repair Routing Log
@@ -1531,6 +1549,7 @@ Round 6 write log:
 - 2026-06-01 16:07 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: local queue update commit. Push status: not pushed; local `main` has unrelated ahead commits outside Reviews A scope, so pushing would publish out-of-scope work. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-06-01 16:10 -06:00 - Codex Reviews A completed idle queue read and three-change Codex review check after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue/provenance-only documentation update); proof commands: `git diff --check 12255ddb..HEAD -- docs/live-codex-reviews.md docs/live-build-1.md`, `git diff 12255ddb..HEAD -- docs/live-codex-reviews.md docs/live-build-1.md`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings; no implementation changed by Reviews A. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-06-01 16:20 -06:00 - Codex Reviews A completed Build 1 Relay summary serialization review for commit `ff6893c6`. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_relay_executor.py -q` (140 passed); proof commands: `git merge-base --is-ancestor ff6893c6 HEAD`, scoped Relay summary inspection, side-effect scan with `rg`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings; Build 1 Relay summary serialization passed and Build 2 Session Lifecycle remains next candidate. Commit: this commit. Push status: pushed to `origin/main`; unrelated dirty implementation files left unstaged/out of scope. Obsidian update status: not updated; review queue records pass only.
+- 2026-06-01 16:26 -06:00 - Codex Reviews A completed Build 1 Relay proof payload serialization review for commit `7079ceb8`. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_relay_executor.py -q` (145 passed); proof commands: `git merge-base --is-ancestor 7079ceb8 HEAD`, `git diff 7079ceb8^..7079ceb8 -- meridian_core/relay_executor.py tests/test_relay_executor.py`, side-effect scan with `rg`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings; Build 1 Relay proof payload serialization passed and Build 2 Session Lifecycle remains next candidate. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue records pass only.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
