@@ -1,4 +1,4 @@
-﻿# Live Build 3 Queue
+# Live Build 3 Queue
 
 ## Queue Authority
 
@@ -522,8 +522,8 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-11 02:45 UTC - Build 3 checked queue; status: idle; Active Task (FileMap repair) already complete (commit ba83a4c); cadence 3/3 since Round B5 — Codex review required before next task
 2026-06-11 03:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 3/3 since Round B5 — initiating Codex review for commits 23efaf7, 80ebea4, ba83a4c
 2026-06-11 03:20 UTC - Build 3 checked queue; status: idle; Codex review complete (two repair iterations); cadence reset to 0/3 since Round B5; no new Active Task assigned; ready for next FileMap assignment
-2026-05-31 02:00 -06:00 - Build 3 checked queue; status: active task found (FileMap registration -- cockpit_provider.py + tests/test_cockpit_provider.py); starting work
 2026-06-11 03:35 UTC - Build 3 checked queue; status: idle; Active Task (Session Lifecycle FileMap registration) already complete (commits 92ff6f4 + 9bb93ad); V2 FileMap audit completed in previous session; cadence 1/3 since Round B5; no new Active Task assigned; awaiting next task assignment
+2026-06-11 03:40 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
 ```
 
 ## Write/Completion Log
@@ -613,15 +613,15 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/f
 
 ## Archived Prior Active Task - Do Not Execute
 
-Current Active Task - COMPLETED:
+Archived Completed Task:
 
 Coordinator Override task completed in commit `67a75dc`: Registered V1 Electron cockpit app shell (package.json, electron/main.js), Bifrost preview renderer (bifrost/preview.py, tests/test_bifrost_preview.py), and Prime queue reconciliation requirement (docs/prime-queue-reconciliation-requirement.md) in FileMap. All 5 entries now present with FileArea.BIFROST and FileArea.ARCHITECTURE classifications. Tests: 46/46 filemap passing. Ready for Codex Review.
 
-Next Active Task: awaiting new assignment.
+Archived: awaiting new assignment at time of archival.
 
 Prior stale task archived below.
 
-Current Active Task:
+Archived Stale Task:
 
 Goal: register the V2 detailed build plan in FileMap.
 
@@ -676,6 +676,7 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 - **COMPLETED 2026-05-30 16:07 -06:00** — FileMap repair (Round B3 — prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:03 -06:00** — FileMap refresh (model_adapter.py); commit be34fea; tests 46/46 filemap; Ready for Codex Review. Codex review cleared 2026-05-30 16:11 -06:00 (Reviews B; no findings; cadence window 774695f, 330f200, be34fea clear).
 
+```text
 2026-06-01 21:35 -06:00 - Build 3 completed FileMap registration (docs/v2-detailed-build-plan.md); commit b48b5c3; files changed: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; Obsidian update pending; Ready for Codex Review
 2026-06-01 21:40 -06:00 - Build 3 checked queue; status: idle; Active Task already complete (e0d7c08 + c7b43d1 pushed); cadence 1/3 since Round B5; awaiting next task assignment
 2026-06-02 00:00 UTC - Build 3 checked queue; status: idle; Active Task stale (V2 FileMap complete at e0d7c08/c7b43d1); cadence 1/3 since Round B5; awaiting next task assignment
@@ -725,3 +726,4 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 2026-06-10 18:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 3/3 since Round B5; awaiting Codex review clearance before next assignment
 2026-06-10 23:59 UTC - Build 3 checked queue; status: paused; cadence 3/3 since Round B5 complete; awaiting Codex review findings and next assignment
 2026-06-11 02:50 UTC - Build 3 checked queue; status: idle; pulled origin/main (e2f4078); Session Lifecycle checklist now exists; FileMap re-registered (filemap.py:576); repair Active Task superseded; cadence 3/3 since Round B5 — awaiting Codex review findings before next assignment
+```
