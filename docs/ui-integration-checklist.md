@@ -514,7 +514,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | MB8 | Visible session continuity | Follow-up prompts carry the visible panel transcript as bounded context, with no hidden backend memory. | Response metadata and `/api/recent-calls` record nonzero `sessionContextEntries` after a follow-up prompt. |
 | MB9 | Bridge capability guard | UI blocks prompt sends when the running bridge does not advertise visible transcript context support. | Old bridge shows restart-required status instead of silently sending stateless follow-ups. |
 | MB10 | Bridge restart endpoint | Local bridge exposes a same-port restart endpoint for Reset recovery. | `POST /api/restart` returns accepted, then `/health` and `/api/models` come back with visible-context capability. |
-| MB11 | Bridge capability parity | `/health` and `/api/models` advertise the same bridge version and capability flags. | Both endpoints report `visibleTranscriptContext`, `recentCallContextDiagnostics`, and `samePortRestart`. |
+| MB11 | Bridge capability parity | `/health` and `/api/models` advertise the same bridge version and capability flags, and the UI readiness line shows the active bridge generation. | Both endpoints report `visibleTranscriptContext`, `recentCallContextDiagnostics`, and `samePortRestart`; session status includes the bridge version. |
 | MB12 | Local-origin bridge access | Browser access to bridge endpoints is limited to the Meridian local UI origins. | Disallowed origins get `403`; command-line checks without an Origin header still work. |
 
 ## Harness UI Rules

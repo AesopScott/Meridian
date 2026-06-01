@@ -3303,6 +3303,7 @@ body {
       bridgeOnline = true;
       modelReadiness = Array.isArray(result.models) ? result.models : [];
       bridgeCapabilities = result.capabilities || {};
+      const bridgeLabel = result.version ? ` · bridge ${result.version}` : '';
       if (modelSelect.value === 'auto') {
         document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'Prime / Relay auto'));
         return;
@@ -3311,7 +3312,7 @@ body {
       document.querySelectorAll('.session-prompt-input').forEach((input) => {
         if (!bridgeCapabilities.visibleTranscriptContext) setStatus(input, 'model bridge restart required');
         else if (selected && !selected.installed) setStatus(input, `${selected.cli} setup required`);
-        else if (selected) setStatus(input, `${selected.label} ready`);
+        else if (selected) setStatus(input, `${selected.label} ready${bridgeLabel}`);
       });
     } catch {
       bridgeOnline = false;
