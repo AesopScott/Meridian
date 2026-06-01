@@ -350,6 +350,27 @@ def make_default_map() -> FileMap:
             notes="Run before changing meridian_core/relay_executor.py or Relay execution behavior.",
         ),
         FileMapEntry(
+            path="tests/test_relay.py",
+            area=FileArea.RELAY_ROUTING,
+            purpose="Test suite for meridian_core/relay.py: covers deterministic routing plan, CouncilPlan integration, PromptBudgetPlan, and risk tier mapping.",
+            related_tests=[],
+            notes="Run before changing meridian_core/relay.py or Relay routing logic.",
+        ),
+        FileMapEntry(
+            path="tests/test_relay_packet.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Test suite for meridian_core/relay_packet.py: covers validated PromptPacket assembly, token budget enforcement, and source lineage.",
+            related_tests=[],
+            notes="Run before changing meridian_core/relay_packet.py or prompt packet construction.",
+        ),
+        FileMapEntry(
+            path="tests/test_relay_dispatch.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Test suite for meridian_core/relay_dispatch.py: covers immutable dispatch plan mapping and per-lane model work routing.",
+            related_tests=[],
+            notes="Run before changing meridian_core/relay_dispatch.py or dispatch planning logic.",
+        ),
+        FileMapEntry(
             path="meridian_core/model_adapter.py",
             area=FileArea.MODEL_HARNESS,
             purpose="Provider-neutral Model Adapter contract: payload-only callable boundary, deterministic fake adapter, and env-safe live adapter configuration wrapper.",
