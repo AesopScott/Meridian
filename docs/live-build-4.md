@@ -706,6 +706,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-12 14:10 -06:00 - Build 4 checked queue; status: idle; no executable Coordinator Override - Active Now section; Aegis-to-Relay handoff contract marked Completed/Ready for Codex Review (commit f64df7e6); Next Candidate Task = bind Aegis outputs into Relay decision-record proof awaits coordinator promotion; origin/main synced (8a939d35); cadence 3/3
 2026-06-12 14:15 -06:00 - Build 4 checked queue; status: idle; no executable Coordinator Override - Active Now section; Aegis-to-Relay handoff contract Ready for Codex Review; Next Candidate Task (bind Aegis gate outputs into Relay decision-record proof) awaits coordinator promotion; origin/main up to date; cadence 3/3 awaiting Codex review before proceeding
 2026-06-01 17:10 UTC - Build 4 checked queue; status: running; Active Task found = repair Aegis-to-Relay contract field-shape mismatches; pulled origin/main in worktree; beginning repairs
+2026-06-01 17:12 UTC - Build 4 checked queue; status: idle; no executable Coordinator Override - Active Now section; Aegis contract repair task completed (commit 4581c51c merged, queue updated in b0b84042); marked Ready for Codex Review; Next Candidate Task (bind Aegis gate outputs into Relay decision-record proof) awaits coordinator promotion; origin/main up to date
 ```
 
 ## Write/Completion Log
