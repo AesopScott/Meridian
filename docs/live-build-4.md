@@ -1,5 +1,4 @@
 # Live Build 4 Queue
-2026-06-01 ~03:57 UTC - Build 4 checked queue; status: idle; no executable Active Task; all blocks completed/archived; 10th consecutive idle poll — pausing; origin/main at f1c4559
 
 ## Queue Authority
 
@@ -408,6 +407,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-01 ~03:49 UTC - Build 4 checked queue; status: idle; no executable Active Task; all Coordinator Override blocks completed/archived; Next Candidate Task (DeepSeek direct-provider adapter implementation handoff) awaits coordinator promotion; origin/main at c97c139
 2026-06-01 ~03:51 UTC - Build 4 checked queue; status: idle; no executable Active Task; all Coordinator Override blocks completed/archived; Next Candidate Task (DeepSeek direct-provider adapter implementation handoff) awaits coordinator promotion; origin/main at 4df8866
 2026-06-01 ~03:53 UTC - Build 4 checked queue; status: idle; no executable Active Task; all Coordinator Override blocks completed/archived; Next Candidate Task (DeepSeek direct-provider adapter implementation handoff) awaits coordinator promotion; origin/main at 619bc1b
+2026-06-01 ~04:02 UTC - Build 4 checked queue; status: idle: no executable Active Task; all Coordinator Override blocks completed/archived; Next Candidate Task (DeepSeek direct-provider adapter implementation handoff) awaits coordinator promotion; prior commit 4f3be6d had misplaced read check (file header) — structurally repaired in this poll; origin/main at 4f3be6d
 ```
 
 ## Write/Completion Log
