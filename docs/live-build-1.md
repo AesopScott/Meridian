@@ -4,6 +4,30 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: bind Aegis route-gate evidence into Relay decision records after the Aegis runtime gate slice lands.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: `meridian_core/aegis.py`, `docs/relay-aegis-risk-proof-gates.md`, `docs/relay-completeness-audit.md`, and current Relay executor tests.
+
+Task: add provider-neutral Relay evidence fields or test coverage so a Relay decision record can carry Aegis gate outcomes without calling Aegis directly at runtime yet. Cover gate id, decision (`allow`, `demote`, `block`, `human_gate`), severity, evidence refs, waiver/approval record presence, and downstream explanation text. Keep this as a pure data/evidence slice. Do not call models, inspect accounts, touch UI, spawn CLIs, move branches, or edit Aegis implementation.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: implement Relay-side blocking behavior once Aegis gate evidence has been reviewed.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: harden Relay decision-record stop-condition coverage while Codex review runs.
@@ -708,6 +732,11 @@ Tests:
 - Build 1 idle and polling for next task assignment
 
 **Build 1 Read Check** — 2026-06-01 15:51 -06:00
+- Status: queue poll complete; no Active Now task
+- Next Candidate Task awaiting promotion from Prime/Codex
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-01 15:53 -06:00
 - Status: queue poll complete; no Active Now task
 - Next Candidate Task awaiting promotion from Prime/Codex
 - Build 1 idle and polling for next task assignment
