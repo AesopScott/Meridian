@@ -10,6 +10,25 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Completed / Ready For Codex Review
 
+Goal: audit FileMap coverage for any Relay/Session Lifecycle implementation files that land from Build 1 or Build 2.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: compared current `origin/main` against FileMap coverage for the Relay decision-record and Session Lifecycle routing work that landed after the previous FileMap pass. Verified `meridian_core/relay.py`, `meridian_core/relay_executor.py`, `tests/test_relay.py`, `tests/test_relay_executor.py`, `meridian_core/session_lifecycle.py`, and `tests/test_session_lifecycle.py` are discoverable with accurate V2 purpose text. Found and registered two missing entries (relay_executor.py and test_relay_executor.py).
+
+Completion:
+
+- Build 3 registered relay_executor.py and test_relay_executor.py entries in filemap.py, docs/FileMap.md, and tests/test_filemap.py.
+- Files changed: `meridian_core/filemap.py` (2 entries added), `docs/FileMap.md` (2 rows added after relay_dispatch.py), `tests/test_filemap.py` (2 paths added to _REQUIRED_PATHS).
+- Tests: `python -m pytest tests/test_filemap.py -q` — 46 passed.
+- Commit: `536b43aa`.
+- Push: successful to origin/main (commit b81e02e1).
+- Cadence: 2/3 since Round B5.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
 Goal: register the new Relay audit and UI integration planning artifacts in FileMap.
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
@@ -29,21 +48,19 @@ Ready for Codex Review.
 
 ## Active Task
 
-Goal: audit FileMap coverage for any Relay/Session Lifecycle implementation files that land from Build 1 or Build 2.
+Goal: register any new Aegis risk/proof runtime files or tests after Build 4 lands its runtime slice.
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
 
-Task: compare current `origin/main` against FileMap coverage for the Relay decision-record and Session Lifecycle routing work that landed after the previous FileMap pass. Verify `meridian_core/relay.py`, `meridian_core/relay_executor.py`, `tests/test_relay.py`, `tests/test_relay_executor.py`, `meridian_core/session_lifecycle.py`, and `tests/test_session_lifecycle.py` are still discoverable with accurate V2 purpose text. Add missing entries or required-path coverage only for files that exist. Do not edit Relay, Session Lifecycle, UI, review queues, or source design docs.
+Task: inspect current Aegis/proof runtime state and register any new files that exist and are not already discoverable in FileMap. Do not create Aegis/proof files; only register completed runtime code and tests after they exist on origin/main.
 
-Tests:
-
-- `python -m pytest tests/test_filemap.py -q`
+Tests: `python -m pytest tests/test_filemap.py -q`
 
 Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
 
 ## Next Candidate Task
 
-Goal: register any new Aegis risk/proof runtime files or tests after Build 4 lands its runtime slice.
+Goal: register any new Session Lifecycle or Bifrost harness runtime files or tests after subsequent build phases.
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
 
@@ -836,6 +853,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-12 07:10 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; FileMap gap noted: docs/ui-integration-checklist.md landed (Build 1) but not registered in meridian_core/filemap.py; awaiting assignment
 2026-06-12 07:15 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
 2026-06-12 07:20 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-12 07:25 UTC - Build 3 checked queue; status: active task found (FileMap audit for Relay/Session Lifecycle files); executing registration for relay_executor.py and test_relay_executor.py
 ```
 
 ## Write/Completion Log
@@ -878,6 +896,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-06-11 03:15 UTC - Build 3 Codex review correction (Iteration 2): commit 1635f80; re-registered Session Lifecycle implementation checklist after discovering initial repair was overly aggressive; file exists and must be registered; files changed: meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; push successful; cadence reset to 0/3 since Round B5; ready for next FileMap assignment
 2026-06-11 03:30 UTC - Build 3 completed V2 FileMap audit â€” verified all previously pending files now exist and are registered; updated docs/filemap-v2-v3-discoverability-audit.md to reflect current state; commit 92ff6f4; files changed: docs/filemap-v2-v3-discoverability-audit.md; tests 46/46 filemap passing; all V2 built-and-review-cleared artifacts now discoverable by Prime; cadence 1/3 since Round B5; Ready for Codex Review
 2026-06-11 03:35 UTC - Build 3 queue poll â€” appended Read Checks entry noting idle status and awaiting new task assignment; no code changes; cadence 1/3 since Round B5
+2026-06-12 07:30 UTC - Build 3 completed FileMap audit for Relay/Session Lifecycle implementation files; registered meridian_core/relay_executor.py and tests/test_relay_executor.py; commit 536b43aa; files changed: meridian_core/filemap.py (2 entries), docs/FileMap.md (2 rows after relay_dispatch), tests/test_filemap.py (2 paths to _REQUIRED_PATHS); tests: python -m pytest tests/test_filemap.py -q â€” 46 passed; push: b81e02e1; cadence 2/3 since Round B5; Ready for Codex Review
 ```
 
 ## Cross-Check Activity
