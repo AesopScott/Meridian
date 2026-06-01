@@ -1,5 +1,35 @@
 # Live Build 1 Queue
 
+## Codex Review Repair - Active Now
+
+2026-05-31 22:09 -06:00 - Codex Reviews A routed a MEDIUM repair from the Build 1 runtime cadence review.
+
+Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
+
+Allowed files only: `meridian_core/cockpit_state.py`, `tests/test_cockpit_state.py`, `docs/live-build-1.md`.
+
+Finding:
+
+- `PrimeCockpitSnapshot` is a frozen dataclass and documents an immutable snapshot, but direct construction accepts mutable lists for `lanes` and `progress_events`. Because those list references are stored unchanged, external mutation after construction changes the snapshot contents.
+
+Required fix:
+
+- Normalize `PrimeCockpitSnapshot.lanes` and `PrimeCockpitSnapshot.progress_events` to tuples during construction, or otherwise enforce immutable storage.
+- Add regression coverage showing list inputs are converted or protected so mutating the source lists after construction cannot change the snapshot.
+- Preserve the pure data-model boundary: no filesystem, CLI, UI, network, or model calls.
+- Do not broaden into Bifrost rendering, package exports, or FileMap.
+
+Tests:
+
+- `python -m pytest tests/test_cockpit_state.py -q`
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+
+Completion:
+
+- Commit only the allowed repair files.
+- Push to `origin/main`.
+- Mark the repair Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
 ## Codex Review Repair Completed / Verified
 
 2026-05-31 14:45 -06:00 - Codex Reviews A routed MEDIUM repairs from the V2 runtime/code review sweep.
@@ -653,6 +683,7 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 1 completed <task>; commit <hash>; tests <result>
+2026-05-31 22:09 -06:00 - Codex Reviews A routed cockpit-state immutability repair; files changed: docs/live-build-1.md; tests run by Reviews A before routing: model_adapter+relay_executor 77 passed, cockpit_state 25 passed, cognition_policy+aegis+relay_executor 157 passed; Reviews A commit this commit; push pending; Obsidian status pending.
 2026-05-31 12:58 -06:00 - Codex Reviews A routed Round 4 repair task for `restart_resteer.py`; files changed: docs/live-build-1.md; tests run by Reviews A before routing: filemap/prompt_metrics 94 passed, restart_resteer/bifrost targeted 124 passed, npm proof:cockpit 108 passed + 0 vulnerabilities; commit pending from Reviews A; push pending; Obsidian status: repair note already present at `Meridian_Build/2026-05-31 Restart Resteer Repair Ready.md`.
 2026-05-30 ~22:30 CDT - Build 1 completed Prompt Budget package API + FileMap; commit d18d651; tests 604 passed
 2026-05-30 10:33 -06:00 - Codex assigned Relay Prompt Budget integration into RelayRoute; commit pending; tests pending
