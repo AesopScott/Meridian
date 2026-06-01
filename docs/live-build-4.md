@@ -302,11 +302,23 @@ Ready for Codex Review:
 - New test classes: 9 test classes with 93 tests total (allow/demote/block paths)
 - Integration: gates are standalone pure functions; ready for Relay/Aegis runtime binding
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: bind Aegis gate outputs into Relay decision-record proof after the runtime tests clear review.
 
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
 Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Required sources: `docs/aegis-relay-summary-handoff-contract.md`, `meridian_core/relay.py`, `meridian_core/relay_executor.py`, and current Aegis gate summary helpers.
+
+Task: add the focused Aegis-side proof needed for Relay decision-record binding. Verify Aegis gate outputs expose the stable gate decision, severity, evidence requirement, waiver/approval state, and downstream action fields promised by the handoff contract. Keep the slice pure and deterministic. Do not edit Relay runtime, Relay tests, Bifrost, FileMap, UI, process/model/account code, branches, or Polaris.
+
+Proof command:
+
+- `python -m pytest tests/test_aegis.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review with commit hash and proof count, and leave a concrete Next Candidate.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
