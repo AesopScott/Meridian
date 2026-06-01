@@ -28,7 +28,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SP1 | Prime panel | User types directly to Prime/orchestrator. | partial | Send prompt from left panel; response appears below prompt in left panel. |
-| SP2 | User panel | User interacts with the selected live session from the Sessions dropdown. | partial | Select session; panel title changes to session name and prompts route there. |
+| SP2 | Right interaction panel | User interacts with the selected live session, settings surface, or harness surface. | partial | Active surface changes panel title and prompt routing target. |
 | SP3 | Prime prompt input | Two-line scrollable prompt input. Enter sends; Shift+Enter newline. | wired | Type three lines; Enter sends and clears. |
 | SP4 | User prompt input | Same prompt behavior as Prime panel. | wired | Type three lines; Enter sends and clears. |
 | SP5 | Prime response window | Displays Prime/model output below Prime prompt. | partial | Prompt text remains yellow; response text appears below it. |
@@ -58,7 +58,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 |---|---|---|---|---|
 | SEL1 | Model selector | Manual model selection. Defaults to Codex. Auto stays disabled until Prime/Relay logic exists. | partial | Served page has Codex selected and Auto disabled. |
 | SEL2 | Projects selector | Selects active project context for Prime and project-scoped UI state. | planned | Track `PRJ-*` subitems before wiring the selector. |
-| SEL3 | User Sessions selector | Selects from all open live sessions, grouped alphabetically by project. | planned | Dropdown shows project groups, including hidden and test-waiting sessions, and selection routes User prompt immediately. |
+| SEL3 | User Sessions selector | Selects from all open live sessions when the right panel is in User Session mode. | planned | Dropdown shows project groups, including hidden and test-waiting sessions, and selection routes User prompt immediately. |
 
 ### Projects Selector Subitems
 
@@ -81,7 +81,7 @@ The Prime panel's Projects dropdown selects the active project context for Prime
 
 ### User Sessions Selector Subitems
 
-The User panel needs a Sessions dropdown that mirrors the Prime panel's Projects dropdown. Prime selects project context; User selects the specific live session to interact with.
+The right panel needs a Sessions dropdown when it is in User Session mode. Prime selects project context; User Session mode selects the specific live session to interact with. Other right-panel modes, such as Settings or a harness surface, replace this session target with their own scoped target.
 
 | ID | User Sessions Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
@@ -97,13 +97,14 @@ The User panel needs a Sessions dropdown that mirrors the Prime panel's Projects
 | USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | planned | Reload/refresh behavior is explicit and does not silently route to stale session. |
 | USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | planned | Status is visible in selector label or row. |
 | USE12 | Stale target guard | If selected session closes or becomes unavailable, User prompt is blocked with a readable target warning. | planned | Sending to closed session shows setup/target error instead of disappearing. |
+| USE13 | User mode restore | Returning from Settings/Harness mode restores prior selected live session if still available. | planned | Toggle away and back; previous session target returns or shows stale warning. |
 
 ### Spark Ring Icons
 
 | ID | Icon / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| SK1 | Spark center image | Visual voice/core of Prime; toggles session panel visibility through nearby core toggle. | partial | Center image remains visible after refresh. |
-| SK2 | Toggle session panels | Opens/closes or reveals session panel mode without changing session data. | partial | Click toggle; panels visibility changes predictably. |
+| SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | partial | Track `SPK-*` subitems before changing Spark focus behavior. |
+| SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | partial | Track `SUR-*` subitems before changing panel toggle behavior. |
 | SK3 | Settings | Opens settings surface for UI/model/project/session options. | planned | Track `SET-*` subitems before wiring the surface. |
 | SK4 | Filter | Controls how much data is included in a session prompt/context stream. | planned | Track `FIL-*` subitems before wiring the surface. |
 | SK5 | Models | Opens model selector/settings surface. | planned | Until wired, model selection remains in explicit selector. |
@@ -116,6 +117,44 @@ The User panel needs a Sessions dropdown that mirrors the Prime panel's Projects
 | SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | partial | Track `RLD-*` subitems before changing reload behavior. |
 | SK13 | Routines | Opens routine/automation surface. | planned | Until wired, no fake routine status. |
 | SK14 | Balance | Opens balance/provider/routing view. | planned | Until wired, it must not make routing claims. |
+
+### Spark Surface Subitems
+
+Spark is Prime's voice/core and the visual focus point for moving between right-panel surfaces. It may change what the user is interacting with, but it must not lose the previous target state.
+
+| ID | Spark Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| SPK1 | Prime voice/core identity | Keeps Spark visually tied to Prime, speech, and system focus. | partial | Center image remains visible and labeled as Spark/Prime voice. |
+| SPK2 | Surface focus entry | Acts as the visual entry point for changing right-panel surface focus. | planned | Interaction can open/switch surfaces without layout drift. |
+| SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | planned | State is visible and not faked. |
+| SPK4 | Surface mode indication | Makes it clear whether the right panel is User Session, Settings, or a harness. | planned | Active surface label/title changes with mode. |
+| SPK5 | Preserve prior session target | Switching away from User Session mode preserves the selected live session target. | planned | Return to User Session restores previous target if live. |
+| SPK6 | Stale target warning | If prior session target closes while away, returning shows a readable warning. | planned | Stale target is not silently reused. |
+| SPK7 | No implicit reset | Spark surface interaction does not clear prompts/transcripts. | planned | Toggle modes and return; prior panel state remains unless reset was confirmed. |
+| SPK8 | No implicit archive/close | Spark surface interaction does not archive, close, stop, or delete sessions. | planned | Session/archive counts unchanged after surface switches. |
+| SPK9 | Prompt target visibility | Active prompt target is visible before the user sends. | planned | Prompt surface shows selected session/settings/harness target. |
+| SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | planned | Surface switch is visually clear, not disorienting. |
+| SPK11 | Keyboard accessibility | Surface switching can be done without mouse-only interaction. | planned | Keyboard focus reaches surface controls. |
+| SPK12 | Recovery on bad surface | If a surface cannot load, return to prior usable surface with error. | planned | Failed surface load does not blank the right panel. |
+
+### Right Panel Surface Toggle Subitems
+
+The right panel is not always a User session. It can become Settings or a harness-specific surface, and the prompt routes to the active surface target.
+
+| ID | Surface Toggle Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| SUR1 | User Session mode | Right panel targets the selected live session from the Sessions dropdown. | planned | Title and routing target match selected session. |
+| SUR2 | Settings mode | Right panel targets Settings and shows settings-scoped controls/prompt if applicable. | planned | Settings title/target replaces User session target. |
+| SUR3 | Harness mode | Right panel targets selected harness surface. | planned | Harness title/target replaces User session target. |
+| SUR4 | Immediate routing switch | Switching surface immediately changes where right-panel prompts route. | planned | Prompt sent after switch goes to active surface target. |
+| SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | planned | Return to prior surface restores previous target. |
+| SUR6 | Surface-specific prompt | Prompt placeholder/target metadata reflects active surface. | planned | User can tell who/what they are talking to before sending. |
+| SUR7 | Surface state preservation | Unsaved drafts/transcripts are preserved per surface unless reset/close confirms otherwise. | planned | Switch away/back preserves surface draft state. |
+| SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | planned | Close does not destroy previous session target. |
+| SUR9 | Harness scoped commands | Harness prompts only route to harnesses that can receive scoped commands. | planned | Unsupported harness surface blocks prompt with readable warning. |
+| SUR10 | Settings scoped commands | Settings prompt/actions only mutate explicit settings items. | planned | Settings interaction does not send to live session accidentally. |
+| SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | planned | Prompt does not disappear into a dead target. |
+| SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | planned | Visual regression check passes after switches. |
 
 ### Reset Surface Subitems
 
