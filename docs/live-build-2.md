@@ -81,11 +81,15 @@ Completion: commit only this Bifrost integration contract slice, push, update Ob
 
 ## Next Candidate Task
 
-Goal: integrate Prime next action into the Bifrost cockpit view model after Codex review clears this domain object.
+Goal: implement the Session Lifecycle domain objects after the checklist and review clear.
 
-Allowed files: to be assigned by Prime/Codex after review.
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
 
-Task: expose Prime next action in the cockpit snapshot without letting Bifrost own decision logic.
+Task: create the first runtime slice for `SessionLifecycleState` and `SessionCommandPlan` from `docs/session-lifecycle-v2-contract.md` and `docs/session-lifecycle-implementation-checklist.md`. Model spawn, watch, poll_queue, steer, stop_request, transfer, archive, restart, resteer, recover_from_limit, and request_human_gate as typed actions without executing live process control. Include legality/executability helpers, proof refs, queue routing, unique-worktree and branch-permission constraints, and human-gate behavior.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
 
 ## Superseded Task
 

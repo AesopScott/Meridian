@@ -32,13 +32,22 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write a Prime workflow/sub-agent usage checklist for harness offloading.
 
 Allowed files only: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
 
 Task: convert the workflow/sub-agent architecture note into an operational checklist Prime can use when deciding whether Echo, Atlas, Aegis, Relay, Bifrost, or Session Lifecycle work should run in a separate workflow context.
+
+Completion:
+
+- Coordinator completed this docs-only checklist on 2026-05-31.
+- Files changed: `docs/workflow-subagent-usage-checklist.md`, `docs/live-build-4.md`.
+- Tests: not required (docs-only).
+- Commit: `ac9cef8`.
+
+Ready for Codex Review.
 
 ## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 08:55 -06:00)~~
 
@@ -57,13 +66,42 @@ Task: convert the workflow/sub-agent architecture note into an operational check
 - Files: `docs/workflows-subagent-harness-architecture.md`
 - Tests: not required (docs-only)
 
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: write the DeepSeek validation benchmark plan.
+
+Allowed files only: `docs/deepseek-validation-benchmark-plan.md`, `docs/live-build-4.md`.
+
+Task: define the benchmark plan Meridian will use before DeepSeek can move beyond candidate provider status. Cover direct API proof, Q-mode prompt-payload flatness, small coding tasks, docs tasks, failure modes, required Codex review proof, demotion triggers, and why DeepSeek cannot clear reviews, move branches, or receive autonomous coding authority until the gate passes.
+
+Completion:
+
+- Coordinator completed this docs-only benchmark plan on 2026-05-31.
+- Files changed: `docs/deepseek-validation-benchmark-plan.md`, `docs/live-build-4.md`.
+- Tests: not required (docs-only).
+- Commit: `a9695d1`.
+
+Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
+Goal: write the Model Harness V2 metadata contract.
+
+Allowed files only: `docs/model-harness-v2-contract.md`, `docs/live-build-4.md`.
+
+Task: create the docs contract for provider capability metadata and prompt-drag telemetry fields that Build 1's `meridian_core/model_adapter.py` runtime slice should implement. Cover Claude, OpenAI, DeepSeek direct API, trust state, context/prompt budgets, route ownership, direct-vs-aggregator evidence, prompt payload snapshot references, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding.
+
+Completion: commit only this docs slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
+
 ## Next Candidate Task
 
-Goal: write the Prime restart/resteer logic contract.
+Goal: write the DeepSeek direct-provider adapter implementation handoff.
 
-Allowed files only: `docs/prime-restart-resteer-contract.md`, `docs/live-build-4.md`.
+Allowed files only: `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`.
 
-Task: define how Prime detects stale sessions, bad queue routing, shared-worktree violations, vendor/model limits, failed pushes, and popup/launch errors, then restarts or resteers lanes without waiting for Scott.
+Task: after `docs/model-harness-v2-contract.md` lands and clears review, write a bounded implementation handoff for adding direct DeepSeek provider metadata/routing through Relay and Aegis. Cover environment variable names, direct-vs-aggregator proof, candidate trust state, prompt payload snapshot evidence, Q-mode flatness proof, blocked authorities, tests expected, and which runtime files should be touched by the later implementation lane.
+
+Tests: not required for this docs-only handoff.
 
 This file is the standing assignment queue for Build 4.
 

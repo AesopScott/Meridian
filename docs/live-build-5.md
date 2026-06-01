@@ -30,7 +30,7 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: write a Bifrost voice-control command palette contract.
 
@@ -40,7 +40,77 @@ Task: define the voice-first commands for opening harness panels, switching proj
 
 Tests: none required, docs-only.
 
-Completion: commit only this Bifrost voice command contract slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion:
+
+- Coordinator completed this docs-only Bifrost voice command contract on 2026-05-31.
+- Files changed: `docs/bifrost-voice-command-contract.md`, `docs/live-build-5.md`.
+- Tests: not required (docs-only).
+- Commit: `d04b441`.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
+Goal: write the Bifrost provider balance and prompt payload visibility surface contract.
+
+Allowed files only: `docs/bifrost-balance-payload-surface-contract.md`, `docs/live-build-5.md`.
+
+Task: define how Bifrost should expose the Polaris-style Balance button and per-prompt payload meter for Claude, OpenAI, DeepSeek, and future adapters. Cover provider health, token/cost pressure, prompt-size label, growth/flat Q-mode state, warning/degraded states, and the rule that Bifrost displays structured Relay/Model Harness telemetry but does not make routing decisions.
+
+Completion:
+
+- Coordinator completed this docs-only Bifrost balance/payload surface contract on 2026-05-31.
+- Files changed: `docs/bifrost-balance-payload-surface-contract.md`, `docs/live-build-5.md`.
+- Tests: not required (docs-only).
+- Commit: `70d3af4`.
+
+Ready for Codex Review.
+
+## Active Task
+
+Goal: implement the Bifrost V2 browser-first HUD shell for the latest UI direction.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: move the current Bifrost preview toward the latest Scott-approved HUD-grid direction, using `docs/bifrost-v2-cockpit-extensions.md` as the source of truth.
+
+Requirements:
+
+- Keep the cockpit browser-first HTML/CSS; do not add Electron-only dependencies.
+- Make the central Prime command bay the dominant surface. The prompt/input area must be large enough for real conversation, not a small widget.
+- Keep the center presence core quiet: only `PRIMED` plus a pulsing orb/state. Do not put provider balance, Claude/OpenAI/DeepSeek, prompt payload, queue, proof, Prime, B1-B5, ABH, tier, version, or numbered HUD labels inside that core.
+- Remove permanent top navigation noise. Panels should be summonable through Prime/voice or scoped controls, not a top row of buttons.
+- Make the left rail project-first: show project names first; when a project is selected, reveal that project's sessions and let unrelated lane contents disappear from that rail.
+- Bottom harness/system controls should open focused harness windows with their own scoped prompt to interact with Meridian about that harness.
+- Keep Voice I/O visibly first-class: listening/thinking/speaking/muted state, text prompt, microphone affordance, spoken-output affordance.
+- Use sample/static view-model data only; Bifrost displays state and does not make Prime/Relay/Aegis routing decisions.
+- Add or update focused render tests proving the old noisy labels and top-nav text are absent, the large prompt is present, project drilldown/session state renders, harness scoped prompts render, and voice state renders.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
+## Next Candidate Task
+
+Goal: implement the Bifrost V2 voice I/O surface state.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: after the HUD shell lands and clears immediate review/repair blockers, add the first visible Voice I/O surface state from `docs/bifrost-voice-command-contract.md`.
+
+Requirements:
+
+- Add deterministic view-model/sample-data fields for listening, dictating, thinking, speaking, muted, and blocked states.
+- Render microphone input, spoken-output, mute/stop controls, and a concise state label without letting the UI own orchestration decisions.
+- Keep voice action controls as inert/render-only affordances for this slice; no live microphone or TTS plumbing yet.
+- Preserve the large central prompt and quiet `PRIMED` core from the active HUD shell.
+- Add tests proving each voice state can render and old noisy provider/build labels remain absent.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
 
 ## ~~Codex Repair - Active Now~~ (COMPLETED 2026-05-31 13:54 -06:00)
 
