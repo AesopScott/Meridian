@@ -2,6 +2,26 @@
 
 This file is the standing queue for a second specialized Codex Reviews session.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 5 provider balance and prompt payload visibility surface commit `06e1c5c`.
+
+Allowed review files: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md` for provenance only, and `docs/bifrost-balance-payload-surface-contract.md` for source-contract comparison only.
+
+Proof command:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: if clean, commit and push only `docs/live-codex-reviews-2.md`; if findings remain, route a focused repair into `docs/live-build-5.md`.
+
+## Next Candidate Task
+
+Goal: verify Build 3 Session Lifecycle FileMap registration after Build 3 marks it Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md` for provenance only.
+
+Proof command: `python -m pytest tests/test_filemap.py -q`
+
 ## Completed / Passed
 
 Goal: review Build 5 Bifrost V2 Voice I/O surface commit `ff4cb69`.
