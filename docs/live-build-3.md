@@ -553,6 +553,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-06-11 02:30 UTC - Build 3 completed FileMap repair (remove Session Lifecycle checklist registration pending file arrival); commit ba83a4c; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; tests 46/46 filemap passing; Ready for Codex Review; cadence 3/3 since Round B5
 2026-06-11 02:50 UTC - Build 3 repair Active Task superseded: Session Lifecycle checklist artifact (docs/session-lifecycle-implementation-checklist.md) arrived in commit 7d20f47 (Build 2) along with runtime module (meridian_core/session_lifecycle.py); file exists on disk
 2026-06-11 03:15 UTC - Build 3 Codex review correction (Iteration 2): commit 1635f80; re-registered Session Lifecycle implementation checklist after discovering initial repair was overly aggressive; file exists and must be registered; files changed: meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; push successful; cadence reset to 0/3 since Round B5; ready for next FileMap assignment
+2026-06-11 03:30 UTC - Build 3 completed V2 FileMap audit — verified all previously pending files now exist and are registered; updated docs/filemap-v2-v3-discoverability-audit.md to reflect current state; commit 92ff6f4; files changed: docs/filemap-v2-v3-discoverability-audit.md; tests 46/46 filemap passing; all V2 built-and-review-cleared artifacts now discoverable by Prime; cadence 1/3 since Round B5; Ready for Codex Review
 ```
 
 ## Cross-Check Activity
