@@ -2388,3 +2388,36 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 17:17 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no executable Reviews B Active Task is currently promoted. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 17:19 -06:00 — pulled latest `origin/main` (`Already up to date`) and read `docs/live-codex-reviews-2.md`, `docs/live-build-3.md`, and `docs/live-build-4.md`. Active Reviews B task is the Build 3 duplicate `docs/ui-integration-checklist.md` FileMap mirror repair review; executed against current main.
+
+## Completed / Passed
+
+Goal: review Build 3 duplicate `docs/ui-integration-checklist.md` FileMap mirror repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Review result:
+
+- Passed. No repair findings.
+- `docs/FileMap.md` now has one mirror row for `docs/ui-integration-checklist.md`.
+- The remaining UI checklist row area/purpose matches the canonical runtime FileMap entry: `Build process`, active UI integration gate/checklist purpose.
+- `_REQUIRED_PATHS` still covers `docs/ui-integration-checklist.md` and `docs/relay-bifrost-proof-payload-contract.md`.
+- `docs/relay-bifrost-proof-payload-contract.md` is present in runtime FileMap, `docs/FileMap.md`, and required-path coverage.
+- Scope check: no UI/runtime files, Relay, Aegis, Session Lifecycle, process/model/account code, branch movement, or Polaris dependency changes were made by this review.
+
+Proof:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+
+Next Candidate:
+
+- Review Build 4 Relay harness model-selection logic depth.
+
+## Write / Completion Log
+
+- 2026-06-01 17:19 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance/disposition only. Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed). Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
