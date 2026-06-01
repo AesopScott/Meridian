@@ -559,6 +559,12 @@ Tests:
 - Notable pull: relay-heartbeat-model-routing-logic.md (new, 221 lines), ui-integration-checklist.md expanded (+272 lines), FileMap.md updated
 - Build 1 idle and polling for next task assignment
 
+**Build 1 Read Check** — 2026-06-01 17:13 -05:00
+- Status: queue poll complete; no Active Now task
+- Notable pull: relay-completeness-audit.md (new, 202 lines), FileMap.md updated, read checks from builds 2/3/5
+- PrimeCockpitSnapshot task verified already complete (29/29 tests pass); no new implementation required
+- Build 1 idle and polling for next task assignment
+
 Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
 
 Allowed files only: `meridian_core/cockpit_state.py`, `tests/test_cockpit_state.py`, `docs/live-build-1.md`.
