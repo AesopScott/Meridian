@@ -403,6 +403,12 @@ Tests:
 - Next Candidate Task awaiting promotion from Prime/Codex
 - Build 1 idle and polling for next task assignment
 
+**Build 1 Read Check** — 2026-06-01 10:45 -05:00
+- Status: pulled origin/main (build-2, build-3, build-5, live-codex-reviews.md updates); no Active Now task
+- Relay metadata binding and snapshot hardening ready for Codex Review
+- Next Candidate Task awaiting promotion from Prime/Codex
+- Build 1 idle and polling for next task assignment
+
 Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
 
 Allowed files only: `meridian_core/cockpit_state.py`, `tests/test_cockpit_state.py`, `docs/live-build-1.md`.
