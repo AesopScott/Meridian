@@ -1017,6 +1017,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-06 12:44 -06:00 - Build 3 checked queue; status: idle; no new Active Task; Active Task Build 5 verification complete; cadence 1/3 since Round B5; awaiting next assignment
 2026-06-06 17:31 -06:00 - Build 3 checked queue; status: idle; no new Active Task; Active Task Build 5 verification complete; cadence 1/3 since Round B5; awaiting next assignment
 2026-06-06 22:18 -06:00 - Build 3 checked queue; status: idle; no new Active Task; Active Task Build 5 verification complete; cadence 1/3 since Round B5; awaiting next assignment
+2026-06-01 16:00 -06:00 - Build 3 checked queue; status: active task found (Codex Reviews B Repair — FileMap duplicate row); starting work
 ```
 
 ## Write/Completion Log
@@ -1083,6 +1084,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 cross-check: none/finding/fix; details: <short not
 2026-06-01 15:53 -06:00 - Build 3 completed Aegis FileMap verification and registration (meridian_core/aegis.py, tests/test_aegis.py); commit cf6e8c42; tests 46/46 filemap; Obsidian update pending; files: meridian_core/filemap.py, docs/FileMap.md, tests/test_filemap.py; cadence 3/3 since Round B5; Ready for Codex Review
 2026-06-01 15:56 -06:00 - Build 3 Codex review (model: claude-sonnet-4-6) complete for commit cf6e8c42 (Aegis FileMap registration); verdict: APPROVE; findings: none actionable (whitespace-only note on blank line, auto-cleaned by formatter); cadence 3/3 verified; no repair needed
 2026-06-01 16:02 -06:00 - Build 3 completed Build 5 right-panel rendering FileMap verification (bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/bifrost-right-panel-mode-contract.md); all files already registered in filemap.py, docs/FileMap.md, tests/test_filemap.py; tests 46/46 filemap; no changes needed; cadence 1/3 since Round B5; Ready for Codex Review
+2026-06-01 16:15 -06:00 - Build 3 completed Codex Reviews B Repair (FileMap duplicate row removal); removed duplicate docs/ui-integration-checklist.md row (Bifrost area) from docs/FileMap.md; commit c063837c; tests 46 passed; push successful; cadence 1/3 since last review; Ready for Codex Review
 ```
 
 ## Codex Review Cadence
