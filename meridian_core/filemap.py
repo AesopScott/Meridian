@@ -357,6 +357,13 @@ def make_default_map() -> FileMap:
             notes="Use before promoting DeepSeek beyond candidate state or routing DeepSeek build-lane queue work.",
         ),
         FileMapEntry(
+            path="docs/model-harness-v2-contract.md",
+            area=FileArea.MODEL_HARNESS,
+            purpose="Model harness V2 contract: provider capability metadata, prompt-drag telemetry, trust state, route ownership, direct-vs-aggregator evidence, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding.",
+            related_tests=[],
+            notes="V2 entry-point. Read before implementing model capability metadata, trust routing, or provider telemetry integration.",
+        ),
+        FileMapEntry(
             path="meridian_core/restart_resteer.py",
             area=FileArea.DOMAIN_MODEL,
             purpose="Prime restart/resteer domain objects and evaluator: detects empty queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates.",
