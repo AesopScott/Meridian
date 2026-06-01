@@ -1235,3 +1235,236 @@ summary {
     flex-wrap: wrap;
   }
 }
+
+/* ── Right-Panel Modes ────────────────────────────────────────────────────── */
+
+.right-panel {
+  display: none;
+  background: linear-gradient(135deg, #1a1e2e 0%, #16192b 100%);
+  border-left: 1px solid #405a8a;
+  padding: 16px;
+  min-width: 300px;
+  max-width: 400px;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #e0e6ed;
+}
+
+.right-panel-user-session,
+.right-panel-settings,
+.right-panel-harness {
+  display: block;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.right-panel-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #405a8a;
+}
+
+.right-panel-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e6ed;
+}
+
+/* ── User Session Mode ────────────────────────────────────────────────────── */
+
+.right-panel-user-session {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sessions-dropdown select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  background-color: #2d3748;
+  border: 1px solid #405a8a;
+  border-radius: 4px;
+  color: #e0e6ed;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sessions-dropdown select:hover,
+.sessions-dropdown select:focus {
+  background-color: #3d4758;
+  border-color: #5a7abc;
+  outline: none;
+}
+
+.prompt-response-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 200px;
+}
+
+.prompt-input {
+  padding: 10px;
+  border: 1px solid #405a8a;
+  border-radius: 4px;
+  background-color: #2d3748;
+  color: #e0e6ed;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.prompt-input:focus {
+  outline: none;
+  border-color: #5a7abc;
+  background-color: #3d4758;
+}
+
+.response-output {
+  flex: 1;
+  padding: 10px;
+  background-color: #1a1e2e;
+  border: 1px solid #405a8a;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-y: auto;
+  min-height: 80px;
+  color: #c0c6cd;
+}
+
+/* ── Configuration Mode ────────────────────────────────────────────────────── */
+
+.right-panel-settings {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-item label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #a0a6ad;
+}
+
+.settings-item input {
+  padding: 8px;
+  border: 1px solid #405a8a;
+  border-radius: 4px;
+  background-color: #2d3748;
+  color: #e0e6ed;
+  font-size: 13px;
+}
+
+.settings-item input:focus {
+  outline: none;
+  border-color: #5a7abc;
+  background-color: #3d4758;
+}
+
+.settings-item input[type="toggle"] {
+  width: auto;
+  cursor: pointer;
+}
+
+/* ── Harness Mode ─────────────────────────────────────────────────────────── */
+
+.right-panel-harness {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.harness-search {
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #405a8a;
+  border-radius: 4px;
+  background-color: #2d3748;
+  color: #e0e6ed;
+  font-size: 13px;
+}
+
+.harness-search:focus {
+  outline: none;
+  border-color: #5a7abc;
+  background-color: #3d4758;
+}
+
+.harness-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.harness-item {
+  padding: 10px;
+  background-color: #2d3748;
+  border: 1px solid #405a8a;
+  border-radius: 4px;
+  border-left: 3px solid #5a7abc;
+}
+
+.harness-item-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.harness-item-name {
+  font-weight: 500;
+  color: #e0e6ed;
+  font-size: 13px;
+}
+
+.harness-item-type {
+  font-size: 11px;
+  color: #a0a6ad;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background-color: #1a1e2e;
+  border-radius: 3px;
+}
+
+.harness-item-description {
+  font-size: 12px;
+  color: #a0a6ad;
+  line-height: 1.4;
+}
+
+.harness-item-gate {
+  border-left-color: #4a9a5f;
+}
+
+.harness-item-finding {
+  border-left-color: #d97a0f;
+}
+
+.harness-item-waiver {
+  border-left-color: #7a5f9a;
+}

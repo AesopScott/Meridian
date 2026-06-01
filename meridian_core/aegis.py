@@ -622,6 +622,7 @@ def gate_aggregator_authority(
     trust_mode: str,
     risk_tier: int,
     proof_strength: str = "WEAK",
+    selected_model_evidence: str | None = None,
 ) -> GateResult:
     """
     Gate 7: Aggregator Authority Gate.
@@ -629,7 +630,8 @@ def gate_aggregator_authority(
     Trigger: trust_mode==AGGREGATOR and risk_tier >= 3.
     Logic:
     - If Tier >= 3 and aggregator, block.
-    - If Tier 0-2 and aggregator and proof_strength=WEAK, allow with warning.
+    - If Tier 2 and aggregator, require explicit selected model/vendor evidence.
+    - If Tier 0-1 and aggregator and proof_strength=WEAK, allow with warning.
     - If proof_strength=NONE, block.
     """
     if trust_mode != "AGGREGATOR":
@@ -653,10 +655,25 @@ def gate_aggregator_authority(
             reason="aggregator route with no proof not allowed",
         )
 
+    # Tier 2 aggregator routes require explicit selected model/vendor evidence
+    if risk_tier == 2:
+        if not selected_model_evidence or selected_model_evidence.strip() == "":
+            return GateResult(
+                gate_name="aggregator_authority",
+                decision=GateDecision.BLOCK,
+                reason="Tier 2: aggregator route requires explicit selected model/vendor evidence",
+            )
+        return GateResult(
+            gate_name="aggregator_authority",
+            decision=GateDecision.ALLOW,
+            reason=f"Tier 2: aggregator allowed with explicit model evidence ({selected_model_evidence!r})",
+        )
+
+    # Tier 0-1 aggregator routes
     return GateResult(
         gate_name="aggregator_authority",
         decision=GateDecision.ALLOW,
-        reason=f"Tier {risk_tier}: aggregator allowed for Tier 0-2",
+        reason=f"Tier {risk_tier}: aggregator allowed for Tier 0-1",
     )
 
 
@@ -746,21 +763,21 @@ def gate_cost_exposure(
             reason=f"cost_posture={cost_posture!r}",
         )
 
-    if cost_justified:
-        return GateResult(
-            gate_name="cost_exposure",
-            decision=GateDecision.ALLOW,
-            reason="premium cost justified",
-        )
-
     if risk_tier <= 1:
+        # Tier 0-1: premium cost allowed if cost_justified or by default
+        if cost_justified:
+            return GateResult(
+                gate_name="cost_exposure",
+                decision=GateDecision.ALLOW,
+                reason="premium cost justified",
+            )
         return GateResult(
             gate_name="cost_exposure",
             decision=GateDecision.ALLOW,
             reason=f"Tier {risk_tier}: premium cost allowed with warning",
         )
 
-    # Tier >= 2: premium cost requires explicit user approval
+    # Tier >= 2: premium cost requires explicit user approval, not cost_justified alone
     if approval_record is not None and approval_record.is_valid():
         return GateResult(
             gate_name="cost_exposure",
@@ -773,3 +790,296 @@ def gate_cost_exposure(
         decision=GateDecision.BLOCK,
         reason=f"Tier {risk_tier}: premium cost requires valid user approval record (actor, scope, timestamp, reason)",
     )
+
+
+# ---------------------------------------------------------------------------
+# Aegis Gate Summary Helpers for Relay/Bifrost Display
+# ---------------------------------------------------------------------------
+
+
+# Gate metadata: human-readable labels and proof requirements per gate
+_GATE_METADATA = {
+    "unknown_route_class": {
+        "label": "Route Class Validation",
+        "proof_type": "route metadata",
+    },
+    "missing_exact_model_id": {
+        "label": "Model ID Exactness",
+        "proof_type": "model version audit trail",
+    },
+    "tier3_dual_lane_requirement": {
+        "label": "Tier 3 Dual-Lane Requirement",
+        "proof_type": "dual-lane evidence or waiver record",
+    },
+    "unknown_proof_requirement": {
+        "label": "Proof Requirement",
+        "proof_type": "proof artifacts per risk tier",
+    },
+    "unsafe_fallback": {
+        "label": "Fallback Safety",
+        "proof_type": "fallback blockers analysis",
+    },
+    "unvalidated_deepseek": {
+        "label": "DeepSeek Validation",
+        "proof_type": "external review status",
+    },
+    "aggregator_authority": {
+        "label": "Aggregator Authority",
+        "proof_type": "proof strength and selected model evidence",
+    },
+    "account_session_risk": {
+        "label": "Account/Session Risk",
+        "proof_type": "account risk level and session health",
+    },
+    "cost_exposure": {
+        "label": "Cost Exposure",
+        "proof_type": "cost justification or user approval record",
+    },
+}
+
+
+def _decision_to_severity(decision: GateDecision) -> str:
+    """Map GateDecision to display severity level."""
+    if decision == GateDecision.ALLOW:
+        return "info"
+    if decision == GateDecision.DEMOTE:
+        return "warning"
+    return "error"  # BLOCK
+
+
+def _extract_waiver_approval_status(gate_name: str, reason: str) -> str:
+    """Extract waiver/approval status from gate result reason if present."""
+    if "waiver" in reason.lower() and "valid" in reason.lower():
+        return "waiver_present"
+    if "approval" in reason.lower() and "valid" in reason.lower():
+        return "approval_present"
+    if "waiver" in reason.lower() or "approval" in reason.lower():
+        return "waiver_approval_missing"
+    return "none"
+
+
+def _downstream_action(gate_name: str, decision: GateDecision, demote_to_tier: int | None) -> str:
+    """Describe the downstream action based on gate decision."""
+    if decision == GateDecision.ALLOW:
+        return "route_allowed"
+    if decision == GateDecision.DEMOTE:
+        tier_label = f"tier_{demote_to_tier}" if demote_to_tier is not None else "lower_tier"
+        return f"route_demoted_to_{tier_label}"
+    return "route_blocked"
+
+
+@dataclass
+class GateSummary:
+    """Display-friendly summary of a single gate result for Relay/Bifrost."""
+    gate_id: str
+    gate_label: str
+    decision: str
+    severity: str
+    reason: str
+    required_evidence: str
+    waiver_approval_status: str
+    downstream_action: str
+
+
+def summarize_gate_result(result: GateResult) -> GateSummary:
+    """
+    Produce a Relay/Bifrost-friendly summary of a gate result.
+
+    Pure, deterministic function: no model calls, no account inspection.
+    Output is display-safe for both system and human consumption.
+    """
+    gate_name = result.gate_name
+    metadata = _GATE_METADATA.get(gate_name, {
+        "label": gate_name.replace("_", " ").title(),
+        "proof_type": "gate-specific evidence",
+    })
+
+    return GateSummary(
+        gate_id=gate_name,
+        gate_label=metadata["label"],
+        decision=result.decision.value,
+        severity=_decision_to_severity(result.decision),
+        reason=result.reason,
+        required_evidence=metadata["proof_type"],
+        waiver_approval_status=_extract_waiver_approval_status(gate_name, result.reason),
+        downstream_action=_downstream_action(gate_name, result.decision, result.demote_to_tier),
+    )
+
+
+def summarize_gate_results(results: list[GateResult]) -> list[GateSummary]:
+    """Summarize multiple gate results in order."""
+    return [summarize_gate_result(r) for r in results]
+
+
+def format_gate_summary_for_display(summary: GateSummary) -> str:
+    """Format a GateSummary for human-readable display."""
+    return (
+        f"{summary.gate_label}: {summary.decision.upper()} "
+        f"(severity={summary.severity})\n"
+        f"  reason: {summary.reason}\n"
+        f"  evidence: {summary.required_evidence}\n"
+        f"  waiver/approval: {summary.waiver_approval_status}\n"
+        f"  action: {summary.downstream_action}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Aegis Aggregate Route-Gate Summary Helpers
+# ---------------------------------------------------------------------------
+
+
+def _highest_severity(severities: list[str]) -> str:
+    """Determine highest severity from a list: error > warning > info."""
+    severity_order = {"error": 3, "warning": 2, "info": 1}
+    return max(severities, key=lambda s: severity_order.get(s, 0))
+
+
+def _aggregate_downstream_action(summaries: list[GateSummary]) -> str:
+    """
+    Determine aggregate downstream action from multiple gates.
+
+    Priority: route_blocked > route_demoted > route_allowed
+    """
+    actions = [s.downstream_action for s in summaries]
+
+    # If any gate blocks, the route is blocked
+    if any("blocked" in action for action in actions):
+        return "route_blocked"
+
+    # If any gate demotes, find the lowest tier demotion
+    demote_actions = [a for a in actions if "demoted" in a]
+    if demote_actions:
+        # Extract tier numbers and return the lowest
+        tiers = []
+        for action in demote_actions:
+            try:
+                tier = int(action.split("_")[-1])
+                tiers.append(tier)
+            except (ValueError, IndexError):
+                pass
+        if tiers:
+            return f"route_demoted_to_tier_{min(tiers)}"
+        return "route_demoted"
+
+    return "route_allowed"
+
+
+def _aggregate_evidence_status(summaries: list[GateSummary]) -> dict[str, list[str]]:
+    """
+    Aggregate evidence/waiver/approval status across gates.
+
+    Returns dict with keys: evidence_required, waivers_present, approvals_present
+    """
+    evidence_required = []
+    waivers_present = []
+    approvals_present = []
+
+    for summary in summaries:
+        evidence_required.append(f"{summary.gate_id}: {summary.required_evidence}")
+        if summary.waiver_approval_status == "waiver_present":
+            waivers_present.append(summary.gate_id)
+        elif summary.waiver_approval_status == "approval_present":
+            approvals_present.append(summary.gate_id)
+
+    return {
+        "evidence_required": evidence_required,
+        "waivers_present": waivers_present,
+        "approvals_present": approvals_present,
+    }
+
+
+@dataclass
+class AggregateGateSummary:
+    """Aggregate summary of multiple gate results for route decisions."""
+    gate_count: int
+    highest_severity: str
+    aggregate_action: str
+    blocked_gates: list[str]
+    demoted_gates: list[str]
+    allowed_gates: list[str]
+    evidence_required: list[str]
+    waivers_present: list[str]
+    approvals_present: list[str]
+    gate_details: list[GateSummary]
+
+
+def summarize_aggregate_route_gates(summaries: list[GateSummary]) -> AggregateGateSummary:
+    """
+    Produce an aggregate summary of multiple gate results.
+
+    Pure, deterministic function for route-level decision display.
+    Combines individual gate results to show:
+    - Highest severity across all gates
+    - Aggregate downstream action (blocked > demoted > allowed)
+    - Which gates block/demote/allow
+    - Evidence/waiver/approval requirements across all gates
+    """
+    if not summaries:
+        return AggregateGateSummary(
+            gate_count=0,
+            highest_severity="info",
+            aggregate_action="route_allowed",
+            blocked_gates=[],
+            demoted_gates=[],
+            allowed_gates=[],
+            evidence_required=[],
+            waivers_present=[],
+            approvals_present=[],
+            gate_details=[],
+        )
+
+    # Determine highest severity
+    severities = [s.severity for s in summaries]
+    highest_sev = _highest_severity(severities)
+
+    # Determine aggregate action
+    agg_action = _aggregate_downstream_action(summaries)
+
+    # Categorize gates by decision
+    blocked = [s.gate_id for s in summaries if "blocked" in s.downstream_action]
+    demoted = [s.gate_id for s in summaries if "demoted" in s.downstream_action]
+    allowed = [s.gate_id for s in summaries if "allowed" in s.downstream_action]
+
+    # Aggregate evidence/waiver/approval status
+    evidence_status = _aggregate_evidence_status(summaries)
+
+    return AggregateGateSummary(
+        gate_count=len(summaries),
+        highest_severity=highest_sev,
+        aggregate_action=agg_action,
+        blocked_gates=blocked,
+        demoted_gates=demoted,
+        allowed_gates=allowed,
+        evidence_required=evidence_status["evidence_required"],
+        waivers_present=evidence_status["waivers_present"],
+        approvals_present=evidence_status["approvals_present"],
+        gate_details=summaries,
+    )
+
+
+def format_aggregate_summary_for_display(aggregate: AggregateGateSummary) -> str:
+    """Format an AggregateGateSummary for human-readable display."""
+    lines = [
+        f"Route-Gate Aggregate Summary ({aggregate.gate_count} gates)",
+        f"  highest severity: {aggregate.highest_severity}",
+        f"  aggregate action: {aggregate.aggregate_action}",
+    ]
+
+    if aggregate.blocked_gates:
+        lines.append(f"  blocked gates: {', '.join(aggregate.blocked_gates)}")
+    if aggregate.demoted_gates:
+        lines.append(f"  demoted gates: {', '.join(aggregate.demoted_gates)}")
+    if aggregate.allowed_gates:
+        lines.append(f"  allowed gates: {', '.join(aggregate.allowed_gates)}")
+
+    if aggregate.evidence_required:
+        lines.append("  evidence required:")
+        for ev in aggregate.evidence_required:
+            lines.append(f"    - {ev}")
+
+    if aggregate.waivers_present:
+        lines.append(f"  waivers present: {', '.join(aggregate.waivers_present)}")
+    if aggregate.approvals_present:
+        lines.append(f"  approvals present: {', '.join(aggregate.approvals_present)}")
+
+    return "\n".join(lines)

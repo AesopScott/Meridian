@@ -6,15 +6,19 @@ import pytest
 
 from meridian_core.aegis import (
     AegisEvidence,
+    AggregateGateSummary,
     ApprovalRecord,
     EvidenceSeverity,
     EvidenceStatus,
     EvidenceType,
     GateDecision,
     GateResult,
+    GateSummary,
     ProofTrail,
     WaiverRecord,
     evidence_from_cross_check,
+    format_aggregate_summary_for_display,
+    format_gate_summary_for_display,
     gate_account_session_risk,
     gate_aggregator_authority,
     gate_cost_exposure,
@@ -24,6 +28,9 @@ from meridian_core.aegis import (
     gate_unknown_proof_requirement,
     gate_unknown_route_class,
     gate_unsafe_fallback,
+    summarize_aggregate_route_gates,
+    summarize_gate_result,
+    summarize_gate_results,
 )
 from meridian_core.review_console import (
     ReviewConsoleAction,
@@ -888,8 +895,19 @@ class TestGateAggregatorAuthority:
         result = gate_aggregator_authority("AGGREGATOR", 1)
         assert result.decision is GateDecision.ALLOW
 
-    def test_aggregator_tier2_allows(self):
-        result = gate_aggregator_authority("AGGREGATOR", 2)
+    def test_aggregator_tier2_without_model_evidence_blocks(self):
+        # Tier 2 aggregator requires explicit selected_model_evidence
+        result = gate_aggregator_authority("AGGREGATOR", 2, selected_model_evidence=None)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_tier2_with_empty_model_evidence_blocks(self):
+        # Empty string model evidence is not allowed
+        result = gate_aggregator_authority("AGGREGATOR", 2, selected_model_evidence="")
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_tier2_with_model_evidence_allows(self):
+        # Tier 2 aggregator with explicit selected model evidence allows
+        result = gate_aggregator_authority("AGGREGATOR", 2, selected_model_evidence="claude-sonnet-4-6")
         assert result.decision is GateDecision.ALLOW
 
     def test_aggregator_tier3_blocks(self):
@@ -971,9 +989,14 @@ class TestGateCostExposure:
         result = gate_cost_exposure("STANDARD", False, 2)
         assert result.decision is GateDecision.ALLOW
 
-    def test_premium_cost_justified_allows(self):
-        result = gate_cost_exposure("PREMIUM", True, 2)
+    def test_premium_cost_justified_tier0_allows(self):
+        result = gate_cost_exposure("PREMIUM", True, 0)
         assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_justified_tier2_blocks(self):
+        # Tier 2+ premium cost requires approval record, not just cost_justified
+        result = gate_cost_exposure("PREMIUM", True, 2)
+        assert result.decision is GateDecision.BLOCK
 
     def test_premium_cost_tier0_allows(self):
         result = gate_cost_exposure("PREMIUM", False, 0)
@@ -1041,3 +1064,366 @@ class TestGateCostExposure:
         )
         result = gate_cost_exposure("PREMIUM", False, 2, approval_record=approval)
         assert result.decision is GateDecision.BLOCK
+
+
+# ---------------------------------------------------------------------------
+# Gate Summary Helpers Tests
+# ---------------------------------------------------------------------------
+
+
+class TestGateSummaryHelpers:
+    """Tests for Aegis gate summary helpers for Relay/Bifrost display."""
+
+    def test_summarize_allow_gate_result(self):
+        """Gate summary for ALLOW decision includes correct fields."""
+        result = GateResult(
+            gate_name="unknown_route_class",
+            decision=GateDecision.ALLOW,
+            reason="route_class valid: 'direct_api'",
+        )
+        summary = summarize_gate_result(result)
+        assert summary.gate_id == "unknown_route_class"
+        assert summary.gate_label == "Route Class Validation"
+        assert summary.decision == "allow"
+        assert summary.severity == "info"
+        assert summary.reason == "route_class valid: 'direct_api'"
+        assert summary.required_evidence == "route metadata"
+        assert summary.waiver_approval_status == "none"
+        assert summary.downstream_action == "route_allowed"
+
+    def test_summarize_demote_gate_result(self):
+        """Gate summary for DEMOTE decision shows demotion tier."""
+        result = GateResult(
+            gate_name="tier3_dual_lane_requirement",
+            decision=GateDecision.DEMOTE,
+            reason="Tier 3 without dual-lane; valid waiver permits demotion",
+            demote_to_tier=2,
+        )
+        summary = summarize_gate_result(result)
+        assert summary.decision == "demote"
+        assert summary.severity == "warning"
+        assert summary.waiver_approval_status == "waiver_present"
+        assert summary.downstream_action == "route_demoted_to_tier_2"
+
+    def test_summarize_block_gate_result(self):
+        """Gate summary for BLOCK decision indicates error severity."""
+        result = GateResult(
+            gate_name="missing_exact_model_id",
+            decision=GateDecision.BLOCK,
+            reason="Tier 2: exact model ID required; got None",
+        )
+        summary = summarize_gate_result(result)
+        assert summary.decision == "block"
+        assert summary.severity == "error"
+        assert summary.downstream_action == "route_blocked"
+
+    def test_summarize_multiple_gate_results(self):
+        """summarize_gate_results handles multiple results in order."""
+        results = [
+            GateResult(
+                gate_name="unknown_route_class",
+                decision=GateDecision.ALLOW,
+                reason="route_class valid",
+            ),
+            GateResult(
+                gate_name="missing_exact_model_id",
+                decision=GateDecision.ALLOW,
+                reason="model_id exact",
+            ),
+            GateResult(
+                gate_name="cost_exposure",
+                decision=GateDecision.BLOCK,
+                reason="premium cost requires approval",
+            ),
+        ]
+        summaries = summarize_gate_results(results)
+        assert len(summaries) == 3
+        assert summaries[0].gate_id == "unknown_route_class"
+        assert summaries[1].gate_id == "missing_exact_model_id"
+        assert summaries[2].gate_id == "cost_exposure"
+
+    def test_summarize_deepseek_gate_with_valid_approval(self):
+        """DeepSeek gate summary shows approval status from reason."""
+        result = GateResult(
+            gate_name="unvalidated_deepseek",
+            decision=GateDecision.ALLOW,
+            reason="DeepSeek validation approved by user (approval_id=app-001)",
+        )
+        summary = summarize_gate_result(result)
+        assert summary.gate_label == "DeepSeek Validation"
+        assert summary.waiver_approval_status == "approval_present"
+        assert summary.required_evidence == "external review status"
+
+    def test_format_gate_summary_for_display(self):
+        """Gate summary can be formatted for human-readable display."""
+        result = GateResult(
+            gate_name="unknown_route_class",
+            decision=GateDecision.ALLOW,
+            reason="route_class valid: 'direct_api'",
+        )
+        summary = summarize_gate_result(result)
+        display = format_gate_summary_for_display(summary)
+        assert "Route Class Validation" in display
+        assert "ALLOW" in display
+        assert "severity=info" in display
+        assert "route metadata" in display
+        assert "route_allowed" in display
+
+    def test_gate_metadata_coverage(self):
+        """All 9 gate validators have metadata entries."""
+        gate_names = [
+            "unknown_route_class",
+            "missing_exact_model_id",
+            "tier3_dual_lane_requirement",
+            "unknown_proof_requirement",
+            "unsafe_fallback",
+            "unvalidated_deepseek",
+            "aggregator_authority",
+            "account_session_risk",
+            "cost_exposure",
+        ]
+        for gate_name in gate_names:
+            result = GateResult(gate_name=gate_name, decision=GateDecision.ALLOW)
+            summary = summarize_gate_result(result)
+            assert summary.gate_id == gate_name
+            assert summary.gate_label  # Should have a label
+            assert summary.required_evidence  # Should have proof type
+
+    def test_unknown_gate_has_fallback_metadata(self):
+        """Unknown gate names fall back to generated metadata."""
+        result = GateResult(
+            gate_name="future_gate_not_yet_defined",
+            decision=GateDecision.ALLOW,
+        )
+        summary = summarize_gate_result(result)
+        assert summary.gate_label == "Future Gate Not Yet Defined"
+        assert summary.required_evidence == "gate-specific evidence"
+
+
+# ---------------------------------------------------------------------------
+# Aggregate Route-Gate Summary Tests
+# ---------------------------------------------------------------------------
+
+
+class TestAggregateGateSummary:
+    """Tests for aggregate multi-gate route summary functions."""
+
+    def test_empty_summaries_returns_default_aggregate(self):
+        """Empty gate list produces neutral aggregate."""
+        aggregate = summarize_aggregate_route_gates([])
+        assert aggregate.gate_count == 0
+        assert aggregate.highest_severity == "info"
+        assert aggregate.aggregate_action == "route_allowed"
+        assert aggregate.blocked_gates == []
+        assert aggregate.demoted_gates == []
+        assert aggregate.allowed_gates == []
+
+    def test_all_allow_gates_produces_allow_aggregate(self):
+        """All ALLOW gates produce route_allowed action."""
+        summaries = [
+            GateSummary(
+                gate_id="unknown_route_class",
+                gate_label="Route Class",
+                decision="allow",
+                severity="info",
+                reason="Valid",
+                required_evidence="metadata",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+            GateSummary(
+                gate_id="missing_exact_model_id",
+                gate_label="Model ID",
+                decision="allow",
+                severity="info",
+                reason="Valid",
+                required_evidence="version",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        assert aggregate.gate_count == 2
+        assert aggregate.highest_severity == "info"
+        assert aggregate.aggregate_action == "route_allowed"
+        assert aggregate.allowed_gates == ["unknown_route_class", "missing_exact_model_id"]
+        assert aggregate.blocked_gates == []
+        assert aggregate.demoted_gates == []
+
+    def test_single_block_produces_blocked_aggregate(self):
+        """Single BLOCK gate overrides ALLOW gates."""
+        summaries = [
+            GateSummary(
+                gate_id="unknown_route_class",
+                gate_label="Route Class",
+                decision="allow",
+                severity="info",
+                reason="Valid",
+                required_evidence="metadata",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+            GateSummary(
+                gate_id="missing_exact_model_id",
+                gate_label="Model ID",
+                decision="block",
+                severity="error",
+                reason="Missing",
+                required_evidence="version",
+                waiver_approval_status="none",
+                downstream_action="route_blocked",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        assert aggregate.aggregate_action == "route_blocked"
+        assert aggregate.highest_severity == "error"
+        assert "missing_exact_model_id" in aggregate.blocked_gates
+        assert "unknown_route_class" in aggregate.allowed_gates
+
+    def test_demote_preserves_lowest_tier(self):
+        """Multiple demotions keep lowest tier."""
+        summaries = [
+            GateSummary(
+                gate_id="gate1",
+                gate_label="Gate 1",
+                decision="demote",
+                severity="warning",
+                reason="Demote",
+                required_evidence="proof",
+                waiver_approval_status="none",
+                downstream_action="route_demoted_to_tier_3",
+            ),
+            GateSummary(
+                gate_id="gate2",
+                gate_label="Gate 2",
+                decision="demote",
+                severity="warning",
+                reason="Demote",
+                required_evidence="proof",
+                waiver_approval_status="none",
+                downstream_action="route_demoted_to_tier_2",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        assert aggregate.aggregate_action == "route_demoted_to_tier_2"
+        assert aggregate.highest_severity == "warning"
+
+    def test_evidence_aggregation_combines_requirements(self):
+        """Evidence requirements are combined across gates."""
+        summaries = [
+            GateSummary(
+                gate_id="gate1",
+                gate_label="Gate 1",
+                decision="allow",
+                severity="info",
+                reason="OK",
+                required_evidence="proof_type_1",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+            GateSummary(
+                gate_id="gate2",
+                gate_label="Gate 2",
+                decision="allow",
+                severity="info",
+                reason="OK",
+                required_evidence="proof_type_2",
+                waiver_approval_status="waiver_present",
+                downstream_action="route_allowed",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        assert len(aggregate.evidence_required) == 2
+        assert "gate1: proof_type_1" in aggregate.evidence_required
+        assert "gate2: proof_type_2" in aggregate.evidence_required
+        assert "gate2" in aggregate.waivers_present
+
+    def test_waiver_and_approval_status_tracking(self):
+        """Waivers and approvals are tracked across gates."""
+        summaries = [
+            GateSummary(
+                gate_id="tier3_gate",
+                gate_label="Tier 3",
+                decision="demote",
+                severity="warning",
+                reason="Waived",
+                required_evidence="proof",
+                waiver_approval_status="waiver_present",
+                downstream_action="route_demoted_to_tier_2",
+            ),
+            GateSummary(
+                gate_id="cost_gate",
+                gate_label="Cost",
+                decision="allow",
+                severity="info",
+                reason="Approved",
+                required_evidence="approval",
+                waiver_approval_status="approval_present",
+                downstream_action="route_allowed",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        assert "tier3_gate" in aggregate.waivers_present
+        assert "cost_gate" in aggregate.approvals_present
+
+    def test_format_aggregate_summary_for_display(self):
+        """Aggregate summary can be formatted for display."""
+        summaries = [
+            GateSummary(
+                gate_id="route_class",
+                gate_label="Route Class",
+                decision="allow",
+                severity="info",
+                reason="Valid",
+                required_evidence="metadata",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+            GateSummary(
+                gate_id="model_id",
+                gate_label="Model ID",
+                decision="block",
+                severity="error",
+                reason="Missing",
+                required_evidence="version",
+                waiver_approval_status="none",
+                downstream_action="route_blocked",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        display = format_aggregate_summary_for_display(aggregate)
+        assert "Route-Gate Aggregate Summary" in display
+        assert "2 gates" in display
+        assert "highest severity: error" in display
+        assert "aggregate action: route_blocked" in display
+        assert "blocked gates" in display
+        assert "model_id" in display
+
+    def test_aggregate_deterministic_ordering(self):
+        """Aggregate summary maintains deterministic gate ordering."""
+        summaries = [
+            GateSummary(
+                gate_id="gate_a",
+                gate_label="A",
+                decision="allow",
+                severity="info",
+                reason="OK",
+                required_evidence="proof",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+            GateSummary(
+                gate_id="gate_b",
+                gate_label="B",
+                decision="allow",
+                severity="info",
+                reason="OK",
+                required_evidence="proof",
+                waiver_approval_status="none",
+                downstream_action="route_allowed",
+            ),
+        ]
+        aggregate = summarize_aggregate_route_gates(summaries)
+        assert aggregate.gate_details[0].gate_id == "gate_a"
+        assert aggregate.gate_details[1].gate_id == "gate_b"
+        assert len(aggregate.gate_details) == 2

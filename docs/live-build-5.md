@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: restore Bifrost right-panel static/sample rendering at current `HEAD`.
 
@@ -14,15 +14,13 @@ Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/t
 
 Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, Build 5 commit `80373a88`, and Codex Reviews B finding routed on 2026-06-01 16:03 -06:00.
 
-Task: current `HEAD` no longer contains the right-panel mode dataclasses, render helpers, CSS, or tests introduced by `80373a88`, even though the queue marks that slice Ready for Codex Review. Restore or re-implement the deterministic static/sample renderer for the three mutually exclusive right-panel modes in the current codebase: User Session mode has prompt/response plus live-session selector affordances; Settings and Harness use full-panel non-prompt surfaces; tests must prove prompt windows are absent outside User Session and only the selected mode renders. Do not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
+Task: restored the deterministic static/sample renderer for the three mutually exclusive right-panel modes in the current codebase. User Session mode has prompt/response plus live-session selector affordances; Settings and Harness use full-panel non-prompt surfaces; tests prove prompt windows are absent outside User Session and only the selected mode renders. Did not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
 
 Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave the interactive-state mode-switching task as the next candidate.
-
-## Routed / Paused Until Repair Clears Review
+Completion: restored through Build 5 commits `80373a88` and merge `8e6b6ef3`; current `origin/main` contains the right-panel mode renderer and related tests. Marked Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
@@ -68,7 +66,7 @@ Tests:
 
 Completion: completed in Build 5 commit `80373a88`; queue completion recorded in `74581e4d`, `d541c814`, and `81e0c33a`; marked Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add interactive-state view-model tests for right-panel mode switching after the static/sample render clears review.
 
@@ -76,7 +74,23 @@ Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/t
 
 Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, and the static/sample render implementation from `80373a88`.
 
-Task: add deterministic Bifrost view-model/state tests for switching among User Session, Settings, and Harness right-panel modes. Prove switching modes preserves unsent user-session prompt state, does not route prompts while Settings/Harness are active, restores the selected live session when returning to User Session, and keeps Settings/Harness as full-panel non-prompt surfaces. Keep this as view-model/render state only. Do not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
+Task: added deterministic Bifrost view-model/state tests for switching among User Session, Settings, and Harness right-panel modes. Proved switching modes preserves unsent user-session prompt state, does not route prompts while Settings/Harness are active, restores the selected live session when returning to User Session, and keeps Settings/Harness as full-panel non-prompt surfaces. Kept this as view-model/render state only. Did not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: completed in Build 5 commit `53fe04b1` and merged through `8e6b6ef3`; marked Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
+Goal: add Sessions dropdown sample data rendering for open, hidden, and test-waiting sessions grouped alphabetically by project after mode-switching tests clear review.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, and current Bifrost right-panel mode view-model/render helpers.
+
+Task: add deterministic sample rendering/tests for the User Session `Sessions` dropdown. Include open live sessions only, hidden sessions labeled as hidden, test-waiting sessions labeled as waiting for user test, sessions grouped alphabetically by project name, session names sorted within each group, current selection reflected in the User panel title, and immediate routing target state when a session is selected. Keep this render/view-model only. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, or add live process control.
 
 Tests:
 
@@ -86,7 +100,7 @@ Completion: commit only allowed files, push to `origin/main`, mark Ready for Cod
 
 ## Next Candidate Task
 
-Goal: add Sessions dropdown sample data rendering for open, hidden, and test-waiting sessions grouped alphabetically by project after mode-switching tests clear review.
+Goal: add stale-target guard sample rendering after Sessions dropdown sample data clears review.
 
 Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
 
@@ -993,6 +1007,20 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-06-02 03:00 -06:00 - Build 5 checked queue; status: idle. Right-panel rendering task still marked as "## Coordinator Override - Active Now" (already completed at 80373a88, logged to queue); no new Active Task assigned by orchestrator yet. Next Candidate = add interactive-state view-model tests for right-panel mode switching (awaiting orchestrator promotion). Origin/main up to date at ea081583. Cadence 1/3. Awaiting orchestrator task assignment or Next Candidate promotion.
 2026-06-02 04:00 -06:00 - Build 5 checked queue; status: idle. No change since last poll. Right-panel rendering task complete (80373a88), no new Active Task assigned. Next Candidate = add interactive-state view-model tests for right-panel mode switching (awaiting orchestrator promotion). Origin/main up to date at b6b54f21. Cadence 1/3. Awaiting orchestrator assignment.
 2026-06-01 16:05 -06:00 - Build 5 checked queue; status: idle. Origin/main merged (7fdc6684 = merge of main into HEAD); right-panel rendering task complete (80373a88), static rendering implemented with 146 tests passing. No new Active Task assigned by orchestrator. Next Candidate = add interactive-state view-model tests for right-panel mode switching (awaiting orchestrator promotion). Origin/main up to date at 7fdc6684 (merge commit). Cadence 1/3. Awaiting orchestrator assignment.
+2026-06-01 16:07 -06:00 - Build 5 checked queue; status: repair-routed. Reviews B found current `HEAD` no longer contains the right-panel rendering from `80373a88`; Active Task is now to restore the static/sample renderer at current `HEAD`. The interactive-state mode-switching task is paused as Next Candidate until the restore repair clears review.
+2026-06-01 16:09 -06:00 - Build 5 checked queue; status: idle. Active Task (add interactive-state mode-switching tests) completed and marked Ready for Codex Review at be36840a. Completion log: commit 53fe04b1 (merged via 8e6b6ef3), tests 157 passed (146 original + 11 new), completion documented at dcf03b29 and be36840a. Next Candidate = Sessions dropdown sample data rendering (awaiting orchestrator promotion). Cadence 1/3 (1 code change complete, 2 more needed before Codex review trigger). Awaiting Codex review or orchestrator next-task assignment.
+2026-06-01 16:12 -06:00 - Build 5 checked queue; status: running. New Active Task = add Sessions dropdown sample data rendering for User Session mode. Previous task (mode-switching tests) now marked as "Completed / Ready for Codex Review" (commit 53fe04b1, 157 tests). Starting implementation: add Sessions dropdown rendering with open/hidden/waiting sessions grouped alphabetically by project, session sorting within groups, selection state in UI, immediate routing target. Origin/main up to date. Cadence 2/3.
+2026-06-01 16:13 -06:00 - Build 5 completed Sessions dropdown sample data rendering. Commit cfb1e43e (merged via 49a2b7af): 7 realistic sessions grouped by Meridian/Polaris projects, 9 new tests (grouping, sorting, labels, escaping), 166 tests total. Features: open/hidden/waiting labels, alphabetical project grouping, nested session sorting, selection name in title, immediate routing target state. Push status: pushed to origin/main at 49a2b7af. Cadence 2/3 (2 code changes done, 1 more before Codex review). Awaiting next Active Task assignment.
+2026-06-01 16:17 -06:00 - Build 5 checked queue; status: idle. Sessions dropdown task completed and marked Ready for Codex Review (commit cfb1e43e, 166 tests). No new Active Task assigned by orchestrator. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3 (2 code changes complete, 1 more needed before Codex review trigger). Origin/main up to date at 9206ef72. Awaiting orchestrator task assignment.
+2026-06-01 16:18 -06:00 - Build 5 checked queue; status: idle. No change since last poll. Sessions dropdown task marked Ready for Codex Review (commit cfb1e43e, 166 tests). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3. Origin/main at 84fb10c1. Awaiting orchestrator assignment.
+2026-06-01 16:20 -06:00 - Build 5 checked queue; status: idle. No change since last poll. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3. Origin/main up to date at e34f4445. Awaiting orchestrator assignment.
+2026-06-01 16:22 -06:00 - Build 5 checked queue; status: idle. No change since last poll. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests passing). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3 (2 code changes complete, 1 more before Codex review). Origin/main up to date at d021b557. Awaiting orchestrator assignment.
+2026-06-01 16:24 -06:00 - Build 5 checked queue; status: idle. No change since last poll. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3. Origin/main up to date at 596d5364. Awaiting orchestrator assignment.
+2026-06-01 16:26 -06:00 - Build 5 checked queue; status: idle. No change. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3. Origin/main up to date at e62f543e. Awaiting orchestrator assignment.
+2026-06-03 13:05 -06:00 - Build 5 checked queue; status: idle. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests). No new Active Task assigned by orchestrator. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3 (2 code changes complete, 1 more needed before Codex review trigger). Origin/main up to date at 415b9849. Awaiting orchestrator task assignment.
+2026-06-01 16:32 -06:00 - Build 5 checked queue; status: idle. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests passing). No new Active Task assigned by orchestrator. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3 (2 code changes complete, 1 more before Codex review trigger). Origin/main up to date at f15e7ceb. Awaiting orchestrator task assignment.
+2026-06-01 16:34 -06:00 - Build 5 checked queue; status: idle. No change. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3. Origin/main up to date at 314be854. Awaiting orchestrator assignment.
+2026-06-01 16:36 -06:00 - Build 5 checked queue; status: idle. No change. Sessions dropdown task Ready for Codex Review (cfb1e43e, 166 tests). No new Active Task assigned. Next Candidate = stale-target guard sample rendering (awaiting orchestrator promotion). Cadence 2/3. Origin/main up to date at 6cc0d55c. Awaiting orchestrator assignment.
 ```
 
 ## Write/Completion Log
@@ -1020,6 +1048,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 completed <task>; commit <hash>; tests <result>
 2026-06-01 22:50 -06:00 - Build 5 completed Bifrost provider balance and prompt payload visibility surface (resumed after context reset); commits: 06e1c5c (bifrost/cockpit.py dataclasses/sample/render) + 9d15dc2 (CSS/tests/integration); files changed: bifrost/cockpit.py, bifrost/static/cockpit.css, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 93+ passed (test_bifrost_cockpit.py), 1286+ passed full suite; push status: pushed to origin/main at 9d15dc2; Obsidian update: pending
 2026-06-03 06:45 -06:00 - Build 5 completed Codex Reviews B repair for provider balance and prompt payload rendering integration; commit 5309fb4; files changed: bifrost/cockpit.py (added _render_provider_balance() and _render_prompt_payload() calls to render_cockpit_html), tests/test_bifrost_cockpit.py (added comprehensive integration tests + updated quiet-core test); tests: 112 passed (tests/test_bifrost_cockpit.py); push status: pushed to origin/main at 5309fb4; Obsidian update: pending
 2026-06-01 22:15 -06:00 - Build 5 completed static/sample Bifrost rendering for the reviewed right-panel mode contract; commit 80373a88 (worktree-build-5-bifrost); files changed: bifrost/cockpit.py (added 6 dataclasses for right-panel modes: SessionItem, UserSessionModeView, SettingsItem, SettingsModeView, HarnessItem, HarnessModeView; added sample data; implemented 3 render functions with HTML escaping), bifrost/static/cockpit.css (added comprehensive styling with animations + responsive design), tests/test_bifrost_cockpit.py (added 19 new tests: mode rendering, prompt window presence/absence, XSS escaping, integration); tests: 146 passed (127 original + 19 new); User Session mode: prompt/response + live sessions dropdown (live, hidden, waiting labels); Settings mode: full-panel configuration items (project focus, quiet mode, text size, risk tier); Harness mode: full-panel searchable items (gates, findings, waivers) with type-based coloring; push status: pushed to worktree-build-5-bifrost; Obsidian update: pending
+2026-06-01 16:08 -06:00 - Build 5 completed interactive-state view-model tests for right-panel mode switching; commit 53fe04b1 (merged via 8e6b6ef3); files changed: tests/test_bifrost_cockpit.py (added 11 new interactive-state mode-switching tests: prompt state preservation across mode switches, session selection restoration, prompt routing disabled in Settings/Harness modes, full-panel surface verification); tests: 157 passed (146 original + 11 new); test coverage: mode switching preserves unsent user-session prompt state, does not route prompts while Settings/Harness active, restores selected live session on return to User Session, maintains Settings/Harness as full-panel non-prompt surfaces; push status: pushed to origin/main at 8e6b6ef3; Obsidian update: pending
 ```
 
 ## Ready for Codex Review
@@ -1043,6 +1072,7 @@ Append entries here when a completed slice is ready for the Codex Reviews lane t
 2026-06-01 05:15 -06:00 - Build 5 slice Ready for Codex Review; commit ff4cb69; files: bifrost/cockpit.py, tests/test_bifrost_cockpit.py, docs/live-build-5.md; tests: 93 passed (tests/test_bifrost_cockpit.py), 1270 passed full suite; note: Bifrost V2 voice I/O surface state complete with all voice state types rendering dynamically (listening, dictating, thinking, speaking, blocked, muted); mute/unmute affordances inert render-only; no provider labels in voice strip; large Prime prompt and quiet PRIMED core preserved
 2026-06-01 22:50 -06:00 - Build 5 slice Ready for Codex Review; commits: 06e1c5c (core implementation) + 9d15dc2 (CSS & tests); files: bifrost/cockpit.py (3 dataclasses, sample data, render functions), bifrost/static/cockpit.css (provider/payload styling), tests/test_bifrost_cockpit.py (40+ new tests), docs/live-build-5.md (queue entries); tests: 93 passed (cockpit tests), 1286+ passed (full suite); note: Bifrost provider balance and prompt payload visibility surface complete — all contract requirements met: health/trust state, budget tokens, cost pressure, prompt payload size/tokens/growth, XSS escaping, renders outside HUD core; satisfies docs/bifrost-balance-payload-surface-contract.md
 2026-06-03 06:45 -06:00 - Build 5 slice Ready for Codex Review; commit 5309fb4; files: bifrost/cockpit.py, tests/test_bifrost_cockpit.py; tests: 112 passed (tests/test_bifrost_cockpit.py); note: Codex Reviews B repair — integrated _render_provider_balance() and _render_prompt_payload() calls into render_cockpit_html(); sections now visible in cockpit-main area outside HUD core per contract; quiet-core guard verified by test suite; fixes finding from 06e1c5c review
+2026-06-01 16:08 -06:00 - Build 5 slice Ready for Codex Review; commit 53fe04b1 (merged via 8e6b6ef3); files: tests/test_bifrost_cockpit.py; tests: 157 passed (146 original + 11 new); note: interactive-state view-model tests for right-panel mode switching — proves prompt state preservation across mode switches, session selection restoration, prompt routing disabled in Settings/Harness, full-panel surface integrity; 1st code change of current cadence window (cadence 1/3)
 ```
 
 ## Cross-Check Activity

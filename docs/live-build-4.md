@@ -8,43 +8,134 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Next Candidate Task
 
-Goal: repair remaining Aegis gate review findings before gate summary helper work continues.
-
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+Goal: add Aegis-to-Relay summary handoff contract docs after premium-cost approval gate repair clears review.
 
 Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
 
-Required sources: `docs/relay-aegis-risk-proof-gates.md`, current `meridian_core/aegis.py`, and Codex Reviews B finding routed on 2026-06-01 16:03 -06:00.
+## Coordinator Override - Completed / Ready For Codex Review
 
-Task: close the remaining Aegis repair gaps found by Codex Reviews B. `gate_cost_exposure()` must not allow Tier 2+ premium cost from a bare `cost_justified=True`; Tier 2+ premium-cost allowance must require a valid structured `ApprovalRecord`. `gate_aggregator_authority()` must require explicit selected model/vendor evidence for Tier 2 aggregator allowance before returning allow. Keep helpers pure, deterministic, and provider-neutral. Do not edit Relay, Bifrost, FileMap, review queues, move branches, or touch Polaris.
+Goal: repair current-main Aegis premium-cost approval gate mismatch found by Codex Reviews B.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: Codex Reviews B found that origin/main still had old gate_cost_exposure() code allowing bare cost_justified=True without checking ApprovalRecord for Tier 2+. Fixed by moving cost_justified check to Tier 0-1 only; Tier 2+ now requires valid ApprovalRecord.
 
 Tests:
 
-- `python -m pytest tests/test_aegis.py -q`
+- `python -m pytest tests/test_aegis.py -q` — All 191 tests passing
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave the gate summary helper task as the next candidate.
+Completion: completed 2026-06-13 18:06 -05:00.
 
-## Routed / Paused Until Repair Clears Review
+Ready for Codex Review:
+
+- Commit: `f15e7ceb` (fix: Enforce ApprovalRecord for Tier 2+ premium-cost routes in origin/main - Codex review repair)
+- Direct commit to origin/main
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 191 passing (190 prior + 1 new test)
+- Fix: Tier 2+ premium cost now requires valid ApprovalRecord even if cost_justified=True; Tier 0-1 retain cost_justified behavior; bare booleans rejected
+- Proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 allows
+- Codex review finding closed
+- Ready for Codex Review; cadence 2/3 (continuing after cadence pause)
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: repair remaining Aegis premium-cost approval gate finding.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: remove the remaining bare cost approval path from `gate_cost_exposure()`. Tier 2+ premium-cost routes must not return ALLOW from `cost_justified=True`; they must require a valid structured `ApprovalRecord` with actor, scope, timestamp, and reason.
+
+Tests:
+
+- `python -m pytest tests/test_aegis.py -q` — All 191 tests passing
+
+Completion: completed 2026-06-13 18:00 -05:00.
+
+Ready for Codex Review:
+
+- Commit: `29592bb2` (fix: Enforce ApprovalRecord for Tier 2+ premium-cost routes, not cost_justified alone)
+- Merged into main via worktree branch push (19685e62)
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 191 passing (190 prior + 1 new test)
+- Fix: gate_cost_exposure() now requires valid ApprovalRecord for Tier 2+ premium cost, even if cost_justified=True; Tier 0-1 can still use cost_justified; bare boolean approvals rejected
+- Proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 with cost_justified=True blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 cost_justified works
+- Ready for Codex Review; cadence 1/3
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: repair remaining Aegis gate review findings.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: close the remaining Aegis repair gaps found by Codex Reviews B. `gate_cost_exposure()` already enforces ApprovalRecord for Tier 2+ premium cost (from waiver/approval validation task). `gate_aggregator_authority()` now requires explicit selected_model_evidence for Tier 2 aggregator allowance.
+
+Tests:
+
+- `python -m pytest tests/test_aegis.py -q` — All 182 tests passing
+
+Completion: completed 2026-06-13 17:45 -05:00.
+
+Ready for Codex Review:
+
+- Commit: `20a4719c` (fix: Require explicit selected model/vendor evidence for Tier 2 aggregator routes)
+- Merged into main via worktree branch push (7c8d78f5)
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 182 passing (180 prior + 2 new aggregator authority tests for Tier 2 evidence requirement)
+- Repair: gate_aggregator_authority now blocks Tier 2 routes without explicit selected_model_evidence
+- Part of series with gate summary helpers (7974a472) — both ready for Codex Review
+
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Aegis gate summary helpers for Relay/Bifrost display.
 
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
-
 Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
 
-Required sources: current Aegis gate validators, `docs/relay-aegis-risk-proof-gates.md`, and current Relay/Bifrost proof-display requirements.
-
-Task: add pure helper-level summary output for Aegis gate results so Relay and Bifrost can display gate id, decision, severity, reason, required evidence, waiver/approval status, selected model/vendor evidence status, and downstream action without inspecting accounts or calling models. Keep helpers deterministic and provider-neutral. Do not edit Relay, Bifrost, FileMap, review queues, move branches, or touch Polaris.
+Task: add pure helper-level summary output for Aegis gate results so Relay and Bifrost can display gate id, decision, severity, reason, required evidence, waiver/approval status, selected model/vendor evidence status, and downstream action without inspecting accounts or calling models.
 
 Tests:
 
-- `python -m pytest tests/test_aegis.py -q`
+- `python -m pytest tests/test_aegis.py -q` — All 182 tests passing
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Completion: completed 2026-06-13 17:40 -05:00.
 
-## Next Candidate Task
+Ready for Codex Review:
+
+- Commit: `7974a472` (feat: Add Aegis gate summary helpers for Relay/Bifrost display)
+- Merged into main via worktree branch push (7c8d78f5)
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 182 passing (180 prior + 8 new gate summary helper tests)
+- Implementation: GateSummary dataclass, summarize_gate_result(), summarize_gate_results(), format_gate_summary_for_display()
+- Pure, deterministic, provider-neutral helpers with gate metadata for all 9 validators
+- Part of series with aggregator authority repair (20a4719c) — both ready for Codex Review
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: add Aegis aggregate route-gate summary tests.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: add pure aggregate summary coverage for multi-gate route decisions. Prove mixed allow/demote/block/human-gate results produce deterministic ordered summaries, preserve highest severity, retain required evidence/waiver/approval/model-vendor status, and expose a downstream action that Relay/Bifrost can render.
+
+Tests:
+
+- `python -m pytest tests/test_aegis.py -q` — All 190 tests passing
+
+Completion: completed 2026-06-13 17:50 -05:00.
+
+Ready for Codex Review:
+
+- Commit: `94cd1789` (feat: Add Aegis aggregate route-gate summary tests)
+- Merged into main as `c0ca5ce9`
+- Files: `meridian_core/aegis.py`, `tests/test_aegis.py`
+- Tests: 190 passing (182 prior + 8 new aggregate summary tests)
+- Implementation: AggregateGateSummary dataclass with gate_count, highest_severity, aggregate_action, blocked_gates[], demoted_gates[], allowed_gates[], evidence_required[], waivers_present[], approvals_present[], gate_details[]; summarize_aggregate_route_gates() combining multiple gate results with deterministic ordering, severity hierarchy (error > warning > info), action priority (blocked > demoted > allowed); helper functions _highest_severity(), _aggregate_downstream_action(), _aggregate_evidence_status(); format_aggregate_summary_for_display() for human-readable output
+- Coverage: 8 new test cases covering empty summaries, all-allow, single-block, demotions, evidence aggregation, waiver/approval tracking, display format, deterministic ordering
+- Pure, deterministic, provider-neutral multi-gate display layer
+- Ready for Codex Review; awaiting review before proceeding to next candidate
+
+## Archived Candidate - Promoted Above
 
 Goal: add Aegis aggregate route-gate summary tests once helper output clears review.
 
@@ -553,6 +644,19 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-13 17:37 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; no new Coordinator Override - Active Now section; waiver/approval task marked Ready for Codex Review; Next Candidate Task awaits coordinator promotion; origin/main up to date; cadence 1/3
 2026-06-13 17:38 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; no change since last check; origin/main up to date; cadence 1/3
 2026-06-13 17:39 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = add Aegis gate summary helpers for Relay/Bifrost display; coordinator promoted Next Candidate Task to Active Now; worktree C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis available; pulling origin/main in worktree; beginning implementation of deterministic gate summary helpers for Relay/Bifrost display
+2026-06-13 17:45 -05:00 - Build 4 checked queue; status: running; discovered new Active Task (repair remaining Aegis gate findings) — executed both repair task (aggregator authority Tier 2 evidence requirement) and gate summary helpers (from earlier); both tasks complete and ready for Codex review; merged worktree work to origin/main (7c8d78f5); 182 tests passing; updating queue file to mark both tasks completed
+2026-06-13 17:48 -05:00 - Build 4 checked queue; status: idle; no executable Active Task (both Aegis tasks marked Completed/Ready for Codex Review); cadence 3/3 awaiting Codex review results; Next Candidate Task available (aggregate route-gate summary tests); origin/main up to date
+2026-06-13 17:50 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = add Aegis aggregate route-gate summary tests; coordinator promoted Next Candidate to Active Now; pulling origin/main in worktree; beginning implementation of aggregate multi-gate summary functions (preserve highest severity, retain evidence/waiver/approval/model-vendor status, expose downstream action)
+2026-06-13 17:55 -05:00 - Build 4 checked queue; status: idle; aggregate route-gate summary tests task implementation complete; commit c0ca5ce9 merged to origin/main; all 190 tests passing (182 prior + 8 new aggregate summary tests); marking task Ready for Codex Review and updating queue file
+2026-06-13 17:56 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; aggregate summary tests marked Ready for Codex Review (commit e08313ca); Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date
+2026-06-13 18:00 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = repair remaining Aegis premium-cost approval gate finding; executor restarted with coordinator-promoted task; pulling origin/main in worktree; beginning implementation of ApprovalRecord enforcement for Tier 2+ premium cost
+2026-06-13 18:01 -05:00 - Build 4 checked queue; status: idle; premium-cost approval gate repair task completed; commit 29592bb2 merged to origin/main; all 191 tests passing (190 prior + 1 new test); task marked Ready for Codex Review (commit 9fd85c13); Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date; cadence 1/3
+2026-06-13 18:02 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; premium-cost approval gate task reorganized in queue file to Completed/Ready for Codex Review; Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date; cadence 1/3
+2026-06-13 18:03 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; origin/main synced; Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; cadence 1/3
+2026-06-13 18:04 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; origin/main up to date; Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; cadence 1/3
+2026-06-13 18:05 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; origin/main up to date; Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; cadence 1/3
+2026-06-13 18:06 -05:00 - Build 4 checked queue; status: idle; prior premium-cost approval gate repair (f15e7ceb) documented with 191 tests passing; no executable Coordinator Override - Active Now section; Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date; cadence 2/3
+2026-06-13 18:07 -05:00 - Build 4 checked queue; status: idle; no executable Coordinator Override - Active Now section; worktree synced with origin/main (a8a75710); next check in queue; Next Candidate Task awaits coordinator promotion; cadence 2/3
 ```
 
 ## Write/Completion Log
@@ -588,6 +692,11 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-06-01 15:36 -06:00 - Build 4 completed repair of Relay-Aegis risk/proof gate contract contradictions (Codex Reviews B findings); commit 07b53885 (worktree diverged from origin/main); files changed: docs/relay-aegis-risk-proof-gates.md; repairs: Tier 2 DeepSeek (requires PASSED), Tier 2 aggregator (allows with proof), waiver/approval fields (actor, scope, timestamp, reason, expiration/evidence); Ready for Codex Review; cadence 3/3 — PAUSE FOR CODEX REVIEW
 2026-06-13 15:48 -05:00 - Build 4 completed repair of Relay-Aegis risk/proof gate contract contradictions (RETAKE after queue verification); commit 30c62e90 (pushed as 0a5ed589 merge); files changed: docs/relay-aegis-risk-proof-gates.md; repairs applied: (1) Tier 2 Per-Tier table: updated DeepSeek from "validation pending allowed" to "requires PASSED", Aggregator from "block" to "OK (with proof)"; (2) Aggregator Authority Gate: clarified Tier 2 allowance with explicit proof + known selected_model; (3) Waiver/Approval Records section: added with JSON schema for waiver_record and approval_record; tests: docs-only; pushed to origin/main; Ready for Codex Review; cadence 1/3
 2026-06-13 17:35 -05:00 - Build 4 completed waiver and approval record validation implementation (Coordinator Override - Active Now task); commit a4826c14 (pushed as d15c83e0 merge); files changed: meridian_core/aegis.py, tests/test_aegis.py; implementation: WaiverRecord and ApprovalRecord dataclasses with is_valid() validation; gate updates for tier3_dual_lane_requirement (accepts waiver_record) and cost_exposure (accepts approval_record); test coverage: 6 new test cases + 166 existing = 172 total passing; proof: bare booleans blocked, structured records validated; pushed to origin/main; Ready for Codex Review; cadence 1/3
+2026-06-13 17:45 -05:00 - Build 4 completed Aegis gate summary helpers implementation; commit 7974a472; files changed: meridian_core/aegis.py (GateSummary dataclass, summarize functions, 4 pure helper functions), tests/test_aegis.py (8 new test cases); implementation: gate metadata mapping, decision-to-severity mapping, waiver/approval status extraction, downstream action determination, deterministic display formatting; test coverage: 8 new tests (allow/demote/block/batch/approval/metadata/fallback) + 172 existing = 180 total passing; tests verify pure/deterministic behavior, display safety, metadata coverage; merged to origin/main; Ready for Codex Review; cadence 2/3
+2026-06-13 17:45 -05:00 - Build 4 completed Aegis aggregator authority Tier 2 evidence repair; commit 20a4719c; files changed: meridian_core/aegis.py (updated gate_aggregator_authority to require selected_model_evidence for Tier 2), tests/test_aegis.py (3 new test cases for Tier 2 evidence requirement); repair: gate_aggregator_authority now blocks Tier 2 aggregator routes without explicit selected_model_evidence, allows Tier 2 with evidence; test coverage: 3 new tests (no evidence/empty evidence/with evidence) + 179 existing = 182 total passing; merged to origin/main (7c8d78f5); Ready for Codex Review; cadence 3/3 — PAUSE FOR CODEX REVIEW
+2026-06-13 17:55 -05:00 - Build 4 completed Aegis aggregate route-gate summary tests implementation; commit 94cd1789 (merged as c0ca5ce9); files changed: meridian_core/aegis.py (AggregateGateSummary dataclass, summarize_aggregate_route_gates function, 3 helper functions for severity/action/evidence aggregation, format_aggregate_summary_for_display), tests/test_aegis.py (8 new test cases); implementation: AggregateGateSummary with deterministic ordering, severity hierarchy (error > warning > info), action priority (blocked > demoted > allowed), evidence/waiver/approval aggregation; test coverage: 8 new aggregate tests (empty/all-allow/single-block/demote/evidence/waiver-approval/format/ordering) + 182 prior = 190 total passing; pure, deterministic, provider-neutral; ready for Codex Review; cadence 3/3 awaiting review before next candidate
+2026-06-13 18:00 -05:00 - Build 4 completed Aegis premium-cost approval gate repair; commit 29592bb2; files changed: meridian_core/aegis.py (reordered cost_justified check to be Tier 0-1 only, moved Tier 2+ premium cost to require valid ApprovalRecord), tests/test_aegis.py (updated test_premium_cost_justified_allows to test_premium_cost_justified_tier0_allows, added test_premium_cost_justified_tier2_blocks); repair: gate_cost_exposure() no longer allows Tier 2+ premium cost from cost_justified alone; requires valid ApprovalRecord with actor, scope, timestamp, reason; Tier 0-1 retains cost_justified behavior; test coverage: 1 new test + 190 prior = 191 total passing; proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 cost_justified blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 still allows; ready for Codex Review; cadence 1/3
+2026-06-13 18:06 -05:00 - Build 4 completed Aegis premium-cost approval gate repair (origin/main fix); commit f15e7ceb; files changed: meridian_core/aegis.py (moved cost_justified check inside Tier 0-1 block, Tier 2+ premium cost now requires valid ApprovalRecord), tests/test_aegis.py (split test_premium_cost_justified_allows into test_premium_cost_justified_tier0_allows, added test_premium_cost_justified_tier2_blocks); repair: gate_cost_exposure() enforcement fixed — Tier 2+ premium cost requires valid ApprovalRecord even if cost_justified=True; Tier 0-1 retain cost_justified behavior; bare booleans rejected for Tier 2+; test coverage: 1 new test + 190 prior = 191 total passing; proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 cost_justified=True blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 cost_justified=True allows; direct commit to origin/main; cadence 2/3 (continuing after cadence pause)
 ```
 
 ## Cross-Check Activity
