@@ -217,6 +217,19 @@ function spawnModelProcess(command, cwd) {
   });
 }
 
+function restartBridge() {
+  server.close(() => {
+    const child = spawn(process.execPath, [__filename], {
+      cwd: DEFAULT_CWD,
+      detached: true,
+      stdio: 'ignore',
+      env: process.env,
+    });
+    child.unref();
+    setTimeout(() => process.exit(0), 50);
+  });
+}
+
 function checkCommandAvailable(bin) {
   return new Promise((resolve) => {
     const child = spawn(process.platform === 'win32' ? 'where' : 'command', process.platform === 'win32' ? [bin] : ['-v', bin], {
@@ -344,6 +357,12 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET' && req.url === '/api/recent-calls') {
     sendJson(res, 200, { ok: true, calls: recentCalls.slice().reverse() });
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/api/restart') {
+    sendJson(res, 202, { ok: true, restarting: true });
+    setTimeout(restartBridge, 25);
     return;
   }
 

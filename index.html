@@ -3697,11 +3697,37 @@ body {
     url.searchParams.set('meridian_reload', String(Date.now()));
     window.location.replace(url.toString());
   };
+  const waitForModelBridge = async () => {
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+      try {
+        const response = await fetch('http://127.0.0.1:8767/api/models', { cache: 'no-store' });
+        const result = await response.json();
+        if (result?.capabilities?.visibleTranscriptContext) return true;
+      } catch {
+        // Bridge may be between old and new process during reset.
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 250));
+    }
+    return false;
+  };
+  const restartModelBridge = async () => {
+    try {
+      await fetch('http://127.0.0.1:8767/api/restart', { method: 'POST', cache: 'no-store' });
+      await waitForModelBridge();
+    } catch {
+      // Reset still reloads the UI; offline bridge status remains visible after reload.
+    }
+  };
+  const resetUi = async () => {
+    clearSessionWindows();
+    await restartModelBridge();
+    hardReloadUi();
+  };
   buttons.forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
       const actionLabel = button.getAttribute('aria-label') || '';
       if (actionLabel === 'Reset') {
-        hardReloadUi({ clearSessions: true });
+        await resetUi();
         return;
       }
       if (actionLabel === 'Reload') {

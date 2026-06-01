@@ -181,6 +181,7 @@ Reset is a UI/session-window recovery control. It clears visible prompt/transcri
 | RST11 | Reset failure visibility | Shows readable error if reset storage clearing fails. | planned | Failure does not silently pretend reset succeeded. |
 | RST12 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
 | RST13 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
+| RST14 | Restart model bridge | Reset asks the local Meridian bridge to restart before reloading the UI, so stale bridge code does not survive reset. | wired | Click Reset; `/api/models` returns `visibleTranscriptContext: true` after reload. |
 
 ### Reload Surface Subitems
 
@@ -511,6 +512,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | MB7 | Model/context label appears below or near the response area when known. | Manual: send a follow-up request and confirm displayed model/source plus visible context count. |
 | MB8 | Visible session continuity | Follow-up prompts carry the visible panel transcript as bounded context, with no hidden backend memory. | Response metadata and `/api/recent-calls` record nonzero `sessionContextEntries` after a follow-up prompt. |
 | MB9 | Bridge capability guard | UI blocks prompt sends when the running bridge does not advertise visible transcript context support. | Old bridge shows restart-required status instead of silently sending stateless follow-ups. |
+| MB10 | Bridge restart endpoint | Local bridge exposes a same-port restart endpoint for Reset recovery. | `POST /api/restart` returns accepted, then `/api/models` comes back with visible-context capability. |
 
 ## Harness UI Rules
 
