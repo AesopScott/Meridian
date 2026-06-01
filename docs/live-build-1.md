@@ -1,6 +1,6 @@
 ﻿# Live Build 1 Queue
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Relay model-adapter metadata binding.
 
@@ -40,15 +40,31 @@ Ready for Codex Review.
 - Next Candidate Task awaiting promotion from Prime/Codex
 - Build 1 idle and polling for next task assignment
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: harden Relay prompt payload snapshot metadata edge cases after the metadata-binding slice lands.
 
 Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 
+Task: now that Relay model-adapter metadata binding is complete, add any missing provider-neutral payload evidence edge-case coverage needed for downstream Bifrost display. Keep the slice bounded to structured Relay evidence and preserve Aegis proof-gate behavior. Do not add vendor-specific presets, live model calls, network access, filesystem access, UI rendering, Bifrost changes, or package-export changes.
+
 Tests:
 
 - `python -m pytest tests/test_relay_executor.py tests/test_prompt_payload_meter.py -q`
+
+Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews A routes a repair before this slice is committed, complete that repair first.
+
+## Next Candidate Task
+
+Goal: bind Relay metadata review findings after Codex Reviews A completes the `cf5debf` review.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: if Codex Reviews A routes a finding from the Relay model-adapter metadata binding review, repair that finding before taking unrelated Relay work. If Reviews A passes the slice with no findings, Prime may replace this candidate with the next Relay/Model Harness item.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py tests/test_model_adapter.py -q`
 
 ## Codex Review Repair Completed / Ready for Codex Review
 

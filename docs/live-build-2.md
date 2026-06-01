@@ -4,13 +4,31 @@
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the Session Lifecycle permissions and Prime/Beacon binding handoff contract.
 
 Allowed files only: `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-build-2.md`.
 
 Task: create the docs-only handoff for the next Session Lifecycle slice after `SessionLifecycleState` and `SessionCommandPlan` review clears. Define how branch/worktree permission objects, restart/resteer findings, Beacon heartbeat/staleness observations, and Prime command recommendations should bind into Session Lifecycle without adding live process control. Do not edit runtime code, tests, FileMap, Bifrost, or review queues.
+
+Tests: none required (docs-only).
+
+Completion:
+
+- Build 2 completed this handoff contract in commit `04fd9ad`.
+- Queue write-log marker: `d1a49eb`.
+- Files changed: `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-build-2.md`.
+- Tests: not required (docs-only).
+- Routed to Codex Reviews A for docs/architecture review.
+
+## Coordinator Override - Active Now
+
+Goal: write the Session Lifecycle review-to-implementation checklist for the permissions binding slice.
+
+Allowed files only: `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/live-build-2.md`.
+
+Task: convert `docs/session-lifecycle-permissions-prime-beacon-contract.md` into a code-ready checklist for the eventual runtime implementation. Include permission object fields, Prime recommendation inputs, Beacon heartbeat/staleness inputs, branch/worktree gates, tests to write, and what must remain out of runtime execution. Keep this docs-only and do not edit runtime code, tests, FileMap, Bifrost, or review queues.
 
 Tests: none required (docs-only).
 
