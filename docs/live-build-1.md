@@ -12,6 +12,8 @@ Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executo
 
 Task: add focused, provider-neutral tests and implementation hooks for stop-condition evidence around the new Relay decision record. Cover unknown route class, unknown session action, unsafe silent fallback, missing proof refs, and Tier 3 dual-lane independence being absent or waived. Keep this bounded to data/evidence behavior. Do not add live vendor calls, account automation, CLI execution, UI rendering, filesystem/process control, branch movement, or vendor-specific secrets.
 
+Codex Reviews A finding to cover: `RelayDecisionRecord.vendor` and `RelayDecisionRecord.model_id` currently stay `None` even when Tier 2/3 routes dispatch and even when registry adapter metadata or lane preferred models can identify selected route/model facts. Add focused provider-neutral coverage so exact model/vendor identity is either populated from safe available metadata or explicitly represented as a blocking/unknown stop condition before nontrivial dispatch is treated as explainable.
+
 Tests:
 
 - `python -m pytest tests/test_relay_executor.py -q`
