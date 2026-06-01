@@ -132,7 +132,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Model Harness metadata fields for provider capability and prompt-drag telemetry.
 
@@ -144,9 +144,17 @@ Tests:
 
 - `python -m pytest tests/test_model_adapter.py -q`
 
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion:
 
-## Next Candidate Task
+- Build 1 completed this Model Harness metadata slice on 2026-05-31 ~22:15 -05:00.
+- Commit: `a8922c3`.
+- Files changed: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`.
+- Tests run: `python -m pytest tests/test_model_adapter.py -q` (31 passed).
+- Implementation: Added `ModelHarnessMetadata` dataclass with 7 required fields (provider_name, model_name, capability_tier, context_budget, prompt_payload_budget, trust_state, requires_external_review) and optional deepseek_candidate_state mapping. Updated ModelAdapter Protocol to include metadata property. Extended FakeModelAdapter, EnvConfiguredModelAdapter, and HttpJsonModelAdapter to provide metadata with sensible defaults.
+
+Ready for Codex Review. Push: `f96c41a` on `origin/main`.
+
+## Coordinator Override - Active Now
 
 Goal: wire prompt payload snapshot metadata into Relay dispatch evidence.
 
@@ -157,6 +165,12 @@ Task: after Model Harness metadata lands, add provider-neutral prompt payload sn
 Tests:
 
 - `python -m pytest tests/test_relay_executor.py tests/test_prompt_payload_meter.py -q`
+
+Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
+## Next Candidate Task
+
+(Will be assigned by Coordinator once current task completes and Codex review clears.)
 
 ## Archived Prior Candidate - Promoted Above
 
@@ -775,3 +789,4 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 [COMPLETED 2026-05-31 ~22:15 -05:00] Model Harness metadata fields for provider capability and prompt-drag telemetry — commit `a8922c3`; files: meridian_core/model_adapter.py, tests/test_model_adapter.py; tests: 31 targeted passed; Ready for Codex Review.
 
 2026-05-31 22:25 -05:00 - Build 1 checked queue; status: running (Prompt payload snapshot metadata task — Active Now)
+2026-05-31 22:30 -05:00 - Build 1 checked queue; status: running (Prompt payload snapshot metadata into Relay dispatch evidence task)
