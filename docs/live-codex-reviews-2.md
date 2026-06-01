@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Completed / Finding Routed
 
 Goal: review Build 4 Aegis repair and Build 5 Bifrost right-panel rendering.
+
+Status: blocked by Codex Reviews B on 2026-06-01 16:03 -06:00. Build 4 fixed structured Tier 3 waiver records, but Tier 2+ premium-cost approval can still allow from a bare `cost_justified=True`, and aggregator authority still lacks selected model/vendor evidence validation. Build 5 commit `80373a88` exists, but current `HEAD` no longer contains its right-panel mode dataclasses, render helpers, CSS, or tests. Focused repairs routed to Build 4 and Build 5.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
@@ -21,6 +23,16 @@ Proof commands:
 - `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q`
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+Review result:
+
+- `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` passed with 299 tests.
+- Build 4 pass: `gate_tier3_dual_lane_requirement()` now accepts `waiver_record: WaiverRecord | None`; valid structured waivers demote Tier 3 single-lane work and missing/invalid waivers block.
+- Finding 1: `meridian_core/aegis.py` `gate_cost_exposure()` still allows Tier 2+ premium cost from `cost_justified=True` before requiring `ApprovalRecord`, and `tests/test_aegis.py` still asserts that path. Why it matters: premium-cost approval can still bypass the structured actor/scope/timestamp/reason audit record. Recommended owning lane: Build 4.
+- Finding 2: `meridian_core/aegis.py` `gate_aggregator_authority()` still accepts only `trust_mode`, `risk_tier`, and `proof_strength`; it does not validate selected model/vendor evidence before allowing Tier 2 aggregator routes. Why it matters: Relay/Bifrost can still show or dispatch an aggregator allowance without proof of the concrete provider/model. Recommended owning lane: Build 4.
+- Finding 3: current `HEAD` for `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, and `tests/test_bifrost_cockpit.py` does not include the right-panel mode implementation introduced by Build 5 commit `80373a88`; `git diff 80373a88..HEAD` shows the mode dataclasses, render helpers, CSS, and tests removed. Why it matters: the active Build 5 mode-switching task depends on static/sample right-panel rendering that is absent from the current codebase. Recommended owning lane: Build 5.
+
+Completion: focused repairs routed into `docs/live-build-4.md` and `docs/live-build-5.md`. Next candidate remains Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
 
 ## Next Candidate Task
 
@@ -1178,6 +1190,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-06-01 15:22 -06:00 - Reviewed Build 5 right-panel mode/UI checklist design before implementation; result: pass; tests: not run (docs-only review); notes: User Session, Settings, and Harness modes are separated; Settings/Harness use full-panel non-prompt surfaces; User Session routing requirements include selected open live sessions, hidden/test-waiting labels, alphabetical project/session grouping, title update, immediate routing, stale-target guard, and restore behavior; Relay docs require harness logic items and keep Auto disabled until Relay proof/metadata exists.
 2026-06-01 15:35 -06:00 - Reviewed Build 4 commit a8a7aca8 and Build 3 FileMap follow-up readiness; result: blocked for Build 4 contract repair / pass for Build 3 readiness; tests: `python -m pytest tests/test_filemap.py -q` -> 46/46 passed in 0.09s; notes: Relay-Aegis gate contract covers account-first, direct-before-aggregator, Tier 3 dual-lane, Tier 4 human-gate, no-silent-fallback, and stop-condition semantics, but has three runtime-test ambiguities around Tier 2 DeepSeek pending status, Tier 2 aggregator allowance/blocking, and waiver/approval evidence fields; Build 3 FileMap coverage is sufficient.
 2026-06-01 15:53 -06:00 - Reviewed Build 4 Aegis route-gate runtime slice and Build 3 FileMap registrations; result: blocked for Build 4 repair / pass for Build 3 registrations; tests: `python -m pytest tests/test_aegis.py tests/test_filemap.py -q` -> 212/212 passed; notes: nine gate helpers are pure/deterministic with allow/demote/block tests, but waiver/cost approval gates still accept bare booleans and aggregator authority does not validate selected model/vendor evidence; FileMap coverage includes Relay executor, Aegis gate contract, and Bifrost right-panel contract.
+2026-06-01 16:03 -06:00 - Reviewed Build 4 Aegis repair commit a4826c14 / merge d15c83e0 and Build 5 right-panel rendering commit 80373a88; result: blocked for Build 4 and Build 5 repairs; tests: `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` -> 299/299 passed; notes: structured waiver records are present, but Tier 2+ premium cost still allows from bare `cost_justified=True`, aggregator authority still lacks selected model/vendor evidence validation, and current `HEAD` no longer contains the Build 5 right-panel mode implementation from `80373a88`.
 
 ## Proof Log
 
@@ -1211,6 +1224,7 @@ Minimum proof expectations:
 2026-06-01 15:22 -06:00 - Proof for Build 5 right-panel mode/UI checklist design; proof type: reference/manual; evidence: inspected `docs/ui-integration-checklist.md`, missing optional `docs/bifrost-right-panel-mode-contract.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and `docs/live-build-5.md`; `rg` confirmed SUR/USE/HMS requirements for non-prompt Settings/Harness modes and selected live-session routing, plus Relay logic-item/Auto-disabled constraints; result: pass.
 2026-06-01 15:35 -06:00 - Proof for Build 4 Relay-Aegis gate contract and Build 3 FileMap readiness; proof type: test/reference/manual; evidence: `python -m pytest tests/test_filemap.py -q` -> 46/46 passed; `rg` over `docs/relay-aegis-risk-proof-gates.md`, `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/model-harness-v2-contract.md` found contradictory Tier 2 DeepSeek/aggregator wording and missing waiver/approval evidence fields; `rg` over FileMap surfaces confirmed Relay, Session Lifecycle, Relay executor, and Relay-Aegis gate artifacts are registered in docs/FileMap.md, meridian_core/filemap.py, and tests/test_filemap.py; result: blocked for Build 4 repair / pass for Build 3 readiness.
 2026-06-01 15:53 -06:00 - Proof for Build 4 Aegis route-gate runtime and Build 3 FileMap registrations; proof type: test/reference/manual; evidence: `python -m pytest tests/test_aegis.py tests/test_filemap.py -q` -> 212/212 passed; `rg` confirmed `gate_tier3_dual_lane_requirement(... has_waiver: bool)`, `gate_cost_exposure(... cost_justified: bool)`, and `gate_aggregator_authority()` without selected-model evidence, while the repaired contract requires structured waiver/approval records and selected model/vendor evidence for Tier 2 aggregator routes; FileMap surfaces include relay_executor, relay-aegis-risk-proof-gates, and bifrost-right-panel-mode-contract; result: blocked for Build 4 repair / pass for Build 3 registrations.
+2026-06-01 16:03 -06:00 - Proof for Build 4 Aegis repair and Build 5 right-panel rendering; proof type: test/reference/manual; evidence: `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` -> 299/299 passed; `rg` and direct inspection confirm `WaiverRecord` is used by the Tier 3 dual-lane gate, but `gate_cost_exposure("PREMIUM", True, 2)` still allows without `ApprovalRecord` and `gate_aggregator_authority()` has no selected model/vendor evidence parameters; `git diff 80373a88..HEAD -- bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py` shows the right-panel mode dataclasses, render helpers, CSS, and tests from `80373a88` removed at current `HEAD`; result: blocked for Build 4 and Build 5 repairs.
 
 ## Findings
 
@@ -1236,6 +1250,9 @@ YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LO
 2026-06-01 15:53 -06:00 - Build 4 Aegis runtime gate slice; severity: HIGH; file: meridian_core/aegis.py / tests/test_aegis.py; finding: `gate_tier3_dual_lane_requirement()` accepts `has_waiver: bool` and tests prove a bare `True` demotes Tier 3 single-lane work, despite the repaired contract forbidding bare waiver booleans; action: repair-task-written.
 2026-06-01 15:53 -06:00 - Build 4 Aegis runtime gate slice; severity: HIGH; file: meridian_core/aegis.py / tests/test_aegis.py; finding: `gate_cost_exposure()` accepts `cost_justified: bool` and tests prove premium Tier 2 cost can allow from that boolean without approval-record evidence; action: repair-task-written.
 2026-06-01 15:53 -06:00 - Build 4 Aegis runtime gate slice; severity: MEDIUM; file: meridian_core/aegis.py / tests/test_aegis.py; finding: `gate_aggregator_authority()` allows Tier 2 aggregator routes based on proof strength but does not validate selected model/vendor evidence required by the repaired contract; action: repair-task-written.
+2026-06-01 16:03 -06:00 - Build 4 Aegis repair; severity: HIGH; file: meridian_core/aegis.py / tests/test_aegis.py; finding: `gate_cost_exposure()` still returns ALLOW for Tier 2 premium cost when `cost_justified=True`, before requiring structured `ApprovalRecord`; action: repair-task-written.
+2026-06-01 16:03 -06:00 - Build 4 Aegis repair; severity: MEDIUM; file: meridian_core/aegis.py / tests/test_aegis.py; finding: `gate_aggregator_authority()` still lacks selected model/vendor evidence inputs and tests, so Tier 2 aggregator allowance can pass without concrete provider/model evidence; action: repair-task-written.
+2026-06-01 16:03 -06:00 - Build 5 Bifrost right-panel rendering; severity: HIGH; file: bifrost/cockpit.py / bifrost/static/cockpit.css / tests/test_bifrost_cockpit.py; finding: current `HEAD` no longer contains the static/sample right-panel mode implementation from `80373a88`, while Build 5's next mode-switching task depends on that renderer; action: repair-task-written.
 
 ## Repair Routing Log
 
@@ -1252,6 +1269,8 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-05-31 22:44 -06:00 - Routed repair to Build 5; queue: docs/live-build-5.md; finding: commit `06e1c5c` defines provider balance/prompt payload render helpers but never inserts them into `render_cockpit_html()`, leaving the required visible surface absent; status: pending.
 2026-06-01 15:35 -06:00 - Routed repair to Build 4; queue: docs/live-build-4.md; finding: repair Relay-Aegis risk/proof gate contract contradictions for Tier 2 DeepSeek pending status, Tier 2 aggregator allowance/blocking, and waiver/approval evidence fields before runtime tests depend on the contract; status: pending.
 2026-06-01 15:53 -06:00 - Routed repair to Build 4; queue: docs/live-build-4.md; finding: runtime Aegis gates must replace bare waiver/cost booleans with structured waiver/approval records and require selected model/vendor evidence for Tier 2 aggregator allowance; status: pending.
+2026-06-01 16:03 -06:00 - Routed repair to Build 4; queue: docs/live-build-4.md; finding: close remaining Aegis gaps by blocking Tier 2+ premium cost unless a valid `ApprovalRecord` exists and requiring selected model/vendor evidence for Tier 2 aggregator allowance; status: pending.
+2026-06-01 16:03 -06:00 - Routed repair to Build 5; queue: docs/live-build-5.md; finding: restore the static/sample right-panel mode renderer from `80373a88` at current `HEAD` before mode-switching state tests continue; status: pending.
 
 ## Archived Prior Active Task - Do Not Execute
 
@@ -1529,6 +1548,7 @@ Write log:
 - 2026-06-01 15:53 -06:00 - Build 4 Aegis runtime gate and Build 3 FileMap registration review completed by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: `python -m pytest tests/test_aegis.py tests/test_filemap.py -q` (212 passed); commit: `0c52e2dd` (metadata completed in `413e6d12` and push-status update); push status: pushed to `origin/main`; Obsidian update status: not updated (repair routed in queue).
 - 2026-06-01 15:59 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `38c0432a` (metadata completed in `dce0a2de` and push-status update); push status: pushed to `origin/main`; Obsidian update status: not updated (no executable Active Task).
 - 2026-06-01 16:01 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `b7ca6e42` (metadata completed in `ee0d63cb` and push-status update); push status: pushed to `origin/main`; Obsidian update status: not updated (no executable Active Task).
+- 2026-06-01 16:03 -06:00 - Build 4 Aegis repair and Build 5 right-panel rendering review completed by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` (299 passed); commit: `0565cd79`; push status: pending; Obsidian update status: not updated (repair routed in queues).
 
 ## Coordinator Addendum - Round B5 V1 Cockpit Clearance
 
