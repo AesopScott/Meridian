@@ -4,21 +4,31 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: harden Relay decision-record stop-condition coverage while Codex review runs.
 
 Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 
-Task: add focused, provider-neutral tests and implementation hooks for stop-condition evidence around the new Relay decision record. Cover unknown route class, unknown session action, unsafe silent fallback, missing proof refs, and Tier 3 dual-lane independence being absent or waived. Keep this bounded to data/evidence behavior. Do not add live vendor calls, account automation, CLI execution, UI rendering, filesystem/process control, branch movement, or vendor-specific secrets.
+Task: add focused, provider-neutral tests and implementation hooks for stop-condition evidence around the new Relay decision record. Address Codex finding: populate vendor/model_id from safe available metadata or mark as unknown stop conditions for nontrivial dispatch.
 
-Codex Reviews A finding to cover: `RelayDecisionRecord.vendor` and `RelayDecisionRecord.model_id` currently stay `None` even when Tier 2/3 routes dispatch and even when registry adapter metadata or lane preferred models can identify selected route/model facts. Add focused provider-neutral coverage so exact model/vendor identity is either populated from safe available metadata or explicitly represented as a blocking/unknown stop condition before nontrivial dispatch is treated as explainable.
+Completion:
 
-Tests:
+- Build 1 completed Relay decision-record stop-condition coverage on 2026-06-12.
+- Commit: `f0bb2bb6` (feat: Add Relay decision-record stop-condition coverage and vendor/model_id population).
+- Merge commit: `ad46acc3` (integrated remote changes before final push).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (121 tests: 114 original + 7 new stop-condition tests).
+- Implementation: _build_decision_record() now accepts optional adapter_metadata; vendor populated from adapter.metadata.provider_name when available, "unknown" for Tier 2+ without metadata; model_id populated from builder lane preferred_model, "unknown" for Tier 2+ with no lanes; stop-condition detection for unknown_route_class, unknown_session_action, tier3_dual_lane_independence_missing, human_gate_proof_missing; explanation includes vendor binding status; fallback_blockers tracked as mutable list during generation, converted to tuple; execute_relay_plan_with_registry passes adapter metadata to decision record.
+- Push: successful to `origin/main` (commit `f0bb2bb6`, merge `ad46acc3`).
 
-- `python -m pytest tests/test_relay_executor.py -q`
+Ready for Codex Review.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+**Build 1 Read Check** — 2026-06-12 (post-completion)
+- Status: Relay decision-record stop-condition coverage task completed and marked Ready for Codex Review
+- Commits: `f0bb2bb6` (implementation) + `ad46acc3` (merge) pushed to origin/main; all 121 relay executor tests passing
+- Next Candidate Task (bind Codex review findings) awaiting promotion from Prime/Codex
+- Build 1 ready for next task assignment
 
 ## Next Candidate Task
 
