@@ -2043,3 +2043,10 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 - Task: Implement RelayExecutionSummary Aegis gate evidence fields serialization for downstream Bifrost/Prime surfaces
 - Scope: meridian_core/relay_executor.py, tests/test_relay_executor.py, docs/live-build-1.md
 - Beginning implementation
+
+**Build 1 Read Check** — 2026-06-12 13:55 UTC (Idle Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task found
+- Latest origin/main: commit `1323d5a9` (chore: advance V2 queues after repair clearance)
+- Previous Active Now task ("add Relay proof payload docs/FileMap registration request") already completed and marked Ready for Codex Review
+- Next Candidate Task: "add Relay proof payload negative-path tests" awaiting promotion from Prime/Codex
+- Build 1 idle and polling for next task assignment
