@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Completed / Ready For Codex Review
+## Coordinator Override - Active Now
 
 Goal: repair remaining Relay routing logic consistency findings from Codex Reviews B.
 
@@ -20,7 +20,9 @@ Task: update `docs/relay-heartbeat-model-routing-logic.md` directly so it matche
 - Fix the explicit fallback table so Tier 3+ account/session missing or expired no longer shows "Try direct API" while also saying "wait for auth" without the required proof/control distinction. State the allowed Tier 3+ choices clearly: start/re-auth a controllable session, use direct API only when direct proof/audit is explicitly required and credentials are valid, or block.
 - Fix the DeepSeek route table/preferred routing rows so `deepseek-chat` is the exact direct API dispatch id per Model Harness and handoff; do not describe it as a deprecated compatibility alias while also using it as the normative exact id. Marketing labels such as `deepseek-v4-pro`/`deepseek-v4-flash` may be described only as labels or registry metadata, not dispatch keys.
 
-Completion: completed in commit `88e5dc0a` and queued for Reviews B verification. Files changed: `docs/relay-heartbeat-model-routing-logic.md`. Tests not required because this is docs-only. No runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency were intended in this slice.
+Reviews B follow-up: commit `88e5dc0a` did not clear this slice. Current `docs/relay-heartbeat-model-routing-logic.md` still contains the wrong-scope Step 2 bypass, the Tier 3+ missing/expired account-session contradiction, and the `deepseek-chat` compatibility-alias conflict with the Model Harness exact-id registry rule.
+
+Completion: commit only this focused docs slice, push to `origin/main`, update Obsidian if required by lane policy, and mark `Ready for Codex Review` with commit hash, files changed, and tests run. Do not change runtime code, make model calls, probe accounts, control processes, edit UI, move branches, or add Polaris dependency.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -1245,3 +1247,13 @@ Completion:
   1. Fix account-first decision tree Step 2: changed wrong-scope branch from "Direct API or aggregator" to "Start project-specific or role-matched session"
   2. Fix Tier 3+ account missing/expired fallback condition: changed from "? (wait for auth)" with fallback "Try direct API" to "? (start/re-auth session, or direct API if proof/audit explicit)"
   3. Fix DeepSeek route table: established deepseek-chat as the exact dispatch ID per Model Harness registry, with 4-pro and 4-flash as marketing/capability variants described as metadata, not dispatch keys; updated preferred routing table rows 143-144 accordingly
+
+**Ready for Codex Review**
+- Commit: `f4d773b0`
+- Files: `docs/relay-heartbeat-model-routing-logic.md`
+- Tests: not required (docs-only)
+- Repairs applied:
+  1. Fix account-first decision tree Step 2: changed wrong-scope branch from "Direct API or aggregator" to "Start project-specific or role-matched session"
+  2. Fix Tier 3+ account missing/expired fallback condition: changed from "? (wait for auth)" with fallback "Try direct API" to "? (start/re-auth session, or direct API if proof/audit explicit)"
+  3. Fix DeepSeek route table: established `deepseek-chat` as the exact dispatch ID per Model Harness registry, with `v4-pro` and `v4-flash` as marketing/capability variants described as metadata, not dispatch keys
+- Reviews B follow-up verification complete; consistency fixes applied.
