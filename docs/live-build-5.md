@@ -99,7 +99,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: implement the Bifrost V2 voice I/O surface state.
 
@@ -119,15 +119,37 @@ Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only the allowed Bifrost files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews B routes a HUD-shell repair before this voice slice is committed, complete that repair first.
+Completion:
 
-## Next Candidate Task
+- Build 5 completed this Voice I/O surface in `ff4cb69`.
+- Queue marker/completion commits: `62c2bd7`, `9389f4e`, `93ff454`.
+- Files changed: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+- Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 93 tests; full suite passed with 1270 tests.
+- Routed to Codex Reviews B for Bifrost/UI review.
+
+Ready for Codex Review.
+
+## Active Task
 
 Goal: implement the Bifrost provider balance and prompt payload visibility surface.
 
 Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
 
 Task: after the Voice I/O surface state lands, add the first deterministic provider-balance and prompt-payload visibility surface from `docs/bifrost-balance-payload-surface-contract.md`. Keep it render-only: Bifrost displays provider/payload telemetry supplied by Relay/Model Harness and does not make routing decisions.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only the allowed Bifrost files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews B routes a Voice I/O repair before this provider/payload slice is committed, complete that repair first.
+
+## Next Candidate Task
+
+Goal: implement Bifrost session lifecycle preview state.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: after provider balance and prompt payload visibility land, add deterministic render-only session lifecycle state from the Session Lifecycle domain objects. Keep Bifrost display-only and do not add live session control, queue mutation, process control, or routing decisions.
 
 Tests:
 

@@ -4,7 +4,40 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 ## Coordinator Override - Active Now
 
+Goal: review Build 5 Bifrost V2 Voice I/O surface commit `ff4cb69`.
+
+Scope:
+
+- Build 5 implementation commit `ff4cb69`.
+- Queue/completion marker commits `62c2bd7`, `9389f4e`, and `93ff454`.
+- Queue provenance in `docs/live-build-5.md`.
+
+Allowed review files:
+
+- `bifrost/cockpit.py`
+- `bifrost/static/cockpit.css`
+- `tests/test_bifrost_cockpit.py`
+- `docs/live-build-5.md` for provenance only.
+- `docs/bifrost-voice-command-contract.md` for source-contract comparison only.
+
+Proof command:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Review expectations:
+
+- Verify listening, dictating, thinking, speaking, muted, and blocked voice states render deterministically from static/sample data.
+- Verify controls are inert display affordances only: no live microphone, TTS, model calls, queue mutation, process control, routing decisions, or filesystem/network effects.
+- Verify the large Prime prompt and quiet `PRIMED` core remain intact and old provider/build noise does not return.
+- If clean, clear Build 5 to continue provider balance and prompt payload visibility. If findings exist, route a focused repair back to Build 5 first.
+
+Completion: commit and push only `docs/live-codex-reviews-2.md` unless routing a repair into `docs/live-build-5.md`.
+
+## Completed / Finding Routed
+
 Goal: review Build 3 Session Lifecycle checklist FileMap registration commit `80ebea4`.
+
+Status: blocked by Codex Reviews B on 2026-05-31 22:21 -06:00. FileMap registration surfaces were updated and focused tests pass, but the registered checklist file is missing from `HEAD`. Repair routed to Build 3.
 
 Scope:
 
@@ -28,7 +61,14 @@ Review expectations:
 - Verify the FileMap entry is under the Session Lifecycle area and does not claim runtime implementation is complete.
 - If clean, clear Build 3 and leave its next candidate on the future Session Lifecycle runtime module registration. If findings exist, route a focused repair back to Build 3.
 
-Completion: commit and push only `docs/live-codex-reviews-2.md` unless routing a repair into `docs/live-build-3.md`.
+Review result:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `docs/session-lifecycle-implementation-checklist.md` is present in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- The registered path is not present on disk at `HEAD`; `Test-Path docs/session-lifecycle-implementation-checklist.md` returned `False`.
+- Because the FileMap now points to a missing checklist, Build 3 is not cleared.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` and repair routing in `docs/live-build-3.md`. Build 3 repair pending.
 
 ## Completed / Passed
 
@@ -758,11 +798,11 @@ Look for:
 
 ## Checkpoint Ledger
 
-Latest ledger note: as of 2026-05-31 22:18 -06:00, commit `4a2838c` is review-cleared for Build 5 Bifrost V2 browser-first HUD shell; no repair is routed.
+Latest ledger note: as of 2026-05-31 22:21 -06:00, Build 3 commit `80ebea4` is blocked: it registers `docs/session-lifecycle-implementation-checklist.md`, but the file is missing at `HEAD`; repair routed to Build 3.
 
 | Build lane | Last reviewed commit | Last reviewed task | Review status | Pending finding / repair | Next action |
 | --- | --- | --- | --- | --- | --- |
-| Build 3 | c90b05f | V2 FileMap drift audit registration for `docs/model-harness-v2-contract.md` | passed | none - FileMap tests passed and runtime map/docs/FileMap/required paths include the contract | next candidate: register Session Lifecycle implementation checklist after it lands and clears review |
+| Build 3 | 80ebea4 | Session Lifecycle checklist FileMap registration | blocked | MEDIUM: registered `docs/session-lifecycle-implementation-checklist.md` is missing on disk at `HEAD` | repair routed to Build 3 |
 | Build 4 | 0115581 | Workflows architecture note (Round B15) | passed-with-findings | MEDIUM: 5 V2 architecture docs need FileMap registration (echo-memory-contract.md, atlas-retrieval-contract.md, workflow-subagent-harness-contract.md, prime-autonomy-v2-contract.md, workflows-subagent-harness-architecture.md — from Rounds B11+B13+B14+B15 findings) | route consolidated 5-entry FileMap repair to Build 3; verify in next Build 3 cadence review |
 | Build 5 | 4a2838c | Bifrost V2 browser-first HUD shell | passed | none - focused tests pass and rendered HUD shell is Prime-command dominant, quiet, static/sample-data only, and display-only | Build 5 may proceed to Voice I/O surface task |
 
@@ -828,6 +868,14 @@ Tests to run: `python -m pytest tests/test_bifrost_cockpit.py -q`.
 Out of scope: Build-lane implementation work, runtime/live state harvesting, model routing behavior, Electron packaging, and unrelated Review A/runtime findings.
 Reason: Coordinator Override Active Now assigned Codex Reviews B to review Build 5 Bifrost V2 browser-first HUD shell commit `4a2838c`.
 
+2026-05-31 22:21 -06:00 - Round B18 scope
+Build lanes: Build 3
+Commit range(s): Build 3 80ebea4 (Session Lifecycle checklist FileMap registration).
+Allowed review files: diff/current files only - meridian_core/filemap.py, docs/FileMap.md, tests/test_filemap.py; docs/live-build-3.md for provenance and repair routing only.
+Tests to run: `python -m pytest tests/test_filemap.py -q`.
+Out of scope: Session Lifecycle runtime/API behavior, Build 2 source review, and unrelated build-lane product work.
+Reason: Coordinator Override Active Now assigned Codex Reviews B to review Build 3 Session Lifecycle checklist FileMap registration commit `80ebea4`.
+
 ## Read Checks
 
 Append entries here when this file is checked while idle.
@@ -868,6 +916,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 2026-05-31 22:13 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; archived/stale Active Task sections were not executed; no review scope opened.
 2026-05-31 22:16 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; archived/stale Active Task sections were not executed; no review scope opened.
 2026-05-31 22:18 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; executable Coordinator Override Active Now found for Build 5 commit 4a2838c; starting Round B17 review.
+2026-05-31 22:21 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; executable Coordinator Override Active Now found for Build 3 commit 80ebea4; starting Round B18 review.
 
 ## Review Log
 
@@ -886,6 +935,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-31 03:41 -06:00 - Reviewed Build 5 commit 9328272 (Round B8 final V1 cockpit review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 104/104 passed in 0.13s; notes: Harness Dashboard is static, view-only, grouped, and escaped; no queue/log/env/prompt reads, no JavaScript, no persistence, and no mutation controls; existing Bifrost files are already registered so no FileMap repair is required.
 2026-06-01 21:45 -06:00 - Reviewed Build 3 commit c90b05f (+ queue marker 260227e); result: pass; tests: `python -m pytest tests/test_filemap.py -q` -> 46/46 passed in 0.25s; notes: `docs/model-harness-v2-contract.md` exists and is registered in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS` under Model Harness; audit checklist marks the path covered; no runtime/provider routing authority claimed.
 2026-05-31 22:18 -06:00 - Reviewed Build 5 commit 4a2838c (Round B17 HUD shell review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 80/80 passed in 0.17s; notes: rendered HUD has quiet PRIMED core, dominant Prime prompt, project drilldown/session state, harness scoped prompts, voice state surface, mission feed, and instrument band; old provider/build/top-nav/review labels are absent; no model calls, mutation controls, live microphone/TTS, or Electron-only dependency found.
+2026-05-31 22:21 -06:00 - Reviewed Build 3 commit 80ebea4 (Round B18 Session Lifecycle checklist FileMap registration); result: blocked; tests: `python -m pytest tests/test_filemap.py -q` -> 46/46 passed in 0.11s; notes: registration exists in runtime FileMap, docs/FileMap, and `_REQUIRED_PATHS`, but `docs/session-lifecycle-implementation-checklist.md` is missing from `HEAD`; repair routed to Build 3.
 
 ## Proof Log
 
@@ -913,6 +963,7 @@ Minimum proof expectations:
 2026-05-31 03:41 -06:00 - Proof for Build 5 commit 9328272; proof type: test/diff/manual; evidence: `git show --stat --oneline 9328272 -- bifrost/__init__.py bifrost/cockpit.py bifrost/static/cockpit.css tests/test_bifrost_cockpit.py docs/live-build-5.md` shows a bounded Bifrost Harness Dashboard slice; `python -m pytest tests/test_bifrost_cockpit.py tests/test_cockpit_state.py -q` -> 104/104 passed; manual inspection confirms view-only grouped cards, capability chips, planned placeholders, attention/status hooks, escaped harness text, and no new file paths requiring FileMap registration; result: pass.
 2026-06-01 21:45 -06:00 - Proof for Build 3 commit c90b05f; proof type: test/diff/reference; evidence: `git show c90b05f -- meridian_core/filemap.py tests/test_filemap.py docs/FileMap.md docs/filemap-v2-v3-discoverability-audit.md` shows the single Model Harness contract registration across all FileMap surfaces; `rg model-harness-v2-contract ...` confirms runtime/docs/test/audit coverage; `python -m pytest tests/test_filemap.py -q` -> 46/46 passed; result: pass.
 2026-05-31 22:18 -06:00 - Proof for Build 5 commit 4a2838c; proof type: test/diff/manual/reference; evidence: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 80/80 passed; rendered HTML check confirmed PRIMED/prompt/project/harness/voice surfaces and old-label absence; `rg` scan found no live model call, filesystem mutation, queue mutation, microphone/TTS plumbing, or Electron-only dependency; source comparison to `docs/bifrost-v2-cockpit-extensions.md` matched the required Prime-first HUD direction; result: pass.
+2026-05-31 22:21 -06:00 - Proof for Build 3 commit 80ebea4; proof type: test/diff/reference; evidence: `git show 80ebea4 -- meridian_core/filemap.py docs/FileMap.md tests/test_filemap.py` shows registration in all three FileMap surfaces; `python -m pytest tests/test_filemap.py -q` -> 46/46 passed; `Test-Path docs/session-lifecycle-implementation-checklist.md` returned False; result: blocked.
 
 ## Findings
 
@@ -929,6 +980,8 @@ YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LO
 2026-05-30 23:30 -06:00 - Build 5 commit 7c34566; severity: MEDIUM; file: docs/FileMap.md and meridian_core/filemap.py (missing entries); finding: `docs/bifrost-harness-dashboard-brief.md` (created in this slice) and `docs/bifrost-v0-cockpit-layout-brief.md` (created earlier in Build 5 commit `d1d32af`) are both uncatalogued. Brief explicitly disclaims FileMap edits in §15 (docs-only, strategic, "does not authorize runtime code, FileMap edits, or package-API changes"), so this is a Build 3 follow-up; action: repair-task-written (bundled with the Build 4 missing entries into a single Build 3 Active Task).
 2026-05-31 10:20 -06:00 - Build 3 commit 1378bda; severity: MEDIUM; file: docs/FileMap.md and meridian_core/filemap.py (missing entry); finding: `docs/live-codex-reviews-2.md` was created in commit `3de9c74` (post-baseline 4075ef4) and is still absent from both FileMap.md and filemap.py. Parallel to the already-cataloged `docs/live-codex-reviews.md`. Build 3's 1378bda Active Task explicitly asked "note them in the cross-check section, do not silently bundle" for other new docs, but Build 3 did neither (no cross-check entry, no inclusion); action: repair-task-written (small follow-up Active Task into docs/live-build-3.md — one FileMap.md row, one FileMapEntry, one `_REQUIRED_PATHS` line).
 2026-05-31 10:20 -06:00 - Build 3 commit 1378bda; severity: LOW (carryover); file: docs/FileMap.md vs meridian_core/filemap.py (entries for `docs/live-codex-reviews.md` and `docs/prime-orchestration-harness-prototype.md`); finding: the 2 LOW prose-divergence findings recorded in Round B1 remain present; Build 3 1378bda did not opportunistically reconcile them (permitted by its Active Task's "out of scope" allowance); action: defer (re-recorded as carryover so the follow-up Build 3 task can fold them in opportunistically).
+
+2026-05-31 22:21 -06:00 - Build 3 commit 80ebea4; severity: MEDIUM; file: docs/session-lifecycle-implementation-checklist.md / docs/FileMap.md / meridian_core/filemap.py / tests/test_filemap.py; finding: FileMap registration adds `docs/session-lifecycle-implementation-checklist.md` to runtime FileMap, docs/FileMap, and `_REQUIRED_PATHS`, but the registered checklist file is absent from `HEAD`; action: repair-task-written.
 
 ## Repair Routing Log
 
