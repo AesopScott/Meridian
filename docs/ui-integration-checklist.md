@@ -112,7 +112,7 @@ The User panel needs a Sessions dropdown that mirrors the Prime panel's Projects
 | SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
 | SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | planned | Track `CLS-*` subitems before wiring the surface. |
 | SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | planned | Track `ARC-*` subitems before wiring the surface. |
-| SK11 | Reset | Clears session-window prompts/transcripts and then hard reloads UI. | partial | Track `RST-*` subitems before changing reset behavior. |
+| SK11 | Reset | Confirms, clears session-window prompts/transcripts, then hard reloads UI. | partial | Track `RST-*` subitems before changing reset behavior. |
 | SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | partial | Track `RLD-*` subitems before changing reload behavior. |
 | SK13 | Routines | Opens routine/automation surface. | planned | Until wired, no fake routine status. |
 | SK14 | Balance | Opens balance/provider/routing view. | planned | Until wired, it must not make routing claims. |
@@ -127,14 +127,15 @@ Reset is a UI/session-window recovery control. It clears visible prompt/transcri
 | RST2 | Clear User prompt draft | Clears unsent User prompt input. | partial | Type draft, click Reset, draft is gone after reload. |
 | RST3 | Clear Prime transcript view | Clears visible Prime session-window transcript. | partial | Send Prime text, click Reset, Prime window is empty after reload. |
 | RST4 | Clear User transcript view | Clears visible User session-window transcript. | partial | Send User text, click Reset, User window is empty after reload. |
-| RST5 | Clear model status labels | Clears transient sending/ready/setup labels in the session windows. | planned | Reset removes stale model status text. |
-| RST6 | Preserve selected project policy | Preserves or restores selected project according to Settings persistence, not transcript reset. | planned | Reset behavior matches project persistence setting. |
-| RST7 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | planned | Live session list is unchanged after Reset. |
-| RST8 | Preserve archive | Does not modify archived sessions. | planned | Archive count/state unchanged after Reset. |
-| RST9 | Cache-bust reload | Performs hard reload with cache-bust after clearing UI session state. | partial | URL/cache marker changes and page reloads. |
-| RST10 | Reset failure visibility | Shows readable error if reset storage clearing fails. | planned | Failure does not silently pretend reset succeeded. |
-| RST11 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
-| RST12 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
+| RST5 | Confirmation gate | Requires confirmation before clearing non-empty prompt/transcript state; may skip confirmation when both panels are already empty. | planned | Non-empty panels prompt for confirmation; empty panels reset directly. |
+| RST6 | Clear model status labels | Clears transient sending/ready/setup labels in the session windows. | planned | Reset removes stale model status text. |
+| RST7 | Preserve selected project policy | Preserves or restores selected project according to Settings persistence, not transcript reset. | planned | Reset behavior matches project persistence setting. |
+| RST8 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | planned | Live session list is unchanged after Reset. |
+| RST9 | Preserve archive | Does not modify archived sessions. | planned | Archive count/state unchanged after Reset. |
+| RST10 | Cache-bust reload | Performs hard reload with cache-bust after clearing UI session state. | partial | URL/cache marker changes and page reloads. |
+| RST11 | Reset failure visibility | Shows readable error if reset storage clearing fails. | planned | Failure does not silently pretend reset succeeded. |
+| RST12 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
+| RST13 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
 
 ### Reload Surface Subitems
 
