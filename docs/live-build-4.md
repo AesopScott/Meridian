@@ -8,6 +8,28 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: deepen the Relay harness model-selection logic for Prime-led orchestration.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, `docs/live-build-4.md`.
+
+Required sources: current `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-validation-benchmark-plan.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, and Scott's current direction that Prime normally chooses models through Relay harness logic while manual model selection remains optional until Auto exists.
+
+Task: expand the architecture logic so Prime can decide which model/vendor/session path to use without missing important gates. Include account-first CLI/session use before paid API fallback, explicit API fallback conditions, Anthropic/OpenAI/OpenRouter/DeepSeek direct roles, when dual-model or external Codex review is required, when to start a new session because context is filling or reasoning/work type shifts, when to summarize/reset/transfer/archive, how cost/token/rate-limit/account exhaustion changes the route, and what must block rather than guess. Keep this docs-only; do not edit runtime code, Bifrost/UI, FileMap, tests, accounts, processes, branches, or Polaris.
+
+Tests: docs-only; no pytest required.
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: convert the deepened Relay harness model-selection logic into an implementation checklist after Codex review clears.
+
+Allowed files only: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/live-build-4.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Aegis-to-Relay summary handoff contract field-shape mismatches found by Codex Reviews B.
