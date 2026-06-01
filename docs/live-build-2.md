@@ -4,6 +4,39 @@
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: repair the Session Lifecycle implementation checklist provenance before runtime implementation proceeds.
+
+Context:
+
+- Codex Reviews A reviewed the Build 2 checklist marker for commit `0296525`.
+- `docs/live-build-2.md` says `docs/session-lifecycle-implementation-checklist.md` was created and is Ready for Codex Review.
+- Current `HEAD` does not contain `docs/session-lifecycle-implementation-checklist.md`; the reviewed commit `0296525` only changes `docs/live-build-2.md`.
+- The runtime task below depends on this checklist, so it must not proceed until the artifact exists in `HEAD`.
+
+Allowed files only:
+
+- `docs/session-lifecycle-implementation-checklist.md`
+- `docs/live-build-2.md`
+
+Required fix:
+
+- Restore or recreate `docs/session-lifecycle-implementation-checklist.md` from the reviewed Session Lifecycle contract.
+- Ensure the checklist covers the intended code-ready enums, dataclasses, fields, legality helpers, executability helpers, proof expectations, tests, and out-of-scope boundaries.
+- Update this queue with the repair commit hash, files changed, tests run, and Obsidian status.
+- Do not implement `meridian_core/session_lifecycle.py` or `tests/test_session_lifecycle.py` in this repair.
+
+Tests:
+
+- No tests required; docs-only.
+
+Completion:
+
+- Commit only the allowed repair files.
+- Push to `origin/main`.
+- Mark the repair Ready for Codex Review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the V2 Session Lifecycle contract so Prime can spawn, watch, steer, recover, and hand off sessions through typed state instead of ad hoc UI supervision.
@@ -471,6 +504,7 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <list>; tests <result>; Ready for Codex Review
+2026-06-05 03:40 -06:00 - Build 2 completed Session Lifecycle runtime implementation (Coordinator Override); commit 910e652; files: meridian_core/session_lifecycle.py (347 lines), tests/test_session_lifecycle.py (170 lines); enums: SessionStatus/HarnessRole/CommandIntent/ReviewCadenceState/ProofState/HealthState; dataclasses: SessionLifecycleState (frozen, 17 fields), SessionCommandPlan (frozen, 16 fields); helpers: is_idle/is_healthy/can_accept_work/heartbeat_stale/is_executable/requires_aegis_approval/is_legal/verify_state_transition_legal/to_dict; tests: 12 passed (immutability, helpers, legality, executability, serialization); push: 910e652; Ready for Codex Review
 2026-06-05 02:46 -06:00 - Build 2 completed Session Lifecycle implementation checklist (Coordinator Override); created docs/session-lifecycle-implementation-checklist.md from contract; content: 6 enums (SessionStatus/HarnessRole/CommandIntent/ReviewCadenceState/ProofState/HealthState), 2 frozen dataclasses (SessionLifecycleState/SessionCommandPlan) with 10+ helpers, legality matrix, proof specs, executability rules, ~60 test cases, explicit out-of-scope items; files: docs/session-lifecycle-implementation-checklist.md, docs/live-build-2.md; tests none required (docs-only); Ready for Codex Review; push: pending; Obsidian: pending
 2026-06-05 02:45 -06:00 - Build 2 linter repair: is_executable() now gates on human_gate_required; commit 594e0d9 (merged as 631e764); tests 30 passed; anomaly: commit swept in staged changes from shared main worktree (live-build-4.md, live-build-5.md, FileMap, 3 deleted docs — all from other sessions, code verified correct); addressing Codex Reviews A MEDIUM finding from 2026-05-31 13:06; Ready for Codex Review
 2026-05-31 13:06 -06:00 - Codex Reviews A routed MEDIUM repair task for PrimeNextAction human-gate executability; files changed: docs/live-build-2.md; tests run by Reviews A before routing: `python -m pytest tests/test_prime_autonomy.py -q` 30 passed, `python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q` 76 passed; commit pending from Reviews A; push pending; Obsidian status: updated `Meridian_Build/2026-05-31 Prime Autonomy Human Gate Review Finding.md`.
