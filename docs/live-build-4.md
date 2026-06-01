@@ -618,6 +618,8 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-13 17:50 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = add Aegis aggregate route-gate summary tests; coordinator promoted Next Candidate to Active Now; pulling origin/main in worktree; beginning implementation of aggregate multi-gate summary functions (preserve highest severity, retain evidence/waiver/approval/model-vendor status, expose downstream action)
 2026-06-13 17:55 -05:00 - Build 4 checked queue; status: idle; aggregate route-gate summary tests task implementation complete; commit c0ca5ce9 merged to origin/main; all 190 tests passing (182 prior + 8 new aggregate summary tests); marking task Ready for Codex Review and updating queue file
 2026-06-13 17:56 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; aggregate summary tests marked Ready for Codex Review (commit e08313ca); Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date
+2026-06-13 18:00 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = repair remaining Aegis premium-cost approval gate finding; executor restarted with coordinator-promoted task; pulling origin/main in worktree; beginning implementation of ApprovalRecord enforcement for Tier 2+ premium cost
+2026-06-13 18:01 -05:00 - Build 4 checked queue; status: idle; premium-cost approval gate repair task completed; commit 29592bb2 merged to origin/main; all 191 tests passing (190 prior + 1 new test); task marked Ready for Codex Review (commit 9fd85c13); Next Candidate Task (Aegis-to-Relay summary handoff contract) awaits coordinator promotion; origin/main up to date; cadence 1/3
 ```
 
 ## Write/Completion Log
