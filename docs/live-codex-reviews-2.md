@@ -6,6 +6,26 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: review Build 1 Echo/Atlas handoff review note.
+
+Scope:
+
+- Build 1 commits `a350f7f` and `1c81d2b`.
+- File under review: `docs/echo-atlas-handoff-review-note.md`.
+- Queue provenance only: `docs/live-build-1.md`.
+
+Review expectations:
+
+- Verify the note accurately distinguishes Echo as durable decision/context memory and Atlas as file/doc retrieval.
+- Verify it does not overclaim runtime maturity, live persistence, embeddings, cross-project retrieval, automatic gap detection, or Prime runtime wiring.
+- Verify follow-up work is phrased as V2/V3 follow-up items rather than already-built capability if current runtime evidence does not prove it.
+- Verify the note routes FileMap/Atlas integration, Prime composition, Relay/context use, and persistence gaps to appropriate future owners.
+- If findings exist, route a focused docs repair back to Build 1. If clean, record proof and clear the docs/architecture slice.
+
+Proof: docs-only review; no tests required unless the review touches runtime code.
+
 ## Completed / Passed
 
 Goal: review the recent Bifrost browser-first cockpit UI commits after Scott's declutter steering.

@@ -33,6 +33,7 @@ class FileArea:
     OBJECTIVES       = "Mission Objectives recall"
     RISK_ENGINE      = "Risk Tier Engine"
     COUNCIL          = "Council cognition"
+    PRIME_AUTONOMY   = "Prime Autonomy"
     PLANNING         = "Planning harness"
     RELAY_ROUTING    = "Relay routing"
     RELAY_DISPATCH   = "Relay dispatch"
@@ -363,11 +364,39 @@ def make_default_map() -> FileMap:
             notes="Domain-only. Measures Relay overhead vs. vendor baseline. See docs/relay-prompt-metrics-integration-brief.md.",
         ),
         FileMapEntry(
+            path="meridian_core/prompt_payload_meter.py",
+            area=FileArea.PROMPT_METRICS,
+            purpose="Relay prompt payload visibility helper: PromptPayloadSnapshot and PayloadStatus classify prompt size, budget pressure, growth deltas, and Q-mode prompt drag.",
+            related_tests=["tests/test_prompt_payload_meter.py"],
+            notes="V2 helper for visible prompt payload meter. Pure deterministic logic; no model calls, filesystem reads, or live dispatch.",
+        ),
+        FileMapEntry(
+            path="tests/test_prompt_payload_meter.py",
+            area=FileArea.PROMPT_METRICS,
+            purpose="Regression tests for PromptPayloadSnapshot and PayloadStatus, including zero/invalid budget failure-soft behavior and queue-mode growth detection.",
+            related_tests=[],
+            notes="Read before changing prompt payload thresholds or display-label semantics.",
+        ),
+        FileMapEntry(
             path="docs/relay-prompt-metrics-integration-brief.md",
             area=FileArea.PROMPT_METRICS,
             purpose="Architectural plan for wiring PromptMetricSample collection into Relay dispatch, including Polaris-style visible prompt payload size, budget pressure, and growth/flat status in Bifrost/Compass surfaces.",
             related_tests=[],
             notes="Planning only; no runtime changes yet.",
+        ),
+        FileMapEntry(
+            path="meridian_core/prime_autonomy.py",
+            area=FileArea.PRIME_AUTONOMY,
+            purpose="Prime next-action domain model: immutable PrimeNextAction with action type, confidence, risk tier, source, targets, blockers, human gate, rationale, and evidence refs.",
+            related_tests=["tests/test_prime_autonomy.py"],
+            notes="V2 Prime Autonomy seed. Human-gated actions are not executable until a later approval model records approval.",
+        ),
+        FileMapEntry(
+            path="tests/test_prime_autonomy.py",
+            area=FileArea.PRIME_AUTONOMY,
+            purpose="Regression tests for PrimeNextAction, fallback/strict constructors, immutable evidence/blocker sets, confidence/risk mappings, and human-gate executability.",
+            related_tests=[],
+            notes="Read before changing PrimeNextAction execution semantics or public constructor behavior.",
         ),
         FileMapEntry(
             path="meridian_core/prompt_packet.py",
@@ -472,34 +501,6 @@ def make_default_map() -> FileMap:
             purpose="Workflow subagent harness contract: expanded harness framework for V2. Defines multi-step workflows, tool orchestration, decision parallelism, and integration with Prime's stronger autonomy.",
             related_tests=[],
             notes="V2 entry-point. Read before designing or implementing new harness types or multi-step workflow orchestration.",
-        ),
-        FileMapEntry(
-            path="docs/session-lifecycle-v2-contract.md",
-            area=FileArea.ARCHITECTURE,
-            purpose="Session Lifecycle V2 contract: Prime's typed session management for spawn, watch, steer, recover, transfer, and archive. Defines SessionLifecycleState, SessionHeartbeat, and per-lane fields for queue, role, worktree, model, cadence, and proof state.",
-            related_tests=[],
-            notes="V2 entry-point. Read before implementing Prime session lifecycle logic or Bifrost session rendering.",
-        ),
-        FileMapEntry(
-            path="docs/federation-harness-horizon.md",
-            area=FileArea.ARCHITECTURE,
-            purpose="Federation Harness horizon plan: V2 planning boundary for connecting Meridian instances. Defines discovery, permission, Prime-to-Prime handoff, and shared-work principles without V3 runtime implementation.",
-            related_tests=[],
-            notes="V2 planning only. Do not pull Federation runtime into V0, V1, or V2 build.",
-        ),
-        FileMapEntry(
-            path="docs/session-card-queue-activation-contract.md",
-            area=FileArea.ARCHITECTURE,
-            purpose="Session card queue activation contract: product/UI contract for Q-mode queue activation inherited from Polaris. Defines per-session queue binding, idle polling, heartbeat visibility, and Prime recovery without manual supervision.",
-            related_tests=[],
-            notes="V2 entry-point. Read before implementing session queue activation or queue polling behavior in Bifrost or Session Lifecycle.",
-        ),
-        FileMapEntry(
-            path="docs/deepseek-provider-validation-gate.md",
-            area=FileArea.ARCHITECTURE,
-            purpose="DeepSeek provider validation gate: defines the staged validation process for DeepSeek as a candidate model provider. Starts in candidate state; Prime must not assign autonomous code-writing or orchestration authority until the gate is passed.",
-            related_tests=[],
-            notes="V2 entry-point. Read before adding DeepSeek to Relay routing or assigning autonomous coding lanes.",
         ),
 
         FileMapEntry(

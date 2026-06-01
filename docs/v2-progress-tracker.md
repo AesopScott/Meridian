@@ -10,7 +10,7 @@
 
 | Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Prime Autonomy | 0 | 0 | 0 | 2 | 2 | 0% |
+| Prime Autonomy | 1 | 0 | 0 | 1 | 2 | 50% |
 | Echo Harness | 1 | 0 | 2 | 0 | 3 | 100% |
 | Atlas Harness | 0 | 0 | 1 | 2 | 3 | 33% |
 | Relay/Model Harness | 2 | 0 | 1 | 4 | 7 | 43% |
@@ -18,9 +18,13 @@
 | Session Lifecycle Harness | 1 | 0 | 1 | 1 | 3 | 67% |
 | Bifrost Harness | 0 | 0 | 0 | 7 | 7 | 0% |
 | Federation Harness | 0 | 0 | 0 | 1 | 1 | 0% |
-| **Total V2** | **6** | **0** | **5** | **17** | **28** | **21% Clear + 0% Awaiting + 18% Baseline** |
+| **Total V2** | **7** | **0** | **5** | **16** | **28** | **25% Clear + 0% Awaiting + 18% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
+
+### Prime Autonomy
+
+- [x] **Prime + Autonomy Contract:** `PrimeNextAction` domain object with action type, confidence, blockers, human-gate requirements, immutable evidence, and deterministic executability semantics - built in `40def3d`, repaired in `39c9ac8`; review cleared by Reviews C on 2026-05-31.
 
 ### Aegis Harness
 
@@ -75,7 +79,6 @@
 
 ### Prime Autonomy
 
-- [ ] **Prime + Autonomy Contract:** `PrimeNextAction` domain object with action type, confidence, blockers, human-gate requirements - module: `meridian_core/prime_autonomy.py`; tests: `tests/test_prime_autonomy.py`; contract: `docs/prime-autonomy-v2-contract.md`.
 - [ ] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - integrates Echo memory query and Atlas retrieval hits as input placeholders.
 
 ### Echo Harness

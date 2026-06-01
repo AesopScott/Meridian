@@ -32,21 +32,13 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Coordinator Override - Completed / Ready For Codex Review
+## Coordinator Override - Active Now
 
 Goal: write the Session Lifecycle implementation checklist so the runtime slice is bounded before code begins.
 
 Allowed files only: `docs/session-lifecycle-implementation-checklist.md`, `docs/live-build-2.md`.
 
 Task: convert `docs/session-lifecycle-v2-contract.md` into a code-ready implementation checklist. Include enum/dataclass names, fields, legality helpers, executability helpers, proof expectations, tests to write, and what must remain out of runtime execution until later. Do not implement `meridian_core/session_lifecycle.py` until the contract is reviewed.
-
-Completion: coordinator completed this implementation checklist slice in `78d9bdd`. File `docs/session-lifecycle-implementation-checklist.md` created with 229 lines covering: enums (SessionHarnessRole, SessionStatus, SessionCommandIntent), dataclasses (SessionLifecycleState, SessionCommandPlan) with all fields and legality/executability helpers, invariant validators, proof expectations, 30+ test specs, FileMap registration, and out-of-runtime deferrals.
-
-Ready for Codex Review:
-
-- Files: `docs/session-lifecycle-implementation-checklist.md`, `docs/live-build-2.md`
-- Tests: not required (docs-only)
-- Commit: `78d9bdd`
 
 ## ~~Codex Repair Active Task - Reviews A Round 6~~
 
@@ -440,8 +432,6 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-05 02:00 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 1 of 3; polling)
 2026-06-05 02:10 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 1 of 3; polling)
 2026-06-05 02:30 -06:00 - Build 2 checked queue; Active Task found: V2 Prime next-action domain object (Coordinator Override); executing
-2026-06-05 16:00 -06:00 - Build 2 checked queue; status: running (Active Task found -- Session Lifecycle implementation checklist); executing
-2026-05-31 16:23 -06:00 - Build 2 checked queue; status: idle (Session Lifecycle implementation checklist already complete at 78d9bdd; task marked Complete / Ready for Codex Review; awaiting next assignment)
 ```
 
 ## Write/Completion Log
@@ -484,7 +474,6 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-05-31 08:52 -06:00 - Build 2 completed V2 harness maturity/build-number policy (Coordinator Override); commit 34c21b4; files changed: docs/harness-maturity-build-policy.md (new, defines build number tracking, maturity levels, review status, and readiness states for Prime/Bifrost/Relay/Aegis/Beacon/Echo/Atlas/Workflow), docs/live-build-2.md; tests none required (docs-only); cadence count: 3 of 3 since 47eeb89; Ready for Codex Review
 2026-05-31 08:54 -06:00 - Build 2 completed public exports readiness checklist (Coordinator Override); commit 9a2e4e5; files changed: docs/public-exports-readiness-checklist.md (new, 6-section checklist for export-readiness: runtime stability, tests, docs, registry, naming, safety/risk mitigation; per-harness status for Echo/Atlas/Prime/Session/Workflow), docs/live-build-2.md; tests none required (docs-only); cadence count: 1 of 3 (cadence reset after harness maturity policy); Ready for Codex Review
 2026-06-05 02:45 -06:00 - Build 2 completed V2 Prime next-action domain object (Coordinator Override); commit 40def3d; files changed: meridian_core/prime_autonomy.py (new, PrimeActionType/Confidence/RiskTier/Source enums, PrimeNextAction frozen dataclass, select_prime_next_action/make_prime_next_action helpers), tests/test_prime_autonomy.py (new, 30 comprehensive tests: enums, immutability, fallback selection, blocker handling, human-gate propagation, confidence/risk mapping); tests 30 passed; cadence count: 1 of 3; Ready for Codex Review
-2026-05-31 16:23 -06:00 - Build 2 completed Session Lifecycle implementation checklist (already committed by coordinator); commit 78d9bdd; files changed: docs/session-lifecycle-implementation-checklist.md (229 lines new), docs/live-build-2.md; tests: not required (docs-only); Ready for Codex Review
 ```
 
 ## Cross-Check Activity
