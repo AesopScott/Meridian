@@ -793,3 +793,4 @@ Completion:
 - Push to `origin/main`.
 - Update Obsidian.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
+2026-06-01 05:00 -06:00 - Build 5 checked queue; status: running; Active Task = implement Bifrost V2 voice I/O surface state; origin/main at 58d981e; starting voice state view-model fields and render implementation
