@@ -68,9 +68,24 @@ Proof command:
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review Build 3 repair for Relay-Bifrost proof payload contract FileMap registration.
+
+Status: passed by Codex Reviews A on 2026-06-01 17:18 -06:00. Current `origin/main` contains Build 3 repair commit `f8424a07`, and the required FileMap proof passes.
+
+Review result:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git merge-base --is-ancestor f8424a07 HEAD` passed, proving the reviewed repair commit is present in the current checkout.
+- `meridian_core/filemap.py:961` registers `docs/relay-bifrost-proof-payload-contract.md` in `make_default_map()` with Aegis/proof area, purpose, and notes matching the intended contract.
+- `docs/FileMap.md:91` mirrors the contract row with consistent purpose/notes.
+- `tests/test_filemap.py:110` keeps the path in `_REQUIRED_PATHS`, and the injection-summary proof now covers it.
+- `git diff-tree --no-commit-id --name-only -r f8424a07` shows the repair commit only changed `meridian_core/filemap.py`; no Relay runtime/tests, Bifrost, Aegis, Session Lifecycle, process/model/account, branch, or Polaris files were edited.
+
+Finding: none. The prior HIGH runtime FileMap entry missing finding is closed.
+
+Completion: Build 3 Relay-Bifrost proof payload contract FileMap repair is review-cleared. Next Candidate: no executable Reviews A task remains; continue polling for the next coordinator-promoted Ready marker.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
@@ -1198,6 +1213,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-06-01 17:11 -06:00 - Codex Reviews A checked queue; status: running/finding-routed; notes: origin/main current after pull; active Build 3 FileMap registration review executed for `docs/relay-bifrost-proof-payload-contract.md` after commit `da53f4f3` marked Ready; proof failed because docs/FileMap.md and _REQUIRED_PATHS include the path but runtime make_default_map() does not.
 2026-06-01 17:13 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after pull; no executable Active Task / Coordinator Override - Active Now block is present; top relevant Build 3 FileMap item remains completed/repair-routed pending Build 3 runtime FileMap repair.
 2026-06-01 17:16 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after pull; no executable Active Task / Coordinator Override - Active Now block is present; Build 3 FileMap item remains completed/repair-routed pending runtime FileMap repair; queue-only cadence check over recent Reviews A provenance updates found no actionable findings.
+2026-06-01 17:18 -06:00 - Codex Reviews A checked queue; status: running/passed; notes: origin/main current after pull; active Build 3 repair review for `f8424a07` executed exactly as assigned; FileMap proof passed and the prior runtime FileMap entry finding is closed.
 ```
 
 ## Review Log
@@ -1701,6 +1717,7 @@ Round 6 write log:
 - 2026-06-01 17:11 -06:00 - Codex Reviews A completed Build 3 FileMap registration review for `docs/relay-bifrost-proof-payload-contract.md` after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_filemap.py -q` (failed: 2 failed, 44 passed). Proof commands: exact-path search for `relay-bifrost-proof-payload-contract`, scoped inspection of `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: HIGH runtime FileMap entry missing routed to Build 3; docs mirror and required-path test entry exist, but `make_default_map()` does not register `docs/relay-bifrost-proof-payload-contract.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue records repair routing only.
 - 2026-06-01 17:13 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Proof command: `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no new finding; no executable Active Task present after Build 3 FileMap repair routing. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
 - 2026-06-01 17:16 -06:00 - Codex Reviews A completed idle queue read and queue-only cadence check after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update). Proof commands: `git diff --check c6291dc6..HEAD -- docs/live-codex-reviews.md`, `git diff --stat c6291dc6..HEAD -- docs/live-codex-reviews.md`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings in recent Reviews A provenance updates; no executable Active Task present after Build 3 FileMap repair routing. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no new durable review finding or clearance.
+- 2026-06-01 17:18 -06:00 - Codex Reviews A completed Build 3 Relay-Bifrost proof payload contract FileMap repair review for commit `f8424a07` after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed). Proof commands: `git merge-base --is-ancestor f8424a07 HEAD`, exact-path inspection of `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, `git diff-tree --no-commit-id --name-only -r f8424a07`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings; prior HIGH runtime FileMap entry missing finding closed. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue records pass only.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
