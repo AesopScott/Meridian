@@ -93,6 +93,16 @@ Task: create the docs contract for provider capability metadata and prompt-drag 
 
 Completion: commit only this docs slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
 
+## Next Candidate Task
+
+Goal: write the DeepSeek direct-provider adapter implementation handoff.
+
+Allowed files only: `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`.
+
+Task: after `docs/model-harness-v2-contract.md` lands and clears review, write a bounded implementation handoff for adding direct DeepSeek provider metadata/routing through Relay and Aegis. Cover environment variable names, direct-vs-aggregator proof, candidate trust state, prompt payload snapshot evidence, Q-mode flatness proof, blocked authorities, tests expected, and which runtime files should be touched by the later implementation lane.
+
+Tests: not required for this docs-only handoff.
+
 This file is the standing assignment queue for Build 4.
 
 Build 4 is the Opus high-level thinking lane. It should work on architecture, capabilities, strategy, naming, review frameworks, and synthesis. It should not implement runtime code unless Codex explicitly assigns a code slice later.

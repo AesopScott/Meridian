@@ -8,6 +8,37 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex Reviews B on 2026-05-31 15:52 -06:00. FileMap tests passed (46 tests), and no repair was routed.
 
+## Active Task
+
+Goal: audit V2 FileMap drift and register any existing missing V2 artifacts.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/filemap-v2-v3-discoverability-audit.md`, `docs/live-build-3.md`.
+
+Task: compare `docs/v2-progress-tracker.md`, current V2 queue files, and existing repository files against the runtime FileMap. Register only completed existing V2 docs/modules/tests that are missing from `make_default_map()`, `docs/FileMap.md`, or `_REQUIRED_PATHS`.
+
+Requirements:
+
+- Do not create product docs or runtime modules in this slice.
+- Do not edit Build 1, Build 2, Build 4, Build 5, or review queue files.
+- Do not register files that do not exist.
+- Do not register transient read-check reports, helper scratch scripts, local config, or worker worktree gitlinks.
+- If no missing existing V2 artifacts remain, update `docs/filemap-v2-v3-discoverability-audit.md` with the checked sources and result instead of creating read-check-only commits.
+- Keep changes mechanical and small.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion: commit only this FileMap/audit slice, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
+## Next Candidate Task
+
+Goal: register the Session Lifecycle implementation checklist after Build 2 lands it.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: when `docs/session-lifecycle-implementation-checklist.md` exists and has passed Codex review, register it under the Session Lifecycle/FileMap-appropriate area and add required-path coverage.
+
 ## Completed / Ready For Codex Review
 
 Goal: register the DeepSeek validation benchmark plan in FileMap.

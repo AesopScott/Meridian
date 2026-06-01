@@ -4,6 +4,37 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 ## Completed / Passed
 
+Goal: review Build 3 DeepSeek validation benchmark FileMap registration.
+
+Status: passed by coordinator on 2026-06-01. The DeepSeek validation benchmark plan is discoverable through runtime FileMap, docs/FileMap, and required-path coverage. No repair routed.
+
+Scope:
+
+- Build 3/coordinator commit `add63a7` - registers `docs/deepseek-validation-benchmark-plan.md` in runtime FileMap, docs/FileMap, required-path coverage, and marks Build 3 ready for review.
+
+Allowed review files:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md` for provenance only.
+
+Proof command:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+
+Review result:
+
+- `docs/deepseek-validation-benchmark-plan.md` is present in `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- The entry is under the Model Harness area and does not grant DeepSeek autonomous coding, review-clearing, branch movement, or worktree authority.
+- The Build 3 queue now has a fresh executable FileMap audit task plus a next candidate.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` plus Build 3 queue runway update. No repair routed.
+
+No active task. Continue polling for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
+
+## Completed / Passed
+
 Goal: review Build 4 DeepSeek validation benchmark plan.
 
 Status: passed by Codex Reviews B/coordinator on 2026-05-31. The benchmark plan creates a concrete DeepSeek proof ladder without granting autonomous coding, review-clearing, branch movement, or worktree authority. No repair routed.
