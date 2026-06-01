@@ -534,6 +534,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-13 17:36 -05:00 - Build 4 checked queue; status: idle; no executable Active Task (waiver/approval task marked Completed/Ready for Codex Review, not Active Now); Next Candidate Task (gate summary helpers) awaits coordinator promotion; origin/main synced; cadence 1/3 — awaiting Codex review or task assignment
 2026-06-13 17:37 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; no new Coordinator Override - Active Now section; waiver/approval task marked Ready for Codex Review; Next Candidate Task awaits coordinator promotion; origin/main up to date; cadence 1/3
 2026-06-13 17:38 -05:00 - Build 4 checked queue; status: idle; no executable Active Task; no change since last check; origin/main up to date; cadence 1/3
+2026-06-13 17:39 -05:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = add Aegis gate summary helpers for Relay/Bifrost display; coordinator promoted Next Candidate Task to Active Now; worktree C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis available; pulling origin/main in worktree; beginning implementation of deterministic gate summary helpers for Relay/Bifrost display
 ```
 
 ## Write/Completion Log
