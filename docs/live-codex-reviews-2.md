@@ -2316,3 +2316,35 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 17:07 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because the Build 3 Build 5 FileMap registration slice is not yet marked Ready for Codex Review. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 17:09 -06:00 — pulled latest `origin/main` (`Already up to date`) and read `docs/live-codex-reviews-2.md` plus `docs/live-build-3.md`. Build 3 FileMap registration for Build 5 right-panel rendering artifacts is marked `Completed / Ready For Codex Review`; executed the active Reviews B task against current main.
+
+## Completed / Finding Routed
+
+Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marked it Ready for Codex Review.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Review result:
+
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- Build 5 right-panel renderer/runtime artifacts are present in runtime FileMap, `docs/FileMap.md`, and required-path coverage: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/bifrost-right-panel-mode-contract.md`.
+- UI checklist artifact is present in runtime FileMap and required-path coverage, but `docs/FileMap.md` has duplicate mirror rows for `docs/ui-integration-checklist.md` with different areas/purposes.
+- Finding: `docs/FileMap.md` duplicates `docs/ui-integration-checklist.md` under both `Build process` and `Bifrost / session harness`, while runtime FileMap and `tests/test_filemap.py` contain one canonical entry. Why it matters: FileMap readers and tooling can see contradictory ownership/purpose for the same UI checklist artifact, weakening the right-panel/UI checklist coverage guarantee. Recommended owning lane: Build 3.
+- Scope check: no FileMap implementation, runtime code, Bifrost UI, Relay, Aegis, Session Lifecycle, process/model/account code, branch movement, or Polaris dependency changes were made by this review.
+
+Repair routing:
+
+- Routed focused duplicate-row repair to Build 3; see `docs/live-build-3.md` active repair route.
+
+Next Candidate:
+
+- Review Build 4 Relay harness model-selection logic depth after the Build 3 FileMap duplicate-row repair clears.
+
+## Write / Completion Log
+
+- 2026-06-01 17:09 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance/disposition and `docs/live-build-3.md` repair routing only. Tests run: `python -m pytest tests/test_filemap.py -q` (46 passed). Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance/routing only.
