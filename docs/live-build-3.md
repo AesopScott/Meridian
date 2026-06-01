@@ -784,3 +784,43 @@ Historical record for reference. Authoritative detail is in the Write/Completion
 - **COMPLETED 2026-05-30 16:07 -06:00** â€” FileMap repair (Round B3 â€” prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); commit 5e0facb; tests 46/46 filemap; cadence 1/3 since Round B3; Ready for Codex Review.
 - **COMPLETED 2026-05-30 16:03 -06:00** â€” FileMap refresh (model_adapter.py); commit be34fea; tests 46/46 filemap; Ready for Codex Review. Codex review cleared 2026-05-30 16:11 -06:00 (Reviews B; no findings; cadence window 774695f, 330f200, be34fea clear).
 
+2026-06-11 17:35 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 17:40 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 17:45 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 17:50 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 17:55 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:00 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:05 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:10 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:15 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:20 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:25 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:30 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:35 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:40 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:45 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:50 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 18:55 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:00 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:05 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:10 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:15 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:20 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:25 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:30 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:35 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:40 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:45 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:50 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 19:55 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:00 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:05 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:10 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:15 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:20 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:25 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:30 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:35 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:40 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:45 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
+2026-06-11 20:50 UTC - Build 3 checked queue; status: idle; no new Active Task assigned; cadence 1/3 since Round B5; ready for next FileMap assignment
