@@ -33,7 +33,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | SP4 | User Session prompt input | Same prompt behavior as Prime panel, but only in User Session mode. | wired | In User Session mode, type three lines; Enter sends and clears. |
 | SP5 | Prime response window | Displays Prime/model output below Prime prompt. | partial | Prompt text remains yellow; response text appears below it. |
 | SP6 | User Session response window | Displays routed session/model output below User prompt only in User Session mode. | partial | User Session mode shows prompt/response; Settings/Harness modes do not. |
-| SP7 | Prime text-size slider | Single shared slider starts at minimum on first load, persists the chosen size, and controls Prime, User, and harness/Relay panel text. | wired | Drag Prime slider right, reload/reset, and confirm visible panel text keeps the chosen size. |
+| SP7 | Prime text-size slider | Single shared slider starts at minimum on first load, persists the chosen size on input/change, and controls Prime, User, and harness/Relay panel text. | wired | Drag Prime slider right, release it, reload/reset, and confirm visible panel text keeps the chosen size. |
 | SP8 | User text-size slider | Removed as a duplicate control; text size is owned by the Prime slider. | wired | Right panel has no separate slider, and the Prime slider still controls right-panel text. |
 | SP9 | User prompt color | User-entered transcript text is bright yellow anywhere it appears. | wired | Send prompt from either panel; transcript prompt is yellow. |
 | SP10 | Path/file highlighting | File paths and filenames in output render bright orange. | wired | Ask model for working directory; path is orange. |
