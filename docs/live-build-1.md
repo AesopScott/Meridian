@@ -229,6 +229,12 @@ Tests:
 - Next Candidate Task awaiting promotion from Prime/Codex
 - Build 1 idle and polling for next task assignment
 
+**Build 1 Read Check** — 2026-06-01 05:55 -05:00
+- Status: pulled origin/main (3 read checks from other lanes); no Active Now task
+- Two Relay tasks ready for Codex Review
+- Next Candidate Task awaiting promotion from Prime/Codex
+- Build 1 idle and polling for next task assignment
+
 Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
 
 Allowed files only: `meridian_core/cockpit_state.py`, `tests/test_cockpit_state.py`, `docs/live-build-1.md`.
@@ -988,10 +994,6 @@ YYYY-MM-DD HH:MM TZ - Build 1 Codex review result: pass/no actionable findings/f
 2026-05-30 ~16:45 CDT - Build 1 Codex review result (Reviews C Round C4): cleared cadence; commits 0560eb4 (Relay adapter registry), 869faa4 (env-gated HTTP transport) reviewed; repair commit f353c8d (stdlib transport body fix); tests 72 adapter/executor + 916 full passed
 2026-05-31 ~01:10 CDT - Build 1 Codex review result (Reviews C Round C5): cleared cadence; commit f56af55 (cockpit_state domain shape) reviewed; MEDIUM FileMap gap routed to Build 3; repair e89df81 confirmed closed; tests 25 targeted + 941 full passed
 ```
-
-## Archived Prior Active Task - Do Not Execute
-
-(None currently assigned.)
 
 ## Ready for Codex Review
 
