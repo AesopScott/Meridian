@@ -32,13 +32,34 @@ Ready for Codex Review:
 - Tests: not required (docs-only)
 - Commit: `e37030e`
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the Session Lifecycle implementation checklist so the runtime slice is bounded before code begins.
 
 Allowed files only: `docs/session-lifecycle-implementation-checklist.md`, `docs/live-build-2.md`.
 
 Task: convert `docs/session-lifecycle-v2-contract.md` into a code-ready implementation checklist. Include enum/dataclass names, fields, legality helpers, executability helpers, proof expectations, tests to write, and what must remain out of runtime execution until later. Do not implement `meridian_core/session_lifecycle.py` until the contract is reviewed.
+
+Completion:
+
+- Build 2 completed this checklist in `0296525`.
+- Files changed: `docs/session-lifecycle-implementation-checklist.md`, `docs/live-build-2.md`.
+- Tests: not required (docs-only).
+- Routed to Codex Reviews A for docs/contract review.
+
+Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
+Goal: implement the Session Lifecycle domain objects from the reviewed contract/checklist.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: create the first runtime slice for `SessionLifecycleState` and `SessionCommandPlan` from `docs/session-lifecycle-v2-contract.md` and `docs/session-lifecycle-implementation-checklist.md`. Model spawn, watch, poll_queue, steer, stop_request, transfer, archive, restart, resteer, recover_from_limit, and request_human_gate as typed actions without executing live process control. Include legality/executability helpers, proof refs, queue routing, unique-worktree and branch-permission constraints, and human-gate behavior. If Codex Reviews A routes a checklist finding before implementation is committed, repair that finding first.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
 
 ## ~~Codex Repair Active Task - Reviews A Round 6~~
 
@@ -81,7 +102,7 @@ Completion: commit only this Bifrost integration contract slice, push, update Ob
 
 ## Next Candidate Task
 
-Goal: implement the Session Lifecycle domain objects after the checklist and review clear.
+Goal: extend Session Lifecycle permissions and Prime/Beacon binding after the first runtime object slice clears review.
 
 Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
 
@@ -441,6 +462,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-05 03:00 -06:00 - Build 2 checked queue; status: idle (Session Lifecycle implementation checklist already complete, commit 686e7f9 pushed; no new Active Task; awaiting orchestrator assignment; cadence 1 of 3; polling)
 2026-06-05 03:10 -06:00 - Build 2 checked queue; status: idle (Session Lifecycle checklist task complete; no new Active Task; awaiting orchestrator assignment; cadence 1 of 3; polling)
 2026-06-05 03:20 -06:00 - Build 2 checked queue; status: idle (checklist complete and pushed; awaiting orchestrator or Codex review clearance for next task; cadence 1 of 3; polling)
+2026-06-05 03:30 -06:00 - Build 2 checked queue; status: idle (no new Active Task; Session Lifecycle checklist awaiting Codex review; cadence 1 of 3; polling)
 ```
 
 ## Write/Completion Log
