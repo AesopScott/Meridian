@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair review visibility for Relay proof payload negative-path tests.
 
@@ -14,9 +14,23 @@ Allowed files only: `tests/test_relay_executor.py`, `docs/live-build-1.md` for p
 
 Required repair from Codex Reviews A: worker commit `26a71632` exists only on `worktree-build-1-v2-relay` / `origin/worktree-build-1-v2-relay` and is not an ancestor of current `HEAD` / `origin/main`, so Reviews A cannot clear the Ready marker. Land the intended negative-path tests on current `origin/main` through the approved coordinator path, or requeue a current-main review target. Preserve the test-only scope unless a fresh coordinator instruction changes it.
 
-Proof required before requeue: `python -m pytest tests/test_relay_executor.py -q`.
+Completion:
 
-Completion: mark Ready for Codex Review with the current-main commit hash and exact files changed. Do not ask Reviews A to clear commit `26a71632` again unless it is an ancestor of current `origin/main`.
+- Build 1 completed repair and landed negative-path tests on origin/main on 2026-06-12 16:45 UTC.
+- Merge commit: `6de2c4d5` (Merge branch 'worktree-build-1-v2-relay').
+- Files changed: `tests/test_relay_executor.py` (94 insertions).
+- Tests: `python -m pytest tests/test_relay_executor.py -q` (151 tests: 145 original + 6 new negative-path tests, all pass).
+- Proof: Commit `26a71632` is now an ancestor of origin/main (included in merge commit `6de2c4d5`). Ready for Codex Reviews A clearance.
+
+Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-12 16:45 UTC (Repair Task Completion)
+- Status: Repair task completed; negative-path tests merged to origin/main via commit `6de2c4d5`
+- Latest origin/main: commit `b7f6af87` (Build 3 idle read check)
+- Previous Active Now task: repair review visibility (now completed and marked Ready for Codex Review)
+- No new "Coordinator Override - Active Now" task promoted yet
+- Next Candidate Task: "add Relay proof payload downstream-consumer checklist" awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
 
 ## Coordinator Override - Completed / Review-Gated
 
