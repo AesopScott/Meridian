@@ -12,19 +12,48 @@ Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker i
 
 ## Coordinator Override - Active Now
 
-Goal: poll for Build 3 FileMap registration for Build 5 right-panel rendering artifacts.
+Goal: review Build 4 Aegis-to-Relay handoff contract field-shape repair when marked Ready for Codex Review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
-Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+Allowed review files: `docs/aegis-relay-summary-handoff-contract.md`, `meridian_core/aegis.py`, `meridian_core/relay.py`, `meridian_core/relay_executor.py`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
 
-Task: poll `docs/live-build-3.md` and current `origin/main` for Build 3's FileMap registration of the Build 5 right-panel rendering artifacts. When that Build 3 slice is marked Ready for Codex Review, verify the FileMap registration covers the right-panel renderer, mode contracts, tests, and UI checklist artifacts without stale or missing paths. If the slice is not yet ready, append a read check and keep polling; do not mark idle.
+Task: poll `docs/live-build-4.md` and current `origin/main` for the focused Build 4 repair of the Aegis-to-Relay handoff contract field-shape mismatches. When the repair is marked Ready for Codex Review, verify that `ApprovalRecord.expiration`, `WaiverRecord.expiration`, `WaiverRecord.evidence_url`, and `GateSummary.waiver_approval_status` documentation match current runtime shapes, and that the model-call boundary language distinguishes pure Aegis summary helpers from Relay injected adapter/model-call execution. If the repair is not yet ready, append a read check and keep polling; do not mark idle.
 
 Proof command:
 
-- `python -m pytest tests/test_filemap.py -q`
+- `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Completed / Finding Routed
+
+Goal: review Build 4 Aegis-to-Relay summary handoff contract.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/aegis-relay-summary-handoff-contract.md`, `meridian_core/aegis.py`, `meridian_core/relay.py`, `meridian_core/relay_executor.py`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Task: review current `origin/main` commit `f64df7e6` and the Build 4 queue marker for the Aegis-to-Relay summary handoff contract. Verify the contract accurately describes Aegis output shapes, premium-cost approval/waiver evidence, selected model/vendor evidence, human-facing vs audit-only fields, stable Relay handoff boundaries, and explicit out-of-scope limits. Confirm it does not claim live model calls, account access, process control, UI work, branch movement, or Polaris dependency. If findings exist, route focused repair to Build 4; otherwise mark passed and promote the next review candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+Review result:
+
+- `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` passed with 336 tests.
+- Finding: `docs/aegis-relay-summary-handoff-contract.md` does not exactly match current Aegis/Relay field shapes. It documents `ApprovalRecord.expiration` and `WaiverRecord.expiration` as `str = ""`, but runtime uses `str | None = None`; it omits `WaiverRecord.evidence_url`; and it lists `GateSummary.waiver_approval_status` as `none/waived/approved/pending`, while runtime emits `none`, `waiver_present`, `approval_present`, and `waiver_approval_missing`. It also says "Neither system calls models" even though Relay executor owns injected model-call/adapter execution; the intended boundary is that Aegis summaries and this handoff contract do not authorize live calls. Why it matters: Relay/Bifrost/runtime tests could implement the wrong stable schema or overstate Relay purity. Recommended owning lane: Build 4.
+- Scope check: no runtime code was edited by this review; no Relay/Bifrost/FileMap/UI/model/account/process/Polaris changes were added.
+- Repair routed into `docs/live-build-4.md`. Next candidate remains Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
 
 ## Coordinator Override - Completed / Passed
 
@@ -1192,6 +1221,8 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 2026-06-01 16:19 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; executable Coordinator Override Active Now found for current-main Build 4 Aegis and Build 5 Bifrost landing commit review.
 2026-06-01 16:22 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; polling Build 4 premium-cost repair; Build 4 first executable block remains Active Now, not Ready for Codex Review, so review task remains open.
 2026-06-01 16:36 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; Active Now reviews Build 4 premium-cost approval gate repair; Build 4 repair `f15e7ceb` is Ready, so executing proof review.
+2026-06-01 16:39 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; Active Now polls Build 3 FileMap registration for Build 5 right-panel rendering artifacts; Build 3 first current Active Task is still registration work, not Ready for Codex Review, so keep polling and do not mark idle.
+2026-06-01 16:43 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; Active Now reviews Build 4 Aegis-to-Relay summary handoff contract commit `f64df7e6`; executing proof review.
 2026-06-01 16:28 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; Active Now reviews Build 4 premium-cost approval gate repair; Build 4 repair is marked Ready, so executing proof review.
 2026-06-01 16:11 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; executable Coordinator Override Active Now found for current-main Build 4 Aegis and Build 5 Bifrost landing commit review.
 2026-06-01 09:20 -06:00 - Codex Reviews B Round B4 executed; status: PASS-WITH-MEDIUM-FINDING; commit reviewed: 5e0facb; tests: python -m pytest tests/test_filemap.py -q → 46/46 in 0.09s; finding: 3 docs registered in filemap.py and _REQUIRED_PATHS but absent from docs/FileMap.md (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); repair task written to Build 3 Active Task; results in Obsidian (2026-06-01 Codex Reviews B Round B4 Result.md); cadence 2/3 since Round B3; awaiting Round B5 trigger.
@@ -1260,6 +1291,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-06-01 16:19 -06:00 - Reviewed current-main Build 4 Aegis and Build 5 Bifrost landing commits; result: blocked for Build 4 repair / pass for Build 5; tests: `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` -> 356/356 passed; notes: aggregator selected-model evidence, gate summary/aggregate summary helpers, right-panel rendering, and mode-switching tests are present, but Tier 2+ premium cost still allows from bare `cost_justified=True` without `ApprovalRecord`.
 2026-06-01 16:36 -06:00 - Reviewed Build 4 premium-cost approval repair commit `f15e7ceb`; result: pass; tests: `python -m pytest tests/test_aegis.py -q` -> 191/191 passed; notes: Tier 2+ premium cost now blocks from bare `cost_justified=True` without valid `ApprovalRecord`, while Tier 0 `cost_justified=True` remains allowed.
 2026-06-01 16:28 -06:00 - Reviewed Build 4 premium-cost approval repair claim `29592bb2` / `19685e62`; result: blocked for Build 4 repair; tests: `python -m pytest tests/test_aegis.py -q` -> 190/190 passed; notes: Build 4 queue claims 191 tests and fixed ApprovalRecord enforcement, but current `origin/main` still allows Tier 2 premium cost from bare `cost_justified=True` and tests still assert that path.
+2026-06-01 16:43 -06:00 - Reviewed Build 4 Aegis-to-Relay summary handoff contract commit `f64df7e6`; result: blocked for Build 4 docs repair; tests: `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` -> 336/336 passed; notes: contract has field-shape mismatches for ApprovalRecord/WaiverRecord expiration defaults, missing WaiverRecord.evidence_url, wrong waiver_approval_status values, and an overbroad Relay purity claim.
 
 ## Proof Log
 
@@ -1298,6 +1330,7 @@ Minimum proof expectations:
 2026-06-01 16:19 -06:00 - Proof for current-main Build 4 Aegis and Build 5 Bifrost landing commits; proof type: test/reference/manual; evidence: `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` -> 356/356 passed; direct inspection confirms `gate_aggregator_authority()` requires `selected_model_evidence`, gate summary and aggregate summary helpers exist, Bifrost right-panel render helpers/CSS/tests exist, and Settings/Harness omit prompt-response affordances; direct inspection also confirms `gate_cost_exposure()` returns ALLOW for `cost_justified=True` before checking `ApprovalRecord`, with tests still asserting Tier 2 premium cost allows from that boolean; result: blocked for Build 4 repair / pass for Build 5.
 2026-06-01 16:36 -06:00 - Proof for Build 4 premium-cost approval repair commit `f15e7ceb`; proof type: test/reference/manual; evidence: `python -m pytest tests/test_aegis.py -q` -> 191/191 passed; current `gate_cost_exposure()` keeps `cost_justified=True` allowance under `risk_tier <= 1` and requires valid `ApprovalRecord` for Tier 2+; `tests/test_aegis.py` includes `test_premium_cost_justified_tier2_blocks`; result: pass.
 2026-06-01 16:28 -06:00 - Proof for Build 4 premium-cost approval gate repair; proof type: test/reference/manual; evidence: `python -m pytest tests/test_aegis.py -q` -> 190/190 passed; `docs/live-build-4.md` claims commit `29592bb2` / merge `19685e62` landed the repair with 191 tests, but current `meridian_core/aegis.py` still returns ALLOW from `cost_justified=True` before requiring `ApprovalRecord`, and `tests/test_aegis.py` still asserts `gate_cost_exposure("PREMIUM", True, 2)` allows; result: blocked for Build 4 repair.
+2026-06-01 16:43 -06:00 - Proof for Build 4 Aegis-to-Relay summary handoff contract commit `f64df7e6`; proof type: test/reference/manual; evidence: `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` -> 336/336 passed; direct inspection of `meridian_core/aegis.py` shows `ApprovalRecord.expiration: str | None = None`, `WaiverRecord.expiration: str | None = None`, `WaiverRecord.evidence_url: str | None = None`, and `waiver_approval_status` runtime values `none`, `waiver_present`, `approval_present`, `waiver_approval_missing`; result: blocked for Build 4 docs repair.
 
 ## Findings
 
@@ -1330,6 +1363,7 @@ YYYY-MM-DD HH:MM TZ - Build <n> commit <hash>; severity: CRITICAL/HIGH/MEDIUM/LO
 2026-06-01 16:19 -06:00 - Build 4 current-main Aegis review; severity: HIGH; file: meridian_core/aegis.py / tests/test_aegis.py; finding: `gate_cost_exposure()` still returns ALLOW for Tier 2+ premium cost when `cost_justified=True` before requiring structured `ApprovalRecord`; action: repair-task-active.
 2026-06-01 16:36 -06:00 - Build 4 repair commit `f15e7ceb`; severity: HIGH; file: `meridian_core/aegis.py`, `tests/test_aegis.py`; finding: prior premium-cost approval blocker cleared; why it matters: Tier 2+ premium-cost routes now require structured `ApprovalRecord` evidence and no longer bypass auditability through bare `cost_justified=True`; recommended owning lane: Build 4; action: clear.
 2026-06-01 16:28 -06:00 - Build 4 claimed repair `29592bb2` / merge `19685e62`; severity: HIGH; file: `docs/live-build-4.md`, `meridian_core/aegis.py`, `tests/test_aegis.py`; finding: Build 4 marks the premium-cost approval repair Ready with 191 tests, but current `origin/main` still allows `gate_cost_exposure("PREMIUM", True, 2)` without a valid `ApprovalRecord`, and the test suite still asserts that allow path; why it matters: Tier 2+ premium-cost routes can bypass structured approval evidence while the queue falsely reports the blocker fixed; recommended owning lane: Build 4; action: repair-task-written.
+2026-06-01 16:43 -06:00 - Build 4 contract commit `f64df7e6`; severity: MEDIUM; file: `docs/aegis-relay-summary-handoff-contract.md`; finding: documented ApprovalRecord/WaiverRecord shapes and `GateSummary.waiver_approval_status` values diverge from current `meridian_core/aegis.py`, and the contract overstates Relay purity by saying neither system calls models despite Relay executor owning injected adapter/model-call execution; why it matters: downstream Relay/Bifrost tests could freeze an incorrect stable handoff schema or misstate the execution boundary; recommended owning lane: Build 4; action: repair-task-written.
 
 ## Repair Routing Log
 
@@ -1352,6 +1386,7 @@ YYYY-MM-DD HH:MM TZ - Routed repair to Build <n>; queue: docs/live-build-<n>.md;
 2026-06-01 16:19 -06:00 - Routed repair to Build 4; queue: docs/live-build-4.md; finding: cost gate repair is already active in Build 4 queue; status: active.
 2026-06-01 16:36 -06:00 - Cleared Build 4 repair; queue: `docs/live-build-4.md`; finding: premium-cost approval gate now blocks Tier 2+ bare `cost_justified=True` without valid `ApprovalRecord`; status: closed by commit `f15e7ceb`.
 2026-06-01 16:28 -06:00 - Routed repair to Build 4; queue: `docs/live-build-4.md`; finding: current `origin/main` does not contain the claimed premium-cost approval repair from `29592bb2` / `19685e62`; `gate_cost_exposure("PREMIUM", True, 2)` must block without valid `ApprovalRecord`, and tests must reflect the 191-test repair proof; status: active.
+2026-06-01 16:43 -06:00 - Routed repair to Build 4; queue: `docs/live-build-4.md`; finding: repair Aegis-to-Relay summary handoff contract field-shape mismatches for ApprovalRecord/WaiverRecord, `waiver_approval_status`, and Relay execution boundary wording; status: active.
 
 ## Archived Prior Active Task - Do Not Execute
 
@@ -1635,6 +1670,8 @@ Write log:
 - 2026-06-01 16:19 -06:00 - Current-main Build 4 Aegis and Build 5 Bifrost landing review completed by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q` (356 passed); commit: `d021b557`; push status: present on `origin/main` after coordinator sync; Obsidian update status: not updated (repair already active in Build 4 queue).
 - 2026-06-01 16:22 -06:00 - Build 4 premium-cost approval repair poll by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (repair not Ready for Codex Review; Build 4 first executable block remains Active Now); commit: `7e67c396` (metadata completed in `5f845895` and push-status update); push status: pushed to `origin/main`; Obsidian update status: not updated (polling task remains open).
 - 2026-06-01 16:36 -06:00 - Build 4 premium-cost approval gate repair review completed by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: `python -m pytest tests/test_aegis.py -q` (191 passed); commit: `8b53a2c4`; push status: pushed to `origin/main` via `4ca7dd24` metadata update; Obsidian update status: not updated (repair clearance recorded in queue).
+- 2026-06-01 16:39 -06:00 - Build 3 FileMap registration poll by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (Build 3 slice not Ready for Codex Review; polling task remains open); commit: `dc4f5809`; push status: pending; Obsidian update status: not updated (no architecture finding or clearance).
+- 2026-06-01 16:43 -06:00 - Build 4 Aegis-to-Relay summary handoff contract review completed by Codex Reviews B with repair routed; files changed: `docs/live-codex-reviews-2.md`, `docs/live-build-4.md`; tests run: `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` (336 passed); commit: `1da768f5`; push status: present on `origin/main`; Obsidian update status: not updated (repair routed in queue).
 - 2026-06-01 16:28 -06:00 - Build 4 premium-cost approval gate repair review completed by Codex Reviews B with repair rerouted; files changed: `docs/live-codex-reviews-2.md`, `docs/live-build-4.md`; tests run: `python -m pytest tests/test_aegis.py -q` (190 passed); commit: `9a72473a`; push status: blocked because local `main` already had unrelated unpushed commit `53fc5f28`; Obsidian update status: not updated (repair routed in queue).
 
 ## Coordinator Addendum - Round B5 V1 Cockpit Clearance

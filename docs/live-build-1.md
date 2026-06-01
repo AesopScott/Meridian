@@ -2050,3 +2050,38 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 - Previous Active Now task ("add Relay proof payload docs/FileMap registration request") already completed and marked Ready for Codex Review
 - Next Candidate Task: "add Relay proof payload negative-path tests" awaiting promotion from Prime/Codex
 - Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-12 14:00 UTC (Continued Poll)
+- Status: Queue poll complete; "Coordinator Override - Active Now" section still shows old completed task
+- Latest origin/main: already up to date (no new changes since last check)
+- Active Now task ("add Relay proof payload docs/FileMap registration request", commit `eafa0c17`) remains in Completed/Ready For Codex Review section
+- Next Candidate Task: "add Relay proof payload negative-path tests" awaiting promotion
+- Build 1 idle; no executable Active Task found; awaiting coordinator queue update or next task promotion
+
+**Build 1 Read Check** — 2026-06-12 14:05 UTC (Ongoing Poll)
+- Status: Queue poll complete; no changes since last check
+- Latest origin/main: already up to date
+- Active Now section: still contains old completed task (commit `eafa0c17`)
+- Next Candidate Task: "add Relay proof payload negative-path tests" awaiting promotion from Prime/Codex
+- Build 1 idle; no executable Active Task; awaiting coordinator queue update
+
+**Build 1 Read Check** — 2026-06-12 14:10 UTC (Heartbeat Poll)
+- Status: Queue unchanged; no Active Task executable
+- Latest origin/main: already up to date
+- Active Now: old completed task (commit `eafa0c17`)
+- Next Candidate: awaiting Prime/Codex promotion
+- Build 1 idle
+
+**Build 1 Read Check** — 2026-06-12 14:15 UTC (Continued Poll)
+- Status: Queue unchanged; no executable Active Task
+- Latest origin/main: already up to date
+- Active Now: old completed task (commit `eafa0c17`)
+- Next Candidate: awaiting Prime/Codex promotion
+- Build 1 idle
+
+**Build 1 Read Check** — 2026-06-12 14:20 UTC (Polling)
+- Status: Queue unchanged; no executable Active Task
+- Latest origin/main: already up to date
+- Active Now: old completed task
+- Next Candidate: awaiting promotion
+- Build 1 idle

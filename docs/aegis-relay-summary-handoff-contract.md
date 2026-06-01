@@ -196,7 +196,10 @@ selected_model_evidence: {
 - No session state mutation (no side effects).
 - No UI rendering (structured output only).
 - No async/polling (synchronous evaluation).
+<<<<<<< HEAD
 - **Summary helpers are pure functions:** `summarize_gate_result()`, `summarize_gate_results()`, and `summarize_aggregate_route_gates()` take gate evaluation outputs and produce deterministic summaries. They do not call models, inspect accounts, or perform I/O. Relay's execution boundary may invoke adapters or model-call functions, but the handoff contract itself does not authorize live model calls, account inspection, process control, branch movement, or Polaris dependencies.
+=======
+>>>>>>> 2910dbd296af5326ebb6eb9e1e7dd618b3cb07d7
 
 ### Relay Stays Deterministic
 

@@ -31,11 +31,23 @@ Tests:
 
 Completion: landed on current `origin/main` in commit `558af555` (`feat: complete Session Lifecycle routing-action coverage`). Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`. Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 24 tests on 2026-06-01. Ready for Codex Review.
 
-## Next Candidate Task
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Prime command-plan tests that consume the new Session Lifecycle routing reasons after review clears.
 
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
 Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and the review clearance in `docs/live-codex-reviews.md`.
+
+Task: add focused tests proving Prime-facing command-plan behavior can consume the repaired Session Lifecycle routing actions and reasons. Cover archive, request-human-gate, summarize/reset, transfer, context-fill, review-gate, and permission-boundary routing signals through existing typed helpers only. Keep this pure runtime/test coverage; do not spawn sessions, call models, inspect processes, edit UI, move branches, or touch Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: Build 2 completed Prime command-plan tests consuming new routing actions/reasons; commit f69d6683; files changed: tests/test_session_lifecycle.py (added 12 focused tests covering ARCHIVE/REQUEST_HUMAN_GATE/SUMMARIZE_RESET/TRANSFER commands and CONTEXT_FILL/REVIEW_GATE/PERMISSION_BOUNDARY routing signals, proving Prime-facing command-plan behavior); tests 34 passed (22 prior + 12 new Prime command-plan tests exercising archive, human-gate, transfer, and summarize-reset routing decisions); push f69d6683 to origin/main via worktree; Obsidian: not required (code-only); cadence 2 of 3; Ready for Codex Review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -906,6 +918,11 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-12 13:30 -06:00 - Build 2 checked queue; status: idle (routing-action coverage repair task complete; no new Active Task assigned from coordinator; cadence 1 of 3; awaiting next assignment; polling)
 2026-06-12 13:40 -06:00 - Build 2 checked queue; status: idle (routing-action coverage repair task marked Ready for Codex Review; no new Active Task from coordinator; Next Candidate blocked pending review clearance; cadence 1 of 3; awaiting assignment; polling)
 2026-06-12 13:50 -06:00 - Build 2 checked queue; status: idle (routing-action coverage repair task in Active Now; already complete from prior execution; no new orchestrator task assignment; cadence 1 of 3; awaiting next task; polling)
+2026-06-12 14:10 -06:00 - Build 2 checked queue; status: idle (no Active Now task assigned by coordinator; routing-action coverage repair marked Ready for Codex Review; Next Candidate task pending review clearance; cadence 1 of 3; awaiting next task; polling)
+2026-06-12 14:20 -06:00 - Build 2 checked queue; status: idle (no Active Now task; routing-action coverage repair task complete and Ready for Codex Review; new Aegis-Relay handoff contract created on main; cadence 1 of 3; awaiting orchestrator assignment; polling)
+2026-06-12 14:30 -06:00 - Build 2 completed Prime command-plan tests consuming routing actions/reasons (Coordinator Override - Active Now); commit f69d6683; 12 new tests added covering ARCHIVE/REQUEST_HUMAN_GATE/SUMMARIZE_RESET/TRANSFER and routing signals; all 34 tests passing; push complete; cadence 2 of 3; marking Ready for Codex Review; awaiting next assignment
+2026-06-12 14:40 -06:00 - Build 2 checked queue; status: running (Prime command-plan tests task marked Completed / Ready For Codex Review in queue; Active Now task transitioned to completed status; cadence 2 of 3; awaiting next task or Codex review signals; polling)
+2026-06-12 14:50 -06:00 - Build 2 checked queue; status: idle (no Active Now task; both routing-action coverage repair and Prime command-plan tests marked Ready for Codex Review; Next Candidate task blocked pending review clearance; cadence 2 of 3; awaiting Codex review signals or orchestrator assignment; polling)
 ```
 
 ## Write/Completion Log
@@ -914,6 +931,7 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <list>; tests <result>; Ready for Codex Review
+2026-06-12 14:30 -06:00 - Build 2 completed Prime command-plan tests consuming routing actions/reasons (Coordinator Override - Active Now); commit f69d6683; files changed: tests/test_session_lifecycle.py (added 12 focused tests covering ARCHIVE, REQUEST_HUMAN_GATE, SUMMARIZE_RESET, TRANSFER, and routing signals CONTEXT_FILL/REVIEW_GATE/PERMISSION_BOUNDARY; tests prove Prime-facing command-plan behavior can consume repaired Session Lifecycle routing actions); tests: 34 passed (22 prior + 12 new Prime command-plan tests); push: f69d6683 to origin/main via worktree; Obsidian status: not required for code-only tests; cadence count: 2 of 3; Ready for Codex Review
 2026-06-12 13:05 -06:00 - Build 2 completed Session Lifecycle routing-action coverage repair (Codex Finding); commit 558af555; files changed: meridian_core/session_lifecycle.py (added ARCHIVE and REQUEST_HUMAN_GATE actions; added 4 parameters to suggest_routing_action; routing logic now exercises CONTEXT_FILL, REVIEW_GATE, PERMISSION_BOUNDARY reasons), tests/test_session_lifecycle.py (added 4 new routing tests); tests: 24 passed (12 original + 4 new routing tests exercising archive/human_gate actions and 3 previously untested reasons); push: 558af555 to origin/main; Obsidian status: not required for code-only repair; Ready for Codex Review
 2026-06-05 03:40 -06:00 - Build 2 completed Session Lifecycle runtime implementation (Coordinator Override); commit 910e652; files: meridian_core/session_lifecycle.py (347 lines), tests/test_session_lifecycle.py (170 lines); enums: SessionStatus/HarnessRole/CommandIntent/ReviewCadenceState/ProofState/HealthState; dataclasses: SessionLifecycleState (frozen, 17 fields), SessionCommandPlan (frozen, 16 fields); helpers: is_idle/is_healthy/can_accept_work/heartbeat_stale/is_executable/requires_aegis_approval/is_legal/verify_state_transition_legal/to_dict; tests: 12 passed (immutability, helpers, legality, executability, serialization); push: 910e652; Ready for Codex Review
 2026-06-05 02:46 -06:00 - Build 2 found Session Lifecycle implementation checklist (Coordinator Override) already complete; original creation: commit 0296525 (see Completed block above); repair: commit 7d20f47; Read Checks recorded 686e7f9 as the observed pushed state at 03:00 — reconciled: 0296525 is the authoritative creation commit, 7d20f47 is the repair commit, 686e7f9 is consistent with a subsequent merge/push; push: complete; Obsidian: complete; no new commit by this execution
