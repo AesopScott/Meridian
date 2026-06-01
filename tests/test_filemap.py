@@ -54,6 +54,8 @@ _REQUIRED_PATHS = [
     "meridian_core/prompt_packet.py",
     "meridian_core/relay_packet.py",
     "meridian_core/relay_dispatch.py",
+    "meridian_core/relay_executor.py",
+    "tests/test_relay_executor.py",
     "meridian_core/model_adapter.py",
     "meridian_core/restart_resteer.py",
     "docs/relay-prompt-metrics-integration-brief.md",
