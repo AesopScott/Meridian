@@ -28,11 +28,11 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SP1 | Prime panel | User types directly to Prime/orchestrator. | partial | Send prompt from left panel; response appears below prompt in left panel. |
-| SP2 | Right interaction panel | User interacts with the selected live session, settings surface, or harness surface. | partial | Active surface changes panel title and prompt routing target. |
+| SP2 | Right interaction panel | Shows either User Session prompt UI, Settings configuration items, or Harness logic items. | partial | Active mode changes panel title, layout, and interaction model. |
 | SP3 | Prime prompt input | Two-line scrollable prompt input. Enter sends; Shift+Enter newline. | wired | Type three lines; Enter sends and clears. |
-| SP4 | User prompt input | Same prompt behavior as Prime panel. | wired | Type three lines; Enter sends and clears. |
+| SP4 | User Session prompt input | Same prompt behavior as Prime panel, but only in User Session mode. | wired | In User Session mode, type three lines; Enter sends and clears. |
 | SP5 | Prime response window | Displays Prime/model output below Prime prompt. | partial | Prompt text remains yellow; response text appears below it. |
-| SP6 | User response window | Displays routed session/model output below User prompt. | partial | Prompt text remains yellow; response text appears below it. |
+| SP6 | User Session response window | Displays routed session/model output below User prompt only in User Session mode. | partial | User Session mode shows prompt/response; Settings/Harness modes do not. |
 | SP7 | Prime text-size slider | Changes text size in both session panels and syncs both sliders. | wired | Drag Prime slider; both panel text sizes change. |
 | SP8 | User text-size slider | Changes text size in both session panels and syncs both sliders. | wired | Drag User slider; both panel text sizes change. |
 | SP9 | User prompt color | User-entered transcript text is bright yellow anywhere it appears. | wired | Send prompt from either panel; transcript prompt is yellow. |
@@ -132,33 +132,33 @@ Spark is Prime's voice/core and the visual focus point for moving between right-
 | SPK6 | Stale target warning | If prior session target closes while away, returning shows a readable warning. | planned | Stale target is not silently reused. |
 | SPK7 | No implicit reset | Spark surface interaction does not clear prompts/transcripts. | planned | Toggle modes and return; prior panel state remains unless reset was confirmed. |
 | SPK8 | No implicit archive/close | Spark surface interaction does not archive, close, stop, or delete sessions. | planned | Session/archive counts unchanged after surface switches. |
-| SPK9 | Prompt target visibility | Active prompt target is visible before the user sends. | planned | Prompt surface shows selected session/settings/harness target. |
+| SPK9 | Active mode visibility | Active right-panel mode is visible before interaction. | planned | Surface shows User Session, Settings, or Harness mode clearly. |
 | SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | planned | Surface switch is visually clear, not disorienting. |
 | SPK11 | Keyboard accessibility | Surface switching can be done without mouse-only interaction. | planned | Keyboard focus reaches surface controls. |
 | SPK12 | Recovery on bad surface | If a surface cannot load, return to prior usable surface with error. | planned | Failed surface load does not blank the right panel. |
 
 ### Right Panel Surface Toggle Subitems
 
-The right panel is not always a User session. It can become Settings or a harness-specific surface, and the prompt routes to the active surface target.
+The right panel is not always a User session. User Session mode has a prompt/response interface; Settings and Harness modes replace it with full-panel item lists and scoped actions.
 
 Mode meanings:
 
 - User Session mode: work with Prime on plans, reviews, and decisions Prime has decided should be presented to the user, usually inside a project-specific context such as `Prime-Meridian`, `Prime-Polaris`, `Prime-Mojo`, or `Prime-Experts`.
-- Settings mode: work with the orchestrator on Meridian configuration.
-- Harness mode: review and update a list of harness logic items; Prime reviews those logic items when interacting with models through Relay.
+- Settings mode: use the full right panel for Meridian configuration items; no prompt window.
+- Harness mode: use the full right panel for a list of harness logic items; no prompt window. Prime reviews those logic items when interacting with models through Relay.
 
 | ID | Surface Toggle Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SUR1 | User Session mode | Right panel targets user review/decision work Prime has surfaced in a project-specific context. | planned | Title and routing target match selected project/session context. |
-| SUR2 | Settings mode | Right panel targets Meridian configuration work through the orchestrator. | planned | Settings title/target replaces User session target. |
-| SUR3 | Harness mode | Right panel shows selected harness logic items reviewed by Prime through Relay-mediated model interaction. | planned | Harness title/target replaces User session target and displays logic list. |
-| SUR4 | Immediate routing switch | Switching surface immediately changes where right-panel prompts route. | planned | Prompt sent after switch goes to active surface target. |
+| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | planned | Settings title replaces User session target and prompt UI is absent. |
+| SUR3 | Harness mode | Right panel uses full panel for selected harness logic items, with no prompt window. | planned | Harness title replaces User session target and displays logic list. |
+| SUR4 | Immediate interaction switch | Switching surface immediately changes the right-panel interaction model. | planned | User Session shows prompt; Settings/Harness show item lists. |
 | SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | planned | Return to prior surface restores previous target. |
-| SUR6 | Surface-specific prompt | Prompt placeholder/target metadata reflects active surface. | planned | User can tell who/what they are talking to before sending. |
-| SUR7 | Surface state preservation | Unsaved drafts/transcripts are preserved per surface unless reset/close confirms otherwise. | planned | Switch away/back preserves surface draft state. |
+| SUR6 | Surface-specific layout | Layout reflects active surface: prompt/response for User Session, full-panel items for Settings/Harness. | planned | User can tell what mode is active before interacting. |
+| SUR7 | Surface state preservation | Unsaved drafts or item edits are preserved per surface unless reset/close confirms otherwise. | planned | Switch away/back preserves relevant surface state. |
 | SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | planned | Close does not destroy previous session target. |
-| SUR9 | Harness scoped commands | Harness prompts only route to harnesses that can receive scoped commands. | planned | Unsupported harness surface blocks prompt with readable warning. |
-| SUR10 | Settings scoped commands | Settings prompt/actions only mutate explicit settings items. | planned | Settings interaction does not send to live session accidentally. |
+| SUR9 | Harness item actions | Harness mode actions apply only to selected harness logic items. | planned | Unsupported harness action is blocked with readable warning. |
+| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | planned | Settings interaction does not send to live session accidentally. |
 | SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | planned | Prompt does not disappear into a dead target. |
 | SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | planned | Visual regression check passes after switches. |
 
@@ -426,7 +426,7 @@ Speech/Voice is first-class planning now. The user should be able to speak with 
 
 ### Harness Dock Buttons
 
-Harness buttons switch the right panel into Harness mode. They are not merely labels or shortcuts. The prompt target becomes the selected harness logic surface, with previous User Session mode preserved for return.
+Harness buttons switch the right panel into Harness mode. They are not merely labels or shortcuts. The right panel becomes a full-panel harness logic list, with previous User Session mode preserved for return.
 
 | ID | Harness Button | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
@@ -457,19 +457,19 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 |---|---|---|---|---|
 | HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | planned | Right panel title/target changes to selected harness. |
 | HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | planned | Return to User Session restores prior session or stale warning. |
-| HMS3 | Harness logic list | Shows a list of logic items for the selected harness. | planned | Harness mode opens with logic items, not a blank chat. |
+| HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | planned | Harness mode opens with logic items, not a prompt window or blank chat. |
 | HMS4 | Prime review path | Prime reviews harness logic items before model interaction. | planned | Logic item has Prime review state before dispatch. |
 | HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay routing. | planned | Dispatch metadata names Relay route/model target. |
-| HMS6 | Harness-specific routing | Right-panel prompts/actions target selected harness logic surface. | planned | Prompt target metadata names selected harness and logic item. |
-| HMS7 | Unsupported command guard | If harness cannot accept scoped commands yet, prompt send is blocked with readable warning. | planned | Unsupported harness prompt does not disappear. |
+| HMS6 | Harness-specific actions | Right-panel actions target selected harness logic item. | planned | Action metadata names selected harness and logic item. |
+| HMS7 | Unsupported action guard | If harness logic action is not supported yet, action is blocked with readable warning. | planned | Unsupported harness action does not disappear. |
 | HMS8 | Logic update framing | Harness mode language frames work as updating/adding harness logic. | planned | No wording implies arbitrary project session control. |
 | HMS9 | Harness state summary | Shows concise harness status once real state exists. | planned | Status is real or absent; no fake health values. |
 | HMS10 | Harness diagnostics | Shows harness diagnostic events when available. | planned | Diagnostics are structured and filterable. |
 | HMS11 | Harness proof link | Links harness changes to proof/checks when applicable. | planned | Harness update has verification path. |
 | HMS12 | Harness permission boundary | High-risk harness actions require explicit approval. | planned | Source/Git/Release actions cannot run silently. |
 | HMS13 | Harness mode close | Closing Harness mode returns to previous valid right-panel mode. | planned | Close does not lose User Session target. |
-| HMS14 | Harness draft preservation | Unsaved harness-mode prompt drafts are preserved per harness where useful. | planned | Switch harness away/back; draft remains or warning is shown. |
-| HMS15 | No cross-harness leakage | Prompt/context for one harness does not silently route to another harness. | planned | Active harness target is explicit before send. |
+| HMS14 | Harness edit preservation | Unsaved harness-mode item edits are preserved per harness where useful. | planned | Switch harness away/back; edits remain or warning is shown. |
+| HMS15 | No cross-harness leakage | Logic item edits/actions for one harness do not silently route to another harness. | planned | Active harness and logic item are explicit before action. |
 
 ### Bridge / Backend Features
 
@@ -518,7 +518,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | H2 | User/session panels follow rules; orchestrator/Prime panels follow logic. | UI copy and behavior keep Prime logic separate from user/session rules. |
 | H3 | Security is the reserved icon/identity for the TBD security harness. | Harness map lists Security for the TBD slot before wiring actions. |
 | H4 | Prime/Relay model routing remains a future gate until harness logic is defined. | No UI default to Auto and no hidden automatic routing without an explicit Prime/Relay contract. |
-| H5 | Any new harness window has a scoped prompt only if that harness can receive scoped commands. | Manual/code review: prompt target is explicit and does not leak into the wrong session channel. |
+| H5 | Any new harness surface exposes scoped logic-item actions only when that harness can receive them. | Manual/code review: harness/action target is explicit and does not leak into the wrong session channel. |
 
 ## Visual Regression Checks
 
