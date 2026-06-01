@@ -4,7 +4,7 @@
 
 This contract defines how Aegis gate evaluation outcomes, proof evidence, premium-cost approvals, waiver/approval records, and model/vendor evidence are handed to Relay for prompt packaging, context formatting, and downstream Bifrost display.
 
-Aegis evaluates 9 deterministic gates per route and produces structured evidence. Relay consumes that evidence to make deterministic routing decisions and configure prompt context. Neither system calls models, inspects accounts, or persists shared mutable state — both are pure, stateless evaluators.
+Aegis evaluates 9 deterministic gates per route and produces structured evidence. Relay consumes that evidence to make deterministic routing decisions and configure prompt context. Aegis summary helpers and this handoff contract do not call models, inspect accounts, or persist shared mutable state. Relay execution may invoke injected adapters or model-call functions outside this contract boundary.
 
 ---
 
@@ -196,10 +196,7 @@ selected_model_evidence: {
 - No session state mutation (no side effects).
 - No UI rendering (structured output only).
 - No async/polling (synchronous evaluation).
-<<<<<<< HEAD
 - **Summary helpers are pure functions:** `summarize_gate_result()`, `summarize_gate_results()`, and `summarize_aggregate_route_gates()` take gate evaluation outputs and produce deterministic summaries. They do not call models, inspect accounts, or perform I/O. Relay's execution boundary may invoke adapters or model-call functions, but the handoff contract itself does not authorize live model calls, account inspection, process control, branch movement, or Polaris dependencies.
-=======
->>>>>>> 2910dbd296af5326ebb6eb9e1e7dd618b3cb07d7
 
 ### Relay Stays Deterministic
 

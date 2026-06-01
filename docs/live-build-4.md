@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Aegis-to-Relay summary handoff contract field-shape mismatches found by Codex Reviews B.
 
@@ -21,11 +21,21 @@ Task: update `docs/aegis-relay-summary-handoff-contract.md` so its documented sh
 - `GateSummary.waiver_approval_status` values must match runtime strings: `none`, `waiver_present`, `approval_present`, and `waiver_approval_missing`.
 - Clarify that Aegis summary helpers are pure and do not call models/accounts; Relay's execution boundary may call injected adapters/model-call functions, but the handoff contract itself does not authorize live model calls, account inspection, process control, UI work, branch movement, or Polaris dependency.
 
-Proof command:
+Completion: completed 2026-06-01 17:10 UTC.
 
-- `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q`
+Ready for Codex Review:
 
-Completion: commit the docs repair, push to `origin/main`, and mark Ready for Codex Review with the exact commit hash and proof count.
+- Commit: `4581c51c` (pushed to origin/main after merge with diverged remote)
+- Files: `docs/aegis-relay-summary-handoff-contract.md`
+- Tests: 336 passed (all Aegis and Relay executor tests)
+- Repairs applied:
+  1. GateSummary.waiver_approval_status: updated enum values to "none", "waiver_present", "approval_present", "waiver_approval_missing"
+  2. ApprovalRecord.expiration: changed from `str = ""` to `str | None = None`
+  3. WaiverRecord.expiration: changed to `str | None = None`
+  4. WaiverRecord.evidence_url: added as `str | None = None`
+  5. Aegis Stays Pure section: added clarification that summary helpers are pure functions (no model calls, no account inspection, no I/O); Relay execution boundary may invoke adapters/model-call functions but handoff contract does not authorize live calls or account inspection
+- Proof: `python -m pytest tests/test_aegis.py tests/test_relay_executor.py -q` — 336 passed
+- Ready for Codex Review; awaiting sweep
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -695,6 +705,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-01 16:38 -06:00 - Build 4 checked queue; status: idle; Aegis-to-Relay summary handoff contract task completed; contract file created with handoff overview, output shapes, evidence records, field distinctions, boundaries, example flow, testing expectations; commit f64df7e6 pushed to origin/main; marked Ready for Codex Review; Next Candidate Task = bind Aegis outputs into Relay decision-record proof; cadence 3/3 awaiting Codex review
 2026-06-12 14:10 -06:00 - Build 4 checked queue; status: idle; no executable Coordinator Override - Active Now section; Aegis-to-Relay handoff contract marked Completed/Ready for Codex Review (commit f64df7e6); Next Candidate Task = bind Aegis outputs into Relay decision-record proof awaits coordinator promotion; origin/main synced (8a939d35); cadence 3/3
 2026-06-12 14:15 -06:00 - Build 4 checked queue; status: idle; no executable Coordinator Override - Active Now section; Aegis-to-Relay handoff contract Ready for Codex Review; Next Candidate Task (bind Aegis gate outputs into Relay decision-record proof) awaits coordinator promotion; origin/main up to date; cadence 3/3 awaiting Codex review before proceeding
+2026-06-01 17:10 UTC - Build 4 checked queue; status: running; Active Task found = repair Aegis-to-Relay contract field-shape mismatches; pulled origin/main in worktree; beginning repairs
 ```
 
 ## Write/Completion Log
@@ -736,6 +747,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-06-13 18:00 -05:00 - Build 4 completed Aegis premium-cost approval gate repair; commit 29592bb2; files changed: meridian_core/aegis.py (reordered cost_justified check to be Tier 0-1 only, moved Tier 2+ premium cost to require valid ApprovalRecord), tests/test_aegis.py (updated test_premium_cost_justified_allows to test_premium_cost_justified_tier0_allows, added test_premium_cost_justified_tier2_blocks); repair: gate_cost_exposure() no longer allows Tier 2+ premium cost from cost_justified alone; requires valid ApprovalRecord with actor, scope, timestamp, reason; Tier 0-1 retains cost_justified behavior; test coverage: 1 new test + 190 prior = 191 total passing; proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 cost_justified blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 still allows; ready for Codex Review; cadence 1/3
 2026-06-13 18:06 -05:00 - Build 4 completed Aegis premium-cost approval gate repair (origin/main fix); commit f15e7ceb; files changed: meridian_core/aegis.py (moved cost_justified check inside Tier 0-1 block, Tier 2+ premium cost now requires valid ApprovalRecord), tests/test_aegis.py (split test_premium_cost_justified_allows into test_premium_cost_justified_tier0_allows, added test_premium_cost_justified_tier2_blocks); repair: gate_cost_exposure() enforcement fixed — Tier 2+ premium cost requires valid ApprovalRecord even if cost_justified=True; Tier 0-1 retain cost_justified behavior; bare booleans rejected for Tier 2+; test coverage: 1 new test + 190 prior = 191 total passing; proof: test_premium_cost_justified_tier2_blocks verifies Tier 2 cost_justified=True blocks; test_premium_cost_justified_tier0_allows verifies Tier 0 cost_justified=True allows; direct commit to origin/main; cadence 2/3 (continuing after cadence pause)
 2026-06-01 16:38 -06:00 - Build 4 completed Aegis-to-Relay summary handoff contract (docs/aegis-relay-summary-handoff-contract.md); commit f64df7e6; files changed: docs/aegis-relay-summary-handoff-contract.md; tests: not required (docs-only); handoff contract defines: output shapes (GateResult/GateSummary/AggregateGateSummary), evidence records (ApprovalRecord/WaiverRecord), human-facing vs audit-only fields, stable boundaries, out-of-scope areas, example flow, testing/proof expectations; proof: contract matches implementation shapes from aegis.py, validation logic, pure-function design; pushed to origin/main; Ready for Codex Review; cadence 3/3
+2026-06-01 17:10 UTC - Build 4 completed repair of Aegis-to-Relay contract field-shape mismatches; commit 4581c51c; files changed: docs/aegis-relay-summary-handoff-contract.md; repairs: GateSummary.waiver_approval_status enum values (none/waiver_present/approval_present/waiver_approval_missing), ApprovalRecord.expiration (str | None = None), WaiverRecord.expiration (str | None = None), WaiverRecord.evidence_url (str | None = None), Aegis pure-function clarification; tests: 336 passed (all aegis.py + relay_executor.py tests); merged to origin/main after resolving upstream divergence; Ready for Codex Review; awaiting sweep
 ```
 
 ## Cross-Check Activity
