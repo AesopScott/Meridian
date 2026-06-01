@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import pytest
 
 from meridian_core.aegis import (
@@ -17,6 +18,7 @@ from meridian_core.relay import ModelRole, route_from_tier
 from meridian_core.relay_dispatch import RelayDispatchLane, RelayDispatchPlan
 from meridian_core.cognition_policy import evaluate_cognition_policy
 from meridian_core.relay_executor import (
+    AegisGateEvidenceSummary,
     RelayDecisionRecord,
     RelayExecutionError,
     RelayExecutionResult,
@@ -1692,6 +1694,9 @@ class TestRelayDecisionRecord:
         # Explanation should include Aegis context
         assert "Aegis" in record.explanation_for_prime
         assert "human_gate" in record.explanation_for_prime
+        # Note: human_gate_required field represents route base requirement only;
+        # Aegis gate decisions are captured separately in fallback_blockers and explanation.
+        # The explicit "aegis_human_gate_required" blocker serves as the downstream signal.
 
     def test_decision_record_aegis_demote_adds_explanation_only(self) -> None:
         """Decision record treats Aegis 'demote' decision as non-silent demotion."""
@@ -1725,3 +1730,112 @@ class TestRelayDecisionRecord:
         # Aegis decision should still be stored for audit
         assert record.aegis_gate_decision == "allow"
         assert record.aegis_explanation == "policy satisfied"
+
+
+class TestAegisGateEvidenceSummary:
+    """Test serialization of Aegis gate evidence for downstream Bifrost/Prime surfaces."""
+
+    def test_evidence_summary_empty_when_no_decision_record(self) -> None:
+        """Summary returns empty AegisGateEvidenceSummary when decision_record is None."""
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=None)
+        evidence = summary.aegis_gate_evidence_summary()
+        assert evidence.gate_decision is None
+        assert evidence.severity is None
+        assert evidence.evidence_ids == ()
+        assert evidence.waiver_present is False
+        assert evidence.explanation == ""
+        assert evidence.fallback_blockers_from_aegis == ()
+
+    def test_evidence_summary_extracts_allow_decision(self) -> None:
+        """Summary serializes allow gate decision without blockers."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="allow",
+            aegis_explanation="policy satisfied",
+        )
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+        evidence = summary.aegis_gate_evidence_summary()
+        assert evidence.gate_decision == "allow"
+        assert evidence.explanation == "policy satisfied"
+        assert evidence.fallback_blockers_from_aegis == ()
+
+    def test_evidence_summary_extracts_block_decision_and_blocker(self) -> None:
+        """Summary serializes block gate decision with aegis_gate_blocked blocker."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="block",
+            aegis_explanation="security policy violation",
+        )
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+        evidence = summary.aegis_gate_evidence_summary()
+        assert evidence.gate_decision == "block"
+        assert evidence.explanation == "security policy violation"
+        assert "aegis_gate_blocked" in evidence.fallback_blockers_from_aegis
+
+    def test_evidence_summary_extracts_human_gate_blocker(self) -> None:
+        """Summary serializes human_gate decision with aegis_human_gate_required blocker."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="human_gate",
+            aegis_explanation="escalation required",
+        )
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+        evidence = summary.aegis_gate_evidence_summary()
+        assert evidence.gate_decision == "human_gate"
+        assert evidence.explanation == "escalation required"
+        assert "aegis_human_gate_required" in evidence.fallback_blockers_from_aegis
+
+    def test_evidence_summary_filters_only_aegis_blockers(self) -> None:
+        """Summary extracts only aegis_* prefixed blockers from fallback_blockers."""
+        plan = _make_plan(2)
+        record = _build_decision_record(plan, aegis_gate_decision="block")
+        # Manually construct a record with mixed blockers for testing
+        record = dataclasses.replace(
+            record,
+            fallback_blockers=(
+                "vendor_unknown",
+                "aegis_gate_blocked",
+                "model_id_unknown",
+                "aegis_other_evidence",
+            ),
+        )
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+        evidence = summary.aegis_gate_evidence_summary()
+        # Should only extract aegis_* prefixed blockers
+        assert "vendor_unknown" not in evidence.fallback_blockers_from_aegis
+        assert "model_id_unknown" not in evidence.fallback_blockers_from_aegis
+        assert "aegis_gate_blocked" in evidence.fallback_blockers_from_aegis
+        assert "aegis_other_evidence" in evidence.fallback_blockers_from_aegis
+
+    def test_evidence_summary_extracts_severity_and_evidence_ids(self) -> None:
+        """Summary serializes severity, evidence_ids, and waiver_present."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="demote",
+            aegis_explanation="cost constraint",
+        )
+        # Manually set severity, evidence_ids, and waiver_present
+        record = dataclasses.replace(
+            record,
+            aegis_gate_severity="WARNING",
+            aegis_evidence_ids=("evidence-1", "evidence-2"),
+            aegis_waiver_present=True,
+        )
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+        evidence = summary.aegis_gate_evidence_summary()
+        assert evidence.severity == "WARNING"
+        assert evidence.evidence_ids == ("evidence-1", "evidence-2")
+        assert evidence.waiver_present is True
+
+    def test_evidence_summary_immutable(self) -> None:
+        """AegisGateEvidenceSummary is frozen and cannot be modified."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision="allow",
+            explanation="test",
+        )
+        with pytest.raises(Exception):  # FrozenInstanceError from dataclass
+            evidence.gate_decision = "block"  # type: ignore
