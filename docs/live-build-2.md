@@ -2,7 +2,7 @@
 
 ## Required First Command For Every New Task
 
-Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
 ## Queue Authority
 
@@ -865,6 +865,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-12 07:35 -06:00 - Build 2 checked queue; status: idle (Active Task still Session Lifecycle routing decisions, already complete; no orchestrator update since last check; Next Candidate Task blocked pending Codex review; cadence 1 of 3; awaiting task assignment; polling)
 2026-06-12 07:45 -06:00 - Build 2 checked queue; status: idle (Active Task Session Lifecycle routing decisions still complete and unassigned; no new task from coordinator; cadence 1 of 3; awaiting task assignment; polling)
 2026-06-12 07:55 -06:00 - Build 2 checked queue; status: idle (Session Lifecycle routing decisions complete; no new Active Task assigned; Next Candidate blocked pending Codex review; cadence 1 of 3; awaiting orchestrator task assignment; polling)
+2026-06-12 08:05 -06:00 - Build 2 checked queue; status: idle (Active Task Session Lifecycle routing decisions complete; no new assignment from orchestrator; cadence 1 of 3; awaiting task assignment; polling)
 ```
 
 ## Write/Completion Log

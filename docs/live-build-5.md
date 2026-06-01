@@ -2,7 +2,7 @@
 
 ## Required First Command For Every New Task
 
-Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
+You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
 ## Coordinator Override - Active Now
 
@@ -242,7 +242,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: add Bifrost review-gate and proof-state preview fields after session lifecycle preview lands.
 
@@ -254,7 +254,37 @@ Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion:
+
+- Build 5 completed this proof state preview surface in `f9b68e6a`.
+- Files changed: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+- Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` = 127 passed (112 original + 15 new).
+- Verification summary (2026-06-01 18:15):
+  - ProofGateStatus dataclass for individual gate check results (gate_id, gate_name, status, reason)
+  - ProofStateView dataclass container (proof_status, gates list, blocker_count, open_findings, waived_count, notes)
+  - Sample proof state data in sample_cockpit_view_model() with 3 gates: unknown_route_class (pass), missing_model_id (pass), tier3_dual_lane (pass)
+  - _render_proof_state() function at line 836 with CSS state classes (gate-pass, gate-warning, gate-block)
+  - Integration into render_cockpit_html() at line 948 with output at line 972
+  - Full rendering includes proof status, gate items with reason, blocker count, findings summary, and notes
+  - HTML escaping verified via _e() function for all dynamic content (gate names, reasons, notes)
+  - 15 new tests covering: data presence (3 tests), rendering (5 tests), XSS escaping (3 tests), integration (2 tests), edge cases (2 tests)
+- Routed to Codex Reviews B for Bifrost/UI review.
+
+Ready for Codex Review.
+
+## Active Task
+
+Goal: add Bifrost review-gate and proof-state preview styling and layout enhancements.
+
+Allowed files only: `bifrost/static/cockpit.css`, `docs/live-build-5.md`.
+
+Task: after proof state preview structure lands, add CSS styling and layout for the proof state surface to match the visual style of provider balance and prompt payload surfaces. Include gate status indicators, findings summary styling, and responsive layout.
+
+Tests:
+
+- Visual verification in browser: `python -m http.server -d bifrost/static 8000`
+
+Completion: commit only the allowed files, push to `origin/main`, and mark Ready for Codex Review with commit hash, files changed, and visual verification notes.
 
 ## Next Candidate Task
 
@@ -872,6 +902,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-06-01 16:30 -06:00 - Build 5 reorganized queue file: moved session lifecycle preview (d638e8a) from "## Active Task" to "## Completed / Ready For Codex Review" section with full verification summary. Promoted review-gate and proof-state preview to new "## Active Task" section. Appended this Read Check. No code changes. Origin/main up to date. Cadence 1/3. Queue file reorganization complete; ready for orchestrator review.
 2026-06-01 17:00 -06:00 - Build 5 checked queue; status: running. Active Task = add Bifrost review-gate and proof-state preview fields. Session lifecycle preview confirmed complete (d638e8a, 112 tests passing). Starting implementation: create ProofGateStatus + ProofStateView dataclasses, add sample data, implement _render_proof_state(), integrate into render_cockpit_html(), add ~13 tests. Origin/main up to date. Cadence 1/3.
 2026-06-01 18:15 -06:00 - Build 5 completed Bifrost proof state preview surface. Commit f9b68e6a: ProofGateStatus + ProofStateView dataclasses, sample data with 3 gates (pass/pass/pass), _render_proof_state() function rendering gates + findings summary, integrated into render_cockpit_html() after session_lifecycle. Files changed: bifrost/cockpit.py (dataclasses + render function + integration), tests/test_bifrost_cockpit.py (15 new tests: data presence, rendering, XSS escaping, integration). Tests: 127 passed (112 original + 15 new). Push successful. Cadence 1/3. Awaiting Codex review per queue rules.
+2026-06-01 19:00 -06:00 - Build 5 checked queue; status: running. Active Task = add Bifrost review-gate and proof-state preview styling and layout enhancements. Proof state structure (f9b68e6a) confirmed on origin/main with 127 tests passing. Starting CSS implementation: add gate status indicators styling, findings summary styling, proof state section layout, responsive behavior matching provider balance/prompt payload surfaces. Origin/main up to date at 7ec4fb4f. Cadence 1/3.
 ```
 
 ## Write/Completion Log

@@ -336,6 +336,20 @@ def make_default_map() -> FileMap:
             notes="Frozen dataclass. No metadata, lineage, or tokens sent to model.",
         ),
         FileMapEntry(
+            path="meridian_core/relay_executor.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Relay executor: executes RelayDispatch routing plans and dispatches work to model providers via model_adapter.",
+            related_tests=["tests/test_relay_executor.py"],
+            notes="V2 Relay runtime execution layer. Consumes RelayRoute decisions and executes dispatch to adapters.",
+        ),
+        FileMapEntry(
+            path="tests/test_relay_executor.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Test suite for meridian_core/relay_executor.py: coverage for dispatch execution, provider routing, error handling, and state transitions.",
+            related_tests=[],
+            notes="Run before changing meridian_core/relay_executor.py or Relay execution behavior.",
+        ),
+        FileMapEntry(
             path="meridian_core/model_adapter.py",
             area=FileArea.MODEL_HARNESS,
             purpose="Provider-neutral Model Adapter contract: payload-only callable boundary, deterministic fake adapter, and env-safe live adapter configuration wrapper.",

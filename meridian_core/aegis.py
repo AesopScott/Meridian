@@ -13,6 +13,7 @@ Domain-only: no model calls, no UI, no persistence.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -252,4 +253,467 @@ def evidence_from_cross_check(
         source=source,
         target=target,
         summary=summary,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Aegis Route Validation Gates
+# ---------------------------------------------------------------------------
+
+
+class GateDecision(Enum):
+    """Outcome of a single Aegis gate evaluation."""
+    ALLOW = "allow"
+    DEMOTE = "demote"
+    BLOCK = "block"
+
+
+@dataclass
+class GateResult:
+    """Result of evaluating a single gate."""
+    gate_name: str
+    decision: GateDecision
+    reason: str = ""
+    demote_to_tier: int | None = None
+
+
+def gate_unknown_route_class(
+    route_class: str | None,
+) -> GateResult:
+    """
+    Gate 1: Unknown Route Class Gate.
+
+    Trigger: route_class is missing, unknown, or ambiguous.
+    Allowed values: account_session | local_cli | direct_api | aggregator_api
+    Logic: If route_class is not declared, block unconditionally.
+    """
+    allowed = {"account_session", "local_cli", "direct_api", "aggregator_api"}
+    if route_class is None or route_class not in allowed:
+        return GateResult(
+            gate_name="unknown_route_class",
+            decision=GateDecision.BLOCK,
+            reason=f"route_class unknown or missing; got {route_class!r}",
+        )
+    return GateResult(
+        gate_name="unknown_route_class",
+        decision=GateDecision.ALLOW,
+        reason=f"route_class valid: {route_class!r}",
+    )
+
+
+def gate_missing_exact_model_id(
+    model_id: str | None,
+    risk_tier: int,
+) -> GateResult:
+    """
+    Gate 2: Missing Exact Model ID Gate.
+
+    Trigger: model_id is missing, empty, or unversioned.
+    Allowed for: Tier 0, Tier 1 only (with cost/latency pressure noted).
+    Logic:
+    - For Tier 0, gate passes (no model ID needed).
+    - For Tier 1, if model_id missing/unversioned, allow with warning.
+    - For Tier 2+, if model_id missing/unversioned, block.
+
+    Heuristic for "unversioned": missing, ends with generic label like
+    'latest', 'pro', 'next', 'standard', or lacks date/version patterns
+    (YYYY-MM-DD, YYYY-MM, or consecutive digits 2+).
+    """
+    if risk_tier == 0:
+        return GateResult(
+            gate_name="missing_exact_model_id",
+            decision=GateDecision.ALLOW,
+            reason="Tier 0: no model call needed",
+        )
+
+    is_missing = model_id is None or model_id == ""
+
+    # Check if unversioned: generic labels or no version pattern
+    is_unversioned = False
+    if is_missing:
+        is_unversioned = True
+    elif model_id:
+        # Unversioned if it ends with generic labels
+        generic_labels = {"latest", "pro", "next", "standard", "preview"}
+        if any(model_id.lower().endswith(label) for label in generic_labels):
+            is_unversioned = True
+        # Or if no date/version pattern found
+        elif not any(c.isdigit() for c in model_id):
+            is_unversioned = True
+        else:
+            # Has digits but check for version patterns
+            # Look for: YYYY-MM-DD, YYYY-MM, 2+ consecutive digits, or dash-separated numeric components
+            has_version = bool(re.search(r'\d{4}-\d{2}|\d{2,}|-\d+', model_id))
+            is_unversioned = not has_version
+
+    if is_missing or is_unversioned:
+        if risk_tier == 1:
+            return GateResult(
+                gate_name="missing_exact_model_id",
+                decision=GateDecision.ALLOW,
+                reason=f"Tier 1: unversioned allowed with warning; model_id={model_id!r}",
+            )
+        else:
+            return GateResult(
+                gate_name="missing_exact_model_id",
+                decision=GateDecision.BLOCK,
+                reason=f"Tier {risk_tier}: exact model ID required; got {model_id!r}",
+            )
+
+    return GateResult(
+        gate_name="missing_exact_model_id",
+        decision=GateDecision.ALLOW,
+        reason=f"model_id exact: {model_id!r}",
+    )
+
+
+def gate_tier3_dual_lane_requirement(
+    risk_tier: int,
+    dual_lane_required: bool,
+    has_waiver: bool = False,
+) -> GateResult:
+    """
+    Gate 3: Tier 3 Dual-Lane Requirement Gate.
+
+    Trigger: risk_tier is 3 and dual_lane_required is not True.
+    Logic:
+    - If Tier 3 and dual_lane_required=False:
+      - If waiver exists, demote to Tier 2.
+      - If no waiver, block.
+    - If Tier 3 and dual_lane_required=True, gate passes.
+    """
+    if risk_tier != 3:
+        return GateResult(
+            gate_name="tier3_dual_lane_requirement",
+            decision=GateDecision.ALLOW,
+            reason=f"Tier {risk_tier}: dual-lane not required",
+        )
+
+    if dual_lane_required:
+        return GateResult(
+            gate_name="tier3_dual_lane_requirement",
+            decision=GateDecision.ALLOW,
+            reason="Tier 3: dual-lane required and provided",
+        )
+
+    if has_waiver:
+        return GateResult(
+            gate_name="tier3_dual_lane_requirement",
+            decision=GateDecision.DEMOTE,
+            reason="Tier 3 without dual-lane; explicit waiver permits demotion",
+            demote_to_tier=2,
+        )
+
+    return GateResult(
+        gate_name="tier3_dual_lane_requirement",
+        decision=GateDecision.BLOCK,
+        reason="Tier 3 single-lane blocked; dual-lane required or explicit waiver needed",
+    )
+
+
+def gate_unknown_proof_requirement(
+    proof_required: str | None,
+    risk_tier: int,
+) -> GateResult:
+    """
+    Gate 4: Unknown Proof Requirement Gate.
+
+    Trigger: proof_required is missing or unknown.
+    Allowed values per tier:
+    - Tier 0: none
+    - Tier 1: none | artifact | telemetry
+    - Tier 2: artifact | telemetry | code_review
+    - Tier 3: code_review | security_review | dual_review
+    - Tier 4: human_gate | security_review
+
+    Logic:
+    - If proof_required unknown, block.
+    - If mismatch (insufficient for tier), demote or block.
+    """
+    valid_by_tier = {
+        0: {"none"},
+        1: {"none", "artifact", "telemetry"},
+        2: {"artifact", "telemetry", "code_review"},
+        3: {"code_review", "security_review", "dual_review"},
+        4: {"human_gate", "security_review"},
+    }
+
+    allowed = valid_by_tier.get(risk_tier, set())
+
+    if proof_required is None or proof_required not in allowed:
+        if proof_required is None:
+            return GateResult(
+                gate_name="unknown_proof_requirement",
+                decision=GateDecision.BLOCK,
+                reason=f"Tier {risk_tier}: proof_required is missing",
+            )
+        return GateResult(
+            gate_name="unknown_proof_requirement",
+            decision=GateDecision.BLOCK,
+            reason=f"Tier {risk_tier}: proof_required={proof_required!r} not allowed (allowed: {allowed})",
+        )
+
+    return GateResult(
+        gate_name="unknown_proof_requirement",
+        decision=GateDecision.ALLOW,
+        reason=f"Tier {risk_tier}: proof_required={proof_required!r} valid",
+    )
+
+
+def gate_unsafe_fallback(
+    fallback_allowed: bool,
+    fallback_blockers: list[str] | None,
+    risk_tier: int,
+) -> GateResult:
+    """
+    Gate 5: Unsafe Fallback Gate.
+
+    Trigger: fallback_allowed is True but fallback_blockers contains risk flags.
+    Logic:
+    - If fallback_allowed=False, gate passes (no fallback to validate).
+    - If blocker is "silent_fallback", block unconditionally.
+    - If blocker is "trust_downgrade" and Tier >= 2, allow with warning.
+    - If blocker is "cost_increase" and cost_posture=PREMIUM, allow but warn.
+    - If blocker is "model_mismatch" and Tier >= 3, block.
+    """
+    if not fallback_allowed:
+        return GateResult(
+            gate_name="unsafe_fallback",
+            decision=GateDecision.ALLOW,
+            reason="no fallback configured",
+        )
+
+    blockers = fallback_blockers or []
+
+    if "silent_fallback" in blockers:
+        return GateResult(
+            gate_name="unsafe_fallback",
+            decision=GateDecision.BLOCK,
+            reason="silent fallback not allowed for Tier 2+",
+        )
+
+    if "model_mismatch" in blockers and risk_tier >= 3:
+        return GateResult(
+            gate_name="unsafe_fallback",
+            decision=GateDecision.BLOCK,
+            reason="fallback model mismatch not allowed for Tier 3+",
+        )
+
+    return GateResult(
+        gate_name="unsafe_fallback",
+        decision=GateDecision.ALLOW,
+        reason=f"fallback blockers acceptable: {blockers}",
+    )
+
+
+def gate_unvalidated_deepseek(
+    provider: str | None,
+    trust_mode: str,
+    external_review_status: str | None,
+    risk_tier: int,
+) -> GateResult:
+    """
+    Gate 6: Unvalidated DeepSeek Gate.
+
+    Trigger: provider=="deepseek" and external_review_status is not PASSED.
+    Logic:
+    - If provider != deepseek, gate passes.
+    - If provider==deepseek:
+      - If trust_mode != DIRECT, block.
+      - If external_review_status==PENDING, allow Tier 0-1 only.
+      - If external_review_status==PASSED (within 30 days), gate passes.
+      - If external_review_status==FAILED or EXPIRED, block.
+    """
+    if provider != "deepseek":
+        return GateResult(
+            gate_name="unvalidated_deepseek",
+            decision=GateDecision.ALLOW,
+            reason=f"provider={provider!r}; no DeepSeek validation needed",
+        )
+
+    if trust_mode != "DIRECT":
+        return GateResult(
+            gate_name="unvalidated_deepseek",
+            decision=GateDecision.BLOCK,
+            reason="DeepSeek through aggregator not allowed; use direct API",
+        )
+
+    if external_review_status == "PENDING":
+        if risk_tier <= 1:
+            return GateResult(
+                gate_name="unvalidated_deepseek",
+                decision=GateDecision.ALLOW,
+                reason=f"Tier {risk_tier}: DeepSeek validation pending, allowed for Tier 0-1",
+            )
+        return GateResult(
+            gate_name="unvalidated_deepseek",
+            decision=GateDecision.DEMOTE,
+            reason=f"Tier {risk_tier}: DeepSeek validation pending, demoting to Tier 1",
+            demote_to_tier=1,
+        )
+
+    if external_review_status == "PASSED":
+        return GateResult(
+            gate_name="unvalidated_deepseek",
+            decision=GateDecision.ALLOW,
+            reason=f"Tier {risk_tier}: DeepSeek validation passed",
+        )
+
+    if external_review_status in ("FAILED", "EXPIRED", "NOT_REQUIRED"):
+        return GateResult(
+            gate_name="unvalidated_deepseek",
+            decision=GateDecision.BLOCK,
+            reason=f"DeepSeek validation not available: {external_review_status!r}",
+        )
+
+    return GateResult(
+        gate_name="unvalidated_deepseek",
+        decision=GateDecision.BLOCK,
+        reason=f"DeepSeek validation status unknown: {external_review_status!r}",
+    )
+
+
+def gate_aggregator_authority(
+    trust_mode: str,
+    risk_tier: int,
+    proof_strength: str = "WEAK",
+) -> GateResult:
+    """
+    Gate 7: Aggregator Authority Gate.
+
+    Trigger: trust_mode==AGGREGATOR and risk_tier >= 3.
+    Logic:
+    - If Tier >= 3 and aggregator, block.
+    - If Tier 0-2 and aggregator and proof_strength=WEAK, allow with warning.
+    - If proof_strength=NONE, block.
+    """
+    if trust_mode != "AGGREGATOR":
+        return GateResult(
+            gate_name="aggregator_authority",
+            decision=GateDecision.ALLOW,
+            reason=f"trust_mode={trust_mode!r}; not aggregator",
+        )
+
+    if risk_tier >= 3:
+        return GateResult(
+            gate_name="aggregator_authority",
+            decision=GateDecision.BLOCK,
+            reason=f"Tier {risk_tier}: aggregator not authorized",
+        )
+
+    if proof_strength == "NONE":
+        return GateResult(
+            gate_name="aggregator_authority",
+            decision=GateDecision.BLOCK,
+            reason="aggregator route with no proof not allowed",
+        )
+
+    return GateResult(
+        gate_name="aggregator_authority",
+        decision=GateDecision.ALLOW,
+        reason=f"Tier {risk_tier}: aggregator allowed for Tier 0-2",
+    )
+
+
+def gate_account_session_risk(
+    route_class: str,
+    account_risk_level: str | None,
+    session_health_status: str | None,
+    risk_tier: int,
+) -> GateResult:
+    """
+    Gate 8: Account/Session Risk Gate.
+
+    Trigger: route_class==account_session.
+    Logic:
+    - If route_class != account_session, gate passes.
+    - If account_risk_level missing, assume UNKNOWN and demote to Tier 1.
+    - If account_risk_level==HIGH and Tier >= 2, block.
+    - If session_health_status in (POLLUTED, STALE, WRONG_PROJECT), block.
+    """
+    if route_class != "account_session":
+        return GateResult(
+            gate_name="account_session_risk",
+            decision=GateDecision.ALLOW,
+            reason=f"route_class={route_class!r}; not account_session",
+        )
+
+    if session_health_status in ("POLLUTED", "STALE", "WRONG_PROJECT"):
+        return GateResult(
+            gate_name="account_session_risk",
+            decision=GateDecision.BLOCK,
+            reason=f"session context invalid: {session_health_status!r}",
+        )
+
+    if account_risk_level is None:
+        return GateResult(
+            gate_name="account_session_risk",
+            decision=GateDecision.DEMOTE,
+            reason="account_risk_level unknown; demoting to Tier 1",
+            demote_to_tier=1,
+        )
+
+    if account_risk_level == "HIGH" and risk_tier >= 2:
+        return GateResult(
+            gate_name="account_session_risk",
+            decision=GateDecision.BLOCK,
+            reason=f"account risk level HIGH not allowed for Tier {risk_tier}",
+        )
+
+    return GateResult(
+        gate_name="account_session_risk",
+        decision=GateDecision.ALLOW,
+        reason=f"account_risk_level={account_risk_level!r}; session={session_health_status!r}",
+    )
+
+
+def gate_cost_exposure(
+    cost_posture: str,
+    cost_justified: bool,
+    risk_tier: int,
+    cost_pressure: str | None = None,
+) -> GateResult:
+    """
+    Gate 9: Cost Exposure Gate.
+
+    Trigger: cost_posture==PREMIUM or risk_tier==4.
+    Logic:
+    - If cost_posture==PREMIUM and cost_justified=False:
+      - For Tier <= 1, allow with warning.
+      - For Tier >= 2, block unless explicitly approved.
+    - If risk_tier==4 and cost_pressure in (QUOTA_LIMITED, EXHAUSTED), block.
+    """
+    if risk_tier == 4:
+        if cost_pressure in ("QUOTA_LIMITED", "EXHAUSTED"):
+            return GateResult(
+                gate_name="cost_exposure",
+                decision=GateDecision.BLOCK,
+                reason=f"Tier 4: cost limit reached ({cost_pressure!r})",
+            )
+
+    if cost_posture != "PREMIUM":
+        return GateResult(
+            gate_name="cost_exposure",
+            decision=GateDecision.ALLOW,
+            reason=f"cost_posture={cost_posture!r}",
+        )
+
+    if cost_justified:
+        return GateResult(
+            gate_name="cost_exposure",
+            decision=GateDecision.ALLOW,
+            reason="premium cost justified",
+        )
+
+    if risk_tier <= 1:
+        return GateResult(
+            gate_name="cost_exposure",
+            decision=GateDecision.ALLOW,
+            reason=f"Tier {risk_tier}: premium cost allowed with warning",
+        )
+
+    return GateResult(
+        gate_name="cost_exposure",
+        decision=GateDecision.BLOCK,
+        reason=f"Tier {risk_tier}: premium cost requires explicit user approval",
     )
