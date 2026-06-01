@@ -8,9 +8,12 @@ from meridian_core.council import CouncilPlan, CouncilRole
 from meridian_core.prompt_budget import PromptBudgetPlan, PromptBudgetTier
 from meridian_core.relay import (
     AccessRouteClass,
+    ContextHealth,
     ContextStrategy,
     CostPosture,
+    LatencyPosture,
     ModelRole,
+    PrivacyLevel,
     RelayLane,
     RelayRoute,
     RelayRouteAudit,
@@ -432,3 +435,143 @@ class TestPromptBudgetIntegration:
         route = route_from_assessment(assessment)
         assert route.prompt_budget.tier is PromptBudgetTier.BOUNDED
         assert route.prompt_budget.max_context_tokens == 5000
+
+
+# ---------------------------------------------------------------------------
+# Context Health, Latency Posture, Privacy Level -- deepened domain support
+# ---------------------------------------------------------------------------
+
+
+class TestContextHealthLatencyPrivacy:
+    def test_tier0_context_health_is_clean(self):
+        assert route_from_tier(0).context_health is ContextHealth.CLEAN
+
+    def test_tier1_context_health_is_bounded(self):
+        assert route_from_tier(1).context_health is ContextHealth.BOUNDED
+
+    def test_tier2_context_health_is_bounded(self):
+        assert route_from_tier(2).context_health is ContextHealth.BOUNDED
+
+    def test_tier3_context_health_is_clean(self):
+        assert route_from_tier(3).context_health is ContextHealth.CLEAN
+
+    def test_tier4_context_health_is_clean(self):
+        assert route_from_tier(4).context_health is ContextHealth.CLEAN
+
+    def test_tier0_latency_posture_is_fast(self):
+        assert route_from_tier(0).latency_posture is LatencyPosture.FAST
+
+    def test_tier1_latency_posture_is_fast(self):
+        assert route_from_tier(1).latency_posture is LatencyPosture.FAST
+
+    def test_tier2_latency_posture_is_standard(self):
+        assert route_from_tier(2).latency_posture is LatencyPosture.STANDARD
+
+    def test_tier3_latency_posture_is_thorough(self):
+        assert route_from_tier(3).latency_posture is LatencyPosture.THOROUGH
+
+    def test_tier4_latency_posture_is_standard(self):
+        assert route_from_tier(4).latency_posture is LatencyPosture.STANDARD
+
+    def test_tier0_privacy_level_is_local_only(self):
+        assert route_from_tier(0).privacy_level is PrivacyLevel.LOCAL_ONLY
+
+    def test_tier1_privacy_level_is_project_scoped(self):
+        assert route_from_tier(1).privacy_level is PrivacyLevel.PROJECT_SCOPED
+
+    def test_tier2_privacy_level_is_project_scoped(self):
+        assert route_from_tier(2).privacy_level is PrivacyLevel.PROJECT_SCOPED
+
+    def test_tier3_privacy_level_is_project_scoped(self):
+        assert route_from_tier(3).privacy_level is PrivacyLevel.PROJECT_SCOPED
+
+    def test_tier4_privacy_level_is_project_scoped(self):
+        assert route_from_tier(4).privacy_level is PrivacyLevel.PROJECT_SCOPED
+
+    def test_audit_includes_context_health(self):
+        for tier in range(5):
+            audit = route_from_tier(tier).audit
+            assert isinstance(audit.context_health, ContextHealth)
+
+    def test_audit_includes_latency_posture(self):
+        for tier in range(5):
+            audit = route_from_tier(tier).audit
+            assert isinstance(audit.latency_posture, LatencyPosture)
+
+    def test_audit_includes_privacy_level(self):
+        for tier in range(5):
+            audit = route_from_tier(tier).audit
+            assert isinstance(audit.privacy_level, PrivacyLevel)
+
+    def test_fields_match_between_route_and_audit(self):
+        for tier in range(5):
+            route = route_from_tier(tier)
+            assert route.context_health is route.audit.context_health
+            assert route.latency_posture is route.audit.latency_posture
+            assert route.privacy_level is route.audit.privacy_level
+
+    def test_context_health_via_assessment(self):
+        assessment = assess_tier(3)
+        route = route_from_assessment(assessment)
+        assert route.context_health is ContextHealth.CLEAN
+
+    def test_latency_posture_via_assessment(self):
+        assessment = assess_tier(3)
+        route = route_from_assessment(assessment)
+        assert route.latency_posture is LatencyPosture.THOROUGH
+
+    def test_privacy_level_via_assessment(self):
+        assessment = assess_tier(3)
+        route = route_from_assessment(assessment)
+        assert route.privacy_level is PrivacyLevel.PROJECT_SCOPED
+
+
+# ---------------------------------------------------------------------------
+# Dual-Lane Tier 3 Independence and Fallback Blockers
+# ---------------------------------------------------------------------------
+
+
+class TestTier3DualLaneIndependence:
+    def test_tier3_requires_dual_lane_independence(self):
+        route = route_from_tier(3)
+        assert route.requires_independence is True
+
+    def test_tier3_dual_lane_mode(self):
+        assert route_from_tier(3).mode is RoutingMode.DUAL_LANE_PROOF
+
+    def test_tier3_lanes_include_independent_reviewer(self):
+        route = route_from_tier(3)
+        reviewer_lanes = [lane for lane in route.lanes if lane.role is ModelRole.REVIEWER]
+        assert len(reviewer_lanes) > 0
+        assert any(lane.independent for lane in reviewer_lanes)
+
+    def test_tier3_fallback_blockers_include_dual_lane_independence(self):
+        audit = route_from_tier(3).audit
+        assert "dual_lane_independence_required" in audit.fallback_blockers
+
+    def test_tier3_fallback_blockers_include_unknown_trust(self):
+        audit = route_from_tier(3).audit
+        assert "unknown_trust_route" in audit.fallback_blockers
+
+    def test_tier3_proof_required_includes_independent_lanes(self):
+        audit = route_from_tier(3).audit
+        assert "independent_dual_model_lanes" in audit.proof_required
+
+    def test_tier3_trust_state_is_candidate(self):
+        audit = route_from_tier(3).audit
+        assert audit.trust_state is RouteTrustState.CANDIDATE
+
+    def test_tier4_human_gate_required(self):
+        assert route_from_tier(4).requires_human_gate is True
+
+    def test_tier4_trust_state_is_blocked_until_approval(self):
+        audit = route_from_tier(4).audit
+        assert audit.trust_state is RouteTrustState.BLOCKED
+
+    def test_tier4_fallback_blockers_include_human_gate(self):
+        audit = route_from_tier(4).audit
+        assert "human_gate_required" in audit.fallback_blockers
+
+    def test_tier3_aggregator_rejected_for_authority(self):
+        audit = route_from_tier(3).audit
+        assert "aggregator_cannot_be_authoritative" in audit.fallback_blockers

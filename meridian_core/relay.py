@@ -75,11 +75,34 @@ class RouteTrustState(Enum):
     BLOCKED = "blocked"
 
 
+class ContextHealth(Enum):
+    CLEAN = "clean"
+    BOUNDED = "bounded"
+    APPROACHING_LIMIT = "approaching_limit"
+    POLLUTED = "polluted"
+    UNKNOWN = "unknown"
+
+
+class LatencyPosture(Enum):
+    FAST = "fast"
+    STANDARD = "standard"
+    THOROUGH = "thorough"
+    UNKNOWN = "unknown"
+
+
+class PrivacyLevel(Enum):
+    LOCAL_ONLY = "local_only"
+    PROJECT_SCOPED = "project_scoped"
+    EXTERNAL_VENDOR = "external_vendor"
+    UNKNOWN = "unknown"
+
+
 @dataclass
 class RelayLane:
     role: ModelRole
     preferred_model: str
     independent: bool = False
+    independence_reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -88,6 +111,9 @@ class RelayRouteAudit:
     route_class: AccessRouteClass | None
     session_action: SessionAction
     trust_state: RouteTrustState
+    context_health: ContextHealth
+    latency_posture: LatencyPosture
+    privacy_level: PrivacyLevel
     route_precedence: tuple[AccessRouteClass, ...]
     alternatives_rejected: tuple[str, ...]
     fallback_blockers: tuple[str, ...]
@@ -100,6 +126,9 @@ class RelayRoute:
     mode: RoutingMode
     lanes: list[RelayLane]
     context_strategy: ContextStrategy
+    context_health: ContextHealth
+    latency_posture: LatencyPosture
+    privacy_level: PrivacyLevel
     reason: str
     cost_posture: CostPosture
     requires_independence: bool
@@ -185,6 +214,9 @@ _TIER_AUDIT_DEFAULTS: dict[int, dict] = {
         "route_kind": VendorRouteKind.NO_MODEL,
         "route_class": None,
         "trust_state": RouteTrustState.LOCAL_ONLY,
+        "context_health": ContextHealth.CLEAN,
+        "latency_posture": LatencyPosture.FAST,
+        "privacy_level": PrivacyLevel.LOCAL_ONLY,
         "alternatives_rejected": (
             "model_call_rejected: deterministic local logic is sufficient",
         ),
@@ -196,6 +228,9 @@ _TIER_AUDIT_DEFAULTS: dict[int, dict] = {
         "route_kind": VendorRouteKind.ACCOUNT_SESSION,
         "route_class": AccessRouteClass.ACCOUNT_SESSION,
         "trust_state": RouteTrustState.CANDIDATE,
+        "context_health": ContextHealth.BOUNDED,
+        "latency_posture": LatencyPosture.FAST,
+        "privacy_level": PrivacyLevel.PROJECT_SCOPED,
         "alternatives_rejected": (
             "direct_api_deferred: account/session or local CLI route can satisfy low-risk work first",
         ),
@@ -214,6 +249,9 @@ _TIER_AUDIT_DEFAULTS: dict[int, dict] = {
         "route_kind": VendorRouteKind.ACCOUNT_SESSION,
         "route_class": AccessRouteClass.ACCOUNT_SESSION,
         "trust_state": RouteTrustState.CANDIDATE,
+        "context_health": ContextHealth.BOUNDED,
+        "latency_posture": LatencyPosture.STANDARD,
+        "privacy_level": PrivacyLevel.PROJECT_SCOPED,
         "alternatives_rejected": (
             "direct_api_deferred: account/session route remains first if observable",
             "single_lane_limited: independent review lane may be required for meaningful work",
@@ -239,6 +277,9 @@ _TIER_AUDIT_DEFAULTS: dict[int, dict] = {
         "route_kind": VendorRouteKind.ACCOUNT_SESSION,
         "route_class": AccessRouteClass.ACCOUNT_SESSION,
         "trust_state": RouteTrustState.CANDIDATE,
+        "context_health": ContextHealth.CLEAN,
+        "latency_posture": LatencyPosture.THOROUGH,
+        "privacy_level": PrivacyLevel.PROJECT_SCOPED,
         "alternatives_rejected": (
             "single_lane_rejected: Tier 3 requires independent dual-model lanes",
             "aggregator_api_rejected: aggregator cannot be authoritative for Tier 3",
@@ -248,6 +289,7 @@ _TIER_AUDIT_DEFAULTS: dict[int, dict] = {
             "missing_prompt_payload_snapshot",
             "external_review_required",
             "aggregator_cannot_be_authoritative",
+            "dual_lane_independence_required",
         ),
         "proof_required": (
             "aegis_clean_proof_trail",
@@ -268,6 +310,9 @@ _TIER_AUDIT_DEFAULTS: dict[int, dict] = {
         "route_kind": VendorRouteKind.ACCOUNT_SESSION,
         "route_class": AccessRouteClass.ACCOUNT_SESSION,
         "trust_state": RouteTrustState.BLOCKED,
+        "context_health": ContextHealth.CLEAN,
+        "latency_posture": LatencyPosture.STANDARD,
+        "privacy_level": PrivacyLevel.PROJECT_SCOPED,
         "alternatives_rejected": (
             "autonomous_execution_rejected: human gate required",
             "aggregator_api_rejected: high-risk work requires direct or account/session proof",
@@ -314,6 +359,9 @@ def _audit_for_tier(tier: int, context_strategy: ContextStrategy) -> RelayRouteA
         route_class=row["route_class"],
         session_action=session_action,
         trust_state=row["trust_state"],
+        context_health=row["context_health"],
+        latency_posture=row["latency_posture"],
+        privacy_level=row["privacy_level"],
         route_precedence=_ROUTE_PRECEDENCE,
         alternatives_rejected=row["alternatives_rejected"],
         fallback_blockers=row["fallback_blockers"],
@@ -338,10 +386,14 @@ def route_from_assessment(
             f"Unknown risk tier {assessment.tier!r}; valid tiers are {sorted(_ROUTING_TABLE)}"
         )
     row = cast(dict, _ROUTING_TABLE[assessment.tier])
+    audit = _audit_for_tier(assessment.tier, context_strategy)
     return RelayRoute(
         mode=row["mode"],
         lanes=[RelayLane(l.role, l.preferred_model, l.independent) for l in row["lanes"]],
         context_strategy=context_strategy,
+        context_health=audit.context_health,
+        latency_posture=audit.latency_posture,
+        privacy_level=audit.privacy_level,
         reason=row["reason"],
         cost_posture=row["cost_posture"],
         requires_independence=row["requires_independence"],
@@ -349,7 +401,7 @@ def route_from_assessment(
         risk_tier=assessment.tier,
         council_plan=council_plan_for_tier(assessment),
         prompt_budget=prompt_budget_for_risk_tier(assessment.tier),
-        audit=_audit_for_tier(assessment.tier, context_strategy),
+        audit=audit,
     )
 
 
