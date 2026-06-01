@@ -8,7 +8,7 @@ The build lanes build. Review lanes review.
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Repair-Routed
 
 Goal: review the current Relay/account/session routing design before the next runtime slice is accepted.
 
@@ -23,6 +23,23 @@ Proof command:
 - `python -m pytest tests/test_relay_executor.py -q`
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 15:20 -06:00. The current Relay executor remains a pure payload-only boundary and its targeted tests pass, but it cannot yet support the V2 routing requirements from the Relay completeness audit without an additional Build 1 decision-record slice.
+
+Review result:
+
+- `python -m pytest tests/test_relay_executor.py -q` passed with 80 tests.
+- `meridian_core/relay_executor.py` preserves the no-live-vendor boundary: no direct API calls, account automation, filesystem/process control, branch movement, UI rendering, or vendor-specific secrets were added.
+- `docs/relay-heartbeat-model-routing-logic.md` and `docs/relay-completeness-audit.md` require route class, session action, account/session-first precedence, direct-vs-aggregator posture, Tier 3 independent lanes, no silent fallback, model/vendor/risk proof, and user-visible stop conditions.
+- `docs/live-build-1.md` already has a matching Active Now repair task: "implement Relay decision-record coverage from the completeness audit."
+
+Findings:
+
+- HIGH: `meridian_core/relay_executor.py:183` - registry-backed dispatch resolves and calls adapters using only lane role/preferred-model resolution, then records adapter metadata after the call. It has no pre-dispatch decision record for `route_class`, account/session-vs-CLI-vs-direct-API-vs-aggregator route, session action, fallback posture, context health, or proof references, so Relay cannot prove account/session routes were considered before API routes or that fallback was not silent. Required repair: Build 1 must add provider-neutral Relay decision-record support or equivalent test coverage that exposes those fields before dispatch and blocks/records unknown route class, unknown session action, and silent fallback for nontrivial risk.
+- HIGH: `meridian_core/relay_executor.py:202` - Tier 3+ dispatch has no lane-independence gate. The executor pre-resolves adapters per lane but does not verify distinct vendor/model-family/route trust, and tests currently only assert call counts (`tests/test_relay_executor.py:82`) or independent adapter objects for lower-level registry mechanics (`tests/test_relay_executor.py:463`). Required repair: Build 1 must add Tier 3 dual-independent-lane decision evidence and tests that reject or visibly block/waive non-independent lanes before model calls.
+- MEDIUM: `meridian_core/relay_executor.py:35` - `RelayExecutionResult` only carries role, preferred model, output, optional payload snapshot, and optional adapter metadata. It does not carry the required Relay decision record fields for model/vendor/risk proof, stop conditions, fallback blockers, or observability. Required repair: Build 1 must extend the provider-neutral result/proof surface or companion record so downstream Prime/Bifrost can explain the route without leaking prompt payloads.
+
+Completion: focused repair is routed to Build 1 by the existing Active Now task in `docs/live-build-1.md`; no implementation was changed by Reviews A. Runtime acceptance remains blocked until that Build 1 slice is completed and review-cleared.
 
 ## Next Candidate Task
 
@@ -854,7 +871,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-06-01 05:42 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only; three-change queue-only Codex review check found no actionable findings; no rebase/merge/salvage performed.
 2026-06-01 05:57 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only; no rebase/merge/salvage performed.
 2026-06-01 08:05 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after fetch; queue top completed/passed and no executable Active Task present; Build 2 item remains Next Candidate only; no rebase/merge/salvage performed.
-2026-06-01 15:20 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main already current after pull; no executable Active Task / Coordinator Override - Active Now block present; Build 2 item remains Next Candidate only; unrelated dirty files `docs/live-build-4.md` and `docs/live-codex-reviews-2.md` left untouched.
+2026-06-01 15:20 -06:00 - Codex Reviews A checked queue; status: running; notes: origin/main already current after pull; Relay/account/session routing Active Task found and reviewed; unrelated dirty files `docs/live-build-4.md` and `docs/live-codex-reviews-2.md` left untouched.
 ```
 
 ## Review Log
@@ -1286,7 +1303,7 @@ Round 6 write log:
 - 2026-06-01 05:42 -06:00 - Codex Reviews A completed idle queue read and three-change queue-only Codex review check after origin/main update while obeying the required no-rebase/no-merge worktree instruction. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (queue-only documentation update); proof commands: `git diff --check -- docs/live-codex-reviews.md`, `git diff -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-06-01 05:57 -06:00 - Codex Reviews A completed idle queue read after origin/main update while obeying the required no-rebase/no-merge worktree instruction. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-06-01 08:05 -06:00 - Codex Reviews A completed idle queue read after origin/main update while obeying the required no-rebase/no-merge worktree instruction. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
-- 2026-06-01 15:20 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
+- 2026-06-01 15:20 -06:00 - Codex Reviews A completed Relay/account/session routing design review. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_relay_executor.py -q` (80 passed); proof command: `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: HIGH x2 and MEDIUM x1 routed to Build 1's existing Relay decision-record Active Task; no implementation changed by Reviews A. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue records routing only.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
