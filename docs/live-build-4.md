@@ -474,6 +474,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-31 08:55 -06:00 - Build 4 completed Claude Workflows sub-agent architecture note (docs/workflows-subagent-harness-architecture.md) per Coordinator Override (Active Now); narrative companion to docs/workflow-subagent-harness-contract.md; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-06-01 15:23 -06:00 - Build 4 completed Relay-Aegis risk/proof gates contract (docs/relay-aegis-risk-proof-gates.md); commit a8a7aca8; files changed: docs/relay-aegis-risk-proof-gates.md; tests not required (docs-only); pushed to origin/main; Ready for Codex Review; cadence 1/3
 2026-06-01 15:30 -06:00 - Build 4 completed Aegis gate validators implementation (meridian_core/aegis.py + tests/test_aegis.py); commit ad46acc3 (parallel merge with other work); files changed: meridian_core/aegis.py (464 additions), tests/test_aegis.py (393 additions); tests: 166 passed; gates: 9 pure validators + GateDecision/GateResult types; Ready for Codex Review; cadence 2/3
+2026-06-01 15:36 -06:00 - Build 4 completed repair of Relay-Aegis risk/proof gate contract contradictions (Codex Reviews B findings); commit 07b53885 (worktree diverged from origin/main); files changed: docs/relay-aegis-risk-proof-gates.md; repairs: Tier 2 DeepSeek (requires PASSED), Tier 2 aggregator (allows with proof), waiver/approval fields (actor, scope, timestamp, reason, expiration/evidence); Ready for Codex Review; cadence 3/3 — PAUSE FOR CODEX REVIEW
 ```
 
 ## Cross-Check Activity
