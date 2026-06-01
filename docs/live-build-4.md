@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: deepen the Relay harness model-selection logic for Prime-led orchestration.
 
@@ -16,13 +16,25 @@ Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
 
 Allowed files only: `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, `docs/live-build-4.md`.
 
-Required sources: current `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-validation-benchmark-plan.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, and Scott's current direction that Prime normally chooses models through Relay harness logic while manual model selection remains optional until Auto exists.
+Task: expand the architecture logic so Prime can decide which model/vendor/session path to use without missing important gates. Include account-first CLI/session use before paid API fallback, explicit API fallback conditions, Anthropic/OpenAI/OpenRouter/DeepSeek direct roles, when dual-model or external Codex review is required, when to start a new session because context is filling or reasoning/work type shifts, when to summarize/reset/transfer/archive, how cost/token/rate-limit/account exhaustion changes the route, and what must block rather than guess.
 
-Task: expand the architecture logic so Prime can decide which model/vendor/session path to use without missing important gates. Include account-first CLI/session use before paid API fallback, explicit API fallback conditions, Anthropic/OpenAI/OpenRouter/DeepSeek direct roles, when dual-model or external Codex review is required, when to start a new session because context is filling or reasoning/work type shifts, when to summarize/reset/transfer/archive, how cost/token/rate-limit/account exhaustion changes the route, and what must block rather than guess. Keep this docs-only; do not edit runtime code, Bifrost/UI, FileMap, tests, accounts, processes, branches, or Polaris.
+Completion: 2026-06-01 17:42 UTC
 
-Tests: docs-only; no pytest required.
+Ready for Codex Review:
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+- Commit: `b5c40b38` (pushed to origin/main)
+- Files changed: `docs/relay-heartbeat-model-routing-logic.md` (+249 lines)
+- Tests: not required (docs-only)
+- Expansions applied:
+  1. **Account-First Fallback Decision Tree:** 4-step decision process evaluating account/session routes before API fallback
+  2. **Explicit API Fallback Conditions:** Tier-aware table showing when fallback allowed, blockers, and fallback actions
+  3. **Vendor-Specific Fallback Roles:** Distinct fallback authority and blocking conditions for Anthropic, OpenAI, DeepSeek, OpenRouter
+  4. **Dual-Model and External Review Requirements:** When Tier 3+ requires independent lanes, optional for Tier 2, Codex review triggers
+  5. **Session Lifecycle Decisions:** Detailed decision points for reuse, new, summarize/reset, transfer, archive with specific triggers
+  6. **Cost/Token/Account Exhaustion Routing Changes:** Dynamic routing tables for cost pressure, token budget, account exhaustion, rate limits
+  7. **Critical Blockers:** 16 conditions where Relay must block rather than guess (risk tier unknown, proof missing, Aegis gate missing, etc.)
+- Proof: All 7 sections added with explicit decision trees, tables, vendor-specific guidance; deepened routing ready for Prime decision-making
+- Ready for Codex Review; awaiting sweep
 
 ## Next Candidate Task
 
@@ -801,6 +813,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-06-01 16:38 -06:00 - Build 4 completed Aegis-to-Relay summary handoff contract (docs/aegis-relay-summary-handoff-contract.md); commit f64df7e6; files changed: docs/aegis-relay-summary-handoff-contract.md; tests: not required (docs-only); handoff contract defines: output shapes (GateResult/GateSummary/AggregateGateSummary), evidence records (ApprovalRecord/WaiverRecord), human-facing vs audit-only fields, stable boundaries, out-of-scope areas, example flow, testing/proof expectations; proof: contract matches implementation shapes from aegis.py, validation logic, pure-function design; pushed to origin/main; Ready for Codex Review; cadence 3/3
 2026-06-01 17:10 UTC - Build 4 completed repair of Aegis-to-Relay contract field-shape mismatches; commit 4581c51c; files changed: docs/aegis-relay-summary-handoff-contract.md; repairs: GateSummary.waiver_approval_status enum values (none/waiver_present/approval_present/waiver_approval_missing), ApprovalRecord.expiration (str | None = None), WaiverRecord.expiration (str | None = None), WaiverRecord.evidence_url (str | None = None), Aegis pure-function clarification; tests: 336 passed (all aegis.py + relay_executor.py tests); merged to origin/main after resolving upstream divergence; Ready for Codex Review; awaiting sweep
 2026-06-01 17:20 UTC - Build 4 completed bind Aegis gate outputs into Relay decision-record proof (Coordinator Override - Active Now task); proof infrastructure already complete with 336 tests passing; verified that GateSummary exposes all required fields (gate_id, gate_label, decision, severity, reason, required_evidence, waiver_approval_status, downstream_action); AggregateGateSummary provides multi-gate aggregation with deterministic ordering and severity hierarchy; all 9 gate validators (unknown_route_class, missing_exact_model_id, tier3_dual_lane_requirement, unknown_proof_requirement, unsafe_fallback, unvalidated_deepseek, aggregator_authority, account_session_risk, cost_exposure) produce structured GateResult; summary helpers (summarize_gate_result, summarize_gate_results, summarize_aggregate_route_gates) are pure, deterministic, with no model calls or account inspection; proof: 336 tests (191 aegis + 145 relay_executor); marked Ready for Codex Review; awaiting sweep
+2026-06-01 17:42 UTC - Build 4 completed deepen Relay harness model-selection logic for Prime-led orchestration (Coordinator Override - Active Now task); commit b5c40b38; files changed: docs/relay-heartbeat-model-routing-logic.md (+249 lines); tests: not required (docs-only); expansions: (1) Account-First Fallback Decision Tree (4-step process), (2) Explicit API Fallback Conditions (tier-aware table), (3) Vendor-Specific Fallback Roles (Anthropic/OpenAI/DeepSeek/OpenRouter), (4) Dual-Model and External Review Requirements (Tier 3+ lanes, Codex review triggers), (5) Session Lifecycle Decisions (detailed reuse/new/summarize/transfer/archive), (6) Cost/Token/Account Exhaustion Routing Changes (dynamic routing tables), (7) Critical Blockers (16 conditions where Relay must block); pushed to origin/main; marked Ready for Codex Review; Next Candidate Task = convert deepened logic into implementation checklist
 ```
 
 ## Cross-Check Activity
