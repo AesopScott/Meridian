@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Review-Gated
 
 Goal: add Relay proof payload docs/FileMap registration request.
 
@@ -18,7 +18,7 @@ Task: write the concise docs-only Relay-to-Bifrost proof payload contract reques
 
 Tests: docs-only; no pytest required.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Completion: landed on current `origin/main` as commit `7cb80bbb`; Reviews A passed the contract review on 2026-06-01 16:52 -06:00. This lane is review-gated on Build 3 FileMap registration of `docs/relay-bifrost-proof-payload-contract.md` before the next Relay proof-payload negative-path task can be promoted.
 
 **Build 1 Read Check** — 2026-06-01 17:10 -06:00 (Active Task Found)
 - Status: Queue poll complete; Active Now task found: "add Relay proof payload docs/FileMap registration request"
