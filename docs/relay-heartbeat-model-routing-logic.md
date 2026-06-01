@@ -145,6 +145,255 @@ Use OpenRouter as an aggregator route for coverage, fallback, model comparison, 
 | Voice/Spark interaction | OpenAI realtime/audio family | Later voice provider fallback | OpenAI has first-class audio/realtime model families. |
 | Low-risk external fallback | Curated OpenRouter route | Direct provider when available | Aggregator useful for uptime/coverage, not authority. |
 
+## Account-First Fallback Decision Tree
+
+Before using a paid API or aggregator route, Relay evaluates the account/session option through this decision tree:
+
+**Step 1: Is an account/session route available and authenticated?**
+- Yes → Proceed to Step 2
+- No → Skip to API/aggregator fallback options
+
+**Step 2: Does the session have the right project scope, role, and tools?**
+- Yes → Proceed to Step 3
+- No → Direct API or aggregator (wrong session scope)
+
+**Step 3: Is context health clean and under budget?**
+- Yes → Proceed to Step 4
+- No → Summarize/reset and reuse (if same project) or start new session; do not use bloated session
+
+**Step 4: Can Relay steer the session and capture proof?**
+- Yes → Use account/session route
+- No → Direct API if proof/audit is required; aggregator if fallback is acceptable
+
+**If account/session is rejected at any step:**
+1. Relay explicitly records the rejection reason (not silent fallback)
+2. Relay proceeds to direct API if tier/trust allows
+3. Relay proceeds to aggregator only if tier and fallback policy allow
+4. Relay blocks if no route passes validation
+
+This ordering preserves user session state, avoids API cost when unnecessary, and maintains continuity.
+
+## Explicit API Fallback Conditions
+
+Relay may fall through to API routes only when account/session is unavailable, unsuitable, or forbidden. Fallback is never silent.
+
+| Condition | Tier 1-2 Allowed | Tier 3+ Allowed | Fallback Action | Show to Prime |
+|---|---|---|---|---|
+| Account session missing/expired | ✓ (if proof ok) | ✗ (wait for auth) | Try direct API | "Session unavailable, switching to API" |
+| Session context full | ✓ (summarize first) | ✓ (with new session) | Start new session or API | "Context full, summarizing or using API" |
+| Session wrong project | ✗ | ✗ | Start project-specific session | "Wrong project session, starting fresh" |
+| Session wrong role | ✓ (if low-tier) | ✗ | Start role-matched session | "Role mismatch, starting new session" |
+| Session stale/polluted | ✓ (if low-tier) | ✗ | Start fresh session | "Context stale, starting clean" |
+| Session auth broken/wrong cwd | ✗ | ✗ | Block with setup error | "Session setup error, cannot proceed" |
+| No credential/API key present | ✗ | ✗ | Block with setup guidance | "API credentials missing, cannot proceed" |
+| API quota exhausted | ✗ (try aggregator) | ✗ (block) | Aggregator if risk allows; else block | "API quota exhausted, no fallback available" |
+| Account cost exhausted | ✗ | ✗ | Block or escalate to user | "Account balance exhausted, awaiting approval" |
+| API rate limited | ✓ (retry with backoff) | ✓ (retry with backoff) | Retry; escalate if repeated | "Rate limited, retrying after delay" |
+| Aggregator default choice broken | ✗ | ✗ | Use explicit model allowlist; block if none match | "OpenRouter default unavailable, no safe fallback" |
+
+**Key principle:** Fallback is named, shown to Prime, and subject to tier/cost/trust validation. Silent fallback is forbidden.
+
+## Vendor-Specific Fallback Roles
+
+Each vendor has distinct fallback authority and blocking conditions:
+
+### Anthropic Direct Fallback Role
+- **Fallback from:** Account/session, expensive routes
+- **Fallback to:** Claude Sonnet if Opus exhausted or premium-cost blocked by budget
+- **Fallback to:** Claude Haiku for fast triage only if upstream route unavailable
+- **Block if:** Exact model id unknown for Tier 2+; cannot capture structured proof
+- **Promotion:** Sonnet → Opus requires cost approval; Haiku → Sonnet requires context proof
+
+### OpenAI Direct Fallback Role
+- **Fallback from:** Account/session, non-coding routes needing reasoning
+- **Fallback to:** GPT-5.2 if Codex unavailable; Chat if reasoning-only needed
+- **Fallback to:** Aggregator only for exploratory/review work, never authority
+- **Block if:** Exact model id unknown; API credentials missing; structured outputs required but unavailable
+- **Promotion:** Chat → Reasoning/Codex requires code proof and Aegis gate clearance
+
+### DeepSeek Direct Fallback Role
+- **Fallback from:** Cost-sensitive routes; OpenAI/Anthropic unavailable
+- **Fallback to:** Flash if Pro exhausted; block if no quota remains
+- **Block if:** External review validation not passed; candidate trust not yet established
+- **Promotion:** Flash → Pro requires proof of quality; Pro → authority requires external validation pass
+- **No fallback:** DeepSeek cannot be fallback to other vendors; other vendors can use DeepSeek as fallback if candidate trust holds
+
+### OpenRouter Aggregator Fallback Role
+- **Fallback from:** Direct API unavailable; uptime/coverage needed
+- **Fallback to:** Curated allowlist only; no open `openrouter/auto`
+- **Block if:** Tier 3+ requires authority; tier 2+ requires proof/model identity; unknown provider would be selected
+- **Block if:** Data retention policy unknown; cost unbounded
+- **Limitation:** Cannot be authoritative for code, complex planning, or review work
+
+## Dual-Model and External Review Requirements
+
+Tier 3+ work requires architectural independence to reduce shared blind spots and vendor bias.
+
+### When Dual-Lane Is Mandatory
+- **Tier 3:** All code changes, complex planning, architecture review, provider-sensitive decisions
+  - Lane 1: Preferred vendor (Claude, OpenAI, or DeepSeek depending on work type)
+  - Lane 2: Independent vendor (different model family)
+  - Both lanes must use account/session or direct API; aggregator cannot be either lane
+  - Both lanes produce proof; decision is made when lanes agree or explicit tie-break applies
+
+- **Tier 4:** Human gate required; dual-lane for preparation/review only, no autonomous execution
+  - Lane 1: Highest-reasoning (Opus, GPT-5.2 pro, or domain-expert route)
+  - Lane 2: Independent domain expert or human reviewer
+  - Both lanes produce evidence; human gate makes final decision
+
+### When Dual-Lane Is Optional (Tier 2)
+- Single lane is acceptable if:
+  - Work is reversible (documentation, exploration, low-risk changes)
+  - Proof requirement is clear and achievable in one lane
+  - Budget and latency allow single lane
+- Dual lane is recommended if:
+  - Work is meaningful enough to warrant independent confirmation
+  - Cost allows parallel lanes
+  - Risk register requires external validation (e.g., DeepSeek candidate trust)
+
+### When External Codex Review Is Required
+Relay must trigger external Codex review (separate session, different model family) when:
+- Any Tier 3+ code route is first used and has no prior validation proof
+- A provider moves from candidate to production trust (external validation pass)
+- A route's proof type changes (e.g., code review vs. code authority)
+- Tier 4 work requires independent expert confirmation before execution
+- A model's output quality noticeably degrades (prompt-drag, reasoning failure)
+
+External review is asynchronous and blocks execution/promotion until review completes.
+
+## Session Lifecycle Decisions
+
+Detailed decision points for session reuse, summarization, reset, transfer, and archival.
+
+### Reuse Current Session
+**Conditions:**
+- Same project scope as original session
+- Same reasoning mode/role (planning, building, reviewing)
+- Context health: under 70% of capacity, clean
+- No cross-session or cross-project contamination
+- User expects continuity
+- No tool/auth/cwd mismatch
+
+**Action:** Reuse with proof that context remains sound
+
+### Start New Session
+**Triggers:**
+- Project changed (→ project-scoped session)
+- Reasoning mode shifted (planning → coding → review; use role-appropriate session)
+- Context reaching 70%+ capacity (→ summarize current, start new)
+- Context contaminated by unrelated work (→ clean new session)
+- Session stale (>30 min idle on live work, >24h idle on background)
+- Tool/auth/cwd state is broken or wrong (→ new session with correct setup)
+- Tier 3+ requires independence (→ new session, different vendor/model)
+- User explicitly requests context reset
+
+**Action:** Summarize critical state if useful, then start new clean session
+
+### Summarize and Reset
+**When to summarize:**
+- Context is full but continuity is valuable
+- Need to preserve decisions/architecture without carrying full transcript
+- Transitioning from one long work session to the next phase
+
+**Summary includes:**
+- Current project and work type
+- Architecture/design decisions made
+- Key proofs or test results
+- Explicit list of what to NOT re-include (unrelated explorations, dead-end attempts)
+
+**New session starts with:**
+- Summary as context
+- Fresh role-appropriate instructions
+- Clean working directory
+- New proof/test expectations
+
+### Transfer Between Sessions
+**When:**
+- Work started in wrong session (wrong project, wrong role, wrong vendor)
+- Continuing work requires different model family
+- Tier 3 needs to move from single lane to dual lanes
+
+**Transfer includes:**
+- Complete prompt/context from source session
+- Proof/test status and decisions made
+- Explicit note that this is continuation, not restart
+
+### Archive Session
+**When:**
+- Session completes successfully (work is done, approved, merged, released)
+- Session is superseded (replaced by new session for same work)
+- Session is abandoned (user chose different approach)
+
+**Archive captures:**
+- Final state and proof/test results
+- Key decisions and rationale
+- Telemetry: tokens used, latency, cost, model, trust state
+
+## Cost, Token, and Account Exhaustion Routing Changes
+
+Relay adjusts route decisions in real time based on exhaustion pressure.
+
+### Cost Pressure Routing
+
+| Pressure Level | Relay Behavior | Route Adjustment | Show to Prime |
+|---|---|---|---|
+| Normal (0-70%) | Standard routing logic applies | Account/session first, normal vendor preference | Balance available |
+| Caution (70-90%) | Warn before premium routes | Prefer Haiku, DeepSeek Flash, or OpenRouter curated list | "Cost pressure: 70%" |
+| High (90-100%) | Block premium routes | Force Haiku, DeepSeek Flash, or ask for approval | "High cost pressure: requesting approval" |
+| Exhausted (100%+) | Block all routes except free tiers | Aggregator only if risk allows; else block | "Cost exhausted, no fallback available" |
+
+### Token Budget Routing
+
+| Pressure Level | Relay Behavior | Route Adjustment | Show to Prime |
+|---|---|---|---|
+| Normal (<70% context window) | Standard routing | Use longest-context models if needed | Tokens available |
+| Filling (70-85%) | Warn before context-heavy work | Prefer fast models (Haiku, Flash) or summarize | "Context 70%: recommend summarize" |
+| Near full (85-95%) | Block multi-turn work | Only single-shot responses allowed | "Context 85%: must reset" |
+| Full (95%+) | Block all routes | Force session reset | "Context full, session must reset" |
+
+### Account Exhaustion Routing
+
+| Condition | Relay Behavior | Route Adjustment | Show to Prime |
+|---|---|---|---|
+| Account authenticated, healthy | Standard routing | Account/session first | Account ready |
+| Account quota warning (80%+) | Warn, but proceed | May skip aggregator if uncertain | "Account quota: 80%" |
+| Account quota exhausted | Block account routes | Force direct API or aggregator | "Account quota exhausted" |
+| Account payment failed | Block account routes immediately | Direct API only if available; else block | "Account billing failed, using API" |
+| MFA/auth lapsed | Block account routes; require re-auth | Wait for user to refresh login | "Account re-auth required" |
+
+### Rate Limit Handling
+
+| Scenario | Relay Behavior | Route Adjustment | Show to Prime |
+|---|---|---|---|
+| Rate limit encountered (429) | Retry with exponential backoff | Delay 1s, 4s, 16s, escalate | "Rate limited, retrying" |
+| Persistent rate limit | If account available, switch to session | Reduce API call frequency | "Rate limit, using session instead" |
+| All vendors rate limited | Block; do not cascade | Wait and show blocker | "All routes rate limited, awaiting reset" |
+
+## Critical Blockers: What Must Block Rather Than Guess
+
+Relay must **block** (not fallback, not guess, not proceed silently) when:
+
+| Blocker | Why Block | Recovery Path |
+|---|---|---|
+| **Risk tier unknown** | Cannot choose correct route without risk level | Ask Aegis for tier; block until answered |
+| **Route class unknown** | No route type satisfies the risk tier | Audit available routes; block until explicit |
+| **Exact model ID unknown (Tier 2+)** | Model identity cannot drift or alias silently | Query provider registry; pin exact ID before route |
+| **Aegis gate unknown or missing** | Cannot validate proof/security policy | Ask Aegis for gate; block until gate answer received |
+| **Proof requirement unknown** | Output cannot be validated or trusted | Define proof type explicitly before routing |
+| **Context health unknown (session reuse)** | Cannot assess prompt-drag risk | Check context size, contamination, staleness; block until healthy |
+| **Tier 3 cannot get independent lanes** | Shared blind spots persist; no waiver exists | Block unless explicit waiver from coordinator |
+| **Session auth/cwd broken** | Cannot execute work in broken environment | Fix auth/setup; block until environment is correct |
+| **API credentials/quota missing** | Cannot authenticate or pay for route | Show setup guidance; block until credentials available |
+| **Account cost exhausted with no fallback** | Would incur surprise cost or be payment failure | Block and escalate to user for approval |
+| **Provider identity cannot be shown (Aggregator)** | User cannot see what route was actually used | Require explicit model ID before using aggregator |
+| **Relay cannot explain the selection** | Selection is arbitrary or unjustifiable | Force Relay to articulate reasoning; block if none |
+| **Silent fallback would reduce trust (Tier 2+)** | High-risk work downgrades to weaker route | Show fallback explicitly; ask user to approve or block |
+| **DeepSeek route, candidate trust, Tier 3+ work** | Unvalidated provider for high-risk work | Block unless external validation passed |
+| **OpenRouter auto-route for Tier 2+ work** | Unknown underlying provider/model selected | Force curated allowlist; block if no match |
+| **Dual-lane required, only one trusted route available** | Cannot achieve independence | Block and escalate for vendor/model expansion |
+| **Voice/realtime work without mic permission** | Cannot execute without explicit user consent | Block and request mic permissions |
+| **Data leaving boundary with unknown policy** | Sensitive data to unknown provider policy | Block until provider policy confirmed or data excluded |
+
 ## Route Risk Register
 
 | Risk | Applies To | Relay Behavior |
