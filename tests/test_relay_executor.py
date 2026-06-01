@@ -1903,6 +1903,100 @@ class TestAegisGateEvidenceSummary:
         assert isinstance(result["explanation"], str)
         assert isinstance(result["fallback_blockers_from_aegis"], tuple)
 
+    def test_evidence_summary_demote_decision_no_blockers(self) -> None:
+        """Demote decision with explanation but no blockers generated."""
+        plan = _make_plan(2)
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="demote",
+            aegis_explanation="cost constraint applied",
+        )
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+        evidence = summary.aegis_gate_evidence_summary()
+        assert evidence.gate_decision == "demote"
+        assert evidence.explanation == "cost constraint applied"
+        assert evidence.fallback_blockers_from_aegis == ()
+
+    def test_evidence_summary_missing_evidence_ids_empty_tuple(self) -> None:
+        """Evidence ids default to empty tuple when not provided."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision="block",
+            explanation="no evidence collected",
+        )
+        assert evidence.evidence_ids == ()
+        result = evidence.to_dict()
+        assert result["evidence_ids"] == ()
+
+    def test_evidence_summary_absent_waiver_defaults_false(self) -> None:
+        """Waiver presence defaults to False when not explicitly set."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision="block",
+        )
+        assert evidence.waiver_present is False
+        result = evidence.to_dict()
+        assert result["waiver_present"] is False
+
+    def test_evidence_summary_to_dict_multiple_calls_identical(self) -> None:
+        """Multiple calls to to_dict() produce identical deterministic output."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision="block",
+            severity="ERROR",
+            evidence_ids=("ev-1", "ev-2", "ev-3"),
+            waiver_present=True,
+            explanation="security violation",
+            fallback_blockers_from_aegis=("aegis_gate_blocked", "aegis_other"),
+        )
+        result1 = evidence.to_dict()
+        result2 = evidence.to_dict()
+        result3 = evidence.to_dict()
+        assert result1 == result2 == result3
+        # Verify exact content
+        assert result1["gate_decision"] == "block"
+        assert result1["severity"] == "ERROR"
+        assert len(result1["evidence_ids"]) == 3
+
+    def test_evidence_summary_empty_explanation_with_decision(self) -> None:
+        """Gate decision can exist with empty explanation text."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision="allow",
+            explanation="",  # explicitly empty
+        )
+        result = evidence.to_dict()
+        assert result["gate_decision"] == "allow"
+        assert result["explanation"] == ""
+
+    def test_evidence_summary_no_gate_decision_present(self) -> None:
+        """No gate decision (None) with various other fields."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision=None,  # explicitly no decision
+            severity="INFO",
+            evidence_ids=("ev-1",),
+            explanation="gate not evaluated",
+        )
+        result = evidence.to_dict()
+        assert result["gate_decision"] is None
+        assert result["severity"] == "INFO"
+        assert result["evidence_ids"] == ("ev-1",)
+        assert result["explanation"] == "gate not evaluated"
+
+    def test_evidence_summary_mixed_empty_and_full_fields(self) -> None:
+        """Partial evidence: some fields empty, others populated."""
+        evidence = AegisGateEvidenceSummary(
+            gate_decision="demote",  # present
+            severity=None,  # absent
+            evidence_ids=(),  # empty
+            waiver_present=False,  # default
+            explanation="partial evidence",  # present
+            fallback_blockers_from_aegis=("aegis_demote",),  # present
+        )
+        result = evidence.to_dict()
+        assert result["gate_decision"] == "demote"
+        assert result["severity"] is None
+        assert result["evidence_ids"] == ()
+        assert result["waiver_present"] is False
+        assert result["explanation"] == "partial evidence"
+        assert result["fallback_blockers_from_aegis"] == ("aegis_demote",)
+
     def test_evidence_summary_to_dict_multiple_calls_identical(self) -> None:
         """to_dict() returns identical output on multiple calls (deterministic)."""
         evidence = AegisGateEvidenceSummary(
