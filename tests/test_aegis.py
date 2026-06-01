@@ -6,12 +6,14 @@ import pytest
 
 from meridian_core.aegis import (
     AegisEvidence,
+    ApprovalRecord,
     EvidenceSeverity,
     EvidenceStatus,
     EvidenceType,
     GateDecision,
     GateResult,
     ProofTrail,
+    WaiverRecord,
     evidence_from_cross_check,
     gate_account_session_risk,
     gate_aggregator_authority,
@@ -700,10 +702,34 @@ class TestGateTier3DualLaneRequirement:
         result = gate_tier3_dual_lane_requirement(3, False)
         assert result.decision is GateDecision.BLOCK
 
-    def test_tier3_without_dual_lane_with_waiver_demotes(self):
-        result = gate_tier3_dual_lane_requirement(3, False, has_waiver=True)
+    def test_tier3_without_dual_lane_with_bare_boolean_blocks(self):
+        # Bare boolean waivers are no longer accepted
+        result = gate_tier3_dual_lane_requirement(3, False, waiver_record=None)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier3_without_dual_lane_with_valid_waiver_demotes(self):
+        waiver = WaiverRecord(
+            waiver_id="waiv-001",
+            actor="scott@example.com",
+            scope="tier3_dual_lane",
+            timestamp="2026-06-13T16:30:00Z",
+            reason="Rapid iteration approved by Scott",
+        )
+        result = gate_tier3_dual_lane_requirement(3, False, waiver_record=waiver)
         assert result.decision is GateDecision.DEMOTE
         assert result.demote_to_tier == 2
+
+    def test_tier3_without_dual_lane_with_invalid_waiver_blocks(self):
+        # Waiver missing required fields
+        waiver = WaiverRecord(
+            waiver_id="waiv-002",
+            actor="",  # empty actor
+            scope="tier3_dual_lane",
+            timestamp="2026-06-13T16:30:00Z",
+            reason="Incomplete waiver",
+        )
+        result = gate_tier3_dual_lane_requirement(3, False, waiver_record=waiver)
+        assert result.decision is GateDecision.BLOCK
 
     def test_tier4_dual_lane_not_required(self):
         result = gate_tier3_dual_lane_requirement(4, False)
@@ -976,3 +1002,42 @@ class TestGateCostExposure:
     def test_tier4_no_cost_pressure_allows(self):
         result = gate_cost_exposure("STANDARD", True, 4, cost_pressure=None)
         assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_tier2_without_approval_blocks(self):
+        # Premium cost requires valid approval record for Tier 2+
+        result = gate_cost_exposure("PREMIUM", False, 2, approval_record=None)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_premium_cost_tier2_with_valid_approval_allows(self):
+        approval = ApprovalRecord(
+            approval_id="app-001",
+            actor="user@example.com",
+            scope="premium_cost_tier2",
+            timestamp="2026-06-13T16:30:00Z",
+            reason="User approved premium model for faster inference",
+        )
+        result = gate_cost_exposure("PREMIUM", False, 2, approval_record=approval)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_tier3_with_valid_approval_allows(self):
+        approval = ApprovalRecord(
+            approval_id="app-002",
+            actor="scott@example.com",
+            scope="premium_cost_tier3",
+            timestamp="2026-06-13T16:35:00Z",
+            reason="User approved premium route for critical task",
+        )
+        result = gate_cost_exposure("PREMIUM", False, 3, approval_record=approval)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_tier2_with_invalid_approval_blocks(self):
+        # Approval missing required fields
+        approval = ApprovalRecord(
+            approval_id="app-003",
+            actor="",  # empty actor
+            scope="premium_cost_tier2",
+            timestamp="2026-06-13T16:40:00Z",
+            reason="Incomplete approval",
+        )
+        result = gate_cost_exposure("PREMIUM", False, 2, approval_record=approval)
+        assert result.decision is GateDecision.BLOCK

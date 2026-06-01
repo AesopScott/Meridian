@@ -4,7 +4,57 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: implement Relay-side blocking behavior from Aegis gate evidence fields.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: `docs/relay-aegis-risk-proof-gates.md`, `meridian_core/aegis.py`, current `RelayDecisionRecord` Aegis evidence fields, and the current Relay executor tests.
+
+Task: add provider-neutral Relay behavior and tests so decision records with Aegis gate decisions of `block` or `human_gate` produce explicit fallback blockers and downstream explanation text. Aegis `demote` evidence must be represented as a non-silent demotion/constraint, not as an unexplained fallback. Keep this inside Relay decision-record construction; do not call Aegis validators, call models, inspect accounts, touch UI, move branches, edit Bifrost, or touch Polaris.
+
+Completion:
+
+- Build 1 completed Relay Aegis gate decision blocking behavior on 2026-06-01 16:04 -06:00.
+- Commit: `f77c2a68` (feat: Implement Relay-side blocking behavior from Aegis gate evidence fields).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (133 tests: 129 original + 4 new Aegis gate decision tests).
+- Implementation: Updated _build_decision_record() to accept aegis_gate_decision and aegis_explanation parameters. When aegis_gate_decision is "block" or "human_gate", adds explicit fallback blockers ("aegis_gate_blocked" / "aegis_human_gate_required") and sets fallback_allowed=False. When "demote", adds non-silent demotion note to explanation. When "allow", stores decision for audit without blocking. All explanations include Aegis context. Provider-neutral with no external calls.
+- Push: successful to worktree branch; ready for merge.
+
+Ready for Codex Review.
+
+## Next Candidate Task
+
+Goal: add Relay summary serialization for Aegis gate evidence once blocking behavior clears review.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: repair the remaining Relay decision-record vendor-unknown stop-condition gap from Codex Reviews A.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: make Tier 2+ Relay decision records treat missing safe vendor metadata as an explicit blocking stop condition, not only as `vendor="unknown"`. The reviewed commit `f0bb2bb6` populates vendor from adapter metadata and model_id from lane preferred_model, but a clean Tier 2 audited plan with no adapter metadata can still produce `vendor="unknown"`, `fallback_allowed=True`, and no fallback blocker. Add focused regression coverage for that clean-audit edge and repair `_build_decision_record()` so vendor/model identity unknowns become explicit fallback blockers before Tier 2+ dispatch is considered explainable. Preserve provider neutrality and do not add live vendor calls, CLI execution, UI rendering, branch movement, account probing, network access, or Polaris dependency.
+
+Completion:
+
+- Build 1 completed Relay vendor/model_id unknown stop-condition repair on 2026-06-01 15:55 -06:00.
+- Commit: `c3d91214` (feat: Relay decision-record vendor/model_id unknowns as explicit fallback blockers for Tier 2+).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (123 tests: 121 original + 2 new vendor/model_id edge case tests).
+- Implementation: Added "vendor_unknown" and "model_id_unknown" as explicit fallback blockers when vendor/model_id are unknown for Tier 2+ dispatch. Updated existing test to account for new blockers. Provider-neutral implementation with no vendor calls, CLI execution, UI rendering, or branch changes.
+- Push: successful to worktree branch; ready for merge.
+
+Ready for Codex Review.
+
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind Aegis route-gate evidence into Relay decision records after the Aegis runtime gate slice lands.
 
@@ -16,11 +66,16 @@ Required sources: `meridian_core/aegis.py`, `docs/relay-aegis-risk-proof-gates.m
 
 Task: add provider-neutral Relay evidence fields or test coverage so a Relay decision record can carry Aegis gate outcomes without calling Aegis directly at runtime yet. Cover gate id, decision (`allow`, `demote`, `block`, `human_gate`), severity, evidence refs, waiver/approval record presence, and downstream explanation text. Keep this as a pure data/evidence slice. Do not call models, inspect accounts, touch UI, spawn CLIs, move branches, or edit Aegis implementation.
 
-Tests:
+Completion:
 
-- `python -m pytest tests/test_relay_executor.py -q`
+- Build 1 completed Relay Aegis gate evidence binding on 2026-06-01 15:56 -06:00.
+- Commit: `69e9ff55` (feat: Add provider-neutral Aegis gate evidence fields to RelayDecisionRecord).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (129 tests: 123 original + 6 new Aegis field tests).
+- Implementation: Added 5 provider-neutral optional fields to RelayDecisionRecord for Aegis gate evidence: aegis_gate_decision (allow/demote/block/human_gate), aegis_evidence_ids (tuple of evidence ids), aegis_waiver_present (bool), aegis_gate_severity (severity level), aegis_explanation (gate explanation text). Fields default to None/empty/False when not populated. Pure data structure with no Aegis calls at runtime. Frozen dataclass ensures immutability.
+- Push: successful to worktree branch; ready for merge.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Ready for Codex Review.
 
 ## Next Candidate Task
 
@@ -762,6 +817,13 @@ Tests:
 - Status: queue poll complete; no Active Now task
 - Notable pull: relay-completeness-audit.md (new, 202 lines), FileMap.md updated, read checks from builds 2/3/5
 - PrimeCockpitSnapshot task verified already complete (29/29 tests pass); no new implementation required
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-01 16:01 -06:00
+- Status: queue poll complete; no Active Now task
+- Significant pull: 198 insertions across queue files, codex review files, filemap updates from other builds
+- Completed 2 substantial Relay executor tasks (vendor/model_id unknowns + Aegis evidence fields)
+- Codex review (claude-sonnet-4-6) provided verdict: APPROVE with minor code quality notes
 - Build 1 idle and polling for next task assignment
 
 Goal: make `PrimeCockpitSnapshot` preserve its promised immutable snapshot shape when callers pass mutable lane/event sequences.
