@@ -3104,6 +3104,10 @@ body {
     const windowEl = input.closest('.session-window');
     return `meridian.session.prompt.${windowEl?.classList.contains('session-window-right') ? 'user' : 'prime'}`;
   };
+  const sessionChannel = (input) => {
+    const windowEl = input.closest('.session-window');
+    return windowEl?.classList.contains('session-window-right') ? 'user' : 'prime';
+  };
   const readTranscript = (input) => {
     try {
       return JSON.parse(localStorage.getItem(transcriptKey(input)) || '[]');
@@ -3210,6 +3214,7 @@ body {
         body: JSON.stringify({
           backend,
           requestedBackend: selectedBackend,
+          channel: sessionChannel(input),
           prompt,
           cwd: 'C:\\Users\\scott\\Code\\Meridian',
         }),

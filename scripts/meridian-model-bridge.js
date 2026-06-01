@@ -260,6 +260,7 @@ const server = http.createServer(async (req, res) => {
       const body = JSON.parse(await readBody(req));
       const backend = String(body.backend || '').toLowerCase();
       const requestedBackend = String(body.requestedBackend || backend || '').toLowerCase();
+      const channel = String(body.channel || 'prime').toLowerCase();
       const prompt = String(body.prompt || '').trim();
       const cwd = body.cwd ? String(body.cwd) : DEFAULT_CWD;
       if (!prompt) {
@@ -268,6 +269,7 @@ const server = http.createServer(async (req, res) => {
       }
       const result = await runModel({ backend, prompt, cwd });
       result.requestedBackend = requestedBackend;
+      result.channel = channel;
       sendJson(res, result.ok ? 200 : 500, result);
     } catch (error) {
       sendJson(res, 500, { ok: false, text: '', error: error.message });
