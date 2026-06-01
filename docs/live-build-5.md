@@ -4,21 +4,35 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Completed / Ready For Codex Review
 
 Goal: define the Bifrost surface contracts for User, Settings, and Harness right-panel modes.
 
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
-
 Allowed files only: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-build-5.md`.
 
-Required sources: `docs/ui-integration-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and current `index.html` for visual intent only.
+Completion:
 
-Task: create a docs-only Bifrost contract for the right-side surface modes. User Session mode keeps prompt/response and routes to the selected live session. Settings mode uses the full right panel for Meridian configuration items and no prompt window. Harness mode uses the full right panel for searchable/editable harness logic items and no prompt window. Include the Sessions dropdown requirements: open live sessions only, include hidden/test-waiting sessions with labels, group alphabetically by project, selection changes panel title, and selection immediately routes prompts to that session. Do not edit `index.html`, Bifrost runtime code, model calls, review queues, or Polaris.
+- Build 5 completed the Bifrost right-panel mode contract on 2026-06-01 21:00 UTC.
+- Commit: `710c70a2` (feat: add Bifrost right-panel mode contract for User Session, Settings, and Harness surfaces).
+- Files changed: `docs/bifrost-right-panel-mode-contract.md` (257 lines added).
+- Document defines three mutually exclusive right-panel modes:
+  - User Session mode: prompt/response interface with live session routing, Sessions dropdown with project grouping and alphabetical sorting, stale-target guards
+  - Settings mode: full-panel configuration items, no prompt window, scope-limited actions
+  - Harness mode: full-panel searchable harness logic items, no prompt window, deterministic render-only preview
+- Sessions dropdown: live sessions only, includes hidden and test-waiting sessions with status labels, project grouping, immediate routing, selection state persistence
+- Surface toggle via Spark ring: no implicit state loss, preserves unsent prompts/edits, recovery on load failure
+- Interaction rules: no prompt routing to dead targets, global text-size control, consistent color coding, Reset does not claim to clear model memory, Reload does not archive sessions
+- Verification checklist included (16 items)
+- Related documents: ui-integration-checklist.md, relay-heartbeat-model-routing-logic.md, relay-completeness-audit.md
+- Tests: none required (docs-only)
+- Push: successful to origin/main (commit `710c70a2`)
+- Obsidian update: not updated (queue tracking only)
 
-Tests: none required, docs-only.
+Ready for Codex Review.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+## No Active Task
+
+No new executable task assigned. Awaiting orchestrator assignment or next candidate promotion.
 
 ## Next Candidate Task
 
