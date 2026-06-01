@@ -432,7 +432,7 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 |---|---|---|---|---|
 | HN1 | Prime | Opens/focuses Prime core session surface. | partial | Click updates session title/focus without fake status text. |
 | HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | partial | Click updates session title/focus without fake status text. |
-| HN3 | Relay | Opens/focuses model-routing surface. | wired | Click opens Relay harness logic surface; prompt UI is hidden; Auto remains disabled. |
+| HN3 | Relay | Opens/focuses model-routing surface. | partial | Click updates session title/focus; does not enable Auto routing yet. |
 | HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | partial | Click updates session title/focus without fake heartbeat details. |
 | HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon should become Security before wiring actions. |
 | HN6 | Aegis | Opens/focuses proof/cross-check surface. | partial | Click updates session title/focus without fake proof status. |
@@ -455,9 +455,9 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 
 | ID | Harness Mode Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | partial | Relay button switches right panel into Harness mode; remaining harnesses still need logic surfaces. |
+| HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | planned | Right panel title/target changes to selected harness. |
 | HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | planned | Return to User Session restores prior session or stale warning. |
-| HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | partial | Relay opens with full-panel logic items, not a prompt window; remaining harnesses still need surfaces. |
+| HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | planned | Harness mode opens with logic items, not a prompt window or blank chat. |
 | HMS4 | Prime review path | Prime reviews harness logic items before model interaction. | planned | Logic item has Prime review state before dispatch. |
 | HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay routing. | planned | Dispatch metadata names Relay route/model target. |
 | HMS6 | Harness-specific actions | Right-panel actions target selected harness logic item. | planned | Action metadata names selected harness and logic item. |
@@ -583,5 +583,4 @@ Append entries here as items are verified.
 
 ```text
 YYYY-MM-DD HH:MM TZ - <item#> cleared; proof: <short note>; commit: <hash>
-2026-06-01 14:42 -06:00 - HN3 cleared; proof: Live Server Relay click shows scrollable RelayRouteAudit surface, hides prompt/response, Auto disabled; commit: 871327bc
 ```
