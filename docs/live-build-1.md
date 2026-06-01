@@ -2057,3 +2057,10 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 - Active Now task ("add Relay proof payload docs/FileMap registration request", commit `eafa0c17`) remains in Completed/Ready For Codex Review section
 - Next Candidate Task: "add Relay proof payload negative-path tests" awaiting promotion
 - Build 1 idle; no executable Active Task found; awaiting coordinator queue update or next task promotion
+
+**Build 1 Read Check** — 2026-06-12 14:05 UTC (Ongoing Poll)
+- Status: Queue poll complete; no changes since last check
+- Latest origin/main: already up to date
+- Active Now section: still contains old completed task (commit `eafa0c17`)
+- Next Candidate Task: "add Relay proof payload negative-path tests" awaiting promotion from Prime/Codex
+- Build 1 idle; no executable Active Task; awaiting coordinator queue update
