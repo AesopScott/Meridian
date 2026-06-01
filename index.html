@@ -3215,6 +3215,7 @@ body {
   }
   let modelReadiness = [];
   let bridgeCapabilities = {};
+  let bridgeOnline = false;
   const pathPattern = /((?:[A-Za-z]:\\|\.{0,2}[\\/])(?:[\w .()@%+=~-]+[\\/])*[\w .()@%+=~-]+\.[A-Za-z0-9]{1,12}|(?:[\w@%+=~-]+[\\/])+(?:[\w .()@%+=~-]+)(?:\.[A-Za-z0-9]{1,12})?|\b[\w@%+=~-]+\.[A-Za-z0-9]{1,12}\b)/g;
   const transcriptKey = (input) => {
     const windowEl = input.closest('.session-window');
@@ -3296,6 +3297,7 @@ body {
     try {
       const response = await fetch('http://127.0.0.1:8767/api/models');
       const result = await response.json();
+      bridgeOnline = true;
       modelReadiness = Array.isArray(result.models) ? result.models : [];
       bridgeCapabilities = result.capabilities || {};
       if (modelSelect.value === 'auto') {
@@ -3309,6 +3311,8 @@ body {
         else if (selected) setStatus(input, `${selected.label} ready`);
       });
     } catch {
+      bridgeOnline = false;
+      bridgeCapabilities = {};
       document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'model bridge offline'));
     }
   };
@@ -3319,6 +3323,11 @@ body {
     const selectedBackend = modelSelect?.value || 'codex';
     const backend = selectedBackend === 'auto' ? 'codex' : selectedBackend;
     if (!modelReadiness.length) await updateModelReadiness();
+    if (!bridgeOnline) {
+      setStatus(input, 'model bridge offline');
+      pushEntry(input, 'error', 'Error: Meridian model bridge is not running on 127.0.0.1:8767.', backend, { requestedBackend: selectedBackend });
+      return;
+    }
     if (!bridgeCapabilities.visibleTranscriptContext) {
       setStatus(input, 'model bridge restart required');
       pushEntry(input, 'error', 'Error: Restart the Meridian model bridge so follow-up prompts carry visible session context.', backend, { requestedBackend: selectedBackend });
