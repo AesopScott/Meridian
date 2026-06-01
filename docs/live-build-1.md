@@ -20,6 +20,35 @@ Tests: docs-only; no pytest required.
 
 Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
 
+**Build 1 Read Check** — 2026-06-01 17:10 -06:00 (Active Task Found)
+- Status: Queue poll complete; Active Now task found: "add Relay proof payload docs/FileMap registration request"
+- Latest origin/main: commit `935d0a37` (Build 5 read check)
+- Task: Write docs-only contract for Relay-to-Bifrost proof payload registration in FileMap
+- Scope: docs/relay-bifrost-proof-payload-contract.md, docs/live-build-1.md
+- Beginning implementation
+
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: add Relay proof payload docs/FileMap registration request.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `docs/live-build-1.md`, `docs/relay-bifrost-proof-payload-contract.md`.
+
+Required sources: current Relay proof payload serialization hooks, `docs/bifrost-right-panel-mode-contract.md`, and `docs/FileMap.md`.
+
+Task: write the concise docs-only Relay-to-Bifrost proof payload contract request that Build 3 can register in FileMap after review clears. Cover stable payload keys, immutability expectations, downstream display intent, and out-of-scope constraints. Do not edit Relay runtime/tests, Bifrost runtime/CSS/tests, FileMap, review queues, UI, move branches, or touch Polaris.
+
+Completion:
+
+- Build 1 completed Relay-Bifrost proof payload contract on 2026-06-01 17:15 -06:00.
+- Commit: `eafa0c17` (docs: Add Relay-Bifrost proof payload contract for FileMap registration).
+- Files changed: `docs/relay-bifrost-proof-payload-contract.md`.
+- Implementation: Contract defines stable proof payload keys (gate_decision, severity, evidence_ids, waiver_present, explanation, fallback_blockers_from_aegis), immutability guarantees (all immutable types), determinism (consistent across calls), downstream display intent (how to render each field), and out-of-scope constraints (no Relay calls, no Aegis calls, no mutations, display-only). Includes FileMap registration guidance for Build 3.
+- Push: successful to worktree branch; ready for merge.
+
+Ready for Codex Review.
+
 ## Next Candidate Task
 
 Goal: add Relay proof payload negative-path tests after the docs/FileMap request clears review.
