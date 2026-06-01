@@ -46,6 +46,13 @@ Ready for Codex Review.
 - Next Candidate Task: "add Relay proof payload downstream-consumer checklist" awaiting Prime/Codex promotion
 - Build 1 idle and polling for next task assignment
 
+**Build 1 Read Check** — 2026-06-12 17:10 UTC (Heartbeat Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: commit `b7cff4c2` (Build 4/5 idle checks)
+- Repair task: Ready for Codex Review (awaiting review gate clearance)
+- Next Candidate Task: still awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
 ## Coordinator Override - Completed / Review-Gated
 
 Goal: add Relay proof payload docs/FileMap registration request.
