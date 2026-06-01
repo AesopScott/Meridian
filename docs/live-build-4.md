@@ -8,6 +8,28 @@ Do not move data between worktrees, branches, or the main checkout. Do not cherr
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: translate Relay completeness into Aegis risk/proof gates.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/relay-aegis-risk-proof-gates.md`, `docs/live-build-4.md`.
+
+Required sources: `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/deepseek-validation-benchmark-plan.md`, `docs/model-harness-v2-contract.md`, and existing Aegis docs.
+
+Task: create a docs-only gate contract that tells Prime/Aegis when a Relay route is allowed, dual-laned, demoted, blocked, or human-gated. Cover account-first routing, API fallback, aggregator last-resort use, context/session reset triggers, Tier 3 independent dual-model requirement, Tier 4 human gate, vendor/account risk, no-silent fallback, proof references, and explicit stop conditions. Do not edit runtime code, FileMap, Bifrost, review queues, or worker branches.
+
+Tests: none required, docs-only.
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: after review clears, convert the Aegis risk/proof gate contract into bounded runtime test cases.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the Federation Harness horizon plan as the V2 planning entry point for later multi-Meridian and multi-user collaboration.
@@ -367,6 +389,11 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:57 -06:00 - Build 4 checked queue; status: idle (cadence-paused); Claude Workflows sub-agent architecture note complete (17d8d90); Ready for Codex Review block backfilled with real hash; Next Candidate Task (Prime restart/resteer logic contract) sits below override block awaiting coordinator promotion; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe, 17d8d90 (7) still pending Codex Reviews sweep; origin/main at 17d8d90
 2026-05-31 08:58 -06:00 - Build 4 checked queue; status: idle (cadence cleared); Codex Reviews B Round B15 documented at d43cb34 — Workflows architecture note (0115581/17d8d90) PASS-WITH-FINDINGS; sole MEDIUM is consolidated 5-entry FileMap registration routed to Build 3 (not a Build 4 repair); prior rounds B11/B13/B14 cleared Echo/Atlas (7eb5ae1), Workflow sub-agent contract (1448642), and Prime Autonomy contract (3aa16fe) — all V2 first-wave Build 4 slices now reviewed; remaining pending sweep: pre-V2 slices 3cbf336, 1d17fa1, fd9224d only; Next Candidate Task still awaits coordinator promotion; origin/main at d43cb34
 2026-05-31 09:02 -06:00 - Build 4 checked queue; status: idle; no Active Task; Build 1 paused cadence 3/3 awaiting Codex clear (fab3ce0); Build 3 idle awaiting next assignment (f2e88ec); Next Candidate Task (Prime restart/resteer logic contract) still awaits coordinator promotion; origin/main at f1b03b1
+2026-06-01 15:17 -06:00 - Build 4 checked queue; status: idle; no Active Task; cadence-paused since 2026-05-31 08:06 (V2 first-wave slice sweep pending); all prior Coordinator Override tasks completed (last: 17d8d90 on 2026-05-31 08:57); Next Candidate = Prime restart/resteer logic contract (not yet promoted); origin/main pulled and up to date
+2026-06-01 15:18 -06:00 - Build 4 checked queue; status: idle; no Active Task; pulled origin/main (already up to date); no new Coordinator Override section added; cadence-paused; awaiting coordinator task assignment or promotion of Next Candidate Task
+2026-06-01 15:19 -06:00 - Build 4 checked queue; status: idle; no Active Task; pulled origin/main (up to date); no new Coordinator Override section; cadence-paused; Codex Reviews B Round B15 cleared (d43cb34); awaiting coordinator reassignment
+2026-06-01 15:19 -06:00 - Build 4 checked queue; status: idle; no Active Task; origin/main synced; no new Coordinator Override - Active Now section; cadence-paused; awaiting coordinator task assignment
+2026-06-01 15:20 -06:00 - Build 4 checked queue; status: idle; no Active Task; origin/main synced; no executable Coordinator Override - Active Now section; cadence-paused; awaiting coordinator task assignment
 ```
 
 ## Write/Completion Log

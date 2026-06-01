@@ -6,6 +6,26 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: review the Bifrost right-panel mode and UI checklist design before implementation begins.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/ui-integration-checklist.md`, `docs/bifrost-right-panel-mode-contract.md` if present, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and `docs/live-build-5.md` for repair routing only.
+
+Task: review whether the UI design clearly separates User Session, Settings, and Harness modes. Settings/Harness modes must use the full right panel and must not show prompt/response windows. User Session mode must route to the selected open live session, including hidden/test-waiting labels, grouped alphabetically by project. Do not edit `index.html` or runtime UI. If findings exist, route a focused repair into `docs/live-build-5.md`; otherwise mark passed and leave the next review candidate.
+
+Proof command: docs-only review; no tests required unless runtime UI files are changed.
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Relay/UI planning artifacts after it is marked Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md` for provenance only.
+
 ## Completed / Finding Routed
 
 Goal: review Build 5 provider balance and prompt payload visibility surface commit `06e1c5c`.

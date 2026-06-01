@@ -4,6 +4,28 @@
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: define the Bifrost surface contracts for User, Settings, and Harness right-panel modes.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-build-5.md`.
+
+Required sources: `docs/ui-integration-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and current `index.html` for visual intent only.
+
+Task: create a docs-only Bifrost contract for the right-side surface modes. User Session mode keeps prompt/response and routes to the selected live session. Settings mode uses the full right panel for Meridian configuration items and no prompt window. Harness mode uses the full right panel for searchable/editable harness logic items and no prompt window. Include the Sessions dropdown requirements: open live sessions only, include hidden/test-waiting sessions with labels, group alphabetically by project, selection changes panel title, and selection immediately routes prompts to that session. Do not edit `index.html`, Bifrost runtime code, model calls, review queues, or Polaris.
+
+Tests: none required, docs-only.
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: implement static/sample Bifrost rendering for the reviewed right-panel mode contract.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
 ## Completed / Ready For Codex Review
 
 Goal: repair the Bifrost provider balance and prompt payload visibility surface from commit `06e1c5c`.
@@ -341,6 +363,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 13:21 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 0352a34
 2026-05-30 13:23 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 182ffbe
 2026-05-30 13:25 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at e0b103a
+2026-06-01 12:00 UTC - Build 5 checked queue; status: running; Active Task = implement Bifrost session lifecycle preview state; provider balance & prompt payload repair completed at 5309fb4; origin/main synced; beginning session lifecycle state implementation
 2026-05-30 13:26 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 3f873f5
 2026-05-30 13:28 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 7663e63
 2026-05-30 13:32 -06:00 - Build 5 checked queue; status: running; new Active Task = draft V1 Bifrost cockpit implementation brief at docs/v1-bifrost-cockpit-implementation-brief.md; Cross-Check Activity: none; origin/main at e800c03

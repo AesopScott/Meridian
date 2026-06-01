@@ -8,6 +8,30 @@ Do not move data between worktrees, branches, or the main checkout. Do not cherr
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: register the new Relay audit and UI integration planning artifacts in FileMap.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Required sources: `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, `docs/ui-integration-checklist.md`, and current `docs/FileMap.md`.
+
+Task: verify the three current V2 planning artifacts are discoverable through runtime FileMap and mirrored in `docs/FileMap.md`: Relay heartbeat model routing logic, Relay completeness audit, and UI integration checklist. Add missing entries and required-path coverage only for files that exist on disk. Keep this mechanical. Do not edit the source artifacts, runtime Relay code, UI code, review queues, or worker branches.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: audit FileMap coverage for any Relay/Session Lifecycle implementation files that land from Build 1 or Build 2.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
 ## Cadence Cleared
 
 Build 3 cadence for commit `67a75dc` plus marker `b3316b6` was cleared by Codex Reviews B on 2026-05-31 15:52 -06:00. FileMap tests passed (46 tests), and no repair was routed.

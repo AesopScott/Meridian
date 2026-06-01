@@ -8,6 +8,30 @@ Do not move data between worktrees, branches, or the main checkout. Do not cherr
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: implement Session Lifecycle routing decisions for Relay-selected session actions.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-implementation-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/relay-completeness-audit.md`.
+
+Task: extend the typed Session Lifecycle model so Prime can represent Relay session actions without live process control: reuse existing session, start new session, summarize and reset, transfer/handoff, archive, and request human gate. Include context-fill, reasoning-shift, project-scope, stale-heartbeat, review-gate, and permission-boundary reasons. Preserve unique-worktree, assigned-queue, and branch-permission invariants. Do not spawn processes, move branches, call models, edit UI, or touch Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: add Prime command-plan tests that consume the new Session Lifecycle routing reasons after review clears.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the Session Lifecycle permissions and Prime/Beacon binding handoff contract.

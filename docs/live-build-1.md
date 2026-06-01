@@ -4,6 +4,30 @@
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: implement Relay decision-record coverage from the completeness audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, and current `meridian_core/relay_executor.py`.
+
+Task: add provider-neutral Relay decision-record support or test coverage so Relay exposes the audit fields needed for Prime to explain a route: route class, vendor/provider, account-vs-cli-vs-api path, risk tier, dual-model requirement, session action, context-health reason, fallback posture, and proof references. Keep the slice bounded to data planning/evidence. Do not add live vendor calls, UI rendering, Bifrost changes, filesystem/process control, branch movement, or vendor-specific secrets.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: bind Codex review findings from the Relay decision-record coverage slice.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Relay model-adapter metadata binding.
