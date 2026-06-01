@@ -8,7 +8,19 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task - Codex Reviews B Repair
+## Active Task
+
+Goal: audit FileMap coverage for Relay/Session Lifecycle review-cleared runtime artifacts after the Relay-Bifrost proof payload contract docs registration clears review.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: compare the current review-cleared Relay and Session Lifecycle runtime/test/documentation artifacts against runtime FileMap, `docs/FileMap.md`, and required-path coverage. Register only existing missing files. Keep this mechanical; do not edit Relay, Session Lifecycle, Bifrost, Aegis, review queues, process/model/account code, branches, or Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+## Completed / Ready For Codex Review
 
 Goal: repair duplicate `docs/ui-integration-checklist.md` mirror rows in `docs/FileMap.md` found during Reviews B review of Build 5 right-panel FileMap registration.
 
@@ -18,11 +30,16 @@ Finding: `docs/FileMap.md` contains two rows for `docs/ui-integration-checklist.
 
 Task: keep the canonical `docs/ui-integration-checklist.md` coverage consistent across runtime FileMap, `docs/FileMap.md`, and `tests/test_filemap.py`; remove or consolidate duplicate stale FileMap.md row(s) without editing UI/runtime code.
 
-Proof command:
+Completion:
 
-- `python -m pytest tests/test_filemap.py -q`
+- Build 3 removed duplicate `docs/ui-integration-checklist.md` row (Bifrost / session harness area) from docs/FileMap.md. Kept canonical Build process area row.
+- Files changed: `docs/FileMap.md` (1 row removed).
+- Tests: `python -m pytest tests/test_filemap.py -q` — 46 passed.
+- Commit: `c063837c`.
+- Push: successful to origin/main.
+- Cadence: 1/3 since last review.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
@@ -156,18 +173,6 @@ Completion:
 - Cadence: 2/3 since Round B5.
 
 Ready for Codex Review.
-
-## Active Task
-
-Goal: audit FileMap coverage for Relay/Session Lifecycle review-cleared runtime artifacts after the Relay-Bifrost proof payload contract docs registration clears review.
-
-Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
-
-Task: compare the current review-cleared Relay and Session Lifecycle runtime/test/documentation artifacts against runtime FileMap, `docs/FileMap.md`, and required-path coverage. Register only existing missing files. Keep this mechanical; do not edit Relay, Session Lifecycle, Bifrost, Aegis, review queues, process/model/account code, branches, or Polaris.
-
-Tests:
-
-- `python -m pytest tests/test_filemap.py -q`
 
 ## Next Candidate Task
 
