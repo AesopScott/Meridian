@@ -25,7 +25,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind Aegis route-gate evidence into Relay decision records after the Aegis runtime gate slice lands.
 
@@ -37,11 +37,16 @@ Required sources: `meridian_core/aegis.py`, `docs/relay-aegis-risk-proof-gates.m
 
 Task: add provider-neutral Relay evidence fields or test coverage so a Relay decision record can carry Aegis gate outcomes without calling Aegis directly at runtime yet. Cover gate id, decision (`allow`, `demote`, `block`, `human_gate`), severity, evidence refs, waiver/approval record presence, and downstream explanation text. Keep this as a pure data/evidence slice. Do not call models, inspect accounts, touch UI, spawn CLIs, move branches, or edit Aegis implementation.
 
-Tests:
+Completion:
 
-- `python -m pytest tests/test_relay_executor.py -q`
+- Build 1 completed Relay Aegis gate evidence binding on 2026-06-01 15:56 -06:00.
+- Commit: `69e9ff55` (feat: Add provider-neutral Aegis gate evidence fields to RelayDecisionRecord).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (129 tests: 123 original + 6 new Aegis field tests).
+- Implementation: Added 5 provider-neutral optional fields to RelayDecisionRecord for Aegis gate evidence: aegis_gate_decision (allow/demote/block/human_gate), aegis_evidence_ids (tuple of evidence ids), aegis_waiver_present (bool), aegis_gate_severity (severity level), aegis_explanation (gate explanation text). Fields default to None/empty/False when not populated. Pure data structure with no Aegis calls at runtime. Frozen dataclass ensures immutability.
+- Push: successful to worktree branch; ready for merge.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Ready for Codex Review.
 
 ## Next Candidate Task
 
