@@ -200,7 +200,15 @@ Completion: commit only the allowed files, push to `origin/main`, update Obsidia
 
 ## Next Candidate Task
 
-(Will be assigned by Coordinator once current task completes and Codex review clears.)
+Goal: continue Relay prompt payload snapshot metadata hardening after the active cockpit repair and review routing complete.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: extend the Relay dispatch evidence slice if the active prompt payload snapshot metadata work lands before this candidate is promoted. Keep the work provider-neutral, pure, and bounded to structured evidence; do not add live vendor calls, UI work, filesystem access, network access, or Bifrost rendering.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py tests/test_prompt_payload_meter.py -q`
 
 ## Archived Prior Candidate - Promoted Above
 

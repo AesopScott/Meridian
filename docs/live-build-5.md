@@ -66,7 +66,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: implement the Bifrost V2 browser-first HUD shell for the latest UI direction.
 
@@ -90,9 +90,16 @@ Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+Completion:
 
-## Next Candidate Task
+- Build 5 completed this HUD shell in `4a2838c`.
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+- Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 80 tests; full suite passed with 1095 tests.
+- Routed to Codex Reviews B for Bifrost/UI review.
+
+Ready for Codex Review.
+
+## Active Task
 
 Goal: implement the Bifrost V2 voice I/O surface state.
 
@@ -107,6 +114,20 @@ Requirements:
 - Keep voice action controls as inert/render-only affordances for this slice; no live microphone or TTS plumbing yet.
 - Preserve the large central prompt and quiet `PRIMED` core from the active HUD shell.
 - Add tests proving each voice state can render and old noisy provider/build labels remain absent.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only the allowed Bifrost files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews B routes a HUD-shell repair before this voice slice is committed, complete that repair first.
+
+## Next Candidate Task
+
+Goal: implement the Bifrost provider balance and prompt payload visibility surface.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: after the Voice I/O surface state lands, add the first deterministic provider-balance and prompt-payload visibility surface from `docs/bifrost-balance-payload-surface-contract.md`. Keep it render-only: Bifrost displays provider/payload telemetry supplied by Relay/Model Harness and does not make routing decisions.
 
 Tests:
 
@@ -342,6 +363,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-31 13:51 -06:00 - Build 5 checked queue; status: running; Active Task = Codex repair for Bifrost V2 contract queue/path contradictions; origin/main already up to date
 2026-05-31 22:15 -06:00 - Build 5 checked queue; status: idle (complete); Active Task = implement Bifrost V2 browser-first HUD shell (completed at 4a2838c, pushed to origin/main at eea6825); all 80 tests pass (1095 full suite); V2 cockpit requirements met: Prime command bay dominant, PRIMED core quiet, voice I/O visible, project-first rail, harness on-demand, mission feed, instrument band; 1st code change in cadence window (after 3-change pause cleared); no actionable cross-check activity; awaiting next Active Task assignment; origin/main at eea6825
 2026-06-01 04:35 -06:00 - Build 5 checked queue; status: idle (awaiting reassignment); Active Task still names completed Bifrost V2 HUD shell (4a2838c); no new task assigned; Reviews B metadata and Reviews ledger updates landed (7c34c98); V2 cockpit implementation verified complete with all requirements met and tests passing; cadence pause cleared; awaiting orchestrator to assign next Active Task; origin/main at 7c34c98
+2026-06-01 04:45 -06:00 - Build 5 checked queue; status: idle (awaiting reassignment); Active Task still the completed V2 HUD shell (4a2838c); no new task assigned yet; Build 1 heartbeat updates landed (5fdc5c0); V2 cockpit complete and proven ready; awaiting orchestrator next task; origin/main at 5fdc5c0
 ```
 
 ## Write/Completion Log
