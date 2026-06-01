@@ -277,6 +277,49 @@ class GateResult:
     demote_to_tier: int | None = None
 
 
+@dataclass
+class WaiverRecord:
+    """Waiver record for policy exceptions — must include required evidence fields."""
+    waiver_id: str
+    actor: str
+    scope: str
+    timestamp: str
+    reason: str
+    expiration: str | None = None
+    evidence_url: str | None = None
+
+    def is_valid(self) -> bool:
+        """Check that all required fields are present and non-empty."""
+        return bool(
+            self.waiver_id.strip()
+            and self.actor.strip()
+            and self.scope.strip()
+            and self.timestamp.strip()
+            and self.reason.strip()
+        )
+
+
+@dataclass
+class ApprovalRecord:
+    """Approval record for user consent — must include required evidence fields."""
+    approval_id: str
+    actor: str
+    scope: str
+    timestamp: str
+    reason: str
+    expiration: str | None = None
+
+    def is_valid(self) -> bool:
+        """Check that all required fields are present and non-empty."""
+        return bool(
+            self.approval_id.strip()
+            and self.actor.strip()
+            and self.scope.strip()
+            and self.timestamp.strip()
+            and self.reason.strip()
+        )
+
+
 def gate_unknown_route_class(
     route_class: str | None,
 ) -> GateResult:
@@ -370,7 +413,7 @@ def gate_missing_exact_model_id(
 def gate_tier3_dual_lane_requirement(
     risk_tier: int,
     dual_lane_required: bool,
-    has_waiver: bool = False,
+    waiver_record: WaiverRecord | None = None,
 ) -> GateResult:
     """
     Gate 3: Tier 3 Dual-Lane Requirement Gate.
@@ -378,9 +421,11 @@ def gate_tier3_dual_lane_requirement(
     Trigger: risk_tier is 3 and dual_lane_required is not True.
     Logic:
     - If Tier 3 and dual_lane_required=False:
-      - If waiver exists, demote to Tier 2.
-      - If no waiver, block.
+      - If valid waiver_record exists (with actor, scope, timestamp, reason),
+        demote to Tier 2.
+      - If no valid waiver_record, block.
     - If Tier 3 and dual_lane_required=True, gate passes.
+    - Bare boolean waivers are not accepted; structured evidence required.
     """
     if risk_tier != 3:
         return GateResult(
@@ -396,18 +441,18 @@ def gate_tier3_dual_lane_requirement(
             reason="Tier 3: dual-lane required and provided",
         )
 
-    if has_waiver:
+    if waiver_record is not None and waiver_record.is_valid():
         return GateResult(
             gate_name="tier3_dual_lane_requirement",
             decision=GateDecision.DEMOTE,
-            reason="Tier 3 without dual-lane; explicit waiver permits demotion",
+            reason=f"Tier 3 without dual-lane; valid waiver permits demotion (waiver_id={waiver_record.waiver_id})",
             demote_to_tier=2,
         )
 
     return GateResult(
         gate_name="tier3_dual_lane_requirement",
         decision=GateDecision.BLOCK,
-        reason="Tier 3 single-lane blocked; dual-lane required or explicit waiver needed",
+        reason="Tier 3 single-lane blocked; dual-lane required or valid waiver record needed (actor, scope, timestamp, reason)",
     )
 
 
@@ -672,6 +717,7 @@ def gate_cost_exposure(
     cost_justified: bool,
     risk_tier: int,
     cost_pressure: str | None = None,
+    approval_record: ApprovalRecord | None = None,
 ) -> GateResult:
     """
     Gate 9: Cost Exposure Gate.
@@ -680,8 +726,10 @@ def gate_cost_exposure(
     Logic:
     - If cost_posture==PREMIUM and cost_justified=False:
       - For Tier <= 1, allow with warning.
-      - For Tier >= 2, block unless explicitly approved.
+      - For Tier >= 2, block unless valid approval_record exists
+        (with actor, scope, timestamp, reason).
     - If risk_tier==4 and cost_pressure in (QUOTA_LIMITED, EXHAUSTED), block.
+    - Bare boolean approvals are not accepted; structured evidence required.
     """
     if risk_tier == 4:
         if cost_pressure in ("QUOTA_LIMITED", "EXHAUSTED"):
@@ -712,8 +760,16 @@ def gate_cost_exposure(
             reason=f"Tier {risk_tier}: premium cost allowed with warning",
         )
 
+    # Tier >= 2: premium cost requires explicit user approval
+    if approval_record is not None and approval_record.is_valid():
+        return GateResult(
+            gate_name="cost_exposure",
+            decision=GateDecision.ALLOW,
+            reason=f"Tier {risk_tier}: premium cost approved by user (approval_id={approval_record.approval_id})",
+        )
+
     return GateResult(
         gate_name="cost_exposure",
         decision=GateDecision.BLOCK,
-        reason=f"Tier {risk_tier}: premium cost requires explicit user approval",
+        reason=f"Tier {risk_tier}: premium cost requires valid user approval record (actor, scope, timestamp, reason)",
     )
