@@ -10,7 +10,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Finding Routed
 
 Goal: review Build 4 remaining Relay routing logic consistency repair.
 
@@ -2582,3 +2582,40 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 17:40 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 17:43 -06:00 — pulled latest `origin/main` (`Already up to date`) and read `docs/live-codex-reviews-2.md` plus `docs/live-build-4.md`. Active Reviews B task is promoted: review Build 4 remaining Relay routing logic consistency repair at commit `88e5dc0a`. Executed the active docs/architecture review against current main.
+
+## Completed / Finding Routed
+
+Goal: review Build 4 remaining Relay routing logic consistency repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Review result:
+
+- Finding 1: `docs/relay-heartbeat-model-routing-logic.md` still lets wrong project/role/tools fall through to direct API or aggregator. Lines 156-158 still say Step 2 failure goes to "Direct API or aggregator (wrong session scope)" instead of starting a project-specific/role-matched session or blocking. Why it matters: wrong-scope account context can still be bypassed instead of preserving account/API/session precedence and cross-project isolation. Recommended owning lane: Build 4.
+- Finding 2: `docs/relay-heartbeat-model-routing-logic.md` still has the Tier 3+ account-session missing/expired contradiction. Lines 57-68 allow direct APIs when proof/control requires them, but line 182 still says Tier 3+ missing/expired account session is not allowed with "wait for auth" while the fallback action is still "Try direct API." Why it matters: implementers still cannot tell whether Tier 3+ should re-auth/start a controllable session, use direct API for explicit proof/audit needs, or block. Recommended owning lane: Build 4.
+- Finding 3: `docs/relay-heartbeat-model-routing-logic.md` still treats `deepseek-chat` inconsistently. Lines 120-123 still describe `deepseek-v4-pro` and `deepseek-v4-flash` as direct route model names and `deepseek-chat` as a deprecated compatibility alias, while `docs/model-harness-v2-contract.md` and `docs/deepseek-direct-provider-implementation-handoff.md` require `deepseek-chat` as the exact DeepSeek direct API dispatch id. Why it matters: Relay, harness metadata, and the implementation handoff still disagree on the actual dispatch key. Recommended owning lane: Build 4.
+- Scope check: commit `88e5dc0a` changed only `docs/relay-heartbeat-model-routing-logic.md`; no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency was added by the reviewed slice.
+
+Proof:
+
+- Docs-only review; no pytest required.
+- Inspected `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, and `docs/live-build-4.md`.
+- `git show --stat --oneline --no-renames 88e5dc0a` shows a docs-only change to `docs/relay-heartbeat-model-routing-logic.md`.
+
+Repair routing:
+
+- Routed focused follow-up repair to Build 4 in `docs/live-build-4.md`.
+
+Next Candidate:
+
+- Re-review Build 4 remaining Relay routing logic consistency repair after Build 4 marks the follow-up Ready for Codex Review.
+
+## Write / Completion Log
+
+- 2026-06-01 17:43 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance/disposition and `docs/live-build-4.md` repair routing only. Tests run: not run; docs/architecture review only. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance/routing only.
