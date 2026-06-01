@@ -8,6 +8,30 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add Aegis aggregate route-gate summary tests.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Required sources: current Aegis gate summary helpers, route-gate validators, and `docs/relay-aegis-risk-proof-gates.md`.
+
+Task: add pure aggregate summary coverage for multi-gate route decisions. Prove mixed allow/demote/block/human-gate results produce deterministic ordered summaries, preserve highest severity, retain required evidence/waiver/approval/model-vendor status, and expose a downstream action that Relay/Bifrost can render. Keep this helper/test level only. Do not edit Relay, Bifrost, FileMap, review queues, move branches, or touch Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_aegis.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: add Aegis-to-Relay summary handoff contract docs after aggregate summary tests clear review.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining Aegis gate review findings.
@@ -55,7 +79,7 @@ Ready for Codex Review:
 - Pure, deterministic, provider-neutral helpers with gate metadata for all 9 validators
 - Part of series with aggregator authority repair (20a4719c) — both ready for Codex Review
 
-## Next Candidate Task
+## Archived Candidate - Promoted Above
 
 Goal: add Aegis aggregate route-gate summary tests once helper output clears review.
 

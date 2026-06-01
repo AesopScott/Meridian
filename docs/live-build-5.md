@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: restore Bifrost right-panel static/sample rendering at current `HEAD`.
 
@@ -14,15 +14,13 @@ Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/t
 
 Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, Build 5 commit `80373a88`, and Codex Reviews B finding routed on 2026-06-01 16:03 -06:00.
 
-Task: current `HEAD` no longer contains the right-panel mode dataclasses, render helpers, CSS, or tests introduced by `80373a88`, even though the queue marks that slice Ready for Codex Review. Restore or re-implement the deterministic static/sample renderer for the three mutually exclusive right-panel modes in the current codebase: User Session mode has prompt/response plus live-session selector affordances; Settings and Harness use full-panel non-prompt surfaces; tests must prove prompt windows are absent outside User Session and only the selected mode renders. Do not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
+Task: restored the deterministic static/sample renderer for the three mutually exclusive right-panel modes in the current codebase. User Session mode has prompt/response plus live-session selector affordances; Settings and Harness use full-panel non-prompt surfaces; tests prove prompt windows are absent outside User Session and only the selected mode renders. Did not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
 
 Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave the interactive-state mode-switching task as the next candidate.
-
-## Routed / Paused Until Repair Clears Review
+Completion: restored through Build 5 commits `80373a88` and merge `8e6b6ef3`; current `origin/main` contains the right-panel mode renderer and related tests. Marked Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
@@ -68,7 +66,7 @@ Tests:
 
 Completion: completed in Build 5 commit `80373a88`; queue completion recorded in `74581e4d`, `d541c814`, and `81e0c33a`; marked Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add interactive-state view-model tests for right-panel mode switching after the static/sample render clears review.
 
@@ -76,7 +74,23 @@ Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/t
 
 Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, and the static/sample render implementation from `80373a88`.
 
-Task: add deterministic Bifrost view-model/state tests for switching among User Session, Settings, and Harness right-panel modes. Prove switching modes preserves unsent user-session prompt state, does not route prompts while Settings/Harness are active, restores the selected live session when returning to User Session, and keeps Settings/Harness as full-panel non-prompt surfaces. Keep this as view-model/render state only. Do not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
+Task: added deterministic Bifrost view-model/state tests for switching among User Session, Settings, and Harness right-panel modes. Proved switching modes preserves unsent user-session prompt state, does not route prompts while Settings/Harness are active, restores the selected live session when returning to User Session, and keeps Settings/Harness as full-panel non-prompt surfaces. Kept this as view-model/render state only. Did not edit `index.html`, call models, spawn sessions, touch Polaris, or add live process control.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: completed in Build 5 commit `53fe04b1` and merged through `8e6b6ef3`; marked Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
+Goal: add Sessions dropdown sample data rendering for open, hidden, and test-waiting sessions grouped alphabetically by project after mode-switching tests clear review.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, and current Bifrost right-panel mode view-model/render helpers.
+
+Task: add deterministic sample rendering/tests for the User Session `Sessions` dropdown. Include open live sessions only, hidden sessions labeled as hidden, test-waiting sessions labeled as waiting for user test, sessions grouped alphabetically by project name, session names sorted within each group, current selection reflected in the User panel title, and immediate routing target state when a session is selected. Keep this render/view-model only. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, or add live process control.
 
 Tests:
 
@@ -86,7 +100,7 @@ Completion: commit only allowed files, push to `origin/main`, mark Ready for Cod
 
 ## Next Candidate Task
 
-Goal: add Sessions dropdown sample data rendering for open, hidden, and test-waiting sessions grouped alphabetically by project after mode-switching tests clear review.
+Goal: add stale-target guard sample rendering after Sessions dropdown sample data clears review.
 
 Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
 

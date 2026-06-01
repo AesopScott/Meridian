@@ -6,6 +6,28 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: review current-main Build 4 Aegis and Build 5 Bifrost landing commits.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `meridian_core/aegis.py`, `tests/test_aegis.py`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-4.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md` for provenance/routing only.
+
+Task: verify current `origin/main` contains and passes the Build 4 Aegis repairs/gate summary helpers and Build 5 right-panel restore plus mode-switching tests. Confirm the prior Reviews B findings are closed or route focused repairs: Tier 2+ premium cost must require structured approval evidence, Tier 2 aggregator allowance must require selected model/vendor evidence, right-panel mode rendering must exist at current HEAD, and Settings/Harness must remain non-prompt full-panel surfaces. Do not edit runtime code.
+
+Proof commands:
+
+- `python -m pytest tests/test_aegis.py tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Build 5 right-panel rendering artifacts after Build 3 marks it Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
 ## Completed / Finding Routed
 
 Goal: review Build 4 Aegis repair and Build 5 Bifrost right-panel rendering.

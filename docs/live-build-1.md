@@ -4,6 +4,30 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add Relay summary serialization for Aegis gate evidence.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: current `RelayDecisionRecord` Aegis evidence fields, `RelayExecutionSummary`, `docs/relay-aegis-risk-proof-gates.md`, and current Relay executor tests.
+
+Task: add provider-neutral summary serialization for Aegis gate evidence so downstream Bifrost/Prime surfaces can show gate decision, severity, evidence ids, waiver presence, explanation, and any Relay fallback blocker generated from Aegis evidence. Keep this as deterministic data serialization only. Do not call Aegis validators, call models, inspect accounts, touch UI, move branches, edit Bifrost, or touch Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: add Relay-to-Bifrost proof payload contract tests after summary serialization clears review.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Relay-side blocking behavior from Aegis gate evidence fields.
@@ -27,7 +51,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Next Candidate Task
+## Archived Candidate - Promoted Above
 
 Goal: add Relay summary serialization for Aegis gate evidence once blocking behavior clears review.
 
