@@ -1418,7 +1418,7 @@ body {
   gap: 10px;
   overflow: hidden;
   color: rgba(var(--session-electric-soft), 0.96);
-  font-size: 10px;
+  font-size: var(--session-text-size, 16px);
   line-height: 1.35;
 }
 
@@ -1433,7 +1433,7 @@ body {
 
 .relay-models-title {
   color: rgba(var(--session-electric-soft), 0.98);
-  font-size: 14px;
+  font-size: 1.4em;
   line-height: 1.1;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1446,7 +1446,7 @@ body {
   color: #ffb000;
   padding: 4px 7px;
   text-align: center;
-  font-size: 8px;
+  font-size: 0.8em;
   line-height: 1.15;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1469,7 +1469,7 @@ body {
 .relay-models-section-title {
   margin-bottom: 6px;
   color: rgba(var(--session-electric-soft), 0.88);
-  font-size: 9px;
+  font-size: 0.9em;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1576,6 +1576,10 @@ body {
 .session-window-left .session-text-slider {
   right: auto;
   left: 12px;
+}
+
+.session-window-right .session-text-slider {
+  display: none;
 }
 
 .session-text-slider span {
@@ -3182,6 +3186,7 @@ body {
     `);
   });
 
+  document.querySelector('.session-window-right .session-text-slider')?.remove();
   const textSliders = Array.from(document.querySelectorAll('.session-text-slider input[type="range"]'));
   const setTextSize = (value) => {
     const sliderValue = Number(value);
