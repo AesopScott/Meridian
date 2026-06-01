@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Relay proof payload negative-path deterministic test collection.
 
@@ -14,9 +14,24 @@ Allowed files only: `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 
 Required repair from Codex Reviews A: current-main review of commit `26a71632` found `TestAegisGateEvidenceSummary.test_evidence_summary_to_dict_multiple_calls_identical` is defined twice. The later existing definition shadows the newly added negative-path deterministic test, so pytest collects only one method with that name. Rename the newly added deterministic negative-path test, or add a uniquely named equivalent, to prove deterministic immutable `to_dict()` output for incomplete/partial evidence. Keep the repair test-only.
 
-Proof required before requeue: `python -m pytest tests/test_relay_executor.py -q` and `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q`.
+Completion:
 
-Completion: mark Ready for Codex Review with the current-main commit hash and exact files changed.
+- Build 1 completed repair of deterministic test collection on 2026-06-12 17:30 UTC.
+- Commit: `fbf6cc2c` (fix: Rename duplicate deterministic test to resolve shadowing in negative-path test collection).
+- Files changed: `tests/test_relay_executor.py` (2 lines: method name rename).
+- Tests: `python -m pytest tests/test_relay_executor.py -q` (152 tests pass: 145 original + 7 negative-path tests).
+- Proof: `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q` (19 tests collected, both `test_evidence_summary_to_dict_multiple_calls_identical` and `test_evidence_summary_to_dict_multiple_calls_identical_with_partial_evidence` now collected without shadowing).
+- Implementation: Renamed second deterministic test method from `test_evidence_summary_to_dict_multiple_calls_identical` to `test_evidence_summary_to_dict_multiple_calls_identical_with_partial_evidence` to remove shadowing. Both tests verify deterministic immutable output, first with complete evidence, second with partial evidence (no waiver_present).
+
+Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-12 17:30 UTC (Active Task Completed)
+- Status: Deterministic test collection repair completed and marked Ready for Codex Review
+- Latest origin/main: commit `8b7205ca` (Build 1 idle read check)
+- Current task: repair Relay proof payload negative-path deterministic test collection (now completed, commit `fbf6cc2c`)
+- No new "Coordinator Override - Active Now" task promoted yet
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and awaiting next task assignment
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
