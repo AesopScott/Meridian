@@ -9,8 +9,19 @@ from meridian_core.aegis import (
     EvidenceSeverity,
     EvidenceStatus,
     EvidenceType,
+    GateDecision,
+    GateResult,
     ProofTrail,
     evidence_from_cross_check,
+    gate_account_session_risk,
+    gate_aggregator_authority,
+    gate_cost_exposure,
+    gate_missing_exact_model_id,
+    gate_tier3_dual_lane_requirement,
+    gate_unvalidated_deepseek,
+    gate_unknown_proof_requirement,
+    gate_unknown_route_class,
+    gate_unsafe_fallback,
 )
 from meridian_core.review_console import (
     ReviewConsoleAction,
@@ -583,3 +594,385 @@ class TestProofTrailEnqueueToReviewConsole:
         result = ProofTrail().enqueue_to_review_console(queue)
         assert result == []
         assert queue.items == []
+
+
+# ---------------------------------------------------------------------------
+# Gate 1: Unknown Route Class Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateUnknownRouteClass:
+    def test_valid_account_session_allows(self):
+        result = gate_unknown_route_class("account_session")
+        assert result.decision is GateDecision.ALLOW
+
+    def test_valid_local_cli_allows(self):
+        result = gate_unknown_route_class("local_cli")
+        assert result.decision is GateDecision.ALLOW
+
+    def test_valid_direct_api_allows(self):
+        result = gate_unknown_route_class("direct_api")
+        assert result.decision is GateDecision.ALLOW
+
+    def test_valid_aggregator_api_allows(self):
+        result = gate_unknown_route_class("aggregator_api")
+        assert result.decision is GateDecision.ALLOW
+
+    def test_unknown_route_class_blocks(self):
+        result = gate_unknown_route_class("unknown_class")
+        assert result.decision is GateDecision.BLOCK
+
+    def test_none_route_class_blocks(self):
+        result = gate_unknown_route_class(None)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_empty_route_class_blocks(self):
+        result = gate_unknown_route_class("")
+        assert result.decision is GateDecision.BLOCK
+
+
+# ---------------------------------------------------------------------------
+# Gate 2: Missing Exact Model ID Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateMissingExactModelId:
+    def test_tier0_no_model_id_required(self):
+        result = gate_missing_exact_model_id(None, 0)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier1_unversioned_allowed(self):
+        result = gate_missing_exact_model_id("gpt-latest", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier1_missing_allowed(self):
+        result = gate_missing_exact_model_id(None, 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier2_missing_blocks(self):
+        result = gate_missing_exact_model_id(None, 2)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier2_unversioned_blocks(self):
+        result = gate_missing_exact_model_id("gpt-latest", 2)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier3_missing_blocks(self):
+        result = gate_missing_exact_model_id(None, 3)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier4_versioned_allows(self):
+        result = gate_missing_exact_model_id("gpt-4-turbo-2025-05-13", 4)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_versioned_model_with_dash_allowed(self):
+        result = gate_missing_exact_model_id("claude-opus-4-7", 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_versioned_model_with_underscore_allowed(self):
+        result = gate_missing_exact_model_id("gpt_4_2025_05", 2)
+        assert result.decision is GateDecision.ALLOW
+
+
+# ---------------------------------------------------------------------------
+# Gate 3: Tier 3 Dual-Lane Requirement Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateTier3DualLaneRequirement:
+    def test_tier0_dual_lane_not_required(self):
+        result = gate_tier3_dual_lane_requirement(0, False)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier1_dual_lane_not_required(self):
+        result = gate_tier3_dual_lane_requirement(1, False)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier2_dual_lane_not_required(self):
+        result = gate_tier3_dual_lane_requirement(2, False)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier3_with_dual_lane_allows(self):
+        result = gate_tier3_dual_lane_requirement(3, True)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier3_without_dual_lane_blocks(self):
+        result = gate_tier3_dual_lane_requirement(3, False)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier3_without_dual_lane_with_waiver_demotes(self):
+        result = gate_tier3_dual_lane_requirement(3, False, has_waiver=True)
+        assert result.decision is GateDecision.DEMOTE
+        assert result.demote_to_tier == 2
+
+    def test_tier4_dual_lane_not_required(self):
+        result = gate_tier3_dual_lane_requirement(4, False)
+        assert result.decision is GateDecision.ALLOW
+
+
+# ---------------------------------------------------------------------------
+# Gate 4: Unknown Proof Requirement Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateUnknownProofRequirement:
+    def test_tier0_none_required_allows(self):
+        result = gate_unknown_proof_requirement("none", 0)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier1_none_allowed(self):
+        result = gate_unknown_proof_requirement("none", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier1_telemetry_allowed(self):
+        result = gate_unknown_proof_requirement("telemetry", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier2_code_review_allowed(self):
+        result = gate_unknown_proof_requirement("code_review", 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier3_security_review_allowed(self):
+        result = gate_unknown_proof_requirement("security_review", 3)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier4_human_gate_allowed(self):
+        result = gate_unknown_proof_requirement("human_gate", 4)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_tier1_missing_proof_blocks(self):
+        result = gate_unknown_proof_requirement(None, 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier2_invalid_proof_blocks(self):
+        result = gate_unknown_proof_requirement("invalid_type", 2)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier1_code_review_disallowed(self):
+        result = gate_unknown_proof_requirement("code_review", 1)
+        assert result.decision is GateDecision.BLOCK
+
+
+# ---------------------------------------------------------------------------
+# Gate 5: Unsafe Fallback Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateUnsafeFallback:
+    def test_no_fallback_allowed(self):
+        result = gate_unsafe_fallback(False, None, 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_silent_fallback_blocker_blocks(self):
+        result = gate_unsafe_fallback(True, ["silent_fallback"], 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_trust_downgrade_blocker_allowed_tier1(self):
+        result = gate_unsafe_fallback(True, ["trust_downgrade"], 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_trust_downgrade_blocker_allowed_tier2(self):
+        result = gate_unsafe_fallback(True, ["trust_downgrade"], 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_model_mismatch_blocker_allowed_tier2(self):
+        result = gate_unsafe_fallback(True, ["model_mismatch"], 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_model_mismatch_blocker_blocks_tier3(self):
+        result = gate_unsafe_fallback(True, ["model_mismatch"], 3)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_model_mismatch_blocker_blocks_tier4(self):
+        result = gate_unsafe_fallback(True, ["model_mismatch"], 4)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_cost_increase_blocker_allowed(self):
+        result = gate_unsafe_fallback(True, ["cost_increase"], 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_multiple_blockers_with_silent_fallback_blocks(self):
+        result = gate_unsafe_fallback(True, ["cost_increase", "silent_fallback"], 2)
+        assert result.decision is GateDecision.BLOCK
+
+
+# ---------------------------------------------------------------------------
+# Gate 6: Unvalidated DeepSeek Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateUnvalidatedDeepseek:
+    def test_non_deepseek_provider_allows(self):
+        result = gate_unvalidated_deepseek("openai", "DIRECT", "PASSED", 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_deepseek_aggregator_blocks(self):
+        result = gate_unvalidated_deepseek("deepseek", "AGGREGATOR", "PASSED", 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_deepseek_direct_passed_tier1_allows(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "PASSED", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_deepseek_direct_passed_tier3_allows(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "PASSED", 3)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_deepseek_pending_tier0_allows(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "PENDING", 0)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_deepseek_pending_tier1_allows(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "PENDING", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_deepseek_pending_tier2_demotes(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "PENDING", 2)
+        assert result.decision is GateDecision.DEMOTE
+        assert result.demote_to_tier == 1
+
+    def test_deepseek_failed_blocks(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "FAILED", 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_deepseek_expired_blocks(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "EXPIRED", 2)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_deepseek_not_required_blocks(self):
+        result = gate_unvalidated_deepseek("deepseek", "DIRECT", "NOT_REQUIRED", 0)
+        assert result.decision is GateDecision.BLOCK
+
+
+# ---------------------------------------------------------------------------
+# Gate 7: Aggregator Authority Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateAggregatorAuthority:
+    def test_direct_api_allows_tier3(self):
+        result = gate_aggregator_authority("DIRECT", 3)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_aggregator_tier0_allows(self):
+        result = gate_aggregator_authority("AGGREGATOR", 0)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_aggregator_tier1_allows(self):
+        result = gate_aggregator_authority("AGGREGATOR", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_aggregator_tier2_allows(self):
+        result = gate_aggregator_authority("AGGREGATOR", 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_aggregator_tier3_blocks(self):
+        result = gate_aggregator_authority("AGGREGATOR", 3)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_tier4_blocks(self):
+        result = gate_aggregator_authority("AGGREGATOR", 4)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_no_proof_blocks_tier0(self):
+        result = gate_aggregator_authority("AGGREGATOR", 0, proof_strength="NONE")
+        assert result.decision is GateDecision.BLOCK
+
+    def test_aggregator_weak_proof_tier1_allows(self):
+        result = gate_aggregator_authority("AGGREGATOR", 1, proof_strength="WEAK")
+        assert result.decision is GateDecision.ALLOW
+
+
+# ---------------------------------------------------------------------------
+# Gate 8: Account/Session Risk Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateAccountSessionRisk:
+    def test_non_account_session_allows(self):
+        result = gate_account_session_risk("direct_api", "HIGH", "CLEAN", 3)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_account_session_clean_low_risk_allows(self):
+        result = gate_account_session_risk("account_session", "LOW", "CLEAN", 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_account_session_clean_standard_risk_allows(self):
+        result = gate_account_session_risk("account_session", "STANDARD", "CLEAN", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_account_session_polluted_health_blocks(self):
+        result = gate_account_session_risk("account_session", "LOW", "POLLUTED", 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_account_session_stale_health_blocks(self):
+        result = gate_account_session_risk("account_session", "LOW", "STALE", 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_account_session_wrong_project_blocks(self):
+        result = gate_account_session_risk("account_session", "LOW", "WRONG_PROJECT", 1)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_account_session_unknown_risk_demotes(self):
+        result = gate_account_session_risk("account_session", None, "CLEAN", 2)
+        assert result.decision is GateDecision.DEMOTE
+        assert result.demote_to_tier == 1
+
+    def test_account_session_high_risk_tier1_allows(self):
+        result = gate_account_session_risk("account_session", "HIGH", "CLEAN", 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_account_session_high_risk_tier2_blocks(self):
+        result = gate_account_session_risk("account_session", "HIGH", "CLEAN", 2)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_account_session_high_risk_tier3_blocks(self):
+        result = gate_account_session_risk("account_session", "HIGH", "CLEAN", 3)
+        assert result.decision is GateDecision.BLOCK
+
+
+# ---------------------------------------------------------------------------
+# Gate 9: Cost Exposure Gate
+# ---------------------------------------------------------------------------
+
+
+class TestGateCostExposure:
+    def test_minimal_cost_allows(self):
+        result = gate_cost_exposure("MINIMAL", False, 3)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_standard_cost_allows(self):
+        result = gate_cost_exposure("STANDARD", False, 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_justified_allows(self):
+        result = gate_cost_exposure("PREMIUM", True, 2)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_tier0_allows(self):
+        result = gate_cost_exposure("PREMIUM", False, 0)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_tier1_allows(self):
+        result = gate_cost_exposure("PREMIUM", False, 1)
+        assert result.decision is GateDecision.ALLOW
+
+    def test_premium_cost_tier2_not_justified_blocks(self):
+        result = gate_cost_exposure("PREMIUM", False, 2)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_premium_cost_tier3_not_justified_blocks(self):
+        result = gate_cost_exposure("PREMIUM", False, 3)
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier4_quota_limited_blocks(self):
+        result = gate_cost_exposure("MINIMAL", True, 4, cost_pressure="QUOTA_LIMITED")
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier4_quota_exhausted_blocks(self):
+        result = gate_cost_exposure("MINIMAL", True, 4, cost_pressure="EXHAUSTED")
+        assert result.decision is GateDecision.BLOCK
+
+    def test_tier4_no_cost_pressure_allows(self):
+        result = gate_cost_exposure("STANDARD", True, 4, cost_pressure=None)
+        assert result.decision is GateDecision.ALLOW
