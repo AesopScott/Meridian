@@ -143,15 +143,15 @@ The right panel is not always a User session. It can become Settings or a harnes
 
 Mode meanings:
 
-- User Session mode: work with the project orchestrator and live sessions for a particular project, such as `Prime-Meridian`, `Prime-Polaris`, `Prime-Mojo`, or `Prime-Experts`.
-- Settings mode: work with the orchestrator to improve interaction with the interface and tool.
-- Harness mode: update or add logic to the selected harness.
+- User Session mode: work with Prime on plans, reviews, and decisions Prime has decided should be presented to the user, usually inside a project-specific context such as `Prime-Meridian`, `Prime-Polaris`, `Prime-Mojo`, or `Prime-Experts`.
+- Settings mode: work with the orchestrator on Meridian configuration.
+- Harness mode: review and update a list of harness logic items; Prime reviews those logic items when interacting with models through Relay.
 
 | ID | Surface Toggle Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| SUR1 | User Session mode | Right panel targets a project-specific orchestrator/live-session context from the Sessions dropdown. | planned | Title and routing target match selected project/session context. |
-| SUR2 | Settings mode | Right panel targets interface/tool interaction improvements through the orchestrator. | planned | Settings title/target replaces User session target. |
-| SUR3 | Harness mode | Right panel targets selected harness logic updates or additions. | planned | Harness title/target replaces User session target. |
+| SUR1 | User Session mode | Right panel targets user review/decision work Prime has surfaced in a project-specific context. | planned | Title and routing target match selected project/session context. |
+| SUR2 | Settings mode | Right panel targets Meridian configuration work through the orchestrator. | planned | Settings title/target replaces User session target. |
+| SUR3 | Harness mode | Right panel shows selected harness logic items reviewed by Prime through Relay-mediated model interaction. | planned | Harness title/target replaces User session target and displays logic list. |
 | SUR4 | Immediate routing switch | Switching surface immediately changes where right-panel prompts route. | planned | Prompt sent after switch goes to active surface target. |
 | SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | planned | Return to prior surface restores previous target. |
 | SUR6 | Surface-specific prompt | Prompt placeholder/target metadata reflects active surface. | planned | User can tell who/what they are talking to before sending. |
@@ -451,22 +451,25 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 
 ### Harness Mode Subitems
 
-Harness mode is for updating or adding harness logic. It may expose diagnostics and scoped controls, but it should not pretend a harness can receive commands until that harness target is defined.
+Harness mode is for reviewing and updating harness logic items. It may expose diagnostics and scoped controls, but model interaction goes through Prime and Relay; it should not pretend a harness can receive arbitrary direct commands until that harness target is defined.
 
 | ID | Harness Mode Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | planned | Right panel title/target changes to selected harness. |
 | HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | planned | Return to User Session restores prior session or stale warning. |
-| HMS3 | Harness-specific routing | Right-panel prompts route to selected harness logic surface. | planned | Prompt target metadata names selected harness. |
-| HMS4 | Unsupported command guard | If harness cannot accept scoped commands yet, prompt send is blocked with readable warning. | planned | Unsupported harness prompt does not disappear. |
-| HMS5 | Logic update framing | Harness mode language frames work as updating/adding harness logic. | planned | No wording implies arbitrary project session control. |
-| HMS6 | Harness state summary | Shows concise harness status once real state exists. | planned | Status is real or absent; no fake health values. |
-| HMS7 | Harness diagnostics | Shows harness diagnostic events when available. | planned | Diagnostics are structured and filterable. |
-| HMS8 | Harness proof link | Links harness changes to proof/checks when applicable. | planned | Harness update has verification path. |
-| HMS9 | Harness permission boundary | High-risk harness actions require explicit approval. | planned | Source/Git/Release actions cannot run silently. |
-| HMS10 | Harness mode close | Closing Harness mode returns to previous valid right-panel mode. | planned | Close does not lose User Session target. |
-| HMS11 | Harness draft preservation | Unsaved harness-mode prompt drafts are preserved per harness where useful. | planned | Switch harness away/back; draft remains or warning is shown. |
-| HMS12 | No cross-harness leakage | Prompt/context for one harness does not silently route to another harness. | planned | Active harness target is explicit before send. |
+| HMS3 | Harness logic list | Shows a list of logic items for the selected harness. | planned | Harness mode opens with logic items, not a blank chat. |
+| HMS4 | Prime review path | Prime reviews harness logic items before model interaction. | planned | Logic item has Prime review state before dispatch. |
+| HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay routing. | planned | Dispatch metadata names Relay route/model target. |
+| HMS6 | Harness-specific routing | Right-panel prompts/actions target selected harness logic surface. | planned | Prompt target metadata names selected harness and logic item. |
+| HMS7 | Unsupported command guard | If harness cannot accept scoped commands yet, prompt send is blocked with readable warning. | planned | Unsupported harness prompt does not disappear. |
+| HMS8 | Logic update framing | Harness mode language frames work as updating/adding harness logic. | planned | No wording implies arbitrary project session control. |
+| HMS9 | Harness state summary | Shows concise harness status once real state exists. | planned | Status is real or absent; no fake health values. |
+| HMS10 | Harness diagnostics | Shows harness diagnostic events when available. | planned | Diagnostics are structured and filterable. |
+| HMS11 | Harness proof link | Links harness changes to proof/checks when applicable. | planned | Harness update has verification path. |
+| HMS12 | Harness permission boundary | High-risk harness actions require explicit approval. | planned | Source/Git/Release actions cannot run silently. |
+| HMS13 | Harness mode close | Closing Harness mode returns to previous valid right-panel mode. | planned | Close does not lose User Session target. |
+| HMS14 | Harness draft preservation | Unsaved harness-mode prompt drafts are preserved per harness where useful. | planned | Switch harness away/back; draft remains or warning is shown. |
+| HMS15 | No cross-harness leakage | Prompt/context for one harness does not silently route to another harness. | planned | Active harness target is explicit before send. |
 
 ### Bridge / Backend Features
 
