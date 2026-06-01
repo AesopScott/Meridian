@@ -547,6 +547,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 completed <task>; commit <hash>; tests <result>
 2026-06-10 06:45 UTC - Build 3 completed Coordinator Override task (V1 Electron cockpit app shell + Prime queue reconciliation registration); commit 67a75dc; files changed: docs/FileMap.md, meridian_core/filemap.py, tests/test_filemap.py; tests 46/46 filemap passing; entries added: package.json, electron/main.js, bifrost/preview.py, tests/test_bifrost_preview.py, docs/prime-queue-reconciliation-requirement.md; Ready for Codex Review; cadence 3/3 since Round B5
 2026-06-11 00:45 UTC - Build 3 completed V2 FileMap audit; found and registered missing artifact: docs/model-harness-v2-contract.md; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; commit 23efaf7; tests 46/46 filemap passing; Ready for Codex Review; cadence 1/3 since Round B5
 2026-06-11 01:45 UTC - Build 3 completed Session Lifecycle implementation checklist FileMap registration; commit 80ebea4; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; tests 46/46 filemap passing; Ready for Codex Review; cadence 2/3 since Round B5
+2026-06-11 02:30 UTC - Build 3 completed FileMap repair (remove Session Lifecycle checklist registration pending file arrival); commit ba83a4c; files changed: meridian_core/filemap.py, tests/test_filemap.py, docs/FileMap.md; tests 46/46 filemap passing; Ready for Codex Review; cadence 3/3 since Round B5
 ```
 
 ## Cross-Check Activity
