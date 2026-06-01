@@ -508,8 +508,8 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | MB4 | Selecting Max sends through the Meridian bridge when the Claude CLI is available. | `/api/models` reports Max availability before sending; unavailable state gives setup guidance. |
 | MB5 | Public setup errors are readable. | Missing CLI or auth failure returns install/login guidance instead of a silent hang. |
 | MB6 | Request metadata is tracked without logging prompt text. | `/api/recent-calls` shows request id, channel, backend, model label, duration, status, and visible-context counts only. |
-| MB7 | Model label appears below or near the response area when known. | Manual: send a request and confirm displayed model/source label. |
-| MB8 | Visible session continuity | Follow-up prompts carry the visible panel transcript as bounded context, with no hidden backend memory. | `/api/recent-calls` records nonzero `sessionContextEntries` after a follow-up prompt. |
+| MB7 | Model/context label appears below or near the response area when known. | Manual: send a follow-up request and confirm displayed model/source plus visible context count. |
+| MB8 | Visible session continuity | Follow-up prompts carry the visible panel transcript as bounded context, with no hidden backend memory. | Response metadata and `/api/recent-calls` record nonzero `sessionContextEntries` after a follow-up prompt. |
 
 ## Harness UI Rules
 

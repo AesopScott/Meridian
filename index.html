@@ -3267,7 +3267,11 @@ body {
         if (entry.model) {
           const meta = document.createElement('div');
           meta.className = 'session-output-meta';
-          meta.textContent = entry.model;
+          const metaParts = [entry.model];
+          if (Number(entry.sessionContextEntries) > 0) {
+            metaParts.push(`visible context ${entry.sessionContextEntries} entries`);
+          }
+          meta.textContent = metaParts.join(' · ');
           row.append(meta);
         }
       }
@@ -3354,7 +3358,13 @@ body {
       const result = await response.json();
       const modelLabel = result.model || backend;
       setStatus(input, modelLabel);
-      pushEntry(input, result.ok ? 'model' : (result.setupRequired ? 'setup' : 'error'), result.ok ? (result.text || '(empty response)') : `Error: ${result.error || 'Model call failed'}`, modelLabel, { requestedBackend: result.requestedBackend || selectedBackend, responseChannel: result.channel || sessionChannel(input), requestId: result.requestId || requestId });
+      pushEntry(input, result.ok ? 'model' : (result.setupRequired ? 'setup' : 'error'), result.ok ? (result.text || '(empty response)') : `Error: ${result.error || 'Model call failed'}`, modelLabel, {
+        requestedBackend: result.requestedBackend || selectedBackend,
+        responseChannel: result.channel || sessionChannel(input),
+        requestId: result.requestId || requestId,
+        sessionContextEntries: result.sessionContextEntries || 0,
+        sessionContextChars: result.sessionContextChars || 0,
+      });
     } catch (error) {
       setStatus(input, backend);
       pushEntry(input, 'error', error.name === 'AbortError'
