@@ -3156,9 +3156,9 @@ body {
     });
     output.scrollTop = output.scrollHeight;
   };
-  const pushEntry = (input, role, text, model = statusFor(input)?.textContent || '') => {
+  const pushEntry = (input, role, text, model = statusFor(input)?.textContent || '', extra = {}) => {
     const entries = readTranscript(input);
-    entries.push({ role, text, at: new Date().toISOString(), model });
+    entries.push({ role, text, at: new Date().toISOString(), model, channel: sessionChannel(input), ...extra });
     writeTranscript(input, entries);
     renderTranscript(input);
   };
@@ -3196,14 +3196,15 @@ body {
     const selectedReadiness = readinessForBackend(backend);
     if (selectedReadiness && !selectedReadiness.installed) {
       setStatus(input, `${selectedReadiness.cli} setup required`);
-      pushEntry(input, 'setup', `Error: ${selectedReadiness.setupHint || 'Install and sign in to the selected model CLI.'}`, selectedReadiness.label || backend);
+      pushEntry(input, 'setup', `Error: ${selectedReadiness.setupHint || 'Install and sign in to the selected model CLI.'}`, selectedReadiness.label || backend, { requestedBackend: selectedBackend });
       return;
     }
     input.dataset.sessionSending = 'true';
-    pushEntry(input, 'user', prompt);
+    pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend });
     input.value = '';
     localStorage.setItem(draftKey(input), '');
     setStatus(input, `${backend} running`);
+    const requestId = `meridian-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     try {
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 180000);
@@ -3215,6 +3216,7 @@ body {
           backend,
           requestedBackend: selectedBackend,
           channel: sessionChannel(input),
+          requestId,
           prompt,
           cwd: 'C:\\Users\\scott\\Code\\Meridian',
         }),
@@ -3226,7 +3228,7 @@ body {
       const result = await response.json();
       const modelLabel = result.model || backend;
       setStatus(input, modelLabel);
-      pushEntry(input, result.ok ? 'model' : (result.setupRequired ? 'setup' : 'error'), result.ok ? (result.text || '(empty response)') : `Error: ${result.error || 'Model call failed'}`, modelLabel);
+      pushEntry(input, result.ok ? 'model' : (result.setupRequired ? 'setup' : 'error'), result.ok ? (result.text || '(empty response)') : `Error: ${result.error || 'Model call failed'}`, modelLabel, { requestedBackend: result.requestedBackend || selectedBackend, responseChannel: result.channel || sessionChannel(input), requestId: result.requestId || requestId });
     } catch (error) {
       setStatus(input, backend);
       pushEntry(input, 'error', error.name === 'AbortError'
