@@ -1997,8 +1997,8 @@ class TestAegisGateEvidenceSummary:
         assert result["explanation"] == "partial evidence"
         assert result["fallback_blockers_from_aegis"] == ("aegis_demote",)
 
-    def test_evidence_summary_to_dict_multiple_calls_identical(self) -> None:
-        """to_dict() returns identical output on multiple calls (deterministic)."""
+    def test_evidence_summary_to_dict_multiple_calls_identical_with_partial_evidence(self) -> None:
+        """to_dict() returns identical output on multiple calls with partial evidence (deterministic)."""
         evidence = AegisGateEvidenceSummary(
             gate_decision="demote",
             severity="WARNING",
