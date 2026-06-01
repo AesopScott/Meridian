@@ -83,16 +83,20 @@ Completion:
 
 Ready for Codex Review.
 
-## Coordinator Override - Active Now
+## ~~Coordinator Override - Active Now (COMPLETED 2026-05-31 ~20:10 UTC)~~
 
-Goal: write the Model Harness V2 metadata contract.
+~~Goal: write the Model Harness V2 metadata contract.~~
 
-Allowed files only: `docs/model-harness-v2-contract.md`, `docs/live-build-4.md`.
+~~Allowed files only: `docs/model-harness-v2-contract.md`, `docs/live-build-4.md`.~~
 
-Task: create the docs contract for provider capability metadata and prompt-drag telemetry fields that Build 1's `meridian_core/model_adapter.py` runtime slice should implement. Cover Claude, OpenAI, DeepSeek direct API, trust state, context/prompt budgets, route ownership, direct-vs-aggregator evidence, prompt payload snapshot references, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding.
+~~Task: create the docs contract for provider capability metadata and prompt-drag telemetry fields that Build 1's `meridian_core/model_adapter.py` runtime slice should implement. Cover Claude, OpenAI, DeepSeek direct API, trust state, context/prompt budgets, route ownership, direct-vs-aggregator evidence, prompt payload snapshot references, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding.~~
 
-Completion: commit only this docs slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.
+~~Completion: commit only this docs slice, push, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, and tests run.~~
 
+**Ready for Codex Review**
+- Commit: `2bfaf6f`
+- Files changed: `docs/model-harness-v2-contract.md`
+- Tests: not required (docs-only)
 ## Next Candidate Task
 
 Goal: write the DeepSeek direct-provider adapter implementation handoff.
@@ -348,6 +352,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:57 -06:00 - Build 4 checked queue; status: idle (cadence-paused); Claude Workflows sub-agent architecture note complete (17d8d90); Ready for Codex Review block backfilled with real hash; Next Candidate Task (Prime restart/resteer logic contract) sits below override block awaiting coordinator promotion; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe, 17d8d90 (7) still pending Codex Reviews sweep; origin/main at 17d8d90
 2026-05-31 08:58 -06:00 - Build 4 checked queue; status: idle (cadence cleared); Codex Reviews B Round B15 documented at d43cb34 — Workflows architecture note (0115581/17d8d90) PASS-WITH-FINDINGS; sole MEDIUM is consolidated 5-entry FileMap registration routed to Build 3 (not a Build 4 repair); prior rounds B11/B13/B14 cleared Echo/Atlas (7eb5ae1), Workflow sub-agent contract (1448642), and Prime Autonomy contract (3aa16fe) — all V2 first-wave Build 4 slices now reviewed; remaining pending sweep: pre-V2 slices 3cbf336, 1d17fa1, fd9224d only; Next Candidate Task still awaits coordinator promotion; origin/main at d43cb34
 2026-05-31 09:02 -06:00 - Build 4 checked queue; status: idle; no Active Task; Build 1 paused cadence 3/3 awaiting Codex clear (fab3ce0); Build 3 idle awaiting next assignment (f2e88ec); Next Candidate Task (Prime restart/resteer logic contract) still awaits coordinator promotion; origin/main at f1b03b1
+2026-05-31 ~20:10 UTC - Build 4 checked queue; status: running; Active Task = Model Harness V2 metadata contract; pulled origin/main (a2b8cd0 merge); origin/main at post-merge
 ```
 
 ## Write/Completion Log
@@ -418,7 +423,8 @@ YYYY-MM-DD HH:MM TZ - Build 4 Codex review requested after commits <hash1>, <has
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review finding: <severity>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 4 Codex review result: pass/no actionable findings/fixed; details: <short note>
-2026-05-30 11:31 -06:00 - Build 4 Codex review requested after commits 951a6ed, 1db1b23, d29cca6
+2026-05-30 11:31 -06:00 - Build 4 Codex review requested after commit
+2026-05-31 ~20:10 UTC - Build 4 completed Model Harness V2 metadata contract (docs/model-harness-v2-contract.md); commit 2bfaf6f; tests not required (docs-only); Ready for Codex Reviews 951a6ed, 1db1b23, d29cca6
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; docs/meridian-capabilities-architecture-map.md claims Prompt Metrics "not built" — prompt_metrics.py exists with domain types; repair: reclassify as domain slice
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; capabilities map says RelayRoute does not carry budget field — relay.py already carries prompt_budget: PromptBudgetPlan; repair: correct claim
 2026-05-30 11:37 -06:00 - Build 4 Codex review finding: CRITICAL; Review Console marked "planned" — review_console.py domain model exists; repair: reclassify as domain slice
