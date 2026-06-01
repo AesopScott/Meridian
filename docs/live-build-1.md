@@ -93,6 +93,13 @@ Completion:
 
 Ready for Codex Review.
 
+**Build 1 Read Check** — 2026-06-12 16:40 UTC (Task Completion)
+- Status: Previous Active Task completed (negative-path tests, commit `26a71632`)
+- Latest origin/main: up to date
+- No new "Coordinator Override - Active Now" task promoted
+- Next Candidate Task: "add Relay proof payload downstream-consumer checklist" awaiting promotion from Prime/Codex
+- Build 1 idle and awaiting next task assignment
+
 ## Next Candidate Task
 
 Goal: add Relay proof payload downstream-consumer checklist after negative-path tests clear review.
