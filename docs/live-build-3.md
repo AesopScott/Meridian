@@ -510,6 +510,7 @@ YYYY-MM-DD HH:MM TZ - Build 3 checked queue; status: idle/running/blocked
 2026-06-11 02:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; Session Lifecycle FileMap registration routed to Codex review; cadence 2/3 since Round B5; awaiting next assignment
 2026-06-11 02:15 UTC - Build 3 checked queue; status: idle; no executable Active Task; Session Lifecycle FileMap registration awaiting Codex review findings; cadence 2/3 since Round B5
 2026-06-11 02:45 UTC - Build 3 checked queue; status: idle; Active Task (FileMap repair) already complete (commit ba83a4c); cadence 3/3 since Round B5 — Codex review required before next task
+2026-06-11 03:00 UTC - Build 3 checked queue; status: idle; no executable Active Task; cadence 3/3 since Round B5 — initiating Codex review for commits 23efaf7, 80ebea4, ba83a4c
 2026-05-31 02:00 -06:00 - Build 3 checked queue; status: active task found (FileMap registration -- cockpit_provider.py + tests/test_cockpit_provider.py); starting work
 ```
 
@@ -576,6 +577,9 @@ YYYY-MM-DD HH:MM TZ - Build 3 Codex review requested after commits <hash1>, <has
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review finding: <severity>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review repair: commit <hash>; tests <result>; details: <short note>
 YYYY-MM-DD HH:MM TZ - Build 3 Codex review result: pass/no actionable findings/fixed; details: <short note>
+2026-06-11 03:00 UTC - Build 3 Codex review requested after commits 23efaf7, 80ebea4, ba83a4c
+2026-06-11 03:05 UTC - Build 3 Codex review finding: HIGH; details: Session Lifecycle checklist removed from docs/FileMap.md only; entries in meridian_core/filemap.py and tests/test_filemap.py remain, registering non-existent file
+2026-06-11 03:05 UTC - Build 3 Codex review repair: auto-executing; removing session-lifecycle-implementation-checklist from filemap.py and test_filemap.py
 2026-05-30 11:10 -06:00 - Build 3 Codex review requested after commits 34792fb, 7b67c41, a996abc
 2026-05-30 12:32 -06:00 - Build 3 Codex review requested after commits d84bb0f, 73c9628, 26dc597
 2026-05-30 12:32 -06:00 - Build 3 Codex review finding: LOW; details: lane set omitted live-build-5.md in queue hygiene note Summary
