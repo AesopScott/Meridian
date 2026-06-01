@@ -8,7 +8,7 @@ Do not move data between worktrees, branches, or the main checkout. Do not cherr
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: translate Relay completeness into Aegis risk/proof gates.
 
@@ -22,7 +22,16 @@ Task: create a docs-only gate contract that tells Prime/Aegis when a Relay route
 
 Tests: none required, docs-only.
 
-Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+Completion: completed 2026-06-01 15:23 -06:00.
+
+Ready for Codex Review:
+
+- Commit: `a8a7aca8`
+- Files: `docs/relay-aegis-risk-proof-gates.md`
+- Tests: not required (docs-only)
+- Gate categories: unknown route class, missing exact model ID, Tier 3 dual-lane, unknown proof, unsafe fallback, unvalidated DeepSeek, aggregator authority, account/session risk, cost exposure (9 gates total)
+- Per-tier enforcement and stop conditions defined
+- Integration with Relay routing and Model Harness metadata specified
 
 ## Next Candidate Task
 
@@ -426,6 +435,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-31 08:02 -06:00 - Build 4 completed Workflow Sub-Agent Harness contract (docs/workflow-subagent-harness-contract.md) per Coordinator Override; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:45 -06:00 - Build 4 completed V2 Prime Autonomy contract (docs/prime-autonomy-v2-contract.md) per Coordinator Override (Active Now); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:55 -06:00 - Build 4 completed Claude Workflows sub-agent architecture note (docs/workflows-subagent-harness-architecture.md) per Coordinator Override (Active Now); narrative companion to docs/workflow-subagent-harness-contract.md; commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-06-01 15:23 -06:00 - Build 4 completed Relay-Aegis risk/proof gates contract (docs/relay-aegis-risk-proof-gates.md); commit a8a7aca8; files changed: docs/relay-aegis-risk-proof-gates.md; tests not required (docs-only); pushed to origin/main; Ready for Codex Review; cadence 1/3
 ```
 
 ## Cross-Check Activity
