@@ -436,6 +436,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-05 02:00 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 1 of 3; polling)
 2026-06-05 02:10 -06:00 - Build 2 checked queue; status: idle (no new Active Task; cadence 1 of 3; polling)
 2026-06-05 02:30 -06:00 - Build 2 checked queue; Active Task found: V2 Prime next-action domain object (Coordinator Override); executing
+2026-06-05 02:45 -06:00 - Build 2 checked queue; status: idle (V2 Prime next-action domain object complete commit 40def3d; linter repair commit 594e0d9/631e764 applied; 30 tests passing; cadence 1 of 3; Ready for Codex Review; polling)
 ```
 
 ## Write/Completion Log
@@ -444,6 +445,7 @@ Append entries here when this file is modified or an active task is completed.
 
 ```text
 YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <list>; tests <result>; Ready for Codex Review
+2026-06-05 02:45 -06:00 - Build 2 linter repair: is_executable() now gates on human_gate_required; commit 594e0d9 (merged as 631e764); tests 30 passed; anomaly: commit swept in staged changes from shared main worktree (live-build-4.md, live-build-5.md, FileMap, 3 deleted docs — all from other sessions, code verified correct); addressing Codex Reviews A MEDIUM finding from 2026-05-31 13:06; Ready for Codex Review
 2026-05-31 13:06 -06:00 - Codex Reviews A routed MEDIUM repair task for PrimeNextAction human-gate executability; files changed: docs/live-build-2.md; tests run by Reviews A before routing: `python -m pytest tests/test_prime_autonomy.py -q` 30 passed, `python -m pytest tests/test_prime_autonomy.py tests/test_filemap.py -q` 76 passed; commit pending from Reviews A; push pending; Obsidian status: updated `Meridian_Build/2026-05-31 Prime Autonomy Human Gate Review Finding.md`.
 2026-05-30 10:33 -06:00 - Codex assigned Prompt Metrics package API + FileMap exposure; commit pending; tests pending
 2026-05-30 10:37 -06:00 - Codex strengthened polling contract; commit pending; tests not required
