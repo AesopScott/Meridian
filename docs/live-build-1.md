@@ -126,6 +126,39 @@ Ready for Codex Review.
 - Next Candidate Task awaiting promotion
 - Build 1 idle and polling for next task assignment
 
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: deepen Relay domain support using relay-completeness-audit to represent route decisions.
+
+Allowed files only: `meridian_core/relay.py`, `tests/test_relay.py`, `docs/live-build-1.md`.
+
+Task: enhance Relay structures to represent route_class, session_action, account/session-first precedence, dual-lane Tier 3, trust/proof blockers, context health, fallback blockers, and Prime explanation per relay-completeness-audit.md requirements.
+
+Implementation:
+
+- Added ContextHealth enum (clean, bounded, approaching_limit, polluted, unknown)
+- Added LatencyPosture enum (fast, standard, thorough, unknown)
+- Added PrivacyLevel enum (local_only, project_scoped, external_vendor, unknown)
+- Extended RelayLane with independence_reason field
+- Extended RelayRouteAudit and RelayRoute to carry context_health, latency_posture, privacy_level
+- Updated tier routing defaults to properly initialize domain fields
+- Added Tier 3 dual-lane fallback blocker to prevent routes without independent lanes
+- Tier 3 trust state properly represented as CANDIDATE until dual-lane independence verified
+- Tier 4 trust state properly represented as BLOCKED until human gate approval
+
+Tests run:
+
+- `python -m pytest tests/test_relay.py -q` = 129 passed (added 33 new tests)
+- `python -m pytest -q` = 1364 passed (full suite)
+
+Completion:
+
+- Commit: `b812677e`
+- Files changed: `meridian_core/relay.py`, `tests/test_relay.py`
+- Tests: 129 passed (relay-focused), 1364 passed (full suite)
+
+Ready for Codex Review.
+
 ## Next Candidate Task
 
 Goal: bind Relay metadata review findings after Codex Reviews A completes the `cf5debf` review.
