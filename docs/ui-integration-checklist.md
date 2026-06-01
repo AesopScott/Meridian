@@ -112,10 +112,48 @@ The User panel needs a Sessions dropdown that mirrors the Prime panel's Projects
 | SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
 | SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | planned | Track `CLS-*` subitems before wiring the surface. |
 | SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | planned | Track `ARC-*` subitems before wiring the surface. |
-| SK11 | Reset | Clears session prompts/transcripts and hard reloads UI. | partial | Send text, click Reset, confirm both panels empty after reload. |
-| SK12 | Reload | Hard reloads UI without promising to clear session state. | partial | Click Reload; page reloads with cache-bust. |
+| SK11 | Reset | Clears session-window prompts/transcripts and then hard reloads UI. | partial | Track `RST-*` subitems before changing reset behavior. |
+| SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | partial | Track `RLD-*` subitems before changing reload behavior. |
 | SK13 | Routines | Opens routine/automation surface. | planned | Until wired, no fake routine status. |
 | SK14 | Balance | Opens balance/provider/routing view. | planned | Until wired, it must not make routing claims. |
+
+### Reset Surface Subitems
+
+Reset is a UI/session-window recovery control. It clears visible prompt/transcript state for the Prime and User panels, then reloads the interface. It must not archive, delete, close, or mutate live worker/session ownership.
+
+| ID | Reset Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| RST1 | Clear Prime prompt draft | Clears unsent Prime prompt input. | partial | Type draft, click Reset, draft is gone after reload. |
+| RST2 | Clear User prompt draft | Clears unsent User prompt input. | partial | Type draft, click Reset, draft is gone after reload. |
+| RST3 | Clear Prime transcript view | Clears visible Prime session-window transcript. | partial | Send Prime text, click Reset, Prime window is empty after reload. |
+| RST4 | Clear User transcript view | Clears visible User session-window transcript. | partial | Send User text, click Reset, User window is empty after reload. |
+| RST5 | Clear model status labels | Clears transient sending/ready/setup labels in the session windows. | planned | Reset removes stale model status text. |
+| RST6 | Preserve selected project policy | Preserves or restores selected project according to Settings persistence, not transcript reset. | planned | Reset behavior matches project persistence setting. |
+| RST7 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | planned | Live session list is unchanged after Reset. |
+| RST8 | Preserve archive | Does not modify archived sessions. | planned | Archive count/state unchanged after Reset. |
+| RST9 | Cache-bust reload | Performs hard reload with cache-bust after clearing UI session state. | partial | URL/cache marker changes and page reloads. |
+| RST10 | Reset failure visibility | Shows readable error if reset storage clearing fails. | planned | Failure does not silently pretend reset succeeded. |
+| RST11 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
+| RST12 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
+
+### Reload Surface Subitems
+
+Reload is a UI/cache recovery control. It refreshes the page and assets without promising to clear prompts, transcripts, live sessions, archives, or model memory.
+
+| ID | Reload Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| RLD1 | Hard reload UI | Reloads the current UI page. | partial | Click Reload; page refreshes. |
+| RLD2 | Cache-bust assets | Busts stale browser/Live Server cache where possible. | partial | Reload URL/marker changes or assets refresh. |
+| RLD3 | Preserve prompts | Does not intentionally clear prompt drafts. | planned | Drafts remain if stored state says they should remain. |
+| RLD4 | Preserve transcripts | Does not intentionally clear session-window transcripts. | planned | Transcript state remains after reload. |
+| RLD5 | Preserve selected project | Keeps or restores selected project according to project persistence. | planned | Selected project behavior is deterministic. |
+| RLD6 | Preserve selected User session | Keeps selected live session if still available; otherwise shows target warning. | planned | Closed target does not silently route prompts. |
+| RLD7 | Preserve model selector | Keeps selected model if valid; invalid/Auto falls back to Codex. | partial | Saved Auto becomes Codex; valid model remains. |
+| RLD8 | Do not archive | Reload does not archive or close any session. | planned | Archive/session counts unchanged. |
+| RLD9 | Do not reset model memory | Reload does not claim to reset CLI/model/session memory. | planned | UI copy distinguishes reload from reset/clear-memory. |
+| RLD10 | Bridge health recheck | Rechecks bridge/model readiness after reload. | partial | `/api/models` readiness updates after page reload. |
+| RLD11 | Visual baseline check | Reload preserves center image and approved layout. | partial | Center image and panel alignment remain after reload. |
+| RLD12 | Reload failure visibility | If reload cannot complete or served file is wrong, diagnose cache/root mismatch before more UI edits. | planned | Wrong served file triggers stop condition. |
 
 ### Settings Surface Subitems
 
