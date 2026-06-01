@@ -140,8 +140,8 @@ Use OpenRouter as an aggregator route for coverage, fallback, model comparison, 
 | Routine project planning | Anthropic `claude-sonnet-4-6` | OpenAI latest Chat/Reasoning route | Balanced intelligence/cost. |
 | Repository coding/build lane | OpenAI `GPT-5.3-Codex` | Anthropic `claude-sonnet-4-6` | Codex route for code, Claude for independent reasoning/review. |
 | Deep code review / architecture review | Anthropic `claude-opus-4-8` | OpenAI `GPT-5.3-Codex` | Different model families reduce shared blind spots. |
-| Fast triage / heartbeat summary | Anthropic `claude-haiku-4-5` or DeepSeek `deepseek-v4-flash` | None or OpenRouter low-risk route | Fast, low-cost, bounded context. |
-| Cost-sensitive reasoning | DeepSeek `deepseek-v4-pro` | Claude/OpenAI reviewer if action matters | Candidate direct route with proof before authority. |
+| Fast triage / heartbeat summary | Anthropic `claude-haiku-4-5` or DeepSeek `deepseek-chat` (v4-flash variant) | None or OpenRouter low-risk route | Fast, low-cost, bounded context. |
+| Cost-sensitive reasoning | DeepSeek `deepseek-chat` (v4-pro variant) | Claude/OpenAI reviewer if action matters | Candidate direct route with proof before authority. |
 | Voice/Spark interaction | OpenAI realtime/audio family | Later voice provider fallback | OpenAI has first-class audio/realtime model families. |
 | Low-risk external fallback | Curated OpenRouter route | Direct provider when available | Aggregator useful for uptime/coverage, not authority. |
 
