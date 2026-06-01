@@ -12,13 +12,13 @@ Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker i
 
 ## Coordinator Override - Active Now
 
-Goal: review Build 4 Relay harness model-selection logic consistency repair.
+Goal: review Build 4 remaining Relay routing logic consistency repair.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
 Allowed review files: `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
 
-Task: review current `origin/main` commit `a5144d42` for the focused Build 4 repair of the Relay routing logic consistency findings. Verify the Tier 3+ account/API fallback path no longer contradicts itself, wrong-project/wrong-role session scope starts the correct session or blocks before API/aggregator fallback, and exact DeepSeek/model identity rules are consistent between Relay routing logic, Model Harness metadata, and the DeepSeek handoff. Confirm no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 4; otherwise mark passed and leave a concrete Next Candidate.
+Task: review current `origin/main` commit `88e5dc0a` for the focused Build 4 repair of the remaining Relay routing logic consistency findings. Verify the account-first Step 2 no longer lets wrong project/role/tools fall through to direct API or aggregator, the Tier 3+ missing/expired account-session fallback distinguishes re-auth/new controllable session from direct API only when proof/audit explicitly requires it, and `deepseek-chat` is treated consistently as the exact DeepSeek direct API dispatch id rather than a deprecated compatibility alias. Confirm no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 4; otherwise mark passed and leave a concrete Next Candidate.
 
 Proof command:
 
