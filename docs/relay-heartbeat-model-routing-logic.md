@@ -22,10 +22,11 @@ This document is the first model/vendor routing list for Meridian. It is not run
 2. Relay owns model/vendor route selection.
 3. Aegis owns proof and risk gates.
 4. Bifrost displays the routing state; it does not choose.
-5. Direct provider APIs are preferred for high-trust work.
-6. Aggregator routes are useful but lower-trust unless separately proven.
-7. DeepSeek direct is a candidate primary route, not automatically trusted.
-8. Auto routing stays disabled until Relay logic, metadata, and proof are implemented.
+5. Existing user account/session routes are preferred before paid/direct API routes when they can satisfy the job safely.
+6. Direct provider APIs are preferred for high-trust work when account/session routes are unavailable, unsuitable, or insufficiently controllable.
+7. Aggregator routes are useful but lower-trust unless separately proven.
+8. DeepSeek direct is a candidate primary route, not automatically trusted.
+9. Auto routing stays disabled until Relay logic, metadata, and proof are implemented.
 
 ## Top-To-Bottom Relay Flow
 
@@ -36,23 +37,55 @@ This document is the first model/vendor routing list for Meridian. It is not run
 | 3 | What is the risk tier? | Ask Aegis/Risk: Tier 0-4, human gate required, proof required, account/public/destructive sensitivity. |
 | 4 | What context shape is needed? | Choose focused packet, reuse session, summarize-and-reset, large context, or no model. |
 | 5 | What role is needed? | Choose role: orchestrator, builder, reviewer, verifier, researcher, release operator, voice, or classifier. |
-| 6 | What model class fits? | Match role/risk/context to model family: highest reasoning, coding, fast cheap, independent review, voice, or fallback. |
-| 7 | What vendor route is safest? | Prefer direct provider API for Tier 3+. Use aggregator only when risk allows and fallback/coverage matters. |
-| 8 | What does the budget allow? | Check cost posture, quota, token budget, context pressure, and prompt payload size. |
-| 9 | Is there a trust block? | Block routes with unknown trust, failed/expired review, prompt-drag degradation, route mismatch, or missing metadata. |
-| 10 | Is dual-lane needed? | For meaningful build/review or high-risk work, select independent lanes and compare outputs. |
-| 11 | What should Prime see? | Return selected route, reason, risk notes, alternatives rejected, and proof requirements. |
-| 12 | What should Bifrost show? | Show model/vendor, direct vs aggregator, trust state, cost pressure, payload size, and warning state. |
+| 6 | Should this reuse a session or start a new one? | Reuse only when context is healthy and the reasoning mode still matches. Start new when context is filling, polluted, stale, or the work type shifts. |
+| 7 | What model class fits? | Match role/risk/context to model family: highest reasoning, coding, fast cheap, independent review, voice, or fallback. |
+| 8 | What access route should be tried first? | Prefer existing account/session routes, then direct APIs, then aggregator routes if risk allows. |
+| 9 | What vendor route is safest? | Prefer direct provider API for Tier 3+ when account/session route cannot satisfy control/proof needs. Use aggregator only when risk allows and fallback/coverage matters. |
+| 10 | What does the budget allow? | Check account quota, API cost posture, token budget, context pressure, and prompt payload size. |
+| 11 | Is there a trust block? | Block routes with unknown trust, failed/expired review, prompt-drag degradation, route mismatch, or missing metadata. |
+| 12 | Is dual-lane needed? | Tier 3 requires independent dual-model lanes; Tier 2 uses dual lane when meaningful work or review warrants it. |
+| 13 | What should Prime see? | Return selected route, reason, risk notes, alternatives rejected, and proof requirements. |
+| 14 | What should Bifrost show? | Show model/vendor, account/API/aggregator route, trust state, cost pressure, payload size, and warning state. |
 
 ## Risk Tier Routing Defaults
 
 | Tier | Default Route Logic | Notes |
 |---|---|---|
 | Tier 0 | No model call. Deterministic local logic only. | Formatting, local checks, known state. |
-| Tier 1 | Fast/cheap single lane allowed. Aggregator allowed if metadata is clear. | Low-risk drafting, summarization, classification. |
-| Tier 2 | One primary lane plus optional independent review lane. Aggregator allowed for review/exploration, not authority. | Meaningful but reversible work. |
-| Tier 3 | Direct provider only. Stronger model, proof, and review required. | Code changes, complex planning, provider-sensitive decisions. |
-| Tier 4 | Human gate required. Direct provider only for preparation/review, not autonomous execution. | Public, financial, destructive, account-risking, policy-sensitive. |
+| Tier 1 | Fast/cheap single lane allowed. Account/session route first; aggregator allowed if metadata is clear. | Low-risk drafting, summarization, classification. |
+| Tier 2 | One primary lane plus independent review lane when meaningful work warrants it. Account/session route first; aggregator allowed for review/exploration, not authority. | Meaningful but reversible work. |
+| Tier 3 | Independent dual-model lanes required. Prefer account/session routes first, then direct APIs if proof/control requires them. Aggregator cannot be authoritative. | Code changes, complex planning, provider-sensitive decisions. |
+| Tier 4 | Human gate required plus independent model review for preparation. Prefer account/session routes where controllable, direct provider APIs for audit/proof; no autonomous execution. | Public, financial, destructive, account-risking, policy-sensitive. |
+
+## Access Route Precedence
+
+Relay should not jump to raw APIs when an existing user account or session route can do the job safely. The preferred route order is:
+
+| Priority | Route Class | When To Use | When To Skip |
+|---|---|---|---|
+| 1 | Existing user account/session | The user is already logged in, the vendor session has the right tools/context, and Relay can capture enough metadata/proof. | Skip if session context is bloated, stale, polluted, wrong role, wrong project, missing proof metadata, or cannot be steered safely. |
+| 2 | Local CLI-backed route | Codex/Claude CLI or similar account-backed local route can execute with known working directory and recoverable transcript. | Skip if CLI missing, unauthenticated, wrong cwd, wrong session identity, or cannot satisfy risk/proof gates. |
+| 3 | Direct provider API | Need pinned model id, clean prompt packet, auditability, direct endpoint, structured telemetry, or stronger trust for Tier 3+. | Skip if account/session route is safer and sufficiently observable, or if API credentials/quota are unavailable. |
+| 4 | Aggregator API | Need fallback, model availability, low-risk comparison, or exploratory routing. | Skip for authoritative Tier 3+, high-risk work, unknown data policy, model identity uncertainty, or unbounded cost. |
+
+The route chosen must be visible as `route_class: account_session | local_cli | direct_api | aggregator_api`.
+
+## Session Lifecycle Routing
+
+Relay must decide whether to reuse a session, start a new session, summarize/reset, or transfer work. This is part of routing, not cleanup.
+
+| Signal | Relay Decision | Reason |
+|---|---|---|
+| Context window filling or prompt payload over budget | Summarize important state and start a new session. | Prevent prompt drag and context collapse. |
+| Session context polluted by unrelated work | Start a new focused session. | Avoid contaminating reasoning and model output. |
+| Reasoning type shifts, such as planning to coding or coding to review | Start or switch to a role-appropriate session/model. | Different work needs different tools, instructions, and model strengths. |
+| Project changes | Use project-specific orchestrator/session context; do not reuse cross-project context silently. | Prevent project bleed. |
+| User moves from User Session mode to Settings mode | Preserve user session; use Settings configuration surface, not the old prompt context. | Keep configuration separate from project work. |
+| User moves to Harness mode | Preserve previous user session; use selected harness logic list. | Harness logic updates are not general project chat. |
+| Long-running session with healthy context and same role | Reuse session. | Preserve continuity when it is still useful. |
+| Session hits tool/auth/cwd mismatch | Start corrected session or block with setup warning. | Avoid sending work to a broken or wrong environment. |
+| Review finds defect in build output | Start repair or reviewer-specific lane, not necessarily the original builder session. | Use the right role for the next action. |
+| Tier 3+ decision requires independence | Start independent second lane with different vendor/model family. | Reduce shared blind spots. |
 
 ## Vendor And Model Set
 
@@ -122,6 +155,10 @@ Use OpenRouter as an aggregator route for coverage, fallback, model comparison, 
 | Prompt drag | All model calls, especially Q-mode | Require prompt payload snapshot and growth delta. |
 | Data retention / provider policy | OpenRouter and some direct routes | Prefer direct/ZDR/deny-data-collection where available; surface policy state. |
 | Missing CLI/API key/login | Local Codex/Claude and direct APIs | Show setup guidance; do not silently fall back to another route. |
+| Account/session route unavailable | Account-backed routes | Fall through to next route class only if risk allows and fallback is shown to Prime/user. |
+| Context nearly full | All session routes | Summarize and start new role-appropriate session. |
+| Reasoning-mode mismatch | Reused sessions | Start or switch session/model for the new role. |
+| Cross-project context bleed | Reused sessions | Block reuse and start project-specific session. |
 | Unvalidated DeepSeek route | DeepSeek direct or aggregator | Candidate trust; external validation required before high-risk authority. |
 | Model identity drift | OpenRouter / aliases | Prefer pinned model IDs or registry snapshots for high-risk work. |
 | Voice privacy | Realtime/audio routes | Visible mic state, permission check, transcript policy. |
@@ -141,6 +178,8 @@ role
 selected_vendor
 selected_model
 route_kind: direct | aggregator | local_cli
+route_class: account_session | local_cli | direct_api | aggregator_api
+session_action: reuse | start_new | summarize_and_reset | transfer | no_session
 reason
 alternatives_rejected
 cost_posture
