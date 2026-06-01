@@ -2533,3 +2533,36 @@ Next Candidate:
 ## Read Checks
 
 - 2026-06-01 17:34 -06:00 — re-read `docs/live-codex-reviews-2.md` after `origin/main` advanced to `8c4436ec`. Active Reviews B task is now promoted: review Build 4 Relay harness model-selection logic consistency repair at commit `a5144d42`. Executing the active docs/architecture review against current main.
+
+## Completed / Finding Routed
+
+Goal: review Build 4 Relay harness model-selection logic consistency repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance only.
+
+Review result:
+
+- Finding 1: `docs/relay-heartbeat-model-routing-logic.md` still contains the Tier 3+ account/API fallback contradiction. Lines 57-68 still allow direct APIs when Tier 3 proof/control requires them, but lines 180-188 still say account session missing/expired is not Tier 3+ allowed while the same row still lists "Try direct API" as the fallback action. Why it matters: Build 1/Relay implementation still lacks an unambiguous Tier 3+ rule for re-auth/new session vs direct API vs block. Recommended owning lane: Build 4.
+- Finding 2: `docs/relay-heartbeat-model-routing-logic.md` still sends wrong session scope to API/aggregator. Lines 156-158 still say a session with wrong project scope, role, or tools falls to "Direct API or aggregator (wrong session scope)", while lines 184-185 still require project-specific or role-matched sessions. Why it matters: wrong-project or wrong-role context can still be bypassed into external routing instead of forcing the clean session boundary. Recommended owning lane: Build 4.
+- Finding 3: DeepSeek exact model identity is still inconsistent across docs. `docs/model-harness-v2-contract.md` lines 136-151 and `docs/deepseek-direct-provider-implementation-handoff.md` lines 34-40/76-80 define `deepseek-chat` as the exact direct API dispatch id, but `docs/relay-heartbeat-model-routing-logic.md` lines 120-123 still says `deepseek-v4-pro`/`deepseek-v4-flash` are the named direct routes and `deepseek-chat` is a compatibility alias that should not be chosen for new routes. Why it matters: exact model id is a Tier 2+ blocker and the UI/Relay registry can still disagree on whether `deepseek-chat` is forbidden or required. Recommended owning lane: Build 4.
+- Scope check: no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency were changed by this review.
+
+Proof:
+
+- Docs-only review; no pytest required.
+- `git show --stat --oneline --no-renames a5144d42` shows the repair commit changed only `docs/model-harness-v2-contract.md`, leaving the contradictory Relay routing text unresolved.
+- Inspected `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, and `docs/live-build-4.md`.
+
+Repair routing:
+
+- Routed focused follow-up repair to Build 4 in `docs/live-build-4.md`.
+
+Next Candidate:
+
+- Re-review the Build 4 Relay routing logic consistency repair after Build 4 marks the follow-up Ready for Codex Review.
+
+## Write / Completion Log
+
+- 2026-06-01 17:34 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance/disposition and `docs/live-build-4.md` repair routing only. Tests run: not run; docs/architecture review only. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance/routing only.
