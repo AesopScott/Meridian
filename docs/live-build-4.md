@@ -441,6 +441,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-01 15:27 -06:00 - Build 4 checked queue; status: idle; no executable Active Task; prior branch divergence resolved by origin/main advancement; local main now synced with origin/main (13237596); Next Candidate Task (convert gates to runtime test cases) still awaits coordinator promotion; cadence 1/3
 2026-06-01 15:28 -06:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = convert Aegis risk/proof gate contract into bounded runtime test cases (meridian_core/aegis.py + tests/test_aegis.py); pulled origin/main; now at c58aee40; beginning implementation of 9 gate validators with focused test coverage
 2026-06-01 15:30 -06:00 - Build 4 checked queue; status: idle; Active Task moved to Completed/Ready for Codex Review; implemented all 9 gates (GateDecision enum, GateResult type, 9 validator functions); 166 tests passed (73 legacy + 93 new); commit ad46acc3 includes implementation; worktree synced with origin/main; cadence 2/3
+2026-06-01 15:35 -06:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = repair Relay-Aegis risk/proof gate contract contradictions (Codex Reviews B findings); fixes: Tier 2 DeepSeek validation wording, Tier 2 aggregator authority wording, waiver/approval field semantics; worktree synced with origin/main; beginning repairs
 ```
 
 ## Write/Completion Log
