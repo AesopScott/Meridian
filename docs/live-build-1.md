@@ -6,6 +6,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
+Goal: repair the remaining Relay decision-record vendor-unknown stop-condition gap from Codex Reviews A.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: make Tier 2+ Relay decision records treat missing safe vendor metadata as an explicit blocking stop condition, not only as `vendor="unknown"`. The reviewed commit `f0bb2bb6` populates vendor from adapter metadata and model_id from lane preferred_model, but a clean Tier 2 audited plan with no adapter metadata can still produce `vendor="unknown"`, `fallback_allowed=True`, and no fallback blocker. Add focused regression coverage for that clean-audit edge and repair `_build_decision_record()` so vendor/model identity unknowns become explicit fallback blockers before Tier 2+ dispatch is considered explainable. Preserve provider neutrality and do not add live vendor calls, CLI execution, UI rendering, branch movement, account probing, network access, or Polaris dependency.
+
+Required proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
 Goal: bind Aegis route-gate evidence into Relay decision records after the Aegis runtime gate slice lands.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
