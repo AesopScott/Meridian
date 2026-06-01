@@ -47,7 +47,7 @@ class CommandIntent(Enum):
     STOP_REQUEST = "stop_request"   # Request graceful stop
     TRANSFER = "transfer"         # Hand off session to another worker
     ARCHIVE = "archive"           # Terminal archive action
-    RESTART = "restart"           # Restart stale/stopped session
+    RESTART = "restart"           # Restart stale session
     RESTEER = "resteer"           # Modify steering mid-execution
     RECOVER_FROM_LIMIT = "recover_from_limit"  # Recover from capacity limit
     REQUEST_HUMAN_GATE = "request_human_gate"  # Request human approval
@@ -115,7 +115,7 @@ Frozen (immutable) dataclass representing the authoritative snapshot of a sessio
 
 #### Execution State (3 fields)
 - `status: SessionStatus` — Current session status
-- `worktree_path: str` — Absolute path to unique worktree for this session
+- `worktree_path: str` — Absolute path to unique worktree for this session. At SPAWN time this is the planned path (worktree not yet created on disk); it is verified/created during worktree setup, not at dataclass construction.
 - `branch_name: str` — Current branch name in worktree
 
 #### Task Context (1 field)
@@ -136,14 +136,14 @@ Frozen (immutable) dataclass representing the authoritative snapshot of a sessio
 - `blocker_summary: Optional[str]` — Human-readable description of any blocker
 
 #### Permissions (1 field)
-- `permission_context: dict[str, Any]` — Permission metadata (e.g., {"user": "scott"})
+- `permission_context: dict[str, str | int | float | bool | None]` — Permission metadata (e.g., {"user": "scott"}). All values must be JSON-safe primitives. Treat as read-only after construction; the frozen dataclass prevents field reassignment but not dict mutation.
 
 ### Helper Methods
 
 #### `is_idle() -> bool`
-Returns `True` if session is waiting for work.
+Returns `True` if session is not actively executing.
 - **Logic:** `status in (POLLING, WAITING, REVIEW_GATED)`
-- **Use Case:** Determine if session can accept new work from queue.
+- **Use Case:** Determine if session has no active work in progress (polling, waiting, or gated on review). Note: REVIEW_GATED is idle but cannot accept new work; use `can_accept_work()` to test work eligibility.
 
 #### `is_healthy() -> bool`
 Returns `True` if session is in good operational health.
@@ -154,7 +154,7 @@ Returns `True` if session is in good operational health.
 Returns `True` if session is eligible to transition to RUNNING.
 - **Logic:** 
   ```
-  status not in (BLOCKED, STALE, ARCHIVED, CAPACITY_LIMITED)
+  status not in (STARTING, BLOCKED, STALE, STOPPED, ARCHIVED, CAPACITY_LIMITED, REVIEW_GATED)
   AND is_healthy()
   ```
 - **Use Case:** Pre-flight check before queue dispatch.
@@ -163,9 +163,10 @@ Returns `True` if session is eligible to transition to RUNNING.
 Returns `True` if `last_queue_read_at` exceeds threshold.
 - **Logic:** 
   ```
-  elapsed = now(UTC) - last_queue_read_at
+  elapsed = datetime.now(timezone.utc) - last_queue_read_at.astimezone(timezone.utc)
   elapsed.total_seconds() > (threshold_minutes * 60)
   ```
+- **Note:** `last_queue_read_at` must be UTC-aware. Use `.astimezone(timezone.utc)` for normalization — never `replace(tzinfo=timezone.utc)`, which silently reinterprets naive timestamps.
 - **Use Case:** Detect stale sessions for health monitoring.
 
 #### `to_dict() -> dict[str, Any]`
@@ -226,16 +227,16 @@ Returns `True` if command can execute immediately.
 - **Logic:**
   ```
   is_executable_now AND
-  NOT human_approval_required AND
-  proof_requirement != ProofState.NO_PROOF
+  NOT human_approval_required
   ```
+- **Note:** `proof_requirement` is enforced at plan-construction time (before `is_executable_now` is set). There is no collected-proof field on the dataclass, so `is_executable()` cannot re-validate proof level at call time.
 - **Use Case:** Gate command execution to safe, approved plans only.
 
 #### `requires_aegis_approval() -> bool`
 Returns `True` if command needs Aegis security gate.
-- **High-Risk Intents:** TRANSFER, ARCHIVE, RESTART, RECOVER_FROM_LIMIT
+- **High-Risk Intents:** TRANSFER, ARCHIVE, RESTART, RECOVER_FROM_LIMIT, REQUEST_HUMAN_GATE
 - **Logic:** `command_intent in high_risk_intents`
-- **Use Case:** Route high-risk commands through Aegis approval gate.
+- **Use Case:** Route high-risk commands through Aegis approval gate. REQUEST_HUMAN_GATE requires Aegis pre-approval to prevent spurious human interruptions.
 
 #### `is_legal(current_state: SessionLifecycleState) -> bool`
 Returns `True` if command is legal given current session state.
@@ -276,8 +277,15 @@ A command's expected state transition must be one of these tuples:
 (CAPACITY_LIMITED, WAITING)
 (STALE, RUNNING)
 (STALE, ARCHIVED)
+(STALE, STOPPED)
+(STARTING, STOPPED)
+(POLLING, STOPPED)
+(RUNNING, STOPPED)
+(WAITING, STOPPED)
+(BLOCKED, STOPPED)
+(REVIEW_GATED, STOPPED)
+(CAPACITY_LIMITED, STOPPED)
 (STOPPED, ARCHIVED)
-(ARCHIVED, ARCHIVED)
 ```
 
 ### Legal Command-State Pairs
@@ -287,13 +295,13 @@ For each `CommandIntent`, allowed current states:
 | Intent | Allowed Current States |
 |--------|------------------------|
 | `SPAWN` | {STARTING} |
-| `WATCH` | {RUNNING, POLLING} |
+| `WATCH` | {POLLING, RUNNING, WAITING, BLOCKED, REVIEW_GATED, CAPACITY_LIMITED, STALE} |
 | `POLL_QUEUE` | {STARTING, POLLING, RUNNING, WAITING, BLOCKED, REVIEW_GATED, CAPACITY_LIMITED, STALE, STOPPED} |
 | `STEER` | {RUNNING} |
 | `STOP_REQUEST` | {STARTING, POLLING, RUNNING, WAITING, BLOCKED, REVIEW_GATED, CAPACITY_LIMITED, STALE} |
 | `TRANSFER` | {RUNNING, WAITING} |
-| `ARCHIVE` | {STOPPED, ARCHIVED} |
-| `RESTART` | {STOPPED, STALE} |
+| `ARCHIVE` | {STOPPED} |
+| `RESTART` | {STALE} |
 | `RESTEER` | {RUNNING} |
 | `RECOVER_FROM_LIMIT` | {CAPACITY_LIMITED} |
 | `REQUEST_HUMAN_GATE` | {all SessionStatus values} |
@@ -348,11 +356,11 @@ Commands progress through proof states:
 ### Proof Requirement
 - **Rule:** No hidden automation or branch switching without explicit command-plan proof.
 - **Enforcement:** All commands must carry evidence references and proof state.
-- **Validation:** is_executable() refuses commands below proof threshold.
+- **Validation:** Proof threshold is enforced at plan-construction time before `is_executable_now` is set; `is_executable()` does not re-validate proof level at call time.
 
 ---
 
-## Part 7: Test Cases (~60 tests)
+## Part 7: Test Cases (~90 tests)
 
 ### TestSessionLifecycleState (12-15 tests)
 
@@ -380,6 +388,9 @@ Commands progress through proof states:
 - [ ] `test_cannot_accept_work_blocked` — BLOCKED → False
 - [ ] `test_cannot_accept_work_stale` — STALE → False
 - [ ] `test_cannot_accept_work_archived` — ARCHIVED → False
+- [ ] `test_cannot_accept_work_starting` — STARTING → False
+- [ ] `test_cannot_accept_work_stopped` — STOPPED → False
+- [ ] `test_cannot_accept_work_review_gated` — REVIEW_GATED → False
 - [ ] `test_cannot_accept_work_unhealthy` — Unhealthy state → False
 
 #### heartbeat_stale() Tests
@@ -406,7 +417,7 @@ Commands progress through proof states:
 - [ ] `test_is_executable_all_conditions_met` — All conditions → True
 - [ ] `test_not_executable_is_executable_now_false` — is_executable_now=False → False
 - [ ] `test_not_executable_human_approval_required` — human_approval_required=True → False
-- [ ] `test_not_executable_no_proof` — proof_requirement=NO_PROOF → False
+- [ ] `test_not_executable_construction_time_proof` — plan with NO_PROOF rejected at construction time, not via is_executable()
 - [ ] `test_is_executable_respects_all_gates` — All gates checked
 
 #### requires_aegis_approval() Tests
@@ -414,6 +425,7 @@ Commands progress through proof states:
 - [ ] `test_requires_aegis_archive` — ARCHIVE → True
 - [ ] `test_requires_aegis_restart` — RESTART → True
 - [ ] `test_requires_aegis_recover_from_limit` — RECOVER_FROM_LIMIT → True
+- [ ] `test_requires_aegis_request_human_gate` — REQUEST_HUMAN_GATE → True
 - [ ] `test_not_requires_aegis_poll_queue` — POLL_QUEUE → False
 - [ ] `test_not_requires_aegis_watch` — WATCH → False
 
@@ -421,6 +433,11 @@ Commands progress through proof states:
 - [ ] `test_is_legal_spawn_from_starting` — SPAWN in STARTING → True
 - [ ] `test_not_legal_spawn_from_running` — SPAWN in RUNNING → False
 - [ ] `test_is_legal_poll_queue_any_state` — POLL_QUEUE in various states → All valid
+- [ ] `test_is_legal_watch_running` — WATCH in RUNNING → True
+- [ ] `test_is_legal_watch_stale` — WATCH in STALE → True
+- [ ] `test_is_legal_watch_blocked` — WATCH in BLOCKED → True
+- [ ] `test_not_legal_watch_stopped` — WATCH in STOPPED → False
+- [ ] `test_not_legal_watch_starting` — WATCH in STARTING → False
 - [ ] `test_is_legal_steer_only_running` — STEER only in RUNNING → Correct
 - [ ] `test_is_legal_transfer_running_or_waiting` — TRANSFER in RUNNING/WAITING → True
 - [ ] `test_not_legal_transfer_polling` — TRANSFER in POLLING → False
@@ -430,9 +447,13 @@ Commands progress through proof states:
 - [ ] `test_legal_transition_polling_to_running` — (POLLING, RUNNING) → True
 - [ ] `test_legal_transition_running_to_waiting` — (RUNNING, WAITING) → True
 - [ ] `test_legal_transition_blocked_to_polling` — (BLOCKED, POLLING) → True
+- [ ] `test_legal_transition_review_gated_to_running` — (REVIEW_GATED, RUNNING) → True
+- [ ] `test_legal_transition_running_to_stopped` — (RUNNING, STOPPED) → True
+- [ ] `test_legal_transition_stopped_to_archived` — (STOPPED, ARCHIVED) → True
 - [ ] `test_illegal_transition_archived_to_running` — (ARCHIVED, RUNNING) → False
+- [ ] `test_illegal_transition_stopped_to_running` — (STOPPED, RUNNING) → False
 - [ ] `test_illegal_transition_polling_to_blocked` — (POLLING, BLOCKED) → False
-- [ ] `test_all_18_legal_transitions` — Verify all 18 legal transitions accepted
+- [ ] `test_all_24_legal_transitions` — Verify all 24 legal transitions accepted
 
 #### to_dict() Tests
 - [ ] `test_to_dict_all_fields` — All fields serialized
@@ -454,7 +475,7 @@ Commands progress through proof states:
 - [ ] `test_aegis_gate_blocks_transfer` — TRANSFER without Aegis approval → not executable
 - [ ] `test_aegis_gate_blocks_archive` — ARCHIVE without Aegis approval → not executable
 - [ ] `test_human_gate_blocks_execution` — human_approval_required → not executable
-- [ ] `test_proof_gate_blocks_no_proof` — NO_PROOF requirement → not executable
+- [ ] `test_proof_gate_enforced_at_construction` — NO_PROOF blocked at plan-construction time; is_executable() does not re-check proof level
 
 #### Health-Based Tests
 - [ ] `test_unhealthy_session_cannot_accept_work` — Degraded health blocks dispatch
@@ -488,15 +509,15 @@ The following are explicitly OUT OF SCOPE for Session Lifecycle V2 runtime imple
 
 ## Summary
 
-**SessionLifecycleState** is the immutable, serializable snapshot of session execution with 22 fields and 5 helper methods covering health, idleness, work eligibility, heartbeat staleness, and JSON serialization.
+**SessionLifecycleState** is the immutable, serializable snapshot of session execution with 21 fields and 5 helper methods covering health, idleness, work eligibility, heartbeat staleness, and JSON serialization.
 
-**SessionCommandPlan** is the immutable, auditable command proposal with 16 fields and 4 helper methods covering executability, approval requirements, legality validation, and serialization.
+**SessionCommandPlan** is the immutable, auditable command proposal with 20 fields and 4 helper methods covering executability, approval requirements, legality validation, and serialization.
 
-**Enums** define 42 distinct values across 6 type-safe enumerations covering session lifecycle, roles, commands, cadence, proof, and health states.
+**Enums** define 43 distinct values across 6 type-safe enumerations covering session lifecycle, roles, commands, cadence, proof, and health states.
 
-**Legality Matrix** enforces 18 valid state transitions and 11 command-state pairs, preventing illegal session state operations.
+**Legality Matrix** enforces 24 valid state transitions and 11 command-state pairs, preventing illegal session state operations.
 
-**Test Coverage** includes ~60 tests spanning immutability, helper method behavior, safety gates, constraint enforcement, and end-to-end workflows.
+**Test Coverage** includes ~90 tests spanning immutability, helper method behavior, safety gates, constraint enforcement, and end-to-end workflows.
 
 **Invariants** ensure unique worktree isolation, queue routing by role, permission-gated branch movement, and proof-based command execution.
 

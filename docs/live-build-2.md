@@ -8,6 +8,30 @@ Do not move data between worktrees, branches, or the main checkout. Do not cherr
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: implement Session Lifecycle routing decisions for Relay-selected session actions.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-implementation-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/relay-completeness-audit.md`.
+
+Task: extend the typed Session Lifecycle model so Prime can represent Relay session actions without live process control: reuse existing session, start new session, summarize and reset, transfer/handoff, archive, and request human gate. Include context-fill, reasoning-shift, project-scope, stale-heartbeat, review-gate, and permission-boundary reasons. Preserve unique-worktree, assigned-queue, and branch-permission invariants. Do not spawn processes, move branches, call models, edit UI, or touch Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: add Prime command-plan tests that consume the new Session Lifecycle routing reasons after review clears.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: write the Session Lifecycle permissions and Prime/Beacon binding handoff contract.
@@ -833,6 +857,11 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 15:17 -06:00 - Build 2 checked queue; status: idle (no new Active Task; awaiting coordinator assignment; cadence 0 of 3; polling)
 2026-06-01 15:27 -06:00 - Build 2 checked queue; status: idle (no new Active Task; awaiting coordinator assignment; cadence 0 of 3; polling)
 2026-06-01 15:37 -06:00 - Build 2 checked queue; status: idle (no new Active Task; awaiting coordinator assignment; cadence 0 of 3; polling)
+2026-06-01 15:47 -06:00 - Build 2 checked queue; status: idle (no Coordinator Override - Active Now section found; Session Lifecycle checklist refinements complete; awaiting orchestrator assignment; cadence 1 of 3; polling)
+2026-06-01 22:15 -06:00 - Build 2 checked queue; status: idle (no Coordinator Override - Active Now section found; Session Lifecycle implementation verified complete; 12/12 tests + 265 integration tests passing; awaiting active task assignment or Codex review feedback; polling)
+2026-06-02 07:30 -06:00 - Build 2 checked queue; status: idle (no Coordinator Override - Active Now section found; awaiting orchestrator assignment; Session Lifecycle work cadence 1 of 3; polling)
+2026-06-12 07:20 -06:00 - Build 2 checked queue; Active Task found: Session Lifecycle routing decisions (Coordinator Override - Active Now); task already complete from prior session execution; completion entry added to Write/Completion Log; commit 76f6e186; 20 tests passed; cadence 1 of 3; marked Ready for Codex Review; no new Active Task assigned yet; polling
+2026-06-12 07:25 -06:00 - Build 2 checked queue; status: idle (Active Task still Session Lifecycle routing decisions, already complete; Next Candidate Task blocked pending Codex review clearance; no executable Active Task at this time; cadence 1 of 3; awaiting orchestrator assignment; polling)
 ```
 
 ## Write/Completion Log
@@ -883,6 +912,8 @@ YYYY-MM-DD HH:MM TZ - Build 2 completed <task>; commit <hash>; files changed: <l
 2026-05-31 22:44 -06:00 - Build 2 completed Session Lifecycle permissions and Prime/Beacon binding handoff contract (Coordinator Override); commit 04fd9ad; files: docs/session-lifecycle-permissions-prime-beacon-contract.md (new, 157 lines), docs/live-build-2.md (queue checkpoint); content: PermissionContext field spec, Beacon integration/heartbeat/staleness/blocker binding, Prime autonomy command recommendations (spawn/watch/poll_queue/steer/stop_request/transfer/archive/restart/resteer/recover_from_limit/request_human_gate), branch permission bindings, worktree isolation invariant, permission checking semantics, proof/safety auditing, out-of-scope boundaries; tests none required (docs-only); push: 04fd9ad to main; cadence count: 2 of 3; Ready for Codex Review
 2026-05-31 22:48 -06:00 - Build 2 completed Session Lifecycle permissions implementation checklist (Coordinator Override); commit f2f53b4 (merged as 6f5e1ab); files: docs/session-lifecycle-permissions-implementation-checklist.md (new, 250+ lines), docs/live-build-2.md (queue checkpoint); content: PermissionContext frozen dataclass (6 fields: approved_by/approval_scope/escalation_gate/escalation_reason/branch_permission_state/last_permission_change), SessionLifecycleState extension with permission_context embedding, RestartResteerFinding and PrimeAutonomyInput frozen dataclasses, PermissionState/OperationScope/FindingType enums, helper methods (is_permission_locked/requires_approval_for_operation/can_accept_work/heartbeat_stale/health_from_heartbeat/approve_operation/generate_restart_finding/generate_resteer_finding/gather_prime_autonomy_input), 18 test cases (immutability, locking, unlock expiry, approval scope, restart/resteer findings, Prime input gathering), legality matrix (6 valid/2 invalid state transitions), proof/safety/invariant specs, out-of-scope boundaries; tests none required (docs-only); push: 6f5e1ab to main; cadence count: 3 of 3 (Codex cadence review trigger); Ready for Codex Review
 2026-05-31 22:56 -06:00 - Build 2 Codex cadence review repair: commit 1b115c3; files: docs/session-lifecycle-permissions-implementation-checklist.md; HIGH findings (3/3 fixed): approval_scope deep immutability (frozenset[OperationScope]), temporary unlock fields (unlock_expiry/task_scope), dual-signer approval (approved_by_secondary); MEDIUM findings (4/4 fixed): enum-typed helpers, RestartResteerFinding evidence (typed fields), test count 25+coverage, SessionCommandPlan deferred; LOW (naming drift deferred); tests: none (docs-only); push: 1b115c3 to main; checklist code-ready for permissions binding runtime slice
+2026-06-01 15:40 -06:00 - Build 2 completed Session Lifecycle implementation checklist refinements (checklist repair); commit db8f3385; files: docs/session-lifecycle-implementation-checklist.md (541 lines, enhanced from 520); improvements: RESTART comment clarified (stale session focus), worktree_path SPAWN-time behavior documented, permission_context JSON-safety specified, helper method descriptions refined (is_idle/can_accept_work distinction), timezone handling corrected (heartbeat_stale UTC normalization), is_executable() proof enforcement semantics clarified, REQUEST_HUMAN_GATE added to high-risk Aegis intents, legal state transition matrix completed (24 transitions + STOPPED pathways); tests: Session Lifecycle runtime verified complete (commit 910e652, prior session) with 12/12 passing, 265 session/relay tests passing; proof: python -m pytest tests/test_session_lifecycle.py -v (12 passed), python -m pytest tests/ -q -k "relay or session" (265 passed); push: db8f3385 to main; cadence count: 1 of 3; Ready for Codex Review
+2026-06-12 07:20 -06:00 - Build 2 completed Session Lifecycle routing decisions (Coordinator Override - Active Now); commit 76f6e186 (after rebase onto origin/main); files: meridian_core/session_lifecycle.py (extended from 347→418 lines), tests/test_session_lifecycle.py (extended from 170→201 lines); new enums: SessionAction (REUSE/START_NEW/SUMMARIZE_RESET/TRANSFER/AVOID), SessionActionReason (13 values: CONTEXT_FILL/REASONING_SHIFT/PROJECT_SCOPE/STALE_HEARTBEAT/REVIEW_GATE/PERMISSION_BOUNDARY/CONTEXT_HEALTHY/CONTEXT_POLLUTION/TOOL_MISMATCH/SURFACE_MODE/PAYLOAD_BUDGET/DEFECT_FOUND/DUAL_LANE_NEEDED); extended SessionLifecycleState with optional routing_action/routing_reason fields; implemented suggest_routing_action() helper with priority-ordered signal analysis (tool_or_auth_broken→AVOID, payload_near_limit→SUMMARIZE_RESET, context_health_degraded→START_NEW, reasoning_mode_shifted→START_NEW, project_changed→START_NEW, surface_mode_changed→START_NEW, defect_found→START_NEW, tier_3_needs_independence→TRANSFER, else healthy→REUSE, else→START_POLLUTION); updated to_dict() serialization with routing fields; tests: 20 passed (12 existing + 8 new routing decision tests covering all signal paths); push: 76f6e186 to origin/main; cadence count: 1 of 3 (new cadence after prior Codex review); Ready for Codex Review; Next Candidate Task: add Prime command-plan tests that consume the new Session Lifecycle routing reasons after review clears
 ```
 
 ## Cross-Check Activity

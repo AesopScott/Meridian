@@ -6,6 +6,36 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Completed / Passed
+
+Goal: review the Bifrost right-panel mode and UI checklist design before implementation begins.
+
+Status: passed by Codex Reviews B on 2026-06-01 15:22 -06:00. The design separates User Session, Settings, and Harness modes clearly enough for Build 5 to proceed with the docs-only right-panel mode contract. No repair routed.
+
+Worktree note: assigned worktree `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b` is clean but stale against `origin/main`, so review used the current main checkout after pulling latest `origin/main`.
+
+Allowed review files: `docs/ui-integration-checklist.md`, `docs/bifrost-right-panel-mode-contract.md` if present, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and `docs/live-build-5.md` for repair routing only.
+
+Task: review whether the UI design clearly separates User Session, Settings, and Harness modes. Settings/Harness modes must use the full right panel and must not show prompt/response windows. User Session mode must route to the selected open live session, including hidden/test-waiting labels, grouped alphabetically by project. Do not edit `index.html` or runtime UI. If findings exist, route a focused repair into `docs/live-build-5.md`; otherwise mark passed and leave the next review candidate.
+
+Proof command: docs-only review; no tests required unless runtime UI files are changed.
+
+Review result:
+
+- `docs/bifrost-right-panel-mode-contract.md` is not present yet, which is acceptable for this pre-implementation review because the Build 5 active task is to create it.
+- `docs/ui-integration-checklist.md` defines the right panel as User Session, Settings, or Harness mode, with Settings/Harness as full-panel item/list surfaces and no prompt window.
+- User Session mode keeps prompt/response semantics and requires selected live-session routing; the Sessions selector requirements include open/live sessions, hidden labels, test-waiting labels, project grouping, alphabetical project/session sorting, title updates, immediate routing, stale-target guards, and restore behavior.
+- Relay source docs reinforce that Settings/Harness modes must not inherit project chat context, Harness mode uses selected harness logic lists, Relay harness panels show logic items rather than chat prompts, and Auto remains disabled until Relay metadata/proof exists.
+- `index.html` and runtime UI files were not edited. `docs/live-build-5.md` was not edited because no repair was routed.
+
+Completion: committed and pushed `docs/live-codex-reviews-2.md` only. No repair routed. Next candidate remains Build 3 FileMap registration for Relay/UI planning artifacts.
+
+## Next Candidate Task
+
+Goal: review Build 3 FileMap registration for Relay/UI planning artifacts after it is marked Ready for Codex Review.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md` for provenance only.
+
 ## Completed / Finding Routed
 
 Goal: review Build 5 provider balance and prompt payload visibility surface commit `06e1c5c`.
@@ -979,6 +1009,8 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews B checked queue; status: idle/running/blocke
 2026-06-01 08:35 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; Build 3 5e0facb still pending Round B4 verification.
 2026-06-01 08:50 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; Build 3 5e0facb still pending Round B4 verification.
 2026-06-01 09:05 -06:00 - Codex Reviews B checked queue; status: idle; notes: no new Ready for Codex Review markers; Build 3 5e0facb still pending Round B4 verification.
+2026-06-01 15:19 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; top queue has prior Build 5 finding routed plus non-executable Build 3 next candidate only; archived/stale Active Task sections were not executed.
+2026-06-01 15:22 -06:00 - Codex Reviews B checked queue; status: running; notes: pulled latest origin/main first; executable Coordinator Override Active Now found for Bifrost right-panel mode/UI checklist design review; starting docs-only review.
 2026-06-01 09:20 -06:00 - Codex Reviews B Round B4 executed; status: PASS-WITH-MEDIUM-FINDING; commit reviewed: 5e0facb; tests: python -m pytest tests/test_filemap.py -q → 46/46 in 0.09s; finding: 3 docs registered in filemap.py and _REQUIRED_PATHS but absent from docs/FileMap.md (prime-status-console-cli-brief.md, non-orchestrator-surface-naming.md, bifrost-configurable-progress-surface-brief.md); repair task written to Build 3 Active Task; results in Obsidian (2026-06-01 Codex Reviews B Round B4 Result.md); cadence 2/3 since Round B3; awaiting Round B5 trigger.
 2026-05-31 22:13 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; archived/stale Active Task sections were not executed; no review scope opened.
 2026-05-31 22:16 -06:00 - Codex Reviews B checked queue; status: idle; notes: pulled latest origin/main first; no executable Active Task in docs/live-codex-reviews-2.md; archived/stale Active Task sections were not executed; no review scope opened.
@@ -1037,6 +1069,7 @@ YYYY-MM-DD HH:MM TZ - Reviewed Build <n> commit <hash>; result: pass/finding/blo
 2026-05-31 22:21 -06:00 - Reviewed Build 3 commit 80ebea4 (Round B18 Session Lifecycle checklist FileMap registration); result: blocked; tests: `python -m pytest tests/test_filemap.py -q` -> 46/46 passed in 0.11s; notes: registration exists in runtime FileMap, docs/FileMap, and `_REQUIRED_PATHS`, but `docs/session-lifecycle-implementation-checklist.md` is missing from `HEAD`; repair routed to Build 3.
 2026-05-31 22:21 -06:00 - Reviewed Build 5 commit ff4cb69 (Round B19 Voice I/O surface review); result: pass; tests: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 93/93 passed in 0.21s; notes: listening, dictating, thinking, speaking, muted, and blocked states render deterministically; controls are inert display affordances; no live microphone/TTS/model/queue/process/filesystem/network effects found; Prime prompt and quiet PRIMED core remain intact.
 2026-05-31 22:44 -06:00 - Reviewed Build 5 commit 06e1c5c (provider balance and prompt payload visibility surface); result: blocked; tests: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 93/93 passed in 0.18s; notes: provider/payload view-model data and render helpers exist, but `render_cockpit_html()` never inserts the provider balance or prompt payload sections into the document; repair routed to Build 5.
+2026-06-01 15:22 -06:00 - Reviewed Build 5 right-panel mode/UI checklist design before implementation; result: pass; tests: not run (docs-only review); notes: User Session, Settings, and Harness modes are separated; Settings/Harness use full-panel non-prompt surfaces; User Session routing requirements include selected open live sessions, hidden/test-waiting labels, alphabetical project/session grouping, title update, immediate routing, stale-target guard, and restore behavior; Relay docs require harness logic items and keep Auto disabled until Relay proof/metadata exists.
 
 ## Proof Log
 
@@ -1067,6 +1100,7 @@ Minimum proof expectations:
 2026-05-31 22:21 -06:00 - Proof for Build 3 commit 80ebea4; proof type: test/diff/reference; evidence: `git show 80ebea4 -- meridian_core/filemap.py docs/FileMap.md tests/test_filemap.py` shows registration in all three FileMap surfaces; `python -m pytest tests/test_filemap.py -q` -> 46/46 passed; `Test-Path docs/session-lifecycle-implementation-checklist.md` returned False; result: blocked.
 2026-05-31 22:21 -06:00 - Proof for Build 5 commit ff4cb69; proof type: test/diff/manual/reference; evidence: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 93/93 passed; rendered-state script confirmed listening/dictating/thinking/speaking/muted/blocked states keep voice strip, Prime prompt, PRIMED core, and old-label exclusions; `rg` scan found no live microphone, TTS, model call, queue/process/filesystem/network side effects; source comparison to `docs/bifrost-voice-command-contract.md` matched the inert voice surface requirements; result: pass.
 2026-05-31 22:44 -06:00 - Proof for Build 5 commit 06e1c5c; proof type: test/diff/manual/reference; evidence: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 93/93 passed; `git show --stat --oneline 06e1c5c -- bifrost/cockpit.py ...` shows only `bifrost/cockpit.py` changed; manual inspection confirms `_render_provider_balance()` and `_render_prompt_payload()` are defined but not called by `render_cockpit_html()`; `rg` scan found no live model calls, routing decisions, queue/process/filesystem/network effects, JavaScript, or Electron dependency; result: blocked.
+2026-06-01 15:22 -06:00 - Proof for Build 5 right-panel mode/UI checklist design; proof type: reference/manual; evidence: inspected `docs/ui-integration-checklist.md`, missing optional `docs/bifrost-right-panel-mode-contract.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and `docs/live-build-5.md`; `rg` confirmed SUR/USE/HMS requirements for non-prompt Settings/Harness modes and selected live-session routing, plus Relay logic-item/Auto-disabled constraints; result: pass.
 
 ## Findings
 
@@ -1362,6 +1396,8 @@ Write log:
 - 2026-05-31 23:28 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `8542dd4` (metadata completed in `dba059e`); push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
 - 2026-05-31 23:30 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `761f415` (metadata completed in `9ce81f5`); push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
 - 2026-05-31 23:32 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `c71ec5f`; push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
+- 2026-06-01 15:19 -06:00 - Read-check-only update by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`; tests run: not run (queue read-check only); commit: `e3d15a65`; push status: pushed to `origin/main`; Obsidian update status: not updated (no architecture finding or clearance).
+- 2026-06-01 15:22 -06:00 - Bifrost right-panel mode/UI checklist design review completed by Codex Reviews B; files changed: `docs/live-codex-reviews-2.md`, `docs/live-build-5.md`; tests run: not run (docs-only review); commit: `8c4bcdd7`; push status: pushed to `origin/main`; Obsidian update status: not updated (no finding or repair routed).
 
 ## Coordinator Addendum - Round B5 V1 Cockpit Clearance
 

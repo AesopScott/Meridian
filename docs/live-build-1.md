@@ -4,6 +4,30 @@
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: implement Relay decision-record coverage from the completeness audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, and current `meridian_core/relay_executor.py`.
+
+Task: add provider-neutral Relay decision-record support or test coverage so Relay exposes the audit fields needed for Prime to explain a route: route class, vendor/provider, account-vs-cli-vs-api path, risk tier, dual-model requirement, session action, context-health reason, fallback posture, and proof references. Keep the slice bounded to data planning/evidence. Do not add live vendor calls, UI rendering, Bifrost changes, filesystem/process control, branch movement, or vendor-specific secrets.
+
+Tests:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: bind Codex review findings from the Relay decision-record coverage slice.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Relay model-adapter metadata binding.
@@ -1484,6 +1508,7 @@ YYYY-MM-DD HH:MM TZ - Build 1 checked queue; status: idle/running/blocked
 2026-06-11 05:05 -05:00 - Build 1 checked queue; status: idle (origin/main up to date); no Active Now task; cadence 3/3 review gate pending; awaiting Codex Reviews clearance
 2026-06-11 05:15 -05:00 - Build 1 checked queue; status: idle (origin/main up to date); no Active Now task; cadence 3/3 review gate pending; awaiting Codex Reviews clearance
 2026-06-11 05:25 -05:00 - Build 1 checked queue; status: idle (origin/main up to date); no Active Now task; cadence 3/3 review gate pending; awaiting Codex Reviews clearance
+2026-06-12 12:00 -05:00 - Build 1 checked queue; status: idle (origin/main up to date at e8577e10); no Active Now task; Relay domain deepening work (b812677e, f57fb587) completed and Ready for Codex Review; cadence gate cleared or overridden; awaiting next task assignment
 ```
 
 ## Write/Completion Log

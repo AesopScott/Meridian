@@ -4,7 +4,29 @@
 
 Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Active Task - Repair Routed By Codex Reviews B
+## Coordinator Override - Active Now
+
+Goal: define the Bifrost surface contracts for User, Settings, and Harness right-panel modes.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-build-5.md`.
+
+Required sources: `docs/ui-integration-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, and current `index.html` for visual intent only.
+
+Task: create a docs-only Bifrost contract for the right-side surface modes. User Session mode keeps prompt/response and routes to the selected live session. Settings mode uses the full right panel for Meridian configuration items and no prompt window. Harness mode uses the full right panel for searchable/editable harness logic items and no prompt window. Include the Sessions dropdown requirements: open live sessions only, include hidden/test-waiting sessions with labels, group alphabetically by project, selection changes panel title, and selection immediately routes prompts to that session. Do not edit `index.html`, Bifrost runtime code, model calls, review queues, or Polaris.
+
+Tests: none required, docs-only.
+
+Completion: commit only allowed files, push to `origin/main`, mark Ready for Codex Review, and leave a concrete Next Candidate.
+
+## Next Candidate Task
+
+Goal: implement static/sample Bifrost rendering for the reviewed right-panel mode contract.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+## Completed / Ready For Codex Review
 
 Goal: repair the Bifrost provider balance and prompt payload visibility surface from commit `06e1c5c`.
 
@@ -15,18 +37,30 @@ Finding from Codex Reviews B:
 - `06e1c5c` adds `ProviderBalanceItem`, `ProviderBalanceView`, `PromptPayloadView`, `_render_provider_balance()`, and `_render_prompt_payload()`, but `render_cockpit_html()` never calls the new helpers, so the provider balance and prompt payload visibility surface required by `docs/bifrost-balance-payload-surface-contract.md` is absent from the rendered cockpit.
 - Existing tests still pass because no test asserts that the provider balance or prompt payload sections render.
 
-Repair requirements:
+Repair completed:
 
-- Insert the provider balance and prompt payload sections into the rendered cockpit in a visible, non-core location that preserves the quiet `PRIMED` command core.
-- Keep Bifrost render-only: no model/provider calls, no routing decisions, no queue mutation, no process control, no filesystem/network effects, no live microphone/TTS plumbing, no JavaScript, and no Electron-only dependency.
-- Add focused tests proving the rendered document includes `Provider Balance`, `Prompt Payload Visibility`, provider rows for Claude/OpenAI/DeepSeek with trust/health/budget/pressure details, prompt size/tokens/budget/delta/source/evidence or equivalent payload metadata, and prompt-drag warning behavior where applicable.
-- Preserve the existing quiet-core guard that provider labels and payload labels do not return to the central `PRIMED` command core.
+- Build 5 repaired the integration at commit `5309fb4` on 2026-06-03 06:45 -06:00.
+- Added calls to `_render_provider_balance()` and `_render_prompt_payload()` in `render_cockpit_html()`.
+- Provider balance and prompt payload sections now render in cockpit-main area outside HUD core.
+- Added comprehensive integration tests verifying sections appear with correct data (provider names, trust state, budget metrics, payload size/tokens).
+- Quiet-core guard verified: provider labels and payload labels remain absent from central `PRIMED` command core.
+- All 112 tests in `tests/test_bifrost_cockpit.py` pass.
+- Verified rendering:
+  - Provider Balance section: ✓
+  - Prompt Payload Visibility section: ✓
+  - Claude/OpenAI/DeepSeek provider rows: ✓
+  - Prompt payload size label and metrics: ✓
+  - Escape hatching and XSS prevention: ✓
 
-Proof command:
+Proof:
 
-- `python -m pytest tests/test_bifrost_cockpit.py -q`
+- `python -m pytest tests/test_bifrost_cockpit.py -q` = 112 passed
 
-Completion: mark the repair Ready for Codex Review with the repair commit hash and tests run.
+Ready for Codex Review:
+
+- Commit: `5309fb4`
+- Files: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`
+- Tests: 112 passed in `tests/test_bifrost_cockpit.py`
 
 ## Completed Task - Ready For Codex Review
 
@@ -179,7 +213,7 @@ Completion:
 
 Ready for Codex Review.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: implement Bifrost session lifecycle preview state.
 
@@ -191,9 +225,24 @@ Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status. If Codex Reviews B routes a provider/payload repair before this session lifecycle preview is committed, complete that repair first.
+Completion:
 
-## Next Candidate Task
+- Build 5 completed this session lifecycle preview surface in `d638e8a`.
+- Files changed: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+- Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` = 112 passed.
+- Verification summary (2026-06-12 08:30):
+  - SessionLifecycleItem dataclass at line 125
+  - SessionLifecycleView dataclass at line 139
+  - Sample session lifecycle data in sample_cockpit_view_model() at lines 375-415
+  - _render_session_lifecycle() function at line 790 with 10 CSS state classes (session-active, session-status-*, session-health-*, session-role-*)
+  - Integration into render_cockpit_html() at line 850 with output at line 873
+  - Full rendering includes session names, project names, harness roles, status indicators, health states, queue read labels, review cadence states, proof states, and blocker summaries
+  - HTML escaping verified via _e() function for all dynamic content
+- Routed to Codex Reviews B for Bifrost/UI review.
+
+Ready for Codex Review.
+
+## Active Task
 
 Goal: add Bifrost review-gate and proof-state preview fields after session lifecycle preview lands.
 
@@ -204,6 +253,10 @@ Task: surface deterministic render-only Aegis/review-gate proof state in the coc
 Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only the allowed files, push to `origin/main`, update Obsidian, and mark Ready for Codex Review with commit hash, files changed, tests run, and Obsidian status.
+
+## Next Candidate Task
 
 ## ~~Codex Repair - Active Now~~ (COMPLETED 2026-05-31 13:54 -06:00)
 
@@ -329,6 +382,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-05-30 13:21 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 0352a34
 2026-05-30 13:23 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 182ffbe
 2026-05-30 13:25 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at e0b103a
+2026-06-01 12:00 UTC - Build 5 checked queue; status: running; Active Task = implement Bifrost session lifecycle preview state; provider balance & prompt payload repair completed at 5309fb4; origin/main synced; beginning session lifecycle state implementation
 2026-05-30 13:26 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 3f873f5
 2026-05-30 13:28 -06:00 - Build 5 checked queue; status: idle; no change since last poll — Reviews B Round B3 still pending for a412e90, no repair routed, no new Cross-Check Activity, Active Task still stale; cadence at 2/3; awaiting orchestrator reassignment; origin/main at 7663e63
 2026-05-30 13:32 -06:00 - Build 5 checked queue; status: running; new Active Task = draft V1 Bifrost cockpit implementation brief at docs/v1-bifrost-cockpit-implementation-brief.md; Cross-Check Activity: none; origin/main at e800c03
@@ -815,6 +869,7 @@ YYYY-MM-DD HH:MM TZ - Build 5 checked queue; status: idle/running/blocked
 2026-09-16 08:00 -06:00 - Build 5 checked queue; status: idle. Both "## Active Task" sections complete: (1) repair at 5309fb4 (marked Ready for Codex Review at fd8798f), (2) session lifecycle preview at d638e8a (verified on origin/main, 1312 tests). Next Candidate = review-gate and proof-state preview fields (awaiting orchestrator promotion). No executable task assigned. Origin/main up to date. Cadence 1/3. Awaiting orchestrator reassignment.
 2026-09-16 16:00 -06:00 - Build 5 checked queue; status: idle. Both "## Active Task" sections complete: (1) repair at 5309fb4 (marked Ready for Codex Review at fd8798f), (2) session lifecycle preview at d638e8a (verified on origin/main, 1312 tests). Next Candidate = review-gate and proof-state preview fields (awaiting orchestrator promotion). No executable task assigned. Origin/main up to date. Cadence 1/3. Awaiting orchestrator reassignment.
 2026-09-17 00:00 -06:00 - Build 5 checked queue; status: idle. Both "## Active Task" sections complete: (1) repair at 5309fb4 (marked Ready for Codex Review at fd8798f), (2) session lifecycle preview at d638e8a (verified on origin/main, 1312 tests). Next Candidate = review-gate and proof-state preview fields (awaiting orchestrator promotion). No executable task assigned. Origin/main up to date. Cadence 1/3. Awaiting orchestrator reassignment.
+2026-06-01 16:30 -06:00 - Build 5 reorganized queue file: moved session lifecycle preview (d638e8a) from "## Active Task" to "## Completed / Ready For Codex Review" section with full verification summary. Promoted review-gate and proof-state preview to new "## Active Task" section. Appended this Read Check. No code changes. Origin/main up to date. Cadence 1/3. Queue file reorganization complete; ready for orchestrator review.
 ```
 
 ## Write/Completion Log

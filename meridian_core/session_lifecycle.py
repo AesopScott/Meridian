@@ -84,6 +84,34 @@ class HealthState(Enum):
     FAILED = "failed"
 
 
+class SessionAction(Enum):
+    """Relay routing decision: what to do with a session."""
+
+    REUSE = "reuse"
+    START_NEW = "start_new"
+    SUMMARIZE_RESET = "summarize_reset"
+    TRANSFER = "transfer"
+    AVOID = "avoid"
+
+
+class SessionActionReason(Enum):
+    """Why Relay chose a particular session action."""
+
+    CONTEXT_FILL = "context_fill"
+    REASONING_SHIFT = "reasoning_shift"
+    PROJECT_SCOPE = "project_scope"
+    STALE_HEARTBEAT = "stale_heartbeat"
+    REVIEW_GATE = "review_gate"
+    PERMISSION_BOUNDARY = "permission_boundary"
+    CONTEXT_HEALTHY = "context_healthy"
+    CONTEXT_POLLUTION = "context_pollution"
+    TOOL_MISMATCH = "tool_mismatch"
+    SURFACE_MODE = "surface_mode"
+    PAYLOAD_BUDGET = "payload_budget"
+    DEFECT_FOUND = "defect_found"
+    DUAL_LANE_NEEDED = "dual_lane_needed"
+
+
 @dataclass(frozen=True)
 class SessionLifecycleState:
     """Authoritative snapshot of a session.
@@ -132,6 +160,10 @@ class SessionLifecycleState:
     # Permissions
     permission_context: dict[str, Any]
 
+    # Relay Routing Decisions
+    routing_action: Optional[SessionAction] = None
+    routing_reason: Optional[SessionActionReason] = None
+
     def is_idle(self) -> bool:
         """True if waiting for work: POLLING, WAITING, or REVIEW_GATED."""
         return self.status in (
@@ -164,6 +196,41 @@ class SessionLifecycleState:
         )
         return elapsed.total_seconds() > (threshold_minutes * 60)
 
+    def suggest_routing_action(
+        self,
+        context_health_degraded: bool = False,
+        payload_near_limit: bool = False,
+        reasoning_mode_shifted: bool = False,
+        project_changed: bool = False,
+        surface_mode_changed: bool = False,
+        tool_or_auth_broken: bool = False,
+        defect_found: bool = False,
+        tier_3_needs_independence: bool = False,
+    ) -> tuple[SessionAction, SessionActionReason]:
+        """Suggest routing action based on session state signals.
+
+        Returns tuple of (SessionAction, SessionActionReason).
+        """
+        if tool_or_auth_broken:
+            return (SessionAction.AVOID, SessionActionReason.TOOL_MISMATCH)
+        if payload_near_limit:
+            return (SessionAction.SUMMARIZE_RESET, SessionActionReason.PAYLOAD_BUDGET)
+        if context_health_degraded or self.heartbeat_stale():
+            return (SessionAction.START_NEW, SessionActionReason.STALE_HEARTBEAT)
+        if reasoning_mode_shifted:
+            return (SessionAction.START_NEW, SessionActionReason.REASONING_SHIFT)
+        if project_changed:
+            return (SessionAction.START_NEW, SessionActionReason.PROJECT_SCOPE)
+        if surface_mode_changed:
+            return (SessionAction.START_NEW, SessionActionReason.SURFACE_MODE)
+        if defect_found:
+            return (SessionAction.START_NEW, SessionActionReason.DEFECT_FOUND)
+        if tier_3_needs_independence:
+            return (SessionAction.TRANSFER, SessionActionReason.DUAL_LANE_NEEDED)
+        if self.is_healthy() and not context_health_degraded:
+            return (SessionAction.REUSE, SessionActionReason.CONTEXT_HEALTHY)
+        return (SessionAction.START_NEW, SessionActionReason.CONTEXT_POLLUTION)
+
     def to_dict(self) -> dict[str, Any]:
         """Serialize to JSON-safe dict for Bifrost."""
         return {
@@ -188,6 +255,8 @@ class SessionLifecycleState:
             "health_state": self.health_state.value,
             "blocker_summary": self.blocker_summary,
             "permission_context": self.permission_context,
+            "routing_action": self.routing_action.value if self.routing_action else None,
+            "routing_reason": self.routing_reason.value if self.routing_reason else None,
         }
 
 

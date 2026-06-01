@@ -10,6 +10,37 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: translate Relay completeness into Aegis risk/proof gates.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/relay-aegis-risk-proof-gates.md`, `docs/live-build-4.md`.
+
+Required sources: `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/deepseek-validation-benchmark-plan.md`, `docs/model-harness-v2-contract.md`, and existing Aegis docs.
+
+Task: create a docs-only gate contract that tells Prime/Aegis when a Relay route is allowed, dual-laned, demoted, blocked, or human-gated. Cover account-first routing, API fallback, aggregator last-resort use, context/session reset triggers, Tier 3 independent dual-model requirement, Tier 4 human gate, vendor/account risk, no-silent fallback, proof references, and explicit stop conditions. Do not edit runtime code, FileMap, Bifrost, review queues, or worker branches.
+
+Tests: none required, docs-only.
+
+Completion: completed 2026-06-01 15:23 -06:00.
+
+Ready for Codex Review:
+
+- Commit: `a8a7aca8`
+- Files: `docs/relay-aegis-risk-proof-gates.md`
+- Tests: not required (docs-only)
+- Gate categories: unknown route class, missing exact model ID, Tier 3 dual-lane, unknown proof, unsafe fallback, unvalidated DeepSeek, aggregator authority, account/session risk, cost exposure (9 gates total)
+- Per-tier enforcement and stop conditions defined
+- Integration with Relay routing and Model Harness metadata specified
+
+## Next Candidate Task
+
+Goal: after review clears, convert the Aegis risk/proof gate contract into bounded runtime test cases.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: write the Federation Harness horizon plan as the V2 planning entry point for later multi-Meridian and multi-user collaboration.
 
 Allowed files only: `docs/federation-harness-horizon.md`, `docs/live-build-4.md`.
@@ -367,6 +398,13 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-05-31 08:57 -06:00 - Build 4 checked queue; status: idle (cadence-paused); Claude Workflows sub-agent architecture note complete (17d8d90); Ready for Codex Review block backfilled with real hash; Next Candidate Task (Prime restart/resteer logic contract) sits below override block awaiting coordinator promotion; Build 4 slices 3cbf336, 1d17fa1, fd9224d, 7eb5ae1, 1448642, 3aa16fe, 17d8d90 (7) still pending Codex Reviews sweep; origin/main at 17d8d90
 2026-05-31 08:58 -06:00 - Build 4 checked queue; status: idle (cadence cleared); Codex Reviews B Round B15 documented at d43cb34 — Workflows architecture note (0115581/17d8d90) PASS-WITH-FINDINGS; sole MEDIUM is consolidated 5-entry FileMap registration routed to Build 3 (not a Build 4 repair); prior rounds B11/B13/B14 cleared Echo/Atlas (7eb5ae1), Workflow sub-agent contract (1448642), and Prime Autonomy contract (3aa16fe) — all V2 first-wave Build 4 slices now reviewed; remaining pending sweep: pre-V2 slices 3cbf336, 1d17fa1, fd9224d only; Next Candidate Task still awaits coordinator promotion; origin/main at d43cb34
 2026-05-31 09:02 -06:00 - Build 4 checked queue; status: idle; no Active Task; Build 1 paused cadence 3/3 awaiting Codex clear (fab3ce0); Build 3 idle awaiting next assignment (f2e88ec); Next Candidate Task (Prime restart/resteer logic contract) still awaits coordinator promotion; origin/main at f1b03b1
+2026-06-01 15:17 -06:00 - Build 4 checked queue; status: idle; no Active Task; cadence-paused since 2026-05-31 08:06 (V2 first-wave slice sweep pending); all prior Coordinator Override tasks completed (last: 17d8d90 on 2026-05-31 08:57); Next Candidate = Prime restart/resteer logic contract (not yet promoted); origin/main pulled and up to date
+2026-06-01 15:18 -06:00 - Build 4 checked queue; status: idle; no Active Task; pulled origin/main (already up to date); no new Coordinator Override section added; cadence-paused; awaiting coordinator task assignment or promotion of Next Candidate Task
+2026-06-01 15:19 -06:00 - Build 4 checked queue; status: idle; no Active Task; pulled origin/main (up to date); no new Coordinator Override section; cadence-paused; Codex Reviews B Round B15 cleared (d43cb34); awaiting coordinator reassignment
+2026-06-01 15:19 -06:00 - Build 4 checked queue; status: idle; no Active Task; origin/main synced; no new Coordinator Override - Active Now section; cadence-paused; awaiting coordinator task assignment
+2026-06-01 15:20 -06:00 - Build 4 checked queue; status: idle; no Active Task; origin/main synced; no executable Coordinator Override - Active Now section; cadence-paused; awaiting coordinator task assignment
+2026-06-01 15:21 -06:00 - Build 4 checked queue; status: running; NEW ACTIVE TASK FOUND = translate Relay completeness into Aegis risk/proof gates (docs/relay-aegis-risk-proof-gates.md); worktree C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis DOES NOT EXIST; requesting coordinator to create worktree before proceeding
+2026-06-01 15:22 -06:00 - Build 4 executing Active Task; created worktree C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis; beginning document creation from sources: relay-completeness-audit.md, relay-heartbeat-model-routing-logic.md, deepseek-validation-benchmark-plan.md, model-harness-v2-contract.md, Aegis docs; origin/main up to date
 ```
 
 ## Write/Completion Log
@@ -397,6 +435,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 completed <task>; commit <hash>; tests <result>
 2026-05-31 08:02 -06:00 - Build 4 completed Workflow Sub-Agent Harness contract (docs/workflow-subagent-harness-contract.md) per Coordinator Override; commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:45 -06:00 - Build 4 completed V2 Prime Autonomy contract (docs/prime-autonomy-v2-contract.md) per Coordinator Override (Active Now); commit pending; tests not required (docs-only); Ready for Codex Review after commit
 2026-05-31 08:55 -06:00 - Build 4 completed Claude Workflows sub-agent architecture note (docs/workflows-subagent-harness-architecture.md) per Coordinator Override (Active Now); narrative companion to docs/workflow-subagent-harness-contract.md; commit pending; tests not required (docs-only); Ready for Codex Review after commit
+2026-06-01 15:23 -06:00 - Build 4 completed Relay-Aegis risk/proof gates contract (docs/relay-aegis-risk-proof-gates.md); commit a8a7aca8; files changed: docs/relay-aegis-risk-proof-gates.md; tests not required (docs-only); pushed to origin/main; Ready for Codex Review; cadence 1/3
 ```
 
 ## Cross-Check Activity

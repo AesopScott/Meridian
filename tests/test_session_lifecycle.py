@@ -10,6 +10,8 @@ from meridian_core.session_lifecycle import (
     ReviewCadenceState,
     ProofState,
     HealthState,
+    SessionAction,
+    SessionActionReason,
     SessionLifecycleState,
     SessionCommandPlan,
 )
@@ -72,6 +74,65 @@ class TestSessionLifecycleState:
         serialized = healthy_state.to_dict()
         assert serialized["session_id"] == "session-1"
         assert serialized["status"] == "polling"
+
+    def test_suggest_routing_action_reuse_healthy(self, healthy_state):
+        """Test routing suggests REUSE for healthy sessions."""
+        action, reason = healthy_state.suggest_routing_action()
+        assert action == SessionAction.REUSE
+        assert reason == SessionActionReason.CONTEXT_HEALTHY
+
+    def test_suggest_routing_action_avoid_broken_tool(self, healthy_state):
+        """Test routing suggests AVOID when tool/auth broken."""
+        action, reason = healthy_state.suggest_routing_action(tool_or_auth_broken=True)
+        assert action == SessionAction.AVOID
+        assert reason == SessionActionReason.TOOL_MISMATCH
+
+    def test_suggest_routing_action_summarize_payload_limit(self, healthy_state):
+        """Test routing suggests SUMMARIZE when payload near limit."""
+        action, reason = healthy_state.suggest_routing_action(payload_near_limit=True)
+        assert action == SessionAction.SUMMARIZE_RESET
+        assert reason == SessionActionReason.PAYLOAD_BUDGET
+
+    def test_suggest_routing_action_new_stale_heartbeat(self, healthy_state):
+        """Test routing suggests START_NEW for stale sessions."""
+        action, reason = healthy_state.suggest_routing_action(
+            context_health_degraded=True
+        )
+        assert action == SessionAction.START_NEW
+        assert reason == SessionActionReason.STALE_HEARTBEAT
+
+    def test_suggest_routing_action_new_reasoning_shift(self, healthy_state):
+        """Test routing suggests START_NEW when reasoning mode shifts."""
+        action, reason = healthy_state.suggest_routing_action(reasoning_mode_shifted=True)
+        assert action == SessionAction.START_NEW
+        assert reason == SessionActionReason.REASONING_SHIFT
+
+    def test_suggest_routing_action_new_project_changed(self, healthy_state):
+        """Test routing suggests START_NEW when project changes."""
+        action, reason = healthy_state.suggest_routing_action(project_changed=True)
+        assert action == SessionAction.START_NEW
+        assert reason == SessionActionReason.PROJECT_SCOPE
+
+    def test_suggest_routing_action_transfer_dual_lane(self, healthy_state):
+        """Test routing suggests TRANSFER for dual-lane Tier 3."""
+        action, reason = healthy_state.suggest_routing_action(
+            tier_3_needs_independence=True
+        )
+        assert action == SessionAction.TRANSFER
+        assert reason == SessionActionReason.DUAL_LANE_NEEDED
+
+    def test_routing_fields_in_serialization(self, healthy_state):
+        """Test routing fields are included in to_dict()."""
+        state_with_routing = SessionLifecycleState(
+            **{
+                **healthy_state.__dict__,
+                "routing_action": SessionAction.REUSE,
+                "routing_reason": SessionActionReason.CONTEXT_HEALTHY,
+            }
+        )
+        serialized = state_with_routing.to_dict()
+        assert serialized["routing_action"] == "reuse"
+        assert serialized["routing_reason"] == "context_healthy"
 
 
 class TestSessionCommandPlan:
