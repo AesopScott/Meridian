@@ -321,6 +321,13 @@ Coordinator Reviews A Build 2/3 clearance - 2026-06-02:
 - Review results: Build 2 Session Lifecycle command-plan edge coverage passed with no findings; Build 3 FileMap prompt payload visibility coverage passed with no findings. Reported proof: `python -m pytest tests/test_session_lifecycle.py -q` passed 76/76; `git diff --check ee00bc4a^..42783048` passed; `python -m pytest tests/test_filemap.py -q` passed 46/46; `git diff --check 4ee53306^..e1e35d9c` passed.
 - Next coordinator action: route Reviews A to review Build 1 Relay prompt payload evidence after this provenance movement is pushed.
 
+Coordinator Reviews B Build 5 clearance - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Reviews B worktree clean before movement.
+- Approved and completed path-limited movement of Reviews B provenance commit `73858886` onto shared main as `1c46c80c`, limited to `docs/live-codex-reviews-2.md`.
+- Review result: Build 5 Bifrost prompt payload visibility sample rendering passed with no findings. Reported proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 193/193; `git diff --check 41412aee^..8ca2390e` passed.
+- Next coordinator action: wait for Reviews A Build 1 review result, then promote fresh executable tasks for review-cleared lanes.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
