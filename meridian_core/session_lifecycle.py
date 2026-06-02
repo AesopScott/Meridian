@@ -686,3 +686,102 @@ def gather_prime_autonomy_input(
         recent_completions=tuple(recent_completions),
         timestamp=timestamp or datetime.now(timezone.utc),
     )
+
+
+def plan_command_from_session_action(
+    session: Optional[SessionLifecycleState],
+    action: SessionAction,
+    reason: SessionActionReason,
+    evidence: tuple[str, ...] | list[str] = (),
+) -> Optional[SessionCommandPlan]:
+    """Map a routing/recovery decision into a pure advisory command plan.
+
+    This does not execute control. It only gives Prime a typed, auditable plan
+    that can be reviewed, gated, or discarded by a caller.
+    """
+    if session is None:
+        return None
+
+    evidence_refs = tuple(evidence)
+    current_state_evidence = "; ".join(evidence_refs) or (
+        f"SessionLifecycleState:{session.session_id}:{session.status.value}"
+    )
+    review_gate_evidence = None
+    proof_requirement = ProofState.COMMAND_STAGED
+    command_intent = CommandIntent.WATCH
+    expected_transition = (session.status, session.status)
+    is_executable_now = False
+    human_approval_required = False
+    approval_context = None
+    rollback_or_recovery_note = "Advisory only; no live session control is executed."
+
+    if action == SessionAction.SUMMARIZE_RESET:
+        command_intent = CommandIntent.STEER
+        expected_transition = (session.status, session.status)
+        is_executable_now = session.status == SessionStatus.RUNNING
+    elif action == SessionAction.TRANSFER:
+        command_intent = CommandIntent.TRANSFER
+        expected_transition = (session.status, SessionStatus.WAITING)
+        human_approval_required = True
+        approval_context = "Transfer requires human/Aegis approval."
+    elif action == SessionAction.START_NEW:
+        if reason == SessionActionReason.STALE_HEARTBEAT or session.status == SessionStatus.STALE:
+            command_intent = CommandIntent.RESTART
+            expected_transition = (SessionStatus.STALE, SessionStatus.RUNNING)
+            human_approval_required = True
+            approval_context = "Stale recovery requires human/Aegis approval."
+        else:
+            command_intent = CommandIntent.SPAWN
+            expected_transition = (SessionStatus.STARTING, SessionStatus.POLLING)
+            human_approval_required = True
+            approval_context = "Starting a new session requires staged approval."
+    elif action == SessionAction.ARCHIVE:
+        command_intent = CommandIntent.ARCHIVE
+        expected_transition = (session.status, SessionStatus.ARCHIVED)
+        human_approval_required = True
+        approval_context = "Archive requires human/Aegis approval."
+    elif action == SessionAction.REQUEST_HUMAN_GATE:
+        command_intent = CommandIntent.REQUEST_HUMAN_GATE
+        expected_transition = (session.status, session.status)
+        human_approval_required = True
+        approval_context = "Human gate required before session recovery proceeds."
+        if reason == SessionActionReason.REVIEW_GATE:
+            review_gate_evidence = "review gate pending"
+        if reason == SessionActionReason.PERMISSION_BOUNDARY:
+            proof_requirement = ProofState.PERMISSION_VALIDATED
+    elif action == SessionAction.REUSE:
+        command_intent = CommandIntent.WATCH
+        expected_transition = (session.status, session.status)
+        is_executable_now = True
+        proof_requirement = ProofState.QUEUE_READ
+    elif action == SessionAction.AVOID:
+        command_intent = CommandIntent.REQUEST_HUMAN_GATE
+        expected_transition = (session.status, session.status)
+        human_approval_required = True
+        approval_context = "Avoided session requires human review before reuse."
+
+    if human_approval_required:
+        is_executable_now = False
+
+    return SessionCommandPlan(
+        session_id=session.session_id,
+        session_name=session.session_name,
+        command_intent=command_intent,
+        reason=reason.value,
+        expected_state_transition=expected_transition,
+        current_state_evidence=current_state_evidence,
+        queue_file_evidence=session.assigned_queue_file,
+        worktree_evidence=session.worktree_path,
+        review_gate_evidence=review_gate_evidence,
+        proof_requirement=proof_requirement,
+        queue_file_affected=session.assigned_queue_file,
+        worktree_path_affected=session.worktree_path,
+        branch_affected=session.branch_name,
+        aegis_gate_result=None,
+        cadence_gate_required=reason == SessionActionReason.REVIEW_GATE,
+        cadence_gate_status=session.review_cadence_state,
+        is_executable_now=is_executable_now,
+        human_approval_required=human_approval_required,
+        approval_context=approval_context,
+        rollback_or_recovery_note=rollback_or_recovery_note,
+    )

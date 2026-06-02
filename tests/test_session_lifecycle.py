@@ -23,6 +23,7 @@ from meridian_core.session_lifecycle import (
     gather_prime_autonomy_input,
     generate_restart_finding,
     generate_resteer_finding,
+    plan_command_from_session_action,
 )
 
 
@@ -460,6 +461,196 @@ class TestSessionCommandPlan:
             }
         )
         assert archive_for_fill.command_intent == CommandIntent.ARCHIVE
+
+
+class TestSessionCommandPlanEdgeCoverage:
+    """Tests for routing-to-command-plan edge decisions."""
+
+    @pytest.fixture
+    def running_state(self):
+        """Create a running state with valid task-scoped permissions."""
+        now = datetime.now(timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset(
+                [
+                    OperationScope.RESTART,
+                    OperationScope.RESTEER,
+                    OperationScope.ARCHIVE,
+                ]
+            ),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="task-1",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-edge",
+            session_name="Build 2 Edge",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.RUNNING,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/aligned-build-2-command-plan",
+            current_task_id="task-1",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=24000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def test_summarize_reset_edge_is_executable_steer_plan(self, running_state):
+        """Summarize/reset maps to a staged, non-human-gated STEER plan."""
+        plan = plan_command_from_session_action(
+            running_state,
+            SessionAction.SUMMARIZE_RESET,
+            SessionActionReason.PAYLOAD_BUDGET,
+            evidence=["payload near limit"],
+        )
+
+        assert plan is not None
+        assert plan.command_intent == CommandIntent.STEER
+        assert plan.expected_state_transition == (
+            SessionStatus.RUNNING,
+            SessionStatus.RUNNING,
+        )
+        assert plan.is_executable()
+        assert not plan.human_approval_required
+
+    def test_transfer_edge_is_human_gated(self, running_state):
+        """Transfer stays advisory and requires human/Aegis approval."""
+        plan = plan_command_from_session_action(
+            running_state,
+            SessionAction.TRANSFER,
+            SessionActionReason.DUAL_LANE_NEEDED,
+        )
+
+        assert plan is not None
+        assert plan.command_intent == CommandIntent.TRANSFER
+        assert plan.requires_aegis_approval()
+        assert plan.human_approval_required
+        assert not plan.is_executable()
+
+    def test_start_new_session_edge_is_spawn_advisory(self, running_state):
+        """Start-new routing becomes a staged SPAWN advisory, not live launch."""
+        plan = plan_command_from_session_action(
+            running_state,
+            SessionAction.START_NEW,
+            SessionActionReason.REASONING_SHIFT,
+        )
+
+        assert plan is not None
+        assert plan.command_intent == CommandIntent.SPAWN
+        assert plan.expected_state_transition == (
+            SessionStatus.STARTING,
+            SessionStatus.POLLING,
+        )
+        assert plan.human_approval_required
+        assert not plan.is_executable()
+
+    def test_archive_no_session_edge_has_no_plan(self):
+        """Archive/no-session does not fabricate a command target."""
+        assert (
+            plan_command_from_session_action(
+                None,
+                SessionAction.ARCHIVE,
+                SessionActionReason.CONTEXT_FILL,
+            )
+            is None
+        )
+
+    def test_stale_recovery_edge_is_gated_restart(self, running_state):
+        """Stale heartbeat recovery maps to gated RESTART command plan."""
+        stale_state = SessionLifecycleState(
+            **{
+                **running_state.__dict__,
+                "status": SessionStatus.STALE,
+                "health_state": HealthState.STALE,
+                "last_prompt_sent_at": datetime.now(timezone.utc) - timedelta(hours=1),
+            }
+        )
+        plan = plan_command_from_session_action(
+            stale_state,
+            SessionAction.START_NEW,
+            SessionActionReason.STALE_HEARTBEAT,
+        )
+
+        assert plan is not None
+        assert plan.command_intent == CommandIntent.RESTART
+        assert plan.expected_state_transition == (
+            SessionStatus.STALE,
+            SessionStatus.RUNNING,
+        )
+        assert plan.requires_aegis_approval()
+        assert not plan.is_executable()
+
+    def test_review_gate_edge_requires_human_gate(self, running_state):
+        """Review-gated recovery produces a non-executable human-gate plan."""
+        gated_state = SessionLifecycleState(
+            **{
+                **running_state.__dict__,
+                "status": SessionStatus.REVIEW_GATED,
+                "review_cadence_state": ReviewCadenceState.REVIEW_GATED,
+            }
+        )
+        plan = plan_command_from_session_action(
+            gated_state,
+            SessionAction.REQUEST_HUMAN_GATE,
+            SessionActionReason.REVIEW_GATE,
+        )
+
+        assert plan is not None
+        assert plan.command_intent == CommandIntent.REQUEST_HUMAN_GATE
+        assert plan.cadence_gate_required
+        assert plan.review_gate_evidence == "review gate pending"
+        assert plan.human_approval_required
+        assert not plan.is_executable()
+
+    def test_permission_boundary_edge_blocks_execution(self, running_state):
+        """Permission-boundary plans carry permission proof and block execution."""
+        locked_context = PermissionContext(
+            approved_by="scott",
+            approval_scope=frozenset(),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.LOCKED_BY_DEFAULT,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
+            last_permission_change=datetime.now(timezone.utc),
+        )
+        blocked_state = SessionLifecycleState(
+            **{
+                **running_state.__dict__,
+                "status": SessionStatus.BLOCKED,
+                "blocker_summary": "permission boundary",
+                "permission_context": locked_context,
+            }
+        )
+        plan = plan_command_from_session_action(
+            blocked_state,
+            SessionAction.REQUEST_HUMAN_GATE,
+            SessionActionReason.PERMISSION_BOUNDARY,
+        )
+
+        assert plan is not None
+        assert plan.command_intent == CommandIntent.REQUEST_HUMAN_GATE
+        assert plan.proof_requirement == ProofState.PERMISSION_VALIDATED
+        assert plan.human_approval_required
+        assert not blocked_state.can_execute_operation(OperationScope.RESTART)
+        assert not plan.is_executable()
 
 
 class TestRestartResteerRecoveryDecisions:
