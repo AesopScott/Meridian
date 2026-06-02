@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage after the Build 4/5 and Reviews A movement landed on main.
 
@@ -21,6 +21,20 @@ Task: audit whether the newly landed Relay/Aegis PromptPacket policy integration
 Tests: `python -m pytest tests/test_filemap.py -q`.
 
 Completion: mark Ready for Codex Review with commit hash if changed, files changed or no-op evidence, tests run, and Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Completion:
+
+- Build 3 audited current-main Build 4/5 and Reviews A movement paths from prior FileMap completion `53ee81d9..HEAD`, plus the required minimum inspect list.
+- Registered the one missing existing artifact: `docs/relay-aegis-promptpacket-policy-integration-checklist.md`.
+- Verified existing coverage for `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, and `docs/v2-orchestrator-transition-ledger.md`.
+- Audit evidence: focused coverage check across 13 existing movement/minimum paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Commit: `3e617c09`.
+- Queue marker: this completion update.
+- Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
