@@ -11,6 +11,7 @@ _REQUIRED_PATHS = [
     "MISSION.md",
     "context.md",
     "docs/FileMap.md",
+    "docs/harness-stage-checklist.md",
     "docs/agentic-ai-framework-checklist.md",
     "docs/atlas-retrieval-contract.md",
     "meridian_core/atlas.py",

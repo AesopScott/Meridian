@@ -6,6 +6,8 @@
 
 **Source:** `docs/v2-detailed-build-plan.md`
 
+**Harness stage view:** `docs/harness-stage-checklist.md` tracks each harness across Contract/Baseline, V2 Backend, Core Implementation, Prime Integration, Runtime Logic UI, Proofs/Review, and Operations.
+
 ## V2 Progress Summary
 
 | Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
