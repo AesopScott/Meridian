@@ -35,7 +35,7 @@ Proof:
 
 Completion: Build 4 Model Harness runtime validation checklist and Build 5 candidate-trust/external-review badge rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: keep Reviews B polling Build 4 and Build 5 without blocking on read-check-only updates.
 
@@ -46,6 +46,19 @@ Task: inspect current `origin/main` queue tops for Build 4 and Build 5. If Build
 Proof: for Build 4, text/shape inspection plus `git diff --check` on the reviewed range. For Build 5, `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check` on the reviewed range.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If neither lane is Ready, record no commit and report concrete polling evidence; do not mark read-check-only progress. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 polling after these reviews.
+
+Review result - 2026-06-02 00:22 -06:00:
+
+- Build 4 provider transport metadata pass-through checklist passed. Commits `7dda4334` and `f2cbab11` changed only `docs/provider-transport-metadata-pass-through-checklist.md` and `docs/live-build-4.md`.
+- The checklist is docs-only and covers deterministic dispatch metadata envelope requirements, exact model id handling, provider route kind, direct-vs-aggregator proof refs, trust and external-review state, prompt-drag budget/growth fields, validation fail-closed behavior before transport, provider payload boundaries, Relay/Aegis binding, Bifrost display expectations, deterministic tests, and runtime enablement gates.
+- Exclusions cover live provider calls, credential/account probing, raw prompt leakage beyond approved `PromptPacket.model_payload()` transport, raw provider request/response bodies, process/session control, FileMap edits, branch/worktree movement, shared-main writes, pushes to main, and Polaris.
+
+Proof:
+
+- Text/shape inspection passed for the Build 4 checklist and Ready marker.
+- `git diff --check 7dda4334^..f2cbab11` passed.
+
+Completion: Build 4 provider transport metadata pass-through checklist is review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
