@@ -8,6 +8,31 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 4 provider transport metadata envelope pass-through.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 4 provider transport metadata envelope pass-through commits `8d51b6b7` and `c78b1441`. Verify provider-neutral envelope pass-through, exact model id/route kind/trust/proof refs/prompt-drag/external-review state, fail-closed advisory data, adapter/provider request still receives approved payload text only, no live provider calls, no credentials/account probing, no raw provider responses, no UI/Bifrost/FileMap/branch/worktree/main/Polaris leakage.
+
+Proof: `python -m pytest tests/test_relay_executor.py -q` plus `git diff --check 8d51b6b7^..c78b1441`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 00:31 -06:00:
+
+- Build 4 provider transport metadata envelope pass-through passed. Commits `8d51b6b7` and `c78b1441` changed only `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, and `docs/live-build-4.md`.
+- The Relay slice is provider-neutral and extends `RelayDispatchMetadataEnvelope` with trust mode, proof strength, direct/aggregator proof refs, validation evidence ref, allowed/blocked task types, blocked authorities, max risk tier, telemetry support flags, metadata transport advisory state, and retry-fresh-metadata advisory state.
+- Registry-backed execution binds adapter metadata into the envelope while tests verify adapter/provider transport still receives only the approved lane payload text. Scope check found no live provider calls, credentials/account probing, raw provider responses, UI/Bifrost/FileMap edits, branch/worktree/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_relay_executor.py -q` passed: 197 tests.
+- `git diff --check 8d51b6b7^..c78b1441` passed.
+
+Completion: Build 4 provider transport metadata envelope pass-through is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 3 FileMap registration for the provider transport metadata checklist.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
