@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Session Lifecycle command-plan edge coverage after Reviews A cleared the Prime/Beacon advisory binding.
 
@@ -26,7 +26,14 @@ Tests:
 
 - `python -m pytest tests/test_session_lifecycle.py -q`
 
-Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from this command-plan edge slice before unrelated Session Lifecycle work.
+Completion:
+
+- Build 2 completed the command-plan edge coverage slice in local worktree commit `b83a7159`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Coverage added: pure routing-to-command-plan helper and tests for summarize/reset, transfer, start-new-session, archive/no-session, stale recovery restart, review-gate human approval, and permission-boundary blockers.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 76 tests.
+- Ready for Codex Review.
+- Next Candidate: bind any review findings from this command-plan edge slice before unrelated Session Lifecycle work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
