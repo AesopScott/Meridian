@@ -791,6 +791,18 @@ _SAFE_PROMPT_PACKET_EVIDENCE_PREFIXES = (
 )
 
 
+def _is_safe_handoff_evidence_id(tag: str) -> bool:
+    for prefix in _SAFE_PROMPT_PACKET_EVIDENCE_PREFIXES:
+        if not tag.startswith(prefix):
+            continue
+        suffix = tag[len(prefix) :]
+        return bool(suffix) and all(
+            character.islower() or character.isdigit() or character == "-"
+            for character in suffix
+        )
+    return False
+
+
 def _display_safe_handoff_tags(
     tags: tuple[str, ...],
     *,
@@ -803,11 +815,20 @@ def _display_safe_handoff_tags(
             safe_tags.append(tag)
         elif tag in _SAFE_PROMPT_PACKET_HANDOFF_TAGS:
             safe_tags.append(tag)
-        elif tag.startswith(_SAFE_PROMPT_PACKET_EVIDENCE_PREFIXES):
+        elif _is_safe_handoff_evidence_id(tag):
             safe_tags.append(tag)
         else:
             safe_tags.append(fallback)
     return tuple(dict.fromkeys(safe_tags))
+
+
+def relay_display_safe_handoff_tags(
+    tags: tuple[str, ...],
+    *,
+    fallback: str,
+) -> tuple[str, ...]:
+    """Return the Relay handoff sanitizer contract for downstream consumers."""
+    return _display_safe_handoff_tags(tags, fallback=fallback)
 
 
 @dataclass(frozen=True)
