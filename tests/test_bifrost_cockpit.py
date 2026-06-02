@@ -268,7 +268,8 @@ def test_index_relay_harness_renders_backend_logic_snapshot_contract():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
 
     assert "data-relay-logic" in doc
-    assert "bridgeUrl('relay-logic')" in doc
+    assert "const relayLogicUrl = `${localBridgeBase}/relay-logic`;" in doc
+    assert "fetch(relayLogicUrl, { cache: 'no-store' })" in doc
     assert "renderRelayLogicSnapshot(snapshot)" in doc
     assert "renderRelayPrimeDirectives(snapshot)" in doc
     assert "capabilitySections.map(renderRelayCapabilitySection)" in doc
