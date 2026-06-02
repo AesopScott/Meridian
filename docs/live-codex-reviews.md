@@ -8,9 +8,11 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review Build 1 DeepSeek candidate metadata preset slice when it is marked Ready for Codex Review on current main.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:30 -06:00. Current `HEAD` and `origin/main` are `00c4ab0d`, and relevant Build 1 commits `d41e33cd` and `0b7f1bc4` are ancestors of current main.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
@@ -24,11 +26,26 @@ Proof command:
 
 - `python -m pytest tests/test_model_adapter.py -q`
 
+Review result:
+
+- `git merge-base --is-ancestor d41e33cd HEAD` and `git merge-base --is-ancestor 0b7f1bc4 HEAD` passed.
+- `git show --stat --oneline --name-only d41e33cd 0b7f1bc4` shows the runtime commit only changed `meridian_core/model_adapter.py` and `tests/test_model_adapter.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py -q` passed with 32 tests.
+- Verified `deepseek_candidate_route_presets()` provides `default_quality` and `fast` candidate lanes, keeps `deepseek-chat` as the sole dispatch model, and keeps `deepseek-v4-pro` / `deepseek-v4-flash` as metadata variant labels only.
+- Verified DeepSeek remains candidate trust with external review pending and explicit blocks for review clearance, branch movement, Relay/Aegis bypass, and autonomous coding.
+- Scoped side-effect scan found no new network/live model call path, credentials handling, UI/Bifrost rendering, branch movement, or Polaris dependency in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 1 DeepSeek candidate metadata preset slice is review-cleared. Next Relay/Model Harness candidate for coordinator/Prime selection from `docs/v2-progress-tracker.md`: continue remaining Relay/Model Harness build work such as visible prompt payload meter wiring or metadata/pass-through hardening; DeepSeek must remain candidate-gated until validation proof exists.
+
 Completion: if clean, mark passed and promote the next Relay/Model Harness candidate from `docs/v2-progress-tracker.md`; if findings exist, route the smallest focused repair to Build 1 ahead of unrelated Relay work. Commit only review-queue/provenance updates and push to `origin/main`.
 
-## Next Candidate Task
+## Next Candidate Task - Completed / Passed
 
 Goal: review Build 2 Session Lifecycle restart/resteer recovery tests when marked Ready for Codex Review on current main.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:30 -06:00. Current `HEAD` and `origin/main` are `00c4ab0d`, and relevant Build 2 commits `636d946c` and `2b7011fb` are ancestors of current main.
 
 Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for review provenance/routing only.
 
@@ -37,6 +54,18 @@ Task: after the active Build 1 DeepSeek candidate metadata preset review is pass
 Proof command:
 
 - `python -m pytest tests/test_session_lifecycle.py -q`
+
+Review result:
+
+- `git merge-base --is-ancestor 636d946c HEAD` and `git merge-base --is-ancestor 2b7011fb HEAD` passed.
+- `git show --stat --oneline --name-only 636d946c 2b7011fb` shows the test commit only changed `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 65 tests.
+- Verified recovery coverage for stale heartbeat restart advisory/gated plan, context-fill summarize/reset and start-new paths, reasoning-shift start-new plus transfer recovery, review-gate human approval, and permission-boundary blocking with expiry/task-scope invariants preserved.
+- Scoped side-effect scan found no session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 2 restart/resteer recovery test slice is review-cleared. Next Session Lifecycle candidate for coordinator/Prime selection from `docs/v2-progress-tracker.md`: wire the restart/resteer evaluator into Prime/Beacon runtime state while preserving branch/worktree permission boundaries.
 
 Completion: if clean, mark passed and promote the next Session Lifecycle candidate from `docs/v2-progress-tracker.md`; if findings exist, route the smallest focused repair to Build 2 ahead of unrelated Session Lifecycle work. Commit only review-queue/provenance updates and push to `origin/main`.
 
