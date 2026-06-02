@@ -12,6 +12,8 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Goal: audit FileMap coverage for the current-main Relay UI/runtime integration landing.
 
+Coordinator nudge: this is not a passive poll. Execute this FileMap audit now; the current check shows `meridian_core/relay_logic_snapshot.py` and `tests/test_relay_logic_snapshot.py` are present on current main but not yet registered in FileMap coverage.
+
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
 
 Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.

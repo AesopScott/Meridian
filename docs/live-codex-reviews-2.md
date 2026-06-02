@@ -10,6 +10,8 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Goal: review the current-main Relay harness UI/runtime integration landing.
 
+Coordinator nudge: this is not a passive poll. Review the landed Relay harness UI/runtime integration now, using current `origin/main` and the proof command below; either pass it with provenance or route a focused finding.
+
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
 Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
