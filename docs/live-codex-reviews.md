@@ -8,9 +8,27 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Repair-Routed
 
 Goal: review current-main Build 2 Session Lifecycle permissions and Prime/Beacon binding implementation.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 18:14 -06:00. Current `HEAD` and `origin/main` contain Build 2 commit `7e96994a`, and the required proof passes, but the implementation does not yet satisfy the reviewed permissions/Prime-Beacon checklist invariants.
+
+Review result:
+
+- `git merge-base --is-ancestor 7e96994a HEAD` and `git merge-base --is-ancestor 7e96994a origin/main` passed.
+- `git show --stat --oneline --name-only 7e96994a` and `git diff-tree --no-commit-id --name-only -r 7e96994a` show the implementation commit only changed `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 52 tests.
+- Scoped side-effect scan found no subprocess/session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency in `meridian_core/session_lifecycle.py` / `tests/test_session_lifecycle.py`.
+
+Findings:
+
+- HIGH: `meridian_core/session_lifecycle.py:144` - `PermissionContext` omits the reviewed checklist fields and invariants for `approved_by_secondary`, `unlock_expiry`, and `task_scope` (`docs/session-lifecycle-permissions-implementation-checklist.md:16`, `docs/session-lifecycle-permissions-implementation-checklist.md:21`, `docs/session-lifecycle-permissions-implementation-checklist.md:22`, `docs/session-lifecycle-permissions-implementation-checklist.md:186`, `docs/session-lifecycle-permissions-implementation-checklist.md:187`). Without expiry/task scope and dual-signer support, temporary unlocks are not timestamp-bound/task-scoped and permanent unlocks cannot require Aegis + Scott approval. Required repair: Build 2 must add the missing fields/invariants and regression tests for expiry, task scope, and dual-signer permanent unlocks.
+- HIGH: `meridian_core/session_lifecycle.py:292` - `SessionLifecycleState.can_accept_work()` ignores `permission_context`, so a healthy locked session can still accept work despite the checklist requiring `can_accept_work()` to be false while permission is locked or an unlock is expired (`docs/session-lifecycle-permissions-implementation-checklist.md:101`, `docs/session-lifecycle-permissions-implementation-checklist.md:151`, `docs/session-lifecycle-permissions-implementation-checklist.md:153`, `docs/session-lifecycle-permissions-implementation-checklist.md:154`). Required repair: Build 2 must make work acceptance enforce permission lock, expiry, and task scope, with tests proving locked/expired/out-of-scope sessions cannot accept work.
+- MEDIUM: `meridian_core/session_lifecycle.py:305` - `heartbeat_stale()` uses `last_queue_read_at` and a minutes threshold, but the permissions checklist defines staleness from `last_prompt_sent_at` with a seconds threshold (`docs/session-lifecycle-permissions-implementation-checklist.md:37`, `docs/session-lifecycle-permissions-implementation-checklist.md:102`, `docs/session-lifecycle-permissions-implementation-checklist.md:132`, `docs/session-lifecycle-permissions-implementation-checklist.md:133`). Required repair: Build 2 must align heartbeat staleness with `last_prompt_sent_at` / seconds semantics or update the reviewed contract before implementation.
+- MEDIUM: `meridian_core/session_lifecycle.py:206` - `PrimeAutonomyInput` is a frozen dataclass but stores mutable `list`/`dict` fields and `to_dict()` returns those containers by reference at `meridian_core/session_lifecycle.py:220` through `meridian_core/session_lifecycle.py:223`. This violates the checklist's immutable/deterministic Prime input requirement (`docs/session-lifecycle-permissions-implementation-checklist.md:147`, `docs/session-lifecycle-permissions-implementation-checklist.md:181`, `docs/session-lifecycle-permissions-implementation-checklist.md:190`). Required repair: Build 2 must normalize Prime input containers to immutable representations or defensive copies and add mutation-resistance tests.
+
+Completion: routed the focused contract-completeness repair to Build 2 in `docs/live-build-2.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 2 provides a current-main repair target.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
@@ -1435,6 +1453,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-06-01 18:06 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main fetched and fast-forward checked; no executable Active Task in the assigned Reviews A queue after the Build 1 repair pass; Build 2 has Ready markers in its build queue but no promoted Reviews A Active Task.
 2026-06-01 18:08 -06:00 - Codex Reviews A checked queue; status: repair routed; notes: active Build 2 Session Lifecycle permissions/Prime-Beacon binding review found target commit `6e2f2a5f` is not an ancestor of current HEAD/origin/main, so visibility repair was routed instead of running proof against the wrong checkout.
 2026-06-01 18:11 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current at `5568043b`; top Build 2 permissions/Prime-Beacon binding review is completed/repair-routed and no executable Active Task remains in the assigned Reviews A queue.
+2026-06-01 18:14 -06:00 - Codex Reviews A checked queue; status: repair routed; notes: active current-main Build 2 Session Lifecycle permissions/Prime-Beacon binding review executed; proof passed but contract-completeness findings were routed to Build 2.
 ```
 
 ## Review Log

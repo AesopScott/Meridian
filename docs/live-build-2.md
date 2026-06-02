@@ -8,6 +8,29 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: repair Session Lifecycle permissions and Prime/Beacon binding contract completeness.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Review findings routed by Codex Reviews A on 2026-06-01 18:14 -06:00:
+
+- HIGH: `meridian_core/session_lifecycle.py:144` - `PermissionContext` omits the reviewed checklist fields and invariants for `approved_by_secondary`, `unlock_expiry`, and `task_scope` (`docs/session-lifecycle-permissions-implementation-checklist.md:16`, `docs/session-lifecycle-permissions-implementation-checklist.md:21`, `docs/session-lifecycle-permissions-implementation-checklist.md:22`, `docs/session-lifecycle-permissions-implementation-checklist.md:186`, `docs/session-lifecycle-permissions-implementation-checklist.md:187`). Without expiry/task scope and dual-signer support, temporary unlocks are not timestamp-bound/task-scoped and permanent unlocks cannot require Aegis + Scott approval.
+- HIGH: `meridian_core/session_lifecycle.py:292` - `SessionLifecycleState.can_accept_work()` ignores `permission_context`, so a healthy locked session can still accept work despite the checklist requiring `can_accept_work()` to be false while permission is locked or an unlock is expired (`docs/session-lifecycle-permissions-implementation-checklist.md:101`, `docs/session-lifecycle-permissions-implementation-checklist.md:151`, `docs/session-lifecycle-permissions-implementation-checklist.md:153`, `docs/session-lifecycle-permissions-implementation-checklist.md:154`).
+- MEDIUM: `meridian_core/session_lifecycle.py:305` - `heartbeat_stale()` uses `last_queue_read_at` and a minutes threshold, but the permissions checklist defines staleness from `last_prompt_sent_at` with a seconds threshold (`docs/session-lifecycle-permissions-implementation-checklist.md:37`, `docs/session-lifecycle-permissions-implementation-checklist.md:102`, `docs/session-lifecycle-permissions-implementation-checklist.md:132`, `docs/session-lifecycle-permissions-implementation-checklist.md:133`).
+- MEDIUM: `meridian_core/session_lifecycle.py:206` - `PrimeAutonomyInput` is a frozen dataclass but stores mutable `list`/`dict` fields and `to_dict()` returns those containers by reference at `meridian_core/session_lifecycle.py:220` through `meridian_core/session_lifecycle.py:223`, violating the immutable/deterministic Prime input requirement (`docs/session-lifecycle-permissions-implementation-checklist.md:147`, `docs/session-lifecycle-permissions-implementation-checklist.md:181`, `docs/session-lifecycle-permissions-implementation-checklist.md:190`).
+
+Task: repair the implementation to match the reviewed permissions/Prime-Beacon checklist. Add the missing `PermissionContext` fields/invariants, enforce permission lock/expiry/task scope in `can_accept_work()`, align `heartbeat_stale()` with the reviewed `last_prompt_sent_at` seconds semantics or update the reviewed contract before implementation, and normalize `PrimeAutonomyInput` containers to immutable representations or defensive copies. Add focused regression tests for each repaired invariant. Preserve the no-live-process-control boundary and do not edit UI/Bifrost/FileMap/Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: record the current-main repair commit hash, changed files, proof result, push status, and Ready for Codex Review marker in this queue.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Session Lifecycle permissions and Prime/Beacon binding review visibility.
