@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Bifrost prompt payload visibility sample rendering after Reviews B cleared the proof-state preview.
 
@@ -22,7 +22,14 @@ Tests:
 
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
-Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from prompt payload visibility before unrelated Bifrost work.
+Completion:
+
+- Build 5 completed Bifrost prompt payload visibility sample rendering in commit `f7c06ae2`.
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 193 tests.
+- Ready for Codex Review.
+
+Next Candidate: bind any review findings from prompt payload visibility before unrelated Bifrost work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
