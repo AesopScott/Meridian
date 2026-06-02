@@ -137,6 +137,69 @@ class RelayPromptPayloadEvidence:
 
 
 @dataclass(frozen=True)
+class RelayPromptPayloadMeterEvidence:
+    """Display-safe visible prompt payload meter data for Relay lanes."""
+
+    meter_evidence_id: str
+    heartbeat_id: str | None = None
+    lane_id: str | None = None
+    route_id: str | None = None
+    selected_provider: str | None = None
+    exact_model_id: str | None = None
+    provider_route_kind: str = "unknown"
+    trust_state: str = "unknown"
+    capability_tier: str | None = None
+    display_label: str = "(unknown)"
+    estimated_prompt_tokens: int | None = None
+    prompt_budget_tokens: int | None = None
+    budget_percent: float | None = None
+    payload_status: str = "unknown"
+    growth_delta_tokens: int | None = None
+    growth_delta_percent: float | None = None
+    q_mode: bool = False
+    growth_state: str = "unknown"
+    prompt_drag_tags: tuple[str, ...] = ()
+    warning_tags: tuple[str, ...] = ()
+    blocker_tags: tuple[str, ...] = ()
+    payload_evidence_ref: str | None = None
+    prompt_payload_snapshot_hash: str | None = None
+    model_metadata_ref: str | None = None
+    external_review_evidence_ref: str | None = None
+    serialization_only: bool = True
+
+    def to_dict(self) -> dict[str, object]:
+        """Return stable meter data without prompt text or provider responses."""
+        return {
+            "meter_evidence_id": self.meter_evidence_id,
+            "heartbeat_id": self.heartbeat_id,
+            "lane_id": self.lane_id,
+            "route_id": self.route_id,
+            "selected_provider": self.selected_provider,
+            "exact_model_id": self.exact_model_id,
+            "provider_route_kind": self.provider_route_kind,
+            "trust_state": self.trust_state,
+            "capability_tier": self.capability_tier,
+            "display_label": self.display_label,
+            "estimated_prompt_tokens": self.estimated_prompt_tokens,
+            "prompt_budget_tokens": self.prompt_budget_tokens,
+            "budget_percent": self.budget_percent,
+            "payload_status": self.payload_status,
+            "growth_delta_tokens": self.growth_delta_tokens,
+            "growth_delta_percent": self.growth_delta_percent,
+            "q_mode": self.q_mode,
+            "growth_state": self.growth_state,
+            "prompt_drag_tags": self.prompt_drag_tags,
+            "warning_tags": self.warning_tags,
+            "blocker_tags": self.blocker_tags,
+            "payload_evidence_ref": self.payload_evidence_ref,
+            "prompt_payload_snapshot_hash": self.prompt_payload_snapshot_hash,
+            "model_metadata_ref": self.model_metadata_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
+            "serialization_only": self.serialization_only,
+        }
+
+
+@dataclass(frozen=True)
 class RelayDispatchEnvelope:
     """Safe audit envelope built before dispatch without raw transport payloads."""
 
@@ -577,6 +640,7 @@ class RelayDecisionRecord:
     aegis_explanation: str = ""  # gate evaluation explanation
     route_metadata: ModelRouteMetadataBinding | None = None
     payload_evidence: RelayPromptPayloadEvidence | None = None
+    payload_meter_evidence: RelayPromptPayloadMeterEvidence | None = None
     dispatch_envelope: RelayDispatchEnvelope | None = None
     dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None
     provider_result_validation_evidence: RelayProviderResultValidationEvidence | None = None
@@ -600,6 +664,7 @@ class RelayExecutionResult:
     adapter_metadata: ModelHarnessMetadata | None = None
     route_metadata: ModelRouteMetadataBinding | None = None
     payload_evidence: RelayPromptPayloadEvidence | None = None
+    payload_meter_evidence: RelayPromptPayloadMeterEvidence | None = None
     dispatch_envelope: RelayDispatchEnvelope | None = None
     dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None
     provider_result_validation_evidence: RelayProviderResultValidationEvidence | None = None
@@ -1039,6 +1104,59 @@ class RelayExecutionSummary:
             lanes=tuple(lane_summaries),
             missing_metadata_tags=tuple(dict.fromkeys(missing_tags)),
         )
+
+    def prompt_payload_meter_evidence(
+        self,
+    ) -> tuple[RelayPromptPayloadMeterEvidence, ...]:
+        """Return display-safe visible prompt payload meter evidence."""
+        evidence = [result.payload_meter_evidence for result in self.results]
+        return tuple(item for item in evidence if item is not None)
+
+    def prompt_payload_meter_consumer_view(self) -> dict[str, object]:
+        """Return deterministic prompt payload meter data for Relay consumers."""
+        evidence = self.prompt_payload_meter_evidence()
+        decision_evidence = (
+            self.decision_record.payload_meter_evidence
+            if self.decision_record is not None
+            else None
+        )
+        if not evidence and decision_evidence is not None:
+            evidence = (decision_evidence,)
+        blocker_tags = tuple(
+            dict.fromkeys(
+                tag
+                for item in (*evidence, decision_evidence)
+                if item is not None
+                for tag in item.blocker_tags
+            )
+        )
+        warning_tags = tuple(
+            dict.fromkeys(
+                tag
+                for item in (*evidence, decision_evidence)
+                if item is not None
+                for tag in item.warning_tags
+            )
+        )
+        heartbeat_id = None
+        if decision_evidence is not None:
+            heartbeat_id = decision_evidence.heartbeat_id
+        elif evidence:
+            heartbeat_id = evidence[0].heartbeat_id
+        elif self.decision_record is not None:
+            heartbeat_id = self.decision_record.heartbeat_id
+        return {
+            "heartbeat_id": heartbeat_id,
+            "consumer_view_kind": "relay_prompt_payload_meter",
+            "serialization_only": True,
+            "meter_evidence": tuple(item.to_dict() for item in evidence),
+            "decision_record_meter_evidence": (
+                decision_evidence.to_dict() if decision_evidence is not None else None
+            ),
+            "prompt_drag_blocked": bool(blocker_tags),
+            "blocker_tags": blocker_tags,
+            "warning_tags": warning_tags,
+        }
 
     def dispatch_metadata_envelopes(self) -> tuple[RelayDispatchMetadataEnvelope, ...]:
         """Return display-safe metadata envelopes without provider payloads."""
@@ -1534,6 +1652,104 @@ def _payload_evidence_ref(payload_evidence: RelayPromptPayloadEvidence | None) -
     heartbeat_id = payload_evidence.heartbeat_id or "unknown-heartbeat"
     lane_id = payload_evidence.lane_id or "unknown-lane"
     return f"relay-payload-evidence:{heartbeat_id}:{lane_id}"
+
+
+def _build_prompt_payload_meter_evidence(
+    plan: RelayDispatchPlan,
+    payload_snapshot: PromptPayloadSnapshot | None = None,
+    payload_evidence: RelayPromptPayloadEvidence | None = None,
+    *,
+    lane_id: str | None = None,
+) -> RelayPromptPayloadMeterEvidence:
+    """Build visible prompt payload meter data without exposing prompt text."""
+    packet = plan.packet
+    snapshot = payload_snapshot
+    if snapshot is None:
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=len(packet.serialized_prompt),
+            estimated_tokens=(
+                payload_evidence.estimated_prompt_tokens
+                if payload_evidence is not None
+                and payload_evidence.estimated_prompt_tokens is not None
+                else packet.prompt_tokens
+            ),
+            budget_tokens=(
+                payload_evidence.prompt_budget_tokens
+                if payload_evidence is not None
+                else None
+            ),
+        )
+    lane_label = (
+        lane_id
+        or (payload_evidence.lane_id if payload_evidence is not None else None)
+        or "unknown-lane"
+    )
+    prompt_drag_tags = (
+        payload_evidence.prompt_drag_tags
+        if payload_evidence is not None
+        else _payload_evidence_prompt_drag_tags(
+            snapshot,
+            over_budget=(
+                snapshot.budget_tokens is not None
+                and snapshot.budget_tokens > 0
+                and snapshot.estimated_tokens > snapshot.budget_tokens
+            ),
+        )
+    )
+    warning_tags: list[str] = []
+    blocker_tags: list[str] = []
+    if snapshot.status.value == "watch":
+        warning_tags.append("prompt_payload_watch")
+    elif snapshot.status.value == "degraded":
+        blocker_tags.append("prompt_payload_degraded")
+    for tag in prompt_drag_tags:
+        if "over_budget" in tag or "degraded" in tag:
+            blocker_tags.append(tag)
+        elif "watch" in tag or "growth" in tag:
+            warning_tags.append(tag)
+    return RelayPromptPayloadMeterEvidence(
+        meter_evidence_id=f"relay-prompt-meter:{packet.packet_id}:{lane_label}",
+        heartbeat_id=packet.packet_id,
+        lane_id=lane_label,
+        route_id=(
+            payload_evidence.route_id
+            if payload_evidence is not None
+            else f"tier-{plan.route.risk_tier}:{plan.route.mode.value}"
+        ),
+        selected_provider=(
+            payload_evidence.selected_provider if payload_evidence is not None else None
+        ),
+        exact_model_id=(
+            payload_evidence.selected_model if payload_evidence is not None else None
+        ),
+        provider_route_kind=(
+            payload_evidence.provider_route_kind
+            if payload_evidence is not None
+            else "unknown"
+        ),
+        trust_state=payload_evidence.trust_state if payload_evidence else "unknown",
+        capability_tier=payload_evidence.capability_tier if payload_evidence else None,
+        display_label=snapshot.display_label,
+        estimated_prompt_tokens=snapshot.estimated_tokens,
+        prompt_budget_tokens=snapshot.budget_tokens,
+        budget_percent=snapshot.budget_percent,
+        payload_status=snapshot.status.value,
+        growth_delta_tokens=snapshot.growth_tokens,
+        growth_delta_percent=snapshot.growth_percent,
+        q_mode=snapshot.queue_mode,
+        growth_state=_payload_evidence_growth_state(snapshot),
+        prompt_drag_tags=prompt_drag_tags,
+        warning_tags=tuple(dict.fromkeys(warning_tags)),
+        blocker_tags=tuple(dict.fromkeys(blocker_tags)),
+        payload_evidence_ref=_payload_evidence_ref(payload_evidence),
+        prompt_payload_snapshot_hash=(
+            payload_evidence.prompt_payload_snapshot_hash if payload_evidence else None
+        ),
+        model_metadata_ref=payload_evidence.model_metadata_ref if payload_evidence else None,
+        external_review_evidence_ref=(
+            payload_evidence.external_review_evidence_ref if payload_evidence else None
+        ),
+    )
 
 
 def _proof_trail_evidence_ids(proof_trail: ProofTrail | None) -> tuple[str, ...]:
@@ -2711,6 +2927,19 @@ def execute_relay_dispatch_plan(
         )
         for lane, snapshot in zip(plan.lanes, snapshots)
     )
+    payload_meter_evidences = tuple(
+        _build_prompt_payload_meter_evidence(
+            plan,
+            snapshot,
+            payload_evidence,
+            lane_id=f"{lane.role.value}:{lane.preferred_model}",
+        )
+        for lane, snapshot, payload_evidence in zip(
+            plan.lanes,
+            snapshots,
+            payload_evidences,
+        )
+    )
     dispatch_envelopes = tuple(
         _build_dispatch_envelope(
             plan,
@@ -2736,10 +2965,11 @@ def execute_relay_dispatch_plan(
         )
     )
 
-    for lane, snapshot, payload_evidence, dispatch_envelope, dispatch_metadata_envelope in zip(
+    for lane, snapshot, payload_evidence, payload_meter_evidence, dispatch_envelope, dispatch_metadata_envelope in zip(
         plan.lanes,
         snapshots,
         payload_evidences,
+        payload_meter_evidences,
         dispatch_envelopes,
         dispatch_metadata_envelopes,
     ):
@@ -2761,6 +2991,7 @@ def execute_relay_dispatch_plan(
                     output=output,
                     payload_snapshot=snapshot,
                     payload_evidence=payload_evidence,
+                    payload_meter_evidence=payload_meter_evidence,
                     dispatch_envelope=dispatch_envelope,
                     dispatch_metadata_envelope=dispatch_metadata_envelope,
                     provider_result_validation_evidence=result_validation_evidence,
@@ -2779,6 +3010,9 @@ def execute_relay_dispatch_plan(
     if include_decision_record:
         first_snapshot = snapshots[0] if snapshots else None
         first_payload_evidence = payload_evidences[0] if payload_evidences else None
+        first_payload_meter_evidence = (
+            payload_meter_evidences[0] if payload_meter_evidences else None
+        )
         decision_record = _build_decision_record(
             plan,
             first_snapshot,
@@ -2791,6 +3025,7 @@ def execute_relay_dispatch_plan(
         if results:
             decision_record = replace(
                 decision_record,
+                payload_meter_evidence=first_payload_meter_evidence,
                 provider_result_validation_evidence=(
                     results[0].provider_result_validation_evidence
                 ),
@@ -2858,6 +3093,19 @@ def execute_relay_plan_with_registry(
             snapshots,
         )
     )
+    payload_meter_evidences = tuple(
+        _build_prompt_payload_meter_evidence(
+            plan,
+            snapshot,
+            payload_evidence,
+            lane_id=f"{lane.role.value}:{lane.preferred_model}",
+        )
+        for lane, snapshot, payload_evidence in zip(
+            plan.lanes,
+            snapshots,
+            payload_evidences,
+        )
+    )
     dispatch_envelopes = tuple(
         _build_dispatch_envelope(
             plan,
@@ -2894,12 +3142,13 @@ def execute_relay_plan_with_registry(
         )
     )
 
-    for lane, adapter, snapshot, route_metadata, payload_evidence, dispatch_envelope, dispatch_metadata_envelope in zip(
+    for lane, adapter, snapshot, route_metadata, payload_evidence, payload_meter_evidence, dispatch_envelope, dispatch_metadata_envelope in zip(
         plan.lanes,
         resolved_adapters,
         snapshots,
         resolved_route_metadata,
         payload_evidences,
+        payload_meter_evidences,
         dispatch_envelopes,
         dispatch_metadata_envelopes,
     ):
@@ -2923,6 +3172,7 @@ def execute_relay_plan_with_registry(
                     adapter_metadata=adapter.metadata,
                     route_metadata=route_metadata,
                     payload_evidence=payload_evidence,
+                    payload_meter_evidence=payload_meter_evidence,
                     dispatch_envelope=dispatch_envelope,
                     dispatch_metadata_envelope=dispatch_metadata_envelope,
                     provider_result_validation_evidence=result_validation_evidence,
@@ -2943,6 +3193,9 @@ def execute_relay_plan_with_registry(
         first_adapter_metadata = resolved_adapters[0].metadata if resolved_adapters else None
         first_route_metadata = resolved_route_metadata[0] if resolved_route_metadata else None
         first_payload_evidence = payload_evidences[0] if payload_evidences else None
+        first_payload_meter_evidence = (
+            payload_meter_evidences[0] if payload_meter_evidences else None
+        )
         decision_record = _build_decision_record(
             plan,
             first_snapshot,
@@ -2955,6 +3208,7 @@ def execute_relay_plan_with_registry(
         if results:
             decision_record = replace(
                 decision_record,
+                payload_meter_evidence=first_payload_meter_evidence,
                 provider_result_validation_evidence=(
                     results[0].provider_result_validation_evidence
                 ),

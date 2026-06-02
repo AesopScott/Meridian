@@ -34,6 +34,7 @@ from meridian_core.relay_executor import (
     RelayExecutionResult,
     RelayExecutionSummary,
     RelayModelCapabilityMetadataSummary,
+    RelayPromptPayloadMeterEvidence,
     RelayProviderResultValidationEvidence,
     RelayPromptPacketPolicyDisposition,
     RelayPromptPacketPolicyEvidence,
@@ -1237,6 +1238,101 @@ class TestPayloadSnapshotEdgeCases:
             budget_tokens=2000,
         )
         assert _snapshot_severity(snapshot_degraded) == EvidenceSeverity.WARNING
+
+
+class TestRelayPromptPayloadMeterEvidence:
+    """Tests for Relay-visible prompt payload meter evidence."""
+
+    def test_meter_evidence_uses_snapshot_label_budget_and_growth(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=12400,
+            estimated_tokens=2500,
+            budget_tokens=2000,
+            prior_estimated_tokens=2000,
+            queue_mode=True,
+        )
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            payload_snapshots=(snapshot,),
+            include_decision_record=True,
+        )
+
+        evidence = summary.results[0].payload_meter_evidence
+        assert isinstance(evidence, RelayPromptPayloadMeterEvidence)
+        assert summary.decision_record.payload_meter_evidence is evidence
+        assert evidence.display_label == "(12.4k)"
+        assert evidence.estimated_prompt_tokens == 2500
+        assert evidence.prompt_budget_tokens == 2000
+        assert evidence.budget_percent == 125.0
+        assert evidence.payload_status == PayloadStatus.DEGRADED.value
+        assert evidence.growth_delta_tokens == 500
+        assert evidence.growth_delta_percent == 25.0
+        assert evidence.q_mode is True
+        assert evidence.selected_provider == "deepseek"
+        assert evidence.exact_model_id == "deepseek-chat"
+        assert evidence.provider_route_kind == "direct"
+        assert "prompt_drag_over_budget" in evidence.prompt_drag_tags
+        assert "prompt_drag_degraded" in evidence.prompt_drag_tags
+        assert "prompt_payload_degraded" in evidence.blocker_tags
+        assert evidence.payload_evidence_ref == (
+            f"relay-payload-evidence:{_PACKET_ID}:"
+            f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}"
+        )
+        assert adapter.received_payloads == [_PROMPT]
+
+    def test_meter_consumer_view_is_stable_and_display_safe(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=800,
+            estimated_tokens=200,
+            budget_tokens=2000,
+        )
+
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("provider response should stay out"),
+            payload_snapshots=(snapshot,),
+            include_decision_record=True,
+        )
+        first = summary.prompt_payload_meter_consumer_view()
+        second = summary.prompt_payload_meter_consumer_view()
+        rendered = " ".join(str(value) for value in first.values())
+
+        assert first == second
+        assert first["heartbeat_id"] == plan.packet.packet_id
+        assert first["consumer_view_kind"] == "relay_prompt_payload_meter"
+        assert len(first["meter_evidence"]) == 1
+        assert first["meter_evidence"][0]["display_label"] == "(under 1k)"
+        assert first["meter_evidence"][0]["budget_percent"] == 10.0
+        assert first["meter_evidence"][0]["payload_status"] == "healthy"
+        assert first["decision_record_meter_evidence"] == first["meter_evidence"][0]
+        assert first["prompt_drag_blocked"] is False
+        assert _PROMPT not in rendered
+        assert "provider response" not in rendered
+        assert "credential" not in rendered.lower()
+
+    def test_meter_fallback_snapshot_exists_for_dispatch_without_snapshot(self) -> None:
+        plan = _make_plan(1)
+        summary = execute_relay_dispatch_plan(plan, _constant_model_call("ok"))
+
+        evidence = summary.results[0].payload_meter_evidence
+        assert evidence is not None
+        assert evidence.display_label == "(under 1k)"
+        assert evidence.estimated_prompt_tokens == plan.packet.prompt_tokens
+        assert evidence.payload_status == "healthy"
+        assert evidence.serialization_only is True
+        assert _PROMPT not in " ".join(str(value) for value in evidence.to_dict().values())
 
 
 class TestAdapterMetadata:
