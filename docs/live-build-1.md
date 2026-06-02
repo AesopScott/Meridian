@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: Relay V3 Goal Runtime handoff/checkpoint display-safety audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-relay-v3-goal-runtime-handoff-audit-20260602-1336`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02.
+- Commit: `e8286272` (`test: Harden Relay goal handoff checkpoint tags`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (225 passed); `git diff --check` (passed); path-scope check limited changes to allowed files.
+- Concrete evidence: Relay's reusable handoff sanitizer now preserves only bounded V3 Goal Runtime/checkpoint tags such as `goal_objective_summary_present`, `lane_session_label_present`, `blocker_continuation_policy_required`, `goal_checkpoint_required`, `regular_git_checkpoint_expected`, `regular_obsidian_checkpoint_expected`, and safe `goal-proof-*` refs. Focused tests prove raw objective/chat text, provider/account tokens, personal-name paths, branch/worktree movement requests, Git command text, uncoordinated main-write requests, free-text blockers, and unsafe goal proof refs are redacted across evidence-id, blocker, warning, and reason surfaces.
+- Next Candidate: once V3 Goal Runtime consumer views are promoted, add matching Bifrost/Prime/Aegis renderer tests that consume these bounded Relay checkpoint tags without exposing raw goal/session text.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: Relay Source/Git main-write coordination handoff display-safety audit.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
