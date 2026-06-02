@@ -235,6 +235,14 @@ Coordinator review and Build 4 repair routing - 2026-06-02:
 - Build 4 repaired the whitespace-only finding locally in commit `2d2c0fb4`; coordinator moved it to main as `6546595c`. Repair scope stayed limited to `docs/relay-heartbeat-model-routing-implementation-checklist.md` and `docs/live-build-4.md`.
 - Proof after repair movement: `git diff --check a4652ce4^..HEAD` passed on shared main. Next coordinator action: re-steer Reviews B to re-review repaired Build 4 and then continue to Build 5 if Build 4 passes.
 
+Coordinator Build 3 maintenance movement and session honesty check - 2026-06-02:
+
+- User explicitly clarified that if all seven sessions are not working, the coordinator must report it rather than assume. Current truth: Build 1, Build 2, Build 4, and Build 5 have completed their local slices and are idle until fresh executable tasks are routed; Reviews A is idle after passing Build 1/2; Build 3 completed a new FileMap maintenance slice; Reviews B was idle until re-steered at this checkpoint.
+- Movement gate: fetched `origin/main`; verified shared main was clean on `main`; verified Build 3 worktree was present and clean before movement. Build 3 branch was clean, `ahead 2, behind 4`, with local commits `25bc316b` and `8eba8c97`.
+- Approved and completed path-limited movement of Build 3 FileMap maintenance commits onto shared main as `0cfd5bfa` (`chore: Register V2 contract FileMap coverage`) and `1df7e081` (`chore: Record V2 FileMap audit completion`). Movement scope stayed limited to `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_filemap.py -q` passed 46/46. Shared main remained clean and was ahead only by the expected Build 3 movement commits.
+- Reviews B was re-steered in thread `019e864a-0536-7250-8057-19bf8a8a85b3` to re-review repaired Build 4 (`a4652ce4`, `e15a38a1`, `6546595c`) and then review Build 5 (`be4074f7`, `093be886`) if Build 4 passes. No takeover completion was marked.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
