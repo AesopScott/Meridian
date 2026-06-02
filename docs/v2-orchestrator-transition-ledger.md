@@ -456,6 +456,15 @@ Coordinator Build 2 permission-evidence movement - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed 168/168; `git diff --check 225a5108^..HEAD` passed.
 - Next coordinator action: push this movement and route Reviews A to review Build 2 permission-aware advisory evidence. Build 2 becomes review-gated until Reviews A passes, routes a finding, or records a blocker.
 
+Coordinator Build 3 and review-clearance movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Build 3, Reviews A, and Reviews B worktrees clean before movement.
+- Approved and completed path-limited movement of Build 3 post-Build-4/5 FileMap audit commits `3e617c09` and `813ea7b6` onto shared main as `c8c7cc22` and `007a1217`, limited to `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
+- Approved and completed path-limited movement of Reviews A Build 2 permission-evidence pass provenance commit `651ff70e` onto shared main as `93037d59`, limited to `docs/live-codex-reviews.md`.
+- Approved and completed path-limited movement of Reviews B Build 4/5 review-clearance provenance commit `e56ce6ff` onto shared main as `eea0468f`, limited to `docs/live-codex-reviews-2.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_filemap.py tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py tests/test_bifrost_cockpit.py -q` passed 434/434; `git diff --check c8c7cc22^..HEAD` passed.
+- Honest lane status after this clearance: Build 1 is unblocked for Relay/Aegis runtime integration, Build 2 is review-cleared and needs a fresh executable task, Build 3 is ready for review of the latest FileMap audit, and Build 4/5 are review-cleared from the checklist/rendering wave.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
