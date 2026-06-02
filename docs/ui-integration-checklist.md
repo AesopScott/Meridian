@@ -173,7 +173,7 @@ Reset is a UI/session-window recovery control. It clears visible prompt/transcri
 | RST2 | Clear User prompt draft | Clears unsent User prompt input. | partial | Type draft, click Reset, draft is gone after reload. |
 | RST3 | Clear Prime transcript view | Clears visible Prime session-window transcript. | partial | Send Prime text, click Reset, Prime window is empty after reload. |
 | RST4 | Clear User transcript view | Clears visible User session-window transcript. | partial | Send User text, click Reset, User window is empty after reload. |
-| RST5 | Confirmation gate | Requires confirmation before clearing non-empty prompt/transcript state; may skip confirmation when both panels are already empty. | planned | Non-empty panels prompt for confirmation; empty panels reset directly. |
+| RST5 | Confirmation gate | Requires confirmation before clearing non-empty prompt/transcript state; may skip confirmation when both panels are already empty. | wired | Non-empty prompt/transcript state prompts for confirmation; empty panels reset directly. |
 | RST6 | Clear model status labels | Clears transient sending/ready/setup labels in the session windows. | planned | Reset removes stale model status text. |
 | RST7 | Preserve selected project policy | Preserves or restores selected project according to Settings persistence, not transcript reset. | planned | Reset behavior matches project persistence setting. |
 | RST8 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | planned | Live session list is unchanged after Reset. |

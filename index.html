@@ -4151,6 +4151,20 @@ body {
       .filter((key) => key.startsWith('meridian.session.transcript.user.') || key.startsWith('meridian.session.prompt.user.'))
       .forEach((key) => localStorage.removeItem(key));
   };
+  const hasResettableSessionState = () => {
+    const hasPromptDraft = Array.from(document.querySelectorAll('.session-prompt-input'))
+      .some((input) => input.value.trim().length > 0);
+    if (hasPromptDraft) return true;
+    return Object.keys(localStorage).some((key) => {
+      if (!key.startsWith('meridian.session.transcript.') && !key.startsWith('meridian.session.prompt.')) return false;
+      const value = localStorage.getItem(key);
+      return typeof value === 'string' && value.trim().length > 2;
+    });
+  };
+  const confirmResetIfNeeded = () => {
+    if (!hasResettableSessionState()) return true;
+    return window.confirm('Reset clears visible prompts and transcripts, then restarts the local Meridian bridge. Continue?');
+  };
   const hardReloadUi = ({ clearSessions = false } = {}) => {
     if (clearSessions) clearSessionWindows();
     const url = new URL(window.location.href);
@@ -4181,6 +4195,7 @@ body {
   let resetInProgress = false;
   const resetUi = async () => {
     if (resetInProgress) return;
+    if (!confirmResetIfNeeded()) return;
     resetInProgress = true;
     clearSessionWindows();
     await restartModelBridge();
