@@ -10,15 +10,13 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the latest current-main Build 1 Relay policy disposition runtime and Build 2 workflow work-order recovery summary slices.
+Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: review current-main Ready markers in order: Build 1 Relay policy disposition runtime commits `52b593f9` and `5e0aa795`, then Build 2 workflow work-order recovery summary commits `b8b2f49a` and `4b820044`. For Build 1, verify the slice stays Relay-only, preserves `PromptPacket.model_payload()` as the only model-bound prompt text, blocks demote/human-gate/fail-closed/missing-metadata outcomes before provider transport, records display-safe disposition/audit data, and introduces no Aegis/Bifrost/UI/FileMap/model-account/process/branch/main/Polaris leakage. For Build 2, verify the slice stays pure Session Lifecycle advisory summary data, does not execute restart/resteer/archive/human-gate actions, preserves permission/review blockers, and introduces no session spawning/process/model/UI/Bifrost/FileMap/branch/main/Polaris leakage.
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` and `docs/live-build-2.md`. Review the oldest Ready marker from Build 1 or Build 2 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
 
-Proof: `python -m pytest tests/test_relay_executor.py -q` plus `git diff --check 52b593f9^..5e0aa795`; `python -m pytest tests/test_session_lifecycle.py -q` plus `git diff --check b8b2f49a^..4b820044`.
-
-Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 1/2 polling and route reviewed follow-up build work.
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Model Harness metadata binding or Build 2 workflow summary advisory binding when either marks Ready for Codex Review.
 
 ## Coordinator Override - Completed / Passed
 

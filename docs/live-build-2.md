@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: bind the review-cleared workflow work-order recovery summary into Prime/Beacon advisory recovery decisions.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`.
+
+Required sources: Reviews A clearance evidence in `docs/live-codex-reviews.md`, `docs/session-lifecycle-v2-contract.md`, `docs/workflow-subagent-harness-contract.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, and current `WorkflowWorkOrderRecoverySummary` / permission summary behavior.
+
+Task: add a narrow pure advisory binding so workflow heartbeat/result summaries can influence Prime/Beacon restart, resteer, archive, and human-gate recovery recommendations without executing those actions. Preserve permission/review blockers, display-safe evidence strings, stale-session recovery rationale, and coordinator-only branch/worktree movement. Keep this advisory and serializable only: no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, autonomous movement, main writes, or Polaris.
+
+Tests: `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` plus `git diff --check`.
+
+Completion: commit locally only, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or route the next Session Lifecycle workflow execution slice.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add a pure Session Lifecycle workflow work-order heartbeat/result summary surface for bounded sub-agent recovery decisions.

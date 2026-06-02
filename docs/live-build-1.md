@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: bind provider-neutral Model Harness capability metadata into Relay dispatch evidence and summaries.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: Reviews B clearance evidence in `docs/live-codex-reviews-2.md` for the Model Harness metadata checklist, `docs/model-harness-v2-contract.md`, `docs/model-harness-metadata-implementation-checklist.md`, `docs/v2-progress-tracker.md`, and current Relay dispatch/evidence summary code.
+
+Task: add the first provider-neutral Relay/Model Harness metadata binding slice. Relay dispatch evidence and summaries should carry display-safe model capability metadata such as exact model id, provider route kind, trust state, context window, prompt token/budget status, prompt-drag growth/degraded tags, external-review requirement/status, and evidence refs. Keep this vendor-neutral: do not add DeepSeek-specific presets, provider calls, credential/account probing, raw prompt text, raw provider responses, Bifrost/UI/FileMap edits, process/session control, branch/worktree movement, main writes, or Polaris.
+
+Tests: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` plus `git diff --check`.
+
+Completion: commit locally only, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or connect reviewed runtime metadata to Bifrost after review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement the first Relay demotion/retry/fail-closed handoff runtime slice after Reviews A cleared the handoff summary and Reviews B cleared the demotion/retry checklist.
