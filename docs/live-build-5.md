@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add deterministic Bifrost Model Harness capability metadata sample rendering for provider route inspection.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/model-harness-v2-contract.md`, `docs/bifrost-balance-payload-surface-contract.md`, `docs/ui-integration-checklist.md`, `docs/v2-progress-tracker.md`, and current Reviews B clearance evidence in `docs/live-codex-reviews-2.md`.
+
+Task: add a static, deterministic Bifrost sample surface for Model Harness capability metadata that can sit beside provider balance/cost-pressure rendering. Show exact model id, provider/direct-vs-aggregator route kind, trust state, context window, allowed/blocked task hints, external-review requirement, prompt-drag budget/status/growth fields, and display-safe evidence refs. Preserve provider balance/cost-pressure rendering, prompt payload visibility, dispatch hardening, PromptPacket proof metadata, Relay/Aegis handoff, proof-state preview, stale-session recovery actions, escaping, and cockpit layout. Do not call providers, inspect accounts, read credentials, spawn sessions, inspect live processes, edit `index.html`, touch Relay runtime, edit FileMap, move branches, main, or Polaris.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check`.
+
+Completion: commit locally only, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or connect reviewed runtime Model Harness metadata when available.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add deterministic Bifrost provider balance and cost-pressure sample rendering for the V2 cockpit.

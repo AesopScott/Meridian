@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: keep FileMap current after the latest Build 3/4/5 movement to shared main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Required sources: current `origin/main`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews-2.md`, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+
+Task: audit FileMap coverage after current-main commits `791373a9`, `5c6ea359`, `996fa89b`, `077ad3aa`, `fde47333`, and this routing checkpoint. At minimum inspect `docs/model-harness-metadata-implementation-checklist.md`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-4.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md`. Register missing existing artifacts only in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`. If no missing existing artifacts are found, record concrete no-op audit evidence with inspected commits and paths; do not commit read-check-only progress.
+
+Tests: `python -m pytest tests/test_filemap.py -q` plus `git diff --check`.
+
+Completion: commit locally only in the assigned worktree if coverage changes or concrete no-op evidence is recorded, mark Ready for Codex Review with commit hash or no-op evidence, files changed, tests run, and Next Candidate: bind review findings before unrelated FileMap cleanup.
+
 ## Completed / Ready For Codex Review
 
 Goal: keep FileMap current after Reviews A provenance and fresh Build 1/2/4/5 routing landed on current main `20f71a0e`.

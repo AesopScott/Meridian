@@ -8,13 +8,15 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: keep Build 4/5 review hot under the rolling two-stage pipeline.
+Goal: review the latest current-main Build 4 Model Harness metadata checklist and Build 5 provider balance/cost-pressure rendering slices.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
-Task: poll current `origin/main` and the top blocks in `docs/live-build-4.md` and `docs/live-build-5.md`. Review the oldest Ready marker from Build 4 or Build 5 when one appears. If neither is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no Relay runtime/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
+Task: review current-main Ready markers in order: Build 4 Model Harness metadata checklist commits `5c6ea359` and `996fa89b`, then Build 5 provider balance/cost-pressure rendering commits `077ad3aa` and `fde47333`. For Build 4, verify docs-only scope and required coverage for exact model id, provider route/trust, prompt-drag telemetry, budget/growth/degraded state, Aegis/Relay binding, Bifrost display expectations, deterministic tests, and exclusions. For Build 5, verify deterministic Bifrost sample/rendering only, provider balance/cost-pressure coverage for direct/aggregator/local routes, escaping, preservation of prior cockpit surfaces, and no live provider/account/session/process/Relay runtime/FileMap/index.html/branch/main/Polaris leakage.
 
-Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 4 Model Harness metadata checklist or Build 5 provider balance/cost-pressure rendering when either marks Ready for Codex Review.
+Proof: text/shape inspection plus `git diff --check 5c6ea359^..996fa89b`; `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check 077ad3aa^..fde47333`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 polling after these current-main reviews.
 
 ## Coordinator Override - Completed / Passed
 
