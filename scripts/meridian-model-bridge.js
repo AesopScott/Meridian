@@ -7,6 +7,9 @@ const HOST = process.env.MERIDIAN_MODEL_HOST || '127.0.0.1';
 const PORT = Number(process.env.MERIDIAN_MODEL_PORT || 8767);
 const DEFAULT_CWD = process.env.MERIDIAN_MODEL_CWD || process.cwd();
 const RECENT_CALLS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_CALLS || 40);
+const RECENT_RESULTS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_RESULTS || 20);
+const RECENT_RESULT_TTL_MS = Number(process.env.MERIDIAN_MODEL_RESULT_TTL_MS || 300000);
+const RECENT_RESULT_TEXT_LIMIT = Number(process.env.MERIDIAN_MODEL_RESULT_TEXT_LIMIT || 80000);
 const SESSION_TRANSCRIPT_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_LIMIT || 12);
 const SESSION_TRANSCRIPT_CHAR_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_CHAR_LIMIT || 12000);
 const BRIDGE_VERSION = 'visible-transcript-v1';
@@ -14,12 +17,14 @@ const BRIDGE_CAPABILITIES = {
   visibleTranscriptContext: true,
   recentCallContextDiagnostics: true,
   samePortRestart: true,
+  requestResultRecovery: true,
 };
 const ALLOWED_ORIGINS = new Set((process.env.MERIDIAN_MODEL_ALLOWED_ORIGINS || 'http://127.0.0.1:5500,http://localhost:5500,null')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean));
 const recentCalls = [];
+const recentResults = [];
 
 if (process.argv.includes('--self-test')) {
   const samples = [
@@ -46,10 +51,12 @@ if (process.argv.includes('--self-test')) {
     emptyPrompt.prompt === 'Fresh question'
   );
   const maxJsonOk = normalizeModelText('max', JSON.stringify({ result: 'max clean ok' })) === 'max clean ok';
+  rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
+  const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
   const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
-  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart;
+  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery;
   const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
-  console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && capabilitiesOk && originOk, samples, setupFlags, contextOk, maxJsonOk, capabilitiesOk, originOk }, null, 2));
+  console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && resultRecoveryOk && capabilitiesOk && originOk, samples, setupFlags, contextOk, maxJsonOk, resultRecoveryOk, capabilitiesOk, originOk }, null, 2));
   process.exit(0);
 }
 
@@ -227,6 +234,45 @@ function rememberCall(entry) {
     ...entry,
   });
   while (recentCalls.length > RECENT_CALLS_LIMIT) recentCalls.shift();
+}
+
+function pruneRecentResults(now = Date.now()) {
+  while (recentResults.length && recentResults[0].expiresAtMs <= now) recentResults.shift();
+  while (recentResults.length > RECENT_RESULTS_LIMIT) recentResults.shift();
+}
+
+function rememberResult(entry) {
+  if (!entry?.requestId) return;
+  const now = Date.now();
+  pruneRecentResults(now);
+  recentResults.push({
+    at: new Date(now).toISOString(),
+    expiresAtMs: now + RECENT_RESULT_TTL_MS,
+    requestId: entry.requestId,
+    channel: entry.channel || '',
+    requestedBackend: entry.requestedBackend || '',
+    backend: entry.backend || '',
+    model: entry.model || '',
+    ok: Boolean(entry.ok),
+    setupRequired: Boolean(entry.setupRequired),
+    text: String(entry.text || '').slice(0, RECENT_RESULT_TEXT_LIMIT),
+    error: entry.error || null,
+    durationMs: entry.durationMs || 0,
+    sessionContextEntries: entry.sessionContextEntries || 0,
+    sessionContextChars: entry.sessionContextChars || 0,
+  });
+  pruneRecentResults(now);
+}
+
+function resultForRequestId(requestId) {
+  pruneRecentResults();
+  for (let index = recentResults.length - 1; index >= 0; index -= 1) {
+    if (recentResults[index].requestId === requestId) {
+      const { expiresAtMs, ...result } = recentResults[index];
+      return result;
+    }
+  }
+  return null;
 }
 
 function needsSetup(backend, errorText) {
@@ -412,6 +458,25 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && req.url.startsWith('/api/call-result')) {
+    const requestUrl = new URL(req.url, `http://${HOST}:${PORT}`);
+    const requestId = String(requestUrl.searchParams.get('requestId') || '');
+    const result = resultForRequestId(requestId);
+    if (!result) {
+      sendJson(res, 404, { ok: false, error: 'Result not found' }, req);
+      return;
+    }
+    sendJson(res, 200, {
+      ok: true,
+      service: 'meridian-model-bridge',
+      version: BRIDGE_VERSION,
+      capabilities: BRIDGE_CAPABILITIES,
+      requestId,
+      result,
+    }, req);
+    return;
+  }
+
   if (req.method === 'POST' && req.url === '/api/restart') {
     sendJson(res, 202, { ok: true, restarting: true }, req);
     setTimeout(restartBridge, 25);
@@ -446,6 +511,20 @@ const server = http.createServer(async (req, res) => {
         model: result.model,
         ok: result.ok,
         setupRequired: Boolean(result.setupRequired),
+        durationMs: result.durationMs,
+        sessionContextEntries: result.sessionContextEntries || 0,
+        sessionContextChars: result.sessionContextChars || 0,
+      });
+      rememberResult({
+        requestId,
+        channel,
+        requestedBackend,
+        backend,
+        model: result.model,
+        ok: result.ok,
+        setupRequired: Boolean(result.setupRequired),
+        text: result.text || '',
+        error: result.error || null,
         durationMs: result.durationMs,
         sessionContextEntries: result.sessionContextEntries || 0,
         sessionContextChars: result.sessionContextChars || 0,

@@ -478,7 +478,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 |---|---|---|---|---|
 | BR1 | Meridian model bridge | Receives UI prompts and routes to selected local CLI backend. | wired | `/health` returns ok plus bridge version/capabilities. |
 | BR2 | Codex backend | Sends selected prompts to Codex CLI. | wired | Select Codex; prompt returns Codex CLI response or readable setup error. |
-| BR3 | Max backend | Sends selected prompts to Claude CLI when available. | partial | Select Max; prompt returns Claude response or readable setup error. |
+| BR3 | Max backend | Sends selected prompts to Claude CLI when available. | wired | Select Max; prompt returns Claude response or readable setup error. |
 | BR4 | CLI setup detection | Detects missing CLI/auth and gives install/login guidance. | wired | `/api/models` and failed calls return setup guidance. |
 | BR5 | Recent call diagnostics | Stores metadata only, never prompt text, and identifies the bridge generation. | wired | `/api/recent-calls` returns bridge version/capabilities plus request id/channel/backend/status/context counts. |
 | BR6 | Bridge origin guard | Accepts local Meridian UI and command-line checks; blocks arbitrary web origins from prompt/restart endpoints. | wired | Self-test proves `127.0.0.1:5500` is allowed and `example.com` is blocked. |
@@ -518,6 +518,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | MB12 | Local-origin bridge access | Browser access to bridge endpoints is limited to the Meridian local UI origins. | Disallowed origins get `403`; command-line checks without an Origin header still work. |
 | MB13 | Bridge readiness self-heal | UI rechecks bridge readiness when the page regains focus or visibility. | Restart bridge externally, return to the page, and status refreshes without manual reload. |
 | MB14 | Relay bridge visibility | Relay panel shows and refreshes live bridge access status from `/health`, not static copy. | Open Relay; Bridge route shows online/offline, version, visible-context state, and reset recovery state; focus/visibility refresh updates it. |
+| MB15 | Lost response recovery | If the browser loses a completed model response, the UI retrieves the short-lived local result by request id and renders it in the visible transcript. | `/api/call-result` returns output for a completed request id; `/api/recent-calls` remains metadata-only. |
 
 ## Harness UI Rules
 
