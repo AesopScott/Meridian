@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add a pure Session Lifecycle runtime-state export for workflow recovery advisory decisions.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/workflow-subagent-harness-contract.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, Reviews A clearance evidence in `docs/live-codex-reviews.md`, and current `SessionLifecycleState`, `SessionCommandPlan`, permission summary, and workflow recovery summary behavior.
+
+Task: add a narrow deterministic runtime-state export that combines a session lifecycle state, command-plan intent, permission summary, and workflow work-order recovery summary into display-safe advisory fields for Prime/Beacon. Include state id, active command kind, target session id, recommended recovery action, human-gate/blocker reasons, stale heartbeat/result status, permission/review blockers, and evidence refs. Keep this pure/advisory and serializable only: no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, autonomous movement, branch/worktree movement, main writes, pushes to main, or Polaris.
+
+Tests: `python -m pytest tests/test_session_lifecycle.py -q` plus `git diff --check`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or connect reviewed runtime-state export to Prime/Beacon.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind the review-cleared workflow work-order recovery summary into Prime/Beacon advisory recovery decisions.

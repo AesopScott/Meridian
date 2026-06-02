@@ -10,6 +10,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
+Goal: review current-main Build 1 Model Harness metadata binding, then Build 2 workflow advisory binding.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: review current-main Ready markers in order: Build 1 Model Harness metadata binding commits `fe51ffd6` and `0ea4ddb4`, then Build 2 workflow summary advisory binding commits `ad9a4969` and `e18c0d7b`. For Build 1, verify provider-neutral metadata binding, dispatch evidence/summary shape, external-review and evidence refs, prompt-drag/budget metadata, no raw prompt/provider/credential leakage, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage. For Build 2, verify Prime/Beacon advisory-only workflow summary consumption, blocker/evidence serialization, no recovery action execution, and no process/model/UI/Bifrost/FileMap/branch/main/Polaris leakage.
+
+Proof: for Build 1, `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` plus `git diff --check fe51ffd6^..0ea4ddb4`. For Build 2, `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` plus `git diff --check ad9a4969^..e18c0d7b`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 1/2 polling after these current-main reviews.
+
+## Coordinator Override - Active Now
+
 Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.

@@ -10,7 +10,7 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Active Task
 
-Goal: keep FileMap current after the latest Build 1/2 routing, Build 3 FileMap registration, and Reviews B clearance on shared main.
+Goal: keep FileMap current after the latest Build 1/2 movement, Build 3 FileMap registration, Reviews B clearance, and routing updates on shared main.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
 
@@ -18,7 +18,7 @@ Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_f
 
 Required sources: current `origin/main`, `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
 
-Task: audit FileMap coverage after current-main commits `90f2bc94`, `7a8e24df`, `459bb2ff`, and this routing checkpoint. At minimum inspect `docs/deepseek-candidate-trust-metadata-implementation-checklist.md`, `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, and `docs/live-codex-reviews-2.md`. Register missing existing artifacts only in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`. If no missing existing artifacts are found, record concrete no-op evidence with inspected commits and paths; do not commit read-check-only progress.
+Task: audit FileMap coverage after current-main commits `90f2bc94`, `7a8e24df`, `459bb2ff`, `3151718b`, `fe51ffd6`, `0ea4ddb4`, `ad9a4969`, `e18c0d7b`, and this routing checkpoint. At minimum inspect `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/deepseek-candidate-trust-metadata-implementation-checklist.md`, `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, and `docs/live-codex-reviews-2.md`. Register missing existing artifacts only in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`. If no missing existing artifacts are found, record concrete no-op evidence with inspected commits and paths; do not commit read-check-only progress.
 
 Tests: `python -m pytest tests/test_filemap.py -q` plus `git diff --check`.
 
