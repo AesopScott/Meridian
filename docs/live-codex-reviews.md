@@ -22,6 +22,35 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 2 live-control permission gate.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:32 -06:00. Current `HEAD` and `origin/main` are `c78b1441`, and Build 2 commits `09ba07c6` and `4cf3c7c6` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 09ba07c6^..4cf3c7c6`
+
+Review result:
+
+- Containment checks for `09ba07c6` and `4cf3c7c6` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 104 tests.
+- `git diff --check 09ba07c6^..4cf3c7c6` passed.
+- Verified `SessionLiveControlPermissionGate` and `evaluate_live_control_permission_gate()` are pure readiness/advisory surfaces only; they emit deterministic permission-gate metadata and do not execute recovery, spawn or inspect processes, call models, write UI/Bifrost/FileMap, move branches/worktrees/sessions, write main, or touch Polaris.
+- Verified command/action mapping covers restart, resteer, and archive readiness: `START_NEW` maps to `RESTART`, `TRANSFER` maps to `RESTEER`, and `ARCHIVE` maps to `ARCHIVE`, with required permission operations preserved.
+- Verified target-session mismatches, unsupported/missing command kinds, missing operations, locked/expired/out-of-scope permissions, escalation gates, and existing runtime human/review blockers remain non-executable blockers with display-safe evidence refs and human-gate rationale.
+
+Finding: none.
+
+Completion: Build 2 live-control permission gate is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 1 Relay dispatch metadata envelope.
 
 Status: passed by Codex Reviews A on 2026-06-02 00:27 -06:00. Current `HEAD` and `origin/main` are `052ee32c`, and Build 1 commits `58d3862c` and `7ec21a2b` are ancestors of current main.
