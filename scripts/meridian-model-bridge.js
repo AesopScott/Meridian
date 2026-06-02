@@ -22,6 +22,7 @@ const BRIDGE_CAPABILITIES = {
   primeRuntimeSnapshot: true,
   compassLogicSnapshot: true,
   vulcanLogicSnapshot: true,
+  arbiterLogicSnapshot: true,
   userSessionTargets: true,
 };
 const BRIDGE_ROUTES = Object.freeze({
@@ -31,6 +32,7 @@ const BRIDGE_ROUTES = Object.freeze({
   primeLogic: '/bridge/prime-logic',
   compassLogic: '/bridge/compass-logic',
   vulcanLogic: '/bridge/vulcan-logic',
+  arbiterLogic: '/bridge/arbiter-logic',
   userSessions: '/bridge/user-sessions',
   recentCalls: '/bridge/recent-calls',
   callResult: '/bridge/call-result',
@@ -79,24 +81,24 @@ if (process.argv.includes('--self-test')) {
   rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
   const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
   const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
-  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot && BRIDGE_CAPABILITIES.primeRuntimeSnapshot && BRIDGE_CAPABILITIES.compassLogicSnapshot && BRIDGE_CAPABILITIES.vulcanLogicSnapshot;
+  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot && BRIDGE_CAPABILITIES.primeRuntimeSnapshot && BRIDGE_CAPABILITIES.compassLogicSnapshot && BRIDGE_CAPABILITIES.vulcanLogicSnapshot && BRIDGE_CAPABILITIES.arbiterLogicSnapshot;
   const sampleSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-bifrost',
+    path: 'C:\\Users\\user\\Code\\Meridian-Worktrees\\build-5-bifrost',
     branch: 'refs/heads/worktree-build-5-bifrost',
     head: 'abc123',
   });
   const waitingSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-test-waiting',
+    path: 'C:\\Users\\user\\Code\\Meridian-Worktrees\\build-5-test-waiting',
     branch: 'refs/heads/worktree-build-5-test-waiting',
     head: 'def456',
   });
   const hiddenSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\codex-reviews-b',
+    path: 'C:\\Users\\user\\Code\\Meridian-Worktrees\\codex-reviews-b',
     branch: 'refs/heads/codex-reviews-b',
     head: 'fed789',
   });
   const sharedMainSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian',
+    path: 'C:\\Users\\user\\Code\\Meridian',
     branch: 'refs/heads/main',
     head: 'abc789',
   });
@@ -542,6 +544,39 @@ function vulcanLogicSnapshot() {
   });
 }
 
+function arbiterLogicSnapshot() {
+  return new Promise((resolve) => {
+    const pythonBin = process.env.MERIDIAN_PYTHON_BIN || 'python';
+    const child = spawn(pythonBin, ['-m', 'meridian_core.arbiter_logic_snapshot'], {
+      cwd: DEFAULT_CWD,
+      shell: process.platform === 'win32',
+      windowsHide: true,
+      env: {
+        ...process.env,
+        PYTHONIOENCODING: 'utf-8',
+      },
+    });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
+    child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+    child.on('error', (error) => {
+      resolve({ ok: false, error: error.message });
+    });
+    child.on('close', (code) => {
+      if (code !== 0) {
+        resolve({ ok: false, error: stderr.trim() || `Arbiter logic snapshot exited with code ${code}` });
+        return;
+      }
+      try {
+        resolve({ ok: true, snapshot: JSON.parse(stdout) });
+      } catch (error) {
+        resolve({ ok: false, error: `Arbiter logic snapshot returned invalid JSON: ${error.message}` });
+      }
+    });
+  });
+}
+
 function parseGitWorktrees(stdout) {
   const records = [];
   let current = null;
@@ -749,6 +784,18 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET' && req.url === BRIDGE_ROUTES.vulcanLogic) {
     const result = await vulcanLogicSnapshot();
+    sendJson(res, result.ok ? 200 : 500, {
+      ok: result.ok,
+      service: 'meridian-model-bridge',
+      version: BRIDGE_VERSION,
+      capabilities: BRIDGE_CAPABILITIES,
+      ...(result.ok ? { ...result.snapshot } : { error: result.error }),
+    }, req);
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === BRIDGE_ROUTES.arbiterLogic) {
+    const result = await arbiterLogicSnapshot();
     sendJson(res, result.ok ? 200 : 500, {
       ok: result.ok,
       service: 'meridian-model-bridge',

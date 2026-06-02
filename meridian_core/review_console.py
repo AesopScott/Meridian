@@ -5,7 +5,7 @@ The Review Console is where Prime places artifacts, proof, cross-check
 findings, plan reviews, system findings, comparisons, and approval gates
 outside the main Orchestrator Queue. It is a prompt window, not a passive log.
 
-Scott can respond directly to any item Prime places here.
+The user can respond directly to any item Prime places here.
 """
 
 from __future__ import annotations
@@ -177,7 +177,7 @@ def make_plan_review_item(
     content: str,
     severity: ReviewConsoleSeverity = ReviewConsoleSeverity.INFO,
 ) -> ReviewConsoleItem:
-    """Plan review placed by Prime for Scott to inspect or approve."""
+    """Plan review placed by Prime for the user to inspect or approve."""
     return ReviewConsoleItem(
         id=id,
         item_type=ReviewConsoleItemType.PLAN_REVIEW,

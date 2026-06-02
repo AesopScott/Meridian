@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || 'C:\\Users\\user\\Code\\Meridian',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4082,6 +4082,24 @@ body {
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };
+  const renderArbiterLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Arbiter logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Arbiter logic snapshot unavailable'],
+      ]), true);
+    }
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    return [
+      relaySection('Arbiter logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Arbiter / Reviews'],
+      ]), true),
+      relaySection('Arbiter summary', relaySummary(snapshot.summary || ''), true),
+      ...capabilitySections.map(renderCompassCapabilitySection),
+    ].join('');
+  };
   const renderPrimeDecisionSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Prime logic source', relayGrid([
@@ -4264,6 +4282,17 @@ body {
       logicNode.innerHTML = renderVulcanLogicSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVulcanLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadArbiterLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-arbiter-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('arbiter-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderArbiterLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderArbiterLogicSnapshot({ ok: false, error: error.message });
     }
   };
   const loadPrimeLogic = async () => {
@@ -4498,6 +4527,37 @@ body {
       return false;
     }
   };
+  const renderArbiterReviewLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Arbiter review logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Arbiter Runtime Logic</div>
+            <div class="relay-models-status">Review console</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-arbiter-logic>${relaySection('Arbiter logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadArbiterLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
@@ -4514,6 +4574,7 @@ body {
     if (rightWorkspace?.querySelector('[data-prime-logic]')) loadPrimeLogic();
     if (rightWorkspace?.querySelector('[data-compass-logic]')) loadCompassLogic();
     if (rightWorkspace?.querySelector('[data-vulcan-logic]')) loadVulcanLogic();
+    if (rightWorkspace?.querySelector('[data-arbiter-logic]')) loadArbiterLogic();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
@@ -4722,7 +4783,9 @@ body {
       ? renderRelayModels()
       : (button.dataset.harness === 'Compass'
         ? renderCompassProjectLogic()
-        : (button.dataset.harness === 'Session Lifecycle' ? renderVulcanSessionLogic() : renderHarnessSurface(button)));
+        : (button.dataset.harness === 'Session Lifecycle'
+          ? renderVulcanSessionLogic()
+          : (button.dataset.harness === 'Codex Reviews' ? renderArbiterReviewLogic() : renderHarnessSurface(button))));
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });
