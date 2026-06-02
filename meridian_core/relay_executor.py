@@ -770,16 +770,23 @@ _SAFE_PROMPT_PACKET_HANDOFF_TAGS = frozenset(
         "aegis_prompt_packet_policy_allow",
         "aegis_prompt_packet_policy_blocked",
         "aegis_prompt_packet_policy_warn",
+        "blocker_continuation_policy_required",
+        "goal_checkpoint_required",
+        "goal_objective_summary_present",
+        "goal_runtime_handoff_checkpoint",
         "human_gate_approval",
         "human_gate_approval_missing",
         "independent_dual_model_lanes",
         "independent_review_when_meaningful",
+        "lane_session_label_present",
         "missing_metadata_fail_closed",
         "packet_hash_missing",
         "packet_hash_required_unavailable",
         "packet_hash_unavailable",
         "packet_proof_metadata_missing",
         "prompt_payload_snapshot",
+        "regular_git_checkpoint_expected",
+        "regular_obsidian_checkpoint_expected",
         "unknown_prompt_packet_policy_decision",
         "unknown_proof_requirement",
     }
@@ -787,12 +794,15 @@ _SAFE_PROMPT_PACKET_HANDOFF_TAGS = frozenset(
 
 _SAFE_PROMPT_PACKET_EVIDENCE_PREFIXES = (
     "aegis-proof-",
+    "goal-proof-",
     "packet-proof-",
 )
 
 _UNSAFE_HANDOFF_EVIDENCE_TERMS = frozenset(
     {
+        "account",
         "branch",
+        "chat",
         "cherry-pick",
         "credential",
         "git",
@@ -803,8 +813,11 @@ _UNSAFE_HANDOFF_EVIDENCE_TERMS = frozenset(
         "raw",
         "rebase",
         "reset",
+        "scott",
         "stash",
         "stash-pop",
+        "token",
+        "users",
         "worktree",
     }
 )

@@ -3535,6 +3535,62 @@ class TestRelayAegisPromptPacketHandoffSummary:
             "human approval required before dispatch",
         )
 
+    def test_display_safe_handoff_tag_contract_preserves_goal_checkpoint_tags(
+        self,
+    ) -> None:
+        result = relay_display_safe_handoff_tags(
+            (
+                "goal_objective_summary_present",
+                "lane_session_label_present",
+                "blocker_continuation_policy_required",
+                "goal_checkpoint_required",
+                "regular_git_checkpoint_expected",
+                "regular_obsidian_checkpoint_expected",
+                "goal-proof-checkpoint-1",
+                "aegis-proof-safe",
+                "packet_hash_missing",
+            ),
+            fallback="redacted_goal_runtime_handoff",
+        )
+
+        assert result == (
+            "goal_objective_summary_present",
+            "lane_session_label_present",
+            "blocker_continuation_policy_required",
+            "goal_checkpoint_required",
+            "regular_git_checkpoint_expected",
+            "regular_obsidian_checkpoint_expected",
+            "goal-proof-checkpoint-1",
+            "aegis-proof-safe",
+            "packet_hash_missing",
+        )
+
+    def test_display_safe_handoff_tag_contract_redacts_goal_runtime_leakage(
+        self,
+    ) -> None:
+        result = relay_display_safe_handoff_tags(
+            (
+                "objective: replay raw prompt and worker chat",
+                "lane=C:\\Users\\Scott\\Secrets\\goal.md",
+                "provider_account_token:sk-test-secret",
+                "continue blocker by running git reset --hard",
+                "move worktree branch for checkpoint",
+                "write uncoordinated main checkpoint",
+                "goal-proof-provider-account-token",
+                "goal-proof-users-scott-obsidian-path",
+                "goal-proof-git-checkpoint",
+                "regular_git_checkpoint_expected",
+                "regular_obsidian_checkpoint_expected",
+            ),
+            fallback="redacted_goal_runtime_handoff",
+        )
+
+        assert result == (
+            "redacted_goal_runtime_handoff",
+            "regular_git_checkpoint_expected",
+            "regular_obsidian_checkpoint_expected",
+        )
+
     def test_handoff_empty_when_policy_not_evaluated(self) -> None:
         summary = RelayExecutionSummary(results=(), errors=(), decision_record=None)
 
@@ -3754,6 +3810,72 @@ class TestRelayAegisPromptPacketHandoffSummary:
         for sentinel in unsafe_values:
             assert sentinel not in rendered
         for token in ("reset --hard", "merge origin", "rebase", "cherry-pick", "stash-pop"):
+            assert token not in rendered
+
+    def test_handoff_redacts_goal_runtime_checkpoint_policy_surfaces(self) -> None:
+        unsafe_values = (
+            "objective summary includes RAW_PROMPT_SENTINEL and worker chat",
+            "lane label C:\\Users\\Scott\\Obsidian\\Goal.md",
+            "session label provider_account_token:sk-test-secret",
+            "free-text blocker says git reset --hard origin/main",
+            "branch/worktree movement requested before checkpoint",
+            "uncoordinated main-write request",
+            "goal-proof-provider-account-token",
+            "goal-proof-users-scott-obsidian-path",
+            "goal-proof-git-checkpoint",
+        )
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="warn",
+            severity="warning",
+            reason="objective summary includes RAW_PROMPT_SENTINEL and worker chat",
+            evidence_ids=unsafe_values
+            + (
+                "goal-proof-checkpoint-1",
+                "regular_git_checkpoint_expected",
+            ),
+            blockers=unsafe_values + ("goal_checkpoint_required",),
+            warnings=unsafe_values + ("regular_obsidian_checkpoint_expected",),
+            packet_id=_PACKET_ID,
+            packet_hash="packet-hash-safe",
+            prompt_budget_ref="budget:safe",
+            packet_proof_metadata_ref="prompt-packet-proof:safe",
+        )
+        summary = RelayExecutionSummary(
+            results=(),
+            errors=(),
+            prompt_packet_policy_evidence=evidence,
+        )
+
+        handoff = summary.aegis_prompt_packet_policy_handoff().to_dict()
+        rendered = " ".join(str(value) for value in handoff.values())
+
+        assert handoff["aegis_evidence_ids"] == (
+            "redacted_evidence_id",
+            "goal-proof-checkpoint-1",
+            "regular_git_checkpoint_expected",
+        )
+        assert handoff["blockers"] == (
+            "redacted_policy_blocker",
+            "goal_checkpoint_required",
+        )
+        assert handoff["warnings"] == (
+            "redacted_policy_warning",
+            "regular_obsidian_checkpoint_expected",
+        )
+        assert handoff["reason_tags"] == (
+            "redacted_policy_reason",
+            "goal_checkpoint_required",
+        )
+        for sentinel in unsafe_values:
+            assert sentinel not in rendered
+        for token in (
+            "RAW_PROMPT_SENTINEL",
+            "worker chat",
+            "provider_account_token",
+            "Users\\Scott",
+            "git reset --hard",
+            "main-write",
+        ):
             assert token not in rendered
 
     def test_handoff_preserves_known_structured_tags_and_fixed_phrases(self) -> None:
