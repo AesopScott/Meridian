@@ -72,7 +72,18 @@ if (process.argv.includes('--self-test')) {
     branch: 'refs/heads/worktree-build-5-bifrost',
     head: 'abc123',
   });
-  const sessionTargetsOk = BRIDGE_CAPABILITIES.userSessionTargets && sampleSession?.sessionId === 'build-5-bifrost' && sampleSession.routable;
+  const waitingSession = sessionTargetFromWorktree({
+    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-test-waiting',
+    branch: 'refs/heads/worktree-build-5-test-waiting',
+    head: 'def456',
+  });
+  const sessionTargetsOk = (
+    BRIDGE_CAPABILITIES.userSessionTargets &&
+    sampleSession?.sessionId === 'build-5-bifrost' &&
+    sampleSession.routable &&
+    sampleSession.status === 'live' &&
+    waitingSession?.status === 'waiting'
+  );
   const routeNamesOk = Object.values(BRIDGE_ROUTES).every((route) => route.startsWith('/bridge/') && !route.startsWith('/api/'));
   const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
   console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && resultRecoveryOk && capabilitiesOk && sessionTargetsOk && routeNamesOk && originOk, samples, setupFlags, contextOk, maxJsonOk, resultRecoveryOk, capabilitiesOk, sessionTargetsOk, routeNamesOk, originOk }, null, 2));
@@ -435,7 +446,10 @@ function sessionTargetFromWorktree(record) {
   const sessionId = normalized.split('/').filter(Boolean).pop();
   if (!sessionId) return null;
   const branch = String(record?.branch || '').replace(/^refs\/heads\//, '');
-  const state = /review|codex-reviews/i.test(sessionId) ? 'hidden' : 'live';
+  const sessionText = `${sessionId} ${branch}`;
+  const state = /review|codex-reviews/i.test(sessionText)
+    ? 'hidden'
+    : (/(test[-_ ]?waiting|waiting[-_ ]?for[-_ ]?test|\bwaiting\b)/i.test(sessionText) ? 'waiting' : 'live');
   return {
     sessionId,
     sessionName: sessionId.replace(/[-_]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
