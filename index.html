@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || '',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4082,6 +4082,27 @@ body {
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };
+  const renderAegisLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Aegis logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Aegis logic snapshot unavailable'],
+      ]), true);
+    }
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    return [
+      relaySection('Aegis logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Aegis'],
+      ]), true),
+      relaySection('Aegis summary', relaySummary(snapshot.summary || ''), true),
+      ...capabilitySections.map((section, index) => renderCompassCapabilitySection({
+        ...section,
+        title: section?.title || `Aegis Section ${index + 1}`,
+      }, index)),
+    ].join('');
+  };
   const renderPrimeDecisionSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Prime logic source', relayGrid([
@@ -4264,6 +4285,17 @@ body {
       logicNode.innerHTML = renderVulcanLogicSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVulcanLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadAegisLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-aegis-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('aegis-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderAegisLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderAegisLogicSnapshot({ ok: false, error: error.message });
     }
   };
   const loadPrimeLogic = async () => {
@@ -4498,6 +4530,37 @@ body {
       return false;
     }
   };
+  const renderAegisProofLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Aegis proof logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Aegis Runtime Logic</div>
+            <div class="relay-models-status">Proof gates</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-aegis-logic>${relaySection('Aegis logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadAegisLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
@@ -4514,6 +4577,7 @@ body {
     if (rightWorkspace?.querySelector('[data-prime-logic]')) loadPrimeLogic();
     if (rightWorkspace?.querySelector('[data-compass-logic]')) loadCompassLogic();
     if (rightWorkspace?.querySelector('[data-vulcan-logic]')) loadVulcanLogic();
+    if (rightWorkspace?.querySelector('[data-aegis-logic]')) loadAegisLogic();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
@@ -4722,7 +4786,9 @@ body {
       ? renderRelayModels()
       : (button.dataset.harness === 'Compass'
         ? renderCompassProjectLogic()
-        : (button.dataset.harness === 'Session Lifecycle' ? renderVulcanSessionLogic() : renderHarnessSurface(button)));
+        : (button.dataset.harness === 'Session Lifecycle'
+          ? renderVulcanSessionLogic()
+          : (button.dataset.harness === 'Aegis' ? renderAegisProofLogic() : renderHarnessSurface(button))));
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });

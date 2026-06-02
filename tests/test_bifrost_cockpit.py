@@ -190,6 +190,18 @@ def test_vulcan_logic_snapshot_documents_session_lifecycle_harness():
     assert "Portfolio Boundary" not in titles
 
 
+def test_aegis_logic_snapshot_documents_proof_harness():
+    from meridian_core.aegis_logic_snapshot import aegis_logic_snapshot
+
+    snapshot = aegis_logic_snapshot()
+    titles = [section["title"] for section in snapshot["capabilitySections"]]
+    assert snapshot["source"] == "meridian_core.aegis_logic_snapshot.aegis_logic_snapshot"
+    assert "Aegis Job" in titles
+    assert "Proof Gate Logic" in titles
+    assert "PromptPacket Policy Logic" in titles
+    assert "Command Staging UI Review Logic" in titles
+
+
 def test_index_projects_selector_is_compass_context_not_user_routing():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
@@ -216,6 +228,17 @@ def test_index_vulcan_harness_uses_backend_logic_snapshot():
     assert "bridgeUrl('vulcan-logic')" in doc
     assert "renderVulcanLogicSnapshot" in doc
     assert "renderVulcanSessionLogic" in doc
+
+
+def test_index_aegis_harness_uses_backend_logic_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Aegis Runtime Logic" in doc
+    assert "data-aegis-logic" in doc
+    assert "bridgeUrl('aegis-logic')" in doc
+    assert "renderAegisLogicSnapshot" in doc
+    assert "renderAegisProofLogic" in doc
+    assert "Aegis logic source" in doc
+    assert "Proof gates" in doc
 
 
 def test_index_prime_harness_uses_backend_runtime_snapshot():
@@ -250,6 +273,7 @@ def test_index_wired_harness_titles_use_runtime_logic_naming():
     assert "Relay Runtime Logic" in doc
     assert "Compass Runtime Logic" in doc
     assert "Vulcan Runtime Logic" in doc
+    assert "Aegis Runtime Logic" in doc
 
 
 def test_bridge_exposes_prime_logic_route_and_capability():
@@ -258,6 +282,14 @@ def test_bridge_exposes_prime_logic_route_and_capability():
     assert "primeLogic: '/bridge/prime-logic'" in doc
     assert "meridian_core.prime_runtime" in doc
     assert "req.url === BRIDGE_ROUTES.primeLogic" in doc
+
+
+def test_bridge_exposes_aegis_logic_route_and_capability():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "aegisLogicSnapshot: true" in doc
+    assert "aegisLogic: '/bridge/aegis-logic'" in doc
+    assert "meridian_core.aegis_logic_snapshot" in doc
+    assert "req.url === BRIDGE_ROUTES.aegisLogic" in doc
 
 
 def test_ui_checklist_defers_deep_compass_and_vulcan_items_to_backend_tracker():
