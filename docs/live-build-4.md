@@ -26,7 +26,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `83b0d7b5`
 - Files changed: `docs/provider-transport-metadata-pass-through-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers dispatch metadata envelope shape, exact model id, provider route kind, trust state, direct-vs-aggregator proof refs, prompt-drag budget/growth fields, external-review state, validation fail-closed behavior, provider request exclusion of raw prompts beyond `PromptPacket.model_payload()`, deterministic tests, Bifrost display expectations, and exclusions for live provider calls, credentials/account probing, raw provider responses, process/session control, FileMap edits, branch/worktree movement, shared-main writes, pushes to main, and Polaris; staged diff passes `git diff --cached --check`.
