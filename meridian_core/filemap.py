@@ -476,6 +476,13 @@ def make_default_map() -> FileMap:
             notes="Read before implementing prompt payload evidence, budget labels, growth/watch/degraded states, or Bifrost payload visibility.",
         ),
         FileMapEntry(
+            path="docs/relay-dispatch-hardening-implementation-checklist.md",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Build-ready checklist for provider-neutral Relay dispatch hardening: envelope boundaries, exact model id handling, payload evidence propagation, Aegis proof hooks, blocked/error states, and Bifrost handoff.",
+            related_tests=["tests/test_relay_executor.py", "tests/test_bifrost_cockpit.py"],
+            notes="Read before changing Relay dispatch metadata pass-through, provider id handling, blocked/error evidence, or Bifrost-visible dispatch payload fields.",
+        ),
+        FileMapEntry(
             path="meridian_core/prime_autonomy.py",
             area=FileArea.PRIME_AUTONOMY,
             purpose="Prime next-action domain model: immutable PrimeNextAction with action type, confidence, risk tier, source, targets, blockers, human gate, rationale, and evidence refs.",

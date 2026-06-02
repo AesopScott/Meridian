@@ -54,6 +54,7 @@ _REQUIRED_PATHS = [
     "meridian_core/prompt_payload_meter.py",
     "tests/test_prompt_payload_meter.py",
     "docs/relay-prompt-payload-visibility-implementation-checklist.md",
+    "docs/relay-dispatch-hardening-implementation-checklist.md",
     "meridian_core/prime_autonomy.py",
     "tests/test_prime_autonomy.py",
     "meridian_core/prompt_packet.py",
