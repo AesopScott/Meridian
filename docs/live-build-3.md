@@ -10,6 +10,31 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Completed / Ready For Codex Review
 
+Goal: keep FileMap current after latest Build 2, Build 3, Build 4, Reviews A/B movement through `fd6e7893`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: fresh FileMap audit after current-main movement through `fd6e7893`, especially `docs/provider-transport-metadata-pass-through-checklist.md` and `docs/model-harness-runtime-validation-checklist.md`.
+
+Completion:
+
+- Build 3 audited current `origin/main` at `fd6e7893` after movement commits `7dda4334`, `f2cbab11`, `ffe828fa`, `dd02fa33`, `e85c9221`, `19e871fe`, and `fd6e7893`.
+- Inspected required/current movement paths from `a89135c2..HEAD`, all five live-build queue files, both live review provenance files, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Inspected called-out paths: `docs/provider-transport-metadata-pass-through-checklist.md` and `docs/model-harness-runtime-validation-checklist.md`, plus Build 2 advisory/runtime files and Build 4/Reviews B queue paths.
+- Registered missing existing artifact: `docs/provider-transport-metadata-pass-through-checklist.md` in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Audit evidence: focused coverage check across 44 inspected changed/referenced existing paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Diff proof: `git diff --check` - passed.
+- Commit: this queue-marker commit.
+- Next Candidate: bind runtime validation or review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
 Goal: keep FileMap current after the latest Build 1/2/4/5 movement and review/routing updates on shared main.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.

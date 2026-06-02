@@ -455,6 +455,13 @@ def make_default_map() -> FileMap:
             notes="Runtime implementation is not authorized by the checklist alone. Read before adding provider metadata validators or allowing metadata-bound live dispatch.",
         ),
         FileMapEntry(
+            path="docs/provider-transport-metadata-pass-through-checklist.md",
+            area=FileArea.MODEL_HARNESS,
+            purpose="Build-ready checklist for passing provider/model metadata through Relay and Model Harness transport boundaries without prompt or response leakage.",
+            related_tests=["tests/test_model_adapter.py", "tests/test_relay_executor.py", "tests/test_bifrost_cockpit.py"],
+            notes="Runtime implementation is not authorized by the checklist alone. Read before passing provider metadata through Relay transport envelopes or Bifrost display records.",
+        ),
+        FileMapEntry(
             path="meridian_core/restart_resteer.py",
             area=FileArea.DOMAIN_MODEL,
             purpose="Prime restart/resteer domain objects and evaluator: detects empty queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates.",

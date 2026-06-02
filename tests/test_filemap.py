@@ -42,6 +42,7 @@ _REQUIRED_PATHS = [
     "docs/model-harness-v2-contract.md",
     "docs/model-harness-metadata-implementation-checklist.md",
     "docs/model-harness-runtime-validation-checklist.md",
+    "docs/provider-transport-metadata-pass-through-checklist.md",
     "meridian_core/models.py",
     "meridian_core/mission.py",
     "meridian_core/wake.py",
