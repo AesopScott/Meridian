@@ -1463,15 +1463,49 @@ body {
 .relay-models-section {
   border: 1px solid rgba(var(--session-electric), 0.26);
   background: rgba(0, 0, 0, 0.44);
-  padding: 8px;
+  padding: 0;
 }
 
-.relay-models-section-title {
-  margin-bottom: 6px;
+.relay-models-section > summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: center;
+  min-height: 32px;
+  padding: 7px 8px;
   color: rgba(var(--session-electric-soft), 0.88);
   font-size: 0.9em;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+
+.relay-models-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.relay-models-section > summary::before {
+  content: ">";
+  color: rgba(var(--session-electric), 0.82);
+  text-shadow: 0 0 6px rgba(var(--session-electric), 0.56);
+  transform: rotate(0deg);
+  transition: transform 120ms ease;
+}
+
+.relay-models-section[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.relay-models-section-body {
+  display: grid;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+
+.relay-models-summary {
+  color: rgba(var(--session-electric-soft), 0.78);
+  overflow-wrap: anywhere;
 }
 
 .relay-models-grid {
@@ -3594,7 +3628,22 @@ body {
     .replaceAll('"', '&quot;');
   const relayGrid = (items) => `<div class="relay-models-grid">${items.map(([key, value]) => `<div class="relay-models-key">${escapeHtml(key)}</div><div class="relay-models-value">${escapeHtml(value)}</div>`).join('')}</div>`;
   const relayList = (items) => `<ul class="relay-models-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
-  const relaySection = (title, body) => `<section class="relay-models-section"><div class="relay-models-section-title">${escapeHtml(title)}</div>${body}</section>`;
+  const relaySectionStateKey = 'meridian.relay.sectionOpen.v1';
+  const relaySectionState = () => {
+    try {
+      return JSON.parse(localStorage.getItem(relaySectionStateKey) || '{}');
+    } catch {
+      return {};
+    }
+  };
+  const relaySectionKey = (title) => String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const relaySection = (title, body, openByDefault = false) => {
+    const key = relaySectionKey(title);
+    const state = relaySectionState();
+    const open = Object.prototype.hasOwnProperty.call(state, key) ? Boolean(state[key]) : openByDefault;
+    return `<details class="relay-models-section" data-relay-section="${escapeHtml(key)}"${open ? ' open' : ''}><summary>${escapeHtml(title)}</summary><div class="relay-models-section-body">${body}</div></details>`;
+  };
+  const relaySummary = (value) => `<div class="relay-models-summary">${escapeHtml(value || '')}</div>`;
   const relayText = (value) => String(value || 'none').replaceAll('_', ' ').replaceAll('-', ' ');
   const relayUnique = (items) => Array.from(new Set(items.filter(Boolean)));
   const relayTierLabel = (tier) => `Tier ${tier.tier}: ${relayText(tier.mode)}`;
@@ -3628,6 +3677,19 @@ body {
       ['primary proof', relayText(audit.primaryProofRequirement)],
     ];
   };
+  const renderRelayCapabilitySection = (section, index) => {
+    const rows = Array.isArray(section?.rows) ? section.rows : [];
+    const bullets = Array.isArray(section?.bullets) ? section.bullets : [];
+    return relaySection(
+      section?.title || `Relay Section ${index + 1}`,
+      [
+        relaySummary(section?.summary || ''),
+        rows.length ? relayGrid(rows) : '',
+        bullets.length ? relayList(bullets) : '',
+      ].join(''),
+      index < 3,
+    );
+  };
   const renderRelayLogicSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Relay logic source', relayGrid([
@@ -3642,20 +3704,22 @@ body {
     const proofItems = relayUnique(tiers.flatMap((tier) => tier.audit?.proofRequired || []));
     const blockerItems = relayUnique(tiers.flatMap((tier) => tier.audit?.fallbackBlockers || []));
     const telemetryItems = relayUnique(tiers.flatMap((tier) => tier.audit?.telemetryRequired || []));
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
     return [
       relaySection('Relay logic source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
         ['auto routing', relayText(snapshot.autoRouting)],
-      ])),
-      relaySection('Access precedence logic', relayGrid(precedenceRows)),
-      relaySection('Risk tier model logic', relayGrid(tierRows)),
+      ]), true),
+      ...capabilitySections.map(renderRelayCapabilitySection),
+      relaySection('Access precedence logic', relayGrid(precedenceRows), false),
+      relaySection('Risk tier model logic', relayGrid(tierRows), false),
       relaySection('Tier 3 dual-model logic', relayGrid([
         ['mode', relayText(tier3.mode)],
         ['lanes', relayLaneSummary(tier3)],
         ['proof required', (tier3.audit?.proofRequired || []).map(relayText).join(' | ') || 'none'],
         ['fallback blockers', (tier3.audit?.fallbackBlockers || []).map(relayText).join(' | ') || 'none'],
-      ])),
+      ]), true),
       relaySection('Dispatch logic', relayGrid([
         ['source', tier3.dispatch?.source || 'unknown'],
         ['lane count', tier3.dispatch?.laneCount ?? 0],
@@ -3663,8 +3727,8 @@ body {
         ['lane work', relayDispatchSummary(tier3)],
         ['payload policy', relayText(tier3.dispatch?.payloadPolicy)],
         ['payload text visible', tier3.dispatch?.payloadTextVisible ? 'yes' : 'no'],
-      ])),
-      relaySection('Audit logic', relayGrid(relayAuditRows(tier3))),
+      ]), true),
+      relaySection('Audit logic', relayGrid(relayAuditRows(tier3)), true),
       relaySection('Fallback blocker logic', relayList(blockerItems.map(relayText))),
       relaySection('Proof and telemetry logic', relayGrid([
         ['proof', proofItems.map(relayText).join(' | ') || 'none'],
@@ -3722,11 +3786,18 @@ body {
           <div class="relay-models-status">Auto disabled</div>
         </div>
         <div class="relay-models-body">
-          ${relaySection('Bridge route', '<div data-relay-bridge-status></div>')}
+          ${relaySection('Bridge route', '<div data-relay-bridge-status></div>', true)}
           <div data-relay-logic>${relaySection('Relay logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
         </div>
       </div>
     `);
+    rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+      const section = event.target;
+      if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+      const state = relaySectionState();
+      state[section.dataset.relaySection] = section.open;
+      localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+    }, true);
     renderRelayBridgeStatus();
     loadRelayLogic();
   };
