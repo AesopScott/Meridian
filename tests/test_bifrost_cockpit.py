@@ -149,6 +149,18 @@ def test_index_right_panel_mode_has_single_authority_and_recovery():
     assert "return false;" in doc
 
 
+def test_index_harness_title_toggles_model_icons():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert '<button class="harness-dock-title" type="button"' in doc
+    assert "Orchestrator Harness" in doc
+    assert "Switch to model harness icons" in doc
+    assert "harness-model-mode" in doc
+    assert 'class="harness-dock harness-dock-bottom harness-model-dock"' in doc
+    assert 'aria-label="Model harness"' in doc
+    for label in ("Claude", "GPT", "Gemini", "DeepSeek", "Local", "Router", "Verifier", "Cost", "Fallback"):
+        assert f'<span class="harness-label">{label}</span>' in doc
+
+
 def test_index_user_session_mode_names_target_and_preserves_storage():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "User Session:" in doc
