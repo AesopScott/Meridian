@@ -35,6 +35,33 @@ Completion: Build 4 Relay/Bifrost visible prompt payload meter checklist is revi
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 5 Bifrost visible prompt payload meter.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 5 visible prompt payload meter commits `3227fc62` and `e3247010`. Verify display-only frontend behavior: model/provider route shown, prompt payload labels (`under 1k`, `12.4k` style), budget percent, growth delta, payload status, Q-mode warning/degraded/blocker state, evidence refs, provider-balance continuity, escaping, no raw prompt/provider response text, no live calls, no session/process/model/provider execution, no Relay runtime/FileMap/main/Polaris leakage, and preservation of adjacent Bifrost surfaces.
+
+Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check 3227fc62^..e3247010`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 09:14 -06:00:
+
+- Build 5 visible prompt payload meter passed. Commits `3227fc62` and `e3247010` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The Bifrost slice is deterministic display-only sample rendering: it adds `VisiblePromptPayloadMeterView` and `VisiblePromptPayloadMeterItem` plus a static `Visible Prompt Payload Meter` section.
+- The rendered meter shows provider/model/route, labels including `under 1k`, `12.4k`, and `over budget`, budget percent, growth delta, payload status, Q-mode prompt-drag flat/degraded/blocked states, provider-balance refs, payload evidence refs, telemetry refs, warning tags, and blocker tags.
+- Escaping is covered for structured fields, and tests assert raw prompt text and provider response text are absent. Adjacent Bifrost surfaces remain visible, including recovery-readiness advisory, stale-session recovery actions, model validation envelopes, provider balance, prompt payload visibility, and Relay/Aegis handoff summary.
+- Scope check found no `index.html`, Relay runtime, FileMap, live calls, session/process/model/provider execution, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 273 tests.
+- `git diff --check 3227fc62^..e3247010` passed.
+
+Completion: Build 5 visible prompt payload meter is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 3 provider-result/FileMap no-op audit.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
