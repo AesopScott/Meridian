@@ -63,7 +63,7 @@ Proof:
 
 Completion: Relay harness UI/runtime integration is review-cleared. Reviews B returns to the Build 4/Build 5 current-main Ready-marker polling task in the Next Candidate section.
 
-## Coordinator Override - Completed / Finding Routed
+## Coordinator Override - Completed / Passed
 
 Goal: resume review of the next current-main Ready marker from Build 4 or Build 5 after the Relay harness UI/runtime integration review is closed.
 
@@ -101,6 +101,22 @@ Proof:
 Next Candidate:
 
 - Re-review Build 4 Relay routing implementation checklist after Build 4 removes the EOF whitespace failure and marks the focused repair Ready for Codex Review. Review Build 5 stale-session recovery action sample rendering only after Build 4 passes.
+
+Follow-up review result - 2026-06-01 21:34 -06:00:
+
+- Build 4 repaired checklist passed. Commit `6546595c` removes the EOF whitespace failure; `git diff --check a4652ce4^..HEAD` now passes.
+- Build 4 scope/content remains clean: commits `a4652ce4`, `e15a38a1`, and `6546595c` change only `docs/live-build-4.md` and `docs/relay-heartbeat-model-routing-implementation-checklist.md`; no runtime code, model calls, account probing, session spawning, Bifrost UI edits, Polaris dependency, branch movement, shared-main write, or push were introduced by the reviewed slice.
+- Build 4 source-doc invariants remain intact: account-first route precedence, wrong-scope correction/blocking, Tier 3+ start/re-auth/direct-with-proof/block choices, `deepseek-chat` exact DeepSeek dispatch identity, `deepseek-v4-pro`/`deepseek-v4-flash` as metadata only, DeepSeek candidate trust gates, Bifrost visibility requirements, Auto-disabled/runtime-blocked boundaries, and FileMap routing for future new runtime/docs files.
+- Build 5 stale-session recovery action sample rendering passed. Commits `be4074f7` and `093be886` change only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- Build 5 renders stale/closed/blocked/missing selected sessions with `.stale-target-guard`, `data-stale-session-id`, explicit "Prompts will not be sent" copy, and deterministic recovery action samples for reselecting, asking Prime to reopen/recover, or returning to the Sessions dropdown. Live selected sessions keep `.routing-target-state` and do not show recovery actions.
+- Build 5 scope check found deterministic render/view-model work only: no session spawning, live process inspection, model calls, `index.html` edits, Polaris dependency, live process control, branch movement, or Relay routing-doc changes.
+
+Proof:
+
+- Build 4: `git diff --check a4652ce4^..HEAD` passed.
+- Build 5: `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 182 tests.
+
+Completion: Build 4 Relay routing implementation checklist and Build 5 stale-session recovery action sample rendering are review-cleared. Reviews B returns to current-main Ready-marker polling for the next Build 4/Build 5 candidate.
 
 ## Coordinator Override - Completed / Passed
 
