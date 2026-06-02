@@ -13,6 +13,7 @@ from meridian_core.beacon import (
     check_harness_liveness,
     command_plan_advisory_evidence,
     permission_summary_advisory_evidence,
+    workflow_recovery_advisory_evidence,
 )
 from meridian_core.models import HeartbeatStatus
 from meridian_core.session_lifecycle import (
@@ -28,6 +29,7 @@ from meridian_core.session_lifecycle import (
     SessionLifecycleState,
     SessionStatus,
     summarize_session_permission_state,
+    summarize_workflow_work_order_recovery,
 )
 
 
@@ -259,3 +261,58 @@ class TestPermissionSummaryAdvisoryEvidence:
         assert any(item.startswith("finding.restart=") for item in evidence.evidence)
         assert any(item.startswith("recovery.rationale=") for item in evidence.evidence)
         assert evidence.to_dict()["advisory_type"] == "restart"
+
+
+class TestWorkflowRecoveryAdvisoryEvidence:
+    def test_workflow_recovery_summary_becomes_beacon_evidence(self) -> None:
+        now = datetime(2026, 6, 2, 8, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now - timedelta(minutes=1),
+            task_scope="workflow-summary",
+            last_permission_change=now,
+        )
+        session = SessionLifecycleState(
+            session_id="build-2-workflow",
+            session_name="Build 2 Workflow",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-workflow-advisory-binding",
+            current_task_id="workflow-summary",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        summary = summarize_workflow_work_order_recovery(
+            session,
+            work_order_id="wo-beacon-workflow",
+            heartbeat_emitted_at=now - timedelta(minutes=10),
+            timestamp=now,
+        )
+
+        evidence = workflow_recovery_advisory_evidence(summary, now=now)
+
+        assert evidence.harness_id == "build-2-workflow"
+        assert evidence.advisory_type == "workflow_request_human_gate"
+        assert evidence.human_gate_required is True
+        assert "permission.unlock_expired" in evidence.blockers
+        assert "workflow.recovery_action=request_human_gate" in evidence.evidence
+        assert "work_order.id=wo-beacon-workflow" in evidence.evidence
+        assert evidence.to_dict()["blockers"] == list(evidence.blockers)

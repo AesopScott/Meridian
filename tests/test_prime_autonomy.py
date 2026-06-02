@@ -15,6 +15,7 @@ from meridian_core.prime_autonomy import (
     select_next_action_from_project_state,
     select_next_action_from_command_plan_audit,
     select_next_action_from_session_lifecycle_advisory,
+    select_next_action_from_workflow_recovery_summary,
 )
 from meridian_core.session_lifecycle import (
     CommandIntent,
@@ -31,6 +32,7 @@ from meridian_core.session_lifecycle import (
     gather_prime_autonomy_input,
     generate_restart_finding,
     generate_resteer_finding,
+    summarize_workflow_work_order_recovery,
 )
 
 
@@ -740,6 +742,89 @@ class TestSessionLifecycleAdvisorySelection:
         assert action.action_type == PrimeActionType.POLL_SESSION
         assert action.risk_tier == PrimeActionRiskTier.SAFE
         assert action.is_executable() is True
+
+    def test_none_workflow_recovery_summary_pauses_safely(self):
+        """Missing workflow recovery summaries fall back to safe pause."""
+        action = select_next_action_from_workflow_recovery_summary(None)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.FALLBACK
+        assert action.target_harness == "Session Lifecycle"
+
+    def test_workflow_stale_summary_becomes_recovery_advisory(self, advisory_session):
+        """Stale workflow heartbeat summaries advise recovery without execution."""
+        observed_at = datetime.now(timezone.utc)
+        summary = summarize_workflow_work_order_recovery(
+            advisory_session,
+            work_order_id="wo-prime-stale",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_workflow_recovery_summary(summary)
+
+        assert action.action_type == PrimeActionType.ADVISE_SESSION_RECOVERY
+        assert action.source == PrimeActionSource.WORKFLOW_RESULT
+        assert action.target_lane == advisory_session.session_id
+        assert action.human_gate_required is True
+        assert "workflow.recovery_action=start_new" in action.evidence
+        assert any("work_order.id=wo-prime-stale" in item for item in action.evidence)
+
+    def test_workflow_permission_blockers_pause_prime_advisory(self, advisory_session):
+        """Workflow summaries with permission blockers pause for human gate."""
+        observed_at = datetime.now(timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(minutes=1),
+            task_scope="task-1",
+            last_permission_change=observed_at,
+        )
+        blocked_session = SessionLifecycleState(
+            **{**advisory_session.__dict__, "permission_context": expired_context}
+        )
+        summary = summarize_workflow_work_order_recovery(
+            blocked_session,
+            work_order_id="wo-prime-blocked",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_workflow_recovery_summary(summary)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is True
+        assert "permission.unlock_expired" in action.blockers
+        assert "blocker=permission.unlock_expired" in action.evidence
+
+    def test_workflow_fresh_summary_continues_polling(self, advisory_session):
+        """Fresh workflow heartbeat summaries keep Prime on watch/poll."""
+        observed_at = datetime.now(timezone.utc)
+        fresh_session = SessionLifecycleState(
+            **{
+                **advisory_session.__dict__,
+                "status": SessionStatus.RUNNING,
+                "health_state": HealthState.HEALTHY,
+                "last_prompt_sent_at": observed_at,
+            }
+        )
+        summary = summarize_workflow_work_order_recovery(
+            fresh_session,
+            work_order_id="wo-prime-fresh",
+            heartbeat_emitted_at=observed_at - timedelta(seconds=10),
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_workflow_recovery_summary(summary)
+
+        assert action.action_type == PrimeActionType.POLL_SESSION
+        assert action.risk_tier == PrimeActionRiskTier.SAFE
+        assert "workflow.recovery_action=reuse" in action.evidence
 
 
 class TestCommandPlanAuditAdvisorySelection:

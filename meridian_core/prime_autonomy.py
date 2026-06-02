@@ -14,9 +14,11 @@ from meridian_core.session_lifecycle import (
     OperationScope,
     PrimeAutonomyInput as SessionPrimeAutonomyInput,
     ReviewCadenceState,
+    SessionAction,
     SessionCommandPlan,
     SessionPermissionSummary,
     SessionStatus,
+    WorkflowWorkOrderRecoverySummary,
 )
 
 
@@ -430,6 +432,79 @@ def select_next_action_from_session_lifecycle_advisory(
         target_harness="Session Lifecycle",
         rationale="No restart/resteer findings; continue watching session state.",
         evidence=evidence,
+    )
+
+
+def select_next_action_from_workflow_recovery_summary(
+    recovery_summary: Optional[WorkflowWorkOrderRecoverySummary] = None,
+) -> PrimeNextAction:
+    """Convert workflow work-order recovery summary into a safe Prime advisory."""
+    if recovery_summary is None:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.FALLBACK,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.ERROR_RECOVERY,
+            target_harness="Session Lifecycle",
+            rationale="No workflow recovery summary available.",
+        )
+
+    blockers = list(recovery_summary.permission_blockers)
+    blockers.extend(recovery_summary.review_gate_blockers)
+    human_gate_required = (
+        recovery_summary.recovery_action == SessionAction.REQUEST_HUMAN_GATE
+        or bool(blockers)
+    )
+    evidence = list(recovery_summary.evidence)
+    evidence.append(f"workflow.recovery_action={recovery_summary.recovery_action.value}")
+
+    if human_gate_required:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.HIGH,
+            source=PrimeActionSource.WORKFLOW_RESULT,
+            target_harness="Session Lifecycle",
+            target_lane=recovery_summary.target_session_id,
+            rationale=(
+                "Workflow recovery summary is blocked by permission or review gates."
+            ),
+            evidence=evidence,
+            human_gate_required=True,
+            blockers=blockers or ["workflow recovery requires human gate"],
+        )
+
+    if recovery_summary.recovery_action == SessionAction.REUSE:
+        return make_prime_next_action(
+            action_type=PrimeActionType.POLL_SESSION,
+            confidence=PrimeActionConfidence.MEDIUM,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.WORKFLOW_RESULT,
+            target_harness="Session Lifecycle",
+            target_lane=recovery_summary.target_session_id,
+            rationale="Workflow heartbeat is current; continue watching the work order.",
+            evidence=evidence,
+        )
+
+    return make_prime_next_action(
+        action_type=PrimeActionType.ADVISE_SESSION_RECOVERY,
+        confidence=PrimeActionConfidence.HIGH,
+        risk_tier=(
+            PrimeActionRiskTier.MEDIUM
+            if recovery_summary.recovery_action == SessionAction.ARCHIVE
+            else PrimeActionRiskTier.HIGH
+        ),
+        source=PrimeActionSource.WORKFLOW_RESULT,
+        target_harness="Session Lifecycle",
+        target_lane=recovery_summary.target_session_id,
+        rationale=(
+            "Workflow recovery advisory for "
+            f"{recovery_summary.work_order_id}: "
+            f"{recovery_summary.stale_session_recovery_rationale}"
+        ),
+        evidence=evidence,
+        human_gate_required=True,
+        blockers=["advisory only; workflow recovery command plan required"],
     )
 
 

@@ -13,7 +13,12 @@ from pathlib import Path
 from typing import Any
 
 from .models import Heartbeat, HeartbeatStatus
-from .session_lifecycle import SessionCommandPlan, SessionPermissionSummary
+from .session_lifecycle import (
+    SessionAction,
+    SessionCommandPlan,
+    SessionPermissionSummary,
+    WorkflowWorkOrderRecoverySummary,
+)
 
 
 @dataclass(frozen=True)
@@ -111,6 +116,29 @@ def permission_summary_advisory_evidence(
         evidence=tuple(evidence),
         blockers=tuple(summary.blockers),
         human_gate_required=bool(summary.blockers or summary.restart_resteer_findings),
+        generated_at=_as_utc(now or datetime.now(timezone.utc)),
+    )
+
+
+def workflow_recovery_advisory_evidence(
+    summary: WorkflowWorkOrderRecoverySummary,
+    *,
+    now: datetime | None = None,
+) -> BeaconAdvisoryEvidence:
+    """Convert a workflow recovery summary into Beacon advisory evidence only."""
+    blockers = tuple(summary.permission_blockers + summary.review_gate_blockers)
+    evidence = list(summary.evidence)
+    evidence.append(f"workflow.recovery_action={summary.recovery_action.value}")
+
+    return BeaconAdvisoryEvidence(
+        harness_id=summary.target_session_id,
+        advisory_type=f"workflow_{summary.recovery_action.value}",
+        evidence=tuple(evidence),
+        blockers=blockers,
+        human_gate_required=(
+            summary.recovery_action == SessionAction.REQUEST_HUMAN_GATE
+            or bool(blockers)
+        ),
         generated_at=_as_utc(now or datetime.now(timezone.utc)),
     )
 
