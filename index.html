@@ -1401,15 +1401,16 @@ body {
   white-space: pre-wrap;
 }
 
-.session-window-right.is-relay-models .session-top-icons,
-.session-window-right.is-relay-models .session-interface,
-.session-window-right.is-relay-models .session-prompt-input,
-.session-window-right.is-relay-models .session-response-output,
-.session-window-right.is-relay-models .session-model-status {
+.session-window-right.is-panel-surface .session-top-icons,
+.session-window-right.is-panel-surface .session-interface,
+.session-window-right.is-panel-surface .session-prompt-input,
+.session-window-right.is-panel-surface .session-response-output,
+.session-window-right.is-panel-surface .session-model-status {
   display: none;
 }
 
-.relay-models-surface {
+.relay-models-surface,
+.right-panel-surface {
   position: absolute;
   inset: 12px 12px 12px 34px;
   z-index: 2;
@@ -3806,14 +3807,76 @@ body {
       bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', { visibleContext: false, samePortRestart: false }));
     }
   };
-  const clearRelayModels = () => {
+  const clearRightPanelSurface = () => {
     if (!rightWindow || !rightWorkspace) return;
+    rightWindow.classList.remove('is-panel-surface');
     rightWindow.classList.remove('is-relay-models');
-    rightWorkspace.querySelectorAll('.relay-models-surface').forEach((node) => node.remove());
+    rightWorkspace.querySelectorAll('.relay-models-surface, .right-panel-surface').forEach((node) => node.remove());
+  };
+  const renderRightPanelSurface = ({ title, status, sections }) => {
+    if (!rightWindow || !rightWorkspace) return;
+    clearRightPanelSurface();
+    rightWindow.classList.add('is-panel-surface');
+    rightWorkspace.removeAttribute('aria-hidden');
+    rightWorkspace.insertAdjacentHTML('beforeend', `
+      <div class="right-panel-surface" role="region" aria-label="${escapeHtml(title)}">
+        <div class="relay-models-header">
+          <div class="relay-models-title">${escapeHtml(title)}</div>
+          <div class="relay-models-status">${escapeHtml(status)}</div>
+        </div>
+        <div class="relay-models-body">${sections.join('')}</div>
+      </div>
+    `);
+    rightWorkspace.querySelector('.right-panel-surface')?.addEventListener('toggle', (event) => {
+      const section = event.target;
+      if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+      const state = relaySectionState();
+      state[section.dataset.relaySection] = section.open;
+      localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+    }, true);
+  };
+  const renderSparkSurface = (label) => {
+    renderRightPanelSurface({
+      title: `${label || 'Settings'} Surface`,
+      status: 'planned',
+      sections: [
+        relaySection('Surface logic', relayGrid([
+          ['mode', 'Settings/Spark'],
+          ['selected surface', label || 'Settings'],
+          ['prompt window', 'hidden in this mode'],
+        ]), true),
+        relaySection('Backend link', relayGrid([
+          ['state', 'not wired yet'],
+          ['mutation policy', 'blocked until an explicit settings backend exists'],
+          ['drift guard', 'visible controls must match backend settings before writes are enabled'],
+        ]), true),
+      ],
+    });
+  };
+  const renderHarnessSurface = (button) => {
+    const harness = button?.dataset.harness || 'Harness';
+    const title = button?.dataset.sessionTitle || harness;
+    renderRightPanelSurface({
+      title,
+      status: button?.dataset.status || 'planned',
+      sections: [
+        relaySection('Harness logic', relayGrid([
+          ['harness', harness],
+          ['surface mode', 'Harness'],
+          ['prompt window', 'hidden in this mode'],
+        ]), true),
+        relaySection('Backend link', relayGrid([
+          ['state', 'not wired for this harness yet'],
+          ['visible proof', 'no backend logic snapshot is registered for this harness'],
+          ['drift guard', 'no hidden backend mutation is available from this panel'],
+        ]), true),
+      ],
+    });
   };
   const renderRelayModels = () => {
     if (!rightWindow || !rightWorkspace) return;
-    clearRelayModels();
+    clearRightPanelSurface();
+    rightWindow.classList.add('is-panel-surface');
     rightWindow.classList.add('is-relay-models');
     rightWorkspace.removeAttribute('aria-hidden');
     rightWorkspace.insertAdjacentHTML('beforeend', `
@@ -3845,7 +3908,7 @@ body {
   const restoreUserPanel = ({ persist = true } = {}) => {
     screen.classList.add('session-theme-aqua');
     screen.classList.remove('session-theme-green');
-    clearRelayModels();
+    clearRightPanelSurface();
     if (userTitle) userTitle.textContent = 'User';
     if (persist) storeRightPanel('user', 'User');
   };
@@ -3980,8 +4043,9 @@ body {
     screen.classList.remove('session-theme-aqua');
     screen.classList.remove('session-theme-green');
     if (userTitle) userTitle.textContent = button.dataset.sessionTitle || button.dataset.harness || 'User';
-    clearRelayModels();
+    clearRightPanelSurface();
     if (button.dataset.harness === 'Relay') renderRelayModels();
+    else renderHarnessSurface(button);
     screen.classList.add('sessions-visible');
     harnessDisabledUntil = Date.now() + 2000;
     harnessDock.classList.remove('harness-dock-open');
@@ -3994,8 +4058,8 @@ body {
     button.classList.add('is-selected');
     screen.classList.remove('session-theme-aqua');
     screen.classList.add('session-theme-green');
-    clearRelayModels();
     if (userTitle) userTitle.textContent = actionLabel || 'Spark';
+    renderSparkSurface(actionLabel || 'Spark');
     screen.classList.add('sessions-visible');
     if (persist) storeRightPanel('spark', actionLabel || 'Spark');
     openSpark();

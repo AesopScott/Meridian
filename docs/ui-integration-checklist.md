@@ -150,15 +150,15 @@ Mode meanings:
 | ID | Surface Toggle Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SUR1 | User Session mode | Right panel targets user review/decision work Prime has surfaced in a project-specific context. | planned | Title and routing target match selected project/session context. |
-| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | planned | Settings title replaces User session target and prompt UI is absent. |
-| SUR3 | Harness mode | Right panel uses full panel for selected harness logic items, with no prompt window. | planned | Harness title replaces User session target and displays logic list. |
-| SUR4 | Immediate interaction switch | Switching surface immediately changes the right-panel interaction model. | planned | User Session shows prompt; Settings/Harness show item lists. |
+| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | partial | Settings title replaces User session target, prompt UI is absent, and unwired backend mutation is visibly blocked. |
+| SUR3 | Harness mode | Right panel uses full panel for selected harness logic items, with no prompt window. | partial | Harness title replaces User session target and displays logic/backend-link sections. |
+| SUR4 | Immediate interaction switch | Switching surface immediately changes the right-panel interaction model. | wired | User Session shows prompt; Settings/Harness show item lists. |
 | SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | planned | Return to prior surface restores previous target. |
-| SUR6 | Surface-specific layout | Layout reflects active surface: prompt/response for User Session, full-panel items for Settings/Harness. | planned | User can tell what mode is active before interacting. |
+| SUR6 | Surface-specific layout | Layout reflects active surface: prompt/response for User Session, full-panel items for Settings/Harness. | wired | User can tell what mode is active before interacting. |
 | SUR7 | Surface state preservation | Unsaved drafts or item edits are preserved per surface unless reset/close confirms otherwise. | planned | Switch away/back preserves relevant surface state. |
 | SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | planned | Close does not destroy previous session target. |
 | SUR9 | Harness item actions | Harness mode actions apply only to selected harness logic items. | planned | Unsupported harness action is blocked with readable warning. |
-| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | planned | Settings interaction does not send to live session accidentally. |
+| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | partial | Settings surface blocks mutation until an explicit settings backend exists and does not send to live session accidentally. |
 | SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | planned | Prompt does not disappear into a dead target. |
 | SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | planned | Visual regression check passes after switches. |
 | SUR13 | Active mode persistence | User, Settings/Spark, and Harness modes persist as the right-panel mode across reload/reset/focus churn. | wired | Open Relay or Settings, reload/reset the UI, and confirm the right panel does not revert to User. |
@@ -457,9 +457,9 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 
 | ID | Harness Mode Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | planned | Right panel title/target changes to selected harness. |
+| HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | wired | Right panel title/target changes to selected harness. |
 | HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | planned | Return to User Session restores prior session or stale warning. |
-| HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | planned | Harness mode opens with logic items, not a prompt window or blank chat. |
+| HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | partial | Harness mode opens with logic/backend-link sections, not a prompt window or blank chat. |
 | HMS4 | Prime review path | Prime reviews harness logic items before model interaction. | planned | Logic item has Prime review state before dispatch. |
 | HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay routing. | planned | Dispatch metadata names Relay route/model target. |
 | HMS6 | Harness-specific actions | Right-panel actions target selected harness logic item. | planned | Action metadata names selected harness and logic item. |
