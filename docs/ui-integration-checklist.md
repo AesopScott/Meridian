@@ -111,7 +111,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
 | SK7 | Skills | Opens searchable skill/capability registry by model, project, and global scope. | planned | Track `SKL-*` subitems before wiring the surface. |
 | SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
-| SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | planned | Track `CLS-*` subitems before wiring the surface. |
+| SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | partial | Transient surface close is wired; session close/write-through remains tracked in `CLS-*`. |
 | SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | planned | Track `ARC-*` subitems before wiring the surface. |
 | SK11 | Reset | Confirms, clears session-window prompts/transcripts, then hard reloads UI. | partial | Track `RST-*` subitems before changing reset behavior. |
 | SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | partial | Track `RLD-*` subitems before changing reload behavior. |
@@ -156,7 +156,7 @@ Mode meanings:
 | SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | planned | Return to prior surface restores previous target. |
 | SUR6 | Surface-specific layout | Layout reflects active surface: prompt/response for User Session, full-panel items for Settings/Harness. | wired | User can tell what mode is active before interacting. |
 | SUR7 | Surface state preservation | Unsaved drafts or item edits are preserved per surface unless reset/close confirms otherwise. | planned | Switch away/back preserves relevant surface state. |
-| SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | planned | Close does not destroy previous session target. |
+| SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | wired | Close returns Settings/Harness surfaces to User mode without destroying session state. |
 | SUR9 | Harness item actions | Harness mode actions apply only to selected harness logic items. | planned | Unsupported harness action is blocked with readable warning. |
 | SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | partial | Settings surface blocks mutation until an explicit settings backend exists and does not send to live session accidentally. |
 | SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | planned | Prompt does not disappear into a dead target. |
@@ -395,7 +395,7 @@ Close is a targeted session-control action, not merely closing a panel. It shoul
 | CLS5 | Archive option | Offers archive-on-close for sessions worth reopening. | planned | Archived close appears in Archive list. |
 | CLS6 | No silent data loss | Blocks close or warns when write-through fails. | planned | Failed write-through leaves session open or visibly recoverable. |
 | CLS7 | Stop-before-close check | Detects running work before close and asks for stop/archive/leave-running path. | planned | Running session cannot be silently killed. |
-| CLS8 | Close overlay mode | Closes transient UI overlays without affecting sessions. | planned | Overlay close is visually distinct from session close. |
+| CLS8 | Close overlay mode | Closes transient UI overlays without affecting sessions. | wired | Spark Close returns the right panel to User mode without running session close/write-through. |
 | CLS9 | Close status event | Emits structured event for session lifecycle/history. | planned | Event is visible to Beacon/Session Lifecycle. |
 | CLS10 | Restore after close | Closed sessions can be found through recent/Archive where applicable. | planned | Recently closed item is recoverable. |
 | CLS11 | Permission gate | Higher-risk close actions require explicit confirmation. | planned | Public/account/build-critical sessions do not close accidentally. |
@@ -469,7 +469,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | HMS10 | Harness diagnostics | Shows harness diagnostic events when available. | planned | Diagnostics are structured and filterable. |
 | HMS11 | Harness proof link | Links harness changes to proof/checks when applicable. | planned | Harness update has verification path. |
 | HMS12 | Harness permission boundary | High-risk harness actions require explicit approval. | planned | Source/Git/Release actions cannot run silently. |
-| HMS13 | Harness mode close | Closing Harness mode returns to previous valid right-panel mode. | planned | Close does not lose User Session target. |
+| HMS13 | Harness mode close | Closing Harness mode returns to previous valid right-panel mode. | wired | Spark Close returns Harness mode to User mode without losing User Session state. |
 | HMS14 | Harness edit preservation | Unsaved harness-mode item edits are preserved per harness where useful. | planned | Switch harness away/back; edits remain or warning is shown. |
 | HMS15 | No cross-harness leakage | Logic item edits/actions for one harness do not silently route to another harness. | planned | Active harness and logic item are explicit before action. |
 

@@ -4075,6 +4075,12 @@ body {
         hardReloadUi();
         return;
       }
+      if (actionLabel === 'Close') {
+        buttons.forEach((item) => item.classList.remove('is-selected'));
+        restoreUserPanel();
+        openSpark();
+        return;
+      }
       activateSparkButton(button);
     });
   });
