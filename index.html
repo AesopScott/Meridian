@@ -4026,6 +4026,7 @@ body {
       ]), true);
     }
     const decision = snapshot.decision || {};
+    const request = decision.request || {};
     const context = decision.context || {};
     const aegisRisk = context.aegisRisk || {};
     const proof = Array.isArray(decision.proof) ? decision.proof : [];
@@ -4046,6 +4047,15 @@ body {
         ['risk', relayText(decision.risk)],
         ['executable', decision.executable ? 'yes' : 'no'],
         ['why', decision.why || 'unknown'],
+      ]), true),
+      relaySection('Interaction request', relayGrid([
+        ['request id', request.requestId || 'unknown'],
+        ['intent', relayText(request.intent)],
+        ['action', relayText(request.action)],
+        ['project', request.projectId || 'unknown'],
+        ['requires approval', request.requiresApproval ? 'yes' : 'no'],
+        ['requires clarification', request.requiresClarification ? 'yes' : 'no'],
+        ['visible prompt ref', request.visiblePromptRef || 'none'],
       ]), true),
       relaySection('Backend context', relayGrid([
         ['project', context.projectId || 'unknown'],

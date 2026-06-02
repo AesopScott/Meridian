@@ -136,6 +136,34 @@ class PrimeAegisRiskInput:
 
 
 @dataclass(frozen=True)
+class PrimeInteractionRequest:
+    """Typed per-interaction request Prime resolves into a runtime decision."""
+
+    request_id: str
+    intent: PrimeIntentKind
+    action: str
+    why: str
+    project_id: str = "Meridian"
+    risk: str = "safe_read_only"
+    requires_approval: bool = False
+    requires_clarification: bool = False
+    visible_prompt_ref: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "requestId": self.request_id,
+            "intent": self.intent.value,
+            "action": self.action,
+            "why": self.why,
+            "projectId": self.project_id,
+            "risk": self.risk,
+            "requiresApproval": self.requires_approval,
+            "requiresClarification": self.requires_clarification,
+            "visiblePromptRef": self.visible_prompt_ref,
+        }
+
+
+@dataclass(frozen=True)
 class PrimeRuntimeContext:
     """Backend context packet Prime consumes before choosing an action."""
 
@@ -170,6 +198,7 @@ class PrimeDecision:
     why: str
     risk: str
     context: PrimeRuntimeContext
+    request: PrimeInteractionRequest | None = None
     proof: tuple[PrimeProof, ...] = field(default_factory=tuple)
     blockers: tuple[str, ...] = field(default_factory=tuple)
     visible_to_scott: tuple[str, ...] = field(default_factory=tuple)
@@ -185,6 +214,7 @@ class PrimeDecision:
             "action": self.action,
             "why": self.why,
             "risk": self.risk,
+            "request": self.request.to_dict() if self.request else None,
             "context": self.context.to_dict(),
             "proof": [item.to_dict() for item in self.proof],
             "blockers": list(self.blockers),
@@ -401,11 +431,16 @@ def make_prime_decision(
     risk: str = "safe_read_only",
     status: PrimeDecisionStatus = PrimeDecisionStatus.EXECUTABLE,
     blockers: tuple[str, ...] = (),
+    request: PrimeInteractionRequest | None = None,
 ) -> PrimeDecision:
     """Create a deterministic Prime decision with visible proof."""
 
     proof = build_prime_proof_packet(owner_harness=owner_harness, context=context)
-    final_status = PrimeDecisionStatus.BLOCKED if blockers else status
+    final_status = (
+        PrimeDecisionStatus.BLOCKED
+        if blockers and status == PrimeDecisionStatus.EXECUTABLE
+        else status
+    )
     return PrimeDecision(
         decision_id="prime-runtime-decision-v1",
         status=final_status,
@@ -414,6 +449,7 @@ def make_prime_decision(
         why=why,
         risk=risk,
         context=context,
+        request=request,
         proof=proof,
         blockers=blockers,
         visible_to_scott=(
@@ -435,6 +471,7 @@ def resolve_prime_decision(
     risk: str = "safe_read_only",
     requires_approval: bool = False,
     requires_clarification: bool = False,
+    request: PrimeInteractionRequest | None = None,
 ) -> PrimeDecision:
     """Resolve owner, gate executability, and return the visible Prime decision."""
 
@@ -453,6 +490,26 @@ def resolve_prime_decision(
         risk=risk,
         status=gate.status,
         blockers=gate.blockers,
+        request=request,
+    )
+
+
+def resolve_prime_interaction(
+    *,
+    context: PrimeRuntimeContext,
+    request: PrimeInteractionRequest,
+) -> PrimeDecision:
+    """Resolve a typed Prime interaction request into the visible decision packet."""
+
+    return resolve_prime_decision(
+        context=context,
+        intent=request.intent,
+        action=request.action,
+        why=request.why,
+        risk=request.risk,
+        requires_approval=request.requires_approval,
+        requires_clarification=request.requires_clarification,
+        request=request,
     )
 
 
@@ -470,11 +527,17 @@ def prime_runtime_snapshot() -> dict[str, Any]:
         relay_snapshot=relay_logic_snapshot(),
         aegis_risk=aegis_risk_from_aggregate(summarize_aggregate_route_gates([])),
     )
-    decision = resolve_prime_decision(
-        context=context,
+    request = PrimeInteractionRequest(
+        request_id="prime-runtime-request-v1",
         intent=PrimeIntentKind.ORCHESTRATION,
         action="inspect_backend_context",
         why="Prime verifies Compass, Vulcan, Relay, and Aegis source refs before any UI-rendered orchestration.",
+        project_id=context.project_id,
+        visible_prompt_ref="visible Prime harness request",
+    )
+    decision = resolve_prime_interaction(
+        context=context,
+        request=request,
     )
     return {
         "ok": True,
@@ -485,6 +548,17 @@ def prime_runtime_snapshot() -> dict[str, Any]:
         "summary": "Prime owns orchestration only after backend project, session, route, and proof context are assembled visibly.",
         "decision": decision.to_dict(),
         "capabilitySections": [
+            {
+                "title": "Interaction Request",
+                "summary": "Prime decisions are driven by typed request fields, not hidden UI interpretation.",
+                "rows": [
+                    {"key": "request id", "value": request.request_id},
+                    {"key": "intent", "value": request.intent.value},
+                    {"key": "action", "value": request.action},
+                    {"key": "project", "value": request.project_id},
+                    {"key": "visible prompt ref", "value": request.visible_prompt_ref},
+                ],
+            },
             {
                 "title": "Prime Job",
                 "summary": "Prime decides the next orchestration action without owning project bounds, session lifecycle, model routing, or proof gates.",
