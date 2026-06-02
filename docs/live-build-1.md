@@ -21,11 +21,20 @@ Task: expose deterministic, display-safe prompt payload meter evidence through R
 Completion:
 - Status: Ready for Codex Review.
 - Completed: 2026-06-02 09:05 -06:00.
-- Commit: `aa060004` (`feat: Add Relay prompt payload meter evidence`).
+- Commit: `44c02e4b` (`feat: Add Relay prompt payload meter evidence`; rebased from `aa060004` after origin/main advanced).
 - Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 - Tests run: `python -m pytest tests/test_relay_executor.py -q` (211 passed); `git diff --check` (passed; Git reported line-ending normalization warnings only).
 - Concrete evidence: Relay now exposes immutable `RelayPromptPayloadMeterEvidence` plus `RelayExecutionSummary.prompt_payload_meter_evidence()` and `RelayExecutionSummary.prompt_payload_meter_consumer_view()`. Runtime meter evidence carries display label, estimated tokens, budget percent, status, Q-mode flag, growth delta, model/provider/route continuity, prompt-drag tags, payload snapshot hash, model metadata ref, external-review ref, and payload evidence ref. Tests prove label buckets, degraded Q-mode blockers, decision-record binding, stable display-safe serialization, no raw prompt/provider-response/credential leakage, and unchanged adapter payload boundaries.
 - Next Candidate: after review, connect this reviewed Relay meter evidence to the Bifrost prompt payload visibility surface, or bind prompt-drag blocker tags into a reviewed Aegis retry/fallback planning lane.
+
+**Build 1 Read Check** — 2026-06-12 22:40 UTC (Continued Poll, cadence 3/3)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" section found
+- Latest origin/main: commit `c0d21b16` (Clear prompt payload meter checklist review)
+- Prompt payload meter evidence task: Ready for Codex Review (commit `44c02e4b`, rebased from `aa060004`; 211 tests pass)
+- Downstream-consumer checklist task: also Ready for Codex Review (awaiting review gate clearance)
+- Code/doc changes in session: 3 of 3 — Codex review check now due
+- Next Candidate Task: awaiting Prime/Codex promotion after review
+- Build 1 idle; pushing meter evidence commit and queuing Codex review check
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
