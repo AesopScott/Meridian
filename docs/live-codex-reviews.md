@@ -22,6 +22,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 2 live-control command-plan staging.
+
+Status: passed by Codex Reviews A on 2026-06-02 09:05 -06:00. Candidate `HEAD` is `15ebb598`, and Build 2 commits `a240ea4d` and `15ebb598` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check a240ea4d^..15ebb598`
+
+Review result:
+
+- Containment checks for `a240ea4d` and `15ebb598` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with Build 2 queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 110 tests.
+- `git diff --check a240ea4d^..15ebb598` passed.
+- Verified `SessionLiveControlCommandPlanStagingRecord` is frozen, deterministic, display-safe, serializable staging metadata and `stage_live_control_command_plan_from_readiness()` only copies reviewed readiness fields into a non-executable record.
+- Verified target session id, command kind, recommended action, required operation, ready flag, human-gate rationale, blockers, evidence refs, and permission state are preserved.
+- Verified the staging record always forces `is_executable_now=False`, `ui_review_required=True`, `human_gate_required=True`, and includes explicit `command_plan.ui_review_required` / `staging.is_executable_now=False` / `staging.ui_review_required=True` evidence.
+- Verified no restart, resteer, archive execution, process/session/model/provider/UI/Bifrost/FileMap side effect, branch/worktree movement, main write, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 live-control command-plan staging is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 2 Prime/Beacon recovery-readiness advisory consumers.
 
 Status: passed by Codex Reviews A on 2026-06-02 08:53 -06:00. Candidate `HEAD` is `8e288664`, and Build 2 commits `d0644f77` and `8e288664` are ancestors of the assigned candidate branch.
