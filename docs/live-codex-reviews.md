@@ -20,6 +20,36 @@ Completion: if a slice is reviewed, commit only review provenance/finding/pass u
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 1 current-main Relay prompt payload evidence binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:06 -06:00. Current `HEAD` and `origin/main` are `f4873bba`, and relevant Build 1 commits `e6ab6af4` and `334c952e` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check e6ab6af4^..334c952e`
+
+Review result:
+
+- `git merge-base --is-ancestor e6ab6af4 HEAD` and `git merge-base --is-ancestor 334c952e HEAD` passed.
+- `git show --stat --oneline --name-only e6ab6af4 334c952e` shows the implementation commit changed only `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 199 tests.
+- `git diff --check e6ab6af4^..334c952e` passed.
+- Verified `RelayPromptPayloadEvidence` carries prompt source, heartbeat/route/lane context, provider/model context, token estimate, budget percent/status/compliance, growth state, snapshot/telemetry support flags, tokenizer family, and explicit missing-telemetry tags.
+- Verified payload evidence is built before the adapter/model-call loop and attached to per-lane `RelayExecutionResult` records and the first-lane `RelayDecisionRecord` without forwarding route metadata into the adapter payload.
+- Verified tests cover raw prompt exclusion from evidence dictionaries, prompt snapshot hashing only when supported, and missing telemetry tags when adapter metadata is absent.
+- Scoped side-effect scan found no new raw prompt text storage in evidence, credential exposure, raw provider response storage, full transcript storage, live model/network call path, UI/Bifrost rendering, FileMap edit, Polaris dependency, branch movement, or cross-worktree movement in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 1 Relay prompt payload evidence binding is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 2 current-main Session Lifecycle command-plan edge coverage, then Build 3 current-main FileMap prompt payload visibility coverage if Build 2 passes.
 
 Status: passed by Codex Reviews A on 2026-06-01 22:01 -06:00. Current `HEAD` and `origin/main` are `4dd951ff`. Build 2 commits `ee00bc4a` and `42783048` are ancestors of current main; Build 3 commits `4ee53306` and `e1e35d9c` are ancestors of current main.
