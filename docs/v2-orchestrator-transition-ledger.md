@@ -349,6 +349,14 @@ Coordinator Build 1/3/5 movement - 2026-06-02:
 - Approved and completed path-limited movement of Build 5 dispatch hardening state sample commits `409358c2` and `aa2fbd47` onto shared main as `ec139883` and `5bb4da7a`, limited to `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
 - Proof rerun on shared main after movement: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed 204/204; `python -m pytest tests/test_filemap.py -q` passed 46/46; `python -m pytest tests/test_bifrost_cockpit.py -q` passed 200/200; `git diff --check HEAD~5..HEAD` passed.
 
+Coordinator review clearance and fresh task promotion - 2026-06-02:
+
+- Movement gate for review provenance was paused when shared main became dirty with doc-only UI scope updates in `docs/live-build-5.md` and `docs/ui-integration-checklist.md`. The dirty doc update was preserved on quarantine branch `codex/quarantine-main-dirty-ui-scope-20260601-222036` at `97fcbb34`, then shared main was returned clean/aligned to `origin/main`.
+- After the clean gate was restored, Reviews A local provenance commit `e5ebe6c8` was moved to main as `61798efa`, limited to `docs/live-codex-reviews.md`. Reviews A passed Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit with no findings.
+- Reviews B local provenance commit `4e9406c7` was moved to main as `b900f4d1`, limited to `docs/live-codex-reviews-2.md`. Reviews B passed Build 4 PromptPacket proof metadata checklist and Build 5 dispatch hardening state sample rendering with no findings.
+- Promoted fresh executable build tasks: Build 1 PromptPacket proof metadata binding in Relay dispatch envelopes; Build 2 Prime-facing advisory consumption of SessionCommandPlan audit evidence; Build 3 FileMap audit for the current review-clearance/routing checkpoint; Build 4 Aegis PromptPacket proof policy checklist; Build 5 Bifrost PromptPacket proof metadata sample rendering.
+- Promoted review queue Active Now blocks: Reviews A polls/reviews the next current-main Ready marker from Build 1/2/3; Reviews B polls/reviews the next current-main Ready marker from Build 4/5. These poll tasks must not commit read-check-only progress.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:

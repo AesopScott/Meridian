@@ -4,6 +4,20 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: bind PromptPacket proof metadata into Relay dispatch envelopes after Reviews A cleared dispatch envelope helpers and Reviews B cleared the PromptPacket proof metadata checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `meridian_core/relay_packet.py`, `meridian_core/prompt_packet.py`, `tests/test_relay_executor.py`, `tests/test_relay_packet.py`, `tests/test_prompt_packet.py`, `docs/live-build-1.md`.
+
+Task: add deterministic packet proof metadata for Relay dispatch envelopes and audit records, including packet id/hash, prompt budget refs, source-lineage compliance, proof requirement, Aegis evidence ids where available, snapshot/hash gaps, and fail-closed blocked tags. Keep `PromptPacket.model_payload()` as the only model-bound payload and do not expose raw prompt text, credentials, raw provider responses, account internals, UI/Bifrost rendering, FileMap edits, branch movement, or Polaris.
+
+Tests: `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from the PromptPacket proof metadata slice before further Relay/Model Harness work.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add provider-neutral Relay dispatch hardening envelope helpers after Reviews A cleared payload evidence and Reviews B cleared the dispatch hardening checklist.

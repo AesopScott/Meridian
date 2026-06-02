@@ -4,6 +4,20 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add Bifrost PromptPacket proof metadata sample rendering after Reviews B cleared dispatch hardening state.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: add deterministic Bifrost sample rendering/tests for PromptPacket proof metadata from structured data: packet id, packet hash, source-lineage compliance, prompt budget refs, Aegis evidence ids, proof requirement, snapshot/hash gaps, block/demote/warn state, and missing metadata warnings. Preserve prompt payload visibility, proof-state preview, stale-session recovery, and dispatch hardening state. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, move branches, or alter Relay docs.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from PromptPacket proof metadata rendering before unrelated Bifrost work.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Bifrost dispatch hardening state sample rendering after Reviews B cleared payload visibility.
