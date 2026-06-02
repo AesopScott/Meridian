@@ -10,16 +10,15 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the current-main Ready markers from Build 2 and Build 3 after the PromptPacket wave movement.
+Goal: review the current-main Build 1 PromptPacket proof metadata slice.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: review the landed current-main slices in this order, stopping and routing a focused finding if any slice fails:
+Task: review the landed current-main Build 1 slice:
 
-- Build 2 Prime audit-evidence advisory binding, commits `dcdce3cd` and `fff4e716`.
-- Build 3 PromptPacket FileMap audit, commits `1072ae3c` and `f6e982de`.
+- Build 1 PromptPacket proof metadata binding, commits `f1acf65c` and `5c6a6a28`.
 
-Use current `origin/main` at or after `24e0c18f`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
+Use current `origin/main` at or after `51f75d98`. Verify containment, path scope, and the proof commands recorded in the Build 1 queue. Do not commit read-check-only progress.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop.
 
