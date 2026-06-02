@@ -18,6 +18,7 @@ const BRIDGE_CAPABILITIES = {
   recentCallContextDiagnostics: true,
   samePortRestart: true,
   requestResultRecovery: true,
+  relayLogicSnapshot: true,
 };
 const ALLOWED_ORIGINS = new Set((process.env.MERIDIAN_MODEL_ALLOWED_ORIGINS || 'http://127.0.0.1:5500,http://localhost:5500,null')
   .split(',')
@@ -54,7 +55,7 @@ if (process.argv.includes('--self-test')) {
   rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
   const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
   const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
-  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery;
+  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot;
   const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
   console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && resultRecoveryOk && capabilitiesOk && originOk, samples, setupFlags, contextOk, maxJsonOk, resultRecoveryOk, capabilitiesOk, originOk }, null, 2));
   process.exit(0);
@@ -356,6 +357,42 @@ async function modelStatus() {
   };
 }
 
+function relayLogicSnapshot() {
+  return new Promise((resolve) => {
+    const pythonBin = process.env.MERIDIAN_PYTHON_BIN || 'python';
+    const child = spawn(pythonBin, ['-m', 'meridian_core.relay_logic_snapshot'], {
+      cwd: DEFAULT_CWD,
+      shell: process.platform === 'win32',
+      env: {
+        ...process.env,
+        PYTHONIOENCODING: 'utf-8',
+      },
+    });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk;
+    });
+    child.on('error', (error) => {
+      resolve({ ok: false, error: error.message });
+    });
+    child.on('close', (code) => {
+      if (code !== 0) {
+        resolve({ ok: false, error: stderr.trim() || `Relay logic snapshot exited with code ${code}` });
+        return;
+      }
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (error) {
+        resolve({ ok: false, error: `Relay logic snapshot returned invalid JSON: ${error.message}` });
+      }
+    });
+  });
+}
+
 function runModel({ backend, prompt, cwd, transcript }) {
   return new Promise((resolve) => {
     let command;
@@ -444,6 +481,17 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET' && req.url === '/api/models') {
     sendJson(res, 200, await modelStatus(), req);
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === '/api/relay-logic') {
+    const snapshot = await relayLogicSnapshot();
+    sendJson(res, snapshot.ok ? 200 : 500, {
+      service: 'meridian-model-bridge',
+      version: BRIDGE_VERSION,
+      capabilities: BRIDGE_CAPABILITIES,
+      ...snapshot,
+    }, req);
     return;
   }
 

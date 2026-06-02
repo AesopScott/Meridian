@@ -3509,44 +3509,6 @@ body {
   const userTitle = document.querySelector('.session-window-right .session-title');
   const rightWindow = document.querySelector('.session-window-right');
   const rightWorkspace = rightWindow?.querySelector('.session-workspace');
-  const relayModels = {
-    access: [
-      ['account/session', 'Try first because it uses an existing paid/logged-in route and preserves vendor-native tools when the session is clean.'],
-      ['local CLI', 'Use next when the local account-backed tool has the right cwd, auth, and model identity.'],
-      ['direct API', 'Use when Relay needs exact model id, clean payload control, cost tracking, or stronger auditability.'],
-      ['aggregator API', 'Use only when fallback/comparison matters and the actual model/provider can be shown.'],
-    ],
-    choices: [
-      ['Anthropic', 'Use Opus for hardest reasoning/review, Sonnet as the balanced workhorse, and Haiku for fast light work.'],
-      ['OpenAI', 'Use Codex for coding, GPT reasoning/chat for planning and explanation, and realtime/audio for voice.'],
-      ['DeepSeek direct', 'Use as a candidate cost-aware reasoning/verification lane after validation gates are satisfied.'],
-      ['OpenRouter', 'Use as aggregator fallback/comparison only; never as hidden authority.'],
-    ],
-    when: [
-      ['no model', 'Do not call a model for deterministic local checks or formatting.'],
-      ['fast model', 'Use for low-risk summaries, classification, and extraction where speed/cost matter.'],
-      ['coding model', 'Use for repo edits, debugging, refactors, tests, and repair.'],
-      ['reasoning model', 'Use for architecture, ambiguous planning, and complex review.'],
-      ['review model', 'Use a different model family when the work needs independent comparison.'],
-      ['voice model', 'Use for spoken interaction only after voice setup and privacy controls exist.'],
-    ],
-    how: [
-      'match the job to a model class first: no model, fast, coding, reasoning, review, or voice',
-      'choose the safest usable access route in order: account/session, local CLI, direct API, aggregator',
-      'prefer direct/provider-controlled routes when identity, audit, or cost control matters',
-      'keep prompt payload bounded before dispatch',
-      'show model, vendor, access route, candidate/trust state, and cost pressure',
-      'show blockers instead of silently falling through to another route',
-    ],
-    blockers: [
-      'Auto routing disabled until model metadata and proof are wired',
-      'missing CLI login, API key, or provider auth',
-      'wrong cwd, account, model id, or session identity',
-      'unknown model/provider identity',
-      'prompt payload over budget',
-      'aggregator selected for authoritative high-risk work',
-    ],
-  };
   const lightningSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   lightningSvg.classList.add('spark-icon-strikes');
   lightningSvg.setAttribute('aria-hidden', 'true');
@@ -3633,6 +3595,66 @@ body {
   const relayGrid = (items) => `<div class="relay-models-grid">${items.map(([key, value]) => `<div class="relay-models-key">${escapeHtml(key)}</div><div class="relay-models-value">${escapeHtml(value)}</div>`).join('')}</div>`;
   const relayList = (items) => `<ul class="relay-models-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
   const relaySection = (title, body) => `<section class="relay-models-section"><div class="relay-models-section-title">${escapeHtml(title)}</div>${body}</section>`;
+  const relayText = (value) => String(value || 'none').replaceAll('_', ' ').replaceAll('-', ' ');
+  const relayUnique = (items) => Array.from(new Set(items.filter(Boolean)));
+  const relayTierLabel = (tier) => `Tier ${tier.tier}: ${relayText(tier.mode)}`;
+  const relayTierSummary = (tier) => [
+    tier.reason,
+    `context ${relayText(tier.contextStrategy)} / ${relayText(tier.contextHealth)}`,
+    `budget ${relayText(tier.promptBudget?.tier)} ${tier.promptBudget?.maxContextTokens || 0} tokens`,
+    `session ${relayText(tier.audit?.sessionAction)} / trust ${relayText(tier.audit?.trustState)}`,
+  ].join(' | ');
+  const relayLaneSummary = (tier) => {
+    const lanes = Array.isArray(tier?.lanes) ? tier.lanes : [];
+    if (!lanes.length) return 'no model lanes';
+    return lanes.map((lane) => `${relayText(lane.role)} -> ${relayText(lane.preferredModel)}${lane.independent ? ' independent' : ''}`).join(' | ');
+  };
+  const renderRelayLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Relay logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Relay logic snapshot unavailable'],
+      ]));
+    }
+    const tiers = Array.isArray(snapshot.tiers) ? snapshot.tiers : [];
+    const tier3 = tiers.find((tier) => tier.tier === 3) || {};
+    const tierRows = tiers.map((tier) => [relayTierLabel(tier), relayTierSummary(tier)]);
+    const precedenceRows = (snapshot.routePrecedence || []).map((route, index) => [`${index + 1}`, relayText(route)]);
+    const proofItems = relayUnique(tiers.flatMap((tier) => tier.audit?.proofRequired || []));
+    const blockerItems = relayUnique(tiers.flatMap((tier) => tier.audit?.fallbackBlockers || []));
+    const telemetryItems = relayUnique(tiers.flatMap((tier) => tier.audit?.telemetryRequired || []));
+    return [
+      relaySection('Relay logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['auto routing', relayText(snapshot.autoRouting)],
+      ])),
+      relaySection('Access precedence logic', relayGrid(precedenceRows)),
+      relaySection('Risk tier model logic', relayGrid(tierRows)),
+      relaySection('Tier 3 dual-model logic', relayGrid([
+        ['mode', relayText(tier3.mode)],
+        ['lanes', relayLaneSummary(tier3)],
+        ['proof required', (tier3.audit?.proofRequired || []).map(relayText).join(' | ') || 'none'],
+        ['fallback blockers', (tier3.audit?.fallbackBlockers || []).map(relayText).join(' | ') || 'none'],
+      ])),
+      relaySection('Fallback blocker logic', relayList(blockerItems.map(relayText))),
+      relaySection('Proof and telemetry logic', relayGrid([
+        ['proof', proofItems.map(relayText).join(' | ') || 'none'],
+        ['telemetry', telemetryItems.map(relayText).join(' | ') || 'none'],
+      ])),
+    ].join('');
+  };
+  const loadRelayLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-relay-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch('http://127.0.0.1:8767/api/relay-logic', { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderRelayLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderRelayLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
   const relayBridgeRows = (status, detail) => [
     ['bridge', status],
     ['version', detail.version || 'unknown'],
@@ -3673,15 +3695,12 @@ body {
         </div>
         <div class="relay-models-body">
           ${relaySection('Bridge route', '<div data-relay-bridge-status></div>')}
-          ${relaySection('Access logic', relayGrid(relayModels.access))}
-          ${relaySection('Model choice logic', relayGrid(relayModels.choices))}
-          ${relaySection('When and why logic', relayGrid(relayModels.when))}
-          ${relaySection('Dispatch logic', relayList(relayModels.how))}
-          ${relaySection('Blocker logic', relayList(relayModels.blockers))}
+          <div data-relay-logic>${relaySection('Relay logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
         </div>
       </div>
     `);
     renderRelayBridgeStatus();
+    loadRelayLogic();
   };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
