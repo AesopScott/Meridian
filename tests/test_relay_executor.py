@@ -28,6 +28,7 @@ from meridian_core.relay_executor import (
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
+    RelayPromptPayloadEvidence,
     RelayProofGateError,
     _build_decision_record,
     execute_relay_dispatch_plan,
@@ -965,6 +966,7 @@ class TestAdapterMetadata:
         )
         assert result.adapter_metadata is None
         assert result.route_metadata is None
+        assert result.payload_evidence is None
 
     def test_execution_result_with_metadata(self) -> None:
         metadata = ModelHarnessMetadata(
@@ -992,6 +994,8 @@ class TestAdapterMetadata:
         assert adapter.metadata.provider_name == "fake"
         assert adapter.metadata.model_name == "fake-model"
         assert adapter.metadata.capability_tier == "test"
+        assert adapter.metadata.supports_payload_snapshot is False
+        assert adapter.metadata.supports_response_hash is False
 
     def test_fake_adapter_with_custom_metadata(self) -> None:
         custom_metadata = ModelHarnessMetadata(
@@ -1100,6 +1104,101 @@ class TestAdapterMetadata:
         execute_relay_plan_with_registry(plan, registry)
         assert adapter.received_payloads == [plan.lanes[0].payload]
         assert "capability_tier" not in adapter.received_payloads[0]
+
+    def test_payload_evidence_attached_to_registry_result_before_model_call_boundary(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=5000,
+            estimated_tokens=1600,
+            budget_tokens=2000,
+            prior_estimated_tokens=1500,
+            queue_mode=True,
+        )
+        metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="candidate-fast",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=True,
+            max_output_tokens=8192,
+            tokenizer_family="deepseek",
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=metadata),
+        )
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            payload_snapshots=(snapshot,),
+        )
+        evidence = summary.results[0].payload_evidence
+        assert evidence is not None
+        assert evidence.prompt_source == "relay"
+        assert evidence.selected_provider == "deepseek"
+        assert evidence.selected_model == "deepseek-chat"
+        assert evidence.estimated_prompt_tokens == 1600
+        assert evidence.prompt_budget_tokens == 2000
+        assert evidence.model_context_window_tokens == 65536
+        assert evidence.max_output_tokens == 8192
+        assert evidence.budget_percent == 80.0
+        assert evidence.budget_status == "watch"
+        assert evidence.growth_state == "growing_expected"
+        assert evidence.adapter_supports_snapshot is True
+        assert evidence.supports_response_hash is True
+        assert evidence.telemetry_error_tags == ()
+
+    def test_payload_evidence_does_not_contain_raw_prompt_text(self) -> None:
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="provider",
+            model_name="model",
+            capability_tier="standard",
+            context_budget=8192,
+            prompt_payload_budget=4096,
+            trust_state="trusted",
+            requires_external_review=False,
+            supports_payload_snapshot=True,
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=metadata),
+        )
+        summary = execute_relay_plan_with_registry(plan, registry)
+        evidence_dict = summary.results[0].payload_evidence.to_dict()
+        evidence_text = " ".join(str(value) for value in evidence_dict.values())
+        assert _PROMPT not in evidence_text
+        assert summary.results[0].payload_evidence.prompt_payload_snapshot_hash is not None
+
+    def test_payload_evidence_missing_telemetry_tags_without_adapter_metadata(self) -> None:
+        plan = _make_plan(1)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("response"),
+            include_decision_record=True,
+        )
+        evidence = summary.decision_record.payload_evidence
+        assert evidence is not None
+        assert "telemetry_unavailable" in evidence.telemetry_error_tags
+        assert "provider_metadata_missing" in evidence.telemetry_error_tags
+        assert "context_window_unknown" in evidence.telemetry_error_tags
+        assert evidence.prompt_payload_snapshot_hash is None
+
+    def test_payload_evidence_to_dict_stable_keys(self) -> None:
+        evidence = RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            heartbeat_id="pkt-1",
+            selected_provider="provider",
+            selected_model="model",
+        )
+        assert evidence.to_dict() == evidence.to_dict()
+        assert tuple(evidence.to_dict().keys())[-1] == "telemetry_error_tags"
 
 
 class TestRelayDecisionRecord:
@@ -1569,6 +1668,47 @@ class TestRelayDecisionRecord:
         assert route_metadata.prompt_payload_budget == 4096
         assert route_metadata.prompt_payload_status == "watch"
         assert summary.decision_record.prompt_payload_status == "watch"
+
+    def test_decision_record_carries_payload_evidence_from_first_lane(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=5000,
+            estimated_tokens=1600,
+            budget_tokens=2000,
+            prior_estimated_tokens=1500,
+            queue_mode=True,
+        )
+        metadata = ModelHarnessMetadata(
+            provider_name="provider",
+            model_name=plan.lanes[0].preferred_model,
+            capability_tier="standard",
+            context_budget=8192,
+            prompt_payload_budget=4096,
+            trust_state="trusted",
+            requires_external_review=False,
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=metadata),
+        )
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            payload_snapshots=(snapshot,),
+            include_decision_record=True,
+        )
+        evidence = summary.decision_record.payload_evidence
+        assert evidence is not None
+        assert evidence.heartbeat_id == plan.packet.packet_id
+        assert evidence.lane_id == f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}"
+        assert evidence.selected_provider == "provider"
+        assert evidence.budget_status == "watch"
+        assert evidence.telemetry_error_tags == ()
+        assert _PROMPT not in " ".join(str(value) for value in evidence.to_dict().values())
 
     def test_decision_record_route_metadata_uses_first_lane_even_if_first_lane_errors(self) -> None:
         plan = _make_plan(2)

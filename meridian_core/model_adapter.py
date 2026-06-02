@@ -33,6 +33,12 @@ class ModelHarnessMetadata:
     trust_state: str
     requires_external_review: bool
     deepseek_candidate_state: Mapping[str, str] | None = None
+    max_output_tokens: int | None = None
+    tokenizer_family: str = "unknown"
+    supports_completion_tokens: bool = False
+    supports_latency_ms: bool = False
+    supports_payload_snapshot: bool = False
+    supports_response_hash: bool = False
 
     def __post_init__(self) -> None:
         if self.deepseek_candidate_state is not None:
@@ -87,6 +93,12 @@ class ModelCandidateRoutePreset:
             prompt_payload_budget=self.prompt_payload_budget,
             trust_state=self.trust_state,
             requires_external_review=self.requires_external_review,
+            max_output_tokens=8192,
+            tokenizer_family=self.provider_name,
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
             deepseek_candidate_state={
                 "api_mode": self.api_mode,
                 "variant_label": self.variant_label,

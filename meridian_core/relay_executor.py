@@ -8,6 +8,7 @@ the model-call function; no role, model name, or metadata is passed through.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 
 from .aegis import (
@@ -32,6 +33,87 @@ from .relay_dispatch import RelayDispatchPlan
 
 
 ModelCallFn = ModelAdapter
+
+
+@dataclass(frozen=True)
+class RelayPromptPayloadEvidence:
+    """Structured prompt payload evidence captured before the model-call boundary.
+
+    This record carries only sizing, route, and telemetry capability facts. It never
+    stores raw prompt text, credentials, raw model responses, or transcripts.
+    """
+
+    prompt_source: str = "relay"
+    heartbeat_id: str | None = None
+    route_id: str | None = None
+    project: str | None = None
+    lane_id: str | None = None
+    selected_provider: str | None = None
+    selected_model: str | None = None
+    route_class: str | None = None
+    route_kind: str | None = None
+    estimated_prompt_tokens: int | None = None
+    prompt_budget_tokens: int | None = None
+    model_context_window_tokens: int | None = None
+    max_output_tokens: int | None = None
+    remaining_context_tokens: int | None = None
+    budget_percent: float | None = None
+    budget_status: str = "unknown"
+    budget_compliant: bool | None = None
+    over_budget_reason: str | None = None
+    previous_prompt_tokens: int | None = None
+    delta_tokens: int | None = None
+    delta_percent: float | None = None
+    comparison_scope: str = "dispatch"
+    growth_state: str = "unknown"
+    expected_growth_reason: str | None = None
+    prompt_payload_snapshot_hash: str | None = None
+    response_payload_snapshot_hash: str | None = None
+    adapter_supports_snapshot: bool = False
+    supports_completion_tokens: bool = False
+    supports_latency_ms: bool = False
+    supports_payload_snapshot: bool = False
+    supports_response_hash: bool = False
+    tokenizer_family: str = "unknown"
+    telemetry_error_tags: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a stable serializable shape for downstream evidence handoff."""
+        return {
+            "prompt_source": self.prompt_source,
+            "heartbeat_id": self.heartbeat_id,
+            "route_id": self.route_id,
+            "project": self.project,
+            "lane_id": self.lane_id,
+            "selected_provider": self.selected_provider,
+            "selected_model": self.selected_model,
+            "route_class": self.route_class,
+            "route_kind": self.route_kind,
+            "estimated_prompt_tokens": self.estimated_prompt_tokens,
+            "prompt_budget_tokens": self.prompt_budget_tokens,
+            "model_context_window_tokens": self.model_context_window_tokens,
+            "max_output_tokens": self.max_output_tokens,
+            "remaining_context_tokens": self.remaining_context_tokens,
+            "budget_percent": self.budget_percent,
+            "budget_status": self.budget_status,
+            "budget_compliant": self.budget_compliant,
+            "over_budget_reason": self.over_budget_reason,
+            "previous_prompt_tokens": self.previous_prompt_tokens,
+            "delta_tokens": self.delta_tokens,
+            "delta_percent": self.delta_percent,
+            "comparison_scope": self.comparison_scope,
+            "growth_state": self.growth_state,
+            "expected_growth_reason": self.expected_growth_reason,
+            "prompt_payload_snapshot_hash": self.prompt_payload_snapshot_hash,
+            "response_payload_snapshot_hash": self.response_payload_snapshot_hash,
+            "adapter_supports_snapshot": self.adapter_supports_snapshot,
+            "supports_completion_tokens": self.supports_completion_tokens,
+            "supports_latency_ms": self.supports_latency_ms,
+            "supports_payload_snapshot": self.supports_payload_snapshot,
+            "supports_response_hash": self.supports_response_hash,
+            "tokenizer_family": self.tokenizer_family,
+            "telemetry_error_tags": self.telemetry_error_tags,
+        }
 
 
 @dataclass(frozen=True)
@@ -82,6 +164,7 @@ class RelayDecisionRecord:
     aegis_gate_severity: str | None = None  # severity level from gate
     aegis_explanation: str = ""  # gate evaluation explanation
     route_metadata: ModelRouteMetadataBinding | None = None
+    payload_evidence: RelayPromptPayloadEvidence | None = None
 
 
 @dataclass(frozen=True)
@@ -94,6 +177,7 @@ class RelayExecutionResult:
     payload_snapshot: PromptPayloadSnapshot | None = None
     adapter_metadata: ModelHarnessMetadata | None = None
     route_metadata: ModelRouteMetadataBinding | None = None
+    payload_evidence: RelayPromptPayloadEvidence | None = None
 
 
 @dataclass(frozen=True)
@@ -244,11 +328,127 @@ def relay_execution_summary_to_proof_trail(
     return trail
 
 
+def _payload_evidence_growth_state(snapshot: PromptPayloadSnapshot | None) -> str:
+    if snapshot is None:
+        return "unknown"
+    if snapshot.budget_tokens is not None and snapshot.estimated_tokens > snapshot.budget_tokens:
+        return "over_budget"
+    if snapshot.growth_tokens == 0:
+        return "flat"
+    if snapshot.queue_mode and snapshot.status.value == "degraded":
+        return "growing_unexpected"
+    return "growing_expected"
+
+
+def _build_payload_evidence(
+    plan: RelayDispatchPlan,
+    payload_snapshot: PromptPayloadSnapshot | None = None,
+    adapter_metadata: ModelHarnessMetadata | None = None,
+    *,
+    prompt_source: str = "relay",
+    lane_id: str | None = None,
+    comparison_scope: str = "dispatch",
+    expected_growth_reason: str | None = None,
+) -> RelayPromptPayloadEvidence:
+    """Build prompt payload evidence before dispatch without storing prompt text."""
+    route = plan.route
+    audit = route.audit
+    packet = plan.packet
+
+    provider = adapter_metadata.provider_name if adapter_metadata else None
+    selected_model = adapter_metadata.model_name if adapter_metadata else None
+    context_window = adapter_metadata.context_budget if adapter_metadata else None
+    prompt_budget = (
+        payload_snapshot.budget_tokens
+        if payload_snapshot is not None and payload_snapshot.budget_tokens is not None
+        else (adapter_metadata.prompt_payload_budget if adapter_metadata else None)
+    )
+    estimated_tokens = (
+        payload_snapshot.estimated_tokens if payload_snapshot is not None else packet.prompt_tokens
+    )
+    remaining_context = (
+        context_window - estimated_tokens if context_window is not None else None
+    )
+    over_budget = (
+        prompt_budget is not None and prompt_budget > 0 and estimated_tokens > prompt_budget
+    )
+
+    telemetry_tags: list[str] = []
+    if adapter_metadata is None:
+        telemetry_tags.append("telemetry_unavailable")
+        telemetry_tags.append("provider_metadata_missing")
+    else:
+        if not adapter_metadata.supports_completion_tokens:
+            telemetry_tags.append("completion_tokens_unavailable")
+        if not adapter_metadata.supports_latency_ms:
+            telemetry_tags.append("latency_ms_unavailable")
+        if not adapter_metadata.supports_payload_snapshot:
+            telemetry_tags.append("prompt_snapshot_missing")
+        if not adapter_metadata.supports_response_hash:
+            telemetry_tags.append("response_hash_unavailable")
+    if over_budget:
+        telemetry_tags.append("budget_exceeded")
+    if context_window is None:
+        telemetry_tags.append("context_window_unknown")
+
+    prompt_hash = None
+    if adapter_metadata is not None and adapter_metadata.supports_payload_snapshot:
+        prompt_hash = hashlib.sha256(packet.serialized_prompt.encode("utf-8")).hexdigest()
+
+    return RelayPromptPayloadEvidence(
+        prompt_source=prompt_source,
+        heartbeat_id=packet.packet_id,
+        route_id=f"tier-{route.risk_tier}:{route.mode.value}",
+        lane_id=lane_id,
+        selected_provider=provider,
+        selected_model=selected_model,
+        route_class=audit.route_class.value if audit.route_class else None,
+        route_kind=audit.route_kind.value,
+        estimated_prompt_tokens=estimated_tokens,
+        prompt_budget_tokens=prompt_budget,
+        model_context_window_tokens=context_window,
+        max_output_tokens=adapter_metadata.max_output_tokens if adapter_metadata else None,
+        remaining_context_tokens=remaining_context,
+        budget_percent=(
+            payload_snapshot.budget_percent
+            if payload_snapshot is not None
+            else ((estimated_tokens / prompt_budget) * 100 if prompt_budget else None)
+        ),
+        budget_status=payload_snapshot.status.value if payload_snapshot is not None else "unknown",
+        budget_compliant=(not over_budget if prompt_budget is not None else None),
+        over_budget_reason="prompt_tokens_exceed_budget" if over_budget else None,
+        previous_prompt_tokens=payload_snapshot.prior_estimated_tokens if payload_snapshot else None,
+        delta_tokens=payload_snapshot.growth_tokens if payload_snapshot else None,
+        delta_percent=payload_snapshot.growth_percent if payload_snapshot else None,
+        comparison_scope=comparison_scope,
+        growth_state=_payload_evidence_growth_state(payload_snapshot),
+        expected_growth_reason=expected_growth_reason,
+        prompt_payload_snapshot_hash=prompt_hash,
+        response_payload_snapshot_hash=None,
+        adapter_supports_snapshot=(
+            adapter_metadata.supports_payload_snapshot if adapter_metadata else False
+        ),
+        supports_completion_tokens=(
+            adapter_metadata.supports_completion_tokens if adapter_metadata else False
+        ),
+        supports_latency_ms=adapter_metadata.supports_latency_ms if adapter_metadata else False,
+        supports_payload_snapshot=(
+            adapter_metadata.supports_payload_snapshot if adapter_metadata else False
+        ),
+        supports_response_hash=(
+            adapter_metadata.supports_response_hash if adapter_metadata else False
+        ),
+        tokenizer_family=adapter_metadata.tokenizer_family if adapter_metadata else "unknown",
+        telemetry_error_tags=tuple(telemetry_tags),
+    )
+
+
 def _build_decision_record(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
     adapter_metadata: ModelHarnessMetadata | None = None,
     route_metadata: ModelRouteMetadataBinding | None = None,
+    payload_evidence: RelayPromptPayloadEvidence | None = None,
     aegis_gate_decision: str | None = None,
     aegis_explanation: str = "",
 ) -> RelayDecisionRecord:
@@ -300,6 +500,12 @@ def _build_decision_record(
             route_cost_posture=route.cost_posture,
             route_latency_posture=route.latency_posture,
             payload_snapshot=payload_snapshot,
+        )
+    if payload_evidence is None:
+        payload_evidence = _build_payload_evidence(
+            plan,
+            payload_snapshot,
+            adapter_metadata,
         )
 
     # Populate vendor from adapter metadata or mark unknown for nontrivial tiers
@@ -397,6 +603,7 @@ def _build_decision_record(
         aegis_gate_decision=aegis_gate_decision,
         aegis_explanation=aegis_explanation,
         route_metadata=route_metadata,
+        payload_evidence=payload_evidence,
     )
 
 
@@ -426,8 +633,16 @@ def execute_relay_dispatch_plan(
     results: list[RelayExecutionResult] = []
     errors: list[RelayExecutionError] = []
     snapshots = payload_snapshots or tuple(None for _ in plan.lanes)
+    payload_evidences = tuple(
+        _build_payload_evidence(
+            plan,
+            snapshot,
+            lane_id=f"{lane.role.value}:{lane.preferred_model}",
+        )
+        for lane, snapshot in zip(plan.lanes, snapshots)
+    )
 
-    for lane, snapshot in zip(plan.lanes, snapshots):
+    for lane, snapshot, payload_evidence in zip(plan.lanes, snapshots, payload_evidences):
         try:
             output = model_call(lane.payload)
             results.append(
@@ -436,6 +651,7 @@ def execute_relay_dispatch_plan(
                     preferred_model=lane.preferred_model,
                     output=output,
                     payload_snapshot=snapshot,
+                    payload_evidence=payload_evidence,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -450,7 +666,12 @@ def execute_relay_dispatch_plan(
     decision_record = None
     if include_decision_record:
         first_snapshot = snapshots[0] if snapshots else None
-        decision_record = _build_decision_record(plan, first_snapshot)
+        first_payload_evidence = payload_evidences[0] if payload_evidences else None
+        decision_record = _build_decision_record(
+            plan,
+            first_snapshot,
+            payload_evidence=first_payload_evidence,
+        )
 
     return RelayExecutionSummary(
         results=tuple(results),
@@ -499,12 +720,22 @@ def execute_relay_plan_with_registry(
         )
         for adapter, snapshot in zip(resolved_adapters, snapshots)
     )
+    payload_evidences = tuple(
+        _build_payload_evidence(
+            plan,
+            snapshot,
+            adapter.metadata,
+            lane_id=f"{lane.role.value}:{lane.preferred_model}",
+        )
+        for lane, adapter, snapshot in zip(plan.lanes, resolved_adapters, snapshots)
+    )
 
-    for lane, adapter, snapshot, route_metadata in zip(
+    for lane, adapter, snapshot, route_metadata, payload_evidence in zip(
         plan.lanes,
         resolved_adapters,
         snapshots,
         resolved_route_metadata,
+        payload_evidences,
     ):
         try:
             output = adapter(lane.payload)
@@ -516,6 +747,7 @@ def execute_relay_plan_with_registry(
                     payload_snapshot=snapshot,
                     adapter_metadata=adapter.metadata,
                     route_metadata=route_metadata,
+                    payload_evidence=payload_evidence,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -532,11 +764,13 @@ def execute_relay_plan_with_registry(
         first_snapshot = snapshots[0] if snapshots else None
         first_adapter_metadata = resolved_adapters[0].metadata if resolved_adapters else None
         first_route_metadata = resolved_route_metadata[0] if resolved_route_metadata else None
+        first_payload_evidence = payload_evidences[0] if payload_evidences else None
         decision_record = _build_decision_record(
             plan,
             first_snapshot,
             first_adapter_metadata,
             first_route_metadata,
+            first_payload_evidence,
         )
 
     return RelayExecutionSummary(

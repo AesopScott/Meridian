@@ -398,6 +398,15 @@ class TestModelRouteMetadataBinding:
         assert binding.trust_state == "candidate"
         assert binding.requires_external_review is True
 
+    def test_deepseek_candidate_metadata_declares_direct_telemetry_support(self) -> None:
+        metadata = deepseek_candidate_metadata_preset()
+        assert metadata.max_output_tokens == 8192
+        assert metadata.tokenizer_family == "deepseek"
+        assert metadata.supports_completion_tokens is True
+        assert metadata.supports_latency_ms is True
+        assert metadata.supports_payload_snapshot is True
+        assert metadata.supports_response_hash is True
+
 
 class TestHttpJsonModelAdapter:
     _config = HttpModelAdapterConfig(
