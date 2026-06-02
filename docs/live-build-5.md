@@ -10,6 +10,23 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement the Bifrost/frontend side of the V2 visible prompt payload meter.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: add deterministic cockpit sample rendering for model/provider route, prompt payload labels (`under 1k`, `12.4k`, and blocked over-budget), budget percent, growth delta, payload status, Q-mode prompt-drag warning/degraded/blocker state, evidence refs, and display-safe continuity with provider balance. Preserve existing Bifrost surfaces and avoid raw prompt/output text, live calls, Relay runtime/FileMap/main/Polaris leakage.
+
+Ready for Codex Review:
+- Commit: `3227fc62` (`Add visible prompt payload meter`).
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Tests run: `python -m pytest tests/test_bifrost_cockpit.py -q` (273 passed); `git diff --check` (passed; Git emitted only line-ending normalization warnings).
+- Concrete rendering evidence: cockpit now renders `aria-label="Visible Prompt Payload Meter"` with source `relay-visible-prompt-payload-meter-sample`, structured rows for Claude direct `under 1k`, DeepSeek direct `12.4k` degraded Q-mode prompt drag, and OpenRouter aggregator blocked over-budget prompt drag. Rows show provider/model/route, budget percent, growth delta, payload status, Q-mode prompt-drag state, provider-balance refs, payload evidence refs, telemetry refs, warnings, and blockers.
+- Next Candidate: bind reviewed Relay `PromptPayloadSnapshot` runtime data into the Bifrost visible prompt payload meter when available.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: add deterministic Bifrost sample rendering for the reviewed Session Lifecycle recovery-readiness advisory summary.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
