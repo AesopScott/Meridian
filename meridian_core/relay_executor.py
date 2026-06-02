@@ -9,14 +9,18 @@ the model-call function; no role, model name, or metadata is passed through.
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .aegis import (
     AegisEvidence,
     EvidenceSeverity,
     EvidenceStatus,
     EvidenceType,
+    PromptPacketProofDecision,
+    PromptPacketProofMetadata as AegisPromptPacketProofMetadata,
+    PromptPacketProofPolicyResult,
     ProofTrail,
+    evaluate_prompt_packet_proof_policy,
 )
 from .cognition_policy import evaluate_cognition_policy
 from .model_adapter import (
@@ -180,6 +184,39 @@ class RelayDispatchEnvelope:
 
 
 @dataclass(frozen=True)
+class RelayPromptPacketPolicyEvidence:
+    """Display-safe Relay record of Aegis PromptPacket policy evaluation."""
+
+    decision: str
+    severity: str
+    reason: str
+    evidence_ids: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+    demote_to_tier: int | None = None
+    packet_id: str | None = None
+    packet_hash: str | None = None
+    prompt_budget_ref: str | None = None
+    packet_proof_metadata_ref: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        """Return deterministic policy evidence without prompt or transport payloads."""
+        return {
+            "decision": self.decision,
+            "severity": self.severity,
+            "reason": self.reason,
+            "evidence_ids": self.evidence_ids,
+            "blockers": self.blockers,
+            "warnings": self.warnings,
+            "demote_to_tier": self.demote_to_tier,
+            "packet_id": self.packet_id,
+            "packet_hash": self.packet_hash,
+            "prompt_budget_ref": self.prompt_budget_ref,
+            "packet_proof_metadata_ref": self.packet_proof_metadata_ref,
+        }
+
+
+@dataclass(frozen=True)
 class RelayDecisionRecord:
     """Provider-neutral decision record capturing route selection rationale for Prime explanation.
 
@@ -234,6 +271,7 @@ class RelayDecisionRecord:
     source_lineage_compliant: bool | None = None
     packet_proof_metadata_ref: str | None = None
     packet_proof_blocked_tags: tuple[str, ...] = ()
+    prompt_packet_policy_evidence: RelayPromptPacketPolicyEvidence | None = None
 
 
 @dataclass(frozen=True)
@@ -298,6 +336,7 @@ class RelayExecutionSummary:
     results: tuple[RelayExecutionResult, ...]
     errors: tuple[RelayExecutionError, ...]
     decision_record: RelayDecisionRecord | None = None
+    prompt_packet_policy_evidence: RelayPromptPacketPolicyEvidence | None = None
 
     def aegis_gate_evidence_summary(self) -> AegisGateEvidenceSummary:
         """Extract Aegis gate evidence from decision record for downstream serialization.
@@ -537,6 +576,131 @@ def _proof_trail_evidence_ids(proof_trail: ProofTrail | None) -> tuple[str, ...]
     return tuple(evidence.id for evidence in proof_trail.evidence)
 
 
+def _relay_proof_requirement_for_aegis(plan: RelayDispatchPlan) -> str:
+    proof_required = tuple(plan.packet.proof_required or plan.route.audit.proof_required)
+    if plan.route.requires_human_gate or "human_gate_approval" in proof_required:
+        return "human_gate"
+    if plan.route.requires_independence:
+        if any(
+            proof in proof_required
+            for proof in ("independent_dual_model_lanes", "independent_review_when_meaningful")
+        ):
+            return "dual_review"
+    if not proof_required:
+        return "none"
+    if "aegis_clean_proof_trail" in proof_required:
+        return "security_review" if plan.route.risk_tier >= 3 else "code_review"
+    if "prompt_payload_snapshot" in proof_required:
+        return "telemetry"
+    return proof_required[0]
+
+
+def _build_aegis_prompt_packet_policy_metadata(
+    plan: RelayDispatchPlan,
+    dispatch_envelope: RelayDispatchEnvelope | None = None,
+    *,
+    proof_trail: ProofTrail | None = None,
+    human_gate_approved: bool = False,
+) -> AegisPromptPacketProofMetadata:
+    """Adapt sealed Relay packet/envelope facts into Aegis policy metadata."""
+    packet = plan.packet
+    packet_proof = getattr(packet, "proof_metadata", None)
+    evidence_ids = (
+        dispatch_envelope.aegis_evidence_ids
+        if dispatch_envelope and dispatch_envelope.aegis_evidence_ids
+        else _proof_trail_evidence_ids(proof_trail)
+    )
+    packet_hash = (
+        dispatch_envelope.packet_hash
+        if dispatch_envelope and dispatch_envelope.packet_hash is not None
+        else (packet_proof.packet_hash if packet_proof else None)
+    )
+    packet_hash_status = "present" if packet_hash else (
+        "unavailable" if packet_proof else "missing"
+    )
+    snapshot_hash = (
+        dispatch_envelope.payload_snapshot_hash
+        if dispatch_envelope and dispatch_envelope.payload_snapshot_hash is not None
+        else (
+            packet_proof.prompt_payload_snapshot_hash
+            if packet_proof and packet_proof.snapshot_hash_available
+            else None
+        )
+    )
+    snapshot_status = "present" if snapshot_hash else "unavailable"
+    proof_requirement = _relay_proof_requirement_for_aegis(plan)
+
+    return AegisPromptPacketProofMetadata(
+        packet_id=getattr(packet, "packet_id", None),
+        packet_hash_status=packet_hash_status,
+        packet_hash=packet_hash,
+        prompt_tokens=getattr(packet, "prompt_tokens", -1),
+        max_context_tokens=packet.budget.max_context_tokens,
+        budget_ref=(
+            dispatch_envelope.prompt_budget_ref
+            if dispatch_envelope and dispatch_envelope.prompt_budget_ref is not None
+            else (packet_proof.prompt_budget_ref if packet_proof else None)
+        ),
+        source_lineage=dict(packet.source_lineage),
+        allowed_sources=tuple(packet.budget.allowed_sources),
+        aegis_evidence_ids=evidence_ids,
+        risk_tier=plan.route.risk_tier,
+        proof_requirement=proof_requirement,
+        selected_model_id=dispatch_envelope.exact_model_id if dispatch_envelope else None,
+        model_trust_state=(
+            dispatch_envelope.trust_state
+            if dispatch_envelope
+            else plan.route.audit.trust_state.value
+        ),
+        snapshot_requirement="required" if plan.route.risk_tier >= 2 else "not_required",
+        snapshot_status=snapshot_status,
+        human_gate_required=plan.route.requires_human_gate,
+        human_approval_present=human_gate_approved,
+        dual_lane_required=plan.route.requires_independence,
+        dual_lane_proof_present=bool(evidence_ids) if plan.route.requires_independence else False,
+        demotion_target_tier=None,
+    )
+
+
+def _relay_prompt_packet_policy_evidence(
+    result: PromptPacketProofPolicyResult,
+    metadata: AegisPromptPacketProofMetadata,
+    dispatch_envelope: RelayDispatchEnvelope | None = None,
+) -> RelayPromptPacketPolicyEvidence:
+    return RelayPromptPacketPolicyEvidence(
+        decision=result.decision.value,
+        severity=result.severity,
+        reason=result.reason,
+        evidence_ids=result.evidence_ids,
+        blockers=result.blockers,
+        warnings=result.warnings,
+        demote_to_tier=result.demote_to_tier,
+        packet_id=metadata.packet_id,
+        packet_hash=metadata.packet_hash,
+        prompt_budget_ref=metadata.budget_ref,
+        packet_proof_metadata_ref=(
+            dispatch_envelope.packet_proof_metadata_ref if dispatch_envelope else None
+        ),
+    )
+
+
+def _evaluate_relay_prompt_packet_policy(
+    plan: RelayDispatchPlan,
+    dispatch_envelope: RelayDispatchEnvelope | None = None,
+    *,
+    proof_trail: ProofTrail | None = None,
+    human_gate_approved: bool = False,
+) -> RelayPromptPacketPolicyEvidence:
+    metadata = _build_aegis_prompt_packet_policy_metadata(
+        plan,
+        dispatch_envelope,
+        proof_trail=proof_trail,
+        human_gate_approved=human_gate_approved,
+    )
+    result = evaluate_prompt_packet_proof_policy(metadata)
+    return _relay_prompt_packet_policy_evidence(result, metadata, dispatch_envelope)
+
+
 def _dispatch_blocking_tags(
     tags: tuple[str, ...],
     *,
@@ -688,6 +852,7 @@ def _build_decision_record(
     route_metadata: ModelRouteMetadataBinding | None = None,
     payload_evidence: RelayPromptPayloadEvidence | None = None,
     dispatch_envelope: RelayDispatchEnvelope | None = None,
+    prompt_packet_policy_evidence: RelayPromptPacketPolicyEvidence | None = None,
     aegis_gate_decision: str | None = None,
     aegis_explanation: str = "",
 ) -> RelayDecisionRecord:
@@ -894,6 +1059,7 @@ def _build_decision_record(
             if packet_proof
             else ("packet_proof_metadata_missing",)
         ),
+        prompt_packet_policy_evidence=prompt_packet_policy_evidence,
     )
 
 
@@ -1139,8 +1305,60 @@ def execute_relay_dispatch_plan_with_policy(
             f"Relay dispatch blocked by cognition policy: {reasons}"
         )
 
-    return execute_relay_dispatch_plan(
-        plan, model_call, proof_trail, payload_snapshots, include_decision_record
+    first_lane = plan.lanes[0] if plan.lanes else None
+    first_snapshot = payload_snapshots[0] if payload_snapshots else None
+    first_payload_evidence = (
+        _build_payload_evidence(
+            plan,
+            first_snapshot,
+            lane_id=f"{first_lane.role.value}:{first_lane.preferred_model}",
+        )
+        if first_lane
+        else None
+    )
+    first_dispatch_envelope = (
+        _build_dispatch_envelope(
+            plan,
+            lane_role=first_lane.role,
+            requested_model_id=first_lane.preferred_model,
+            payload_evidence=first_payload_evidence,
+            aegis_evidence_ids=_proof_trail_evidence_ids(proof_trail),
+        )
+        if first_lane
+        else None
+    )
+    prompt_packet_policy_evidence = _evaluate_relay_prompt_packet_policy(
+        plan,
+        first_dispatch_envelope,
+        proof_trail=proof_trail,
+        human_gate_approved=human_gate_approved,
+    )
+    if prompt_packet_policy_evidence.decision in (
+        PromptPacketProofDecision.BLOCK.value,
+        PromptPacketProofDecision.HUMAN_GATE.value,
+    ):
+        raise RelayProofGateError(
+            "Relay dispatch blocked by PromptPacket proof policy: "
+            f"{prompt_packet_policy_evidence.reason}"
+        )
+
+    summary = execute_relay_dispatch_plan(
+        plan,
+        model_call,
+        proof_trail,
+        payload_snapshots,
+        include_decision_record or prompt_packet_policy_evidence is not None,
+    )
+    decision_record = summary.decision_record
+    if decision_record is not None:
+        decision_record = replace(
+            decision_record,
+            prompt_packet_policy_evidence=prompt_packet_policy_evidence,
+        )
+    return replace(
+        summary,
+        decision_record=decision_record,
+        prompt_packet_policy_evidence=prompt_packet_policy_evidence,
     )
 
 

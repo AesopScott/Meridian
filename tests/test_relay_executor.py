@@ -29,9 +29,12 @@ from meridian_core.relay_executor import (
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
+    RelayPromptPacketPolicyEvidence,
     RelayPromptPayloadEvidence,
     RelayProofGateError,
     _build_decision_record,
+    _build_dispatch_envelope,
+    _evaluate_relay_prompt_packet_policy,
     execute_relay_dispatch_plan,
     execute_relay_dispatch_plan_with_policy,
     execute_relay_plan_with_registry,
@@ -60,6 +63,20 @@ def _constant_model_call(text: str):
     def _call(payload: str) -> str:
         return text
     return _call
+
+
+def _clean_proof_trail(evidence_id: str = "packet-proof-1") -> ProofTrail:
+    return ProofTrail([
+        AegisEvidence(
+            id=evidence_id,
+            evidence_type=EvidenceType.BUILD_OUTPUT,
+            severity=EvidenceSeverity.INFO,
+            status=EvidenceStatus.OPEN,
+            source="test",
+            target="relay",
+            summary="non-blocking proof",
+        )
+    ])
 
 
 class TestExecuteEmptyPlan:
@@ -571,14 +588,22 @@ class TestExecuteRelayDispatchPlanWithPolicy:
 
         assert calls == []
 
-    def test_tier3_clean_proof_allows_dispatch(self):
+    def test_tier3_candidate_trust_blocks_after_clean_proof(self):
         plan = _make_plan(3)
-        summary = execute_relay_dispatch_plan_with_policy(
-            plan,
-            _constant_model_call("ok"),
-            proof_trail=ProofTrail(),
-        )
-        assert len(summary.results) == len(plan.lanes)
+        calls: list[str] = []
+
+        def recording_call(payload: str) -> str:
+            calls.append(payload)
+            return "response"
+
+        with pytest.raises(RelayProofGateError, match="candidate_model_trust_for_high_tier"):
+            execute_relay_dispatch_plan_with_policy(
+                plan,
+                recording_call,
+                proof_trail=_clean_proof_trail(),
+            )
+
+        assert calls == []
 
     def test_tier4_clean_proof_without_human_approval_blocks_before_model_call(self):
         plan = _make_plan(4)
@@ -592,7 +617,7 @@ class TestExecuteRelayDispatchPlanWithPolicy:
             execute_relay_dispatch_plan_with_policy(
                 plan,
                 recording_call,
-                proof_trail=ProofTrail(),
+                proof_trail=_clean_proof_trail("packet-proof-human-missing"),
                 human_gate_approved=False,
             )
 
@@ -603,19 +628,125 @@ class TestExecuteRelayDispatchPlanWithPolicy:
         summary = execute_relay_dispatch_plan_with_policy(
             plan,
             _constant_model_call("ok"),
-            proof_trail=ProofTrail(),
+            proof_trail=_clean_proof_trail("packet-proof-human-approved"),
             human_gate_approved=True,
         )
         assert len(summary.results) == len(plan.lanes)
+        assert summary.prompt_packet_policy_evidence.decision == "allow"
 
-    def test_tier2_still_dispatches_without_proof(self):
+    def test_tier2_prompt_packet_policy_blocks_without_evidence(self):
+        plan = _make_plan(2)
+        calls: list[str] = []
+
+        def recording_call(payload: str) -> str:
+            calls.append(payload)
+            return "response"
+
+        with pytest.raises(RelayProofGateError, match="missing_aegis_evidence_ids"):
+            execute_relay_dispatch_plan_with_policy(
+                plan,
+                recording_call,
+                proof_trail=None,
+            )
+
+        assert calls == []
+
+    def test_tier2_clean_dual_lane_proof_allows_dispatch(self):
         plan = _make_plan(2)
         summary = execute_relay_dispatch_plan_with_policy(
             plan,
             _constant_model_call("ok"),
-            proof_trail=None,
+            proof_trail=_clean_proof_trail("packet-proof-tier2"),
+            include_decision_record=True,
         )
+
         assert len(summary.results) == len(plan.lanes)
+        assert summary.prompt_packet_policy_evidence.decision == "allow"
+        assert summary.decision_record.prompt_packet_policy_evidence.evidence_ids == (
+            "packet-proof-tier2",
+        )
+
+    def test_prompt_packet_policy_unknown_proof_requirement_blocks(self):
+        plan = _make_plan(1)
+        packet = dataclasses.replace(plan.packet, proof_required=("mystery_proof",))
+        plan = dataclasses.replace(plan, packet=packet)
+
+        evidence = _evaluate_relay_prompt_packet_policy(
+            plan,
+            proof_trail=_clean_proof_trail("packet-proof-unknown"),
+        )
+
+        assert evidence.decision == "block"
+        assert "unknown_proof_requirement" in evidence.blockers
+
+    def test_prompt_packet_policy_unavailable_hash_blocks_dual_lane_tier2(self):
+        plan = _make_plan(2)
+        degraded_proof = dataclasses.replace(
+            plan.packet.proof_metadata,
+            packet_hash=None,
+            prompt_payload_snapshot_hash=None,
+            snapshot_hash_available=False,
+        )
+        degraded_packet = dataclasses.replace(plan.packet, proof_metadata=degraded_proof)
+        degraded_plan = dataclasses.replace(plan, packet=degraded_packet)
+
+        evidence = _evaluate_relay_prompt_packet_policy(
+            degraded_plan,
+            proof_trail=_clean_proof_trail("packet-proof-hash-unavailable"),
+        )
+
+        assert evidence.decision == "block"
+        assert "packet_hash_required_unavailable" in evidence.blockers
+
+    def test_prompt_packet_policy_warn_degraded_tier1_is_display_safe(self):
+        plan = _make_plan(1)
+        degraded_proof = dataclasses.replace(
+            plan.packet.proof_metadata,
+            packet_hash=None,
+            prompt_payload_snapshot_hash=None,
+            snapshot_hash_available=False,
+        )
+        degraded_packet = dataclasses.replace(plan.packet, proof_metadata=degraded_proof)
+        degraded_plan = dataclasses.replace(plan, packet=degraded_packet)
+
+        evidence = _evaluate_relay_prompt_packet_policy(
+            degraded_plan,
+            proof_trail=_clean_proof_trail("packet-proof-warn"),
+        )
+
+        assert evidence.decision == "warn"
+        assert "packet_hash_unavailable" in evidence.warnings
+        assert _PROMPT not in " ".join(str(value) for value in evidence.to_dict().values())
+
+    def test_prompt_packet_policy_missing_proof_metadata_fails_closed(self):
+        plan = _make_plan(1)
+        packet = dataclasses.replace(plan.packet, proof_metadata=False)  # type: ignore[arg-type]
+        plan = dataclasses.replace(plan, packet=packet)
+
+        evidence = _evaluate_relay_prompt_packet_policy(
+            plan,
+            proof_trail=_clean_proof_trail("packet-proof-missing"),
+        )
+
+        assert evidence.decision == "block"
+        assert "packet_hash_missing" in evidence.blockers
+
+    def test_prompt_packet_policy_block_prevents_model_call(self):
+        plan = _make_plan(1)
+        calls: list[str] = []
+
+        def recording_call(payload: str) -> str:
+            calls.append(payload)
+            return "response"
+
+        with pytest.raises(RelayProofGateError, match="unsafe_aegis_evidence_id"):
+            execute_relay_dispatch_plan_with_policy(
+                plan,
+                recording_call,
+                proof_trail=_clean_proof_trail("raw_prompt:secret"),
+            )
+
+        assert calls == []
 
 
 class TestPayloadSnapshot:
@@ -767,6 +898,7 @@ class TestPayloadSnapshot:
             plan,
             _constant_model_call("ok"),
             payload_snapshots=snapshots,
+            proof_trail=_clean_proof_trail("packet-proof-snapshot"),
         )
         assert len(summary.results) == 1
         assert summary.results[0].payload_snapshot is snapshot
@@ -1877,7 +2009,7 @@ class TestRelayDecisionRecord:
         summary = execute_relay_dispatch_plan_with_policy(
             plan,
             _constant_model_call("ok"),
-            proof_trail=ProofTrail(),
+            proof_trail=_clean_proof_trail("packet-proof-decision-record"),
             include_decision_record=True,
         )
         assert summary.decision_record is not None
