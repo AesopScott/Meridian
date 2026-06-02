@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair Session Lifecycle permissions and Prime/Beacon binding review visibility.
+
+Review finding routed by Codex Reviews A on 2026-06-01 18:08 -06:00:
+
+- HIGH: review provenance/branch visibility — Build 2 implementation commit `6e2f2a5f` was not on `origin/main` (only on `worktree-build-2-session-lifecycle`), blocking Codex Reviews A from running proof tests.
+
+Task: land the Session Lifecycle permissions and Prime/Beacon binding implementation on current main.
+
+Completion:
+
+- Implementation now on current `origin/main` at commit `7e96994a` (feat: implement Session Lifecycle permissions and Prime/Beacon binding)
+- Files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` — 52 tests passing
+- Implementation includes: PermissionContext, RestartResteerFinding, PrimeAutonomyInput dataclasses; PermissionState, OperationScope, FindingType enums; SessionLifecycleState extended with typed PermissionContext and helper methods; all frozen/immutable
+- Repair finding RESOLVED: implementation is now reviewable on main.
+- Ready for Codex Review.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair Session Lifecycle routing-action coverage found by Codex Reviews A.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
@@ -87,23 +106,26 @@ Completion:
 - Obsidian: complete.
 - Routed to Codex Reviews A; cadence 3 of 3 cleared.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Session Lifecycle permissions and Prime/Beacon binding now that command-plan routing coverage cleared review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
 
-Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+Task: implement the typed permissions and Prime/Beacon binding slice without live process control. Add or extend frozen data structures/helpers so Session Lifecycle can represent branch/worktree permission state, Prime routing recommendations, Beacon heartbeat/staleness observations, and decision reasons needed by Relay/Prime. Preserve existing command-plan behavior and unique-worktree/assigned-queue invariants.
 
-Required sources: `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-v2-contract.md`, `docs/relay-heartbeat-model-routing-logic.md`, and Reviews A clearance for current-main command-plan tests in `docs/live-codex-reviews.md`.
+Completion:
 
-Task: implement the typed permissions and Prime/Beacon binding slice without live process control. Add or extend frozen data structures/helpers so Session Lifecycle can represent branch/worktree permission state, Prime routing recommendations, Beacon heartbeat/staleness observations, and decision reasons needed by Relay/Prime. Preserve existing command-plan behavior and unique-worktree/assigned-queue invariants. Do not spawn sessions, inspect live processes, call models, edit UI/Bifrost/FileMap/review queues, move branches, or touch Polaris.
-
-Tests:
-
-- `python -m pytest tests/test_session_lifecycle.py -q`
-
-Completion: commit only the allowed files from your unique worktree branch, push your worker branch, mark Ready for Codex Review here with commit hash/files/tests, and leave a concrete Next Candidate.
+- Build 2 completed Session Lifecycle permissions and Prime/Beacon binding implementation in commit `6e2f2a5f`.
+- Worktree branch: `worktree-build-2-session-lifecycle`
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`
+- Implementation added:
+  - Enums: PermissionState, OperationScope, FindingType
+  - Dataclasses: PermissionContext (approval/escalation), RestartResteerFinding (Beacon findings), PrimeAutonomyInput (Prime selection input)
+  - SessionLifecycleState updated: permission_context now typed as PermissionContext; added helper methods is_permission_locked(), requires_approval_for_operation(), can_execute_operation()
+  - All fields frozen and immutable
+- Tests: `python -m pytest tests/test_session_lifecycle.py -q` — 52 tests passed (47 prior routing/command tests + 5 new permission/finding/prime-input tests)
+- Ready for Codex Review.
 
 ## Next Candidate Task
 
@@ -520,6 +542,15 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-04 19:40 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
 2026-06-04 19:50 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
 2026-06-13 00:20 -06:00 - Build 2 checked queue; status: idle (no Active Now task executable; Session Lifecycle permissions binding task awaiting coordinator update; cadence 2 of 3; polling)
+2026-06-13 00:35 -06:00 - Build 2 completed Session Lifecycle permissions and Prime/Beacon binding (commit 6e2f2a5f); 52 tests passing; cadence 3 of 3; Ready for Codex Review; awaiting review result before next task
+2026-06-13 00:36 -06:00 - Build 2 checked queue; status: idle (Session Lifecycle permissions binding task complete; cadence 3 of 3; awaiting Codex review result before next task per rule 19; pausing)
+2026-06-13 00:50 -06:00 - Build 2 checked queue; status: idle (Session Lifecycle permissions binding Ready for Codex Review at commit 6e2f2a5f; cadence 3 of 3; awaiting Codex review request/result per rule 19; no Active Task; polling)
+2026-06-13 01:00 -06:00 - Build 2 checked queue; status: idle (no Active Task; cadence 3 of 3; Session Lifecycle permissions binding (6e2f2a5f) awaiting Codex review; pausing per rule 19)
+2026-06-13 01:10 -06:00 - Build 2 checked queue; Active Task found: repair Session Lifecycle permissions binding review visibility (Codex Reviews A HIGH finding); executing
+2026-06-13 01:15 -06:00 - Build 2 completed review visibility repair task; Session Lifecycle permissions binding implementation now on origin/main at commit 7e96994a; Codex Reviews A HIGH finding RESOLVED; tests 52/52 passing; marking Ready for Codex Review; awaiting Codex review result
+2026-06-13 01:20 -06:00 - Build 2 checked queue; status: idle (review visibility repair task complete; no new Active Task; cadence 1 of 3 (repairs count as new cadence cycle); awaiting next assignment or Codex review clearance; polling)
+2026-06-13 01:30 -06:00 - Build 2 checked queue; status: idle (no Active Task; review visibility repair complete (7e96994a); Session Lifecycle permissions binding Ready for Codex Review; cadence 1 of 3; awaiting next assignment; polling)
+2026-06-13 01:40 -06:00 - Build 2 checked queue; status: idle (no Active Task; cadence 1 of 3; awaiting next assignment; polling)
 2026-06-04 20:00 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
 2026-06-04 20:10 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; continuing pause per rule 19; cadence 3 of 3)
 2026-06-04 20:20 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)

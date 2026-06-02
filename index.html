@@ -3310,6 +3310,26 @@ body {
     if (status) status.textContent = text || '';
   };
   const readinessForBackend = (backend) => modelReadiness.find((item) => item.backend === backend);
+  const findRecentBridgeCall = async (requestId) => {
+    try {
+      const response = await fetch('http://127.0.0.1:8767/api/recent-calls');
+      if (!response.ok) return null;
+      const result = await response.json();
+      return (Array.isArray(result.calls) ? result.calls : []).find((call) => call.requestId === requestId) || null;
+    } catch {
+      return null;
+    }
+  };
+  const recoverBridgeResult = async (requestId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8767/api/call-result?requestId=${encodeURIComponent(requestId)}`);
+      if (!response.ok) return null;
+      const result = await response.json();
+      return result.result || null;
+    } catch {
+      return null;
+    }
+  };
   const updateModelReadiness = async () => {
     if (!modelSelect) return;
     try {
@@ -3403,9 +3423,35 @@ body {
       });
     } catch (error) {
       setStatus(input, backend);
+      const recovered = await recoverBridgeResult(requestId);
+      if (recovered) {
+        const modelLabel = recovered.model || backend;
+        setStatus(input, modelLabel);
+        pushEntry(input, recovered.ok ? 'model' : (recovered.setupRequired ? 'setup' : 'error'), recovered.ok ? (recovered.text || '(empty response)') : `Error: ${recovered.error || 'Model call failed'}`, modelLabel, {
+          requestedBackend: recovered.requestedBackend || selectedBackend,
+          responseChannel: recovered.channel || sessionChannel(input),
+          requestId: recovered.requestId || requestId,
+          sessionContextEntries: recovered.sessionContextEntries || 0,
+          sessionContextChars: recovered.sessionContextChars || 0,
+          recoveredFromBridge: true,
+        });
+        return;
+      }
+      const completedCall = await findRecentBridgeCall(requestId);
+      if (completedCall) {
+        const modelLabel = completedCall.model || backend;
+        pushEntry(input, 'error', `Error: Bridge completed ${completedCall.backend || backend} request, but the browser lost the response.`, modelLabel, {
+          requestedBackend: completedCall.requestedBackend || selectedBackend,
+          responseChannel: completedCall.channel || sessionChannel(input),
+          requestId,
+          sessionContextEntries: completedCall.sessionContextEntries || 0,
+          sessionContextChars: completedCall.sessionContextChars || 0,
+        });
+        return;
+      }
       pushEntry(input, 'error', error.name === 'AbortError'
         ? 'Error: Model call timed out.'
-        : `Error: ${error.message || 'Meridian model bridge is not running on 127.0.0.1:8767.'}`);
+        : `Error: ${error.message || 'Meridian model bridge is not running on 127.0.0.1:8767.'}`, backend, { requestedBackend: selectedBackend, requestId });
     } finally {
       input.dataset.sessionSending = 'false';
     }

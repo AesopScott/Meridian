@@ -6,6 +6,67 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add Relay proof payload downstream-consumer checklist now that negative-path tests cleared review.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `docs/relay-bifrost-proof-payload-consumer-checklist.md`, `docs/live-build-1.md`.
+
+Required sources: `docs/relay-bifrost-proof-payload-contract.md`, `docs/bifrost-right-panel-mode-contract.md`, `docs/FileMap.md`, `tests/test_relay_executor.py`, and Reviews A clearance for the deterministic test-collection repair in `docs/live-codex-reviews.md`.
+
+Completion:
+
+- Build 1 completed Relay proof payload downstream-consumer checklist on 2026-06-12 18:20 UTC.
+- Commit: `455ed63c` (docs: Add Relay proof payload downstream-consumer checklist for Bifrost/Prime integration).
+- Files changed: `docs/relay-bifrost-proof-payload-consumer-checklist.md` (374 insertions, new file).
+- Tests: docs-only; no pytest required. Text review completed.
+- Implementation: Comprehensive checklist covering field consumption guide (gate decision, severity, evidence IDs, waiver presence, explanation, fallback blockers), handling absent/empty fields, display examples, JSON deserialization patterns, caching and comparison safety, out-of-scope constraints (no Relay calls, no Aegis calls, no mutations, no UI overrides), and integration verification checklist (18-item checklist for correct consumption and display in Bifrost right panel).
+- Content verified: Checklist covers all required areas per task specification (human-facing vs audit-only fields, empty field handling, fallback blockers, waiver absence, blocked shapes, deterministic output expectations, out-of-scope constraints).
+
+Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-12 18:20 UTC (Active Task Completed)
+- Status: Downstream-consumer checklist completed and marked Ready for Codex Review
+- Latest origin/main: commit `256ca9a9` (Build 2/4/5 idle checks)
+- Current task: add Relay proof payload downstream-consumer checklist (now completed, commit `455ed63c`)
+- No new "Coordinator Override - Active Now" task promoted yet
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and awaiting next task assignment
+
+**Build 1 Read Check** — 2026-06-12 18:30 UTC (Heartbeat Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: worktree up to date
+- Downstream-consumer checklist task: Ready for Codex Review (awaiting review gate clearance)
+- Code/doc changes in session: 2 of 3 before Codex review check
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-12 18:40 UTC (Continued Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: commit `5568043b` (Build 2/3/4/5 progress updates)
+- Downstream-consumer checklist task: Ready for Codex Review (awaiting review gate clearance)
+- Code/doc changes in session: 2 of 3 before Codex review check
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-12 18:50 UTC (Heartbeat Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: commit `cc5d2c85` (Build 2/3/4 idle checks, Reviews A/B updates)
+- Downstream-consumer checklist task: Ready for Codex Review (awaiting review gate clearance)
+- Code/doc changes in session: 2 of 3 before Codex review check (cadence 3 of 3 — polling cycle complete)
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-12 19:00 UTC (Continued Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: worktree up to date
+- Downstream-consumer checklist task: Ready for Codex Review (awaiting review gate clearance)
+- Code/doc changes in session: 2 of 3 before Codex review check
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair Relay proof payload negative-path deterministic test collection.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
@@ -43,6 +104,20 @@ Ready for Codex Review.
 **Build 1 Read Check** — 2026-06-12 17:50 UTC (Continued Poll)
 - Status: Queue poll complete; no "Coordinator Override - Active Now" task
 - Latest origin/main: worktree up to date
+- Deterministic test collection repair task: Ready for Codex Review (awaiting review gate clearance)
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-12 18:00 UTC (Heartbeat Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: commit `b72e1f89` (Build 5 progress update)
+- Deterministic test collection repair task: Ready for Codex Review (awaiting review gate clearance)
+- Next Candidate Task: still awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-12 18:10 UTC (Continued Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: commit `240e0355` (Build 2 progress update)
 - Deterministic test collection repair task: Ready for Codex Review (awaiting review gate clearance)
 - Next Candidate Task: awaiting Prime/Codex promotion
 - Build 1 idle and polling for next task assignment
