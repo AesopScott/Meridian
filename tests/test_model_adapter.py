@@ -217,14 +217,28 @@ class TestDeepSeekCandidatePresets:
     def test_presets_remain_candidate_direct_provider_routes(self) -> None:
         for preset in deepseek_candidate_route_presets():
             assert preset.api_mode == "direct"
+            assert preset.trust_mode == "direct"
             assert preset.trust_state == "candidate"
+            assert preset.proof_strength == "weak"
             assert preset.requires_external_review is True
             assert preset.external_review_status == "pending"
             assert preset.direct_api_endpoint == DEEPSEEK_DIRECT_ENDPOINT
+            assert preset.direct_endpoint_evidence_ref == (
+                "deepseek-direct-endpoint:"
+                "https://api.deepseek.com/v1/chat/completions"
+            )
+            assert preset.external_review_evidence_ref == (
+                "external-review:deepseek:deepseek-chat:pending"
+            )
+            assert preset.validation_evidence_ref == (
+                "deepseek-validation:level-0:metadata-only"
+            )
             assert preset.known_authorities == (
                 "deepseek-official-endpoint",
                 "direct-api-only",
             )
+            assert preset.direct_provider_authority is True
+            assert preset.aggregator_authority is False
 
     def test_presets_preserve_validation_gate_blocks(self) -> None:
         for preset in deepseek_candidate_route_presets():
@@ -239,6 +253,93 @@ class TestDeepSeekCandidatePresets:
             assert preset.can_move_branches is False
             assert preset.bypasses_relay_aegis is False
             assert preset.autonomous_coding_allowed is False
+            assert preset.blocked_authorities == (
+                "review_clearance",
+                "branch_movement",
+                "relay_aegis_bypass",
+                "autonomous_coding",
+                "aggregator_authority",
+            )
+
+    def test_presets_carry_prompt_drag_defaults(self) -> None:
+        for preset in deepseek_candidate_route_presets():
+            assert preset.context_budget == 65536
+            assert preset.prompt_payload_budget == 57344
+            assert preset.prompt_drag_default_status == "unknown_until_relay_snapshot"
+            assert preset.prompt_drag_warning_tags == (
+                "prompt_drag_requires_relay_snapshot",
+                "q_mode_growth_requires_task_change",
+            )
+            assert preset.q_mode_flat is True
+
+    def test_preset_to_dict_is_display_safe_and_stable(self) -> None:
+        preset = deepseek_candidate_route_presets()[0]
+        first = preset.to_dict()
+        second = preset.to_dict()
+
+        assert first == second
+        assert tuple(first.keys()) == (
+            "provider_name",
+            "dispatch_model",
+            "variant_label",
+            "lane",
+            "api_mode",
+            "trust_mode",
+            "trust_state",
+            "proof_strength",
+            "requires_external_review",
+            "external_review_status",
+            "direct_endpoint_evidence_ref",
+            "external_review_evidence_ref",
+            "validation_evidence_ref",
+            "capability_tier",
+            "context_budget",
+            "prompt_payload_budget",
+            "allowed_task_types",
+            "blocked_task_types",
+            "blocked_authorities",
+            "max_risk_tier",
+            "q_mode_flat",
+            "prompt_drag_default_status",
+            "prompt_drag_warning_tags",
+            "can_clear_reviews",
+            "can_move_branches",
+            "bypasses_relay_aegis",
+            "autonomous_coding_allowed",
+            "direct_provider_authority",
+            "aggregator_authority",
+            "known_authorities",
+        )
+        rendered = " ".join(str(value) for value in first.values())
+        assert "deepseek-chat" in rendered
+        assert "deepseek-v4-pro" in rendered
+        assert "credential" not in rendered
+        assert "provider response" not in rendered
+        assert "Polaris" not in rendered
+
+    def test_metadata_candidate_state_carries_display_safe_proof_fields(self) -> None:
+        metadata = deepseek_candidate_metadata_preset("fast")
+        state = metadata.deepseek_candidate_state
+        assert state is not None
+        assert state["trust_mode"] == "direct"
+        assert state["proof_strength"] == "weak"
+        assert state["direct_endpoint_evidence_ref"] == (
+            "deepseek-direct-endpoint:"
+            "https://api.deepseek.com/v1/chat/completions"
+        )
+        assert state["external_review_evidence_ref"] == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
+        assert state["validation_evidence_ref"] == (
+            "deepseek-validation:level-0:metadata-only"
+        )
+        assert state["blocked_authorities"] == (
+            "review_clearance,branch_movement,relay_aegis_bypass,"
+            "autonomous_coding,aggregator_authority"
+        )
+        assert state["prompt_drag_default_status"] == "unknown_until_relay_snapshot"
+        assert state["direct_provider_authority"] == "true"
+        assert state["aggregator_authority"] == "false"
 
     def test_metadata_candidate_state_is_read_only(self) -> None:
         metadata = deepseek_candidate_metadata_preset()
@@ -277,6 +378,39 @@ class TestDeepSeekCandidatePresets:
                 autonomous_coding_allowed=template.autonomous_coding_allowed,
                 known_authorities=template.known_authorities,
             )
+
+    def test_rejects_deepseek_direct_endpoint_mismatch(self) -> None:
+        template = deepseek_candidate_route_presets()[0]
+        with pytest.raises(ModelAdapterConfigError, match="reviewed endpoint"):
+            ModelCandidateRoutePreset(
+                provider_name=template.provider_name,
+                dispatch_model=template.dispatch_model,
+                variant_label=template.variant_label,
+                lane=template.lane,
+                api_mode=template.api_mode,
+                trust_state=template.trust_state,
+                requires_external_review=template.requires_external_review,
+                external_review_status=template.external_review_status,
+                direct_api_endpoint="https://openrouter.example.invalid/v1/chat",
+                capability_tier=template.capability_tier,
+                context_budget=template.context_budget,
+                prompt_payload_budget=template.prompt_payload_budget,
+                allowed_task_types=template.allowed_task_types,
+                blocked_task_types=template.blocked_task_types,
+                max_risk_tier=template.max_risk_tier,
+                q_mode_flat=template.q_mode_flat,
+                can_clear_reviews=template.can_clear_reviews,
+                can_move_branches=template.can_move_branches,
+                bypasses_relay_aegis=template.bypasses_relay_aegis,
+                autonomous_coding_allowed=template.autonomous_coding_allowed,
+                known_authorities=template.known_authorities,
+            )
+
+    def test_candidate_presets_do_not_construct_live_transport(self) -> None:
+        metadata = deepseek_candidate_metadata_preset()
+        assert isinstance(metadata, ModelHarnessMetadata)
+        assert not callable(metadata)
+        assert metadata.model_name == "deepseek-chat"
 
     def test_unknown_preset_lane_raises(self) -> None:
         with pytest.raises(ModelAdapterConfigError, match="Unknown DeepSeek candidate lane"):

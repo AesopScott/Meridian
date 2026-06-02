@@ -74,6 +74,16 @@ class ModelCandidateRoutePreset:
     bypasses_relay_aegis: bool
     autonomous_coding_allowed: bool
     known_authorities: tuple[str, ...]
+    trust_mode: str = "direct"
+    proof_strength: str = "weak"
+    direct_endpoint_evidence_ref: str | None = None
+    external_review_evidence_ref: str | None = None
+    validation_evidence_ref: str | None = None
+    blocked_authorities: tuple[str, ...] = ()
+    prompt_drag_default_status: str = "unknown"
+    prompt_drag_warning_tags: tuple[str, ...] = ()
+    direct_provider_authority: bool = True
+    aggregator_authority: bool = False
 
     def __post_init__(self) -> None:
         if self.provider_name == "deepseek" and self.dispatch_model != DEEPSEEK_DIRECT_MODEL:
@@ -82,6 +92,17 @@ class ModelCandidateRoutePreset:
             )
         if self.variant_label == self.dispatch_model:
             raise ModelAdapterConfigError("variant_label must not masquerade as dispatch_model")
+        if self.provider_name == "deepseek" and self.api_mode == "direct":
+            if self.direct_api_endpoint != DEEPSEEK_DIRECT_ENDPOINT:
+                raise ModelAdapterConfigError(
+                    "DeepSeek direct candidate endpoint must match the reviewed endpoint"
+                )
+            if self.trust_mode != "direct":
+                raise ModelAdapterConfigError("DeepSeek direct candidates must declare direct trust")
+            if self.aggregator_authority:
+                raise ModelAdapterConfigError(
+                    "DeepSeek direct candidates must not inherit aggregator authority"
+                )
 
     def to_metadata(self) -> ModelHarnessMetadata:
         """Return the legacy adapter metadata surface for this candidate preset."""
@@ -104,18 +125,63 @@ class ModelCandidateRoutePreset:
                 "variant_label": self.variant_label,
                 "lane": self.lane,
                 "direct_api_endpoint": self.direct_api_endpoint,
+                "trust_mode": self.trust_mode,
+                "proof_strength": self.proof_strength,
                 "external_review_status": self.external_review_status,
+                "direct_endpoint_evidence_ref": self.direct_endpoint_evidence_ref or "",
+                "external_review_evidence_ref": self.external_review_evidence_ref or "",
+                "validation_evidence_ref": self.validation_evidence_ref or "",
                 "allowed_task_types": ",".join(self.allowed_task_types),
                 "blocked_task_types": ",".join(self.blocked_task_types),
+                "blocked_authorities": ",".join(self.blocked_authorities),
                 "max_risk_tier": str(self.max_risk_tier),
                 "q_mode_flat": str(self.q_mode_flat).lower(),
+                "prompt_drag_default_status": self.prompt_drag_default_status,
+                "prompt_drag_warning_tags": ",".join(self.prompt_drag_warning_tags),
                 "can_clear_reviews": str(self.can_clear_reviews).lower(),
                 "can_move_branches": str(self.can_move_branches).lower(),
                 "bypasses_relay_aegis": str(self.bypasses_relay_aegis).lower(),
                 "autonomous_coding_allowed": str(self.autonomous_coding_allowed).lower(),
+                "direct_provider_authority": str(self.direct_provider_authority).lower(),
+                "aggregator_authority": str(self.aggregator_authority).lower(),
                 "known_authorities": ",".join(self.known_authorities),
             },
         )
+
+    def to_dict(self) -> dict[str, object]:
+        """Return stable display-safe preset metadata without transport details."""
+        return {
+            "provider_name": self.provider_name,
+            "dispatch_model": self.dispatch_model,
+            "variant_label": self.variant_label,
+            "lane": self.lane,
+            "api_mode": self.api_mode,
+            "trust_mode": self.trust_mode,
+            "trust_state": self.trust_state,
+            "proof_strength": self.proof_strength,
+            "requires_external_review": self.requires_external_review,
+            "external_review_status": self.external_review_status,
+            "direct_endpoint_evidence_ref": self.direct_endpoint_evidence_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
+            "validation_evidence_ref": self.validation_evidence_ref,
+            "capability_tier": self.capability_tier,
+            "context_budget": self.context_budget,
+            "prompt_payload_budget": self.prompt_payload_budget,
+            "allowed_task_types": self.allowed_task_types,
+            "blocked_task_types": self.blocked_task_types,
+            "blocked_authorities": self.blocked_authorities,
+            "max_risk_tier": self.max_risk_tier,
+            "q_mode_flat": self.q_mode_flat,
+            "prompt_drag_default_status": self.prompt_drag_default_status,
+            "prompt_drag_warning_tags": self.prompt_drag_warning_tags,
+            "can_clear_reviews": self.can_clear_reviews,
+            "can_move_branches": self.can_move_branches,
+            "bypasses_relay_aegis": self.bypasses_relay_aegis,
+            "autonomous_coding_allowed": self.autonomous_coding_allowed,
+            "direct_provider_authority": self.direct_provider_authority,
+            "aggregator_authority": self.aggregator_authority,
+            "known_authorities": self.known_authorities,
+        }
 
 
 DEEPSEEK_DIRECT_MODEL = "deepseek-chat"
@@ -130,10 +196,15 @@ def deepseek_candidate_route_presets() -> tuple[ModelCandidateRoutePreset, ...]:
         "provider_name": "deepseek",
         "dispatch_model": DEEPSEEK_DIRECT_MODEL,
         "api_mode": "direct",
+        "trust_mode": "direct",
         "trust_state": "candidate",
+        "proof_strength": "weak",
         "requires_external_review": True,
         "external_review_status": "pending",
         "direct_api_endpoint": DEEPSEEK_DIRECT_ENDPOINT,
+        "direct_endpoint_evidence_ref": "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions",
+        "external_review_evidence_ref": "external-review:deepseek:deepseek-chat:pending",
+        "validation_evidence_ref": "deepseek-validation:level-0:metadata-only",
         "context_budget": DEEPSEEK_CONTEXT_BUDGET,
         "prompt_payload_budget": DEEPSEEK_PROMPT_PAYLOAD_BUDGET,
         "allowed_task_types": ("verify", "explain"),
@@ -146,12 +217,26 @@ def deepseek_candidate_route_presets() -> tuple[ModelCandidateRoutePreset, ...]:
             "review_clearance",
             "autonomous_coding",
         ),
+        "blocked_authorities": (
+            "review_clearance",
+            "branch_movement",
+            "relay_aegis_bypass",
+            "autonomous_coding",
+            "aggregator_authority",
+        ),
         "max_risk_tier": 1,
         "q_mode_flat": True,
+        "prompt_drag_default_status": "unknown_until_relay_snapshot",
+        "prompt_drag_warning_tags": (
+            "prompt_drag_requires_relay_snapshot",
+            "q_mode_growth_requires_task_change",
+        ),
         "can_clear_reviews": False,
         "can_move_branches": False,
         "bypasses_relay_aegis": False,
         "autonomous_coding_allowed": False,
+        "direct_provider_authority": True,
+        "aggregator_authority": False,
         "known_authorities": ("deepseek-official-endpoint", "direct-api-only"),
     }
     return (
