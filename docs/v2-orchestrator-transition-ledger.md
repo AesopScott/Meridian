@@ -443,6 +443,12 @@ Coordinator Build 4/5 and Reviews A movement - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 220/220; `git diff --check 07f52228^..HEAD` passed; Build 4 checklist text/shape scan found the required Relay/Aegis metadata, evaluator, outcome mapping, raw-prompt/credential exclusion, Bifrost handoff, fail-closed, deterministic-test, and FileMap-routing terms.
 - Next coordinator action: push this movement, route Reviews B to review the newly landed Build 4/5 Ready markers, and promote fresh executable tasks for Build 1 and Build 3 now that Reviews A cleared their Aegis-wave slices.
 
+Coordinator post-movement routing - 2026-06-02:
+
+- Promoted Build 3 to a fresh mechanical FileMap audit for the newly landed Relay/Aegis checklist, Build 5 edge rendering changes, Reviews A provenance, and ledger/routing records.
+- Kept Build 1 explicitly review-gated: the next natural Relay/Aegis runtime integration should wait for Reviews B to clear the new Build 4 checklist. Build 4 and Build 5 are also review-gated on Reviews B after their Ready markers landed.
+- Build 2 remains actively working on permission-aware Prime/Beacon advisory evidence. Reviews B has an executable review task for Build 4 then Build 5 current-main Ready markers.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
