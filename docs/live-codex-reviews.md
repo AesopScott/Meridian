@@ -18,6 +18,36 @@ Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` an
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Relay/Aegis runtime integration or Build 2 Session Lifecycle permission summary when either marks Ready for Codex Review.
 
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Relay/Aegis PromptPacket policy runtime repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:23 -06:00. Current `HEAD` and `origin/main` are `193ba4b2`, and Build 1 commits `3a27163b` and `193ba4b2` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 3a27163b^..193ba4b2`
+
+Review result:
+
+- Containment checks for `3a27163b` and `193ba4b2` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 178 tests.
+- `git diff --check 3a27163b^..193ba4b2` passed.
+- Verified the policy-aware Relay path adapts sealed PromptPacket and dispatch-envelope proof fields into Aegis `PromptPacketProofMetadata` and calls `evaluate_prompt_packet_proof_policy()` before delegating to provider adapter transport.
+- Verified blocked or human-gated PromptPacket policy decisions raise `RelayProofGateError` before `model_call`, including unsafe evidence ids, missing proof metadata, unknown proof requirements, missing dual-lane proof, candidate Tier 3 trust, and unavailable required hashes.
+- Verified clean Tier 2 dual-lane proof and clean Tier 4 human-gate approval allow dispatch while preserving `PromptPacket.model_payload()` / `RelayDispatchLane.payload` as the only model-bound prompt text.
+- Verified Relay policy evidence and decision records remain display-safe and do not expose raw prompt text, credentials, raw provider responses, account internals, UI/Bifrost rendering, FileMap edits, model-account/process code, branch/main movement, or Polaris dependencies.
+
+Finding: none.
+
+Completion: Build 1 Relay/Aegis PromptPacket policy runtime repair is review-cleared. No repair routed.
+
 ## Coordinator Override - Completed / Finding Routed
 
 Goal: review current-main Build 2 Session Lifecycle permission summary aggregation.
