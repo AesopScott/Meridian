@@ -329,6 +329,92 @@ class TestSessionCommandPlan:
         assert serialized["session_id"] == "session-1"
         assert serialized["command_intent"] == "poll_queue"
 
+    def test_audit_evidence_serializes_plan_action_and_reason(self, poll_command):
+        """Test audit evidence exposes display-safe action and reason metadata."""
+        audit = poll_command.audit_evidence()
+
+        assert audit["plan"]["action"] == "poll_queue"
+        assert audit["plan"]["reason"] == "Check for new tasks in queue"
+        assert audit["plan"]["expected_transition"] == ["polling", "polling"]
+        assert audit["plan"]["is_executable"] is True
+
+    def test_to_dict_includes_audit_evidence(self, poll_command):
+        """Test serialized command plans include audit evidence for Bifrost."""
+        serialized = poll_command.to_dict()
+
+        assert serialized["audit_evidence"]["plan"]["action"] == "poll_queue"
+        assert serialized["audit_evidence"]["permission"]["proof_requirement"] == "queue_read"
+        assert serialized["audit_evidence"]["recovery"]["queue_file_affected"] == (
+            "docs/live-build-2.md"
+        )
+
+    def test_audit_evidence_records_human_gate_blocker(self, poll_command):
+        """Test human-gated plans surface blockers without raw execution data."""
+        gated_command = poll_command.__class__(
+            **{
+                **poll_command.__dict__,
+                "command_intent": CommandIntent.REQUEST_HUMAN_GATE,
+                "is_executable_now": False,
+                "human_approval_required": True,
+                "approval_context": "review gate pending",
+            }
+        )
+
+        audit = gated_command.audit_evidence()
+        assert audit["review_gate"]["human_approval_required"] is True
+        assert "human_approval_required" in audit["blockers"]
+        assert "not_executable_now" in audit["blockers"]
+        assert "review gate pending" in audit["blockers"]
+
+    def test_audit_evidence_records_permission_metadata(self, poll_command):
+        """Test permission-related audit metadata is deterministic and display-safe."""
+        permission_command = poll_command.__class__(
+            **{
+                **poll_command.__dict__,
+                "proof_requirement": ProofState.PERMISSION_VALIDATED,
+                "branch_affected": "codex/aligned-build-2-command-audit",
+                "worktree_path_affected": "/worktree/build-2",
+                "aegis_gate_result": "pending",
+            }
+        )
+
+        audit = permission_command.audit_evidence()
+        assert audit["permission"] == {
+            "proof_requirement": "permission_validated",
+            "aegis_gate_result": "pending",
+            "branch_affected": "codex/aligned-build-2-command-audit",
+            "worktree_path_affected": "/worktree/build-2",
+        }
+
+    def test_audit_evidence_records_review_gate_and_recovery(self, poll_command):
+        """Test review-gate and recovery metadata survive serialization."""
+        recovery_command = poll_command.__class__(
+            **{
+                **poll_command.__dict__,
+                "command_intent": CommandIntent.RESTART,
+                "reason": "stale_heartbeat",
+                "expected_state_transition": (SessionStatus.STALE, SessionStatus.RUNNING),
+                "review_gate_evidence": "review gate pending",
+                "cadence_gate_required": True,
+                "cadence_gate_status": ReviewCadenceState.REVIEW_GATED,
+                "rollback_or_recovery_note": "Restart remains advisory until approved.",
+                "is_executable_now": False,
+                "human_approval_required": True,
+            }
+        )
+
+        audit = recovery_command.audit_evidence()
+        assert audit["plan"]["action"] == "restart"
+        assert audit["review_gate"]["cadence_gate_required"] is True
+        assert audit["review_gate"]["cadence_gate_status"] == "review_gated"
+        assert audit["recovery"]["rollback_or_recovery_note"] == (
+            "Restart remains advisory until approved."
+        )
+
+    def test_audit_evidence_is_deterministic(self, poll_command):
+        """Test repeated audit evidence calls return identical metadata."""
+        assert poll_command.audit_evidence() == poll_command.audit_evidence()
+
     def test_archive_command_for_context_fill(self, poll_command):
         """Test ARCHIVE command when routing suggests context fill."""
         archive_cmd = poll_command.__class__(

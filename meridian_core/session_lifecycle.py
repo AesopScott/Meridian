@@ -568,6 +568,47 @@ class SessionCommandPlan:
 
         return (from_state, to_state) in legal_transitions
 
+    def audit_evidence(self) -> dict[str, Any]:
+        """Return display-safe audit metadata for Prime/Bifrost."""
+        blockers: list[str] = []
+        if self.human_approval_required:
+            blockers.append("human_approval_required")
+        if not self.is_executable_now:
+            blockers.append("not_executable_now")
+        if self.proof_requirement == ProofState.NO_PROOF:
+            blockers.append("proof_missing")
+        if self.approval_context:
+            blockers.append(self.approval_context)
+
+        return {
+            "plan": {
+                "action": self.command_intent.value,
+                "reason": self.reason,
+                "expected_transition": [
+                    self.expected_state_transition[0].value,
+                    self.expected_state_transition[1].value,
+                ],
+                "is_executable": self.is_executable(),
+            },
+            "blockers": blockers,
+            "permission": {
+                "proof_requirement": self.proof_requirement.value,
+                "aegis_gate_result": self.aegis_gate_result,
+                "branch_affected": self.branch_affected,
+                "worktree_path_affected": self.worktree_path_affected,
+            },
+            "review_gate": {
+                "cadence_gate_required": self.cadence_gate_required,
+                "cadence_gate_status": self.cadence_gate_status.value,
+                "review_gate_evidence": self.review_gate_evidence,
+                "human_approval_required": self.human_approval_required,
+            },
+            "recovery": {
+                "rollback_or_recovery_note": self.rollback_or_recovery_note,
+                "queue_file_affected": self.queue_file_affected,
+            },
+        }
+
     def to_dict(self) -> dict[str, Any]:
         """Serialize to JSON-safe dict for Bifrost preview."""
         return {
@@ -594,6 +635,7 @@ class SessionCommandPlan:
             "human_approval_required": self.human_approval_required,
             "approval_context": self.approval_context,
             "rollback_or_recovery_note": self.rollback_or_recovery_note,
+            "audit_evidence": self.audit_evidence(),
         }
 
 
