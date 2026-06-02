@@ -10,6 +10,31 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Completed / Ready For Codex Review
 
+Goal: keep FileMap current after Build 1 provider-result validation evidence runtime and Reviews B provenance through `aa926f07`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: audit FileMap coverage after current-main movement `0e7ef832..aa926f07`, especially Build 1 provider-result validation evidence runtime and Reviews B provenance.
+
+Completion:
+
+- Build 3 audited current `origin/main` at `aa926f07` after movement commits `d6007b21`, `0c38f8f7`, and `aa926f07`.
+- Inspected changed paths from `0e7ef832..aa926f07`, all five live-build queue files, both live review provenance files, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Inspected called-out runtime paths: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews-2.md`.
+- Registered missing existing artifact: `docs/provider-result-validation-evidence-checklist.md` in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Audit evidence: focused coverage check across 45 inspected changed/referenced existing paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 47 passed.
+- Diff proof: `git diff --check` - passed.
+- Commit: this queue-marker commit.
+- Next Candidate: bind runtime validation or review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
 Goal: keep FileMap current after latest Build 1/2/4/5 movement and review provenance through `9198bcbe`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
