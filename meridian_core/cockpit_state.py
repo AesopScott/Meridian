@@ -14,7 +14,7 @@ from typing import Sequence
 class CockpitStatus(Enum):
     ONLINE = "online"
     THINKING = "thinking"
-    WAITING_ON_SCOTT = "waiting_on_scott"
+    WAITING_ON_USER = "waiting_on_user"
     BLOCKED = "blocked"
     DEGRADED = "degraded"
     OFFLINE = "offline"

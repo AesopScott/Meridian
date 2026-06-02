@@ -1,10 +1,10 @@
-"""Static HTML renderer for the Bifrost cockpit surface.
+﻿"""Static HTML renderer for the Bifrost cockpit surface.
 
 Dependency-free rendering path: only Python standard library. Returns a complete,
 self-contained HTML document from a CockpitViewModel. All user-visible strings
 are escaped.
 
-view_model_from_snapshot() maps meridian_core.PrimeCockpitSnapshot → CockpitViewModel
+view_model_from_snapshot() maps meridian_core.PrimeCockpitSnapshot â†’ CockpitViewModel
 and is the only place that imports from meridian_core.
 """
 
@@ -1427,7 +1427,7 @@ def sample_cockpit_view_model(
     )
 
 
-# ── Snapshot → ViewModel mapping ───────────────────────────────────────────
+# â”€â”€ Snapshot â†’ ViewModel mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _prime_status_to_instrument_status(status: object) -> str:
@@ -1435,7 +1435,7 @@ def _prime_status_to_instrument_status(status: object) -> str:
     return {
         CockpitStatus.ONLINE: "ok",
         CockpitStatus.THINKING: "ok",
-        CockpitStatus.WAITING_ON_SCOTT: "warn",
+        CockpitStatus.WAITING_ON_USER: "warn",
         CockpitStatus.BLOCKED: "error",
         CockpitStatus.DEGRADED: "warn",
         CockpitStatus.OFFLINE: "error",
@@ -1518,7 +1518,7 @@ def view_model_from_snapshot(snapshot: PrimeCockpitSnapshot) -> CockpitViewModel
     )
 
 
-# ── Private render helpers ──────────────────────────────────────────────────
+# â”€â”€ Private render helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _render_prime_panel(vm: CockpitViewModel) -> str:
@@ -2777,7 +2777,7 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
             # Show stale-target guard warning
             routing_target_html = (
                 f'<div class="stale-target-guard" data-stale-session-id="{_e(selected_session_id)}">'
-                f'<span class="stale-warning">⚠ Target unavailable: {_e(selected_session_name)}</span>'
+                f'<span class="stale-warning">âš  Target unavailable: {_e(selected_session_name)}</span>'
                 f'<span class="stale-message">Session is closed, blocked, or no longer routable. Prompts will not be sent.</span>'
                 '<div class="stale-recovery-actions" aria-label="Stale session recovery actions">'
                 + recovery_action_markup
@@ -2866,7 +2866,7 @@ def _render_harness_mode(mode: HarnessModeView) -> str:
     )
 
 
-# ── Public API ──────────────────────────────────────────────────────────────
+# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def render_cockpit_html(vm: CockpitViewModel) -> str:
@@ -2907,7 +2907,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         "<head>\n"
         '<meta charset="utf-8" />\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1" />\n'
-        f"<title>Bifrost Cockpit — {_e(vm.project)}</title>\n"
+        f"<title>Bifrost Cockpit â€” {_e(vm.project)}</title>\n"
         f"<style>\n{css}\n</style>\n"
         "</head>\n"
         "<body>\n"

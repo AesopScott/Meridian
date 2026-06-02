@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -3562,7 +3562,7 @@ body {
           if (Number(entry.sessionContextEntries) > 0) {
             metaParts.push(`visible context ${entry.sessionContextEntries} entries`);
           }
-          meta.textContent = metaParts.join(' · ');
+          meta.textContent = metaParts.join(' Â· ');
           row.append(meta);
         }
       }
@@ -3615,7 +3615,7 @@ body {
       bridgeOnline = true;
       modelReadiness = Array.isArray(result.models) ? result.models : [];
       bridgeCapabilities = result.capabilities || {};
-      const bridgeLabel = result.version ? ` · bridge ${result.version}` : '';
+      const bridgeLabel = result.version ? ` Â· bridge ${result.version}` : '';
       if (modelSelect.value === 'auto') {
         document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'Prime / Relay auto'));
         return;
@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || 'C:\\Users\\user\\Code\\Meridian',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4082,6 +4082,24 @@ body {
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };
+  const renderBeaconLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Beacon logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Beacon logic snapshot unavailable'],
+      ]), true);
+    }
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    return [
+      relaySection('Beacon logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Beacon'],
+      ]), true),
+      relaySection('Beacon summary', relaySummary(snapshot.summary || ''), true),
+      ...capabilitySections.map(renderCompassCapabilitySection),
+    ].join('');
+  };
   const renderPrimeDecisionSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Prime logic source', relayGrid([
@@ -4264,6 +4282,17 @@ body {
       logicNode.innerHTML = renderVulcanLogicSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVulcanLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadBeaconLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-beacon-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('beacon-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderBeaconLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderBeaconLogicSnapshot({ ok: false, error: error.message });
     }
   };
   const loadPrimeLogic = async () => {
@@ -4498,6 +4527,37 @@ body {
       return false;
     }
   };
+  const renderBeaconHeartbeatLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Beacon heartbeat logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Beacon Runtime Logic</div>
+            <div class="relay-models-status">Heartbeat and liveness</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-beacon-logic>${relaySection('Beacon logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadBeaconLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
@@ -4722,7 +4782,9 @@ body {
       ? renderRelayModels()
       : (button.dataset.harness === 'Compass'
         ? renderCompassProjectLogic()
-        : (button.dataset.harness === 'Session Lifecycle' ? renderVulcanSessionLogic() : renderHarnessSurface(button)));
+        : (button.dataset.harness === 'Session Lifecycle'
+          ? renderVulcanSessionLogic()
+          : (button.dataset.harness === 'Beacon' ? renderBeaconHeartbeatLogic() : renderHarnessSurface(button))));
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });
