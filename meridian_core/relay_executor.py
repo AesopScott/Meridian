@@ -117,6 +117,61 @@ class RelayPromptPayloadEvidence:
 
 
 @dataclass(frozen=True)
+class RelayDispatchEnvelope:
+    """Safe audit envelope built before dispatch without raw transport payloads."""
+
+    envelope_id: str
+    heartbeat_id: str
+    role: str | None = None
+    requested_model_id: str | None = None
+    exact_model_id: str | None = None
+    selected_provider: str | None = None
+    route_id: str | None = None
+    route_class: str | None = None
+    route_kind: str | None = None
+    risk_tier: int = 0
+    trust_state: str = "unknown"
+    capability_tier: str | None = None
+    payload_evidence_ref: str | None = None
+    payload_snapshot_hash: str | None = None
+    aegis_gate_decision: str | None = None
+    aegis_evidence_ids: tuple[str, ...] = ()
+    proof_required: tuple[str, ...] = ()
+    human_gate_required: bool = False
+    blocked_error_tags: tuple[str, ...] = ()
+    safe_to_dispatch: bool = False
+    transport_payload_kind: str = "approved_prompt_text"
+    audit_fields: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a deterministic serializable envelope for audit handoff."""
+        return {
+            "envelope_id": self.envelope_id,
+            "heartbeat_id": self.heartbeat_id,
+            "role": self.role,
+            "requested_model_id": self.requested_model_id,
+            "exact_model_id": self.exact_model_id,
+            "selected_provider": self.selected_provider,
+            "route_id": self.route_id,
+            "route_class": self.route_class,
+            "route_kind": self.route_kind,
+            "risk_tier": self.risk_tier,
+            "trust_state": self.trust_state,
+            "capability_tier": self.capability_tier,
+            "payload_evidence_ref": self.payload_evidence_ref,
+            "payload_snapshot_hash": self.payload_snapshot_hash,
+            "aegis_gate_decision": self.aegis_gate_decision,
+            "aegis_evidence_ids": self.aegis_evidence_ids,
+            "proof_required": self.proof_required,
+            "human_gate_required": self.human_gate_required,
+            "blocked_error_tags": self.blocked_error_tags,
+            "safe_to_dispatch": self.safe_to_dispatch,
+            "transport_payload_kind": self.transport_payload_kind,
+            "audit_fields": self.audit_fields,
+        }
+
+
+@dataclass(frozen=True)
 class RelayDecisionRecord:
     """Provider-neutral decision record capturing route selection rationale for Prime explanation.
 
@@ -165,6 +220,7 @@ class RelayDecisionRecord:
     aegis_explanation: str = ""  # gate evaluation explanation
     route_metadata: ModelRouteMetadataBinding | None = None
     payload_evidence: RelayPromptPayloadEvidence | None = None
+    dispatch_envelope: RelayDispatchEnvelope | None = None
 
 
 @dataclass(frozen=True)
@@ -178,6 +234,7 @@ class RelayExecutionResult:
     adapter_metadata: ModelHarnessMetadata | None = None
     route_metadata: ModelRouteMetadataBinding | None = None
     payload_evidence: RelayPromptPayloadEvidence | None = None
+    dispatch_envelope: RelayDispatchEnvelope | None = None
 
 
 @dataclass(frozen=True)
@@ -443,12 +500,153 @@ def _build_payload_evidence(
     )
 
 
+def _dedupe_tags(*tag_groups: tuple[str, ...] | list[str]) -> tuple[str, ...]:
+    tags: list[str] = []
+    for group in tag_groups:
+        for tag in group:
+            if tag and tag not in tags:
+                tags.append(tag)
+    return tuple(tags)
+
+
+def _payload_evidence_ref(payload_evidence: RelayPromptPayloadEvidence | None) -> str | None:
+    if payload_evidence is None:
+        return None
+    heartbeat_id = payload_evidence.heartbeat_id or "unknown-heartbeat"
+    lane_id = payload_evidence.lane_id or "unknown-lane"
+    return f"relay-payload-evidence:{heartbeat_id}:{lane_id}"
+
+
+def _dispatch_blocking_tags(
+    tags: tuple[str, ...],
+    *,
+    risk_tier: int,
+) -> tuple[str, ...]:
+    blocking_prefixes = ("aegis_",)
+    blocking_tags = {
+        "budget_exceeded",
+        "context_window_unknown",
+        "provider_metadata_missing",
+        "telemetry_unavailable",
+        "unknown_route_class",
+        "unknown_session_action",
+        "vendor_unknown",
+        "model_id_unknown",
+        "tier3_dual_lane_independence_missing",
+        "human_gate_proof_missing",
+    }
+    if risk_tier >= 2:
+        blocking_tags.update(
+            {
+                "completion_tokens_unavailable",
+                "latency_ms_unavailable",
+                "prompt_snapshot_missing",
+                "response_hash_unavailable",
+            }
+        )
+    return tuple(
+        tag
+        for tag in tags
+        if tag in blocking_tags or tag.startswith(blocking_prefixes)
+    )
+
+
+def _build_dispatch_envelope(
+    plan: RelayDispatchPlan,
+    *,
+    lane_role: ModelRole | None = None,
+    requested_model_id: str | None = None,
+    adapter_metadata: ModelHarnessMetadata | None = None,
+    route_metadata: ModelRouteMetadataBinding | None = None,
+    payload_evidence: RelayPromptPayloadEvidence | None = None,
+    fallback_blockers: tuple[str, ...] = (),
+    aegis_gate_decision: str | None = None,
+    aegis_evidence_ids: tuple[str, ...] = (),
+) -> RelayDispatchEnvelope:
+    """Build the safe Relay dispatch envelope used for audit/transport hardening."""
+    route = plan.route
+    audit = route.audit
+    packet = plan.packet
+
+    selected_provider = None
+    exact_model_id = requested_model_id
+    capability_tier = None
+    trust_state = audit.trust_state.value
+    if route_metadata is not None:
+        selected_provider = route_metadata.provider_name
+        exact_model_id = route_metadata.model_name
+        capability_tier = route_metadata.capability_tier
+        trust_state = route_metadata.trust_state
+    elif adapter_metadata is not None:
+        selected_provider = adapter_metadata.provider_name
+        exact_model_id = adapter_metadata.model_name
+        capability_tier = adapter_metadata.capability_tier
+        trust_state = adapter_metadata.trust_state
+
+    tags = _dedupe_tags(
+        payload_evidence.telemetry_error_tags if payload_evidence else (),
+        fallback_blockers,
+    )
+    blocking_tags = _dispatch_blocking_tags(tags, risk_tier=route.risk_tier)
+    if route.risk_tier >= 2 and selected_provider is None:
+        blocking_tags = _dedupe_tags(blocking_tags, ("vendor_unknown",))
+    if route.risk_tier >= 2 and exact_model_id is None:
+        blocking_tags = _dedupe_tags(blocking_tags, ("model_id_unknown",))
+
+    lane_label = lane_role.value if lane_role else "no-lane"
+    model_label = exact_model_id or requested_model_id or "unknown-model"
+
+    return RelayDispatchEnvelope(
+        envelope_id=f"relay-dispatch:{packet.packet_id}:{lane_label}:{model_label}",
+        heartbeat_id=packet.packet_id,
+        role=lane_role.value if lane_role else None,
+        requested_model_id=requested_model_id,
+        exact_model_id=exact_model_id,
+        selected_provider=selected_provider,
+        route_id=f"tier-{route.risk_tier}:{route.mode.value}",
+        route_class=audit.route_class.value if audit.route_class else None,
+        route_kind=audit.route_kind.value,
+        risk_tier=route.risk_tier,
+        trust_state=trust_state,
+        capability_tier=capability_tier,
+        payload_evidence_ref=_payload_evidence_ref(payload_evidence),
+        payload_snapshot_hash=(
+            payload_evidence.prompt_payload_snapshot_hash if payload_evidence else None
+        ),
+        aegis_gate_decision=aegis_gate_decision,
+        aegis_evidence_ids=aegis_evidence_ids,
+        proof_required=tuple(audit.proof_required),
+        human_gate_required=route.requires_human_gate,
+        blocked_error_tags=blocking_tags,
+        safe_to_dispatch=not blocking_tags,
+        transport_payload_kind="approved_prompt_text" if lane_role else "none",
+        audit_fields=(
+            "heartbeat_id",
+            "role",
+            "requested_model_id",
+            "exact_model_id",
+            "selected_provider",
+            "route_id",
+            "route_class",
+            "route_kind",
+            "risk_tier",
+            "trust_state",
+            "capability_tier",
+            "payload_evidence_ref",
+            "proof_required",
+            "blocked_error_tags",
+            "safe_to_dispatch",
+        ),
+    )
+
+
 def _build_decision_record(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
     adapter_metadata: ModelHarnessMetadata | None = None,
     route_metadata: ModelRouteMetadataBinding | None = None,
     payload_evidence: RelayPromptPayloadEvidence | None = None,
+    dispatch_envelope: RelayDispatchEnvelope | None = None,
     aegis_gate_decision: str | None = None,
     aegis_explanation: str = "",
 ) -> RelayDecisionRecord:
@@ -573,6 +771,26 @@ def _build_decision_record(
         elif aegis_gate_decision in ("block", "human_gate"):
             explanation += f" Aegis: {aegis_gate_decision} gate decision ({aegis_explanation})."
 
+    first_builder_lane = None
+    if lanes:
+        first_builder_lane = next(
+            (lane for lane in lanes if lane.role.value == "builder"),
+            lanes[0],
+        )
+    if dispatch_envelope is None or fallback_blockers or aegis_gate_decision:
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=first_builder_lane.role if first_builder_lane else None,
+            requested_model_id=(
+                first_builder_lane.preferred_model if first_builder_lane else model_id
+            ),
+            adapter_metadata=adapter_metadata,
+            route_metadata=route_metadata,
+            payload_evidence=payload_evidence,
+            fallback_blockers=tuple(fallback_blockers),
+            aegis_gate_decision=aegis_gate_decision,
+        )
+
     return RelayDecisionRecord(
         heartbeat_id=packet.packet_id,
         project=None,
@@ -604,6 +822,7 @@ def _build_decision_record(
         aegis_explanation=aegis_explanation,
         route_metadata=route_metadata,
         payload_evidence=payload_evidence,
+        dispatch_envelope=dispatch_envelope,
     )
 
 
@@ -641,8 +860,22 @@ def execute_relay_dispatch_plan(
         )
         for lane, snapshot in zip(plan.lanes, snapshots)
     )
+    dispatch_envelopes = tuple(
+        _build_dispatch_envelope(
+            plan,
+            lane_role=lane.role,
+            requested_model_id=lane.preferred_model,
+            payload_evidence=payload_evidence,
+        )
+        for lane, payload_evidence in zip(plan.lanes, payload_evidences)
+    )
 
-    for lane, snapshot, payload_evidence in zip(plan.lanes, snapshots, payload_evidences):
+    for lane, snapshot, payload_evidence, dispatch_envelope in zip(
+        plan.lanes,
+        snapshots,
+        payload_evidences,
+        dispatch_envelopes,
+    ):
         try:
             output = model_call(lane.payload)
             results.append(
@@ -652,6 +885,7 @@ def execute_relay_dispatch_plan(
                     output=output,
                     payload_snapshot=snapshot,
                     payload_evidence=payload_evidence,
+                    dispatch_envelope=dispatch_envelope,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -671,6 +905,7 @@ def execute_relay_dispatch_plan(
             plan,
             first_snapshot,
             payload_evidence=first_payload_evidence,
+            dispatch_envelope=dispatch_envelopes[0] if dispatch_envelopes else None,
         )
 
     return RelayExecutionSummary(
@@ -729,13 +964,30 @@ def execute_relay_plan_with_registry(
         )
         for lane, adapter, snapshot in zip(plan.lanes, resolved_adapters, snapshots)
     )
+    dispatch_envelopes = tuple(
+        _build_dispatch_envelope(
+            plan,
+            lane_role=lane.role,
+            requested_model_id=lane.preferred_model,
+            adapter_metadata=adapter.metadata,
+            route_metadata=route_metadata,
+            payload_evidence=payload_evidence,
+        )
+        for lane, adapter, route_metadata, payload_evidence in zip(
+            plan.lanes,
+            resolved_adapters,
+            resolved_route_metadata,
+            payload_evidences,
+        )
+    )
 
-    for lane, adapter, snapshot, route_metadata, payload_evidence in zip(
+    for lane, adapter, snapshot, route_metadata, payload_evidence, dispatch_envelope in zip(
         plan.lanes,
         resolved_adapters,
         snapshots,
         resolved_route_metadata,
         payload_evidences,
+        dispatch_envelopes,
     ):
         try:
             output = adapter(lane.payload)
@@ -748,6 +1000,7 @@ def execute_relay_plan_with_registry(
                     adapter_metadata=adapter.metadata,
                     route_metadata=route_metadata,
                     payload_evidence=payload_evidence,
+                    dispatch_envelope=dispatch_envelope,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -771,6 +1024,7 @@ def execute_relay_plan_with_registry(
             first_adapter_metadata,
             first_route_metadata,
             first_payload_evidence,
+            dispatch_envelopes[0] if dispatch_envelopes else None,
         )
 
     return RelayExecutionSummary(

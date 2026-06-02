@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add provider-neutral Relay dispatch hardening envelope helpers after Reviews A cleared payload evidence and Reviews B cleared the dispatch hardening checklist.
 
@@ -17,6 +17,14 @@ Task: add deterministic dispatch-envelope helpers carrying exact model id, route
 Tests: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`.
 
 Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-01 22:14 -06:00.
+- Commit: this local completion commit; hash reported in final response after commit creation.
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` (204 passed).
+- Next Candidate: bind any review findings from the Relay dispatch hardening envelope helper slice before further Relay/Model Harness work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 

@@ -25,6 +25,7 @@ from meridian_core.cognition_policy import evaluate_cognition_policy
 from meridian_core.relay_executor import (
     AegisGateEvidenceSummary,
     RelayDecisionRecord,
+    RelayDispatchEnvelope,
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
@@ -1199,6 +1200,139 @@ class TestAdapterMetadata:
         )
         assert evidence.to_dict() == evidence.to_dict()
         assert tuple(evidence.to_dict().keys())[-1] == "telemetry_error_tags"
+
+
+class TestRelayDispatchEnvelope:
+    """Tests for safe provider-neutral dispatch envelope metadata."""
+
+    def test_registry_result_dispatch_envelope_uses_exact_adapter_model_id(self) -> None:
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="candidate-fast",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=True,
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=metadata),
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelope = summary.results[0].dispatch_envelope
+        assert isinstance(envelope, RelayDispatchEnvelope)
+        assert envelope.requested_model_id == plan.lanes[0].preferred_model
+        assert envelope.exact_model_id == "deepseek-chat"
+        assert envelope.selected_provider == "deepseek"
+        assert envelope.capability_tier == "candidate-fast"
+        assert envelope.trust_state == "candidate"
+        assert envelope.safe_to_dispatch is True
+
+    def test_dispatch_envelope_references_payload_evidence_without_prompt_text(self) -> None:
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="provider",
+            model_name="exact-model",
+            capability_tier="standard",
+            context_budget=8192,
+            prompt_payload_budget=4096,
+            trust_state="trusted",
+            requires_external_review=False,
+            supports_payload_snapshot=True,
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("raw response should stay out", metadata=metadata),
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelope_dict = summary.results[0].dispatch_envelope.to_dict()
+        envelope_text = " ".join(str(value) for value in envelope_dict.values())
+        assert envelope_dict["payload_evidence_ref"] == (
+            f"relay-payload-evidence:{_PACKET_ID}:"
+            f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}"
+        )
+        assert _PROMPT not in envelope_text
+        assert "secret" not in envelope_text.lower()
+        assert "raw response" not in envelope_text
+
+    def test_dispatch_envelope_without_adapter_metadata_blocks_unknowns(self) -> None:
+        plan = _make_plan(2)
+
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("response"),
+            include_decision_record=True,
+        )
+
+        envelope = summary.decision_record.dispatch_envelope
+        assert envelope is not None
+        assert envelope.selected_provider is None
+        assert envelope.exact_model_id == plan.lanes[0].preferred_model
+        assert "provider_metadata_missing" in envelope.blocked_error_tags
+        assert "context_window_unknown" in envelope.blocked_error_tags
+        assert "vendor_unknown" in envelope.blocked_error_tags
+        assert envelope.safe_to_dispatch is False
+
+    def test_decision_record_dispatch_envelope_carries_aegis_blocker_tags(self) -> None:
+        plan = _make_plan(2)
+
+        record = _build_decision_record(
+            plan,
+            aegis_gate_decision="block",
+            aegis_explanation="policy violation",
+        )
+
+        envelope = record.dispatch_envelope
+        assert envelope is not None
+        assert envelope.aegis_gate_decision == "block"
+        assert "aegis_gate_blocked" in envelope.blocked_error_tags
+        assert envelope.proof_required == tuple(plan.route.audit.proof_required)
+        assert envelope.safe_to_dispatch is False
+
+    def test_dispatch_envelope_to_dict_has_stable_audit_keys(self) -> None:
+        envelope = RelayDispatchEnvelope(
+            envelope_id="relay-dispatch:pkt:builder:model",
+            heartbeat_id="pkt",
+            role="builder",
+            requested_model_id="alias",
+            exact_model_id="model",
+            selected_provider="provider",
+        )
+        assert envelope.to_dict() == envelope.to_dict()
+        assert tuple(envelope.to_dict().keys()) == (
+            "envelope_id",
+            "heartbeat_id",
+            "role",
+            "requested_model_id",
+            "exact_model_id",
+            "selected_provider",
+            "route_id",
+            "route_class",
+            "route_kind",
+            "risk_tier",
+            "trust_state",
+            "capability_tier",
+            "payload_evidence_ref",
+            "payload_snapshot_hash",
+            "aegis_gate_decision",
+            "aegis_evidence_ids",
+            "proof_required",
+            "human_gate_required",
+            "blocked_error_tags",
+            "safe_to_dispatch",
+            "transport_payload_kind",
+            "audit_fields",
+        )
 
 
 class TestRelayDecisionRecord:
