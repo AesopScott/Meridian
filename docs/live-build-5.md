@@ -10,6 +10,23 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add deterministic Bifrost sample rendering for the reviewed Session Lifecycle recovery-readiness advisory summary.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: render display-safe sample recovery-readiness advisory data only; do not execute restart/resteer/archive, inspect sessions/processes, call models/providers, edit Relay runtime/FileMap/index.html, or perform branch/main actions. Preserve existing stale-session recovery sample rendering.
+
+Ready for Codex Review:
+- Commit: `d37e32bd` (`Add recovery readiness advisory surface`).
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Tests run: `python -m pytest tests/test_bifrost_cockpit.py -q` (268 passed); `git diff --check` (passed; Git emitted only line-ending normalization warnings).
+- Concrete rendering evidence: Session Lifecycle now renders `aria-label="Recovery Readiness Advisory Summary"` with advisory id `recovery-readiness:build-5-stale-workflow`, target session `build-5-bifrost`, readiness `advisory_ready`, recommended action `resteer`, permission `display_only`, human gate `required_for_execution`, blockers, display-safe evidence refs, and inert per-action advisories for restart, resteer, archive, poll/watch, and human-gated blocked. Existing stale-session recovery samples remain rendered for stale selected targets.
+- Next Candidate: bind reviewed runtime Session Lifecycle recovery-readiness advisory summaries when available.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: add deterministic stale-session recovery action sample rendering for stale workflow/session states.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
