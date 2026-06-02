@@ -24,7 +24,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `d897cf99`
 - Files changed: `docs/provider-result-validation-evidence-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers provider-return/adapter-result metadata summarization without raw provider responses, credentials, account probing, or live calls; Relay/Aegis/Bifrost fail-closed and display-safe deterministic evidence; exact model id, route kind, proof refs, prompt-drag/budget fields, external review state, deterministic tests, and explicit exclusions; staged diff passes `git diff --cached --check`.
