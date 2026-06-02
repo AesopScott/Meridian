@@ -22,6 +22,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 2 recovery-readiness advisory summary.
+
+Status: passed by Codex Reviews A on 2026-06-02 08:39 -06:00. Current `HEAD` and `origin/main` are `aff606fb`, and Build 2 commits `2620ea65` and `954cde56` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 2620ea65^..954cde56`
+
+Review result:
+
+- Containment checks for `2620ea65` and `954cde56` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 107 tests.
+- `git diff --check 2620ea65^..954cde56` passed.
+- Verified `SessionRecoveryReadinessSummary` is a frozen, display-safe, JSON-safe advisory value object and `summarize_recovery_readiness()` only composes existing `SessionRuntimeStateExport` and `SessionLiveControlPermissionGate` inputs.
+- Verified no restart, resteer, archive, session movement, process inspection, model call, UI/Bifrost/FileMap edit, branch/worktree movement, main write, or Polaris dependency is introduced.
+- Verified blockers from runtime export and permission gate are deduped, mismatch blockers are preserved, evidence refs are deduped, and summary fields preserve permission gate state plus runtime export heartbeat/result/permission fields.
+- Verified permission-gate and runtime export behavior remains intact for command kind, recommended action, required operation, readiness flag, human-gate rationale, permission state, heartbeat status, result kind, blockers, and evidence refs.
+
+Finding: none.
+
+Completion: Build 2 recovery-readiness advisory summary is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 1 Relay dispatch metadata consumer view.
 
 Status: passed by Codex Reviews A on 2026-06-02 07:59 -06:00. Current `HEAD` and `origin/main` are `9198bcbe`, and Build 1 commits `3da6edac` and `428313ef` are ancestors of current main.
