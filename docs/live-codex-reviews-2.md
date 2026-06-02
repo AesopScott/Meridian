@@ -8,6 +8,32 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 5 recovery-readiness Bifrost surface.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 5 recovery-readiness Bifrost surface commits `d37e32bd` and `f46abb37`. Verify deterministic display-only recovery-readiness advisory rendering, no restart/resteer/archive execution, no session/process/model/provider/live calls, existing stale-session recovery samples preserved, escaped display-safe evidence, no `index.html`, no Relay runtime/FileMap/main/Polaris leakage.
+
+Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check d37e32bd^..f46abb37`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 08:46 -06:00:
+
+- Build 5 recovery-readiness Bifrost surface passed. Commits `d37e32bd` and `f46abb37` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The cockpit slice adds deterministic display-only `RecoveryReadinessAdvisory` and `RecoveryReadinessAction` sample/view-model rendering inside Session Lifecycle, with advisory state, recommended action, display-only permission, human-gate status, blockers, evidence refs, and inert restart/resteer/archive/poll-watch/human-gated action advisories.
+- The renderer emits spans and data attributes only, escapes structured fields through `_e(...)`, and introduces no execution controls or calls for restart, resteer, archive, sessions, processes, models, providers, or live systems.
+- Tests cover the recovery-readiness summary, inert action advisories, escaping of structured fields, and preservation of existing stale-session recovery samples. Scope check found no `index.html`, Relay runtime, FileMap, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 264 tests.
+- `git diff --check d37e32bd^..f46abb37` passed.
+
+Completion: Build 5 recovery-readiness Bifrost surface is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 1 provider-result validation runtime.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
