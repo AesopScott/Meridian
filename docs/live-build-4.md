@@ -26,7 +26,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `8cdf20ae`
 - Files changed: `docs/relay-aegis-demotion-retry-handoff-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers demotion target handling, retry/fallback boundaries, fail-closed missing metadata, human-gate decisions, display-safe handoff summary shape, Bifrost adapter expectations, deterministic tests, and exclusions for raw prompts, credentials, provider responses, process/session control, branch/worktree movement, FileMap edits, main writes, and Polaris; staged diff passes `git diff --cached --check`.
