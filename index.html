@@ -3295,6 +3295,17 @@ body {
   setTextSize(readStoredTextSize() ?? textSliders[0]?.value ?? 0);
 
   const modelSelect = document.querySelector('.session-model-select');
+  const projectSelect = document.querySelector('.session-project-select');
+  const projectSelectKey = 'meridian.session.project';
+  if (projectSelect) {
+    const storedProject = localStorage.getItem(projectSelectKey);
+    if (storedProject && Array.from(projectSelect.options).some((option) => option.value === storedProject)) {
+      projectSelect.value = storedProject;
+    }
+    projectSelect.addEventListener('change', () => {
+      localStorage.setItem(projectSelectKey, projectSelect.value || '');
+    });
+  }
   if (modelSelect) {
     const storedModel = localStorage.getItem('meridian.session.model');
     modelSelect.value = storedModel === 'auto' ? 'codex' : (storedModel || modelSelect.value || 'codex');
@@ -3372,6 +3383,7 @@ body {
   const userSessionStatusText = () => {
     if (userSessionsLoadFailed) return 'session list unavailable';
     const selected = selectedUserSession();
+    if (!selected && localStorage.getItem(userSessionTargetKey)) return 'selected session unavailable';
     if (!selected) return 'select live session';
     const status = selected.status && selected.status !== 'live' ? ` (${selected.status.replaceAll('_', ' ')})` : '';
     return `target ${selected.sessionName}${status}`;
@@ -3409,8 +3421,19 @@ body {
         });
       userSessionSelect.append(group);
     });
-    userSessionSelect.value = userSessions.some((session) => session.sessionId === current) ? current : userSessions[0].sessionId;
-    localStorage.setItem(userSessionTargetKey, userSessionSelect.value);
+    if (userSessions.some((session) => session.sessionId === current)) {
+      userSessionSelect.value = current;
+      localStorage.setItem(userSessionTargetKey, userSessionSelect.value);
+    } else if (stored) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = 'Selected session unavailable';
+      userSessionSelect.prepend(option);
+      userSessionSelect.value = '';
+    } else {
+      userSessionSelect.value = userSessions[0].sessionId;
+      localStorage.setItem(userSessionTargetKey, userSessionSelect.value);
+    }
     updateUserSessionTitle();
     updateUserSessionStatus();
   };
@@ -4170,6 +4193,9 @@ body {
       return false;
     }
   };
+  const clearModelStatusLabels = () => {
+    document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, ''));
+  };
   const hasResettableSessionState = () => {
     const hasPromptDraft = Array.from(document.querySelectorAll('.session-prompt-input'))
       .some((input) => input.value.trim().length > 0);
@@ -4180,15 +4206,48 @@ body {
       return typeof value === 'string' && value.trim().length > 2;
     });
   };
-  const confirmResetIfNeeded = () => {
+  let resetConfirmTimer = null;
+  const resetButtonLabel = (button, label) => {
+    if (!button) return;
+    button.setAttribute('aria-label', label);
+    const labelNode = button.querySelector('.spark-action-label');
+    if (labelNode) labelNode.textContent = label;
+  };
+  const clearResetConfirmation = (button) => {
+    window.clearTimeout(resetConfirmTimer);
+    resetConfirmTimer = null;
+    if (button) {
+      button.dataset.resetConfirming = 'false';
+      resetButtonLabel(button, 'Reset');
+      button.removeAttribute('title');
+    }
+  };
+  const confirmResetIfNeeded = (button) => {
     if (!hasResettableSessionState()) return true;
-    return window.confirm('Reset clears visible prompts and transcripts, then restarts the local Meridian bridge. Continue?');
+    if (button?.dataset.resetConfirming === 'true') {
+      clearResetConfirmation(button);
+      return true;
+    }
+    if (button) {
+      button.dataset.resetConfirming = 'true';
+      resetButtonLabel(button, 'Confirm Reset');
+      button.title = 'Reset clears visible prompts and transcripts, then restarts the local Meridian bridge. Click again to confirm.';
+      document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'confirm reset'));
+      window.clearTimeout(resetConfirmTimer);
+      resetConfirmTimer = window.setTimeout(() => clearResetConfirmation(button), 6000);
+    }
+    return false;
   };
   const hardReloadUi = ({ clearSessions = false } = {}) => {
-    if (clearSessions) clearSessionWindows();
-    const url = new URL(window.location.href);
-    url.searchParams.set('meridian_reload', String(Date.now()));
-    window.location.replace(url.toString());
+    try {
+      if (clearSessions && !clearSessionWindows()) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('meridian_reload', String(Date.now()));
+      window.location.replace(url.toString());
+    } catch {
+      document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'reload error'));
+      window.alert('Reload could not start. Check that Live Server is serving the Meridian root.');
+    }
   };
   const waitForModelBridge = async () => {
     for (let attempt = 0; attempt < 24; attempt += 1) {
@@ -4212,10 +4271,11 @@ body {
     }
   };
   let resetInProgress = false;
-  const resetUi = async () => {
+  const resetUi = async (button) => {
     if (resetInProgress) return;
-    if (!confirmResetIfNeeded()) return;
+    if (!confirmResetIfNeeded(button)) return;
     resetInProgress = true;
+    clearModelStatusLabels();
     if (!clearSessionWindows()) {
       resetInProgress = false;
       return;
@@ -4258,8 +4318,8 @@ body {
   buttons.forEach((button) => {
     button.addEventListener('click', async () => {
       const actionLabel = button.getAttribute('aria-label') || '';
-      if (actionLabel === 'Reset') {
-        await resetUi();
+      if (actionLabel === 'Reset' || actionLabel === 'Confirm Reset') {
+        await resetUi(button);
         return;
       }
       if (actionLabel === 'Reload') {

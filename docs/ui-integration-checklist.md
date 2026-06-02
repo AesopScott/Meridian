@@ -171,19 +171,19 @@ Reset is a UI/session-window recovery control. It clears visible prompt/transcri
 
 | ID | Reset Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| RST1 | Clear Prime prompt draft | Clears unsent Prime prompt input. | partial | Type draft, click Reset, draft is gone after reload. |
-| RST2 | Clear User prompt draft | Clears unsent User prompt input. | partial | Type draft, click Reset, draft is gone after reload. |
-| RST3 | Clear Prime transcript view | Clears visible Prime session-window transcript. | partial | Send Prime text, click Reset, Prime window is empty after reload. |
-| RST4 | Clear User transcript view | Clears visible User session-window transcript. | partial | Send User text, click Reset, User window is empty after reload. |
-| RST5 | Confirmation gate | Requires confirmation before clearing non-empty prompt/transcript state; may skip confirmation when both panels are already empty. | wired | Non-empty prompt/transcript state prompts for confirmation; empty panels reset directly. |
-| RST6 | Clear model status labels | Clears transient sending/ready/setup labels in the session windows. | planned | Reset removes stale model status text. |
-| RST7 | Preserve selected project policy | Preserves or restores selected project according to Settings persistence, not transcript reset. | planned | Reset behavior matches project persistence setting. |
-| RST8 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | planned | Live session list is unchanged after Reset. |
-| RST9 | Preserve archive | Does not modify archived sessions. | planned | Archive count/state unchanged after Reset. |
-| RST10 | Cache-bust reload | Performs hard reload with cache-bust after clearing UI session state. | partial | URL/cache marker changes and page reloads. |
+| RST1 | Clear Prime prompt draft | Clears unsent Prime prompt input. | wired | Reset removes `meridian.session.prompt.prime` before hard reload. |
+| RST2 | Clear User prompt draft | Clears unsent User prompt input. | wired | Reset removes scoped `meridian.session.prompt.user.*` keys before hard reload. |
+| RST3 | Clear Prime transcript view | Clears visible Prime session-window transcript. | wired | Reset removes `meridian.session.transcript.prime` before hard reload. |
+| RST4 | Clear User transcript view | Clears visible User session-window transcript. | wired | Reset removes scoped `meridian.session.transcript.user.*` keys before hard reload. |
+| RST5 | Confirmation gate | Requires confirmation before clearing non-empty prompt/transcript state; may skip confirmation when both panels are already empty. | wired | Non-empty state turns the same Spark Reset button into `Confirm Reset`; empty panels reset directly. |
+| RST6 | Clear model status labels | Clears transient sending/ready/setup labels in the session windows. | wired | Reset clears model status labels before storage clearing and hard reload. |
+| RST7 | Preserve selected project policy | Preserves or restores selected project according to Settings persistence, not transcript reset. | wired | Reset does not clear `meridian.session.project`; project selection persists through reload. |
+| RST8 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | wired | Reset only clears local visible UI state and asks `/bridge/restart`; it does not call session close/archive/delete controls. |
+| RST9 | Preserve archive | Does not modify archived sessions. | wired | Reset does not call archive storage or archive controls. |
+| RST10 | Cache-bust reload | Performs hard reload with cache-bust after clearing UI session state. | wired | Reset uses the hard reload path with a `meridian_reload` URL marker. |
 | RST11 | Reset failure visibility | Shows readable error if reset storage clearing fails. | wired | Storage-clearing failure sets `reset storage error`, shows an alert, and does not reload the page. |
 | RST12 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
-| RST13 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
+| RST13 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | wired | Reset confirmation copy names only visible prompts/transcripts and local bridge restart. |
 | RST14 | Restart model bridge | Reset asks the local Meridian bridge to restart before reloading the UI, so stale bridge code does not survive reset. | wired | Click Reset; `/bridge/models` returns `version=local-bridge-routes-v2` and `visibleTranscriptContext: true` after reload; repeated clicks do not stack duplicate restart requests. |
 
 ### Reload Surface Subitems
@@ -196,14 +196,14 @@ Reload is a UI/cache recovery control. It refreshes the page and assets without 
 | RLD2 | Cache-bust assets | Busts stale browser/Live Server cache where possible. | wired | Reload writes a `meridian_reload` URL marker and removes it after load. |
 | RLD3 | Preserve prompts | Does not intentionally clear prompt drafts. | wired | Reload calls the hard reload path without `clearSessions`; stored prompt drafts are left intact. |
 | RLD4 | Preserve transcripts | Does not intentionally clear session-window transcripts. | wired | Reload calls the hard reload path without `clearSessions`; stored transcripts are left intact. |
-| RLD5 | Preserve selected project | Keeps or restores selected project according to project persistence. | planned | Selected project behavior is deterministic. |
-| RLD6 | Preserve selected User session | Keeps selected live session if still available; otherwise shows target warning. | planned | Closed target does not silently route prompts. |
-| RLD7 | Preserve model selector | Keeps selected model if valid; invalid/Auto falls back to Codex. | partial | Saved Auto becomes Codex; valid model remains. |
-| RLD8 | Do not archive | Reload does not archive or close any session. | planned | Archive/session counts unchanged. |
-| RLD9 | Do not reset model memory | Reload does not claim to reset CLI/model/session memory. | planned | UI copy distinguishes reload from reset/clear-memory. |
-| RLD10 | Bridge health recheck | Rechecks bridge/model readiness after reload. | partial | `/bridge/models` readiness updates after page reload and focus/visibility refresh. |
-| RLD11 | Visual baseline check | Reload preserves center image and approved layout. | partial | Center image and panel alignment remain after reload. |
-| RLD12 | Reload failure visibility | If reload cannot complete or served file is wrong, diagnose cache/root mismatch before more UI edits. | planned | Wrong served file triggers stop condition. |
+| RLD5 | Preserve selected project | Keeps or restores selected project according to project persistence. | wired | Project selection persists through `meridian.session.project`. |
+| RLD6 | Preserve selected User session | Keeps selected live session if still available; otherwise shows target warning. | wired | Closed/stale stored target shows `Selected session unavailable` / `selected session unavailable` instead of silently routing to another session. |
+| RLD7 | Preserve model selector | Keeps selected model if valid; invalid/Auto falls back to Codex. | wired | Saved Auto becomes Codex; valid model remains. |
+| RLD8 | Do not archive | Reload does not archive or close any session. | wired | Reload only calls the hard reload path and does not call archive/close/delete controls. |
+| RLD9 | Do not reset model memory | Reload does not claim to reset CLI/model/session memory. | wired | Reload copy and code only refresh the page/assets. |
+| RLD10 | Bridge health recheck | Rechecks bridge/model readiness after reload. | wired | `/bridge/models` readiness updates after page reload and focus/visibility refresh. |
+| RLD11 | Visual baseline check | Reload preserves center image and approved layout. | wired | Spark media asset test and served UI markers preserve the center image path and approved panel controls. |
+| RLD12 | Reload failure visibility | If reload cannot complete or served file is wrong, diagnose cache/root mismatch before more UI edits. | wired | Reload start failure sets `reload error` and shows a Live Server/root warning. |
 
 ### Settings Surface Subitems
 

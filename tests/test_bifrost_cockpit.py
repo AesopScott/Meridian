@@ -94,6 +94,36 @@ def test_index_spark_media_references_existing_assets():
     assert missing == []
 
 
+def test_index_reset_uses_same_button_confirmation_and_visible_failure():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Confirm Reset" in doc
+    assert "dataset.resetConfirming" in doc
+    assert "reset storage error" in doc
+    assert "Reset could not clear visible session state" in doc
+    assert "clearModelStatusLabels" in doc
+    assert "meridian.session.project" in doc
+    assert "Reset clears visible prompts and transcripts" in doc
+    assert "clear memory" not in doc.lower()
+
+
+def test_index_reload_preserves_state_and_reports_failures():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "reloadInProgress" in doc
+    assert "meridian_reload" in doc
+    assert "reload error" in doc
+    assert "Reload could not start" in doc
+    assert "hardReloadUi();" in doc
+    assert "hardReloadUi({ clearSessions: true })" not in doc
+
+
+def test_index_stale_user_session_target_is_not_silently_replaced():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Selected session unavailable" in doc
+    assert "selected session unavailable" in doc
+    assert "session list unavailable" in doc
+    assert "Sessions unavailable" in doc
+
+
 def test_sample_view_model_has_progress_events():
     vm = sample_cockpit_view_model()
     assert len(vm.progress_events) >= 1
