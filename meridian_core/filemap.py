@@ -192,7 +192,7 @@ def make_default_map() -> FileMap:
             area=FileArea.BUILD_PROCESS,
             purpose="Cross-harness stage tracker for Contract/Baseline, V2 Backend, Core Implementation, Prime Integration, Runtime Logic UI, Proofs/Review, and Operations status.",
             related_tests=["tests/test_filemap.py"],
-            notes="Use when Scott asks what stage a harness is in or requests a harness/stage-specific build.",
+            notes="Use when the user asks what stage a harness is in or requests a harness/stage-specific build.",
         ),
         FileMapEntry(
             path="docs/harness-stage-checklist.html",
@@ -935,6 +935,20 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="Planning only; V2 architecture entry point for later V3 federation runtime.",
         ),
+        FileMapEntry(
+            path="meridian_core/federation_logic_snapshot.py",
+            area=FileArea.ARCHITECTURE,
+            purpose="Backend snapshot for Federation Runtime Logic UI: consent-first discovery, permission boundaries, typed handoff packets, cross-harness relationships, and horizon-only runtime limits.",
+            related_tests=["tests/test_federation_logic_snapshot.py", "tests/test_bifrost_cockpit.py"],
+            notes="Bifrost consumes this through /bridge/federation-logic. Display-only; federation networking and identity/trust runtime remain V3 horizon work.",
+        ),
+        FileMapEntry(
+            path="tests/test_federation_logic_snapshot.py",
+            area=FileArea.ARCHITECTURE,
+            purpose="Regression tests for the Federation Runtime Logic backend snapshot, typed handoff packet names, display-only boundary, and JSON serialization.",
+            related_tests=[],
+            notes="Run before changing meridian_core/federation_logic_snapshot.py or the visible Federation harness logic payload.",
+        ),
 
         FileMapEntry(
             path="docs/prime-orchestration-harness-prototype.md",
@@ -953,7 +967,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v0-v1-progress-tracker.md",
             area=FileArea.ARCHITECTURE,
-            purpose="Countable V0/V1 progress view for Prime, Codex, and Scott. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
+            purpose="Countable V0/V1 progress view for Prime, Codex, and user. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
             related_tests=[],
             notes="Update when a gate item status changes. Companion to v0-build-readiness-map.md.",
         ),
@@ -1032,7 +1046,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-cockpit-queue-status-brief.md",
             area=FileArea.BIFROST,
-            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
+            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What the user sees and how build-lane events surface without flooding the cockpit.",
             related_tests=[],
             notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
         ),
@@ -1046,7 +1060,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-harness-dashboard-brief.md",
             area=FileArea.BIFROST,
-            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
+            purpose="Harness dashboard surface brief: what opens when the user clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
             related_tests=[],
             notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
         ),

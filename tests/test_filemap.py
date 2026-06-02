@@ -35,6 +35,8 @@ _REQUIRED_PATHS = [
     "meridian_core/vulcan_logic_snapshot.py",
     "tests/test_session_lifecycle.py",
     "docs/federation-harness-horizon.md",
+    "meridian_core/federation_logic_snapshot.py",
+    "tests/test_federation_logic_snapshot.py",
     "docs/session-card-queue-activation-contract.md",
     "docs/bifrost-voice-command-contract.md",
     "docs/bifrost-balance-payload-surface-contract.md",

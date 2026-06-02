@@ -190,6 +190,22 @@ def test_vulcan_logic_snapshot_documents_session_lifecycle_harness():
     assert "Portfolio Boundary" not in titles
 
 
+def test_federation_logic_snapshot_documents_horizon_harness():
+    from meridian_core.federation_logic_snapshot import federation_logic_snapshot
+
+    snapshot = federation_logic_snapshot()
+    titles = [section["title"] for section in snapshot["capabilitySections"]]
+    assert snapshot["source"] == "meridian_core.federation_logic_snapshot.federation_logic_snapshot"
+    assert snapshot["status"] == "horizon-only"
+    assert "Federation Job" in titles
+    assert "Discovery Consent Logic" in titles
+    assert "Permission Boundary Logic" in titles
+    assert "Typed Handoff Logic" in titles
+    assert "Runtime Boundary" in titles
+    assert snapshot["runtimeFlags"]["displayOnly"] is True
+    assert snapshot["runtimeFlags"]["remoteExecution"] is False
+
+
 def test_index_projects_selector_is_compass_context_not_user_routing():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
@@ -216,6 +232,17 @@ def test_index_vulcan_harness_uses_backend_logic_snapshot():
     assert "bridgeUrl('vulcan-logic')" in doc
     assert "renderVulcanLogicSnapshot" in doc
     assert "renderVulcanSessionLogic" in doc
+
+
+def test_index_federation_harness_uses_backend_logic_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Federation Runtime Logic" in doc
+    assert "data-federation-logic" in doc
+    assert "bridgeUrl('federation-logic')" in doc
+    assert "renderFederationLogicSnapshot" in doc
+    assert "renderFederationNetworkLogic" in doc
+    assert "button.dataset.harness === 'Federation'" in doc
+    assert "Horizon only" in doc
 
 
 def test_index_prime_harness_uses_backend_runtime_snapshot():
@@ -250,6 +277,7 @@ def test_index_wired_harness_titles_use_runtime_logic_naming():
     assert "Relay Runtime Logic" in doc
     assert "Compass Runtime Logic" in doc
     assert "Vulcan Runtime Logic" in doc
+    assert "Federation Runtime Logic" in doc
 
 
 def test_bridge_exposes_prime_logic_route_and_capability():
@@ -258,6 +286,14 @@ def test_bridge_exposes_prime_logic_route_and_capability():
     assert "primeLogic: '/bridge/prime-logic'" in doc
     assert "meridian_core.prime_runtime" in doc
     assert "req.url === BRIDGE_ROUTES.primeLogic" in doc
+
+
+def test_bridge_exposes_federation_logic_route_and_capability():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "federationLogicSnapshot: true" in doc
+    assert "federationLogic: '/bridge/federation-logic'" in doc
+    assert "meridian_core.federation_logic_snapshot" in doc
+    assert "req.url === BRIDGE_ROUTES.federationLogic" in doc
 
 
 def test_ui_checklist_defers_deep_compass_and_vulcan_items_to_backend_tracker():
