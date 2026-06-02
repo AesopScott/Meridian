@@ -8,6 +8,33 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 4 pure Aegis prompt payload meter advisory helper.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 4 prompt payload meter Aegis advisory commits `665a4659` and `941983e3`. Verify primitive/provider-neutral input/result types, deterministic fail-closed advisory metadata, display-safe serialization/redaction, Q-mode prompt-drag blocker/warning handling, provider/model/route continuity refs, evidence refs, stable advisory keys, no Relay imports/types, no Bifrost/FileMap edits, no live provider calls, no credentials/account probing, no raw prompt/provider response storage, no process/session/main/Polaris leakage, and no branch/worktree movement.
+
+Proof: `python -m pytest tests/test_aegis.py -q` plus `git diff --check 665a4659^..941983e3`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 09:19 -06:00:
+
+- Build 4 prompt payload meter Aegis advisory passed. Commits `665a4659` and `941983e3` changed only `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+- The Aegis slice adds primitive/provider-neutral frozen `PromptPayloadMeterInput`, `PromptPayloadMeterPolicyResult`, `PromptPayloadMeterDecision`, deterministic `evaluate_prompt_payload_meter_advisory()`, and display-safe `serialize_prompt_payload_meter_policy_result()` for future Relay/Bifrost consumption without importing Relay or Bifrost types.
+- The evaluator fails closed for over-budget labels, over-limit budget percent, unknown payload or Q-mode states, Q-mode prompt-drag degradation, unexplained growth, missing/unsafe route continuity refs, missing/unsafe evidence refs, and blocker tags. It preserves provider/model/route continuity refs, evidence refs, and warning tags as display-safe advisory metadata.
+- Serialization exposes stable advisory keys, `relay_advisory`, `bifrost_advisory`, reason tags, and redacts unsafe raw prompt, provider response, account, credential, process/session, and raw payload patterns. Tests cover allow/warn/block outcomes, budget watch/over-limit behavior, Q-mode degradation, unexplained growth, route/evidence requirements, stable keys, redaction, and repeat determinism.
+- Scope check found no Relay imports/types, Bifrost/FileMap edits, live provider calls, credentials/account probing, raw prompt/provider response storage, process/session changes, branch/worktree/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_aegis.py -q` passed: 266 tests.
+- `git diff --check 665a4659^..941983e3` passed.
+
+Completion: Build 4 prompt payload meter Aegis advisory is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 4 docs-only Relay/Bifrost visible prompt payload meter checklist.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
