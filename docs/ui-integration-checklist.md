@@ -594,3 +594,5 @@ Append entries here as items are verified.
 ```text
 YYYY-MM-DD HH:MM TZ - <item#> cleared; proof: <short note>; commit: <hash>
 ```
+
+- 2026-06-01 20:02 -06:00 - Containment event: local main had implementation/UI commits touching `index.html`, `meridian_core/relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, and `tests/test_relay_logic_snapshot.py`. Preserved first head as `codex/quarantine-main-impl-6c03da75-20260601-200013`; an external child Codex app-server re-cherry-picked equivalent commits (`1292503d`, `d06f6a0b`, `8ceb7f18`) onto main, preserved as `codex/quarantine-main-impl-8ceb7f18-20260601-200218`. Stopped three `codex.exe app-server --listen stdio://` child helpers, then reset `main` clean to `origin/main` at `24520c5d`. No worker branch movement or push performed.
