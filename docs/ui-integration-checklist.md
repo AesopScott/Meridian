@@ -179,7 +179,7 @@ Reset is a UI/session-window recovery control. It clears visible prompt/transcri
 | RST8 | Preserve live sessions | Does not close, archive, delete, or stop live sessions. | planned | Live session list is unchanged after Reset. |
 | RST9 | Preserve archive | Does not modify archived sessions. | planned | Archive count/state unchanged after Reset. |
 | RST10 | Cache-bust reload | Performs hard reload with cache-bust after clearing UI session state. | partial | URL/cache marker changes and page reloads. |
-| RST11 | Reset failure visibility | Shows readable error if reset storage clearing fails. | planned | Failure does not silently pretend reset succeeded. |
+| RST11 | Reset failure visibility | Shows readable error if reset storage clearing fails. | wired | Storage-clearing failure sets `reset storage error`, shows an alert, and does not reload the page. |
 | RST12 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
 | RST13 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
 | RST14 | Restart model bridge | Reset asks the local Meridian bridge to restart before reloading the UI, so stale bridge code does not survive reset. | wired | Click Reset; `/bridge/models` returns `version=local-bridge-routes-v2` and `visibleTranscriptContext: true` after reload; repeated clicks do not stack duplicate restart requests. |

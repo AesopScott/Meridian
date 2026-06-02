@@ -4141,15 +4141,22 @@ body {
     if (nearSpark) openSpark(); else openHarness();
   };
   const clearSessionWindows = () => {
-    [
-      'meridian.session.transcript.prime',
-      'meridian.session.prompt.prime',
-      'meridian.session.rw.prompt',
-      'meridian.session.rw.user-prompt',
-    ].forEach((key) => localStorage.removeItem(key));
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith('meridian.session.transcript.user.') || key.startsWith('meridian.session.prompt.user.'))
-      .forEach((key) => localStorage.removeItem(key));
+    try {
+      [
+        'meridian.session.transcript.prime',
+        'meridian.session.prompt.prime',
+        'meridian.session.rw.prompt',
+        'meridian.session.rw.user-prompt',
+      ].forEach((key) => localStorage.removeItem(key));
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith('meridian.session.transcript.user.') || key.startsWith('meridian.session.prompt.user.'))
+        .forEach((key) => localStorage.removeItem(key));
+      return true;
+    } catch {
+      document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'reset storage error'));
+      window.alert('Reset could not clear visible session state. The page was not reloaded.');
+      return false;
+    }
   };
   const hasResettableSessionState = () => {
     const hasPromptDraft = Array.from(document.querySelectorAll('.session-prompt-input'))
@@ -4197,7 +4204,10 @@ body {
     if (resetInProgress) return;
     if (!confirmResetIfNeeded()) return;
     resetInProgress = true;
-    clearSessionWindows();
+    if (!clearSessionWindows()) {
+      resetInProgress = false;
+      return;
+    }
     await restartModelBridge();
     hardReloadUi();
   };
