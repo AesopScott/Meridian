@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review the current-main Ready markers from Build 4 and Build 5 after the PromptPacket wave movement.
 
@@ -20,6 +20,25 @@ Task: review the landed current-main slices in this order, stopping and routing 
 Use current `origin/main` at or after `2f40cb7d`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop.
+
+Review result - 2026-06-01 22:31 -06:00:
+
+- Build 4 Aegis PromptPacket proof policy checklist passed. Commits `9a6be911` and `e86f8019` changed only `docs/aegis-promptpacket-proof-policy-checklist.md` and `docs/live-build-4.md`.
+- The checklist covers packet id/hash presence, allowed-source compliance, budget and source-lineage gates, Aegis evidence id requirements, snapshot/hash gap handling, human-gate and dual-lane interactions, block/demote/warn outcomes, Bifrost handoff expectations, FileMap routing, and deterministic test expectations.
+- Build 5 Bifrost PromptPacket proof metadata rendering passed. Commits `6716a928` and `346c6c4e` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The static `PromptPacketProofView` and renderer expose packet id, packet hash, source-lineage compliance, prompt budget refs, Aegis evidence ids, proof requirement, snapshot/hash gaps, block/demote/warn state, and missing metadata warnings from structured data.
+- Focused tests cover required metadata, evidence/gap/warning rendering, block/demote/warn variants, escaping, cockpit-main placement outside the HUD core, and preservation of prompt payload visibility, proof-state preview, stale-session recovery, and dispatch hardening state.
+- Scope check found no runtime code in the Build 4 docs slice and no session spawning, live process/model calls, `index.html` edit, Polaris dependency, branch movement, Relay docs edit in Build 5, shared-main write, or push.
+
+Proof:
+
+- `git diff --check 9a6be911^..e86f8019` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 206 tests.
+- `git diff --check 6716a928^..346c6c4e` passed.
+
+Audit note: local `HEAD` was `71f9bb5d`; the branch's `origin/main` ref reported `1945be3b` during review. No branch movement was performed.
+
+Completion: Build 4 Aegis PromptPacket proof policy checklist and Build 5 Bifrost PromptPacket proof metadata rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
