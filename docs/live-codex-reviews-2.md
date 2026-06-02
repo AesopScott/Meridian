@@ -118,6 +118,23 @@ Proof:
 
 Completion: Build 4 Relay routing implementation checklist and Build 5 stale-session recovery action sample rendering are review-cleared. Reviews B returns to current-main Ready-marker polling for the next Build 4/Build 5 candidate.
 
+Batch review result - 2026-06-01 21:47 -06:00:
+
+- Build 4 Relay prompt-payload visibility implementation checklist passed. Commits `3f8a4ca1` and `14913655` changed only `docs/relay-prompt-payload-visibility-implementation-checklist.md` and `docs/live-build-4.md`.
+- Build 4 checklist covers required proof payload fields, budget percent and display labels, growth delta/watch/degraded/block states, queue/Q-mode prompt-drag detection, Relay evidence requirements, Bifrost handoff, provider balance binding, tests/proofs, block conditions, and runtime enablement gates.
+- Build 4 scope check found docs-only work: no runtime code, tests, Bifrost UI implementation, FileMap edit, live model call, account probe, session start, Polaris dependency, branch movement, shared-main write, or push.
+- Build 5 Bifrost proof-state preview sample rendering passed. Commits `f4880b76` and `eeab3768` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- Build 5 renders deterministic static proof preview states for pending, blocked, passed, and needs-human-review, with proof id/state metadata, owner/evidence/summary fields, styling for each state, and focused tests. Stale-session recovery behavior remains present and covered.
+- Build 5 scope check found deterministic static render/view-model work only: no session spawning, live process inspection, model calls, `index.html` edits, Polaris dependency, branch movement, shared-main write, or push.
+
+Proof:
+
+- Build 4: `git diff --check 3f8a4ca1^..14913655` passed.
+- Build 5: `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 187 tests.
+- Build 5: `git diff --check f4880b76^..eeab3768` passed.
+
+Completion: Build 4 prompt-payload visibility checklist and Build 5 proof-state preview sample rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review current-main Build 4 account-first wrong-scope fallback repair.
