@@ -20,6 +20,55 @@ Completion: if a slice is reviewed, commit only review provenance/finding/pass u
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 2 current-main Session Lifecycle command-plan edge coverage, then Build 3 current-main FileMap prompt payload visibility coverage if Build 2 passes.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:01 -06:00. Current `HEAD` and `origin/main` are `4dd951ff`. Build 2 commits `ee00bc4a` and `42783048` are ancestors of current main; Build 3 commits `4ee53306` and `e1e35d9c` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check ee00bc4a^..42783048`
+
+Build 2 review result:
+
+- `git merge-base --is-ancestor ee00bc4a HEAD` and `git merge-base --is-ancestor 42783048 HEAD` passed.
+- `git show --stat --oneline --name-only ee00bc4a 42783048` shows the implementation commit changed only `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 76 tests.
+- `git diff --check ee00bc4a^..42783048` passed.
+- Verified `plan_command_from_session_action()` maps routing/recovery decisions into typed `SessionCommandPlan` advisory state without executing control.
+- Verified deterministic edge handling for summarize/reset, transfer, start-new, archive/no-session, stale recovery, review-gate human approval, and permission-boundary blockers.
+- Verified human-gated transfer/start-new/restart/archive/review/permission plans are non-executable, permission-boundary proof remains required, and archive/no-session does not fabricate a command target.
+- Scoped side-effect scan found no session spawning, live process inspection, branch movement, model/network/credential calls, UI/Bifrost/FileMap/Polaris edits, or autonomous branch movement in the reviewed Build 2 slice.
+
+Build 2 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 4ee53306^..e1e35d9c`
+
+Build 3 review result:
+
+- `git merge-base --is-ancestor 4ee53306 HEAD` and `git merge-base --is-ancestor e1e35d9c HEAD` passed.
+- `git show --stat --oneline --name-only 4ee53306 e1e35d9c` shows the FileMap registration commit changed only `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 4ee53306^..e1e35d9c` passed.
+- Verified `docs/relay-prompt-payload-visibility-implementation-checklist.md` is registered in runtime `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified `docs/live-build-3.md` records concrete audit evidence, files changed, proof command, commit marker, Ready marker, and next candidate; this is not read-check-only progress.
+- Scoped side-effect scan found no unrelated runtime behavior, live process/model/account code, UI/runtime mutation, Polaris dependency, branch movement, or cross-worktree movement in the reviewed Build 3 slice.
+
+Build 3 finding: none.
+
+Completion: Build 2 Session Lifecycle command-plan edge coverage and Build 3 FileMap prompt payload visibility coverage are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 1 current-main Relay route metadata binding, then Build 3 current-main FileMap checkpoint audit if Build 1 passes.
 
 Status: passed by Codex Reviews A on 2026-06-01 22:05 -06:00. Current `HEAD` and `origin/main` are `119807d0`. Build 1 commits `814bce76` and `d00f305c` are ancestors of current main; Build 3 commits `0b50287e` and `3fbd6c62` are ancestors of current main.
