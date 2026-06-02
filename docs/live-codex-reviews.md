@@ -25,6 +25,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 2 permission-aware Prime/Beacon advisory evidence.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:01 -06:00. Current `HEAD` and `origin/main` are `a8913ca3`, and Build 2 commits `225a5108` and `fe8ed0ec` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check 225a5108^..fe8ed0ec`
+
+Review result:
+
+- Containment checks for `225a5108` and `fe8ed0ec` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 168 tests.
+- `git diff --check 225a5108^..fe8ed0ec` passed.
+- Verified `SessionCommandPlan.audit_evidence()` carries display-safe permission state, task scope, unlock expiry, approved operations, required operation, operation permission result, and permission evidence for Prime/Beacon consumers.
+- Verified branch/worktree movement-sensitive intents map to explicit `BRANCH_MOVE` / `WORKTREE_CREATE` permission operations and add deterministic blockers unless that operation is explicitly allowed by permission evidence.
+- Verified Prime and Beacon convert command-plan audit payloads into deterministic advisory evidence strings/blockers only, without executing restart, resteer, branch movement, worktree movement, session control, or autonomous movement.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, Polaris dependency, branch/worktree movement implementation, or live-control path in the reviewed Build 2 slice.
+
+Finding: none.
+
+Completion: Build 2 permission-aware Prime/Beacon advisory evidence is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review the current-main Build 1 and Build 3 Aegis wave slices.
 
 Status: passed by Codex Reviews A on 2026-06-01 22:54 -06:00. Review branch `HEAD` is `2ee547d8`, `origin/main` is `34a761b9`, and requested commits `3cffeaa2`, `41582efb`, `b962197f`, and `53ee81d9` are ancestors of the review branch.
