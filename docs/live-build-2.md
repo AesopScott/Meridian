@@ -87,23 +87,26 @@ Completion:
 - Obsidian: complete.
 - Routed to Codex Reviews A; cadence 3 of 3 cleared.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Session Lifecycle permissions and Prime/Beacon binding now that command-plan routing coverage cleared review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
 
-Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+Task: implement the typed permissions and Prime/Beacon binding slice without live process control. Add or extend frozen data structures/helpers so Session Lifecycle can represent branch/worktree permission state, Prime routing recommendations, Beacon heartbeat/staleness observations, and decision reasons needed by Relay/Prime. Preserve existing command-plan behavior and unique-worktree/assigned-queue invariants.
 
-Required sources: `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-v2-contract.md`, `docs/relay-heartbeat-model-routing-logic.md`, and Reviews A clearance for current-main command-plan tests in `docs/live-codex-reviews.md`.
+Completion:
 
-Task: implement the typed permissions and Prime/Beacon binding slice without live process control. Add or extend frozen data structures/helpers so Session Lifecycle can represent branch/worktree permission state, Prime routing recommendations, Beacon heartbeat/staleness observations, and decision reasons needed by Relay/Prime. Preserve existing command-plan behavior and unique-worktree/assigned-queue invariants. Do not spawn sessions, inspect live processes, call models, edit UI/Bifrost/FileMap/review queues, move branches, or touch Polaris.
-
-Tests:
-
-- `python -m pytest tests/test_session_lifecycle.py -q`
-
-Completion: commit only the allowed files from your unique worktree branch, push your worker branch, mark Ready for Codex Review here with commit hash/files/tests, and leave a concrete Next Candidate.
+- Build 2 completed Session Lifecycle permissions and Prime/Beacon binding implementation in commit `6e2f2a5f`.
+- Worktree branch: `worktree-build-2-session-lifecycle`
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`
+- Implementation added:
+  - Enums: PermissionState, OperationScope, FindingType
+  - Dataclasses: PermissionContext (approval/escalation), RestartResteerFinding (Beacon findings), PrimeAutonomyInput (Prime selection input)
+  - SessionLifecycleState updated: permission_context now typed as PermissionContext; added helper methods is_permission_locked(), requires_approval_for_operation(), can_execute_operation()
+  - All fields frozen and immutable
+- Tests: `python -m pytest tests/test_session_lifecycle.py -q` — 52 tests passed (47 prior routing/command tests + 5 new permission/finding/prime-input tests)
+- Ready for Codex Review.
 
 ## Next Candidate Task
 
@@ -520,6 +523,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-04 19:40 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
 2026-06-04 19:50 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
 2026-06-13 00:20 -06:00 - Build 2 checked queue; status: idle (no Active Now task executable; Session Lifecycle permissions binding task awaiting coordinator update; cadence 2 of 3; polling)
+2026-06-13 00:35 -06:00 - Build 2 completed Session Lifecycle permissions and Prime/Beacon binding (commit 6e2f2a5f); 52 tests passing; cadence 3 of 3; Ready for Codex Review; awaiting review result before next task
 2026-06-04 20:00 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
 2026-06-04 20:10 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; continuing pause per rule 19; cadence 3 of 3)
 2026-06-04 20:20 -06:00 - Build 2 checked queue; status: idle (Codex cadence review result not yet recorded; no new Active Task; pausing per rule 19; cadence 3 of 3)
