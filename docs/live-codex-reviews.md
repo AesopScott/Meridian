@@ -10,6 +10,38 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 2 current-main Prime/Beacon advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:50 -06:00. Current `HEAD` and `origin/main` are `5677a3aa`, and relevant Build 2 commits `46c118f3` and `4096f0f5` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for review provenance only.
+
+Task: verify the Prime/Beacon advisory binding is pure advisory state only, preserves branch/worktree permission rules, stale heartbeat safety, review-gate human approval, and permission-boundary blocking, and does not spawn sessions, inspect live processes, move branches, call models, edit UI/Bifrost/FileMap/Polaris, or add autonomous branch movement.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py -q`
+- `git diff --check 46c118f3^..4096f0f5`
+
+Review result:
+
+- `git merge-base --is-ancestor 46c118f3 HEAD` and `git merge-base --is-ancestor 4096f0f5 HEAD` passed.
+- `git show --stat --oneline --name-only 46c118f3 4096f0f5` shows the implementation commit changed only `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `tests/test_session_lifecycle.py`, and `tests/test_prime_autonomy.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py -q` passed with 130 tests.
+- `git diff --check 46c118f3^..4096f0f5` passed.
+- Verified `generate_restart_finding()`, `generate_resteer_finding()`, and `gather_prime_autonomy_input()` produce immutable advisory state and evidence without restarting, steering, inspecting, or mutating live sessions.
+- Verified `select_next_action_from_session_lifecycle_advisory()` returns pause/advisory/poll actions only; restart/resteer findings remain human-gated and blocked by command-plan approval requirements.
+- Verified review-gated sessions pause with human approval required, permission-boundary failures pause with blockers, and operation checks use `SessionLifecycleState.can_execute_operation()` with task-scoped permission context.
+- Scoped side-effect scan found no session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, Polaris dependency, or autonomous branch movement in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 2 Prime/Beacon advisory binding is review-cleared. Next Candidate: bind any review findings from this advisory binding slice before unrelated Session Lifecycle work; none routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 3 current-main FileMap maintenance movement.
 
 Status: passed by Codex Reviews A on 2026-06-01 21:40 -06:00. Current `HEAD` and `origin/main` are `f09f0b2a`, and relevant Build 3 commits `0cfd5bfa` and `1df7e081` are ancestors of current main.
