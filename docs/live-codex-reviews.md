@@ -22,6 +22,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 1 Relay dispatch metadata envelope.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:27 -06:00. Current `HEAD` and `origin/main` are `052ee32c`, and Build 1 commits `58d3862c` and `7ec21a2b` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 58d3862c^..7ec21a2b`
+
+Review result:
+
+- Containment checks for `58d3862c` and `7ec21a2b` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 196 tests.
+- `git diff --check 58d3862c^..7ec21a2b` passed.
+- Verified `RelayDispatchMetadataEnvelope` and `RelayExecutionSummary.dispatch_metadata_envelopes()` are provider-neutral, display-safe, serialization-only metadata surfaces for exact model id, provider route kind, trust state, context window, prompt budget/status/growth, external-review state, evidence refs, validation tags, and fail-closed advisory tags.
+- Verified missing/unknown route metadata and pending external review become fail-closed advisory state without executing recovery or transport behavior.
+- Verified adapter/model-call payload boundary is unchanged: execution still forwards only `lane.payload`; metadata envelopes are attached to results and do not alter transport payloads.
+- Verified no live provider/model calls, credentials/account probing, raw prompt text, raw provider responses, UI/Bifrost/FileMap edits, process/session code, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 1 Relay dispatch metadata envelope is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 2 Session Runtime State Export Prime/Beacon advisory binding.
 
 Status: passed by Codex Reviews A on 2026-06-02 00:24 -06:00. Current `HEAD` and `origin/main` are `fd6e7893`, and Build 2 commits `dd02fa33` and `e85c9221` are ancestors of current main.
