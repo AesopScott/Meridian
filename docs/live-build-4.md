@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create a Relay prompt-payload visibility implementation checklist after Reviews B cleared the routing checklist and stale recovery slice.
 
@@ -24,7 +24,15 @@ Task: produce a build-ready checklist for wiring the reviewed prompt payload hel
 
 Tests: none required for docs-only; run text/shape inspection plus `git diff --check` before marking complete.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, verification performed, and a concrete Next Candidate: bind any review findings from this checklist before prompt-payload runtime work.
+Completion: completed 2026-06-01.
+
+Ready for Codex Review:
+
+- Commit: pending local commit hash
+- Files changed: `docs/relay-prompt-payload-visibility-implementation-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Verification performed: text/shape inspection confirmed the checklist exists, covers proof payload fields, budget labels, growth/watch/degraded states, queue/Q-mode prompt-drag detection, Relay evidence, Bifrost handoff, tests, and block conditions; staged diff passes `git diff --cached --check`.
+- Next Candidate: bind any review findings from this checklist before prompt-payload runtime work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
