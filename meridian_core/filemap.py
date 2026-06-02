@@ -469,6 +469,13 @@ def make_default_map() -> FileMap:
             notes="Planning only; no runtime changes yet.",
         ),
         FileMapEntry(
+            path="docs/relay-prompt-payload-visibility-implementation-checklist.md",
+            area=FileArea.PROMPT_METRICS,
+            purpose="Build-ready checklist for wiring Relay prompt payload evidence into dispatch records and Bifrost-visible payload status without authorizing live model calls or UI implementation.",
+            related_tests=["tests/test_prompt_payload_meter.py", "tests/test_relay_executor.py", "tests/test_bifrost_cockpit.py"],
+            notes="Read before implementing prompt payload evidence, budget labels, growth/watch/degraded states, or Bifrost payload visibility.",
+        ),
+        FileMapEntry(
             path="meridian_core/prime_autonomy.py",
             area=FileArea.PRIME_AUTONOMY,
             purpose="Prime next-action domain model: immutable PrimeNextAction with action type, confidence, risk tier, source, targets, blockers, human gate, rationale, and evidence refs.",
