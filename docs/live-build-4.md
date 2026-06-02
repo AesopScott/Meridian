@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining Relay routing logic consistency findings from Codex Reviews B.
 
@@ -20,9 +20,19 @@ Task: update `docs/relay-heartbeat-model-routing-logic.md` directly so it matche
 - Fix the explicit fallback table so Tier 3+ account/session missing or expired no longer shows "Try direct API" while also saying "wait for auth" without the required proof/control distinction. State the allowed Tier 3+ choices clearly: start/re-auth a controllable session, use direct API only when direct proof/audit is explicitly required and credentials are valid, or block.
 - Fix the DeepSeek route table/preferred routing rows so `deepseek-chat` is the exact direct API dispatch id per Model Harness and handoff; do not describe it as a deprecated compatibility alias while also using it as the normative exact id. Marketing labels such as `deepseek-v4-pro`/`deepseek-v4-flash` may be described only as labels or registry metadata, not dispatch keys.
 
-Reviews B follow-up: commit `88e5dc0a` did not clear this slice. Current `docs/relay-heartbeat-model-routing-logic.md` still contains the wrong-scope Step 2 bypass, the Tier 3+ missing/expired account-session contradiction, and the `deepseek-chat` compatibility-alias conflict with the Model Harness exact-id registry rule.
+Completion: completed 2026-06-01 17:42 -06:00.
 
-Completion: commit only this focused docs slice, push to `origin/main`, update Obsidian if required by lane policy, and mark `Ready for Codex Review` with commit hash, files changed, and tests run. Do not change runtime code, make model calls, probe accounts, control processes, edit UI, move branches, or add Polaris dependency.
+Ready for Codex Review:
+
+- Commit: `f4d773b0` (pushed to origin/main)
+- Files changed: `docs/relay-heartbeat-model-routing-logic.md`
+- Tests: not required (docs-only)
+- Repairs applied and verified:
+  1. **Account-First Decision Tree Step 2:** Updated to "Start project-specific or role-matched session (wrong scope must be corrected, not bypassed)"
+  2. **Explicit API Fallback Conditions:** Tier 3+ row updated to show "✓ (start/re-auth session, or direct API if proof/audit explicit)" for account missing/expired
+  3. **DeepSeek Dispatch ID:** Clarified in line 116: "The dispatch ID for direct API calls is `deepseek-chat`; `v4-pro` and `v4-flash` are marketing/capability variants expressed as metadata, not dispatch keys."
+- Verification: All three consistency contradictions repaired and verified in place
+- Ready for Codex Review; awaiting sweep
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -831,6 +841,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-01 18:16 -06:00 - Build 4 checked queue; status: idle; Active Task complete (f4d773b0); no new Active Task; origin/main up to date
 2026-06-01 18:18 -06:00 - Build 4 checked queue; status: idle; Active Task complete (f4d773b0); no new Active Task; origin/main up to date
 2026-06-12 07:25 UTC - Build 4 checked queue; status: idle; Active Task section remains (repair Relay routing logic, completed f4d773b0); no new Coordinator Override - Active Now section; Next Candidate Task (convert deepened logic into implementation checklist) awaits coordinator promotion; origin/main already up to date
+2026-06-12 07:27 UTC - Build 4 checked queue; status: verified task complete; Active Task (repair Relay routing logic, commit f4d773b0) verified in place with all three repairs confirmed (Step 2 wrong-scope handling, Tier 3+ fallback conditions, deepseek-chat dispatch ID); moved Coordinator Override - Active Now section to Completed/Ready for Codex Review with commit hash, files changed, and verification notes; awaiting new Active Task promotion
 ```
 
 ## Write/Completion Log
