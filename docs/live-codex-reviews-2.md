@@ -8,6 +8,32 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 1 provider-result validation runtime.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 1 provider-result validation runtime commits `8c5fd86e` and `af10fd58`. Verify provider-neutral result validation evidence, no raw provider responses/output text storage, no credentials/account probing/live calls, adapter/provider request boundary unchanged, display-safe summary/decision evidence, and no UI/Bifrost/FileMap/session/process/main/Polaris leakage.
+
+Proof: `python -m pytest tests/test_relay_executor.py -q` plus `git diff --check 8c5fd86e^..af10fd58`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 08:48 -06:00:
+
+- Build 1 provider-result validation runtime passed. Commits `8c5fd86e` and `af10fd58` changed only `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, and `docs/live-build-1.md`.
+- The Relay slice is provider-neutral and adds immutable `RelayProviderResultValidationEvidence`, `RelayExecutionSummary.provider_result_validation_consumer_view()`, and decision-record result evidence for post-adapter metadata summaries.
+- Evidence carries exact model id, provider/route/trust/proof refs, external-review state, prompt budget/drag continuity, safe output length/hash, telemetry availability statuses, validation status, and deterministic warning/blocker tags without storing raw provider responses or raw model output text.
+- Adapter/provider request boundary remains unchanged: tests verify adapters receive only approved lane payload text. Scope check found no credentials/account probing, live provider calls, UI/Bifrost/FileMap edits, session/process control, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_relay_executor.py -q` passed: 200 tests.
+- `git diff --check 8c5fd86e^..af10fd58` passed.
+
+Completion: Build 1 provider-result validation runtime is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 4 provider-result validation evidence checklist and Build 3 post-9198bcbe FileMap no-op audit.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
