@@ -8,8 +8,6 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-<<<<<<< HEAD
-=======
 ## Coordinator Override - Active Now
 
 Goal: review current-main Build 1 DeepSeek candidate metadata presets, then Build 2 runtime-state export.
@@ -1490,7 +1488,6 @@ Proof command:
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
 
->>>>>>> dbeaed55 (chore: Record Reviews A prompt meter edge pass)
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 2 Session Lifecycle routing-action repair implementation.
