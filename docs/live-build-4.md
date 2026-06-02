@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add Aegis V3 Goal Runtime checkpoint discipline advisory gate.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: add a pure Aegis advisory evaluator for V3 Goal Runtime checkpoint discipline. Accept summarized inputs for goal objective presence, active owner/lane, last Git checkpoint, last Obsidian checkpoint, checkpoint cadence state, token/time budget status, review/lease gate refs, blocker policy, and proof refs; return bounded display/review metadata only with `execution_authorized=False` and no self-approval. Exclude actual Git/Obsidian operations, automation creation, filesystem movement, UI/Bifrost/Relay/Session/FileMap edits, provider/model calls, shared-main writes, and Polaris.
+
+Tests: `python -m pytest tests/test_aegis.py -q`.
+
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `dfc01107`
+- Files changed: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`
+- Tests run: `python -m pytest tests/test_aegis.py -q` (298 passed)
+- Verification performed: added provider-neutral `V3GoalCheckpointDisciplineInput`, deterministic `evaluate_v3_goal_checkpoint_discipline_advisory()`, and display-safe advisory serialization with `self_approval_granted=False` and `execution_authorized=False`; tests cover current checkpoint allow, missing objective, unassigned owner lane, missing Git/Obsidian checkpoints, stale checkpoint cadence, token/time budget warning and blocking states, missing review/lease/proof refs, blocker policy enforcement, unknown states, stable advisory keys, redaction of path/branch/personal/provider/account/prompt/chat/command strings, and repeat determinism; `git diff --check` passed.
+- Next Candidate: create a docs-only V3 Goal Runtime native object/checkpoint discipline implementation checklist after V2 scope remains protected.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement Compass Cross-Project Handoff Runtime from `docs/v2-progress-tracker.md`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
