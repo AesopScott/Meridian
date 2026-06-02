@@ -305,6 +305,109 @@ class RelayDispatchMetadataEnvelope:
 
 
 @dataclass(frozen=True)
+class RelayProviderResultValidationEvidence:
+    """Display-safe post-adapter result validation metadata."""
+
+    result_evidence_id: str
+    heartbeat_id: str | None = None
+    lane_id: str | None = None
+    role: str | None = None
+    route_id: str | None = None
+    selected_provider: str | None = None
+    exact_model_id: str | None = None
+    provider_route_kind: str = "unknown"
+    trust_mode: str = "unknown"
+    trust_state: str = "unknown"
+    proof_strength: str = "unknown"
+    capability_tier: str | None = None
+    direct_endpoint_evidence_ref: str | None = None
+    aggregator_evidence_ref: str | None = None
+    model_metadata_ref: str | None = None
+    validation_evidence_ref: str | None = None
+    external_review_evidence_ref: str | None = None
+    requires_external_review: bool = False
+    external_review_status: str = "not_required"
+    dispatch_metadata_envelope_ref: str | None = None
+    payload_evidence_ref: str | None = None
+    payload_snapshot_hash: str | None = None
+    packet_hash: str | None = None
+    prompt_budget_ref: str | None = None
+    prompt_payload_status: str = "unknown"
+    prompt_budget_percent: float | None = None
+    prompt_growth_tokens: int | None = None
+    prompt_growth_percent: float | None = None
+    prompt_drag_tags: tuple[str, ...] = ()
+    output_length: int | None = None
+    normalized_output_hash: str | None = None
+    response_hash_status: str = "unknown"
+    completion_tokens_status: str = "unknown"
+    total_tokens_status: str = "unknown"
+    latency_bucket: str = "unknown"
+    supports_completion_tokens: bool = False
+    supports_latency_ms: bool = False
+    supports_response_hash: bool = False
+    result_validation_status: str = "unknown"
+    warning_tags: tuple[str, ...] = ()
+    blocker_tags: tuple[str, ...] = ()
+    retry_requires_fresh_validation: bool = False
+    demotion_required: bool = False
+    human_gate_required: bool = False
+    usable_for_lane: bool = False
+    serialization_only: bool = True
+
+    def to_dict(self) -> dict[str, object]:
+        """Return stable result metadata without raw output or provider bodies."""
+        return {
+            "result_evidence_id": self.result_evidence_id,
+            "heartbeat_id": self.heartbeat_id,
+            "lane_id": self.lane_id,
+            "role": self.role,
+            "route_id": self.route_id,
+            "selected_provider": self.selected_provider,
+            "exact_model_id": self.exact_model_id,
+            "provider_route_kind": self.provider_route_kind,
+            "trust_mode": self.trust_mode,
+            "trust_state": self.trust_state,
+            "proof_strength": self.proof_strength,
+            "capability_tier": self.capability_tier,
+            "direct_endpoint_evidence_ref": self.direct_endpoint_evidence_ref,
+            "aggregator_evidence_ref": self.aggregator_evidence_ref,
+            "model_metadata_ref": self.model_metadata_ref,
+            "validation_evidence_ref": self.validation_evidence_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
+            "requires_external_review": self.requires_external_review,
+            "external_review_status": self.external_review_status,
+            "dispatch_metadata_envelope_ref": self.dispatch_metadata_envelope_ref,
+            "payload_evidence_ref": self.payload_evidence_ref,
+            "payload_snapshot_hash": self.payload_snapshot_hash,
+            "packet_hash": self.packet_hash,
+            "prompt_budget_ref": self.prompt_budget_ref,
+            "prompt_payload_status": self.prompt_payload_status,
+            "prompt_budget_percent": self.prompt_budget_percent,
+            "prompt_growth_tokens": self.prompt_growth_tokens,
+            "prompt_growth_percent": self.prompt_growth_percent,
+            "prompt_drag_tags": self.prompt_drag_tags,
+            "output_length": self.output_length,
+            "normalized_output_hash": self.normalized_output_hash,
+            "response_hash_status": self.response_hash_status,
+            "completion_tokens_status": self.completion_tokens_status,
+            "total_tokens_status": self.total_tokens_status,
+            "latency_bucket": self.latency_bucket,
+            "supports_completion_tokens": self.supports_completion_tokens,
+            "supports_latency_ms": self.supports_latency_ms,
+            "supports_response_hash": self.supports_response_hash,
+            "result_validation_status": self.result_validation_status,
+            "warning_tags": self.warning_tags,
+            "blocker_tags": self.blocker_tags,
+            "retry_requires_fresh_validation": self.retry_requires_fresh_validation,
+            "demotion_required": self.demotion_required,
+            "human_gate_required": self.human_gate_required,
+            "usable_for_lane": self.usable_for_lane,
+            "serialization_only": self.serialization_only,
+        }
+
+
+@dataclass(frozen=True)
 class RelayPromptPacketPolicyEvidence:
     """Display-safe Relay record of Aegis PromptPacket policy evaluation."""
 
@@ -419,6 +522,7 @@ class RelayDecisionRecord:
     payload_evidence: RelayPromptPayloadEvidence | None = None
     dispatch_envelope: RelayDispatchEnvelope | None = None
     dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None
+    provider_result_validation_evidence: RelayProviderResultValidationEvidence | None = None
     packet_hash: str | None = None
     prompt_budget_ref: str | None = None
     source_lineage_compliant: bool | None = None
@@ -441,6 +545,7 @@ class RelayExecutionResult:
     payload_evidence: RelayPromptPayloadEvidence | None = None
     dispatch_envelope: RelayDispatchEnvelope | None = None
     dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None
+    provider_result_validation_evidence: RelayProviderResultValidationEvidence | None = None
 
 
 @dataclass(frozen=True)
@@ -918,6 +1023,61 @@ class RelayExecutionSummary:
             ),
             "fail_closed_advisory": bool(fail_closed_tags),
             "fail_closed_tags": fail_closed_tags,
+        }
+
+    def provider_result_validation_evidence(
+        self,
+    ) -> tuple[RelayProviderResultValidationEvidence, ...]:
+        """Return display-safe post-adapter result validation evidence."""
+        evidence = [
+            result.provider_result_validation_evidence for result in self.results
+        ]
+        return tuple(item for item in evidence if item is not None)
+
+    def provider_result_validation_consumer_view(self) -> dict[str, object]:
+        """Return deterministic result-validation data for downstream consumers."""
+        evidence = self.provider_result_validation_evidence()
+        decision_evidence = (
+            self.decision_record.provider_result_validation_evidence
+            if self.decision_record is not None
+            else None
+        )
+        if not evidence and decision_evidence is not None:
+            evidence = (decision_evidence,)
+        blocker_tags = tuple(
+            dict.fromkeys(
+                tag
+                for item in (*evidence, decision_evidence)
+                if item is not None
+                for tag in item.blocker_tags
+            )
+        )
+        warning_tags = tuple(
+            dict.fromkeys(
+                tag
+                for item in (*evidence, decision_evidence)
+                if item is not None
+                for tag in item.warning_tags
+            )
+        )
+        heartbeat_id = None
+        if decision_evidence is not None:
+            heartbeat_id = decision_evidence.heartbeat_id
+        elif evidence:
+            heartbeat_id = evidence[0].heartbeat_id
+        elif self.decision_record is not None:
+            heartbeat_id = self.decision_record.heartbeat_id
+        return {
+            "heartbeat_id": heartbeat_id,
+            "consumer_view_kind": "relay_provider_result_validation",
+            "serialization_only": True,
+            "result_evidence": tuple(item.to_dict() for item in evidence),
+            "decision_record_result_evidence": (
+                decision_evidence.to_dict() if decision_evidence is not None else None
+            ),
+            "fail_closed": bool(blocker_tags),
+            "blocker_tags": blocker_tags,
+            "warning_tags": warning_tags,
         }
 
 
@@ -1873,6 +2033,274 @@ def _build_dispatch_metadata_envelope(
     )
 
 
+def _build_provider_result_validation_evidence(
+    plan: RelayDispatchPlan,
+    output: object,
+    *,
+    lane_role: ModelRole | None = None,
+    requested_model_id: str | None = None,
+    dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None,
+    payload_evidence: RelayPromptPayloadEvidence | None = None,
+    dispatch_envelope: RelayDispatchEnvelope | None = None,
+) -> RelayProviderResultValidationEvidence:
+    """Build display-safe post-adapter validation evidence from metadata only."""
+    packet = plan.packet
+    route = plan.route
+    lane_id = (
+        dispatch_metadata_envelope.lane_id
+        if dispatch_metadata_envelope is not None
+        else (
+            payload_evidence.lane_id
+            if payload_evidence is not None
+            else (f"{lane_role.value}:{requested_model_id}" if lane_role else None)
+        )
+    )
+    role = (
+        dispatch_metadata_envelope.role
+        if dispatch_metadata_envelope is not None
+        else (lane_role.value if lane_role else None)
+    )
+    warnings: list[str] = []
+    blockers: list[str] = []
+
+    if dispatch_metadata_envelope is None:
+        blockers.append("dispatch_metadata_envelope_missing")
+    else:
+        blockers.extend(dispatch_metadata_envelope.fail_closed_tags)
+        if dispatch_metadata_envelope.requires_external_review and (
+            dispatch_metadata_envelope.external_review_status != "passed"
+        ):
+            blockers.append(
+                f"external_review_{dispatch_metadata_envelope.external_review_status}"
+            )
+
+    output_text = output if isinstance(output, str) else None
+    output_length = len(output_text) if output_text is not None else None
+    normalized_output_hash = (
+        hashlib.sha256(output_text.strip().encode("utf-8")).hexdigest()
+        if output_text is not None
+        else None
+    )
+    if output_text is None:
+        blockers.append("adapter_result_non_string")
+        response_hash_status = "unavailable"
+    elif output_text == "":
+        blockers.append("adapter_result_empty")
+        response_hash_status = "empty"
+    else:
+        response_hash_status = "computed"
+
+    supports_response_hash = (
+        dispatch_metadata_envelope.supports_response_hash
+        if dispatch_metadata_envelope is not None
+        else False
+    )
+    supports_completion_tokens = (
+        dispatch_metadata_envelope.supports_completion_tokens
+        if dispatch_metadata_envelope is not None
+        else False
+    )
+    supports_latency_ms = (
+        dispatch_metadata_envelope.supports_latency_ms
+        if dispatch_metadata_envelope is not None
+        else False
+    )
+    if not supports_response_hash:
+        warnings.append("response_hash_telemetry_unavailable")
+    if not supports_completion_tokens:
+        warnings.append("completion_token_telemetry_unavailable")
+        warnings.append("total_token_telemetry_unavailable")
+    if not supports_latency_ms:
+        warnings.append("latency_telemetry_unavailable")
+
+    prompt_status = (
+        dispatch_metadata_envelope.prompt_payload_status
+        if dispatch_metadata_envelope is not None
+        else (payload_evidence.budget_status if payload_evidence else "unknown")
+    )
+    prompt_drag_tags = (
+        dispatch_metadata_envelope.prompt_drag_tags
+        if dispatch_metadata_envelope is not None
+        else (payload_evidence.prompt_drag_tags if payload_evidence else ())
+    )
+    if prompt_status in {"degraded", "over_budget"}:
+        blockers.append(f"prompt_payload_{prompt_status}")
+    elif prompt_status == "watch":
+        warnings.append("prompt_payload_watch")
+    for tag in prompt_drag_tags:
+        if "over_budget" in tag or "degraded" in tag:
+            blockers.append(tag)
+        elif "watch" in tag or "warning" in tag:
+            warnings.append(tag)
+
+    blockers_tuple = tuple(dict.fromkeys(blockers))
+    warnings_tuple = tuple(dict.fromkeys(warnings))
+    if blockers_tuple:
+        validation_status = "blocked"
+    elif prompt_status == "degraded":
+        validation_status = "degraded"
+    elif warnings_tuple:
+        validation_status = "warning"
+    elif output_text is None:
+        validation_status = "unknown"
+    else:
+        validation_status = "valid"
+
+    return RelayProviderResultValidationEvidence(
+        result_evidence_id=f"relay-provider-result:{packet.packet_id}:{lane_id or 'no-lane'}",
+        heartbeat_id=packet.packet_id,
+        lane_id=lane_id,
+        role=role,
+        route_id=f"tier-{route.risk_tier}:{route.mode.value}",
+        selected_provider=(
+            dispatch_metadata_envelope.selected_provider
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.selected_provider if payload_evidence else None)
+        ),
+        exact_model_id=(
+            dispatch_metadata_envelope.exact_model_id
+            if dispatch_metadata_envelope is not None
+            else (
+                payload_evidence.selected_model
+                if payload_evidence and payload_evidence.selected_model
+                else requested_model_id
+            )
+        ),
+        provider_route_kind=(
+            dispatch_metadata_envelope.provider_route_kind
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.provider_route_kind if payload_evidence else "unknown")
+        ),
+        trust_mode=(
+            dispatch_metadata_envelope.trust_mode
+            if dispatch_metadata_envelope is not None
+            else "unknown"
+        ),
+        trust_state=(
+            dispatch_metadata_envelope.trust_state
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.trust_state if payload_evidence else "unknown")
+        ),
+        proof_strength=(
+            dispatch_metadata_envelope.proof_strength
+            if dispatch_metadata_envelope is not None
+            else "unknown"
+        ),
+        capability_tier=(
+            dispatch_metadata_envelope.capability_tier
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.capability_tier if payload_evidence else None)
+        ),
+        direct_endpoint_evidence_ref=(
+            dispatch_metadata_envelope.direct_endpoint_evidence_ref
+            if dispatch_metadata_envelope is not None
+            else None
+        ),
+        aggregator_evidence_ref=(
+            dispatch_metadata_envelope.aggregator_evidence_ref
+            if dispatch_metadata_envelope is not None
+            else None
+        ),
+        model_metadata_ref=(
+            dispatch_metadata_envelope.model_metadata_ref
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.model_metadata_ref if payload_evidence else None)
+        ),
+        validation_evidence_ref=(
+            dispatch_metadata_envelope.validation_evidence_ref
+            if dispatch_metadata_envelope is not None
+            else None
+        ),
+        external_review_evidence_ref=(
+            dispatch_metadata_envelope.external_review_evidence_ref
+            if dispatch_metadata_envelope is not None
+            else (
+                payload_evidence.external_review_evidence_ref
+                if payload_evidence
+                else None
+            )
+        ),
+        requires_external_review=(
+            dispatch_metadata_envelope.requires_external_review
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.requires_external_review if payload_evidence else False)
+        ),
+        external_review_status=(
+            dispatch_metadata_envelope.external_review_status
+            if dispatch_metadata_envelope is not None
+            else (
+                payload_evidence.external_review_status
+                if payload_evidence
+                else "not_required"
+            )
+        ),
+        dispatch_metadata_envelope_ref=(
+            dispatch_metadata_envelope.envelope_id
+            if dispatch_metadata_envelope is not None
+            else None
+        ),
+        payload_evidence_ref=(
+            dispatch_metadata_envelope.payload_evidence_ref
+            if dispatch_metadata_envelope is not None
+            else _payload_evidence_ref(payload_evidence)
+        ),
+        payload_snapshot_hash=(
+            dispatch_metadata_envelope.payload_snapshot_hash
+            if dispatch_metadata_envelope is not None
+            else (
+                payload_evidence.prompt_payload_snapshot_hash
+                if payload_evidence
+                else None
+            )
+        ),
+        packet_hash=dispatch_envelope.packet_hash if dispatch_envelope else None,
+        prompt_budget_ref=(
+            dispatch_envelope.prompt_budget_ref if dispatch_envelope else None
+        ),
+        prompt_payload_status=prompt_status,
+        prompt_budget_percent=(
+            dispatch_metadata_envelope.prompt_budget_percent
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.budget_percent if payload_evidence else None)
+        ),
+        prompt_growth_tokens=(
+            dispatch_metadata_envelope.prompt_growth_tokens
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.delta_tokens if payload_evidence else None)
+        ),
+        prompt_growth_percent=(
+            dispatch_metadata_envelope.prompt_growth_percent
+            if dispatch_metadata_envelope is not None
+            else (payload_evidence.delta_percent if payload_evidence else None)
+        ),
+        prompt_drag_tags=prompt_drag_tags,
+        output_length=output_length,
+        normalized_output_hash=normalized_output_hash,
+        response_hash_status=response_hash_status,
+        completion_tokens_status=(
+            "supported_unreported"
+            if supports_completion_tokens
+            else "unsupported"
+        ),
+        total_tokens_status=(
+            "supported_unreported"
+            if supports_completion_tokens
+            else "unsupported"
+        ),
+        latency_bucket="supported_unreported" if supports_latency_ms else "unsupported",
+        supports_completion_tokens=supports_completion_tokens,
+        supports_latency_ms=supports_latency_ms,
+        supports_response_hash=supports_response_hash,
+        result_validation_status=validation_status,
+        warning_tags=warnings_tuple,
+        blocker_tags=blockers_tuple,
+        retry_requires_fresh_validation=bool(blockers_tuple),
+        demotion_required=bool(blockers_tuple),
+        human_gate_required=bool(blockers_tuple),
+        usable_for_lane=not blockers_tuple,
+    )
+
+
 def _build_decision_record(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
@@ -2173,6 +2601,15 @@ def execute_relay_dispatch_plan(
     ):
         try:
             output = model_call(lane.payload)
+            result_validation_evidence = _build_provider_result_validation_evidence(
+                plan,
+                output,
+                lane_role=lane.role,
+                requested_model_id=lane.preferred_model,
+                dispatch_metadata_envelope=dispatch_metadata_envelope,
+                payload_evidence=payload_evidence,
+                dispatch_envelope=dispatch_envelope,
+            )
             results.append(
                 RelayExecutionResult(
                     role=lane.role,
@@ -2182,6 +2619,7 @@ def execute_relay_dispatch_plan(
                     payload_evidence=payload_evidence,
                     dispatch_envelope=dispatch_envelope,
                     dispatch_metadata_envelope=dispatch_metadata_envelope,
+                    provider_result_validation_evidence=result_validation_evidence,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -2206,6 +2644,13 @@ def execute_relay_dispatch_plan(
                 dispatch_metadata_envelopes[0] if dispatch_metadata_envelopes else None
             ),
         )
+        if results:
+            decision_record = replace(
+                decision_record,
+                provider_result_validation_evidence=(
+                    results[0].provider_result_validation_evidence
+                ),
+            )
 
     return RelayExecutionSummary(
         results=tuple(results),
@@ -2316,6 +2761,15 @@ def execute_relay_plan_with_registry(
     ):
         try:
             output = adapter(lane.payload)
+            result_validation_evidence = _build_provider_result_validation_evidence(
+                plan,
+                output,
+                lane_role=lane.role,
+                requested_model_id=lane.preferred_model,
+                dispatch_metadata_envelope=dispatch_metadata_envelope,
+                payload_evidence=payload_evidence,
+                dispatch_envelope=dispatch_envelope,
+            )
             results.append(
                 RelayExecutionResult(
                     role=lane.role,
@@ -2327,6 +2781,7 @@ def execute_relay_plan_with_registry(
                     payload_evidence=payload_evidence,
                     dispatch_envelope=dispatch_envelope,
                     dispatch_metadata_envelope=dispatch_metadata_envelope,
+                    provider_result_validation_evidence=result_validation_evidence,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -2353,6 +2808,13 @@ def execute_relay_plan_with_registry(
             dispatch_envelopes[0] if dispatch_envelopes else None,
             dispatch_metadata_envelopes[0] if dispatch_metadata_envelopes else None,
         )
+        if results:
+            decision_record = replace(
+                decision_record,
+                provider_result_validation_evidence=(
+                    results[0].provider_result_validation_evidence
+                ),
+            )
 
     return RelayExecutionSummary(
         results=tuple(results),

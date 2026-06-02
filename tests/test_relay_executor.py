@@ -33,6 +33,7 @@ from meridian_core.relay_executor import (
     RelayExecutionResult,
     RelayExecutionSummary,
     RelayModelCapabilityMetadataSummary,
+    RelayProviderResultValidationEvidence,
     RelayPromptPacketPolicyDisposition,
     RelayPromptPacketPolicyEvidence,
     RelayPromptPayloadEvidence,
@@ -1984,6 +1985,120 @@ class TestRelayDispatchMetadataEnvelope:
         assert view["decision_record_envelope"] == view["envelopes"][0]
         assert "model_metadata_missing" in view["envelopes"][0]["validation_tags"]
         assert "vendor_unknown" in view["fail_closed_tags"]
+
+
+class TestRelayProviderResultValidationEvidence:
+    """Tests for display-safe post-adapter result validation evidence."""
+
+    def test_registry_result_validation_evidence_carries_safe_metadata_only(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "raw provider response body secret should not appear",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            include_decision_record=True,
+        )
+
+        evidence = summary.results[0].provider_result_validation_evidence
+        assert isinstance(evidence, RelayProviderResultValidationEvidence)
+        assert summary.decision_record.provider_result_validation_evidence is evidence
+        assert evidence.selected_provider == "deepseek"
+        assert evidence.exact_model_id == "deepseek-chat"
+        assert evidence.provider_route_kind == "direct"
+        assert evidence.trust_state == "candidate"
+        assert evidence.direct_endpoint_evidence_ref == (
+            "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions"
+        )
+        assert evidence.external_review_status == "pending"
+        assert evidence.output_length == len(
+            "raw provider response body secret should not appear"
+        )
+        assert evidence.normalized_output_hash is not None
+        assert evidence.response_hash_status == "computed"
+        assert evidence.result_validation_status == "blocked"
+        assert "external_review_pending" in evidence.blocker_tags
+        assert adapter.received_payloads == [_PROMPT]
+
+        rendered = " ".join(str(value) for value in evidence.to_dict().values())
+        assert _PROMPT not in rendered
+        assert "raw provider response body" not in rendered
+        assert "credential" not in rendered.lower()
+        assert "Polaris" not in rendered
+
+    def test_result_validation_evidence_empty_result_fails_closed(self) -> None:
+        plan = _make_plan(1)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("", metadata=deepseek_candidate_metadata_preset("fast")),
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        evidence = summary.results[0].provider_result_validation_evidence
+        assert evidence is not None
+        assert evidence.response_hash_status == "empty"
+        assert evidence.result_validation_status == "blocked"
+        assert "adapter_result_empty" in evidence.blocker_tags
+        assert evidence.usable_for_lane is False
+        assert evidence.retry_requires_fresh_validation is True
+        assert evidence.human_gate_required is True
+
+    def test_result_validation_without_provider_metadata_fails_closed(self) -> None:
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("safe output"),
+            include_decision_record=True,
+        )
+
+        evidence = summary.results[0].provider_result_validation_evidence
+        assert evidence is not None
+        assert evidence.selected_provider is None
+        assert evidence.exact_model_id == plan.lanes[0].preferred_model
+        assert evidence.result_validation_status == "blocked"
+        assert "model_metadata_missing" in evidence.blocker_tags
+        assert "provider_route_kind_unknown" in evidence.blocker_tags
+        assert "response_hash_telemetry_unavailable" in evidence.warning_tags
+        assert summary.decision_record.provider_result_validation_evidence is evidence
+
+    def test_result_validation_consumer_view_is_stable_and_display_safe(self) -> None:
+        plan = _make_plan(1)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter(
+                "provider output text must remain private",
+                metadata=deepseek_candidate_metadata_preset("fast"),
+            ),
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            include_decision_record=True,
+        )
+        first = summary.provider_result_validation_consumer_view()
+        second = summary.provider_result_validation_consumer_view()
+        rendered = " ".join(str(value) for value in first.values())
+
+        assert first == second
+        assert first["heartbeat_id"] == plan.packet.packet_id
+        assert first["consumer_view_kind"] == "relay_provider_result_validation"
+        assert first["serialization_only"] is True
+        assert len(first["result_evidence"]) == 1
+        assert first["decision_record_result_evidence"] == first["result_evidence"][0]
+        assert first["fail_closed"] is True
+        assert "external_review_pending" in first["blocker_tags"]
+        assert _PROMPT not in rendered
+        assert "provider output text" not in rendered
+        assert "credential" not in rendered.lower()
 
 
 class TestRelayDecisionRecord:
