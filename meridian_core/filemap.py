@@ -192,7 +192,7 @@ def make_default_map() -> FileMap:
             area=FileArea.BUILD_PROCESS,
             purpose="Cross-harness stage tracker for Contract/Baseline, V2 Backend, Core Implementation, Prime Integration, Runtime Logic UI, Proofs/Review, and Operations status.",
             related_tests=["tests/test_filemap.py"],
-            notes="Use when Scott asks what stage a harness is in or requests a harness/stage-specific build.",
+            notes="Use when the user asks what stage a harness is in or requests a harness/stage-specific build.",
         ),
         FileMapEntry(
             path="docs/harness-stage-checklist.html",
@@ -288,8 +288,15 @@ def make_default_map() -> FileMap:
             path="meridian_core/beacon.py",
             area=FileArea.BEACON,
             purpose="File-backed liveness checks that convert queue/sentinel freshness into Heartbeat objects.",
-            related_tests=["tests/test_beacon.py"],
+            related_tests=["tests/test_beacon.py", "tests/test_beacon_logic_snapshot.py"],
             notes="V0 Beacon slice only; process supervision and restart/resteer actions belong to later Prime runtime.",
+        ),
+        FileMapEntry(
+            path="meridian_core/beacon_logic_snapshot.py",
+            area=FileArea.BEACON,
+            purpose="Backend snapshot for Beacon Runtime Logic UI: heartbeat, liveness, freshness, advisory evidence, and observation-only runtime boundaries.",
+            related_tests=["tests/test_beacon_logic_snapshot.py", "tests/test_bifrost_cockpit.py"],
+            notes="Bifrost consumes this through /bridge/beacon-logic; keep Beacon backend-sourced and display-only.",
         ),
         FileMapEntry(
             path="tests/test_beacon.py",
@@ -297,6 +304,13 @@ def make_default_map() -> FileMap:
             purpose="Test suite for meridian_core/beacon.py: covers file-backed liveness checks, heartbeat conversion, and Beacon freshness behavior.",
             related_tests=[],
             notes="Run before changing Beacon liveness, sentinel freshness, or heartbeat observation behavior.",
+        ),
+        FileMapEntry(
+            path="tests/test_beacon_logic_snapshot.py",
+            area=FileArea.BEACON,
+            purpose="Regression tests for Beacon Runtime Logic snapshot shape, source identity, observation-only boundary, and JSON serializability.",
+            related_tests=[],
+            notes="Run before changing /bridge/beacon-logic payload shape or Beacon Runtime Logic UI rendering.",
         ),
         FileMapEntry(
             path="meridian_core/intention.py",
@@ -953,7 +967,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v0-v1-progress-tracker.md",
             area=FileArea.ARCHITECTURE,
-            purpose="Countable V0/V1 progress view for Prime, Codex, and Scott. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
+            purpose="Countable V0/V1 progress view for Prime, Codex, and user. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
             related_tests=[],
             notes="Update when a gate item status changes. Companion to v0-build-readiness-map.md.",
         ),
@@ -1032,7 +1046,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-cockpit-queue-status-brief.md",
             area=FileArea.BIFROST,
-            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
+            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What the user sees and how build-lane events surface without flooding the cockpit.",
             related_tests=[],
             notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
         ),
@@ -1046,7 +1060,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-harness-dashboard-brief.md",
             area=FileArea.BIFROST,
-            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
+            purpose="Harness dashboard surface brief: what opens when the user clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
             related_tests=[],
             notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
         ),
