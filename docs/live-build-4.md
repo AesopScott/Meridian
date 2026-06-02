@@ -24,7 +24,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `1bca9060`
 - Files changed: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`
 - Tests run: `python -m pytest tests/test_aegis.py -q` (282 passed)
 - Verification performed: added provider-neutral `CommandStagingUiReviewInput`, deterministic `evaluate_command_staging_ui_review_advisory()`, and display-safe advisory serialization with `execution_authorized=False`; tests cover review-ready allow, not-ready/UI-review/permission/human-gate fail-closed blockers, Prime advisory warning, evidence and Beacon evidence refs, blocker tags, stable advisory keys, redaction, no execution authority, and repeat determinism; `git diff --check` passed.
