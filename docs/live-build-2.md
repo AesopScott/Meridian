@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Reviews A finding in Session Lifecycle permission summary expiry handling.
 
@@ -22,7 +22,14 @@ Task: fix `_permission_unlock_expired_at()` so aware datetimes are normalized wi
 
 Tests: `python -m pytest tests/test_session_lifecycle.py -q`.
 
-Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, proof result, and Next Candidate: Reviews A re-review of the repaired permission summary slice.
+Completion:
+
+- Build 2 completed the permission summary expiry timezone repair in local worktree commit `801c9632`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Evidence: `_permission_unlock_expired_at()` now normalizes aware datetimes with `astimezone(timezone.utc)` before comparison while preserving naive-as-UTC handling; regression coverage proves `2026-06-02T02:00:00-06:00` is treated as after `2026-06-02T07:00:00+00:00` and records `permission.unlock_expired`.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 92 tests.
+- Ready for Codex Review.
+- Next Candidate: Reviews A re-review of the repaired permission summary slice.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
