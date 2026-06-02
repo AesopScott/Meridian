@@ -10,6 +10,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 4 Relay routing logic consistency repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `f4d773b0` for the focused Build 4 Relay routing logic consistency repair. Verify the account-first Step 2 now starts a project-specific or role-matched session or blocks instead of falling through to direct API/aggregator for wrong project/role/tools; the Tier 3+ missing/expired account-session fallback clearly distinguishes start/re-auth controllable session, direct API only for explicit proof/audit needs with valid credentials, or block; and `deepseek-chat` is consistently documented as the exact DeepSeek direct API dispatch id while `v4-pro`/`v4-flash` remain metadata/marketing labels, not dispatch keys. Confirm no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 4; otherwise mark passed and leave the next candidate: review Build 5 stale-target guard sample rendering.
+
+Proof command:
+
+- Docs/architecture review; no pytest required unless runtime claims require proof.
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 5 Sessions dropdown repair for open-session filtering and routing target state.
@@ -2824,6 +2840,14 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 18:22 -06:00 - files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff. Push status: pending at write time; see final handoff. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 18:25 -06:00 - pulled latest `origin/main` (`Already up to date`) and read `docs/live-codex-reviews-2.md`. The Reviews B header task is already `Completed / Passed`; no newly promoted executable Reviews B Active Task is present. Status: idle pending next Reviews B Active Task promotion.
+
+## Write / Completion Log
+
+- 2026-06-01 18:25 -06:00 - files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff. Push status: pending at write time; see final handoff. Obsidian update status: not updated; queue provenance only.
 
 ## Write / Completion Log
 
