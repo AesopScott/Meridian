@@ -10,6 +10,27 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: harden downstream Relay handoff/consumer view negative paths after reviewed proof negative-path and FileMap movement.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-relay-handoff-negative-paths-20260602-1200`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: prove Relay handoff and consumer-view surfaces intended for Bifrost, Prime, and Aegis stay display-safe and do not leak raw prompt text, worker chat, credentials, branch movement requests, provider output text, arbitrary exception text, or free-text blocker summaries.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02.
+- Commit: `f2abf7b8` (`test: Harden Relay handoff negative paths`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (216 passed); `git diff --check` (passed with Git line-ending normalization warnings only); path-scope check limited changes to allowed files.
+- Concrete evidence: PromptPacket handoff now sanitizes policy evidence ids, blockers, warnings, and reason tags into structured display-safe tags while preserving existing known fixed policy phrases. Negative tests inject raw prompt, worker chat, credential, branch movement, provider-output, arbitrary exception, and free-text blocker sentinels across Relay proof/evidence/consumer/handoff surfaces and prove downstream rendered handoff data omits them.
+- Next Candidate: bind this reviewed handoff sanitizer into downstream Bifrost display tests once the Bifrost prompt/proof handoff surface is promoted.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: harden Relay proof payload/evidence negative paths without touching the blocked Model Harness metadata path.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
