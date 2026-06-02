@@ -1466,6 +1466,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 18:32 -06:00 - Build 2 checked queue; Active Now task already complete (e41851ae verified: __post_init__ present, 60/60 tests pass); no new Active Task from coordinator; cadence 1 of 3; idle polling
 2026-06-01 18:35 -06:00 - Build 2 checked queue; coordinator moved permission-invariant repair to Completed/Ready for Codex Review; no Active Now section present; cadence 1 of 3; idle polling
 2026-06-01 18:52 -06:00 - Build 2 checked queue; no Active Now section; no executable task; cadence 1 of 3; idle polling
+2026-06-02 08:57 -06:00 - Build 2 checked queue; no Active Now section; coordinator advisory binding work visible (commits fa4bbe5b, 369038c1); no executable task; cadence 1 of 3; idle polling
 ```
 
 ## Write/Completion Log
