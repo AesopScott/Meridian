@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Session Lifecycle permissions and Prime/Beacon binding contract completeness.
 
@@ -29,7 +29,13 @@ Tests:
 
 - `python -m pytest tests/test_session_lifecycle.py -q`
 
-Completion: record the current-main repair commit hash, changed files, proof result, push status, and Ready for Codex Review marker in this queue.
+Completion:
+
+- Coordinator landed the scoped repair on current main as commit `e486de2d`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Repairs applied: `PermissionContext` now carries secondary approval, unlock expiry, and task scope; work acceptance observes permission lock/expiry/scope; heartbeat staleness aligns to prompt-sent seconds semantics; Prime autonomy input containers are protected for deterministic/immutable use.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed.
+- Ready for Codex Review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
