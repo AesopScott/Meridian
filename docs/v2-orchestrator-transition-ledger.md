@@ -380,6 +380,12 @@ Coordinator Reviews A and Build 1 movement - 2026-06-02:
 - Approved and completed path-limited movement of Build 1 PromptPacket proof metadata commits `83d48b35` and `48c74d12` onto shared main as `f1acf65c` and `5c6a6a28`, limited to `meridian_core/prompt_packet.py`, `meridian_core/relay_packet.py`, `meridian_core/relay_executor.py`, `tests/test_prompt_packet.py`, `tests/test_relay_packet.py`, `tests/test_relay_executor.py`, and `docs/live-build-1.md`.
 - Proof rerun on shared main after movement: `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q` passed 234/234; `git diff --check 9e685ec2^..HEAD` passed.
 
+Coordinator Reviews B clearance - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Reviews B worktree clean before movement.
+- Approved and completed path-limited movement of Reviews B provenance commit `cb8366b2` onto shared main as `4b539ac8`, limited to `docs/live-codex-reviews-2.md`.
+- Review result: Build 4 Aegis PromptPacket proof policy checklist and Build 5 Bifrost PromptPacket proof metadata rendering passed with no findings. Reported proof: Build 4 docs/shape inspection plus `git diff --check 9a6be911^..e86f8019`; Build 5 `python -m pytest tests/test_bifrost_cockpit.py -q` passed 206/206 plus `git diff --check 6716a928^..346c6c4e`.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
