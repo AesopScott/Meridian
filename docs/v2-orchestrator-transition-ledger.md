@@ -480,6 +480,15 @@ Coordinator Reviews A FileMap clearance movement - 2026-06-02:
 - Honest lane status after this clearance: Build 3 latest FileMap audit is review-cleared. Build 1, Build 2, Build 4, and Build 5 remain actively working on the rolling-pipeline implementation slices. Reviews B is temporarily idle/polling because Build 4/5 have not yet marked Ready on current main.
 - Queue maintenance: updated Reviews A top Active Now block to poll/review Build 1 and Build 2 Ready markers only, because the Build 3 FileMap audit is now review-cleared on shared main.
 
+Coordinator Build 2/4/5 rolling-slice movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Build 2, Build 4, and Build 5 worktrees clean before movement.
+- Approved and completed path-limited movement of Build 2 Session Lifecycle permission summary aggregation commits `a6b85043` and `942626da` onto shared main as `1b56a098` and `777171fe`, limited to `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, and `docs/live-build-2.md`.
+- Approved and completed path-limited movement of Build 4 Aegis PromptPacket policy edge coverage commits `dfb96f0d` and `47ccd7c7` onto shared main as `6c37c530` and `b7df268f`, limited to `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+- Approved and completed path-limited movement of Build 5 Relay/Aegis handoff summary rendering commits `c8b2ea53` and `c382e611` onto shared main as `58f99765` and `2362985d`, limited to `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_session_lifecycle.py tests/test_aegis.py tests/test_bifrost_cockpit.py -q` passed 546/546; `git diff --check 1b56a098^..HEAD` passed.
+- Honest lane status after this movement: Build 2, Build 4, and Build 5 are Ready for Codex Review on current main. Build 1 remains actively working on Relay/Aegis runtime integration. Build 3 should audit FileMap after this movement batch.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
