@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review the latest current-main Build 4 Model Harness metadata checklist and Build 5 provider balance/cost-pressure rendering slices.
 
@@ -17,6 +17,23 @@ Task: review current-main Ready markers in order: Build 4 Model Harness metadata
 Proof: text/shape inspection plus `git diff --check 5c6ea359^..996fa89b`; `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check 077ad3aa^..fde47333`.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 polling after these current-main reviews.
+
+Review result - 2026-06-01 23:51 -06:00:
+
+- Build 4 Model Harness metadata checklist passed. Commits `5c6ea359` and `996fa89b` changed only `docs/model-harness-metadata-implementation-checklist.md` and `docs/live-build-4.md`.
+- The checklist is docs-only and covers exact model id, provider direct-vs-aggregator route and trust, context window, prompt token estimate, budget percent/status, growth delta, prompt-drag degraded state, external-review requirements, Aegis/Relay binding, Bifrost display expectations, deterministic tests, and exclusions for live model calls, credentials, raw prompts, raw provider responses, account probing, session/process control, branch/worktree movement, FileMap edits, main writes, and Polaris.
+- Build 5 provider balance/cost-pressure rendering passed. Commits `077ad3aa` and `fde47333` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The Bifrost slice is deterministic sample/rendering only and covers Claude, OpenAI, DeepSeek direct, OpenRouter aggregator, and local routes with provider health, route kind, selected provider, context/prompt token usage, quota/credit status, estimated spend, and low/medium/high/degraded/blocked cost-pressure states.
+- Focused tests cover aggregator/local details, escaping, prompt payload visibility, dispatch hardening, PromptPacket proof metadata, Relay/Aegis handoff, proof-state preview, stale-session recovery actions, and cockpit layout preservation. Scope check found no live provider/account/session/process calls, Relay runtime wiring, FileMap edit, `index.html` edit, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- Text/shape inspection passed for the Build 4 checklist and Ready marker.
+- `git diff --check 5c6ea359^..996fa89b` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 241 tests.
+- `git diff --check 077ad3aa^..fde47333` passed.
+
+Completion: Build 4 Model Harness metadata checklist and Build 5 provider balance/cost-pressure rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
