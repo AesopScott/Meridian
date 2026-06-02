@@ -4,6 +4,24 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add stale-target guard sample rendering after Sessions dropdown repair cleared review.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, and Reviews B clearance for the Sessions dropdown repair in `docs/live-codex-reviews-2.md`.
+
+Task: add deterministic sample rendering/tests for stale or unroutable selected session targets in User Session mode. The User panel must make it clear when the selected session target is stale, closed, blocked, missing, or otherwise not routable, and the prompt routing target state must not imply the next prompt will route to a dead target. Keep this view-model/render-only. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, add live process control, move branches, or alter Build 4 Relay routing repair state.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only the allowed files from your unique worktree branch, push your worker branch, mark Ready for Codex Review here with commit hash/files/tests, and leave a concrete Next Candidate.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: restore Bifrost right-panel static/sample rendering at current `HEAD`.
