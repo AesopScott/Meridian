@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add provider-neutral Relay route capability/tier/budget metadata binding after the DeepSeek metadata preset slice cleared Reviews A with no findings.
 
@@ -23,6 +23,18 @@ Tests:
 - `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
 
 Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from the route metadata binding slice before further Relay/Model work.
+
+Completion:
+
+- Build 1 completed provider-neutral Relay route capability/tier/budget metadata binding on 2026-06-01 21:41 -06:00.
+- Commit: `3a458293` (feat: Bind Relay route metadata evidence).
+- Files changed: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`.
+- Tests: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` (193 passed).
+- Implementation: Added immutable `ModelRouteMetadataBinding` and a provider-neutral binding helper that combines adapter capability metadata, route risk/cost/latency posture, and optional `PromptPayloadSnapshot` budget/prompt-drag metrics. Registry-backed Relay execution now attaches this binding to per-lane results and decision records while preserving the payload-only model-call boundary.
+- Scope exclusions verified: no network access, credentials, live model calls, UI/Bifrost rendering, FileMap edits, branch movement, Polaris dependency, merge, rebase, reset, cherry-pick, or cross-worktree movement.
+- Next Candidate: bind any review findings from the route metadata binding slice before further Relay/Model work.
+
+Ready for Codex Review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
