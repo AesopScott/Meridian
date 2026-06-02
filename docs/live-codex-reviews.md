@@ -22,6 +22,35 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 2 Prime/Beacon recovery-readiness advisory consumers.
+
+Status: passed by Codex Reviews A on 2026-06-02 08:53 -06:00. Candidate `HEAD` is `8e288664`, and Build 2 commits `d0644f77` and `8e288664` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check d0644f77^..8e288664`
+
+Review result:
+
+- Containment checks for `d0644f77` and `8e288664` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with Build 2 queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 101 tests.
+- `git diff --check d0644f77^..8e288664` passed.
+- Verified Prime consumes `SessionRecoveryReadinessSummary` through `select_next_action_from_recovery_readiness_summary()` as advisory-only state: readiness-cleared recovery still returns non-executable `ADVISE_SESSION_RECOVERY` with a command-plan staging blocker, while blocked summaries pause with human-gate rationale and blockers preserved.
+- Verified Beacon consumes the same summary through `recovery_readiness_advisory_evidence()` as display-safe serializable evidence only, preserving readiness status, command kind, recommended action, required operation, ready flag, blockers, evidence refs, and human-gate state.
+- Verified no restart, resteer, archive execution, session/process/model/UI/Bifrost/FileMap side effect, branch/worktree movement, main write, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 Prime/Beacon recovery-readiness advisory consumers are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: bounded post-landing smoke review of Build 1 provider-result validation runtime.
 
 Status: passed by Codex Reviews A on 2026-06-02 08:48 -06:00. Current `HEAD` and `origin/main` are `aa926f07`, and landing range `d6007b21^..aa926f07` is present on current main.
