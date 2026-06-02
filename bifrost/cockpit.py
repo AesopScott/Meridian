@@ -83,6 +83,12 @@ class VoiceIOState:
     speaking: bool = False
     muted: bool = False
     blocked: bool = False
+    boot_status: str = "ready"
+    input_mode: str = "mic"
+    output_mode: str = "speaker"
+    permission_state: str = "available"
+    status_call: str = ""
+    last_intent_ref: str = ""
 
 
 @dataclass
@@ -511,6 +517,12 @@ def sample_cockpit_view_model(
             speaking=False,
             muted=False,
             blocked=False,
+            boot_status="status-ready",
+            input_mode="microphone",
+            output_mode="speaker",
+            permission_state="available",
+            status_call="command channel ready",
+            last_intent_ref="voice-intent:panel-focus",
         ),
         provider_balance=ProviderBalanceView(
             providers=[
@@ -1148,9 +1160,9 @@ def sample_cockpit_view_model(
                         action_id="human-gated-blocked",
                         action_label="Human gate blocked",
                         readiness_state="blocked",
-                        permission_state="requires_scott",
+                        permission_state="requires_user",
                         evidence_ref="evidence:human-gate-required",
-                        advisory="Automated recovery is blocked until Scott or review lane clears the gate.",
+                        advisory="Automated recovery is blocked until user or review lane clears the gate.",
                     ),
                 ],
             ),
@@ -1215,7 +1227,7 @@ def sample_cockpit_view_model(
                         is_executable_now=False,
                         ui_review_required=True,
                         permission_state="locked_by_default",
-                        human_gate_rationale="Archive intent remains blocked until Scott or review lane clears the gate.",
+                        human_gate_rationale="Archive intent remains blocked until user or review lane clears the gate.",
                         prime_advisory_ref="prime-advisory:archive-human-gate",
                         beacon_advisory_ref="beacon:staging_archive",
                         blockers=[
@@ -1546,14 +1558,44 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
         voice_states.append('<span class="voice-state voice-speaking">speaker active</span>')
     if vm.voice.blocked:
         voice_states.append('<span class="voice-state voice-blocked">voice blocked</span>')
+    if vm.voice.boot_status:
+        voice_states.append(f'<span class="voice-state voice-boot">boot: {_e(vm.voice.boot_status)}</span>')
+    if not voice_states:
+        voice_states.append('<span class="voice-state voice-idle">voice idle</span>')
 
     mute_button = '<button type="button" class="icon-btn" data-action="mute" title="Mute voice output">Mute</button>'
     mute_control = mute_button if not vm.voice.muted else '<button type="button" class="icon-btn" data-action="unmute" title="Unmute voice output">Unmute</button>'
+    voice_input_control = (
+        '<button type="button" class="icon-btn" data-action="voice" title="Start voice input" '
+        'aria-label="Start voice input">Mic</button>'
+    )
+    voice_read_control = (
+        '<button type="button" class="icon-btn" data-action="read-aloud" title="Read Prime output aloud" '
+        'aria-label="Read Prime output aloud">Read</button>'
+    )
+    voice_status = (
+        '<div class="voice-meta" aria-label="Voice runtime metadata">'
+        f'<span>input: {_e(vm.voice.input_mode)}</span>'
+        f'<span>output: {_e(vm.voice.output_mode)}</span>'
+        f'<span>permission: {_e(vm.voice.permission_state)}</span>'
+        f'<span>status: {_e(vm.voice.status_call or "standing by")}</span>'
+        f'<span>intent: {_e(vm.voice.last_intent_ref or "none")}</span>'
+        "</div>"
+    )
 
     voice = (
-        '<div class="voice-strip" aria-label="Voice I/O state">'
+        '<div class="voice-strip" aria-label="Voice I/O state" '
+        f'data-muted="{str(vm.voice.muted).lower()}" '
+        f'data-blocked="{str(vm.voice.blocked).lower()}">'
+        '<div class="voice-states">'
         + "".join(voice_states)
+        + "</div>"
+        + voice_status
+        + '<div class="voice-controls">'
+        + voice_input_control
+        + voice_read_control
         + mute_control
+        + "</div>"
         + "</div>"
     )
 
@@ -2707,7 +2749,7 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
                     "human-gated-blocked",
                     "human_gate_blocked",
                     "Human gate blocked",
-                    "Block automated recovery until Scott or a review lane clears the gate.",
+                    "Block automated recovery until user or a review lane clears the gate.",
                     "evidence:human-gate-required",
                 ),
             )
