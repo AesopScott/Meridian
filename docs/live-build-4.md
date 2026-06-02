@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: convert the deepened Relay harness model-selection logic into an implementation checklist.
 
@@ -24,7 +24,15 @@ Task: turn the reviewed Relay model/vendor/session routing logic into a build-re
 
 Tests: none required for docs-only; run text/shape inspection before marking complete.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, verification performed, and a concrete Next Candidate: bind any review findings from the implementation checklist before further Relay routing implementation.
+Completion: completed 2026-06-01.
+
+Ready for Codex Review:
+
+- Commit: pending local commit hash
+- Files changed: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Verification performed: text/shape inspection confirmed the checklist exists, has the required section coverage, preserves `deepseek-chat` as the exact DeepSeek dispatch id, treats `deepseek-v4-pro`/`deepseek-v4-flash` as metadata labels only, changes only allowed files, and passes `git diff --check`.
+- Next Candidate: bind any review findings from the implementation checklist before further Relay routing implementation.
 
 ## Next Candidate Task
 
