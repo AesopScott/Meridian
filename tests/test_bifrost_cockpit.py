@@ -252,6 +252,26 @@ def test_index_wired_harness_titles_use_runtime_logic_naming():
     assert "Vulcan Runtime Logic" in doc
 
 
+def test_index_spark_models_and_balance_use_bridge_runtime_surface():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Model / Balance Runtime" in doc
+    assert 'aria-label="Model and balance runtime"' in doc
+    assert "data-spark-model-balance" in doc
+    assert "renderSparkModelBalanceSurface(actionLabel)" in doc
+    assert "actionLabel === 'Models' || actionLabel === 'Balance'" in doc
+    assert "bridgeUrl('models')" in doc
+    assert "renderSparkModelBalanceSnapshot" in doc
+
+
+def test_index_spark_model_balance_surface_is_display_only():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "display only; no route changes from this panel" in doc
+    assert "unavailable unless trusted backend telemetry is returned" in doc
+    assert "visible through Relay payload snapshots, not estimated here" in doc
+    assert "not available from Spark; Relay and Prime own routing" in doc
+    assert "unknown unless provider exposes trusted telemetry" in doc
+
+
 def test_bridge_exposes_prime_logic_route_and_capability():
     doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
     assert "primeRuntimeSnapshot: true" in doc

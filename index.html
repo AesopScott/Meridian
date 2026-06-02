@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || 'C:\\Users\\user\\Code\\Meridian',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4283,6 +4283,49 @@ body {
     ['visible context', detail.visibleContext ? 'enabled' : 'blocked'],
     ['restart', detail.samePortRestart ? 'same-port reset recovery' : 'manual restart required'],
   ];
+  const renderSparkModelBalanceSnapshot = (snapshot, selectedSurface = 'Models') => {
+    if (!snapshot?.ok) {
+      return relaySection('Model bridge source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'model bridge status unavailable'],
+      ]), true);
+    }
+    const models = Array.isArray(snapshot.models) ? snapshot.models : [];
+    const capabilityRows = Object.entries(snapshot.capabilities || {})
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, value]) => [relayText(key), value ? 'enabled' : 'blocked']);
+    return [
+      relaySection('Model bridge source', relayGrid([
+        ['route', '/bridge/models'],
+        ['service', snapshot.service || 'meridian-model-bridge'],
+        ['version', snapshot.version || 'unknown'],
+        ['selected surface', selectedSurface],
+        ['routing owner', 'Relay / Prime'],
+        ['mutation policy', 'display only; no route changes from this panel'],
+      ]), true),
+      relaySection(
+        'Provider readiness',
+        models.length
+          ? relayGrid(models.map((model) => [
+            model.backend || 'unknown',
+            `${model.label || 'unknown model'} | cli ${model.cli || 'unknown'} | ${model.installed ? 'installed' : 'setup required'}`,
+          ]))
+          : relaySummary('no model readiness payload returned'),
+        true,
+      ),
+      relaySection(
+        'Bridge capability gates',
+        capabilityRows.length ? relayGrid(capabilityRows) : relaySummary('no bridge capability payload returned'),
+        true,
+      ),
+      relaySection('Balance and payload boundary', relayGrid([
+        ['provider balance', 'unavailable unless trusted backend telemetry is returned'],
+        ['prompt payload', 'visible through Relay payload snapshots, not estimated here'],
+        ['route decision', 'not available from Spark; Relay and Prime own routing'],
+        ['cost / quota', 'unknown unless provider exposes trusted telemetry'],
+      ]), true),
+    ].join('');
+  };
   const renderRelayBridgeStatus = async () => {
     const bridgeNode = rightWorkspace?.querySelector('[data-relay-bridge-status]');
     if (!bridgeNode) return;
@@ -4297,6 +4340,18 @@ body {
       bridgeNode.innerHTML = relayGrid(relayBridgeRows(result.ok ? 'online' : 'degraded', detail));
     } catch {
       bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', { visibleContext: false, samePortRestart: false }));
+    }
+  };
+  const loadSparkModelBalance = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-spark-model-balance]');
+    if (!logicNode) return;
+    const selectedSurface = logicNode.dataset.sparkSurface || 'Models';
+    try {
+      const response = await fetch(bridgeUrl('models'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderSparkModelBalanceSnapshot(snapshot, selectedSurface);
+    } catch (error) {
+      logicNode.innerHTML = renderSparkModelBalanceSnapshot({ ok: false, error: error.message }, selectedSurface);
     }
   };
   const clearRightPanelSurface = () => {
@@ -4350,6 +4405,38 @@ body {
         ]), true),
       ],
     });
+  };
+  const renderSparkModelBalanceSurface = (label) => {
+    if (!rightWindow || !rightWorkspace) return false;
+    const selectedSurface = label || 'Models';
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Model and balance runtime">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Model / Balance Runtime</div>
+            <div class="relay-models-status">Display only</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-spark-model-balance data-spark-surface="${escapeHtml(selectedSurface)}">${relaySection('Model bridge source', relayGrid([['status', 'loading bridge model telemetry']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadSparkModelBalance();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
   };
   const renderHarnessSurface = (button) => {
     const harness = button?.dataset.harness || 'Harness';
@@ -4514,6 +4601,7 @@ body {
     if (rightWorkspace?.querySelector('[data-prime-logic]')) loadPrimeLogic();
     if (rightWorkspace?.querySelector('[data-compass-logic]')) loadCompassLogic();
     if (rightWorkspace?.querySelector('[data-vulcan-logic]')) loadVulcanLogic();
+    if (rightWorkspace?.querySelector('[data-spark-model-balance]')) loadSparkModelBalance();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
@@ -4737,7 +4825,9 @@ body {
     screen.classList.remove('session-theme-aqua');
     screen.classList.add('session-theme-green');
     if (userTitle) userTitle.textContent = actionLabel || 'Spark';
-    const rendered = renderSparkSurface(actionLabel || 'Spark');
+    const rendered = (actionLabel === 'Models' || actionLabel === 'Balance')
+      ? renderSparkModelBalanceSurface(actionLabel)
+      : renderSparkSurface(actionLabel || 'Spark');
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('spark', actionLabel || 'Spark', { persist });
