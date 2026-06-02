@@ -24,7 +24,7 @@ Completion: completed 2026-06-01.
 
 Ready for Codex Review:
 
-- Commit: pending local commit hash
+- Commit: `234b7551`
 - Files changed: `docs/relay-promptpacket-proof-metadata-implementation-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers packet id/hash, allowed sources, proof requirements, Aegis evidence ids, payload budget refs, raw-prompt exclusions, tests, Bifrost handoff, FileMap routing, and block conditions; staged diff passes `git diff --cached --check`.
