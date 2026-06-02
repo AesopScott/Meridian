@@ -93,6 +93,49 @@ class PrimeExecutability:
 
 
 @dataclass(frozen=True)
+class PrimeAegisRiskInput:
+    """Aegis proof/risk state Prime can consume without calling Aegis internals."""
+
+    source: str
+    highest_severity: str
+    aggregate_action: str
+    evidence_required: tuple[str, ...] = ()
+    blocked_gates: tuple[str, ...] = ()
+    demoted_gates: tuple[str, ...] = ()
+    approvals_present: tuple[str, ...] = ()
+    waivers_present: tuple[str, ...] = ()
+
+    def is_blocking(self) -> bool:
+        return "blocked" in self.aggregate_action or bool(self.blocked_gates)
+
+    def requires_approval(self) -> bool:
+        return self.highest_severity == "error" or self.is_blocking()
+
+    def summary(self) -> str:
+        return (
+            f"Aegis {self.aggregate_action}; severity={self.highest_severity}; "
+            f"evidence={len(self.evidence_required)}; blocked={len(self.blocked_gates)}"
+        )
+
+    def blockers(self) -> tuple[str, ...]:
+        return tuple(f"Aegis gate blocked: {gate}" for gate in self.blocked_gates)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source": self.source,
+            "highestSeverity": self.highest_severity,
+            "aggregateAction": self.aggregate_action,
+            "evidenceRequired": list(self.evidence_required),
+            "blockedGates": list(self.blocked_gates),
+            "demotedGates": list(self.demoted_gates),
+            "approvalsPresent": list(self.approvals_present),
+            "waiversPresent": list(self.waivers_present),
+            "blocking": self.is_blocking(),
+            "requiresApproval": self.requires_approval(),
+        }
+
+
+@dataclass(frozen=True)
 class PrimeRuntimeContext:
     """Backend context packet Prime consumes before choosing an action."""
 
@@ -101,6 +144,7 @@ class PrimeRuntimeContext:
     session_state: str
     relay_route_summary: str
     risk_summary: str
+    aegis_risk: PrimeAegisRiskInput | None = None
     source_refs: tuple[PrimeSourceRef, ...] = field(default_factory=tuple)
 
     def to_dict(self) -> dict[str, Any]:
@@ -110,6 +154,7 @@ class PrimeRuntimeContext:
             "sessionState": self.session_state,
             "relayRouteSummary": self.relay_route_summary,
             "riskSummary": self.risk_summary,
+            "aegisRisk": self.aegis_risk.to_dict() if self.aegis_risk else None,
             "sourceRefs": [source.to_dict() for source in self.source_refs],
         }
 
@@ -165,6 +210,7 @@ def assemble_prime_runtime_context(
     compass_snapshot: Mapping[str, Any],
     vulcan_snapshot: Mapping[str, Any],
     relay_snapshot: Mapping[str, Any],
+    aegis_risk: PrimeAegisRiskInput | None = None,
     project_id: str = "Meridian",
     risk_summary: str = "Aegis proof/risk gate unavailable; treat as safe read-only until wired.",
 ) -> PrimeRuntimeContext:
@@ -173,6 +219,8 @@ def assemble_prime_runtime_context(
     compass_source = str(compass_snapshot.get("source") or "unknown")
     vulcan_source = str(vulcan_snapshot.get("source") or "unknown")
     relay_source = str(relay_snapshot.get("source") or "unknown")
+    aegis_source = aegis_risk.source if aegis_risk else "pending"
+    final_risk_summary = aegis_risk.summary() if aegis_risk else risk_summary
 
     return PrimeRuntimeContext(
         project_id=project_id,
@@ -188,13 +236,38 @@ def assemble_prime_runtime_context(
             relay_snapshot,
             "Relay model route unavailable.",
         ),
-        risk_summary=risk_summary,
+        risk_summary=final_risk_summary,
+        aegis_risk=aegis_risk,
         source_refs=(
             PrimeSourceRef("Compass", compass_source, "project bounds and scope"),
             PrimeSourceRef("Vulcan", vulcan_source, "session lifecycle state"),
             PrimeSourceRef("Relay", relay_source, "model route and access logic"),
-            PrimeSourceRef("Aegis", "pending", "proof/risk gate placeholder"),
+            PrimeSourceRef("Aegis", aegis_source, "proof/risk gate state"),
         ),
+    )
+
+
+def aegis_risk_from_aggregate(
+    aggregate: Any,
+    *,
+    source: str = "meridian_core.aegis.summarize_aggregate_route_gates",
+) -> PrimeAegisRiskInput:
+    """Convert Aegis aggregate gate summary data into Prime risk input."""
+
+    def field_value(name: str, fallback: Any) -> Any:
+        if isinstance(aggregate, Mapping):
+            return aggregate.get(name, fallback)
+        return getattr(aggregate, name, fallback)
+
+    return PrimeAegisRiskInput(
+        source=source,
+        highest_severity=str(field_value("highest_severity", "info")),
+        aggregate_action=str(field_value("aggregate_action", "route_allowed")),
+        evidence_required=tuple(str(item) for item in field_value("evidence_required", ())),
+        blocked_gates=tuple(str(item) for item in field_value("blocked_gates", ())),
+        demoted_gates=tuple(str(item) for item in field_value("demoted_gates", ())),
+        approvals_present=tuple(str(item) for item in field_value("approvals_present", ())),
+        waivers_present=tuple(str(item) for item in field_value("waivers_present", ())),
     )
 
 
@@ -237,7 +310,10 @@ def evaluate_prime_executability(
     if owner_harness == "Relay" and "Relay" not in available:
         blockers.append("model route proof unavailable")
 
-    if requires_approval:
+    if context.aegis_risk and context.aegis_risk.is_blocking():
+        blockers.extend(context.aegis_risk.blockers())
+
+    if requires_approval or (context.aegis_risk and context.aegis_risk.requires_approval()):
         return PrimeExecutability(
             status=PrimeDecisionStatus.NEEDS_APPROVAL,
             blockers=tuple(blockers + ["approval required"]),
@@ -296,6 +372,16 @@ def build_prime_proof_packet(
             ),
             source="Relay",
             invalidates_when="Prime selects a model/vendor without Relay evidence.",
+        ),
+        PrimeProof(
+            question="What proof/risk gate did Aegis return?",
+            answer=(
+                context.aegis_risk.summary()
+                if context.aegis_risk
+                else "Aegis proof/risk source is unavailable."
+            ),
+            source="Aegis",
+            invalidates_when="Prime executes a gated action without an Aegis risk input.",
         ),
         PrimeProof(
             question="Does the selected owner match the intent?",
@@ -374,6 +460,7 @@ def prime_runtime_snapshot() -> dict[str, Any]:
     """Return the canonical Prime runtime packet for bridge/UI rendering."""
 
     from meridian_core.compass_logic_snapshot import compass_logic_snapshot
+    from meridian_core.aegis import summarize_aggregate_route_gates
     from meridian_core.relay_logic_snapshot import relay_logic_snapshot
     from meridian_core.vulcan_logic_snapshot import vulcan_logic_snapshot
 
@@ -381,6 +468,7 @@ def prime_runtime_snapshot() -> dict[str, Any]:
         compass_snapshot=compass_logic_snapshot(),
         vulcan_snapshot=vulcan_logic_snapshot(),
         relay_snapshot=relay_logic_snapshot(),
+        aegis_risk=aegis_risk_from_aggregate(summarize_aggregate_route_gates([])),
     )
     decision = resolve_prime_decision(
         context=context,
@@ -413,7 +501,7 @@ def prime_runtime_snapshot() -> dict[str, Any]:
                     {"key": "1 Compass", "value": "project bounds and scope"},
                     {"key": "2 Vulcan", "value": "session lifecycle and runtime target state"},
                     {"key": "3 Relay", "value": "model route, vendor access, route proof, fallback blockers"},
-                    {"key": "4 Aegis", "value": "proof/risk gate; placeholder until live gate is wired"},
+                    {"key": "4 Aegis", "value": "proof/risk aggregate action, severity, evidence, and blockers"},
                     {"key": "5 Prime", "value": "select owner, explain why, block if source proof is missing"},
                 ],
             },
@@ -423,8 +511,18 @@ def prime_runtime_snapshot() -> dict[str, Any]:
                 "rows": [
                     {"key": "executable", "value": "all required owner sources are available and no gate blocks action"},
                     {"key": "blocked", "value": "required backend source or route proof is missing"},
-                    {"key": "needs approval", "value": "human or Aegis gate required before execution"},
+                    {"key": "needs approval", "value": "human gate or Aegis blocking/error risk requires approval before execution"},
                     {"key": "needs clarification", "value": "intent/scope is ambiguous enough to require Scott-facing question"},
+                ],
+            },
+            {
+                "title": "Aegis Binding",
+                "summary": "Prime consumes Aegis aggregate gate state as backend risk truth instead of a placeholder.",
+                "rows": [
+                    {"key": "source", "value": context.aegis_risk.source if context.aegis_risk else "unavailable"},
+                    {"key": "aggregate action", "value": context.aegis_risk.aggregate_action if context.aegis_risk else "unavailable"},
+                    {"key": "highest severity", "value": context.aegis_risk.highest_severity if context.aegis_risk else "unavailable"},
+                    {"key": "blocking", "value": "yes" if context.aegis_risk and context.aegis_risk.is_blocking() else "no"},
                 ],
             },
             {

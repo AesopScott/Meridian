@@ -4027,6 +4027,7 @@ body {
     }
     const decision = snapshot.decision || {};
     const context = decision.context || {};
+    const aegisRisk = context.aegisRisk || {};
     const proof = Array.isArray(decision.proof) ? decision.proof : [];
     const refs = Array.isArray(context.sourceRefs) ? context.sourceRefs : [];
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
@@ -4052,6 +4053,15 @@ body {
         ['session logic', context.sessionState || 'unknown'],
         ['relay logic', context.relayRouteSummary || 'unknown'],
         ['risk logic', context.riskSummary || 'unknown'],
+      ]), true),
+      relaySection('Aegis risk logic', relayGrid([
+        ['source', aegisRisk.source || 'unavailable'],
+        ['aggregate action', relayText(aegisRisk.aggregateAction)],
+        ['highest severity', relayText(aegisRisk.highestSeverity)],
+        ['blocking', aegisRisk.blocking ? 'yes' : 'no'],
+        ['requires approval', aegisRisk.requiresApproval ? 'yes' : 'no'],
+        ['blocked gates', (aegisRisk.blockedGates || []).map(relayText).join(' | ') || 'none'],
+        ['evidence required', (aegisRisk.evidenceRequired || []).map(relayText).join(' | ') || 'none'],
       ]), true),
       relaySection('Source refs', relayGrid(refs.map((source) => [
         source.harness || 'unknown',

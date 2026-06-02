@@ -2,14 +2,22 @@
 
 from meridian_core.compass_logic_snapshot import compass_logic_snapshot
 from meridian_core.prime_runtime import (
+    PrimeAegisRiskInput,
     PrimeDecisionStatus,
     PrimeIntentKind,
+    aegis_risk_from_aggregate,
     assemble_prime_runtime_context,
     evaluate_prime_executability,
     make_prime_decision,
     resolve_prime_decision,
     resolve_prime_owner,
     prime_runtime_snapshot,
+)
+from meridian_core.aegis import (
+    GateDecision,
+    GateResult,
+    summarize_aggregate_route_gates,
+    summarize_gate_results,
 )
 from meridian_core.relay_logic_snapshot import relay_logic_snapshot
 from meridian_core.vulcan_logic_snapshot import vulcan_logic_snapshot
@@ -32,6 +40,7 @@ def test_prime_runtime_context_assembles_backend_sources():
         "Relay",
         "Aegis",
     ]
+    assert context.aegis_risk is None
 
 
 def test_prime_decision_shape_is_visible_and_executable():
@@ -48,8 +57,9 @@ def test_prime_decision_shape_is_visible_and_executable():
     assert payload["ownerHarness"] == "Prime"
     assert payload["executable"] is True
     assert payload["blockers"] == []
-    assert len(payload["proof"]) == 4
+    assert len(payload["proof"]) == 5
     assert {item["source"] for item in payload["proof"]} == {
+        "Aegis",
         "Compass",
         "Vulcan",
         "Relay",
@@ -88,7 +98,63 @@ def test_prime_context_falls_back_without_inventing_sources():
     assert payload["projectSummary"] == "Compass project context unavailable."
     assert payload["sessionState"] == "Vulcan session lifecycle unavailable."
     assert payload["relayRouteSummary"] == "Relay model route unavailable."
+    assert payload["aegisRisk"] is None
     assert all(source["source"] in {"unknown", "pending"} for source in payload["sourceRefs"])
+
+
+def test_prime_context_consumes_aegis_aggregate_gate_summary():
+    aggregate = summarize_aggregate_route_gates(summarize_gate_results([]))
+    aegis_risk = aegis_risk_from_aggregate(aggregate)
+    context = assemble_prime_runtime_context(
+        compass_snapshot=compass_logic_snapshot(),
+        vulcan_snapshot=vulcan_logic_snapshot(),
+        relay_snapshot=relay_logic_snapshot(),
+        aegis_risk=aegis_risk,
+    )
+    payload = context.to_dict()
+
+    assert context.aegis_risk is not None
+    assert payload["aegisRisk"]["aggregateAction"] == "route_allowed"
+    assert payload["aegisRisk"]["highestSeverity"] == "info"
+    assert payload["aegisRisk"]["blocking"] is False
+    assert payload["sourceRefs"][-1]["source"] == "meridian_core.aegis.summarize_aggregate_route_gates"
+
+
+def test_prime_executability_needs_approval_when_aegis_blocks():
+    aggregate = summarize_aggregate_route_gates(
+        summarize_gate_results([
+            GateResult(
+                gate_name="unknown_route_class",
+                decision=GateDecision.BLOCK,
+                reason="route class missing",
+            )
+        ])
+    )
+    context = assemble_prime_runtime_context(
+        compass_snapshot=compass_logic_snapshot(),
+        vulcan_snapshot=vulcan_logic_snapshot(),
+        relay_snapshot=relay_logic_snapshot(),
+        aegis_risk=aegis_risk_from_aggregate(aggregate),
+    )
+    gate = evaluate_prime_executability(context=context, owner_harness="Prime")
+
+    assert gate.status == PrimeDecisionStatus.NEEDS_APPROVAL
+    assert "Aegis gate blocked: unknown_route_class" in gate.blockers
+    assert "approval required" in gate.blockers
+
+
+def test_prime_aegis_risk_input_serializes_without_aegis_imports():
+    risk = PrimeAegisRiskInput(
+        source="manual-test",
+        highest_severity="warning",
+        aggregate_action="route_demoted_to_tier_1",
+        evidence_required=("gate: proof",),
+        demoted_gates=("deepseek_validation",),
+    )
+
+    assert risk.is_blocking() is False
+    assert risk.requires_approval() is False
+    assert risk.to_dict()["demotedGates"] == ["deepseek_validation"]
 
 
 def test_prime_owner_resolver_maps_intents_to_harnesses():
@@ -186,7 +252,9 @@ def test_prime_runtime_snapshot_is_backend_visible_contract():
     assert snapshot["source"] == "meridian_core.prime_runtime.resolve_prime_decision"
     assert snapshot["decision"]["ownerHarness"] == "Prime"
     assert snapshot["decision"]["context"]["sourceRefs"][0]["harness"] == "Compass"
+    assert snapshot["decision"]["context"]["aegisRisk"]["aggregateAction"] == "route_allowed"
     assert "Prime Job" in titles
     assert "Logic Hierarchy" in titles
+    assert "Aegis Binding" in titles
     assert "Executability Logic" in titles
     assert "Proof Packet" in titles
