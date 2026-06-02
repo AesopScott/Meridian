@@ -9,6 +9,8 @@ import pytest
 
 from bifrost.cockpit import (
     AegisPromptPacketPolicyView,
+    CommandStagingReviewItem,
+    CommandStagingReviewView,
     CockpitViewModel,
     DispatchHardeningView,
     HarnessCard,
@@ -2629,6 +2631,133 @@ def test_session_lifecycle_recovery_readiness_preserves_stale_recovery_samples()
     assert 'data-recovery-action="archive-session"' in doc
     assert 'data-recovery-action="poll-watch-session"' in doc
     assert 'data-recovery-action="human-gated-blocked"' in doc
+
+
+def test_session_lifecycle_renders_command_staging_review_summary():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Live-Control Command-Plan Staging Review"' in doc
+    assert "Command-Plan Staging Review" in doc
+    assert "Source: session-lifecycle-command-staging-sample" in doc
+
+    for staging_id in (
+        "staging:build-5-bifrost:restart",
+        "staging:build-5-bifrost:resteer",
+        "staging:build-5-bifrost:archive",
+    ):
+        assert f'data-staging-id="{staging_id}"' in doc
+
+    assert 'data-target-session-id="build-5-bifrost"' in doc
+    assert "Staged: restart" in doc
+    assert "Staged: resteer" in doc
+    assert "Staged: archive" in doc
+    assert "Recommended: restart" in doc
+    assert "Recommended: resteer" in doc
+    assert "Recommended: archive" in doc
+    assert "Required operation: restart" in doc
+    assert "Required operation: resteer" in doc
+    assert "Required operation: archive" in doc
+
+
+def test_session_lifecycle_command_staging_review_renders_review_gates_and_advisories():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Ready flag: yes" in doc
+    assert "Ready flag: no" in doc
+    assert "Executable now: no" in doc
+    assert "UI review required: yes" in doc
+    assert "Permission: unlocked_temporary" in doc
+    assert "Permission: locked_by_default" in doc
+
+    assert "UI review required before future live-control command execution." in doc
+    assert "Human or Aegis gate required before future live-control command staging." in doc
+    assert "Archive intent remains blocked until Scott or review lane clears the gate." in doc
+    assert "prime-advisory:command-staging-review" in doc
+    assert "prime-advisory:resteer-review-required" in doc
+    assert "prime-advisory:archive-human-gate" in doc
+    assert "beacon:staging_restart" in doc
+    assert "beacon:staging_resteer" in doc
+    assert "beacon:staging_archive" in doc
+    assert "command_plan.ui_review_required" in doc
+    assert "permission.locked" in doc
+    assert "human_gate_required" in doc
+    assert "staging.is_executable_now=False" in doc
+    assert "staging.ui_review_required=True" in doc
+    assert "permission.state=unlocked_temporary" in doc
+    assert "permission.state=locked_by_default" in doc
+
+
+def test_session_lifecycle_command_staging_review_escapes_structured_fields():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="test",
+                session_name="Test",
+                project_name="TestProj",
+                harness_role="build",
+                status="running",
+                health_state="healthy",
+            )
+        ],
+        command_staging_review=CommandStagingReviewView(
+            source="<script>source</script>",
+            items=[
+                CommandStagingReviewItem(
+                    staging_id="<script>staging</script>",
+                    readiness_summary_id="summary:<bad>",
+                    target_session_id="<img src=x>",
+                    command_kind="<bad-kind>",
+                    recommended_action="restart:<bad>",
+                    required_operation="operation:<bad>",
+                    ready_for_execution=True,
+                    is_executable_now=False,
+                    ui_review_required=True,
+                    permission_state="permission:<bad>",
+                    human_gate_rationale="rationale:<bad>",
+                    prime_advisory_ref="prime:<bad>",
+                    beacon_advisory_ref="beacon:<bad>",
+                    blockers=["blocker:<bad>"],
+                    evidence_refs=["evidence:<bad>"],
+                )
+            ],
+        ),
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "Source: &lt;script&gt;source&lt;/script&gt;" in doc
+    assert 'data-staging-id="&lt;script&gt;staging&lt;/script&gt;"' in doc
+    assert 'data-target-session-id="&lt;img src=x&gt;"' in doc
+    assert "Staged: &lt;bad-kind&gt;" in doc
+    assert "Recommended: restart:&lt;bad&gt;" in doc
+    assert "Required operation: operation:&lt;bad&gt;" in doc
+    assert "Readiness summary: summary:&lt;bad&gt;" in doc
+    assert "Permission: permission:&lt;bad&gt;" in doc
+    assert "Human gate: rationale:&lt;bad&gt;" in doc
+    assert "Prime advisory: prime:&lt;bad&gt;" in doc
+    assert "Beacon advisory: beacon:&lt;bad&gt;" in doc
+    assert "blocker:&lt;bad&gt;" in doc
+    assert "evidence:&lt;bad&gt;" in doc
+
+
+def test_command_staging_review_preserves_adjacent_display_only_surfaces():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-staging-session", "Closed Staging Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-staging-session"
+    doc = render_cockpit_html(vm)
+
+    assert 'aria-label="Live-Control Command-Plan Staging Review"' in doc
+    assert 'aria-label="Visible Prompt Payload Meter"' in doc
+    assert 'aria-label="Recovery Readiness Advisory Summary"' in doc
+    assert 'aria-label="Model Harness Runtime Validation Envelopes"' in doc
+    assert 'aria-label="Provider Balance"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'aria-label="Relay Aegis Policy Handoff Summary"' in doc
+    assert 'class="stale-recovery-actions"' in doc
+    assert 'data-recovery-action="restart-session"' in doc
+    assert "Next prompt target: Closed Staging Session" not in doc
 
 
 # Proof State Tests

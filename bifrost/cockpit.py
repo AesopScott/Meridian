@@ -349,10 +349,36 @@ class RecoveryReadinessAdvisory:
 
 
 @dataclass
+class CommandStagingReviewItem:
+    staging_id: str
+    readiness_summary_id: str
+    target_session_id: str
+    command_kind: str
+    recommended_action: str
+    required_operation: str
+    ready_for_execution: bool
+    is_executable_now: bool
+    ui_review_required: bool
+    permission_state: str
+    human_gate_rationale: str
+    prime_advisory_ref: str
+    beacon_advisory_ref: str
+    blockers: list[str] = field(default_factory=list)
+    evidence_refs: list[str] = field(default_factory=list)
+
+
+@dataclass
+class CommandStagingReviewView:
+    items: list[CommandStagingReviewItem] = field(default_factory=list)
+    source: str = "sample"
+
+
+@dataclass
 class SessionLifecycleView:
     sessions: list[SessionLifecycleItem] = field(default_factory=list)
     active_session_id: str = ""
     recovery_readiness: RecoveryReadinessAdvisory = field(default_factory=RecoveryReadinessAdvisory)
+    command_staging_review: CommandStagingReviewView = field(default_factory=CommandStagingReviewView)
 
 
 @dataclass
@@ -1125,6 +1151,83 @@ def sample_cockpit_view_model(
                         permission_state="requires_scott",
                         evidence_ref="evidence:human-gate-required",
                         advisory="Automated recovery is blocked until Scott or review lane clears the gate.",
+                    ),
+                ],
+            ),
+            command_staging_review=CommandStagingReviewView(
+                source="session-lifecycle-command-staging-sample",
+                items=[
+                    CommandStagingReviewItem(
+                        staging_id="staging:build-5-bifrost:restart",
+                        readiness_summary_id="readiness:build-5-bifrost:restart",
+                        target_session_id="build-5-bifrost",
+                        command_kind="restart",
+                        recommended_action="restart",
+                        required_operation="restart",
+                        ready_for_execution=True,
+                        is_executable_now=False,
+                        ui_review_required=True,
+                        permission_state="unlocked_temporary",
+                        human_gate_rationale="UI review required before future live-control command execution.",
+                        prime_advisory_ref="prime-advisory:command-staging-review",
+                        beacon_advisory_ref="beacon:staging_restart",
+                        blockers=["command_plan.ui_review_required"],
+                        evidence_refs=[
+                            "staging.id=build-5-bifrost:restart",
+                            "staging.is_executable_now=False",
+                            "staging.ui_review_required=True",
+                            "permission.state=unlocked_temporary",
+                        ],
+                    ),
+                    CommandStagingReviewItem(
+                        staging_id="staging:build-5-bifrost:resteer",
+                        readiness_summary_id="readiness:build-5-bifrost:resteer",
+                        target_session_id="build-5-bifrost",
+                        command_kind="resteer",
+                        recommended_action="resteer",
+                        required_operation="resteer",
+                        ready_for_execution=False,
+                        is_executable_now=False,
+                        ui_review_required=True,
+                        permission_state="locked_by_default",
+                        human_gate_rationale="Human or Aegis gate required before future live-control command staging.",
+                        prime_advisory_ref="prime-advisory:resteer-review-required",
+                        beacon_advisory_ref="beacon:staging_resteer",
+                        blockers=[
+                            "command_plan.ui_review_required",
+                            "permission.locked",
+                        ],
+                        evidence_refs=[
+                            "staging.id=build-5-bifrost:resteer",
+                            "staging.required_operation=resteer",
+                            "staging.ready_for_execution=False",
+                            "permission.state=locked_by_default",
+                        ],
+                    ),
+                    CommandStagingReviewItem(
+                        staging_id="staging:build-5-bifrost:archive",
+                        readiness_summary_id="readiness:build-5-bifrost:archive",
+                        target_session_id="build-5-bifrost",
+                        command_kind="archive",
+                        recommended_action="archive",
+                        required_operation="archive",
+                        ready_for_execution=False,
+                        is_executable_now=False,
+                        ui_review_required=True,
+                        permission_state="locked_by_default",
+                        human_gate_rationale="Archive intent remains blocked until Scott or review lane clears the gate.",
+                        prime_advisory_ref="prime-advisory:archive-human-gate",
+                        beacon_advisory_ref="beacon:staging_archive",
+                        blockers=[
+                            "command_plan.ui_review_required",
+                            "human_gate_required",
+                        ],
+                        evidence_refs=[
+                            "staging.id=build-5-bifrost:archive",
+                            "staging.required_operation=archive",
+                            "staging.human_gate_required=True",
+                            "permission.state=locked_by_default",
+                        ],
                     ),
                 ],
             ),
@@ -2393,6 +2496,62 @@ def _render_session_lifecycle(lifecycle: SessionLifecycleView) -> str:
             "</div>"
         )
 
+    staging_html = ""
+    staging = lifecycle.command_staging_review
+    if staging.items:
+        staged_items = []
+        for item in staging.items:
+            blockers = "".join(
+                f'<span class="command-staging-chip command-staging-blocker">{_e(blocker)}</span>'
+                for blocker in item.blockers
+            ) or '<span class="command-staging-chip command-staging-empty">none</span>'
+            evidence = "".join(
+                f'<span class="command-staging-chip command-staging-evidence">{_e(ref)}</span>'
+                for ref in item.evidence_refs
+            ) or '<span class="command-staging-chip command-staging-empty">no_evidence_refs</span>'
+            ready_label = "yes" if item.ready_for_execution else "no"
+            executable_label = "yes" if item.is_executable_now else "no"
+            ui_review_label = "yes" if item.ui_review_required else "no"
+            staged_items.append(
+                f'<div class="command-staging-item command-staging-{_e(item.command_kind)}" data-staging-id="{_e(item.staging_id)}" data-target-session-id="{_e(item.target_session_id)}">'
+                '<div class="command-staging-item-header">'
+                f'<span class="command-staging-kind">Staged: {_e(item.command_kind)}</span>'
+                f'<span class="command-staging-target">Target: {_e(item.target_session_id)}</span>'
+                f'<span class="command-staging-recommended">Recommended: {_e(item.recommended_action)}</span>'
+                f'<span class="command-staging-operation">Required operation: {_e(item.required_operation)}</span>'
+                "</div>"
+                '<div class="command-staging-grid">'
+                f'<span>Readiness summary: {_e(item.readiness_summary_id)}</span>'
+                f'<span>Ready flag: {ready_label}</span>'
+                f'<span>Executable now: {executable_label}</span>'
+                f'<span>UI review required: {ui_review_label}</span>'
+                f'<span>Permission: {_e(item.permission_state)}</span>'
+                f'<span>Prime advisory: {_e(item.prime_advisory_ref)}</span>'
+                f'<span>Beacon advisory: {_e(item.beacon_advisory_ref)}</span>'
+                f'<span>Human gate: {_e(item.human_gate_rationale)}</span>'
+                "</div>"
+                '<div class="command-staging-lists">'
+                '<div class="command-staging-list" aria-label="Command Staging Review Blockers"><span class="command-staging-list-title">Blockers</span>'
+                + blockers
+                + "</div>"
+                '<div class="command-staging-list" aria-label="Command Staging Review Evidence Refs"><span class="command-staging-list-title">Evidence</span>'
+                + evidence
+                + "</div>"
+                "</div>"
+                "</div>"
+            )
+        staging_html = (
+            '<div class="command-staging-review" aria-label="Live-Control Command-Plan Staging Review">'
+            '<div class="command-staging-main-header">'
+            '<h4>Command-Plan Staging Review</h4>'
+            f'<span class="command-staging-source">Source: {_e(staging.source)}</span>'
+            "</div>"
+            '<div class="command-staging-items">'
+            + "".join(staged_items)
+            + "</div>"
+            "</div>"
+        )
+
     session_cards = []
     for session in lifecycle.sessions:
         is_active = session.session_id == lifecycle.active_session_id
@@ -2431,6 +2590,7 @@ def _render_session_lifecycle(lifecycle: SessionLifecycleView) -> str:
         '<h3>Session Lifecycle</h3>'
         "</div>"
         + advisory_html
+        + staging_html
         + '<div class="session-cards">'
         + "".join(session_cards)
         + "</div>"
