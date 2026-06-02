@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: create a docs-only implementation checklist for the next Relay post-transport validation evidence surface.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/provider-result-validation-evidence-checklist.md`, `docs/live-build-4.md`.
+
+Task: define how provider-return/adapter-result metadata should be summarized without raw provider responses, credentials, account probing, or live calls, and how Relay/Aegis/Bifrost should fail closed/display deterministic evidence. Cover exact model id, route kind, proof refs, prompt-drag/budget fields, external review state, deterministic tests, and explicit exclusions.
+
+Tests: docs-only; run text/shape inspection plus `git diff --check`.
+
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `d897cf99`
+- Files changed: `docs/provider-result-validation-evidence-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Verification performed: text/shape inspection confirmed the checklist exists and covers provider-return/adapter-result metadata summarization without raw provider responses, credentials, account probing, or live calls; Relay/Aegis/Bifrost fail-closed and display-safe deterministic evidence; exact model id, route kind, proof refs, prompt-drag/budget fields, external review state, deterministic tests, and explicit exclusions; staged diff passes `git diff --cached --check`.
+- Next Candidate: implement reviewed provider result validation evidence runtime surface.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement the reviewed provider transport metadata pass-through runtime slice from `docs/provider-transport-metadata-pass-through-checklist.md`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
