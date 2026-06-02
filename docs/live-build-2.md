@@ -8,6 +8,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Hold - Review Gate Active
+
+Status: Build 2 is not idle; it is blocked on Codex Reviews A for current-main commit `e41851ae`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Required first command while polling: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Current blocker: Reviews A has an executable Active Now task in `docs/live-codex-reviews.md` to review Build 2 commit `e41851ae` for the remaining Session Lifecycle permission-invariant repair. Do not start the restart/resteer recovery test candidate until Reviews A passes this repair or routes a focused finding.
+
+Next Candidate when the review gate clears: add Session Lifecycle restart/resteer recovery tests after permissions binding clears review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining Session Lifecycle permission-invariant gaps.

@@ -8,6 +8,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Hold - Review Gate Active
+
+Status: Build 4 is not idle; it is blocked on Codex Reviews B for current-main commit `fe0b0138`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Required first command while polling: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Current blocker: Reviews B has an executable Active Now task in `docs/live-codex-reviews-2.md` to review Build 4 commit `fe0b0138` for the account-first wrong-scope fallback repair. Do not convert the deepened Relay harness model-selection logic into an implementation checklist until Reviews B passes this repair or routes a focused finding.
+
+Next Candidate when the review gate clears: convert the deepened Relay harness model-selection logic into an implementation checklist.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining account-first wrong-scope fallback contradiction from Codex Reviews B.

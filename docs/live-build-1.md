@@ -4,6 +4,34 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add DeepSeek candidate metadata presets to the provider-neutral Model Harness.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Allowed files only: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
+
+Required sources: `docs/model-harness-v2-contract.md`, `docs/deepseek-provider-validation-gate.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, and `docs/v2-progress-tracker.md`.
+
+Task: add provider-neutral DeepSeek candidate metadata helpers/presets without live API calls. The Model Harness should be able to represent DeepSeek direct-provider candidate routes for a default quality lane and a fast lane while preserving the validation-gate constraints: DeepSeek remains candidate trust, cannot clear reviews, cannot move branches, cannot bypass Relay/Aegis, and cannot run autonomous coding lanes until validation proof exists. Keep exact dispatch identity aligned with the reviewed Relay routing docs: `deepseek-chat` is the direct API dispatch id; marketing labels such as `deepseek-v4-pro` and `deepseek-v4-flash` may appear only as metadata/variant labels, not dispatch keys. Do not add network access, credentials, live model calls, UI/Bifrost rendering, branch movement, or Polaris dependency.
+
+Tests:
+
+- `python -m pytest tests/test_model_adapter.py -q`
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from the DeepSeek metadata preset slice before further Relay/Model work.
+
+## Next Candidate Task
+
+Goal: bind any Codex review findings from the DeepSeek metadata preset slice.
+
+Allowed files only: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
+
+Task: if Codex Reviews A routes a finding from the DeepSeek metadata preset review, repair that finding before taking unrelated Relay work. If Reviews A passes the slice with no findings, Prime may replace this candidate with the next Relay/Model Harness item from `docs/v2-progress-tracker.md`.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Relay proof payload downstream-consumer checklist now that negative-path tests cleared review.

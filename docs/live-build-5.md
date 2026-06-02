@@ -4,6 +4,18 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Hold - Review Gate Active
+
+Status: Build 5 is not idle; it is blocked on Codex Reviews B for current-main commit `31a92c8c`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Required first command while polling: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Current blocker: Reviews B should review Build 5 stale-target guard sample rendering after the current Build 4 review clears. Do not start stale-session recovery action rendering until the stale-target guard passes review or Reviews B routes a focused finding.
+
+Next Candidate when the review gate clears: add stale-session recovery action sample rendering after stale-target guard clears review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add stale-target guard sample rendering after Sessions dropdown repair cleared review.
