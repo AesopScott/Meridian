@@ -127,7 +127,7 @@ Current orchestrator review:
 
 ## Open Checkpoint 3 - Supervised Routing Trial
 
-Status: open; replacement coordinator is approved to perform one supervised routing cycle.
+Status: supervised routing cycle recorded; awaiting current orchestrator review.
 
 Replacement coordinator should perform one supervised routing cycle:
 
@@ -136,6 +136,15 @@ Replacement coordinator should perform one supervised routing cycle:
 - Draft or apply only coordinator-scoped queue updates.
 - Preserve every worker's unique-worktree and no-movement rule.
 - Record actions and proof here.
+
+Replacement coordinator supervised routing trial - 2026-06-02:
+
+- Containment gate: fetched `origin/main`; verified shared main `C:\Users\scott\Code\Meridian` was on `main`, aligned with `origin/main`, and clean before routing. Verified affected worktrees Build 3 and Reviews B were clean before routing.
+- Queue update applied to `docs/live-build-3.md`: added a supervised escalation block with path-specific FileMap evidence. Missing coverage evidence named `meridian_core/relay_logic_snapshot.py`, `tests/test_relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, and `index.html`; existing coverage noted for the three Relay/UI docs. Required Build 3 to complete registration or write a concrete out-of-scope blocker with command evidence; read-check-only updates explicitly rejected.
+- Queue update applied to `docs/live-codex-reviews-2.md`: added a supervised escalation block requiring Reviews B to review the current-main Relay UI/runtime integration and record `Completed / Passed`, `Completed / Finding Routed`, or a concrete blocker. Minimum proof remains `python -m pytest tests/test_relay_logic_snapshot.py -q`; read-check-only updates explicitly rejected.
+- Build 4 route held unchanged: it remains correctly assigned to create `docs/relay-heartbeat-model-routing-implementation-checklist.md`; no Build 4 queue edit was needed.
+- No branch/worktree movement was approved. No worker implementation files were edited. No shared-main implementation contamination was observed.
+- Follow-up needed after current-orchestrator review: fast-forward or otherwise sync the clean affected worker worktrees only if approved/needed so Build 3 and Reviews B can consume these current-main queue updates.
 
 ## Full Takeover Criteria
 

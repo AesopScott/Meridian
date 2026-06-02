@@ -14,6 +14,13 @@ Coordinator nudge: this is not a passive poll. Review the landed Relay harness U
 
 Escalation: if this review lane cannot complete the Relay UI/runtime integration review in the next work cycle, write a concrete blocker in this queue with the command/output evidence. Do not add a read-check-only commit.
 
+Replacement coordinator supervised escalation - 2026-06-02:
+
+- Shared main was fetched and verified clean on `main`; Reviews B worktree was verified clean before this routing update.
+- Intake evidence still shows no pass, focused finding, or concrete blocker for the Relay UI/runtime integration review.
+- Review current `origin/main` now and record one of: `Completed / Passed`, `Completed / Finding Routed`, or a concrete blocker with command/output evidence.
+- Minimum proof remains `python -m pytest tests/test_relay_logic_snapshot.py -q`. If the proof cannot run, record the exact command failure and whether the blocker is local environment, missing file, stale worktree, or review-scope ambiguity. A read-check-only update is not progress.
+
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
 Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.

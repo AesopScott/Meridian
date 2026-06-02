@@ -16,6 +16,13 @@ Coordinator nudge: this is not a passive poll. Execute this FileMap audit now; t
 
 Escalation: if this lane cannot complete the FileMap registration in the next work cycle, write a concrete blocker in this queue with the command/output evidence. Do not add a read-check-only commit.
 
+Replacement coordinator supervised escalation - 2026-06-02:
+
+- Shared main was fetched and verified clean on `main`; Build 3 worktree was verified clean before this routing update.
+- Intake evidence still shows no completion or concrete blocker for this task.
+- Targeted FileMap search found existing registration for `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/ui-integration-checklist.md`, but no FileMap coverage hits for `meridian_core/relay_logic_snapshot.py`, `tests/test_relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, or `index.html` in `meridian_core/filemap.py`, `docs/FileMap.md`, or `tests/test_filemap.py`.
+- Execute this task now. If any listed file should not be registered, write a concrete blocker here naming the file, the command used to inspect it, and the reason it is out of FileMap scope. A read-check-only update is not progress.
+
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
 
 Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
