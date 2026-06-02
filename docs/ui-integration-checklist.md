@@ -434,7 +434,7 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 
 | ID | Harness Button | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| HN1 | Prime | Opens/focuses Prime core session surface. | partial | Click updates session title/focus without fake status text. |
+| HN1 | Prime | Opens/focuses Prime runtime logic surface. | wired | Click opens Prime Runtime Logic with backend-sourced decision, context, source refs, proof logic, and blockers. |
 | HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | partial | Click updates session title/focus without fake status text. |
 | HN3 | Relay | Opens/focuses model-routing surface. | wired | Click opens Relay Model Logic with bridge/access/model/dispatch/blocker logic; Auto remains disabled. |
 | HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | partial | Click updates session title/focus without fake heartbeat details. |
@@ -459,6 +459,7 @@ Compass and Vulcan definitions are backend/V2 build requirements, not UI checkli
 
 | ID | Backend Dependency | UI Readiness Rule | Current Status | Verification |
 |---|---|---|---|---|
+| HBD0 | Prime runtime contract | Prime UI may render backend-sourced orchestration logic, but must not invent owner, proof, blocker, or executability state outside the Prime backend packet. | wired | Prime panel reads `/bridge/prime-logic`; review status lives in `docs/v2-progress-tracker.md`. |
 | HBD1 | Compass backend checklist | Compass UI may render backend-sourced project logic, but must not invent project definitions or cross-project handoff controls before V2 backend rows are built. | wired | Compass panel reads `/bridge/compass-logic`; deeper backend rows live in `docs/v2-progress-tracker.md`. |
 | HBD2 | Vulcan backend checklist | Vulcan UI may render backend-sourced session lifecycle logic, but must not execute session command plans before V2 backend rows are built. | wired | Vulcan panel reads `/bridge/vulcan-logic`; deeper backend rows live in `docs/v2-progress-tracker.md`. |
 

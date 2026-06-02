@@ -80,17 +80,23 @@ First wave deliverable:
 - Define a `PrimeNextAction` domain object.
 - Add a deterministic selector that takes project, backlog priority, active lane state, risk tier, and open review gates.
 - Return a proposed action, confidence, blockers, and required human gate status.
+- Define a `PrimeDecision` runtime packet that assembles Compass, Vulcan, Relay, and Aegis source refs before visible orchestration.
+- Resolve the owning harness, executability status, blockers, proof questions, and invalidation conditions from backend state.
+- Expose the runtime packet through `/bridge/prime-logic` so the Prime harness renders backend logic directly.
 
 **Likely files/modules/docs:**
 
 - `meridian_core/prime_autonomy.py`
+- `meridian_core/prime_runtime.py`
 - `tests/test_prime_autonomy.py`
+- `tests/test_prime_runtime.py`
 - `docs/prime-autonomy-v2-contract.md`
 - Bifrost view-model extension later, after the domain object is stable.
 
 **Proof/test expectation:**
 
 - Unit tests for priority ordering, blocked review gates, stale lanes, and human-gate required actions.
+- Runtime snapshot tests for backend source refs, owner resolution, executability gates, proof packet, and bridge-visible payload shape.
 - No model calls in the first slice.
 
 **Out-of-scope guardrails:**

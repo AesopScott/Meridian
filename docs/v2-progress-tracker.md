@@ -10,7 +10,7 @@
 
 | Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Prime Autonomy | 2 | 0 | 0 | 0 | 2 | 100% |
+| Prime Autonomy | 2 | 1 | 0 | 0 | 3 | 67% clear + 33% awaiting |
 | Echo Harness | 2 | 0 | 2 | 0 | 4 | 100% |
 | Atlas Harness | 2 | 0 | 1 | 0 | 3 | 100% |
 | Relay/Model Harness | 2 | 0 | 2 | 6 | 10 | 20% clear + 20% baseline |
@@ -19,7 +19,7 @@
 | Session Lifecycle Harness | 1 | 0 | 1 | 5 | 7 | 29% |
 | Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **13** | **0** | **9** | **21** | **43** | **30% Clear + 0% Awaiting + 21% Baseline** |
+| **Total V2** | **13** | **1** | **9** | **21** | **44** | **30% Clear + 2% Awaiting + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -95,7 +95,7 @@
 
 ## In Progress / Stabilizing
 
-- None currently.
+- [ ] **Prime + Runtime Decision Contract:** `meridian_core/prime_runtime.py` backend packet assembles Compass, Vulcan, Relay, and Aegis source refs into a visible Prime decision with owner resolution, executability gates, proof packet, `/bridge/prime-logic`, and Prime harness rendering. Built in `9fac6846`, `7c7b3103`, and `13c8b7af`; awaiting review.
 
 ## V3 Scope Note
 
