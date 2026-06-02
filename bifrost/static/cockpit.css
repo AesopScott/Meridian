@@ -1157,7 +1157,9 @@ summary {
 }
 
 .payload-tokens,
-.payload-budget {
+.payload-budget,
+.payload-prompt-budget,
+.payload-context-budget {
   font-size: 11px;
   color: var(--text);
   padding: 3px 6px;
@@ -1180,22 +1182,58 @@ summary {
   border-radius: 4px;
 }
 
-.payload-flat .status-indicator {
+.payload-growth-flat .status-indicator {
   color: var(--blue);
   background: rgba(93, 157, 255, 0.12);
   border: 1px solid rgba(93, 157, 255, 0.32);
 }
 
-.payload-growing .status-indicator {
+.payload-growth-growing_expected .status-indicator,
+.payload-growth-growing_unexpected .status-indicator {
   color: var(--amber);
   background: rgba(255, 203, 107, 0.12);
   border: 1px solid rgba(255, 203, 107, 0.32);
 }
 
-.payload-shrinking .status-indicator {
+.payload-growth-shrinking .status-indicator {
   color: var(--green);
   background: rgba(101, 240, 170, 0.12);
   border: 1px solid rgba(101, 240, 170, 0.32);
+}
+
+.payload-growth-over_budget .status-indicator,
+.payload-growth-unknown .status-indicator {
+  color: var(--red);
+  background: rgba(255, 111, 123, 0.12);
+  border: 1px solid rgba(255, 111, 123, 0.32);
+}
+
+.watch-indicator {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.payload-watch-ok .watch-indicator {
+  color: var(--green);
+  background: rgba(101, 240, 170, 0.12);
+}
+
+.payload-watch-watch .watch-indicator {
+  color: var(--blue);
+  background: rgba(93, 157, 255, 0.12);
+}
+
+.payload-watch-degraded .watch-indicator {
+  color: var(--amber);
+  background: rgba(255, 203, 107, 0.12);
+}
+
+.payload-watch-blocked .watch-indicator {
+  color: var(--red);
+  background: rgba(255, 111, 123, 0.12);
 }
 
 .delta,
@@ -1205,12 +1243,33 @@ summary {
   text-transform: uppercase;
 }
 
+.payload-route-context,
+.payload-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.payload-route-context span,
+.payload-evidence span {
+  font-size: 10px;
+  color: var(--muted);
+  padding: 3px 6px;
+  border: 1px solid rgba(93, 157, 255, 0.16);
+  border-radius: 3px;
+  background: rgba(4, 12, 22, 0.45);
+}
+
+.payload-warnings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
 .payload-warning {
   font-size: 10px;
   color: var(--amber);
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  border-color: rgba(255, 203, 107, 0.32) !important;
 }
 
 @keyframes hud-pulse {

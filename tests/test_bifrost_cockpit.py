@@ -13,6 +13,7 @@ from bifrost.cockpit import (
     LaneRow,
     ProgressEvent,
     ProjectCard,
+    PromptPayloadView,
     ProofGateStatus,
     ProofPreviewItem,
     ProofStateView,
@@ -228,6 +229,140 @@ def test_render_hud_command_core_is_quiet():
     # Provider Balance and Prompt Payload should appear somewhere else in the doc
     assert "Provider Balance" in doc
     assert "Prompt Payload" in doc
+
+
+def test_prompt_payload_sample_renders_structured_visibility_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'class="payload-size">(under 1k)</span>' in doc
+    assert "920 tokens" in doc
+    assert "23% budget" in doc
+    assert "Prompt budget: 4000 tokens" in doc
+    assert "Context budget: 200000 tokens" in doc
+    assert 'data-growth-state="flat"' in doc
+    assert 'data-watch-state="ok"' in doc
+    assert "Delta: 0 tokens / 0.0%" in doc
+
+
+def test_prompt_payload_sample_renders_provider_route_and_evidence_context():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Provider: claude" in doc
+    assert "Model: claude-opus-4-7" in doc
+    assert "Trust: trusted" in doc
+    assert "Route class: direct_api" in doc
+    assert "Route kind: account-first" in doc
+    assert "Evidence: payload-snapshot:dispatch-latest" in doc
+    assert "Telemetry: telemetry:prompt-payload" in doc
+    assert "Adapter: adapter:claude" in doc
+
+
+def test_prompt_payload_renders_label_variants_and_watch_states():
+    cases = [
+        ("(under 1k)", "flat", "ok"),
+        ("(12.4k)", "growing_expected", "watch"),
+        ("(over budget)", "over_budget", "blocked"),
+        ("(unknown)", "unknown", "degraded"),
+    ]
+    for label, growth_state, watch_state in cases:
+        vm = sample_cockpit_view_model()
+        vm.prompt_payload = PromptPayloadView(
+            size_label=label,
+            estimated_tokens=0 if label == "(unknown)" else 12400,
+            prompt_budget_tokens=10000,
+            context_budget_tokens=128000,
+            budget_percent=124.0 if label == "(over budget)" else 42.0,
+            delta_tokens=320,
+            delta_percent=2.7,
+            growth_state=growth_state,
+            watch_state=watch_state,
+            source="queue_q_mode",
+            provider_id="deepseek",
+            model_name="deepseek-chat",
+            trust_state="candidate",
+            route_class="direct_api",
+            route_kind="direct",
+            evidence_ref="payload:snapshot",
+            telemetry_ref="telemetry:q-mode",
+            adapter_metadata_ref="adapter:deepseek",
+        )
+        doc = render_cockpit_html(vm)
+        assert f'class="payload-size">{label}</span>' in doc
+        assert f'data-growth-state="{growth_state}"' in doc
+        assert f'data-watch-state="{watch_state}"' in doc
+        assert "From: queue_q_mode" in doc
+
+
+def test_prompt_payload_renders_missing_snapshot_and_telemetry_warnings():
+    vm = sample_cockpit_view_model()
+    vm.prompt_payload = PromptPayloadView(
+        size_label="(unknown)",
+        estimated_tokens=0,
+        prompt_budget_tokens=0,
+        context_budget_tokens=0,
+        budget_percent=0.0,
+        growth_state="unknown",
+        watch_state="blocked",
+        source="unknown",
+        provider_id="unknown",
+        model_name="unknown",
+        trust_state="unknown",
+        route_class="unknown",
+        route_kind="unknown",
+        evidence_ref="missing",
+        telemetry_ref="missing",
+        adapter_metadata_ref="missing",
+        warnings=["prompt_snapshot_missing", "telemetry_unavailable"],
+    )
+    doc = render_cockpit_html(vm)
+    assert 'class="payload-warnings"' in doc
+    assert 'data-warning="prompt_snapshot_missing"' in doc
+    assert 'data-warning="telemetry_unavailable"' in doc
+    assert "prompt_snapshot_missing" in doc
+    assert "telemetry_unavailable" in doc
+
+
+def test_prompt_payload_escapes_structured_fields_and_warnings():
+    vm = sample_cockpit_view_model()
+    vm.prompt_payload = PromptPayloadView(
+        size_label="(<bad>)",
+        estimated_tokens=1,
+        prompt_budget_tokens=2,
+        context_budget_tokens=3,
+        budget_percent=50.0,
+        growth_state="unknown",
+        watch_state="blocked",
+        source="<script>source</script>",
+        provider_id="<img src=x>",
+        model_name="<script>model</script>",
+        trust_state="unknown",
+        route_class="direct_api",
+        route_kind="direct",
+        evidence_ref="<script>evidence</script>",
+        telemetry_ref="telemetry:<bad>",
+        adapter_metadata_ref="adapter:<bad>",
+        warnings=["<script>warning</script>"],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;source&lt;/script&gt;" in doc
+    assert "telemetry:&lt;bad&gt;" in doc
+    assert "&lt;script&gt;warning&lt;/script&gt;" in doc
+
+
+def test_prompt_payload_visibility_preserves_stale_recovery_and_proof_preview():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-payload-session", "Closed Payload Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-payload-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Payload Session" not in doc
 
 
 

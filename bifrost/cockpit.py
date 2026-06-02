@@ -114,11 +114,23 @@ class ProviderBalanceView:
 class PromptPayloadView:
     size_label: str = ""
     estimated_tokens: int = 0
+    prompt_budget_tokens: int = 0
+    context_budget_tokens: int = 0
     budget_percent: float = 0.0
     delta_tokens: int = 0
-    status: str = "flat"
+    delta_percent: float = 0.0
+    growth_state: str = "flat"
+    watch_state: str = "ok"
     source: str = ""
+    provider_id: str = ""
+    model_name: str = ""
+    trust_state: str = "unknown"
+    route_class: str = ""
+    route_kind: str = ""
     evidence_ref: str = ""
+    telemetry_ref: str = ""
+    adapter_metadata_ref: str = ""
+    warnings: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -323,13 +335,25 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             policy_state="warning",
         ),
         prompt_payload=PromptPayloadView(
-            size_label="(1.2k)",
-            estimated_tokens=1240,
-            budget_percent=31.0,
+            size_label="(under 1k)",
+            estimated_tokens=920,
+            prompt_budget_tokens=4000,
+            context_budget_tokens=200000,
+            budget_percent=23.0,
             delta_tokens=0,
-            status="flat",
+            delta_percent=0.0,
+            growth_state="flat",
+            watch_state="ok",
             source="relay",
-            evidence_ref="dispatch:latest",
+            provider_id="claude",
+            model_name="claude-opus-4-7",
+            trust_state="trusted",
+            route_class="direct_api",
+            route_kind="account-first",
+            evidence_ref="payload-snapshot:dispatch-latest",
+            telemetry_ref="telemetry:prompt-payload",
+            adapter_metadata_ref="adapter:claude",
+            warnings=[],
         ),
         lanes=[
             LaneRow("Cockpit UI", "running", "hud"),
@@ -989,8 +1013,13 @@ def _render_prompt_payload(payload: PromptPayloadView) -> str:
     if not payload.size_label:
         return ""
 
-    status_class = f"payload-{_e(payload.status)}"
+    growth_class = f"payload-growth-{_e(payload.growth_state)}"
+    watch_class = f"payload-watch-{_e(payload.watch_state)}"
     delta_display = f"+{payload.delta_tokens}" if payload.delta_tokens > 0 else f"{payload.delta_tokens}"
+    warning_items = "".join(
+        f'<span class="payload-warning" data-warning="{_e(warning)}">{_e(warning)}</span>'
+        for warning in payload.warnings
+    )
 
     return (
         '<section class="prompt-payload" aria-label="Prompt Payload Visibility">'
@@ -998,17 +1027,28 @@ def _render_prompt_payload(payload: PromptPayloadView) -> str:
         f'<span class="payload-size">{_e(payload.size_label)}</span>'
         f'<span class="payload-tokens">{payload.estimated_tokens} tokens</span>'
         f'<span class="payload-budget">{payload.budget_percent:.0f}% budget</span>'
+        f'<span class="payload-prompt-budget">Prompt budget: {payload.prompt_budget_tokens} tokens</span>'
+        f'<span class="payload-context-budget">Context budget: {payload.context_budget_tokens} tokens</span>'
         "</div>"
-        f'<div class="payload-status {status_class}">'
-        f'<span class="status-indicator">{_e(payload.status)}</span>'
-        f'<span class="delta">Delta: {delta_display}</span>'
+        f'<div class="payload-status {growth_class} {watch_class}" data-growth-state="{_e(payload.growth_state)}" data-watch-state="{_e(payload.watch_state)}">'
+        f'<span class="status-indicator">{_e(payload.growth_state)}</span>'
+        f'<span class="watch-indicator">{_e(payload.watch_state)}</span>'
+        f'<span class="delta">Delta: {delta_display} tokens / {payload.delta_percent:.1f}%</span>'
         f'<span class="source">From: {_e(payload.source)}</span>'
         f"</div>"
-        + (
-            f'<span class="payload-warning">⚠ Prompt drag detected</span>'
-            if payload.status == "growing"
-            else ""
-        )
+        '<div class="payload-route-context">'
+        f'<span class="payload-provider">Provider: {_e(payload.provider_id)}</span>'
+        f'<span class="payload-model">Model: {_e(payload.model_name)}</span>'
+        f'<span class="payload-trust">Trust: {_e(payload.trust_state)}</span>'
+        f'<span class="payload-route-class">Route class: {_e(payload.route_class)}</span>'
+        f'<span class="payload-route-kind">Route kind: {_e(payload.route_kind)}</span>'
+        "</div>"
+        '<div class="payload-evidence">'
+        f'<span class="payload-evidence-ref">Evidence: {_e(payload.evidence_ref)}</span>'
+        f'<span class="payload-telemetry-ref">Telemetry: {_e(payload.telemetry_ref)}</span>'
+        f'<span class="payload-adapter-ref">Adapter: {_e(payload.adapter_metadata_ref)}</span>'
+        f'<span class="payload-warnings">{warning_items}</span>'
+        "</div>"
         + "</section>"
     )
 
