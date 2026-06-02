@@ -233,9 +233,9 @@ The panel renders backend data from:
 
 Current status:
 
-- Prime Runtime Logic UI is built-awaiting-review.
-- It is not review-cleared.
-- Do not bind live execution or live Compass/Vulcan/Relay inputs until review acceptance.
+- Prime Runtime Logic UI is review-cleared.
+- Prime Operations remain not-live.
+- Do not bind live execution or live Compass/Vulcan/Relay inputs until those backend runtime truths are ready.
 
 Visible sections currently include:
 
@@ -304,7 +304,7 @@ When `docs/harness-stage-checklist.md` changes, update `docs/harness-stage-check
 
 | Harness | Contract / Baseline | V2 Backend | Core Implementation | Prime Integration | Runtime Logic UI | Proofs / Review | Operations | Next Build |
 |---|---|---|---|---|---|---|---|---|
-| Prime | built | built-awaiting-review | built-awaiting-review | built-awaiting-review | built-awaiting-review | awaiting review | not live execution | Review Prime Runtime Logic UI and runtime contract before binding live Compass/Vulcan/Relay inputs. |
+| Prime | built | review-cleared | review-cleared | review-cleared | review-cleared | review-cleared | not live execution | Bind live Compass/Vulcan/Relay inputs only after their backend runtime truth is ready. |
 | Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening. |
 | Compass | baseline | needs build | snapshot only | partial via Prime source refs | wired | not reviewed as runtime | no writes | Project definition, bounds/scope, difference, cross-project handoff runtime. |
 | Vulcan / Session Lifecycle | baseline | needs build | partial | partial via Prime source refs | wired | partial | no live command execution | Live session state evidence, command-plan proof, permissions, close/archive write-through. |
@@ -327,7 +327,7 @@ When `docs/harness-stage-checklist.md` changes, update `docs/harness-stage-check
 
 From `docs/v2-progress-tracker.md`:
 
-- Prime Autonomy: 2 clear, 1 awaiting review, total 3.
+- Prime Autonomy: 3 clear, total 3.
 - Echo Harness: 2 clear, 2 contract baseline, total 4.
 - Atlas Harness: 2 clear, 1 contract baseline, total 3.
 - Relay/Model Harness: 2 clear, 2 baseline, 6 needs build, total 10.
@@ -336,7 +336,7 @@ From `docs/v2-progress-tracker.md`:
 - Session Lifecycle Harness: 1 clear, 1 baseline, 5 needs build, total 7.
 - Bifrost Harness: 1 clear, 2 baseline, 6 needs build, total 9.
 - Federation Harness: 1 clear, total 1.
-- Total V2: 13 clear, 1 awaiting review, 9 baseline, 21 needs build, total 44.
+- Total V2: 14 clear, 0 awaiting review, 9 baseline, 21 needs build, total 44.
 
 Important correction:
 
@@ -344,11 +344,10 @@ Important correction:
 
 ## Current Priority
 
-1. Prime review acceptance.
-2. Compass backend runtime.
-3. Vulcan live session state and command-plan proof.
-4. Relay model/provider metadata and prompt payload visibility.
-5. Echo/Atlas live inputs into Prime runtime.
+1. Compass backend runtime.
+2. Vulcan live session state and command-plan proof.
+3. Relay model/provider metadata and prompt payload visibility.
+4. Echo/Atlas live inputs into Prime runtime.
 
 ## Verification Already Run
 
@@ -482,7 +481,7 @@ tests/test_prime_runtime.py
 
 3. If Scott asks to continue Prime:
 
-Recommended next step is **Prime Runtime Logic UI review acceptance** before live Compass/Vulcan/Relay inputs are bound.
+Recommended next step is **Compass backend runtime** because Prime can only bind live Compass/Vulcan/Relay inputs after those backend runtime truths are ready.
 
 4. If Scott asks to build next harness:
 
@@ -490,7 +489,7 @@ Recommended next backend build is **Compass backend runtime** because Prime curr
 
 ## Open Questions / Known Gaps
 
-- Prime backend runtime packet and Prime Runtime Logic UI are built-awaiting-review, not review-cleared.
+- Prime backend runtime packet and Prime Runtime Logic UI are review-cleared, but Operations remain not-live.
 - Compass Runtime Logic UI is wired, but Compass core runtime is not built.
 - Vulcan Runtime Logic UI is wired, but live session lifecycle state/command execution is not fully built.
 - Relay Runtime Logic UI is wired, but provider metadata, DeepSeek primary route, prompt payload visibility, and Auto routing are not complete.

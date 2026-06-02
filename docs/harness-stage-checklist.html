@@ -219,9 +219,9 @@
 
     <div class="grid" aria-label="Harness summary">
       <div class="metric"><strong>18</strong><span>tracked harnesses</span></div>
-      <div class="metric"><strong>1</strong><span>Prime UI awaiting review</span></div>
+      <div class="metric"><strong>1</strong><span>Prime UI review-cleared</span></div>
       <div class="metric"><strong>3</strong><span>review-cleared core harnesses</span></div>
-      <div class="metric"><strong>1</strong><span>Prime runtime awaiting review</span></div>
+      <div class="metric"><strong>1</strong><span>Prime runtime review-cleared</span></div>
       <div class="metric"><strong>0</strong><span>live mutation-ready harnesses</span></div>
     </div>
 
@@ -263,7 +263,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>Prime</td><td><span class="status built">built</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">awaiting review</span></td><td><span class="status not-live">not live execution</span></td><td>Review Prime Runtime Logic UI and runtime contract before binding live Compass/Vulcan/Relay inputs.</td></tr>
+            <tr><td>Prime</td><td><span class="status built">built</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status not-live">not live execution</span></td><td>Bind live Compass/Vulcan/Relay inputs only after their backend runtime truth is ready.</td></tr>
             <tr><td>Relay / Model</td><td><span class="status built">built</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">Auto disabled</span></td><td>Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening.</td></tr>
             <tr><td>Compass</td><td><span class="status baseline">baseline</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">snapshot only</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status needs">not reviewed as runtime</span></td><td><span class="status not-live">no writes</span></td><td>Project definition, bounds/scope, difference, cross-project handoff runtime.</td></tr>
             <tr><td>Vulcan / Session Lifecycle</td><td><span class="status baseline">baseline</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">no live command execution</span></td><td>Live session state evidence, command-plan proof, permissions, close/archive write-through.</td></tr>
@@ -289,11 +289,10 @@
     <section>
       <h2>Current Priority</h2>
       <ol class="priority">
-        <li><b>1</b><span>Prime review acceptance.</span></li>
-        <li><b>2</b><span>Compass backend runtime.</span></li>
-        <li><b>3</b><span>Vulcan live session state and command-plan proof.</span></li>
-        <li><b>4</b><span>Relay model/provider metadata and prompt payload visibility.</span></li>
-        <li><b>5</b><span>Echo/Atlas live inputs into Prime runtime.</span></li>
+        <li><b>1</b><span>Compass backend runtime.</span></li>
+        <li><b>2</b><span>Vulcan live session state and command-plan proof.</span></li>
+        <li><b>3</b><span>Relay model/provider metadata and prompt payload visibility.</span></li>
+        <li><b>4</b><span>Echo/Atlas live inputs into Prime runtime.</span></li>
       </ol>
       <div class="note">When the Markdown checklist changes, update this HTML page in the same checkpoint.</div>
     </section>

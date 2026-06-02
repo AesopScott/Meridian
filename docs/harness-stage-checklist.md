@@ -24,7 +24,7 @@
 
 | Harness | Contract / Baseline | V2 Backend | Core Implementation | Prime Integration | Runtime Logic UI | Proofs / Review | Operations | Next Build |
 |---|---|---|---|---|---|---|---|---|
-| Prime | built | built-awaiting-review | built-awaiting-review | built-awaiting-review | built-awaiting-review | awaiting review | not live execution | Review Prime Runtime Logic UI and runtime contract before binding live Compass/Vulcan/Relay inputs. |
+| Prime | built | review-cleared | review-cleared | review-cleared | review-cleared | review-cleared | not live execution | Bind live Compass/Vulcan/Relay inputs only after their backend runtime truth is ready. |
 | Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening. |
 | Compass | baseline | needs build | snapshot only | partial via Prime source refs | wired | not reviewed as runtime | no writes | Project definition, bounds/scope, difference, cross-project handoff runtime. |
 | Vulcan / Session Lifecycle | baseline | needs build | partial | partial via Prime source refs | wired | partial | no live command execution | Live session state evidence, command-plan proof, permissions, close/archive write-through. |
@@ -68,8 +68,7 @@ Update the Harness Stage Checklist.
 
 ## Current Priority
 
-1. Prime review acceptance.
-2. Compass backend runtime.
-3. Vulcan live session state and command-plan proof.
-4. Relay model/provider metadata and prompt payload visibility.
-5. Echo/Atlas live inputs into Prime runtime.
+1. Compass backend runtime.
+2. Vulcan live session state and command-plan proof.
+3. Relay model/provider metadata and prompt payload visibility.
+4. Echo/Atlas live inputs into Prime runtime.

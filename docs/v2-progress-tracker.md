@@ -12,7 +12,7 @@
 
 | Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Prime Autonomy | 2 | 1 | 0 | 0 | 3 | 67% clear + 33% awaiting |
+| Prime Autonomy | 3 | 0 | 0 | 0 | 3 | 100% |
 | Echo Harness | 2 | 0 | 2 | 0 | 4 | 100% |
 | Atlas Harness | 2 | 0 | 1 | 0 | 3 | 100% |
 | Relay/Model Harness | 2 | 0 | 2 | 6 | 10 | 20% clear + 20% baseline |
@@ -21,7 +21,7 @@
 | Session Lifecycle Harness | 1 | 0 | 1 | 5 | 7 | 29% |
 | Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **13** | **1** | **9** | **21** | **44** | **30% Clear + 2% Awaiting + 20% Baseline** |
+| **Total V2** | **14** | **0** | **9** | **21** | **44** | **32% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -29,6 +29,7 @@
 
 - [x] **Prime + Autonomy Contract:** `PrimeNextAction` domain object with action type, confidence, blockers, human-gate requirements, immutable evidence, and deterministic executability semantics - built in `40def3d`, repaired in `39c9ac8`; review cleared by Reviews C on 2026-05-31.
 - [x] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - built in `57aad9a`, queue provenance in `a2b8cd0`; review cleared by Reviews A on 2026-05-31 with 55 `tests/test_prime_autonomy.py` tests passing.
+- [x] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-Scott declarations, execution blockers, and backend capability sections. Review cleared on 2026-06-02 with Prime runtime, Bifrost cockpit, FileMap, Prime JSON, and bridge self-tests passing. Operations remain not-live.
 
 ### Aegis Harness
 
@@ -64,7 +65,7 @@
 
 ## Built But Awaiting Review
 
-- [ ] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-Scott declarations, execution blockers, and backend capability sections. Built awaiting review; not review-cleared.
+- None currently.
 
 ## Contract Baselines Complete (Not Runtime Implementation)
 
