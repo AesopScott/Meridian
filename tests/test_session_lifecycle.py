@@ -26,8 +26,10 @@ from meridian_core.session_lifecycle import (
     SessionLiveControlPermissionGate,
     SessionRecoveryReadinessSummary,
     SessionLiveControlCommandPlanStagingRecord,
+    SessionCommandStagingReviewPacket,
     SessionLifecycleState,
     SessionCommandPlan,
+    build_command_staging_review_packet,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
@@ -2456,6 +2458,171 @@ class TestSessionLiveControlCommandPlanStagingRecord:
         assert "command_plan.command_kind_not_stageable" in staging.blockers
         assert "command_plan.required_operation_missing" in staging.blockers
         assert "staging.command_kind=watch" in staging.evidence_refs
+
+
+class TestSessionCommandStagingReviewPacket:
+    """Tests for display-safe command-staging review packets."""
+
+    @pytest.fixture
+    def packet_state(self):
+        """Create a stale session with scoped restart permission."""
+        now = datetime(2026, 6, 2, 13, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="command-staging-review-packet",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-review-packet",
+            session_name="Build 2 Review Packet",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-command-staging-review-packet",
+            current_task_id="command-staging-review-packet",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def _staging_record(self, packet_state, observed_at):
+        workflow_summary = summarize_workflow_work_order_recovery(
+            packet_state,
+            work_order_id="wo-review-packet",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            packet_state,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        gate = evaluate_live_control_permission_gate(
+            packet_state,
+            runtime_export,
+            timestamp=observed_at,
+        )
+        readiness = summarize_recovery_readiness(
+            runtime_export,
+            gate,
+            timestamp=observed_at,
+        )
+        return stage_live_control_command_plan_from_readiness(
+            readiness,
+            timestamp=observed_at,
+        )
+
+    def test_review_packet_preserves_staging_prime_and_beacon_shapes(
+        self,
+        packet_state,
+    ):
+        """Review packets serialize staging plus Prime/Beacon advisory evidence."""
+        observed_at = datetime(2026, 6, 2, 13, 10, tzinfo=timezone.utc)
+        staging = self._staging_record(packet_state, observed_at)
+        prime_advisory = {
+            "action_type": "advise_session_recovery",
+            "target_harness": "Session Lifecycle",
+            "target_lane": staging.target_session_id,
+            "human_gate_required": True,
+            "blockers": list(staging.blockers),
+            "evidence": list(staging.evidence_refs),
+            "rationale": "Review non-executable command-plan staging.",
+        }
+        beacon_evidence = {
+            "harness_id": staging.target_session_id,
+            "advisory_type": "staging_restart",
+            "human_gate_required": True,
+            "blockers": list(staging.blockers),
+            "evidence": list(staging.evidence_refs),
+        }
+
+        packet = build_command_staging_review_packet(
+            staging,
+            prime_advisory_action=prime_advisory,
+            beacon_evidence=beacon_evidence,
+            timestamp=observed_at,
+        )
+        serialized = packet.to_dict()
+
+        assert isinstance(packet, SessionCommandStagingReviewPacket)
+        assert packet.target_session_id == packet_state.session_id
+        assert packet.command_kind == CommandIntent.RESTART
+        assert packet.recommended_action == SessionAction.START_NEW
+        assert packet.required_operation == OperationScope.RESTART
+        assert packet.ready_for_execution is True
+        assert packet.is_executable_now is False
+        assert packet.requires_human_ui_review is True
+        assert packet.permission_state == PermissionState.UNLOCKED_TEMPORARY
+        assert "command_plan.ui_review_required" in packet.blockers
+        assert "review_packet.is_executable_now=False" in packet.evidence_refs
+        assert packet.prime_advisory_action["action_type"] == (
+            "advise_session_recovery"
+        )
+        assert packet.beacon_evidence["advisory_type"] == "staging_restart"
+        assert serialized["is_executable_now"] is False
+        assert serialized["requires_human_ui_review"] is True
+
+    def test_review_packet_defaults_missing_prime_and_beacon_shapes(
+        self,
+        packet_state,
+    ):
+        """Missing consumer shapes become deterministic display-safe defaults."""
+        observed_at = datetime(2026, 6, 2, 13, 10, tzinfo=timezone.utc)
+        staging = self._staging_record(packet_state, observed_at)
+
+        packet = build_command_staging_review_packet(staging, timestamp=observed_at)
+
+        assert packet.prime_advisory_action["action_type"] == (
+            "advise_session_recovery"
+        )
+        assert packet.prime_advisory_action["human_gate_required"] is True
+        assert packet.beacon_evidence["advisory_type"] == "staging_unknown"
+        assert packet.beacon_evidence["human_gate_required"] is True
+        assert "review_packet.requires_human_ui_review=True" in packet.evidence_refs
+
+    def test_review_packet_preserves_blocked_staging(self, packet_state):
+        """Blocked staging records preserve blocker and rationale metadata."""
+        observed_at = datetime(2026, 6, 2, 13, 10, tzinfo=timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(seconds=1),
+            task_scope="command-staging-review-packet",
+            last_permission_change=observed_at,
+        )
+        blocked_state = SessionLifecycleState(
+            **{**packet_state.__dict__, "permission_context": expired_context}
+        )
+        staging = self._staging_record(blocked_state, observed_at)
+
+        packet = build_command_staging_review_packet(staging, timestamp=observed_at)
+
+        assert packet.ready_for_execution is False
+        assert packet.human_gate_rationale == staging.human_gate_rationale
+        assert "permission.unlock_expired" in packet.blockers
+        assert "review_packet.blocker=permission.unlock_expired" in packet.evidence_refs
 
 
 class TestPrimeAutonomyInput:

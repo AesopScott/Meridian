@@ -524,6 +524,53 @@ class SessionLiveControlCommandPlanStagingRecord:
 
 
 @dataclass(frozen=True)
+class SessionCommandStagingReviewPacket:
+    """Display-safe command-staging packet for downstream UI review consumers."""
+
+    packet_id: str
+    staging_id: str
+    target_session_id: str
+    command_kind: Optional[CommandIntent]
+    recommended_action: Optional[SessionAction]
+    required_operation: Optional[OperationScope]
+    ready_for_execution: bool
+    is_executable_now: bool
+    requires_human_ui_review: bool
+    human_gate_rationale: str
+    permission_state: PermissionState
+    blockers: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    prime_advisory_action: dict[str, Any]
+    beacon_evidence: dict[str, Any]
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize command-staging review packet to JSON-safe metadata."""
+        return {
+            "packet_id": self.packet_id,
+            "staging_id": self.staging_id,
+            "target_session_id": self.target_session_id,
+            "command_kind": self.command_kind.value if self.command_kind else None,
+            "recommended_action": (
+                self.recommended_action.value if self.recommended_action else None
+            ),
+            "required_operation": (
+                self.required_operation.value if self.required_operation else None
+            ),
+            "ready_for_execution": self.ready_for_execution,
+            "is_executable_now": self.is_executable_now,
+            "requires_human_ui_review": self.requires_human_ui_review,
+            "human_gate_rationale": self.human_gate_rationale,
+            "permission_state": self.permission_state.value,
+            "blockers": list(self.blockers),
+            "evidence_refs": list(self.evidence_refs),
+            "prime_advisory_action": dict(self.prime_advisory_action),
+            "beacon_evidence": dict(self.beacon_evidence),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
 class PrimeAutonomyInput:
     """What Prime receives when selecting next action."""
 
@@ -1721,6 +1768,71 @@ def stage_live_control_command_plan_from_readiness(
     )
 
 
+def build_command_staging_review_packet(
+    staging_record: SessionLiveControlCommandPlanStagingRecord,
+    prime_advisory_action: Optional[dict[str, Any]] = None,
+    beacon_evidence: Optional[dict[str, Any]] = None,
+    timestamp: Optional[datetime] = None,
+) -> SessionCommandStagingReviewPacket:
+    """Build a serializable packet for downstream command-staging UI review.
+
+    This packages already-reviewed staging/advisory evidence only. It does not
+    execute restart/resteer/archive, call processes/models, write UI/Bifrost,
+    move sessions, or touch branches/worktrees/main.
+    """
+    observed_at = _as_utc(timestamp or staging_record.timestamp)
+    blockers = tuple(dict.fromkeys(staging_record.blockers))
+    evidence_refs = list(staging_record.evidence_refs)
+    evidence_refs.extend(
+        [
+            f"review_packet.staging_id={staging_record.staging_id}",
+            f"review_packet.target_session_id={staging_record.target_session_id}",
+            "review_packet.command_kind="
+            + (
+                staging_record.command_kind.value
+                if staging_record.command_kind
+                else "none"
+            ),
+            "review_packet.recommended_action="
+            + (
+                staging_record.recommended_action.value
+                if staging_record.recommended_action
+                else "none"
+            ),
+            "review_packet.required_operation="
+            + (
+                staging_record.required_operation.value
+                if staging_record.required_operation
+                else "none"
+            ),
+            f"review_packet.ready_for_execution={staging_record.ready_for_execution}",
+            "review_packet.is_executable_now=False",
+            "review_packet.requires_human_ui_review=True",
+            f"permission.state={staging_record.permission_state.value}",
+        ]
+    )
+    evidence_refs.extend(f"review_packet.blocker={blocker}" for blocker in blockers)
+
+    return SessionCommandStagingReviewPacket(
+        packet_id=f"{staging_record.staging_id}:review:{observed_at.isoformat()}",
+        staging_id=staging_record.staging_id,
+        target_session_id=staging_record.target_session_id,
+        command_kind=staging_record.command_kind,
+        recommended_action=staging_record.recommended_action,
+        required_operation=staging_record.required_operation,
+        ready_for_execution=staging_record.ready_for_execution,
+        is_executable_now=False,
+        requires_human_ui_review=True,
+        human_gate_rationale=staging_record.human_gate_rationale,
+        permission_state=staging_record.permission_state,
+        blockers=blockers,
+        evidence_refs=tuple(dict.fromkeys(evidence_refs)),
+        prime_advisory_action=_review_packet_prime_advisory(prime_advisory_action),
+        beacon_evidence=_review_packet_beacon_evidence(beacon_evidence),
+        timestamp=observed_at,
+    )
+
+
 def _workflow_heartbeat_age_seconds(
     heartbeat_emitted_at: Optional[datetime],
     observed_at: datetime,
@@ -1728,6 +1840,39 @@ def _workflow_heartbeat_age_seconds(
     if heartbeat_emitted_at is None:
         return None
     return max(0, int((observed_at - _as_utc(heartbeat_emitted_at)).total_seconds()))
+
+
+def _review_packet_prime_advisory(
+    advisory: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    source = advisory or {}
+    return {
+        "action_type": str(source.get("action_type", "advise_session_recovery")),
+        "target_harness": str(source.get("target_harness", "Session Lifecycle")),
+        "target_lane": source.get("target_lane"),
+        "human_gate_required": bool(source.get("human_gate_required", True)),
+        "blockers": list(source.get("blockers", ())),
+        "evidence": list(source.get("evidence", ())),
+        "rationale": str(
+            source.get(
+                "rationale",
+                "Live-control command-plan staging requires UI review.",
+            )
+        ),
+    }
+
+
+def _review_packet_beacon_evidence(
+    evidence: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    source = evidence or {}
+    return {
+        "harness_id": source.get("harness_id"),
+        "advisory_type": str(source.get("advisory_type", "staging_unknown")),
+        "human_gate_required": bool(source.get("human_gate_required", True)),
+        "blockers": list(source.get("blockers", ())),
+        "evidence": list(source.get("evidence", ())),
+    }
 
 
 def _live_control_command_kind(
