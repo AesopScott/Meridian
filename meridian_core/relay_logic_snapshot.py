@@ -7,10 +7,14 @@ from enum import Enum
 from typing import Any
 
 from .relay import route_from_tier
+from .relay_dispatch import build_relay_dispatch_plan
+from .relay_packet import assemble_relay_packet
 
 
 SNAPSHOT_VERSION = "relay-domain-v1"
 SNAPSHOT_SOURCE = "meridian_core.relay.route_from_tier"
+DISPATCH_SOURCE = "meridian_core.relay_dispatch.build_relay_dispatch_plan"
+SNAPSHOT_PROMPT = "Relay dispatch snapshot placeholder."
 
 
 def _value(item: Any) -> Any:
@@ -56,6 +60,35 @@ def _audit_snapshot(route: Any) -> dict[str, Any]:
     }
 
 
+def _dispatch_snapshot(route: Any) -> dict[str, Any]:
+    packet = assemble_relay_packet(
+        packet_id=f"relay-logic-tier-{route.risk_tier}",
+        serialized_prompt=SNAPSHOT_PROMPT,
+        route=route,
+    )
+    plan = build_relay_dispatch_plan(route, packet)
+    lanes = [
+        {
+            "role": _value(lane.role),
+            "preferredModel": lane.preferred_model,
+            "independent": lane.independent,
+            "payloadSource": "packet.model_payload",
+            "payloadTextVisible": False,
+            "payloadEqualsModelPayload": lane.payload == packet.model_payload(),
+            "payloadIncludesPacketMetadata": packet.packet_id in lane.payload,
+        }
+        for lane in plan.lanes
+    ]
+    return {
+        "source": DISPATCH_SOURCE,
+        "laneCount": len(plan.lanes),
+        "laneOrder": [_value(lane.role) for lane in plan.lanes],
+        "payloadPolicy": "model_payload_only",
+        "payloadTextVisible": False,
+        "lanes": lanes,
+    }
+
+
 def _tier_snapshot(tier: int) -> dict[str, Any]:
     route = route_from_tier(tier)
     return {
@@ -72,6 +105,7 @@ def _tier_snapshot(tier: int) -> dict[str, Any]:
         "privacyLevel": _value(route.privacy_level),
         "promptBudget": _prompt_budget_snapshot(route),
         "audit": _audit_snapshot(route),
+        "dispatch": _dispatch_snapshot(route),
     }
 
 
@@ -83,6 +117,7 @@ def relay_logic_snapshot() -> dict[str, Any]:
         "service": "meridian-relay-logic",
         "version": SNAPSHOT_VERSION,
         "source": SNAPSHOT_SOURCE,
+        "dispatchSource": DISPATCH_SOURCE,
         "autoRouting": "disabled_until_prime_relay_contract",
         "routePrecedence": tiers[1]["audit"]["routePrecedence"],
         "tiers": tiers,

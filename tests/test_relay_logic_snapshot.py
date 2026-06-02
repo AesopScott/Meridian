@@ -33,6 +33,19 @@ def test_tier3_exposes_dual_model_proof_logic():
     assert "dual_lane_independence_required" in tier3["audit"]["fallbackBlockers"]
 
 
+def test_tier3_exposes_dispatch_plan_without_prompt_text():
+    tier3 = relay_logic_snapshot()["tiers"][3]
+    dispatch = tier3["dispatch"]
+
+    assert dispatch["source"] == "meridian_core.relay_dispatch.build_relay_dispatch_plan"
+    assert dispatch["laneCount"] == 3
+    assert dispatch["laneOrder"] == ["builder", "reviewer", "verifier"]
+    assert dispatch["payloadPolicy"] == "model_payload_only"
+    assert dispatch["payloadTextVisible"] is False
+    assert all(lane["payloadEqualsModelPayload"] for lane in dispatch["lanes"])
+    assert not any(lane["payloadIncludesPacketMetadata"] for lane in dispatch["lanes"])
+
+
 def test_tier4_exposes_human_gate_block():
     tier4 = relay_logic_snapshot()["tiers"][4]
 

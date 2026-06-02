@@ -3609,6 +3609,12 @@ body {
     if (!lanes.length) return 'no model lanes';
     return lanes.map((lane) => `${relayText(lane.role)} -> ${relayText(lane.preferredModel)}${lane.independent ? ' independent' : ''}`).join(' | ');
   };
+  const relayDispatchSummary = (tier) => {
+    const dispatch = tier?.dispatch || {};
+    const lanes = Array.isArray(dispatch.lanes) ? dispatch.lanes : [];
+    if (!lanes.length) return 'no dispatch lanes';
+    return lanes.map((lane) => `${relayText(lane.role)} -> ${relayText(lane.preferredModel)}${lane.independent ? ' independent' : ''}`).join(' | ');
+  };
   const renderRelayLogicSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Relay logic source', relayGrid([
@@ -3636,6 +3642,14 @@ body {
         ['lanes', relayLaneSummary(tier3)],
         ['proof required', (tier3.audit?.proofRequired || []).map(relayText).join(' | ') || 'none'],
         ['fallback blockers', (tier3.audit?.fallbackBlockers || []).map(relayText).join(' | ') || 'none'],
+      ])),
+      relaySection('Dispatch logic', relayGrid([
+        ['source', tier3.dispatch?.source || 'unknown'],
+        ['lane count', tier3.dispatch?.laneCount ?? 0],
+        ['lane order', (tier3.dispatch?.laneOrder || []).map(relayText).join(' | ') || 'none'],
+        ['lane work', relayDispatchSummary(tier3)],
+        ['payload policy', relayText(tier3.dispatch?.payloadPolicy)],
+        ['payload text visible', tier3.dispatch?.payloadTextVisible ? 'yes' : 'no'],
       ])),
       relaySection('Fallback blocker logic', relayList(blockerItems.map(relayText))),
       relaySection('Proof and telemetry logic', relayGrid([
