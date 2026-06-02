@@ -12,13 +12,21 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 Goal: audit FileMap coverage for Relay/Session Lifecycle review-cleared runtime artifacts after the Relay-Bifrost proof payload contract docs registration clears review.
 
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Required sources: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`, `docs/v2-progress-tracker.md`, current runtime FileMap entries, and `docs/FileMap.md`.
 
 Task: compare the current review-cleared Relay and Session Lifecycle runtime/test/documentation artifacts against runtime FileMap, `docs/FileMap.md`, and required-path coverage. Register only existing missing files. Keep this mechanical; do not edit Relay, Session Lifecycle, Bifrost, Aegis, review queues, process/model/account code, branches, or Polaris.
 
 Tests:
 
 - `python -m pytest tests/test_filemap.py -q`
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, missing-file audit result, and a concrete Next Candidate: register any remaining V2/V3 architecture or domain contract docs that land without FileMap coverage before unrelated FileMap cleanup.
 
 ## Completed / Ready For Codex Review
 
