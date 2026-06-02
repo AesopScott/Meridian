@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: keep Build 4/5 review hot under the rolling two-stage pipeline.
 
@@ -15,6 +15,20 @@ Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 Task: poll current `origin/main` and the top blocks in `docs/live-build-4.md` and `docs/live-build-5.md`. Review the oldest Ready marker from Build 4 or Build 5 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no Relay runtime/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 4 demotion/retry handoff checklist or Build 5 Bifrost handoff adapter wiring when either marks Ready for Codex Review.
+
+Review result - 2026-06-01 23:34 -06:00:
+
+- Build 5 Relay/Aegis handoff adapter view-model wiring passed. Commits `3c6850ca` and `cd3e1d78` changed only `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The change keeps Bifrost deterministic sample/view-model rendering only: `sample_cockpit_view_model()` accepts structured Relay/Aegis summary dictionaries and routes them through reviewed `relay_aegis_policy_handoff_from_summary()` before rendering.
+- Default no-argument sample determinism is preserved by the same structured handoff data, and focused tests cover human-gate summaries, fail-closed missing metadata placeholders, escaping/redaction, deterministic ordering, prompt payload visibility, provider balance, dispatch hardening, PromptPacket proof metadata, proof-state preview, stale-session recovery actions, and cockpit layout preservation.
+- Scope check found no live Relay runtime wiring, model/process/session calls, `index.html` edit, FileMap edit, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 235 tests.
+- `git diff --check 3c6850ca^..cd3e1d78` passed.
+
+Completion: Build 5 Relay/Aegis handoff adapter view-model wiring is review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
