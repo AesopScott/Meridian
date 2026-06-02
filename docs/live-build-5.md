@@ -10,6 +10,24 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: audit current-main Bifrost render/preview surfaces for V3 Goal Runtime checkpoint/update execution exposure.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`, `docs/live-build-5.md`.
+
+Task: inspect the current static Bifrost cockpit/preview render contracts while the V3 Goal Runtime checkpoint/update display-only frontend surface remains queued elsewhere. No reviewed V3 Goal-facing Bifrost runtime surface exists yet, so this is a no-op render audit plus focused tests proving current inert goal/checkpoint/proof-adjacent text does not expose executable controls for writing Git, writing Obsidian, creating automations, moving branches/worktrees, merge/rebase/reset/cherry-pick/stash-pop, spawning sessions, or changing token budgets.
+
+Ready for Codex Review:
+- Commit: `a15c8ff1` (`Add V3 goal runtime render audit tests`).
+- Inspected paths: `bifrost/cockpit.py`, `bifrost/preview.html`, `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`, `docs/live-build-5.md`.
+- Files changed: `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`.
+- Tests run: `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` (312 passed); `git diff --check` (passed); path-scope check for marker commit limited to `docs/live-build-5.md`.
+- Concrete evidence: Bifrost render/preview output may show inert proof/checkpoint-adjacent text such as `Awaiting next proof write after local tests`, but tests now reject V3 Goal Runtime / Goal Runtime / Goal Checkpoint control labels, goal/checkpoint/update action hooks, Git/Obsidian/automation/branch/worktree movement hooks, merge/rebase/reset/cherry-pick/stash-pop hooks, spawn-session hooks, token-budget control hooks, and matching control attributes or visible command labels.
+- Next Candidate: when a reviewed V3 Goal Bifrost display-only surface lands, add sample rendering and escaping tests for checkpoint state, update request metadata, token-budget advisory state, proof refs, human gate, and non-executable status.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement the Bifrost/frontend display-only surface for Session Lifecycle live-control command-plan staging review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
