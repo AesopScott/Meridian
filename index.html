@@ -3619,6 +3619,26 @@ body {
   };
   scheduleSparkIconLightning();
   let harnessDisabledUntil = 0;
+  const rightPanelModeKey = 'meridian.right-panel.mode.v1';
+  const rightPanelSelectionKey = 'meridian.right-panel.selection.v1';
+  const readStoredRightPanel = () => {
+    try {
+      return {
+        mode: localStorage.getItem(rightPanelModeKey) || 'user',
+        selection: localStorage.getItem(rightPanelSelectionKey) || 'User',
+      };
+    } catch {
+      return { mode: 'user', selection: 'User' };
+    }
+  };
+  const storeRightPanel = (mode, selection) => {
+    try {
+      localStorage.setItem(rightPanelModeKey, mode);
+      localStorage.setItem(rightPanelSelectionKey, selection || 'User');
+    } catch {
+      // The live panel still changes even if browser storage is unavailable.
+    }
+  };
   if (buttons[0]) buttons[0].classList.add('is-selected');
   if (mockupButtons[0]) mockupButtons[0].classList.add('is-selected');
   const escapeHtml = (value) => String(value)
@@ -3822,11 +3842,12 @@ body {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
   };
-  const restoreUserPanel = () => {
+  const restoreUserPanel = ({ persist = true } = {}) => {
     screen.classList.add('session-theme-aqua');
     screen.classList.remove('session-theme-green');
     clearRelayModels();
     if (userTitle) userTitle.textContent = 'User';
+    if (persist) storeRightPanel('user', 'User');
   };
   const refreshRelayPanel = () => {
     if (rightWorkspace?.querySelector('.relay-models-surface')) renderRelayBridgeStatus();
@@ -3954,7 +3975,7 @@ body {
     await restartModelBridge();
     hardReloadUi();
   };
-  const activateHarnessButton = (button) => {
+  const activateHarnessButton = (button, { persist = true } = {}) => {
     if (!button) return;
     screen.classList.remove('session-theme-aqua');
     screen.classList.remove('session-theme-green');
@@ -3964,6 +3985,20 @@ body {
     screen.classList.add('sessions-visible');
     harnessDisabledUntil = Date.now() + 2000;
     harnessDock.classList.remove('harness-dock-open');
+    if (persist) storeRightPanel('harness', button.dataset.harness || '');
+  };
+  const activateSparkButton = (button, { persist = true } = {}) => {
+    if (!button) return;
+    const actionLabel = button.getAttribute('aria-label') || '';
+    buttons.forEach((item) => item.classList.remove('is-selected'));
+    button.classList.add('is-selected');
+    screen.classList.remove('session-theme-aqua');
+    screen.classList.add('session-theme-green');
+    clearRelayModels();
+    if (userTitle) userTitle.textContent = actionLabel || 'Spark';
+    screen.classList.add('sessions-visible');
+    if (persist) storeRightPanel('spark', actionLabel || 'Spark');
+    openSpark();
   };
   buttons.forEach((button) => {
     button.addEventListener('click', async () => {
@@ -3976,14 +4011,7 @@ body {
         hardReloadUi();
         return;
       }
-      buttons.forEach((item) => item.classList.remove('is-selected'));
-      button.classList.add('is-selected');
-      screen.classList.remove('session-theme-aqua');
-      screen.classList.add('session-theme-green');
-      clearRelayModels();
-      if (userTitle) userTitle.textContent = actionLabel || 'Spark';
-      screen.classList.add('sessions-visible');
-      openSpark();
+      activateSparkButton(button);
     });
   });
   mockupButtons.forEach((button, index) => {
@@ -4027,6 +4055,21 @@ body {
   harnessButtons.forEach((button) => {
     button.addEventListener('click', () => activateHarnessButton(button));
   });
+  const restoreStoredRightPanel = () => {
+    const stored = readStoredRightPanel();
+    if (stored.mode === 'harness') {
+      const button = harnessButtons.find((item) => item.dataset.harness === stored.selection);
+      if (button) activateHarnessButton(button, { persist: false });
+      return;
+    }
+    if (stored.mode === 'spark') {
+      const button = buttons.find((item) => item.getAttribute('aria-label') === stored.selection);
+      if (button && stored.selection !== 'Reset' && stored.selection !== 'Reload') activateSparkButton(button, { persist: false });
+      return;
+    }
+    restoreUserPanel({ persist: false });
+  };
+  restoreStoredRightPanel();
   menu.addEventListener('pointerenter', openSpark);
   document.addEventListener('pointermove', chooseVisibleSystem);
 })();

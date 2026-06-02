@@ -161,6 +161,7 @@ Mode meanings:
 | SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | planned | Settings interaction does not send to live session accidentally. |
 | SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | planned | Prompt does not disappear into a dead target. |
 | SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | planned | Visual regression check passes after switches. |
+| SUR13 | Active mode persistence | User, Settings/Spark, and Harness modes persist as the right-panel mode across reload/reset/focus churn. | wired | Open Relay or Settings, reload/reset the UI, and confirm the right panel does not revert to User. |
 
 ### Reset Surface Subitems
 
