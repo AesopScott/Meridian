@@ -210,6 +210,16 @@ Coordinator containment and lane alignment - 2026-06-02:
 - Queue state remains executable: Build 1 DeepSeek metadata presets; Build 2 restart/resteer recovery tests; Build 3 FileMap maintenance audit; Build 4 Relay routing implementation checklist; Build 5 stale-session recovery rendering; Reviews A Build 1 Ready-marker polling; Reviews B Build 4/Build 5 Ready-marker polling.
 - Takeover remains `In transition`. Remaining blocker/decision: explicit disposition is needed for implementation/UI commits now present on `origin/main` if the coordinator-only main rule must be restored by revert or quarantine branch policy.
 
+Coordinator session launch and extra-lane pause - 2026-06-02:
+
+- User check-in clarified the operational standard: if all seven sessions are not actually working, report it plainly. Thread search showed the seven lane sessions were not all active: only the old main-running `Meridian Build` thread plus two completed replacement pressure threads were exposed; Build 1, Build 2, Build 4, Build 5, and Reviews A had no active session thread found.
+- Containment gate before launch: fetched `origin/main`; verified shared main clean/aligned at `8366ac2e`; synced all seven assigned worktrees to current `origin/main`; verified all seven assigned worktrees clean.
+- Launched or re-steered the seven lane sessions: Build 1 `019e865b-2f45-7f82-b802-24e15fb98a7a`; Build 2 `019e865b-37ab-72e2-be4d-ba879f85d34a`; Build 3 `019e8649-c8c7-75f3-927c-99c76c4ee255`; Build 4 `019e865b-3fb2-77b3-9e78-88105f8ded77`; Build 5 `019e865b-48ff-7bf1-8fa3-b0d41e9ead0e`; Reviews A `019e865b-53a5-7d83-ba56-453f06bd4977`; Reviews B `019e864a-0536-7250-8057-19bf8a8a85b3`.
+- Readback confirmed all seven lane sessions were `inProgress` and had begun with clean-worktree checks and/or task-source reads. None was marked complete or blocked at this checkpoint.
+- The old main-running `Meridian Build` thread attempted to create an extra worktree lane. Coordinator instructed it to pause. It reported extra worktree `C:\Users\scott\Code\Meridian-Worktrees\session-target-selector`, branch `codex/session-target-selector`, HEAD `8366ac2e`, clean, no changed files, no staged files, no commits, and no pushes.
+- Extra non-seven worktrees observed and clean during spot check: `C:\Users\scott\AppData\Local\Temp\meridian-coordinator-runway`, `C:\Users\scott\AppData\Local\Temp\meridian-v2-heartbeat-0439`, `C:\Users\scott\Code\Meridian-Worktrees\codex-relay-harness`, `C:\Users\scott\Code\Meridian-Worktrees\relay-main-update`, and `C:\Users\scott\Code\Meridian-Worktrees\session-target-selector`. They are not active approved V2 lanes.
+- Takeover remains `In transition`; next coordinator duty is to poll the seven lane threads for local commits, concrete blockers, or review findings before approving any movement to main.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
