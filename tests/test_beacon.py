@@ -13,6 +13,7 @@ from meridian_core.beacon import (
     check_harness_liveness,
     command_plan_advisory_evidence,
     permission_summary_advisory_evidence,
+    recovery_readiness_advisory_evidence,
     runtime_state_advisory_evidence,
     workflow_recovery_advisory_evidence,
 )
@@ -29,7 +30,9 @@ from meridian_core.session_lifecycle import (
     SessionCommandPlan,
     SessionLifecycleState,
     SessionStatus,
+    evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
+    summarize_recovery_readiness,
     summarize_session_permission_state,
     summarize_workflow_work_order_recovery,
 )
@@ -402,3 +405,134 @@ class TestRuntimeStateAdvisoryEvidence:
         assert "runtime.recovery_action=start_new" in evidence.evidence
         assert "workflow.work_order_id=wo-beacon-runtime" in evidence.evidence
         assert evidence.to_dict()["advisory_type"] == "runtime_start_new"
+
+
+class TestRecoveryReadinessAdvisoryEvidence:
+    def test_recovery_readiness_summary_becomes_beacon_evidence(self) -> None:
+        now = datetime(2026, 6, 2, 10, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="readiness-summary",
+            last_permission_change=now,
+        )
+        session = SessionLifecycleState(
+            session_id="build-2-readiness",
+            session_name="Build 2 Readiness",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-readiness-prime-beacon",
+            current_task_id="readiness-summary",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            session,
+            work_order_id="wo-beacon-readiness",
+            heartbeat_emitted_at=now - timedelta(minutes=10),
+            timestamp=now,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=now,
+        )
+        gate = evaluate_live_control_permission_gate(
+            session,
+            runtime_export,
+            timestamp=now,
+        )
+        readiness = summarize_recovery_readiness(runtime_export, gate, timestamp=now)
+
+        evidence = recovery_readiness_advisory_evidence(readiness, now=now)
+
+        assert evidence.harness_id == "build-2-readiness"
+        assert evidence.advisory_type == "readiness_ready"
+        assert evidence.human_gate_required is False
+        assert evidence.blockers == ()
+        assert "readiness.status=ready" in evidence.evidence
+        assert "readiness.ready_for_execution=True" in evidence.evidence
+        assert "workflow.work_order_id=wo-beacon-readiness" in evidence.evidence
+        assert evidence.to_dict()["advisory_type"] == "readiness_ready"
+
+    def test_blocked_recovery_readiness_beacon_evidence_preserves_blockers(
+        self,
+    ) -> None:
+        now = datetime(2026, 6, 2, 10, 0, tzinfo=timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now - timedelta(minutes=1),
+            task_scope="readiness-summary",
+            last_permission_change=now,
+        )
+        session = SessionLifecycleState(
+            session_id="build-2-readiness-blocked",
+            session_name="Build 2 Readiness Blocked",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-readiness-prime-beacon",
+            current_task_id="readiness-summary",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=expired_context,
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            session,
+            work_order_id="wo-beacon-readiness-blocked",
+            heartbeat_emitted_at=now - timedelta(minutes=10),
+            timestamp=now,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=now,
+        )
+        gate = evaluate_live_control_permission_gate(
+            session,
+            runtime_export,
+            timestamp=now,
+        )
+        readiness = summarize_recovery_readiness(runtime_export, gate, timestamp=now)
+
+        evidence = recovery_readiness_advisory_evidence(readiness, now=now)
+
+        assert evidence.advisory_type == "readiness_blocked"
+        assert evidence.human_gate_required is True
+        assert "permission.unlock_expired" in evidence.blockers
+        assert "readiness.blocker=permission.unlock_expired" in evidence.evidence
+        assert evidence.to_dict()["human_gate_required"] is True

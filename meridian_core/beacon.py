@@ -17,6 +17,7 @@ from .session_lifecycle import (
     SessionAction,
     SessionCommandPlan,
     SessionPermissionSummary,
+    SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
     WorkflowWorkOrderRecoverySummary,
 )
@@ -185,6 +186,52 @@ def runtime_state_advisory_evidence(
         blockers=blockers,
         human_gate_required=(
             recovery_action == SessionAction.REQUEST_HUMAN_GATE or bool(blockers)
+        ),
+        generated_at=_as_utc(now or datetime.now(timezone.utc)),
+    )
+
+
+def recovery_readiness_advisory_evidence(
+    readiness_summary: SessionRecoveryReadinessSummary,
+    *,
+    now: datetime | None = None,
+) -> BeaconAdvisoryEvidence:
+    """Convert recovery readiness summary into Beacon advisory evidence only."""
+    evidence = list(readiness_summary.evidence_refs)
+    evidence.extend(
+        [
+            f"readiness.summary_id={readiness_summary.summary_id}",
+            f"readiness.status={readiness_summary.readiness_status}",
+            "readiness.command_kind="
+            + (
+                readiness_summary.command_kind.value
+                if readiness_summary.command_kind
+                else "none"
+            ),
+            "readiness.recommended_action="
+            + (
+                readiness_summary.recommended_action.value
+                if readiness_summary.recommended_action
+                else "none"
+            ),
+            "readiness.required_operation="
+            + (
+                readiness_summary.required_operation.value
+                if readiness_summary.required_operation
+                else "none"
+            ),
+            f"readiness.ready_for_execution={readiness_summary.ready_for_execution}",
+        ]
+    )
+
+    return BeaconAdvisoryEvidence(
+        harness_id=readiness_summary.target_session_id,
+        advisory_type=f"readiness_{readiness_summary.readiness_status}",
+        evidence=tuple(evidence),
+        blockers=readiness_summary.blockers,
+        human_gate_required=(
+            readiness_summary.human_gate_required
+            or bool(readiness_summary.blockers)
         ),
         generated_at=_as_utc(now or datetime.now(timezone.utc)),
     )

@@ -17,6 +17,7 @@ from meridian_core.session_lifecycle import (
     SessionAction,
     SessionCommandPlan,
     SessionPermissionSummary,
+    SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
     SessionStatus,
     WorkflowWorkOrderRecoverySummary,
@@ -601,6 +602,96 @@ def select_next_action_from_runtime_state_export(
         evidence=evidence,
         human_gate_required=True,
         blockers=["advisory only; runtime-state recovery command plan required"],
+    )
+
+
+def select_next_action_from_recovery_readiness_summary(
+    readiness_summary: Optional[SessionRecoveryReadinessSummary] = None,
+) -> PrimeNextAction:
+    """Convert a recovery readiness summary into safe Prime advisory input."""
+    if readiness_summary is None:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.FALLBACK,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.ERROR_RECOVERY,
+            target_harness="Session Lifecycle",
+            rationale="No Session Lifecycle recovery readiness summary available.",
+        )
+
+    evidence = list(readiness_summary.evidence_refs)
+    evidence.extend(
+        [
+            f"readiness.summary_id={readiness_summary.summary_id}",
+            f"readiness.status={readiness_summary.readiness_status}",
+            "readiness.command_kind="
+            + (
+                readiness_summary.command_kind.value
+                if readiness_summary.command_kind
+                else "none"
+            ),
+            "readiness.recommended_action="
+            + (
+                readiness_summary.recommended_action.value
+                if readiness_summary.recommended_action
+                else "none"
+            ),
+            "readiness.required_operation="
+            + (
+                readiness_summary.required_operation.value
+                if readiness_summary.required_operation
+                else "none"
+            ),
+            f"readiness.ready_for_execution={readiness_summary.ready_for_execution}",
+        ]
+    )
+    blockers = list(readiness_summary.blockers)
+
+    if readiness_summary.human_gate_required or blockers:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.HIGH,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness="Session Lifecycle",
+            target_lane=readiness_summary.target_session_id,
+            rationale=readiness_summary.human_gate_rationale,
+            evidence=evidence,
+            human_gate_required=True,
+            blockers=blockers
+            or ["recovery readiness summary requires human gate"],
+        )
+
+    if readiness_summary.readiness_status == "watch":
+        return make_prime_next_action(
+            action_type=PrimeActionType.POLL_SESSION,
+            confidence=PrimeActionConfidence.MEDIUM,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness="Session Lifecycle",
+            target_lane=readiness_summary.target_session_id,
+            rationale="Recovery readiness summary recommends continued watch.",
+            evidence=evidence,
+        )
+
+    return make_prime_next_action(
+        action_type=PrimeActionType.ADVISE_SESSION_RECOVERY,
+        confidence=PrimeActionConfidence.HIGH,
+        risk_tier=(
+            PrimeActionRiskTier.MEDIUM
+            if readiness_summary.recommended_action == SessionAction.ARCHIVE
+            else PrimeActionRiskTier.HIGH
+        ),
+        source=PrimeActionSource.SESSION_STATE,
+        target_harness="Session Lifecycle",
+        target_lane=readiness_summary.target_session_id,
+        rationale=(
+            "Recovery readiness summary is "
+            f"{readiness_summary.readiness_status}; advise command-plan staging only."
+        ),
+        evidence=evidence,
+        human_gate_required=True,
+        blockers=["advisory only; recovery readiness command plan required"],
     )
 
 

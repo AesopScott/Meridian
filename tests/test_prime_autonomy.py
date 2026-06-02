@@ -14,6 +14,7 @@ from meridian_core.prime_autonomy import (
     make_prime_next_action,
     select_next_action_from_project_state,
     select_next_action_from_command_plan_audit,
+    select_next_action_from_recovery_readiness_summary,
     select_next_action_from_session_lifecycle_advisory,
     select_next_action_from_runtime_state_export,
     select_next_action_from_workflow_recovery_summary,
@@ -31,10 +32,12 @@ from meridian_core.session_lifecycle import (
     SessionCommandPlan,
     SessionLifecycleState,
     SessionStatus,
+    evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
     generate_restart_finding,
     generate_resteer_finding,
+    summarize_recovery_readiness,
     summarize_workflow_work_order_recovery,
 )
 
@@ -927,6 +930,102 @@ class TestSessionLifecycleAdvisorySelection:
         assert action.risk_tier == PrimeActionRiskTier.SAFE
         assert action.is_executable() is True
         assert "runtime.recovery_action=reuse" in action.evidence
+
+    def test_none_recovery_readiness_summary_pauses_safely(self):
+        """Missing recovery readiness summaries fall back to safe pause."""
+        action = select_next_action_from_recovery_readiness_summary(None)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.FALLBACK
+        assert action.target_harness == "Session Lifecycle"
+
+    def test_recovery_readiness_ready_summary_stays_advisory(self, advisory_session):
+        """Ready summaries advise command-plan staging without execution."""
+        observed_at = datetime.now(timezone.utc)
+        workflow_summary = summarize_workflow_work_order_recovery(
+            advisory_session,
+            work_order_id="wo-readiness-prime",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            advisory_session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        gate = evaluate_live_control_permission_gate(
+            advisory_session,
+            runtime_export,
+            timestamp=observed_at,
+        )
+        readiness = summarize_recovery_readiness(
+            runtime_export,
+            gate,
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_recovery_readiness_summary(readiness)
+
+        assert readiness.ready_for_execution is True
+        assert action.action_type == PrimeActionType.ADVISE_SESSION_RECOVERY
+        assert action.target_lane == advisory_session.session_id
+        assert action.human_gate_required is True
+        assert action.is_executable() is False
+        assert "advisory only; recovery readiness command plan required" in (
+            action.blockers
+        )
+        assert "readiness.status=ready" in action.evidence
+
+    def test_recovery_readiness_blockers_pause_prime_advisory(
+        self,
+        advisory_session,
+    ):
+        """Blocked readiness summaries preserve blockers and human gate."""
+        observed_at = datetime.now(timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(minutes=1),
+            task_scope="task-1",
+            last_permission_change=observed_at,
+        )
+        blocked_session = SessionLifecycleState(
+            **{**advisory_session.__dict__, "permission_context": expired_context}
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            blocked_session,
+            work_order_id="wo-readiness-blocked",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            timestamp=observed_at,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            blocked_session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        gate = evaluate_live_control_permission_gate(
+            blocked_session,
+            runtime_export,
+            timestamp=observed_at,
+        )
+        readiness = summarize_recovery_readiness(
+            runtime_export,
+            gate,
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_recovery_readiness_summary(readiness)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is True
+        assert "permission.unlock_expired" in action.blockers
+        assert "readiness.blocker=permission.unlock_expired" in action.evidence
+        assert action.rationale == readiness.human_gate_rationale
 
 
 class TestCommandPlanAuditAdvisorySelection:
