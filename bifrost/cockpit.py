@@ -1563,15 +1563,25 @@ def _render_prime_panel(vm: CockpitViewModel) -> str:
     if not voice_states:
         voice_states.append('<span class="voice-state voice-idle">voice idle</span>')
 
-    mute_button = '<button type="button" class="icon-btn" data-action="mute" title="Mute voice output">Mute</button>'
-    mute_control = mute_button if not vm.voice.muted else '<button type="button" class="icon-btn" data-action="unmute" title="Unmute voice output">Unmute</button>'
+    mute_button = (
+        '<button type="button" class="icon-btn" data-voice-control="mute-status" '
+        'aria-disabled="true" title="Voice output mute status">Mute</button>'
+    )
+    mute_control = (
+        mute_button
+        if not vm.voice.muted
+        else (
+            '<button type="button" class="icon-btn" data-voice-control="unmute-status" '
+            'aria-disabled="true" title="Voice output muted status">Unmute</button>'
+        )
+    )
     voice_input_control = (
-        '<button type="button" class="icon-btn" data-action="voice" title="Start voice input" '
-        'aria-label="Start voice input">Mic</button>'
+        '<button type="button" class="icon-btn" data-voice-control="input-status" '
+        'title="Voice input status" aria-label="Voice input status" aria-disabled="true">Mic</button>'
     )
     voice_read_control = (
-        '<button type="button" class="icon-btn" data-action="read-aloud" title="Read Prime output aloud" '
-        'aria-label="Read Prime output aloud">Read</button>'
+        '<button type="button" class="icon-btn" data-voice-control="read-aloud-status" '
+        'title="Read-aloud status" aria-label="Read-aloud status" aria-disabled="true">Read</button>'
     )
     voice_status = (
         '<div class="voice-meta" aria-label="Voice runtime metadata">'
