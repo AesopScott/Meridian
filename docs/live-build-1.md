@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add DeepSeek candidate provider metadata presets to the provider-neutral Model Harness without enabling live provider transport.
 
@@ -23,6 +23,15 @@ Task: add deterministic provider-neutral metadata presets for DeepSeek candidate
 Tests: `python -m pytest tests/test_model_adapter.py -q` plus `git diff --check`.
 
 Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or implement reviewed runtime validation gates.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02 00:10 -06:00.
+- Commit: `e9e84431` (`feat: Expand DeepSeek candidate metadata presets`).
+- Files changed: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_model_adapter.py -q` (43 passed); `git diff --check` (passed; Git reported line-ending normalization warnings only).
+- Concrete evidence: DeepSeek candidate presets now carry provider-neutral direct trust/proof metadata, reviewed endpoint proof refs, external-review and validation evidence refs, blocked authority tags, prompt-drag default/warning tags, direct-provider authority flags, and stable display-safe `to_dict()` output. `deepseek-chat` remains the only dispatch id; `deepseek-v4-pro` and `deepseek-v4-flash` remain variant labels only; candidate trust, external review pending, max risk tier 1, no review clearance, no branch movement, no Relay/Aegis bypass, and no autonomous coding authority remain enforced by immutable metadata/tests. No live provider transport, credentials, account probing, raw prompts, provider responses, Relay/Bifrost/FileMap edits, branch movement, main writes, or Polaris work were added.
+- Next Candidate: bind review findings or implement reviewed runtime validation gates.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
