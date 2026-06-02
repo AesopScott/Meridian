@@ -436,12 +436,12 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 |---|---|---|---|---|
 | HN1 | Prime | Opens/focuses Prime runtime logic surface. | wired | Click opens Prime Runtime Logic with backend-sourced decision, context, source refs, proof logic, and blockers. |
 | HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | partial | Click updates session title/focus without fake status text. |
-| HN3 | Relay | Opens/focuses model-routing surface. | wired | Click opens Relay Model Logic with bridge/access/model/dispatch/blocker logic; Auto remains disabled. |
+| HN3 | Relay | Opens/focuses model-routing surface. | wired | Click opens Relay Runtime Logic with bridge/access/model/dispatch/blocker logic; Auto remains disabled. |
 | HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | partial | Click updates session title/focus without fake heartbeat details. |
 | HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon should become Security before wiring actions. |
 | HN6 | Aegis | Opens/focuses proof/cross-check surface. | partial | Click updates session title/focus without fake proof status. |
-| HN7 | Compass | Opens/focuses mission/project bearing surface. | wired | Click opens Compass Project Logic with backend-sourced project selector, Prime prompt context, and portfolio boundary sections. |
-| HN8 | Vulcan / Session Lifecycle | Opens/focuses session lifecycle controls. | wired | Click opens Vulcan Session Logic with backend-sourced User Session independence, project-aware session grouping, stale target guard, and lifecycle boundary sections. |
+| HN7 | Compass | Opens/focuses mission/project bearing surface. | wired | Click opens Compass Runtime Logic with backend-sourced project selector, Prime prompt context, and portfolio boundary sections. |
+| HN8 | Vulcan / Session Lifecycle | Opens/focuses session lifecycle controls. | wired | Click opens Vulcan Runtime Logic with backend-sourced User Session independence, project-aware session grouping, stale target guard, and lifecycle boundary sections. |
 | HN9 | Atlas | Opens/focuses knowledge/context retrieval surface. | planned | Until wired, no fake retrieved context. |
 | HN10 | Charon / FileMap | Opens/focuses navigation/FileMap surface. | partial | Click updates session title/focus; future view should read FileMap. |
 | HN11 | Arbiter / Codex Reviews | Opens/focuses review queue surface. | partial | Click updates session title/focus; no fake review findings. |

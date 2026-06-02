@@ -187,7 +187,7 @@ def test_index_projects_selector_is_compass_context_not_user_routing():
 
 def test_index_compass_harness_uses_backend_logic_snapshot():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
-    assert "Compass Project Logic" in doc
+    assert "Compass Runtime Logic" in doc
     assert "data-compass-logic" in doc
     assert "bridgeUrl('compass-logic')" in doc
     assert "renderCompassLogicSnapshot" in doc
@@ -196,7 +196,7 @@ def test_index_compass_harness_uses_backend_logic_snapshot():
 
 def test_index_vulcan_harness_uses_backend_logic_snapshot():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
-    assert "Vulcan Session Logic" in doc
+    assert "Vulcan Runtime Logic" in doc
     assert "data-vulcan-logic" in doc
     assert "bridgeUrl('vulcan-logic')" in doc
     assert "renderVulcanLogicSnapshot" in doc
@@ -210,6 +210,14 @@ def test_index_prime_harness_uses_backend_runtime_snapshot():
     assert "bridgeUrl('prime-logic')" in doc
     assert "renderPrimeDecisionSnapshot" in doc
     assert "renderPrimeLogic" in doc
+
+
+def test_index_wired_harness_titles_use_runtime_logic_naming():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Prime Runtime Logic" in doc
+    assert "Relay Runtime Logic" in doc
+    assert "Compass Runtime Logic" in doc
+    assert "Vulcan Runtime Logic" in doc
 
 
 def test_bridge_exposes_prime_logic_route_and_capability():
