@@ -30,12 +30,14 @@ from meridian_core.relay_executor import (
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
+    RelayPromptPacketPolicyDisposition,
     RelayPromptPacketPolicyEvidence,
     RelayPromptPayloadEvidence,
     RelayProofGateError,
     _build_decision_record,
     _build_dispatch_envelope,
     _evaluate_relay_prompt_packet_policy,
+    _relay_prompt_packet_policy_disposition,
     execute_relay_dispatch_plan,
     execute_relay_dispatch_plan_with_policy,
     execute_relay_plan_with_registry,
@@ -666,6 +668,11 @@ class TestExecuteRelayDispatchPlanWithPolicy:
         assert summary.decision_record.prompt_packet_policy_evidence.evidence_ids == (
             "packet-proof-tier2",
         )
+        assert summary.prompt_packet_policy_disposition.transport_allowed is True
+        assert (
+            summary.decision_record.prompt_packet_policy_disposition.transport_action
+            == "dispatch"
+        )
 
     def test_prompt_packet_policy_unknown_proof_requirement_blocks(self):
         plan = _make_plan(1)
@@ -748,6 +755,141 @@ class TestExecuteRelayDispatchPlanWithPolicy:
             )
 
         assert calls == []
+
+    def test_prompt_packet_policy_disposition_allows_warn_without_retry(self):
+        plan = _make_plan(1)
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="warn",
+            severity="warning",
+            reason="packet hash unavailable",
+            evidence_ids=("packet-proof-warn",),
+            warnings=("packet_hash_unavailable",),
+            packet_id=_PACKET_ID,
+        )
+
+        disposition = _relay_prompt_packet_policy_disposition(plan, evidence)
+
+        assert disposition == RelayPromptPacketPolicyDisposition(
+            transport_allowed=True,
+            transport_action="dispatch",
+            fallback_allowed=True,
+            audit_tags=("aegis_prompt_packet_policy_warn",),
+            explanation="packet hash unavailable",
+        )
+        assert disposition.to_dict()["retry_requires_fresh_evaluation"] is False
+
+    def test_prompt_packet_policy_disposition_demote_requires_fresh_evaluation(self):
+        plan = _make_plan(2)
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="demote",
+            severity="warning",
+            reason="packet hash unavailable; demote to lower tier",
+            evidence_ids=("packet-proof-demote",),
+            warnings=("packet_hash_unavailable_demote",),
+            demote_to_tier=1,
+            packet_id=_PACKET_ID,
+        )
+
+        disposition = _relay_prompt_packet_policy_disposition(plan, evidence)
+
+        assert disposition.transport_allowed is False
+        assert disposition.transport_action == "demote_requires_fresh_evaluation"
+        assert disposition.retry_requires_fresh_evaluation is True
+        assert disposition.demotion_target_tier == 1
+        assert disposition.demotion_authorized is True
+        assert disposition.fallback_allowed is False
+        assert "aegis_demotion_requires_fresh_policy_evaluation" in disposition.blockers
+        assert "rerun_aegis_before_transport" in disposition.audit_tags
+
+    def test_prompt_packet_policy_disposition_invalid_demote_target_blocks(self):
+        plan = _make_plan(2)
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="demote",
+            severity="warning",
+            reason="invalid demotion target",
+            evidence_ids=("packet-proof-demote",),
+            warnings=("packet_hash_unavailable_demote",),
+            demote_to_tier=2,
+            packet_id=_PACKET_ID,
+        )
+
+        disposition = _relay_prompt_packet_policy_disposition(plan, evidence)
+
+        assert disposition.transport_allowed is False
+        assert disposition.demotion_authorized is False
+        assert "aegis_demotion_target_unauthorized" in disposition.blockers
+
+    def test_prompt_packet_policy_demote_prevents_model_call_until_rerun(
+        self,
+        monkeypatch,
+    ):
+        plan = _make_plan(2)
+        calls: list[str] = []
+        demote_evidence = RelayPromptPacketPolicyEvidence(
+            decision="demote",
+            severity="warning",
+            reason="packet hash unavailable; demote to lower tier",
+            evidence_ids=("packet-proof-demote",),
+            warnings=("packet_hash_unavailable_demote",),
+            demote_to_tier=1,
+            packet_id=_PACKET_ID,
+        )
+
+        def recording_call(payload: str) -> str:
+            calls.append(payload)
+            return "response"
+
+        monkeypatch.setattr(
+            "meridian_core.relay_executor._evaluate_relay_prompt_packet_policy",
+            lambda *args, **kwargs: demote_evidence,
+        )
+
+        with pytest.raises(
+            RelayProofGateError,
+            match="demote_requires_fresh_evaluation",
+        ):
+            execute_relay_dispatch_plan_with_policy(
+                plan,
+                recording_call,
+                proof_trail=_clean_proof_trail("packet-proof-demote"),
+            )
+
+        assert calls == []
+
+    def test_prompt_packet_policy_human_gate_disposition_adds_blocker(self):
+        plan = _make_plan(4)
+        evidence = _evaluate_relay_prompt_packet_policy(
+            plan,
+            proof_trail=_clean_proof_trail("packet-proof-human-gate"),
+            human_gate_approved=False,
+        )
+
+        disposition = _relay_prompt_packet_policy_disposition(plan, evidence)
+
+        assert disposition.transport_allowed is False
+        assert disposition.transport_action == "human_gate_required"
+        assert disposition.fail_closed is True
+        assert disposition.retry_requires_fresh_evaluation is True
+        assert "aegis_human_gate_required" in disposition.blockers
+        assert "wait_for_review_console_approval" in disposition.audit_tags
+
+    def test_prompt_packet_policy_missing_metadata_disposition_fails_closed(self):
+        plan = _make_plan(1)
+        packet = dataclasses.replace(plan.packet, proof_metadata=False)  # type: ignore[arg-type]
+        plan = dataclasses.replace(plan, packet=packet)
+        evidence = _evaluate_relay_prompt_packet_policy(
+            plan,
+            proof_trail=_clean_proof_trail("packet-proof-missing"),
+        )
+
+        disposition = _relay_prompt_packet_policy_disposition(plan, evidence)
+
+        assert disposition.transport_allowed is False
+        assert disposition.transport_action == "block"
+        assert disposition.fail_closed is True
+        assert disposition.retry_requires_fresh_evaluation is True
+        assert "missing_metadata_fail_closed" in disposition.blockers
+        assert "correct_metadata_before_retry" in disposition.audit_tags
 
 
 class TestPayloadSnapshot:

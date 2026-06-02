@@ -217,6 +217,37 @@ class RelayPromptPacketPolicyEvidence:
 
 
 @dataclass(frozen=True)
+class RelayPromptPacketPolicyDisposition:
+    """Relay transport disposition derived from evaluated PromptPacket policy."""
+
+    transport_allowed: bool
+    transport_action: str
+    fail_closed: bool = False
+    retry_requires_fresh_evaluation: bool = False
+    demotion_target_tier: int | None = None
+    demotion_authorized: bool = False
+    fallback_allowed: bool = False
+    blockers: tuple[str, ...] = ()
+    audit_tags: tuple[str, ...] = ()
+    explanation: str = ""
+
+    def to_dict(self) -> dict[str, object]:
+        """Return deterministic advisory data for decision/audit handoff."""
+        return {
+            "transport_allowed": self.transport_allowed,
+            "transport_action": self.transport_action,
+            "fail_closed": self.fail_closed,
+            "retry_requires_fresh_evaluation": self.retry_requires_fresh_evaluation,
+            "demotion_target_tier": self.demotion_target_tier,
+            "demotion_authorized": self.demotion_authorized,
+            "fallback_allowed": self.fallback_allowed,
+            "blockers": self.blockers,
+            "audit_tags": self.audit_tags,
+            "explanation": self.explanation,
+        }
+
+
+@dataclass(frozen=True)
 class RelayDecisionRecord:
     """Provider-neutral decision record capturing route selection rationale for Prime explanation.
 
@@ -272,6 +303,7 @@ class RelayDecisionRecord:
     packet_proof_metadata_ref: str | None = None
     packet_proof_blocked_tags: tuple[str, ...] = ()
     prompt_packet_policy_evidence: RelayPromptPacketPolicyEvidence | None = None
+    prompt_packet_policy_disposition: RelayPromptPacketPolicyDisposition | None = None
 
 
 @dataclass(frozen=True)
@@ -382,6 +414,7 @@ class RelayExecutionSummary:
     errors: tuple[RelayExecutionError, ...]
     decision_record: RelayDecisionRecord | None = None
     prompt_packet_policy_evidence: RelayPromptPacketPolicyEvidence | None = None
+    prompt_packet_policy_disposition: RelayPromptPacketPolicyDisposition | None = None
 
     def aegis_gate_evidence_summary(self) -> AegisGateEvidenceSummary:
         """Extract Aegis gate evidence from decision record for downstream serialization.
@@ -739,6 +772,7 @@ def _build_aegis_prompt_packet_policy_metadata(
     *,
     proof_trail: ProofTrail | None = None,
     human_gate_approved: bool = False,
+    demotion_target_tier: int | None = None,
 ) -> AegisPromptPacketProofMetadata:
     """Adapt sealed Relay packet/envelope facts into Aegis policy metadata."""
     packet = plan.packet
@@ -796,7 +830,7 @@ def _build_aegis_prompt_packet_policy_metadata(
         human_approval_present=human_gate_approved,
         dual_lane_required=plan.route.requires_independence,
         dual_lane_proof_present=bool(evidence_ids) if plan.route.requires_independence else False,
-        demotion_target_tier=None,
+        demotion_target_tier=demotion_target_tier,
     )
 
 
@@ -822,18 +856,118 @@ def _relay_prompt_packet_policy_evidence(
     )
 
 
+def _relay_prompt_packet_policy_disposition(
+    plan: RelayDispatchPlan,
+    evidence: RelayPromptPacketPolicyEvidence,
+) -> RelayPromptPacketPolicyDisposition:
+    """Map evaluated policy evidence into a conservative Relay transport action."""
+    decision = evidence.decision
+    if decision in (
+        PromptPacketProofDecision.ALLOW.value,
+        PromptPacketProofDecision.WARN.value,
+    ):
+        audit_tags = (
+            ("aegis_prompt_packet_policy_warn",)
+            if decision == PromptPacketProofDecision.WARN.value
+            else ("aegis_prompt_packet_policy_allow",)
+        )
+        return RelayPromptPacketPolicyDisposition(
+            transport_allowed=True,
+            transport_action="dispatch",
+            fallback_allowed=True,
+            audit_tags=audit_tags,
+            explanation=evidence.reason,
+        )
+
+    if decision == PromptPacketProofDecision.DEMOTE.value:
+        target = evidence.demote_to_tier
+        demotion_authorized = (
+            target is not None
+            and isinstance(target, int)
+            and 0 <= target < plan.route.risk_tier
+        )
+        blockers = (
+            "aegis_demotion_requires_fresh_policy_evaluation",
+        )
+        if not demotion_authorized:
+            blockers = blockers + ("aegis_demotion_target_unauthorized",)
+        return RelayPromptPacketPolicyDisposition(
+            transport_allowed=False,
+            transport_action="demote_requires_fresh_evaluation",
+            retry_requires_fresh_evaluation=True,
+            demotion_target_tier=target,
+            demotion_authorized=demotion_authorized,
+            blockers=blockers,
+            audit_tags=(
+                "rebuild_prompt_packet_for_demoted_route",
+                "rerun_aegis_before_transport",
+                "no_silent_fallback",
+            ),
+            explanation=evidence.reason,
+        )
+
+    if decision == PromptPacketProofDecision.HUMAN_GATE.value:
+        blockers = evidence.blockers or ("aegis_human_gate_required",)
+        if "aegis_human_gate_required" not in blockers:
+            blockers = blockers + ("aegis_human_gate_required",)
+        return RelayPromptPacketPolicyDisposition(
+            transport_allowed=False,
+            transport_action="human_gate_required",
+            fail_closed=True,
+            retry_requires_fresh_evaluation=True,
+            blockers=blockers,
+            audit_tags=(
+                "wait_for_review_console_approval",
+                "rerun_aegis_before_transport",
+            ),
+            explanation=evidence.reason,
+        )
+
+    if decision == PromptPacketProofDecision.BLOCK.value:
+        blockers = evidence.blockers or ("aegis_prompt_packet_policy_blocked",)
+        if any("missing" in blocker for blocker in blockers):
+            blockers = blockers + ("missing_metadata_fail_closed",)
+        return RelayPromptPacketPolicyDisposition(
+            transport_allowed=False,
+            transport_action="block",
+            fail_closed=True,
+            retry_requires_fresh_evaluation=True,
+            blockers=tuple(dict.fromkeys(blockers)),
+            audit_tags=(
+                "correct_metadata_before_retry",
+                "rerun_aegis_before_transport",
+            ),
+            explanation=evidence.reason,
+        )
+
+    return RelayPromptPacketPolicyDisposition(
+        transport_allowed=False,
+        transport_action="block",
+        fail_closed=True,
+        retry_requires_fresh_evaluation=True,
+        blockers=("unknown_prompt_packet_policy_decision",),
+        audit_tags=(
+            "correct_metadata_before_retry",
+            "rerun_aegis_before_transport",
+        ),
+        explanation=evidence.reason,
+    )
+
+
 def _evaluate_relay_prompt_packet_policy(
     plan: RelayDispatchPlan,
     dispatch_envelope: RelayDispatchEnvelope | None = None,
     *,
     proof_trail: ProofTrail | None = None,
     human_gate_approved: bool = False,
+    demotion_target_tier: int | None = None,
 ) -> RelayPromptPacketPolicyEvidence:
     metadata = _build_aegis_prompt_packet_policy_metadata(
         plan,
         dispatch_envelope,
         proof_trail=proof_trail,
         human_gate_approved=human_gate_approved,
+        demotion_target_tier=demotion_target_tier,
     )
     result = evaluate_prompt_packet_proof_policy(metadata)
     return _relay_prompt_packet_policy_evidence(result, metadata, dispatch_envelope)
@@ -1418,6 +1552,7 @@ def execute_relay_dispatch_plan_with_policy(
     human_gate_approved: bool = False,
     payload_snapshots: tuple[PromptPayloadSnapshot | None, ...] | None = None,
     include_decision_record: bool = False,
+    demotion_target_tier: int | None = None,
 ) -> RelayExecutionSummary:
     """
     Execute a plan after evaluating V2 CognitionPolicy against the risk tier.
@@ -1470,14 +1605,19 @@ def execute_relay_dispatch_plan_with_policy(
         first_dispatch_envelope,
         proof_trail=proof_trail,
         human_gate_approved=human_gate_approved,
+        demotion_target_tier=demotion_target_tier,
     )
-    if prompt_packet_policy_evidence.decision in (
-        PromptPacketProofDecision.BLOCK.value,
-        PromptPacketProofDecision.HUMAN_GATE.value,
-    ):
+    prompt_packet_policy_disposition = _relay_prompt_packet_policy_disposition(
+        plan,
+        prompt_packet_policy_evidence,
+    )
+    if not prompt_packet_policy_disposition.transport_allowed:
+        blockers = ", ".join(prompt_packet_policy_disposition.blockers)
         raise RelayProofGateError(
             "Relay dispatch blocked by PromptPacket proof policy: "
-            f"{prompt_packet_policy_evidence.reason}"
+            f"{prompt_packet_policy_evidence.reason}; "
+            f"action={prompt_packet_policy_disposition.transport_action}; "
+            f"blockers={blockers}"
         )
 
     summary = execute_relay_dispatch_plan(
@@ -1492,11 +1632,13 @@ def execute_relay_dispatch_plan_with_policy(
         decision_record = replace(
             decision_record,
             prompt_packet_policy_evidence=prompt_packet_policy_evidence,
+            prompt_packet_policy_disposition=prompt_packet_policy_disposition,
         )
     return replace(
         summary,
         decision_record=decision_record,
         prompt_packet_policy_evidence=prompt_packet_policy_evidence,
+        prompt_packet_policy_disposition=prompt_packet_policy_disposition,
     )
 
 
