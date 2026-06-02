@@ -293,6 +293,14 @@ Coordinator Build 2/3/4 movement - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_session_lifecycle.py -q` passed 76/76; `python -m pytest tests/test_filemap.py -q` passed 46/46; `git diff --check ee00bc4a^..HEAD` passed; Build 4 text/shape inspection found the required dispatch envelope, metadata pass-through, Aegis, Bifrost, FileMap, credential/raw prompt, exact model, blocked/error, and test terms.
 - Next coordinator action: push this movement and route Reviews A to review Build 2 then Build 3 current-main Ready markers, and Reviews B to review Build 4 current-main Ready marker.
 
+Coordinator Build 1 payload evidence movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Build 1 worktree clean before movement. Build 5 remained dirty/in-progress and was not moved.
+- Approved and completed path-limited movement of Build 1 Relay prompt payload evidence binding onto shared main as `e6ab6af4` (`feat: Bind Relay prompt payload evidence`) and `334c952e` (`docs: Mark payload evidence binding ready for review`).
+- Movement scope stayed limited to `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, and `docs/live-build-1.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed 199/199; `git diff --check e6ab6af4^..334c952e` passed.
+- Next coordinator action: route Reviews A to review Build 1 after it completes the already assigned Build 2/3 review pass; continue polling Build 5 for Ready/blocker evidence.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
