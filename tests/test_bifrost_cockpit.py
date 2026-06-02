@@ -18,6 +18,7 @@ from bifrost.cockpit import (
     ProgressEvent,
     ProjectCard,
     PromptPayloadView,
+    PromptPacketProofView,
     ProofGateStatus,
     ProofPreviewItem,
     ProofStateView,
@@ -482,6 +483,99 @@ def test_dispatch_hardening_preserves_payload_proof_and_stale_recovery():
     assert 'class="stale-target-guard"' in doc
     assert 'data-recovery-action="ask-prime-recover"' in doc
     assert "Next prompt target: Closed Dispatch Session" not in doc
+
+
+def test_prompt_packet_proof_sample_renders_required_metadata():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="PromptPacket Proof Metadata"' in doc
+    assert "PromptPacket Proof" in doc
+    assert "prompt-packet-001" in doc
+    assert "Packet hash: sha256:packet-proof-sample" in doc
+    assert "Source lineage: compliant" in doc
+    assert "Prompt budget ref: budget:relay-dispatch-4000" in doc
+    assert "Proof requirement: tier2_payload_snapshot" in doc
+    assert 'packet-state-warn' in doc
+
+
+def test_prompt_packet_proof_sample_renders_evidence_gaps_and_warnings():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'class="packet-list packet-aegis-evidence"' in doc
+    assert "aegis:route-tier" in doc
+    assert "aegis:payload-proof" in doc
+    assert "response_payload_hash_pending" in doc
+    assert "completion_tokens_missing" in doc
+    assert "latency_ms_missing" in doc
+
+
+def test_prompt_packet_proof_supports_block_demote_warn_states():
+    cases = ("block", "demote", "warn")
+    for proof_state in cases:
+        vm = sample_cockpit_view_model()
+        vm.prompt_packet_proof = PromptPacketProofView(
+            packet_id=f"packet-{proof_state}",
+            packet_hash=f"sha256:{proof_state}",
+            source_lineage_compliance="noncompliant" if proof_state == "block" else "partial",
+            prompt_budget_ref="budget:test",
+            aegis_evidence_ids=["aegis:test"],
+            proof_requirement="tier3_dual_lane",
+            snapshot_hash_gaps=["prompt_snapshot_missing"],
+            proof_state=proof_state,
+            missing_metadata_warnings=["packet_metadata_missing"],
+        )
+        doc = render_cockpit_html(vm)
+        assert f"packet-{proof_state}" in doc
+        assert f"packet-state-{proof_state}" in doc
+        assert "prompt_snapshot_missing" in doc
+        assert "packet_metadata_missing" in doc
+
+
+def test_prompt_packet_proof_escapes_structured_fields():
+    vm = sample_cockpit_view_model()
+    vm.prompt_packet_proof = PromptPacketProofView(
+        packet_id="<script>packet</script>",
+        packet_hash="sha256:<bad>",
+        source_lineage_compliance="<img src=x>",
+        prompt_budget_ref="budget:<bad>",
+        aegis_evidence_ids=["<script>evidence</script>"],
+        proof_requirement="<script>requirement</script>",
+        snapshot_hash_gaps=["gap:<bad>"],
+        proof_state="block",
+        missing_metadata_warnings=["<script>warning</script>"],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;packet&lt;/script&gt;" in doc
+    assert "sha256:&lt;bad&gt;" in doc
+    assert "budget:&lt;bad&gt;" in doc
+    assert "gap:&lt;bad&gt;" in doc
+
+
+def test_prompt_packet_proof_in_cockpit_main_not_hud_core():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    main_section = doc[doc.find('<main class="cockpit-main">'):doc.find('</main>')]
+    core_start = doc.find('class="hud-command-core"')
+    core_end = doc.find("</div>", core_start)
+    core_section = doc[core_start:core_end]
+    assert 'class="prompt-packet-proof"' in main_section
+    assert "PromptPacket Proof" not in core_section
+
+
+def test_prompt_packet_proof_preserves_prior_bifrost_surfaces():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-packet-session", "Closed Packet Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-packet-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="PromptPacket Proof Metadata"' in doc
+    assert 'aria-label="Dispatch Hardening State"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Packet Session" not in doc
 
 
 

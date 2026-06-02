@@ -150,6 +150,19 @@ class DispatchHardeningView:
 
 
 @dataclass
+class PromptPacketProofView:
+    packet_id: str = ""
+    packet_hash: str = ""
+    source_lineage_compliance: str = "unknown"
+    prompt_budget_ref: str = ""
+    aegis_evidence_ids: list[str] = field(default_factory=list)
+    proof_requirement: str = "unknown"
+    snapshot_hash_gaps: list[str] = field(default_factory=list)
+    proof_state: str = "warn"
+    missing_metadata_warnings: list[str] = field(default_factory=list)
+
+
+@dataclass
 class ProofGateStatus:
     gate_id: str
     gate_name: str
@@ -267,6 +280,7 @@ class CockpitViewModel:
     provider_balance: ProviderBalanceView = field(default_factory=ProviderBalanceView)
     prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     dispatch_hardening: DispatchHardeningView = field(default_factory=DispatchHardeningView)
+    prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
     session_lifecycle: SessionLifecycleView = field(default_factory=SessionLifecycleView)
     proof_state: ProofStateView = field(default_factory=ProofStateView)
     user_session_mode: UserSessionModeView = field(default_factory=UserSessionModeView)
@@ -390,6 +404,25 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             dispatch_error_tags=[
                 "fallback_not_authorized",
                 "auto_routing_disabled",
+            ],
+        ),
+        prompt_packet_proof=PromptPacketProofView(
+            packet_id="prompt-packet-001",
+            packet_hash="sha256:packet-proof-sample",
+            source_lineage_compliance="compliant",
+            prompt_budget_ref="budget:relay-dispatch-4000",
+            aegis_evidence_ids=[
+                "aegis:route-tier",
+                "aegis:payload-proof",
+            ],
+            proof_requirement="tier2_payload_snapshot",
+            snapshot_hash_gaps=[
+                "response_payload_hash_pending",
+            ],
+            proof_state="warn",
+            missing_metadata_warnings=[
+                "completion_tokens_missing",
+                "latency_ms_missing",
             ],
         ),
         lanes=[
@@ -1141,6 +1174,54 @@ def _render_dispatch_hardening(dispatch: DispatchHardeningView) -> str:
     )
 
 
+def _render_prompt_packet_proof(packet: PromptPacketProofView) -> str:
+    if not packet.packet_id:
+        return ""
+
+    evidence_items = "".join(
+        f'<span class="packet-chip packet-evidence">{_e(evidence_id)}</span>'
+        for evidence_id in packet.aegis_evidence_ids
+    )
+    gap_items = "".join(
+        f'<span class="packet-chip packet-gap">{_e(gap)}</span>'
+        for gap in packet.snapshot_hash_gaps
+    )
+    warning_items = "".join(
+        f'<span class="packet-chip packet-warning">{_e(warning)}</span>'
+        for warning in packet.missing_metadata_warnings
+    )
+
+    return (
+        '<section class="prompt-packet-proof" aria-label="PromptPacket Proof Metadata">'
+        '<div class="packet-header-main">'
+        '<h3>PromptPacket Proof</h3>'
+        f'<span class="packet-id">{_e(packet.packet_id)}</span>'
+        f'<span class="packet-state packet-state-{_e(packet.proof_state)}">{_e(packet.proof_state)}</span>'
+        "</div>"
+        '<div class="packet-proof-grid">'
+        f'<span class="packet-field packet-hash">Packet hash: {_e(packet.packet_hash)}</span>'
+        f'<span class="packet-field packet-lineage">Source lineage: {_e(packet.source_lineage_compliance)}</span>'
+        f'<span class="packet-field packet-budget-ref">Prompt budget ref: {_e(packet.prompt_budget_ref)}</span>'
+        f'<span class="packet-field packet-requirement">Proof requirement: {_e(packet.proof_requirement)}</span>'
+        "</div>"
+        '<div class="packet-proof-lists">'
+        '<div class="packet-list packet-aegis-evidence" aria-label="Aegis Evidence IDs">'
+        '<span class="packet-list-title">Aegis evidence IDs</span>'
+        + evidence_items
+        + "</div>"
+        '<div class="packet-list packet-snapshot-gaps" aria-label="Snapshot Hash Gaps">'
+        '<span class="packet-list-title">Snapshot/hash gaps</span>'
+        + gap_items
+        + "</div>"
+        '<div class="packet-list packet-metadata-warnings" aria-label="Missing Metadata Warnings">'
+        '<span class="packet-list-title">Missing metadata warnings</span>'
+        + warning_items
+        + "</div>"
+        + "</div>"
+        + "</section>"
+    )
+
+
 def _render_instrument_band(inst: InstrumentBand) -> str:
     def chip(label: str, status: str) -> str:
         return (
@@ -1467,6 +1548,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     provider_balance = _render_provider_balance(vm.provider_balance)
     prompt_payload = _render_prompt_payload(vm.prompt_payload)
     dispatch_hardening = _render_dispatch_hardening(vm.dispatch_hardening)
+    prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
     projects = _render_project_strip(vm.projects, vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
@@ -1498,6 +1580,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{session_lifecycle}\n"
         f"{proof_state}\n"
         f"{dispatch_hardening}\n"
+        f"{prompt_packet_proof}\n"
         f"{provider_balance}\n"
         f"{prompt_payload}\n"
         "</main>\n"
