@@ -21,7 +21,7 @@ Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executo
 Completion:
 - Status: Ready for Codex Review.
 - Completed: 2026-06-02.
-- Commit: `1977d936` (`test: Add Relay handoff sanitizer contract coverage`).
+- Commit: `05006fc9` (`test: Add Relay handoff sanitizer contract coverage`).
 - Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 - Tests run: `python -m pytest tests/test_relay_executor.py -q` (220 passed); `git diff --check` (passed); path-scope check limited changes to allowed files.
 - Concrete evidence: Relay now exposes `relay_display_safe_handoff_tags()` as the reusable downstream sanitizer contract, with stricter proof-evidence id suffix validation for `packet-proof-*` and `aegis-proof-*` tags. Contract tests prove unsafe free-text tags and evidence ids including `credential:sk-test-secret`, `raw_prompt_secret`, `branch_move_request`, and `packet-proof-credential:sk-test-secret` are redacted, while known structured tags and fixed safe phrases survive.
