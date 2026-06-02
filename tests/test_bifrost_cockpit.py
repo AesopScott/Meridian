@@ -2992,6 +2992,55 @@ def test_proof_state_preview_does_not_replace_stale_recovery_guard():
     assert "Next prompt target: Closed Proof Session" not in doc
 
 
+def test_render_has_no_v3_goal_runtime_execution_surface():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'class="proof-preview-list"' in doc
+    assert "Awaiting next proof write after local tests" in doc
+    for fragment in (
+        'aria-label="V3 Goal Runtime"',
+        'aria-label="Goal Runtime"',
+        'aria-label="Goal Checkpoint Update"',
+        'aria-label="Goal Checkpoint Controls"',
+        'data-action="goal"',
+        'data-action="goal-runtime"',
+        'data-action="goal-checkpoint"',
+        'data-action="checkpoint-goal"',
+        'data-action="update-goal"',
+        'data-action="complete-goal"',
+        'data-action="block-goal"',
+        'data-action="write-git"',
+        'data-action="write-obsidian"',
+        'data-action="create-automation"',
+        'data-action="move-branch"',
+        'data-action="move-worktree"',
+        'data-action="merge"',
+        'data-action="rebase"',
+        'data-action="reset"',
+        'data-action="cherry-pick"',
+        'data-action="stash-pop"',
+        'data-action="spawn-session"',
+        'data-action="change-token-budget"',
+        "data-goal-runtime=",
+        "data-goal-checkpoint=",
+        "data-token-budget-control=",
+        "data-obsidian-write=",
+        "data-automation-create=",
+        "data-branch-movement=",
+        "data-worktree-movement=",
+        "V3 Goal Runtime",
+        "Goal checkpoint controls",
+        "Write Git",
+        "Write Obsidian",
+        "Create automation",
+        "Move branch",
+        "Move worktree",
+        "Change token budget",
+        "Set token budget",
+        "Spawn session",
+    ):
+        assert fragment not in doc
+
+
 def test_proof_state_with_default_status_renders():
     vm = CockpitViewModel(project="Test", bearing="test")
     vm.proof_state = ProofStateView()
