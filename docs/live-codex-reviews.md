@@ -22,6 +22,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 1 Relay proof payload negative-path hardening.
+
+Status: passed by Codex Reviews A on 2026-06-02 10:57 -06:00. Candidate `HEAD` is `b5f02f43`, and Build 1 commits `8081871d` and `b5f02f43` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 8081871d^..b5f02f43`
+
+Review result:
+
+- Containment checks for `8081871d` and `b5f02f43` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with Build 1 queue provenance in `docs/live-build-1.md`; `meridian_core/model_adapter.py` was not touched.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 215 tests.
+- `git diff --check 8081871d^..b5f02f43` passed.
+- Verified Relay proof-trail error evidence now records structured lane/error-length information instead of arbitrary exception free text.
+- Verified added negative-path tests cover raw prompt sentinels, worker chat markers, credential markers, branch movement requests, free-text blocker summaries, and provider output text staying out of proof/evidence/consumer-view surfaces.
+- Verified the executor change is provider-neutral, deterministic, bounded to structured proof evidence, and preserves adapter/provider request boundaries.
+- Verified no live vendor calls, network/filesystem access, UI/Bifrost/FileMap/session/process/main/Polaris behavior, branch/worktree movement, or cross-worktree behavior was introduced.
+
+Finding: none.
+
+Completion: Build 1 Relay proof payload negative-path hardening is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 2 close/archive write-through proof slice.
 
 Status: passed by Codex Reviews A on 2026-06-02 10:52 -06:00. Candidate `HEAD` is `ad9fc03f`, and Build 2 commits `6dfabea0` and `ad9fc03f` are ancestors of the assigned candidate branch.

@@ -8,6 +8,26 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 3 post-voice FileMap audit / registration.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 3 commit `90e6d739` (`chore: register Bifrost voice preview FileMap coverage`). Verify Bifrost voice preview/runtime paths are registered in runtime FileMap and `docs/FileMap.md`, no mojibake/BOM/personal-name regressions in touched FileMap docs/code, and no unrelated scope leakage.
+
+Proof: `python -m pytest tests/test_filemap.py -q`; `git diff --check 90e6d739^..90e6d739`.
+
+Review result - 2026-06-02 10:55 -06:00:
+
+- Build 3 post-voice FileMap coverage passed. Commit `90e6d739` changed only allowed files: `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
+- `python -m pytest tests/test_filemap.py -q` passed with 47 tests.
+- `git diff --check 90e6d739^..90e6d739` passed.
+- `git diff --name-only 90e6d739^..90e6d739` showed only the four allowed Build 3/FileMap files.
+- No mojibake, BOM, personal-name wording, runtime/UI/session/process, branch/worktree/main movement, or Polaris leakage was found in the reviewed scope.
+
+Completion: Build 3 post-voice FileMap coverage is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: re-review repaired frontend Bifrost voice runtime/status surface.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
