@@ -1064,6 +1064,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 18:23 -06:00 - Build 2 checked queue; Active Task found: enforce remaining Session Lifecycle permission-invariant gaps (Codex Reviews A repair, routed 2026-06-01 18:21); executing
 2026-06-01 18:28 -06:00 - Build 2 completed enforce remaining Session Lifecycle permission-invariant gaps; commit e41851ae on main; all fixes applied and tested 60/60 passing; queue updated; Ready for Codex Review; cadence 1 of 3; no new Active Task; returning to polling
 2026-06-01 18:29 -06:00 - Build 2 checked queue; Active Now task (permission-invariant repair) marked complete at e41851ae; no new Active Task assigned; cadence 1 of 3; idle polling
+2026-06-01 18:30 -06:00 - Build 2 checked queue; prior Active Task (permission-invariant repair) still showing in Active Now section (not yet moved to Completed by coordinator); no executable task; cadence 1 of 3; idle polling
 ```
 
 ## Write/Completion Log
