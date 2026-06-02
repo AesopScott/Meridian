@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || 'C:\\Users\\user\\Code\\Meridian',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4283,6 +4283,38 @@ body {
     ['visible context', detail.visibleContext ? 'enabled' : 'blocked'],
     ['restart', detail.samePortRestart ? 'same-port reset recovery' : 'manual restart required'],
   ];
+  const renderSparkBacklogSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Backlog source', relayGrid([
+        ['status', 'offline'],
+        ['source error', snapshot?.error || 'backlog source unavailable'],
+      ]), true);
+    }
+    const tasks = Array.isArray(snapshot.tasks) ? snapshot.tasks : [];
+    const taskRows = tasks.map((task, index) => [
+      task.id || task.title || `task ${index + 1}`,
+      [task.status || 'unknown', task.priority || 'unprioritized', task.summary || task.title || 'no summary'].join(' | '),
+    ]);
+    return [
+      relaySection('Backlog source', relayGrid([
+        ['source', 'docs/backlog.json'],
+        ['tasks', String(tasks.length)],
+        ['surface mode', 'display only'],
+        ['mutation policy', 'intake, edits, approval, and conversion stay blocked until a backend exists'],
+      ]), true),
+      relaySection(
+        'Backlog tasks',
+        taskRows.length ? relayGrid(taskRows) : relaySummary('docs/backlog.json returned zero tasks'),
+        true,
+      ),
+      relaySection('Backlog boundaries', relayGrid([
+        ['fake tasks', 'blocked'],
+        ['project scope', 'not inferred without task metadata'],
+        ['Prime recommendation', 'not available until Prime owns backlog ranking'],
+        ['writes', 'no browser write path is available from this panel'],
+      ]), true),
+    ].join('');
+  };
   const renderRelayBridgeStatus = async () => {
     const bridgeNode = rightWorkspace?.querySelector('[data-relay-bridge-status]');
     if (!bridgeNode) return;
@@ -4297,6 +4329,17 @@ body {
       bridgeNode.innerHTML = relayGrid(relayBridgeRows(result.ok ? 'online' : 'degraded', detail));
     } catch {
       bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', { visibleContext: false, samePortRestart: false }));
+    }
+  };
+  const loadSparkBacklog = async () => {
+    const backlogNode = rightWorkspace?.querySelector('[data-spark-backlog]');
+    if (!backlogNode) return;
+    try {
+      const response = await fetch('docs/backlog.json', { cache: 'no-store' });
+      const snapshot = await response.json();
+      backlogNode.innerHTML = renderSparkBacklogSnapshot({ ok: true, ...snapshot });
+    } catch (error) {
+      backlogNode.innerHTML = renderSparkBacklogSnapshot({ ok: false, error: error.message });
     }
   };
   const clearRightPanelSurface = () => {
@@ -4350,6 +4393,37 @@ body {
         ]), true),
       ],
     });
+  };
+  const renderSparkBacklogSurface = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Backlog runtime">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Backlog Runtime</div>
+            <div class="relay-models-status">Display only</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-spark-backlog>${relaySection('Backlog source', relayGrid([['status', 'loading docs/backlog.json']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadSparkBacklog();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
   };
   const renderHarnessSurface = (button) => {
     const harness = button?.dataset.harness || 'Harness';
@@ -4514,6 +4588,7 @@ body {
     if (rightWorkspace?.querySelector('[data-prime-logic]')) loadPrimeLogic();
     if (rightWorkspace?.querySelector('[data-compass-logic]')) loadCompassLogic();
     if (rightWorkspace?.querySelector('[data-vulcan-logic]')) loadVulcanLogic();
+    if (rightWorkspace?.querySelector('[data-spark-backlog]')) loadSparkBacklog();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
@@ -4737,7 +4812,9 @@ body {
     screen.classList.remove('session-theme-aqua');
     screen.classList.add('session-theme-green');
     if (userTitle) userTitle.textContent = actionLabel || 'Spark';
-    const rendered = renderSparkSurface(actionLabel || 'Spark');
+    const rendered = actionLabel === 'Backlog'
+      ? renderSparkBacklogSurface()
+      : renderSparkSurface(actionLabel || 'Spark');
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('spark', actionLabel || 'Spark', { persist });

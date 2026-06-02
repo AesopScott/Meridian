@@ -252,6 +252,27 @@ def test_index_wired_harness_titles_use_runtime_logic_naming():
     assert "Vulcan Runtime Logic" in doc
 
 
+def test_index_spark_backlog_uses_real_backlog_json_source():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Backlog Runtime" in doc
+    assert 'aria-label="Backlog runtime"' in doc
+    assert "data-spark-backlog" in doc
+    assert "fetch('docs/backlog.json', { cache: 'no-store' })" in doc
+    assert "renderSparkBacklogSnapshot" in doc
+    assert "actionLabel === 'Backlog'" in doc
+    assert "docs/backlog.json returned zero tasks" in doc
+
+
+def test_index_spark_backlog_surface_blocks_fake_tasks_and_writes():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "intake, edits, approval, and conversion stay blocked until a backend exists" in doc
+    assert "fake tasks" in doc
+    assert "blocked" in doc
+    assert "not inferred without task metadata" in doc
+    assert "not available until Prime owns backlog ranking" in doc
+    assert "no browser write path is available from this panel" in doc
+
+
 def test_bridge_exposes_prime_logic_route_and_capability():
     doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
     assert "primeRuntimeSnapshot: true" in doc
