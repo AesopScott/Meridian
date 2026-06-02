@@ -53,6 +53,7 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | `meridian_core/mission.py` | Mission boot | Loads/parses `MISSION.md` into native objects. | `tests/test_mission.py` | Required before Prime acts. |
 | `meridian_core/wake.py` | Wake sequence | Builds structured wake brief from harness heartbeat state. | `tests/test_wake.py` | NASA-style Go calls are UI/audio concerns later. |
 | `meridian_core/beacon.py` | Beacon / liveness harness | File-backed liveness checks that convert queue/sentinel freshness into `Heartbeat` objects. | `tests/test_beacon.py` | V0 Beacon slice only; process supervision and restart/resteer actions belong to later Prime runtime. |
+| `tests/test_beacon.py` | Beacon / liveness harness | Test suite for meridian_core/beacon.py: covers file-backed liveness checks, heartbeat conversion, and Beacon freshness behavior. | n/a | Run before changing Beacon liveness, sentinel freshness, or heartbeat observation behavior. |
 | `meridian_core/intention.py` | Progress Intention / Compass | Builds stage/objective/risk-tier view from portfolio and decision state. | `tests/test_intention.py` | Functional seed for Prime's work intention. |
 | `meridian_core/objectives.py` | Mission Objectives recall | Stable on-demand API for Compass-derived mission objectives. | `tests/test_objectives.py` | Future cockpit Mission Objectives button uses this. |
 
@@ -118,6 +119,7 @@ G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
 | File | Area | Purpose | Related Tests | Notes |
 | --- | --- | --- | --- | --- |
 | `meridian_core/filemap.py` | File map / knowledge tracker | Domain-level knowledge tracker: `FileMapEntry`, `FileMap`, `make_default_map()`. | `tests/test_filemap.py` | Feed to Echo/Atlas for session memory injection. |
+| `tests/test_filemap.py` | File map / knowledge tracker | Test suite for meridian_core/filemap.py: verifies required FileMap entries, deterministic summaries, area filtering, and injection-summary coverage. | n/a | Run before changing FileMap entries, required-path coverage, or FileMap summary behavior. |
 | `docs/FileMap.md` | File map / knowledge tracker | Human-readable living knowledge tracker for important Meridian files. | n/a | Obsidian mirror: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md` |
 
 ## Planning And Handoffs

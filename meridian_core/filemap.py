@@ -271,6 +271,13 @@ def make_default_map() -> FileMap:
             notes="V0 Beacon slice only; process supervision and restart/resteer actions belong to later Prime runtime.",
         ),
         FileMapEntry(
+            path="tests/test_beacon.py",
+            area=FileArea.BEACON,
+            purpose="Test suite for meridian_core/beacon.py: covers file-backed liveness checks, heartbeat conversion, and Beacon freshness behavior.",
+            related_tests=[],
+            notes="Run before changing Beacon liveness, sentinel freshness, or heartbeat observation behavior.",
+        ),
+        FileMapEntry(
             path="meridian_core/intention.py",
             area=FileArea.COMPASS,
             purpose="Builds stage/objective/risk-tier view from portfolio and decision state.",
@@ -1157,6 +1164,13 @@ def make_default_map() -> FileMap:
             purpose="Domain-level knowledge tracker: FileMapEntry, FileMap, make_default_map().",
             related_tests=["tests/test_filemap.py"],
             notes="Feed to Echo/Atlas for session memory injection.",
+        ),
+        FileMapEntry(
+            path="tests/test_filemap.py",
+            area=FileArea.FILE_MAP,
+            purpose="Test suite for meridian_core/filemap.py: verifies required FileMap entries, deterministic summaries, area filtering, and injection-summary coverage.",
+            related_tests=[],
+            notes="Run before changing FileMap entries, required-path coverage, or FileMap summary behavior.",
         ),
 
         # -- New Relay/UI docs (2026-06-12) --------------------------------
