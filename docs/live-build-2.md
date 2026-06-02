@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add a deterministic, display-safe Session Lifecycle command-staging review packet for downstream Bifrost/UI review consumers.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: build a pure review packet from landed non-executable command-plan staging plus Prime/Beacon advisory shapes, preserving target session id, command kind/recommended action, required operation, ready flag, human-gate rationale, UI-review blocker, permission state, blockers, evidence refs, Prime advisory action, and Beacon evidence shape while explicitly marking `is_executable_now=False` and `requires_human_ui_review=True`.
+
+Completion:
+
+- Build 2 completed the command-staging review packet slice in local worktree commit `0a0aadd9`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Evidence: added frozen `SessionCommandStagingReviewPacket` plus `build_command_staging_review_packet()` to package `SessionLiveControlCommandPlanStagingRecord` and optional Prime/Beacon advisory dictionaries into display-safe downstream review metadata. The packet preserves staging ids, target session id, command kind, recommended action, required operation, readiness, human-gate rationale, permission state, blockers, evidence refs, Prime advisory action shape, and Beacon evidence shape while forcing `is_executable_now=False` and `requires_human_ui_review=True`.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 113 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or connect the reviewed packet to Prime/Beacon advisory serialization when routed.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: connect reviewed non-executable live-control command-plan staging records to Prime/Beacon advisory consumers.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
