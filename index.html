@@ -4201,6 +4201,12 @@ body {
     await restartModelBridge();
     hardReloadUi();
   };
+  let reloadInProgress = false;
+  const reloadUi = () => {
+    if (reloadInProgress) return;
+    reloadInProgress = true;
+    hardReloadUi();
+  };
   const activateHarnessButton = (button, { persist = true } = {}) => {
     if (!button) return;
     screen.classList.remove('session-theme-aqua');
@@ -4235,7 +4241,7 @@ body {
         return;
       }
       if (actionLabel === 'Reload') {
-        hardReloadUi();
+        reloadUi();
         return;
       }
       if (actionLabel === 'Close') {

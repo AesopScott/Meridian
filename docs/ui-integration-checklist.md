@@ -190,10 +190,10 @@ Reload is a UI/cache recovery control. It refreshes the page and assets without 
 
 | ID | Reload Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| RLD1 | Hard reload UI | Reloads the current UI page. | partial | Click Reload; page refreshes. |
-| RLD2 | Cache-bust assets | Busts stale browser/Live Server cache where possible. | partial | Reload URL/marker changes or assets refresh. |
-| RLD3 | Preserve prompts | Does not intentionally clear prompt drafts. | planned | Drafts remain if stored state says they should remain. |
-| RLD4 | Preserve transcripts | Does not intentionally clear session-window transcripts. | planned | Transcript state remains after reload. |
+| RLD1 | Hard reload UI | Reloads the current UI page. | wired | Click Reload; page refreshes once even if clicked repeatedly. |
+| RLD2 | Cache-bust assets | Busts stale browser/Live Server cache where possible. | wired | Reload writes a `meridian_reload` URL marker and removes it after load. |
+| RLD3 | Preserve prompts | Does not intentionally clear prompt drafts. | wired | Reload calls the hard reload path without `clearSessions`; stored prompt drafts are left intact. |
+| RLD4 | Preserve transcripts | Does not intentionally clear session-window transcripts. | wired | Reload calls the hard reload path without `clearSessions`; stored transcripts are left intact. |
 | RLD5 | Preserve selected project | Keeps or restores selected project according to project persistence. | planned | Selected project behavior is deterministic. |
 | RLD6 | Preserve selected User session | Keeps selected live session if still available; otherwise shows target warning. | planned | Closed target does not silently route prompts. |
 | RLD7 | Preserve model selector | Keeps selected model if valid; invalid/Auto falls back to Codex. | partial | Saved Auto becomes Codex; valid model remains. |
