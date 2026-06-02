@@ -24,7 +24,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `aef87e82`
 - Files changed: `docs/relay-bifrost-prompt-payload-meter-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers PromptPayloadSnapshot/budget/growth flow, Bifrost cockpit meter visibility, under-1k and 12.4k labels, budget percent, growth delta, Q-mode prompt-drag degradation, provider/model route continuity, Aegis/Relay blockers, deterministic tests, escaping, and explicit exclusions; `git diff --check` passed.
