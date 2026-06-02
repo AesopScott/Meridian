@@ -199,6 +199,31 @@ class PromptPayloadView:
 
 
 @dataclass
+class VisiblePromptPayloadMeterItem:
+    meter_id: str
+    provider_id: str
+    model_id: str
+    route_kind: str
+    prompt_label: str
+    payload_status: str
+    budget_percent: float = 0.0
+    growth_delta_tokens: int = 0
+    growth_delta_percent: float = 0.0
+    q_mode_prompt_drag_state: str = "ok"
+    provider_balance_ref: str = ""
+    payload_evidence_ref: str = ""
+    telemetry_ref: str = ""
+    warning_tags: list[str] = field(default_factory=list)
+    blocker_tags: list[str] = field(default_factory=list)
+
+
+@dataclass
+class VisiblePromptPayloadMeterView:
+    items: list[VisiblePromptPayloadMeterItem] = field(default_factory=list)
+    source: str = "sample"
+
+
+@dataclass
 class DispatchHardeningView:
     dispatch_id: str = ""
     provider_id: str = ""
@@ -399,6 +424,7 @@ class CockpitViewModel:
     provider_balance: ProviderBalanceView = field(default_factory=ProviderBalanceView)
     model_capabilities: ModelCapabilityMetadataView = field(default_factory=ModelCapabilityMetadataView)
     model_validation_envelopes: ModelValidationEnvelopeView = field(default_factory=ModelValidationEnvelopeView)
+    visible_prompt_payload_meter: VisiblePromptPayloadMeterView = field(default_factory=VisiblePromptPayloadMeterView)
     prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     dispatch_hardening: DispatchHardeningView = field(default_factory=DispatchHardeningView)
     prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
@@ -748,6 +774,62 @@ def sample_cockpit_view_model(
                     blocker_tags=["aggregator_without_proof", "payload_snapshot_missing"],
                     warning_tags=["aggregator_route_capped", "prompt_drag_degraded"],
                     evidence_refs=["adapter:openrouter", "snapshot:unavailable"],
+                ),
+            ],
+        ),
+        visible_prompt_payload_meter=VisiblePromptPayloadMeterView(
+            source="relay-visible-prompt-payload-meter-sample",
+            items=[
+                VisiblePromptPayloadMeterItem(
+                    meter_id="payload-meter:claude-dispatch-under-1k",
+                    provider_id="claude",
+                    model_id="claude-sonnet-4-20250514",
+                    route_kind="direct",
+                    prompt_label="under 1k",
+                    payload_status="ok",
+                    budget_percent=23.0,
+                    growth_delta_tokens=0,
+                    growth_delta_percent=0.0,
+                    q_mode_prompt_drag_state="flat",
+                    provider_balance_ref="provider-balance:claude",
+                    payload_evidence_ref="payload-snapshot:dispatch-latest",
+                    telemetry_ref="telemetry:prompt-payload",
+                    warning_tags=[],
+                    blocker_tags=[],
+                ),
+                VisiblePromptPayloadMeterItem(
+                    meter_id="payload-meter:deepseek-qmode-12-4k",
+                    provider_id="deepseek",
+                    model_id="deepseek-chat",
+                    route_kind="direct",
+                    prompt_label="12.4k",
+                    payload_status="degraded",
+                    budget_percent=72.0,
+                    growth_delta_tokens=240,
+                    growth_delta_percent=6.0,
+                    q_mode_prompt_drag_state="degraded",
+                    provider_balance_ref="provider-balance:deepseek",
+                    payload_evidence_ref="payload-snapshot:deepseek-qmode",
+                    telemetry_ref="telemetry:deepseek-qmode",
+                    warning_tags=["q_mode_prompt_drag_degraded", "unexpected_growth_delta"],
+                    blocker_tags=[],
+                ),
+                VisiblePromptPayloadMeterItem(
+                    meter_id="payload-meter:openrouter-qmode-blocked",
+                    provider_id="openrouter",
+                    model_id="deepseek-chat",
+                    route_kind="aggregator",
+                    prompt_label="over budget",
+                    payload_status="blocked",
+                    budget_percent=101.5,
+                    growth_delta_tokens=720,
+                    growth_delta_percent=18.0,
+                    q_mode_prompt_drag_state="blocked",
+                    provider_balance_ref="provider-balance:openrouter",
+                    payload_evidence_ref="payload-snapshot:unavailable",
+                    telemetry_ref="telemetry:missing-provider-metadata",
+                    warning_tags=["route_mismatch_warning"],
+                    blocker_tags=["q_mode_payload_over_budget", "aggregator_prompt_drag_blocked"],
                 ),
             ],
         ),
@@ -1710,6 +1792,66 @@ def _render_model_validation_envelopes(validation: ModelValidationEnvelopeView) 
     )
 
 
+def _render_visible_prompt_payload_meter(meter: VisiblePromptPayloadMeterView) -> str:
+    if not meter.items:
+        return ""
+
+    item_markup = []
+    for item in meter.items:
+        warnings = "".join(
+            f'<span class="payload-meter-chip payload-meter-warning">{_e(tag)}</span>'
+            for tag in item.warning_tags
+        ) or '<span class="payload-meter-chip payload-meter-empty">none</span>'
+        blockers = "".join(
+            f'<span class="payload-meter-chip payload-meter-blocker">{_e(tag)}</span>'
+            for tag in item.blocker_tags
+        ) or '<span class="payload-meter-chip payload-meter-empty">none</span>'
+        delta_display = (
+            f"+{item.growth_delta_tokens}"
+            if item.growth_delta_tokens > 0
+            else str(item.growth_delta_tokens)
+        )
+        item_markup.append(
+            f'<div class="payload-meter-item payload-meter-status-{_e(item.payload_status)} payload-meter-drag-{_e(item.q_mode_prompt_drag_state)}" data-meter-id="{_e(item.meter_id)}" data-provider="{_e(item.provider_id)}" data-model="{_e(item.model_id)}">'
+            '<div class="payload-meter-item-header">'
+            f'<span class="payload-meter-label">{_e(item.prompt_label)}</span>'
+            f'<span class="payload-meter-provider">Provider: {_e(item.provider_id)}</span>'
+            f'<span class="payload-meter-model">Model: {_e(item.model_id)}</span>'
+            f'<span class="payload-meter-route">Route: {_e(item.route_kind)}</span>'
+            "</div>"
+            '<div class="payload-meter-values">'
+            f'<span>Budget: {item.budget_percent:.1f}%</span>'
+            f'<span>Growth delta: {delta_display} tokens / {item.growth_delta_percent:.1f}%</span>'
+            f'<span>Payload status: {_e(item.payload_status)}</span>'
+            f'<span>Q-mode prompt drag: {_e(item.q_mode_prompt_drag_state)}</span>'
+            f'<span>Provider balance: {_e(item.provider_balance_ref)}</span>'
+            f'<span>Payload evidence: {_e(item.payload_evidence_ref)}</span>'
+            f'<span>Telemetry: {_e(item.telemetry_ref)}</span>'
+            "</div>"
+            '<div class="payload-meter-lists">'
+            '<div class="payload-meter-list" aria-label="Prompt Payload Meter Warnings"><span class="payload-meter-list-title">Warnings</span>'
+            + warnings
+            + "</div>"
+            '<div class="payload-meter-list" aria-label="Prompt Payload Meter Blockers"><span class="payload-meter-list-title">Blockers</span>'
+            + blockers
+            + "</div>"
+            "</div>"
+            "</div>"
+        )
+
+    return (
+        '<section class="visible-prompt-payload-meter" aria-label="Visible Prompt Payload Meter">'
+        '<div class="payload-meter-main-header">'
+        '<h3>Visible Prompt Payload Meter</h3>'
+        f'<span class="payload-meter-source">Source: {_e(meter.source)}</span>'
+        "</div>"
+        '<div class="payload-meter-items">'
+        + "".join(item_markup)
+        + "</div>"
+        "</section>"
+    )
+
+
 def _render_prompt_payload(payload: PromptPayloadView) -> str:
     if not payload.size_label:
         return ""
@@ -2529,6 +2671,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     provider_balance = _render_provider_balance(vm.provider_balance)
     model_capabilities = _render_model_capabilities(vm.model_capabilities)
     model_validation_envelopes = _render_model_validation_envelopes(vm.model_validation_envelopes)
+    visible_prompt_payload_meter = _render_visible_prompt_payload_meter(vm.visible_prompt_payload_meter)
     prompt_payload = _render_prompt_payload(vm.prompt_payload)
     dispatch_hardening = _render_dispatch_hardening(vm.dispatch_hardening)
     prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
@@ -2571,6 +2714,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{provider_balance}\n"
         f"{model_capabilities}\n"
         f"{model_validation_envelopes}\n"
+        f"{visible_prompt_payload_meter}\n"
         f"{prompt_payload}\n"
         "</main>\n"
         '<aside class="right-panel">\n'

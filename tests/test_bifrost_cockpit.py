@@ -38,6 +38,8 @@ from bifrost.cockpit import (
     SettingsItem,
     SettingsModeView,
     UserSessionModeView,
+    VisiblePromptPayloadMeterItem,
+    VisiblePromptPayloadMeterView,
     VoiceIOState,
     _render_proof_state,
     _e,
@@ -781,6 +783,121 @@ def test_model_validation_envelopes_escape_structured_fields():
     assert "blocker:&lt;bad&gt;" in doc
     assert "warning:&lt;bad&gt;" in doc
     assert "evidence:&lt;bad&gt;" in doc
+
+
+def test_visible_prompt_payload_meter_sample_renders_required_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Visible Prompt Payload Meter"' in doc
+    assert "Visible Prompt Payload Meter" in doc
+    assert "Source: relay-visible-prompt-payload-meter-sample" in doc
+    assert 'data-meter-id="payload-meter:claude-dispatch-under-1k"' in doc
+    assert 'data-meter-id="payload-meter:deepseek-qmode-12-4k"' in doc
+    assert 'data-meter-id="payload-meter:openrouter-qmode-blocked"' in doc
+    assert "under 1k" in doc
+    assert "12.4k" in doc
+    assert "over budget" in doc
+
+
+def test_visible_prompt_payload_meter_sample_renders_route_and_budget_continuity():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Provider: claude" in doc
+    assert "Model: claude-sonnet-4-20250514" in doc
+    assert "Route: direct" in doc
+    assert "Provider: deepseek" in doc
+    assert "Model: deepseek-chat" in doc
+    assert "Provider: openrouter" in doc
+    assert "Route: aggregator" in doc
+    assert "Budget: 23.0%" in doc
+    assert "Budget: 72.0%" in doc
+    assert "Budget: 101.5%" in doc
+    assert "Growth delta: 0 tokens / 0.0%" in doc
+    assert "Growth delta: +240 tokens / 6.0%" in doc
+    assert "Growth delta: +720 tokens / 18.0%" in doc
+    assert "Provider balance: provider-balance:claude" in doc
+    assert "Provider balance: provider-balance:deepseek" in doc
+    assert "Provider balance: provider-balance:openrouter" in doc
+
+
+def test_visible_prompt_payload_meter_sample_renders_qmode_drag_states_and_evidence():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Payload status: ok" in doc
+    assert "Payload status: degraded" in doc
+    assert "Payload status: blocked" in doc
+    assert "Q-mode prompt drag: flat" in doc
+    assert "Q-mode prompt drag: degraded" in doc
+    assert "Q-mode prompt drag: blocked" in doc
+    assert "payload-snapshot:dispatch-latest" in doc
+    assert "payload-snapshot:deepseek-qmode" in doc
+    assert "payload-snapshot:unavailable" in doc
+    assert "telemetry:deepseek-qmode" in doc
+    assert "telemetry:missing-provider-metadata" in doc
+    assert "q_mode_prompt_drag_degraded" in doc
+    assert "unexpected_growth_delta" in doc
+    assert "route_mismatch_warning" in doc
+    assert "q_mode_payload_over_budget" in doc
+    assert "aggregator_prompt_drag_blocked" in doc
+
+
+def test_visible_prompt_payload_meter_escapes_structured_fields():
+    vm = sample_cockpit_view_model()
+    vm.visible_prompt_payload_meter = VisiblePromptPayloadMeterView(
+        source="<script>source</script>",
+        items=[
+            VisiblePromptPayloadMeterItem(
+                meter_id="<script>meter</script>",
+                provider_id="<img src=x>",
+                model_id="<script>model</script>",
+                route_kind="<bad-route>",
+                prompt_label="<12k>",
+                payload_status="<bad-status>",
+                budget_percent=9.5,
+                growth_delta_tokens=12,
+                growth_delta_percent=1.5,
+                q_mode_prompt_drag_state="<script>drag</script>",
+                provider_balance_ref="balance:<bad>",
+                payload_evidence_ref="payload:<bad>",
+                telemetry_ref="telemetry:<bad>",
+                warning_tags=["warning:<bad>"],
+                blocker_tags=["blocker:<bad>"],
+            )
+        ],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "Source: &lt;script&gt;source&lt;/script&gt;" in doc
+    assert 'data-meter-id="&lt;script&gt;meter&lt;/script&gt;"' in doc
+    assert "Provider: &lt;img src=x&gt;" in doc
+    assert "Model: &lt;script&gt;model&lt;/script&gt;" in doc
+    assert "&lt;12k&gt;" in doc
+    assert "Payload status: &lt;bad-status&gt;" in doc
+    assert "Q-mode prompt drag: &lt;script&gt;drag&lt;/script&gt;" in doc
+    assert "balance:&lt;bad&gt;" in doc
+    assert "payload:&lt;bad&gt;" in doc
+    assert "telemetry:&lt;bad&gt;" in doc
+    assert "warning:&lt;bad&gt;" in doc
+    assert "blocker:&lt;bad&gt;" in doc
+
+
+def test_visible_prompt_payload_meter_preserves_existing_surfaces():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-meter-session", "Closed Meter Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-meter-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Visible Prompt Payload Meter"' in doc
+    assert 'aria-label="Recovery Readiness Advisory Summary"' in doc
+    assert 'class="stale-recovery-actions"' in doc
+    assert 'aria-label="Model Harness Runtime Validation Envelopes"' in doc
+    assert 'aria-label="Provider Balance"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'aria-label="Relay Aegis Policy Handoff Summary"' in doc
+    assert 'data-recovery-action="restart-session"' in doc
+    assert "Next prompt target: Closed Meter Session" not in doc
+    assert "raw prompt text" not in doc
+    assert "provider response text" not in doc
 
 
 def test_prompt_payload_sample_renders_structured_visibility_fields():
