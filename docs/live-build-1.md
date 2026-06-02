@@ -8,6 +8,26 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Blocked
+
+Goal: implement provider-neutral Model Harness capability metadata and prompt-drag telemetry on a stable fresh branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-model-harness-metadata-retry-20260602-1258`.
+
+Allowed files only: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
+
+Blocker:
+- Status: Blocked by repeated disappearing-edit / branch-head instability during the metadata retry.
+- Date: 2026-06-02.
+- First steps completed: `git fetch origin main`; `git status --short --branch`; `git status --porcelain`; fresh branch created from `origin/main`.
+- Evidence before disappearance: provider-neutral metadata enums/dataclasses, registry metadata methods, and focused tests were patched and immediately staged; `python -m pytest tests/test_model_adapter.py -q` passed with 43 tests.
+- Evidence after disappearance: `git status --porcelain=v1`, `git diff --name-only`, and `git diff --cached --name-only` returned empty; `rg -n "ProviderCapability|PromptDragTelemetry|register_metadata|HarnessCostPosture" meridian_core/model_adapter.py tests/test_model_adapter.py` returned no matches; `git log --oneline -5 --decorate` showed HEAD moved to `63bff014` (`chore: Build 1 Codex review result - 2026-06-02 17:58 UTC (APPROVE; cadence reset)`) with coordinator/read-check commits below it.
+- Concrete impact: no implementable code/test diff remained to commit without mechanically reusing unstable edits or moving work across branches/worktrees.
+- Proof run before disappearance: `python -m pytest tests/test_model_adapter.py -q` (43 passed). Final path-scope at blocker commit is limited to `docs/live-build-1.md`.
+- Next Candidate: coordinator should provide a locked/quiet fresh branch or pause queue automation for the Model Harness metadata retry, then reapply the provider-neutral metadata API and tests in one uninterrupted commit.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Relay-side downstream handoff sanitizer contract coverage for promoted Bifrost/Prime/Aegis display consumers.
