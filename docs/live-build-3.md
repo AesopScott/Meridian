@@ -8,6 +8,28 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: register any remaining V2/V3 architecture or domain contract docs that have landed without FileMap coverage.
+
+Coordinator nudge: this lane is not idle after the Relay UI/runtime FileMap registration. Execute this mechanical FileMap audit in the assigned worktree. If there are no missing current-main docs, record a concrete no-op completion with the command evidence; do not add a read-check-only update.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Required sources: current `origin/main`, `docs/v2-progress-tracker.md`, current runtime FileMap entries, `docs/FileMap.md`, and recent Ready/completion markers in `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, and `docs/live-codex-reviews-2.md`.
+
+Task: poll for new V2/V3 contract or architecture documents that have landed on `origin/main` but are not yet discoverable in runtime FileMap, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`. Register any missing existing files following the same mechanical pattern. Keep this narrow; do not edit the docs themselves, Relay behavior, Bifrost UI, Aegis, Session Lifecycle, model/account/process code, branches, or Polaris.
+
+Tests:
+
+- `python -m pytest tests/test_filemap.py -q`
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, missing-file/no-op audit result, and a concrete Next Candidate: bind any review findings from this FileMap slice before unrelated FileMap cleanup.
+
 ## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage for the current-main Relay UI/runtime integration landing.

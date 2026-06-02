@@ -63,9 +63,13 @@ Proof:
 
 Completion: Relay harness UI/runtime integration is review-cleared. Reviews B returns to the Build 4/Build 5 current-main Ready-marker polling task in the Next Candidate section.
 
-## Next Candidate Task
+## Coordinator Override - Active Now
 
 Goal: resume review of the next current-main Ready marker from Build 4 or Build 5 after the Relay harness UI/runtime integration review is closed.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
 
 Allowed review files by lane remain the same as the Active Now task:
 

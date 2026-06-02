@@ -192,6 +192,14 @@ Coordinator movement completion - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_filemap.py -q` passed 46/46; `python -m pytest tests/test_relay_logic_snapshot.py -q` passed 11/11.
 - Result: Build 3 FileMap pressure point is completed and Reviews B Relay UI/runtime review is completed/passed with no routed findings. Takeover remains `In transition` until the remaining lane criteria and explicit approval record are satisfied.
 
+Coordinator routing refresh - 2026-06-02:
+
+- After pushing movement completion to `origin/main` at `407ac602`, refreshed all seven lane worktree statuses. All lanes were present and clean: Build 1 `ahead 18, behind 17`; Build 2 `ahead 21, behind 17`; Build 3 `ahead 2, behind 6`; Build 4 `behind 7`; Build 5 `behind 7`; Reviews A `behind 7`; Reviews B `ahead 1, behind 6`. No dirty, conflicted, or missing worktree was observed.
+- Queue update: promoted Build 3's FileMap maintenance candidate to an executable `Active Task`, requiring a concrete missing-file/no-op audit with `python -m pytest tests/test_filemap.py -q` proof. This prevents the completed Relay UI FileMap slice from leaving Build 3 idle.
+- Queue update: promoted Reviews B's Build 4/Build 5 Ready-marker polling candidate to `Coordinator Override - Active Now`, with Build 4 checklist review before Build 5 if both become ready. This keeps Reviews B executable after the Relay UI/runtime review pass.
+- Build 1, Build 2, Build 4, Build 5, and Reviews A already had executable Active Now tasks plus Next Candidates; their existing routes were left unchanged.
+- Takeover remains `In transition`. Remaining pressure is implementation/proof from Build 1, Build 2, Build 4, and Build 5, plus review follow-through as Ready markers land.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
