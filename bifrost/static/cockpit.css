@@ -1345,6 +1345,19 @@ summary {
   color: #c0c6cd;
 }
 
+.routing-target-state {
+  padding: 8px 10px;
+  background-color: rgba(90, 122, 188, 0.15);
+  border-left: 3px solid #5a7abc;
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+.routing-label {
+  color: #a0c8ff;
+  font-weight: 500;
+}
+
 /* ── Configuration Mode ────────────────────────────────────────────────────── */
 
 .right-panel-settings {
