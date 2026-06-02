@@ -571,6 +571,68 @@ class SessionCommandStagingReviewPacket:
 
 
 @dataclass(frozen=True)
+class SessionCommandPreviewProof:
+    """Display-safe proof fields for non-executable command preview review."""
+
+    preview_id: str
+    packet_id: str
+    target_session_id: str
+    command_kind: Optional[CommandIntent]
+    recommended_action: Optional[SessionAction]
+    required_operation: Optional[OperationScope]
+    reason: str
+    expected_state_transition: tuple[SessionStatus, SessionStatus]
+    queue_file_evidence: str
+    worktree_evidence: str
+    branch_affected: str
+    aegis_gate_result: Optional[str]
+    aegis_gate_status: str
+    proof_requirement: ProofState
+    ready_for_execution: bool
+    is_executable_now: bool
+    requires_human_ui_review: bool
+    rollback_or_recovery_note: str
+    permission_state: PermissionState
+    blockers: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize command-preview proof fields to JSON-safe metadata."""
+        return {
+            "preview_id": self.preview_id,
+            "packet_id": self.packet_id,
+            "target_session_id": self.target_session_id,
+            "command_kind": self.command_kind.value if self.command_kind else None,
+            "recommended_action": (
+                self.recommended_action.value if self.recommended_action else None
+            ),
+            "required_operation": (
+                self.required_operation.value if self.required_operation else None
+            ),
+            "reason": self.reason,
+            "expected_state_transition": [
+                self.expected_state_transition[0].value,
+                self.expected_state_transition[1].value,
+            ],
+            "queue_file_evidence": self.queue_file_evidence,
+            "worktree_evidence": self.worktree_evidence,
+            "branch_affected": self.branch_affected,
+            "aegis_gate_result": self.aegis_gate_result,
+            "aegis_gate_status": self.aegis_gate_status,
+            "proof_requirement": self.proof_requirement.value,
+            "ready_for_execution": self.ready_for_execution,
+            "is_executable_now": self.is_executable_now,
+            "requires_human_ui_review": self.requires_human_ui_review,
+            "rollback_or_recovery_note": self.rollback_or_recovery_note,
+            "permission_state": self.permission_state.value,
+            "blockers": list(self.blockers),
+            "evidence_refs": list(self.evidence_refs),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
 class PrimeAutonomyInput:
     """What Prime receives when selecting next action."""
 
@@ -1833,6 +1895,79 @@ def build_command_staging_review_packet(
     )
 
 
+def build_command_preview_proof(
+    session: SessionLifecycleState,
+    review_packet: SessionCommandStagingReviewPacket,
+    reason: Optional[str] = None,
+    timestamp: Optional[datetime] = None,
+) -> SessionCommandPreviewProof:
+    """Build non-executable command-preview proof fields for UI review.
+
+    This uses typed Session Lifecycle state and an existing review packet only.
+    It does not execute recovery, inspect/spawn sessions, call models, write UI,
+    or move branches/worktrees/main.
+    """
+    observed_at = _as_utc(timestamp or review_packet.timestamp)
+    blockers = tuple(dict.fromkeys(review_packet.blockers))
+    expected_transition = _command_preview_expected_transition(
+        session.status,
+        review_packet.command_kind,
+    )
+    reason_text = reason or review_packet.human_gate_rationale
+    evidence_refs = list(review_packet.evidence_refs)
+    evidence_refs.extend(
+        [
+            f"preview.packet_id={review_packet.packet_id}",
+            f"preview.target_session_id={review_packet.target_session_id}",
+            "preview.command_kind="
+            + (
+                review_packet.command_kind.value
+                if review_packet.command_kind
+                else "none"
+            ),
+            "preview.expected_transition="
+            f"{expected_transition[0].value}->{expected_transition[1].value}",
+            f"preview.queue_file={session.assigned_queue_file}",
+            f"preview.worktree={session.worktree_path}",
+            f"preview.branch={session.branch_name}",
+            "preview.aegis_gate_status=pending_ui_review",
+            "preview.aegis_gate_result=pending",
+            "preview.proof_requirement=command_staged",
+            "preview.is_executable_now=False",
+            "preview.requires_human_ui_review=True",
+            f"permission.state={review_packet.permission_state.value}",
+        ]
+    )
+    evidence_refs.extend(f"preview.blocker={blocker}" for blocker in blockers)
+
+    return SessionCommandPreviewProof(
+        preview_id=f"{review_packet.packet_id}:preview:{observed_at.isoformat()}",
+        packet_id=review_packet.packet_id,
+        target_session_id=review_packet.target_session_id,
+        command_kind=review_packet.command_kind,
+        recommended_action=review_packet.recommended_action,
+        required_operation=review_packet.required_operation,
+        reason=reason_text,
+        expected_state_transition=expected_transition,
+        queue_file_evidence=session.assigned_queue_file,
+        worktree_evidence=session.worktree_path,
+        branch_affected=session.branch_name,
+        aegis_gate_result="pending",
+        aegis_gate_status="pending_ui_review",
+        proof_requirement=ProofState.COMMAND_STAGED,
+        ready_for_execution=review_packet.ready_for_execution,
+        is_executable_now=False,
+        requires_human_ui_review=True,
+        rollback_or_recovery_note=(
+            "Non-executable command preview only; no live recovery is executed."
+        ),
+        permission_state=review_packet.permission_state,
+        blockers=blockers,
+        evidence_refs=tuple(dict.fromkeys(evidence_refs)),
+        timestamp=observed_at,
+    )
+
+
 def _workflow_heartbeat_age_seconds(
     heartbeat_emitted_at: Optional[datetime],
     observed_at: datetime,
@@ -1840,6 +1975,19 @@ def _workflow_heartbeat_age_seconds(
     if heartbeat_emitted_at is None:
         return None
     return max(0, int((observed_at - _as_utc(heartbeat_emitted_at)).total_seconds()))
+
+
+def _command_preview_expected_transition(
+    current_status: SessionStatus,
+    command_kind: Optional[CommandIntent],
+) -> tuple[SessionStatus, SessionStatus]:
+    if command_kind == CommandIntent.RESTART:
+        return (SessionStatus.STALE, SessionStatus.RUNNING)
+    if command_kind == CommandIntent.RESTEER:
+        return (current_status, SessionStatus.WAITING)
+    if command_kind == CommandIntent.ARCHIVE:
+        return (current_status, SessionStatus.ARCHIVED)
+    return (current_status, current_status)
 
 
 def _review_packet_prime_advisory(

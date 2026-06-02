@@ -27,9 +27,11 @@ from meridian_core.session_lifecycle import (
     SessionRecoveryReadinessSummary,
     SessionLiveControlCommandPlanStagingRecord,
     SessionCommandStagingReviewPacket,
+    SessionCommandPreviewProof,
     SessionLifecycleState,
     SessionCommandPlan,
     build_command_staging_review_packet,
+    build_command_preview_proof,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
@@ -2623,6 +2625,182 @@ class TestSessionCommandStagingReviewPacket:
         assert packet.human_gate_rationale == staging.human_gate_rationale
         assert "permission.unlock_expired" in packet.blockers
         assert "review_packet.blocker=permission.unlock_expired" in packet.evidence_refs
+
+
+class TestSessionCommandPreviewProof:
+    """Tests for command-preview proof fields for UI review staging."""
+
+    @pytest.fixture
+    def preview_state(self):
+        """Create a stale session with scoped restart permission."""
+        now = datetime(2026, 6, 2, 14, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="command-preview-proof",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-preview-proof",
+            session_name="Build 2 Preview Proof",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-command-preview-proof-fields",
+            current_task_id="command-preview-proof",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def _review_packet(self, preview_state, observed_at):
+        workflow_summary = summarize_workflow_work_order_recovery(
+            preview_state,
+            work_order_id="wo-preview-proof",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            preview_state,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        gate = evaluate_live_control_permission_gate(
+            preview_state,
+            runtime_export,
+            timestamp=observed_at,
+        )
+        readiness = summarize_recovery_readiness(
+            runtime_export,
+            gate,
+            timestamp=observed_at,
+        )
+        staging = stage_live_control_command_plan_from_readiness(
+            readiness,
+            timestamp=observed_at,
+        )
+        return build_command_staging_review_packet(staging, timestamp=observed_at)
+
+    def test_command_preview_proof_preserves_restart_fields(self, preview_state):
+        """Preview proof fields serialize restart context without executability."""
+        observed_at = datetime(2026, 6, 2, 14, 10, tzinfo=timezone.utc)
+        packet = self._review_packet(preview_state, observed_at)
+
+        proof = build_command_preview_proof(
+            preview_state,
+            packet,
+            reason="Preview restart after stale workflow heartbeat.",
+            timestamp=observed_at,
+        )
+        serialized = proof.to_dict()
+
+        assert isinstance(proof, SessionCommandPreviewProof)
+        assert proof.target_session_id == preview_state.session_id
+        assert proof.command_kind == CommandIntent.RESTART
+        assert proof.recommended_action == SessionAction.START_NEW
+        assert proof.required_operation == OperationScope.RESTART
+        assert proof.expected_state_transition == (
+            SessionStatus.STALE,
+            SessionStatus.RUNNING,
+        )
+        assert proof.queue_file_evidence == preview_state.assigned_queue_file
+        assert proof.worktree_evidence == preview_state.worktree_path
+        assert proof.branch_affected == preview_state.branch_name
+        assert proof.aegis_gate_result == "pending"
+        assert proof.aegis_gate_status == "pending_ui_review"
+        assert proof.proof_requirement == ProofState.COMMAND_STAGED
+        assert proof.is_executable_now is False
+        assert proof.requires_human_ui_review is True
+        assert proof.permission_state == PermissionState.UNLOCKED_TEMPORARY
+        assert "command_plan.ui_review_required" in proof.blockers
+        assert "preview.expected_transition=stale->running" in proof.evidence_refs
+        assert serialized["is_executable_now"] is False
+        assert serialized["expected_state_transition"] == ["stale", "running"]
+
+    def test_command_preview_proof_preserves_blocked_packet(self, preview_state):
+        """Blocked packets keep blocker and rollback/recovery proof metadata."""
+        observed_at = datetime(2026, 6, 2, 14, 10, tzinfo=timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(seconds=1),
+            task_scope="command-preview-proof",
+            last_permission_change=observed_at,
+        )
+        blocked_state = SessionLifecycleState(
+            **{**preview_state.__dict__, "permission_context": expired_context}
+        )
+        packet = self._review_packet(blocked_state, observed_at)
+
+        proof = build_command_preview_proof(
+            blocked_state,
+            packet,
+            timestamp=observed_at,
+        )
+
+        assert proof.ready_for_execution is False
+        assert proof.is_executable_now is False
+        assert "permission.unlock_expired" in proof.blockers
+        assert "preview.blocker=permission.unlock_expired" in proof.evidence_refs
+        assert proof.rollback_or_recovery_note == (
+            "Non-executable command preview only; no live recovery is executed."
+        )
+
+    def test_command_preview_proof_holds_unsupported_transition(self, preview_state):
+        """Unsupported preview command kinds keep current-state transition."""
+        observed_at = datetime(2026, 6, 2, 14, 10, tzinfo=timezone.utc)
+        packet = SessionCommandStagingReviewPacket(
+            packet_id=f"{preview_state.session_id}:watch:review:{observed_at.isoformat()}",
+            staging_id=f"{preview_state.session_id}:watch:{observed_at.isoformat()}",
+            target_session_id=preview_state.session_id,
+            command_kind=CommandIntent.WATCH,
+            recommended_action=SessionAction.REUSE,
+            required_operation=None,
+            ready_for_execution=False,
+            is_executable_now=False,
+            requires_human_ui_review=True,
+            human_gate_rationale="UI review required before command preview.",
+            permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            blockers=("command_plan.command_kind_not_stageable",),
+            evidence_refs=("review_packet.command_kind=watch",),
+            prime_advisory_action={},
+            beacon_evidence={},
+            timestamp=observed_at,
+        )
+
+        proof = build_command_preview_proof(
+            preview_state,
+            packet,
+            timestamp=observed_at,
+        )
+
+        assert proof.command_kind == CommandIntent.WATCH
+        assert proof.expected_state_transition == (
+            preview_state.status,
+            preview_state.status,
+        )
+        assert "preview.expected_transition=stale->stale" in proof.evidence_refs
 
 
 class TestPrimeAutonomyInput:
