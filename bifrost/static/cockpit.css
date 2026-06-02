@@ -1383,6 +1383,22 @@ summary {
   font-style: italic;
 }
 
+.stale-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.recovery-action {
+  padding: 6px 8px;
+  background-color: rgba(217, 83, 79, 0.18);
+  border: 1px solid rgba(255, 153, 153, 0.4);
+  border-radius: 4px;
+  color: #ffd6d6;
+  font-size: 11px;
+}
+
 /* ── Configuration Mode ────────────────────────────────────────────────────── */
 
 .right-panel-settings {

@@ -1960,3 +1960,79 @@ def test_stale_target_guard_for_multiple_closed_sessions():
     # But guard shows for the selected closed session
     assert "stale-target-guard" in doc
     assert "Done D" in doc  # Name shown in guard, not dropdown
+
+
+def test_stale_session_recovery_actions_render_for_closed_target():
+    """Stale targets show deterministic recovery action samples."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Live", "P", "live"),
+            SessionItem("s2", "Closed", "P", "done"),
+        ],
+        selected_session_id="s2",
+    )
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+
+    assert 'class="stale-recovery-actions"' in doc
+    assert 'data-recovery-action="reselect-session"' in doc
+    assert "Reselect session" in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Ask Prime to reopen/recover" in doc
+    assert 'data-recovery-action="return-to-sessions"' in doc
+    assert "Return to Sessions dropdown" in doc
+
+
+def test_stale_session_recovery_actions_render_for_blocked_target():
+    """Blocked selected sessions get the same recovery action sample."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Live", "P", "live"),
+            SessionItem("s2", "Blocked", "P", "blocked"),
+        ],
+        selected_session_id="s2",
+    )
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+
+    assert "stale-target-guard" in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Blocked" not in doc
+
+
+def test_stale_session_recovery_actions_render_for_missing_target():
+    """Missing selected session ids still show recovery without a fake route."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Live", "P", "live"),
+        ],
+        selected_session_id="missing-session-id",
+    )
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+
+    assert 'data-stale-session-id="missing-session-id"' in doc
+    assert "Target unavailable: missing-session-id" in doc
+    assert 'data-recovery-action="reselect-session"' in doc
+    assert "Next prompt target: missing-session-id" not in doc
+
+
+def test_stale_session_recovery_actions_absent_for_live_target():
+    """Available selected sessions keep normal routing state only."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Live", "P", "live"),
+        ],
+        selected_session_id="s1",
+    )
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+
+    assert "routing-target-state" in doc
+    assert "Next prompt target: Live" in doc
+    assert 'class="stale-recovery-actions"' not in doc
+    assert "data-recovery-action" not in doc

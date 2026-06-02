@@ -1131,6 +1131,8 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
             if session.session_id == mode.selected_session_id:
                 selected_session_name = session.session_name
                 break
+        if not selected_session_name:
+            selected_session_name = mode.selected_session_id
 
     # Build optgroups for each project
     optgroups = []
@@ -1166,6 +1168,11 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
                 f'<div class="stale-target-guard" data-stale-session-id="{_e(selected_session_id)}">'
                 f'<span class="stale-warning">⚠ Target unavailable: {_e(selected_session_name)}</span>'
                 f'<span class="stale-message">Session is closed, blocked, or no longer routable. Prompts will not be sent.</span>'
+                '<div class="stale-recovery-actions" aria-label="Stale session recovery actions">'
+                '<button type="button" class="recovery-action" data-recovery-action="reselect-session">Reselect session</button>'
+                '<button type="button" class="recovery-action" data-recovery-action="ask-prime-recover">Ask Prime to reopen/recover</button>'
+                '<button type="button" class="recovery-action" data-recovery-action="return-to-sessions">Return to Sessions dropdown</button>'
+                "</div>"
                 "</div>"
             )
         else:
