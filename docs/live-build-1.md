@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair Reviews A finding `9a0b2d36` on Relay handoff sanitizer leakage.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-relay-handoff-negative-paths-20260602-1200`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02.
+- Commit: `3a659d4d` (`fix: Tighten Relay handoff tag sanitizer`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (218 passed); `git diff --check` (passed).
+- Concrete evidence: `_display_safe_handoff_tags()` now preserves only known structured Relay/Aegis tags, `packet-proof-*` / `aegis-proof-*` evidence ids, and existing fixed safe policy phrases. Regression tests prove `credential:sk-test-secret`, `raw_prompt_secret`, and `branch_move_request` are redacted from handoff evidence ids, blockers, warnings, and reason tags.
+- Next Candidate: carry this explicit allow-list posture into promoted Bifrost proof/handoff renderer tests.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: harden downstream Relay handoff/consumer view negative paths after reviewed proof negative-path and FileMap movement.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
