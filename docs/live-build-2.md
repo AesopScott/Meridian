@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add a pure Session Lifecycle workflow work-order heartbeat/result summary surface for bounded sub-agent recovery decisions.
 
@@ -22,7 +22,14 @@ Task: add a narrow deterministic, serializable summary surface for workflow/sub-
 
 Tests: `python -m pytest tests/test_session_lifecycle.py -q`.
 
-Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect the summary to Prime/Beacon after review.
+Completion:
+
+- Build 2 completed the workflow work-order heartbeat/result recovery summary slice in local worktree commit `bd83affe`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Evidence: added frozen workflow heartbeat/result enums plus `WorkflowWorkOrderRecoverySummary` and `summarize_workflow_work_order_recovery()`; the helper emits display-safe work order id, target session id, heartbeat age/status, result/error kind, retry/resteer recommendation, permission/review blockers, recovery action, and stale-session recovery rationale without executing restart, resteer, archive, or human-gate actions.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 97 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or connect the summary to Prime/Beacon after review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
