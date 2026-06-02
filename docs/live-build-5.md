@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add deterministic Bifrost candidate-trust and external-review badge rendering for Model Harness capability metadata.
 
@@ -22,7 +22,12 @@ Task: extend the deterministic Bifrost Model Harness capability metadata sample 
 
 Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check`.
 
-Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, concrete rendering evidence, and Next Candidate: bind reviewed runtime Model Harness validation results when available.
+Ready for Codex Review:
+- Commit: `e872ed33` (`Add Bifrost candidate trust badges`).
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Tests run: `python -m pytest tests/test_bifrost_cockpit.py -q` (250 passed); `git diff --check` (passed; Git emitted only line-ending normalization warnings).
+- Concrete rendering evidence: Model Harness capability rows now render compact badges for `Candidate trust: trusted`, `Candidate trust: candidate`, `Candidate trust: validation_blocked`, and `Candidate trust: external_review_cleared`; external-review badges render `External review status: not_required`, `pending`, and `passed`; proof badges render `Proof: strong`, `standard`, and `weak`; blocked authorities render `external_review_required`, `aggregator_without_proof`, and `payload_snapshot_missing`; evidence refs include `review:codex-b` and `validation:deepseek-direct-passed`.
+- Next Candidate: bind reviewed runtime Model Harness validation results when available.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
