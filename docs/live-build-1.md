@@ -8,6 +8,8 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Goal: add DeepSeek candidate metadata presets to the provider-neutral Model Harness.
 
+Coordinator nudge: this lane is not waiting on review or user input. Execute this Active Now task immediately in the assigned worktree. Do not add another read-check-only/idle marker; either implement the allowed Model Harness/test changes or report a concrete blocker with evidence.
+
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
 
 Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
