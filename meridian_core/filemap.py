@@ -605,6 +605,13 @@ def make_default_map() -> FileMap:
             notes="Do not edit from other build lanes except for approved FileMap/queue coordination markers.",
         ),
         FileMapEntry(
+            path="docs/live-build-3.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Live queue file for Build 3 (FileMap / knowledge tracker lane): active FileMap maintenance tasks, completions, cadence, and review-ready markers.",
+            related_tests=[],
+            notes="Build 3 owns this queue. Read before running FileMap audits or recording FileMap completion markers.",
+        ),
+        FileMapEntry(
             path="docs/live-build-4.md",
             area=FileArea.BUILD_PROCESS,
             purpose="Live queue file for Build 4 (Aegis/architecture lane): active tasks, contract/checklist completions, cadence, and review-ready markers.",
