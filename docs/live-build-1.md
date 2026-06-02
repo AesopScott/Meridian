@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: extend the review-cleared Relay/Aegis PromptPacket policy runtime integration into a display-safe Relay handoff summary for Bifrost consumption.
 
@@ -23,6 +23,15 @@ Task: add a narrow deterministic Relay summary surface that converts the already
 Tests: `python -m pytest tests/test_relay_executor.py -q`.
 
 Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect the handoff summary into Bifrost rendering after review.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-01 23:35 -06:00.
+- Commit: `b09b7913` (`feat: Add Relay Aegis handoff summary`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (184 passed); `git diff --check` (passed; Git reported line-ending normalization warnings only).
+- Concrete evidence: Relay now exposes `RelayExecutionSummary.aegis_prompt_packet_policy_handoff()` returning a deterministic, display-safe `RelayAegisPromptPacketHandoffSummary.to_dict()` for Bifrost. The handoff carries decision, severity, packet id/hash status, prioritized proof requirement, Aegis evidence ids, blockers, warnings, deterministic missing metadata fields, reason tags, demotion target, human-gate state, fail-closed state, prompt budget ref, and packet proof metadata ref without raw prompt text, credentials, account data, or provider responses. Tests cover empty summaries, allow, warn/hash gaps, human-gate fail-closed state, deterministic missing metadata fields, decision-record fallback, immutable tuple values, and display-safe serialization.
+- Next Candidate: bind review findings or connect the handoff summary into Bifrost rendering after review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
