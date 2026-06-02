@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: create a docs-only implementation checklist for the frontend-critical Relay/Bifrost visible prompt payload meter.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/relay-bifrost-prompt-payload-meter-checklist.md`, `docs/live-build-4.md`.
+
+Task: cover how reviewed `PromptPayloadSnapshot`/budget/growth metadata should flow through Relay dispatch and Bifrost cockpit visibility, display labels like under-1k and 12.4k, budget percent, growth delta, Q-mode prompt-drag degradation, provider/model route continuity, Aegis/Relay blockers, deterministic tests, escaping, and explicit exclusions for raw prompt/provider response leakage, live provider calls, credentials/account probing, autonomous routing, process/session control, FileMap edits, shared main writes, pushes, and Polaris.
+
+Tests: docs-only; run text/shape inspection plus `git diff --check`.
+
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `pending local commit hash`
+- Files changed: `docs/relay-bifrost-prompt-payload-meter-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Verification performed: text/shape inspection confirmed the checklist exists and covers PromptPayloadSnapshot/budget/growth flow, Bifrost cockpit meter visibility, under-1k and 12.4k labels, budget percent, growth delta, Q-mode prompt-drag degradation, provider/model route continuity, Aegis/Relay blockers, deterministic tests, escaping, and explicit exclusions; `git diff --check` passed.
+- Next Candidate: implement reviewed Relay/Bifrost prompt payload meter runtime and cockpit surface.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: add a pure Aegis-side helper/test surface for provider-result validation advisory input.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
