@@ -1091,9 +1091,16 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
     if not mode.sessions:
         return ""
 
+    # Filter to open sessions only (exclude blocked and done)
+    open_statuses = {"live", "hidden", "waiting"}
+    open_sessions = [s for s in mode.sessions if s.status in open_statuses]
+
+    if not open_sessions:
+        return ""
+
     # Group sessions by project, sorting projects and sessions alphabetically
     sessions_by_project: dict[str, list[SessionItem]] = {}
-    for session in mode.sessions:
+    for session in open_sessions:
         if session.project_name not in sessions_by_project:
             sessions_by_project[session.project_name] = []
         sessions_by_project[session.project_name].append(session)
@@ -1103,11 +1110,13 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
     for project in sessions_by_project:
         sessions_by_project[project].sort(key=lambda s: s.session_name)
 
-    # Find currently selected session for title display
+    # Find currently selected session for title display and routing target
     selected_session_name = ""
-    for session in mode.sessions:
+    selected_session_id = ""
+    for session in open_sessions:
         if session.session_id == mode.selected_session_id:
             selected_session_name = session.session_name
+            selected_session_id = session.session_id
             break
 
     # Build optgroups for each project
@@ -1135,6 +1144,15 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
             + "</optgroup>"
         )
 
+    # Build routing target state indicator
+    routing_target_html = ""
+    if selected_session_id:
+        routing_target_html = (
+            f'<div class="routing-target-state" data-target-session-id="{_e(selected_session_id)}">'
+            f'<span class="routing-label">Next prompt target: {_e(selected_session_name)}</span>'
+            "</div>"
+        )
+
     return (
         '<div class="right-panel-user-session" aria-label="User Session Mode">'
         '<div class="right-panel-header">'
@@ -1146,6 +1164,7 @@ def _render_user_session_mode(mode: UserSessionModeView) -> str:
         "</div>"
         "</div>"
         '<div class="prompt-response-area">'
+        f'{routing_target_html}'
         '<textarea class="prompt-input" placeholder="Enter prompt..."></textarea>'
         '<div class="response-output"></div>'
         "</div>"

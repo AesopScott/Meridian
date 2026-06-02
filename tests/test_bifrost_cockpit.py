@@ -1707,3 +1707,135 @@ def test_prompt_window_only_renders_in_user_session_mode():
     # (These are proven by having different section structures)
     assert "settings" in settings_doc.lower() or "configuration" in settings_doc.lower()
     assert "harness" in harness_doc.lower() or "gate-" in harness_doc
+
+
+# ── Sessions dropdown filtering (Reviews B repairs) ──────────────────────────
+
+def test_sessions_dropdown_excludes_blocked_sessions():
+    """Non-open sessions (blocked, done) are excluded from the dropdown."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Open Live", "Meridian", "live"),
+            SessionItem("s2", "Blocked Session", "Meridian", "blocked"),
+            SessionItem("s3", "Done Session", "Meridian", "done"),
+            SessionItem("s4", "Hidden Open", "Meridian", "hidden"),
+        ],
+        selected_session_id="s1",
+    )
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+
+    # Open sessions should be present
+    assert "Open Live" in doc
+    assert "Hidden Open" in doc
+
+    # Non-open sessions should NOT be in options
+    assert "Blocked Session" not in doc or "blocked" not in doc
+    assert "Done Session" not in doc or "done" not in doc
+
+
+def test_sessions_dropdown_excludes_closed_from_options():
+    """Verify blocked/done sessions are not in <option> elements."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Live", "P", "live"),
+            SessionItem("s2", "Blocked", "P", "blocked"),
+        ],
+        selected_session_id="s1",
+    )
+    vm.right_panel_active_mode = "user_session"
+    html = render_cockpit_html(vm)
+
+    # Live should be in an option
+    assert '<option' in html
+    assert "Live" in html
+
+    # Blocked should not appear in the rendered dropdown
+    assert "Blocked" not in html
+
+
+def test_routing_target_state_shows_selected_session():
+    """Routing target state indicator shows the selected session."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Session One", "Meridian", "live"),
+            SessionItem("s2", "Session Two", "Meridian", "live"),
+        ],
+        selected_session_id="s1",
+    )
+    vm.right_panel_active_mode = "user_session"
+    doc = render_cockpit_html(vm)
+
+    # Routing target state should be present
+    assert "routing-target-state" in doc
+    assert "Next prompt target:" in doc or "routing-label" in doc
+    # Should show the selected session name
+    assert "Session One" in doc
+
+
+def test_routing_target_updates_when_selection_changes():
+    """Routing target state updates when selected_session_id changes."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    sessions = [
+        SessionItem("s1", "First Session", "Meridian", "live"),
+        SessionItem("s2", "Second Session", "Meridian", "live"),
+    ]
+    vm.user_session_mode = UserSessionModeView(
+        sessions=sessions,
+        selected_session_id="s1",
+    )
+    vm.right_panel_active_mode = "user_session"
+
+    # Render with first session selected
+    doc1 = render_cockpit_html(vm)
+    assert "First Session" in doc1
+
+    # Change selection to second session
+    vm.user_session_mode.selected_session_id = "s2"
+    doc2 = render_cockpit_html(vm)
+
+    # Second session should now be in the routing target
+    assert "Second Session" in doc2
+
+
+def test_routing_target_includes_session_id_metadata():
+    """Routing target state includes data-target-session-id attribute."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[SessionItem("target-id-123", "Test Session", "Project", "live")],
+        selected_session_id="target-id-123",
+    )
+    vm.right_panel_active_mode = "user_session"
+    html = render_cockpit_html(vm)
+
+    # Should have the data attribute with the session ID
+    assert 'data-target-session-id="target-id-123"' in html
+
+
+def test_sessions_dropdown_with_mixed_statuses_filters_correctly():
+    """Dropdown correctly filters when mix of open and closed sessions present."""
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.user_session_mode = UserSessionModeView(
+        sessions=[
+            SessionItem("s1", "Live A", "P1", "live"),
+            SessionItem("s2", "Hidden B", "P1", "hidden"),
+            SessionItem("s3", "Waiting C", "P2", "waiting"),
+            SessionItem("s4", "Blocked D", "P2", "blocked"),
+            SessionItem("s5", "Done E", "P1", "done"),
+        ],
+        selected_session_id="s1",
+    )
+    vm.right_panel_active_mode = "user_session"
+    html = render_cockpit_html(vm)
+
+    # Open sessions should render
+    assert "Live A" in html
+    assert "Hidden B" in html
+    assert "Waiting C" in html
+
+    # Closed sessions should not render
+    assert "Blocked D" not in html
+    assert "Done E" not in html
