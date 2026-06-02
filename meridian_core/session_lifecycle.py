@@ -336,6 +336,61 @@ class WorkflowWorkOrderRecoverySummary:
 
 
 @dataclass(frozen=True)
+class SessionRuntimeStateExport:
+    """Display-safe runtime state export for workflow recovery advice."""
+
+    state_id: str
+    session_id: str
+    session_name: str
+    status: SessionStatus
+    health_state: HealthState
+    current_task_id: str
+    active_command_kind: Optional[CommandIntent]
+    target_session_id: Optional[str]
+    recommended_recovery_action: Optional[SessionAction]
+    heartbeat_status: Optional[WorkflowHeartbeatStatus]
+    heartbeat_age_seconds: Optional[int]
+    result_kind: Optional[WorkflowResultKind]
+    permission_state: PermissionState
+    permission_blockers: tuple[str, ...]
+    review_gate_blockers: tuple[str, ...]
+    human_gate_blockers: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize runtime-state export to JSON-safe advisory metadata."""
+        return {
+            "state_id": self.state_id,
+            "session_id": self.session_id,
+            "session_name": self.session_name,
+            "status": self.status.value,
+            "health_state": self.health_state.value,
+            "current_task_id": self.current_task_id,
+            "active_command_kind": (
+                self.active_command_kind.value if self.active_command_kind else None
+            ),
+            "target_session_id": self.target_session_id,
+            "recommended_recovery_action": (
+                self.recommended_recovery_action.value
+                if self.recommended_recovery_action
+                else None
+            ),
+            "heartbeat_status": (
+                self.heartbeat_status.value if self.heartbeat_status else None
+            ),
+            "heartbeat_age_seconds": self.heartbeat_age_seconds,
+            "result_kind": self.result_kind.value if self.result_kind else None,
+            "permission_state": self.permission_state.value,
+            "permission_blockers": list(self.permission_blockers),
+            "review_gate_blockers": list(self.review_gate_blockers),
+            "human_gate_blockers": list(self.human_gate_blockers),
+            "evidence_refs": list(self.evidence_refs),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
 class PrimeAutonomyInput:
     """What Prime receives when selecting next action."""
 
@@ -1132,6 +1187,114 @@ def summarize_workflow_work_order_recovery(
         review_gate_blockers=review_gate_blockers,
         stale_session_recovery_rationale=rationale,
         evidence=tuple(evidence),
+        timestamp=observed_at,
+    )
+
+
+def export_session_runtime_state_for_workflow_recovery(
+    session: SessionLifecycleState,
+    command_plan: Optional[SessionCommandPlan] = None,
+    permission_summary: Optional[SessionPermissionSummary] = None,
+    workflow_recovery_summary: Optional[WorkflowWorkOrderRecoverySummary] = None,
+    approvals_pending: tuple[tuple[str, str], ...] | list[tuple[str, str]] = (),
+    restart_resteer_findings: tuple[RestartResteerFinding, ...]
+    | list[RestartResteerFinding] = (),
+    stale_threshold_seconds: int = 1800,
+    timestamp: Optional[datetime] = None,
+) -> SessionRuntimeStateExport:
+    """Export deterministic runtime-state advice for Prime/Beacon recovery views.
+
+    This combines already-typed Session Lifecycle surfaces into serializable
+    advisory fields only. It does not spawn, inspect, move, restart, or steer.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+    summary = permission_summary or summarize_session_permission_state(
+        session,
+        approvals_pending=approvals_pending,
+        restart_resteer_findings=restart_resteer_findings,
+        stale_threshold_seconds=stale_threshold_seconds,
+        timestamp=observed_at,
+    )
+    workflow = workflow_recovery_summary
+
+    permission_blockers = tuple(
+        blocker
+        for blocker in summary.blockers
+        if blocker.startswith(("permission.", "approval.pending"))
+    )
+    review_gate_blockers = summary.review_gate_blockers
+    human_gate_blockers = list(permission_blockers)
+    human_gate_blockers.extend(review_gate_blockers)
+
+    evidence_refs = [
+        f"state.id={session.session_id}:{session.status.value}:{observed_at.isoformat()}",
+        f"session.id={session.session_id}",
+        f"session.status={session.status.value}",
+        f"session.health={session.health_state.value}",
+        f"session.current_task_id={session.current_task_id}",
+        f"permission.summary.session_id={summary.session_id}",
+        f"permission.state={summary.permission_state.value}",
+    ]
+    evidence_refs.extend(f"permission.blocker={blocker}" for blocker in permission_blockers)
+    evidence_refs.extend(f"review.blocker={blocker}" for blocker in review_gate_blockers)
+
+    if command_plan is not None:
+        audit = command_plan.audit_evidence()
+        evidence_refs.extend(
+            [
+                f"command.kind={command_plan.command_intent.value}",
+                f"command.target_session_id={command_plan.session_id}",
+                f"command.executable={audit['plan']['is_executable']}",
+            ]
+        )
+        human_gate_blockers.extend(str(blocker) for blocker in audit["blockers"])
+        if command_plan.session_id != session.session_id:
+            human_gate_blockers.append("command.target_session_mismatch")
+            evidence_refs.append("command.target_session_mismatch=True")
+    else:
+        evidence_refs.append("command.kind=none")
+
+    if workflow is not None:
+        evidence_refs.extend(
+            [
+                f"workflow.work_order_id={workflow.work_order_id}",
+                f"workflow.target_session_id={workflow.target_session_id}",
+                f"workflow.heartbeat_status={workflow.heartbeat_status.value}",
+                "workflow.heartbeat_age_seconds="
+                + (
+                    "unknown"
+                    if workflow.heartbeat_age_seconds is None
+                    else str(workflow.heartbeat_age_seconds)
+                ),
+                f"workflow.result_kind={workflow.result_kind.value}",
+                f"workflow.recovery_action={workflow.recovery_action.value}",
+            ]
+        )
+        evidence_refs.extend(f"workflow.evidence={item}" for item in workflow.evidence)
+        if workflow.target_session_id != session.session_id:
+            human_gate_blockers.append("workflow.target_session_mismatch")
+            evidence_refs.append("workflow.target_session_mismatch=True")
+    else:
+        evidence_refs.append("workflow.summary=none")
+
+    return SessionRuntimeStateExport(
+        state_id=f"{session.session_id}:{session.status.value}:{observed_at.isoformat()}",
+        session_id=session.session_id,
+        session_name=session.session_name,
+        status=session.status,
+        health_state=session.health_state,
+        current_task_id=session.current_task_id,
+        active_command_kind=command_plan.command_intent if command_plan else None,
+        target_session_id=workflow.target_session_id if workflow else None,
+        recommended_recovery_action=workflow.recovery_action if workflow else None,
+        heartbeat_status=workflow.heartbeat_status if workflow else None,
+        heartbeat_age_seconds=workflow.heartbeat_age_seconds if workflow else None,
+        result_kind=workflow.result_kind if workflow else None,
+        permission_state=summary.permission_state,
+        permission_blockers=permission_blockers,
+        review_gate_blockers=review_gate_blockers,
+        human_gate_blockers=tuple(dict.fromkeys(human_gate_blockers)),
+        evidence_refs=tuple(evidence_refs),
         timestamp=observed_at,
     )
 

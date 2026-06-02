@@ -22,8 +22,10 @@ from meridian_core.session_lifecycle import (
     PrimeAutonomyInput,
     SessionPermissionSummary,
     WorkflowWorkOrderRecoverySummary,
+    SessionRuntimeStateExport,
     SessionLifecycleState,
     SessionCommandPlan,
+    export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
     generate_restart_finding,
     generate_resteer_finding,
@@ -1709,6 +1711,209 @@ class TestWorkflowWorkOrderRecoverySummary:
         assert serialized["result_kind"] == "timeout"
         assert serialized["recovery_action"] == "start_new"
         assert serialized["timestamp"] == observed_at.isoformat()
+
+
+class TestSessionRuntimeStateExport:
+    """Tests for pure runtime-state exports used by advisory recovery views."""
+
+    @pytest.fixture
+    def runtime_state(self):
+        """Create a review-gated session with scoped restart permission."""
+        now = datetime(2026, 6, 2, 9, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="runtime-state-export",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-runtime",
+            session_name="Build 2 Runtime",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.REVIEW_GATED,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-runtime-state-export",
+            current_task_id="runtime-state-export",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.REVIEW_GATED,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary="review gate pending",
+            permission_context=permission_context,
+        )
+
+    def test_runtime_state_export_combines_command_permission_and_workflow(
+        self,
+        runtime_state,
+    ):
+        """Runtime export surfaces only display-safe advisory fields."""
+        observed_at = datetime(2026, 6, 2, 9, 10, tzinfo=timezone.utc)
+        command_plan = SessionCommandPlan(
+            session_id=runtime_state.session_id,
+            session_name=runtime_state.session_name,
+            command_intent=CommandIntent.RESTART,
+            reason="Workflow heartbeat stale",
+            expected_state_transition=(SessionStatus.STALE, SessionStatus.RUNNING),
+            current_state_evidence="session-runtime:stale",
+            queue_file_evidence=runtime_state.assigned_queue_file,
+            worktree_evidence=runtime_state.worktree_path,
+            review_gate_evidence="review required before restart",
+            proof_requirement=ProofState.PERMISSION_VALIDATED,
+            queue_file_affected=runtime_state.assigned_queue_file,
+            worktree_path_affected=runtime_state.worktree_path,
+            branch_affected=runtime_state.branch_name,
+            aegis_gate_result="pending",
+            cadence_gate_required=True,
+            cadence_gate_status=ReviewCadenceState.REVIEW_GATED,
+            is_executable_now=False,
+            human_approval_required=True,
+            approval_context="workflow restart requires review",
+            rollback_or_recovery_note="Advisory restart only.",
+            permission_state=runtime_state.permission_context.branch_permission_state,
+            permission_task_scope=runtime_state.permission_context.task_scope,
+            permission_unlock_expiry=runtime_state.permission_context.unlock_expiry,
+            permission_approved_operations=tuple(
+                runtime_state.permission_context.approval_scope
+            ),
+            permission_operation=OperationScope.RESTART,
+            permission_operation_allowed=True,
+            permission_evidence="permission validated for restart",
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            runtime_state,
+            work_order_id="wo-runtime-stale",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+
+        export = export_session_runtime_state_for_workflow_recovery(
+            runtime_state,
+            command_plan=command_plan,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        serialized = export.to_dict()
+
+        assert isinstance(export, SessionRuntimeStateExport)
+        assert serialized["state_id"] == (
+            f"{runtime_state.session_id}:review_gated:{observed_at.isoformat()}"
+        )
+        assert serialized["active_command_kind"] == "restart"
+        assert serialized["target_session_id"] == runtime_state.session_id
+        assert serialized["recommended_recovery_action"] == "request_human_gate"
+        assert serialized["heartbeat_status"] == "stale"
+        assert serialized["heartbeat_age_seconds"] == 600
+        assert serialized["result_kind"] == "pending"
+        assert "review_gate.status=review_gated" in serialized["review_gate_blockers"]
+        assert "workflow restart requires review" in serialized["human_gate_blockers"]
+        assert "workflow.recovery_action=request_human_gate" in (
+            serialized["evidence_refs"]
+        )
+
+    def test_runtime_state_export_records_permission_blockers(self, runtime_state):
+        """Expired permissions become advisory blockers in the export."""
+        observed_at = datetime(2026, 6, 2, 9, 10, tzinfo=timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(seconds=1),
+            task_scope="runtime-state-export",
+            last_permission_change=observed_at,
+        )
+        expired_state = SessionLifecycleState(
+            **{**runtime_state.__dict__, "permission_context": expired_context}
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            expired_state,
+            work_order_id="wo-runtime-expired",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            timestamp=observed_at,
+        )
+
+        export = export_session_runtime_state_for_workflow_recovery(
+            expired_state,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+
+        assert export.recommended_recovery_action == SessionAction.REQUEST_HUMAN_GATE
+        assert "permission.unlock_expired" in export.permission_blockers
+        assert "permission.blocker=permission.unlock_expired" in export.evidence_refs
+        assert export.to_dict()["permission_state"] == "unlocked_temporary"
+
+    def test_runtime_state_export_flags_mismatched_command_and_workflow_targets(
+        self,
+        runtime_state,
+    ):
+        """Mismatched advisory inputs stay serializable and human-gated."""
+        observed_at = datetime(2026, 6, 2, 9, 10, tzinfo=timezone.utc)
+        command_plan = SessionCommandPlan(
+            session_id="other-session",
+            session_name="Other",
+            command_intent=CommandIntent.RESTART,
+            reason="Mismatched command target",
+            expected_state_transition=(SessionStatus.STALE, SessionStatus.RUNNING),
+            current_state_evidence="other-session:stale",
+            queue_file_evidence=runtime_state.assigned_queue_file,
+            worktree_evidence=runtime_state.worktree_path,
+            review_gate_evidence=None,
+            proof_requirement=ProofState.PERMISSION_VALIDATED,
+            queue_file_affected=runtime_state.assigned_queue_file,
+            worktree_path_affected=runtime_state.worktree_path,
+            branch_affected=runtime_state.branch_name,
+            aegis_gate_result=None,
+            cadence_gate_required=False,
+            cadence_gate_status=ReviewCadenceState.NONE,
+            is_executable_now=False,
+            human_approval_required=True,
+            approval_context=None,
+            rollback_or_recovery_note=None,
+        )
+        workflow_summary = WorkflowWorkOrderRecoverySummary(
+            work_order_id="wo-other",
+            target_session_id="other-session",
+            heartbeat_age_seconds=None,
+            heartbeat_status=WorkflowHeartbeatStatus.MISSING,
+            result_kind=WorkflowResultKind.PENDING,
+            error_kind=None,
+            retry_resteer_recommendation=None,
+            recovery_action=SessionAction.START_NEW,
+            permission_blockers=(),
+            review_gate_blockers=(),
+            stale_session_recovery_rationale="Mismatch fixture.",
+            evidence=("work_order.id=wo-other", "target_session.id=other-session"),
+            timestamp=observed_at,
+        )
+
+        export = export_session_runtime_state_for_workflow_recovery(
+            runtime_state,
+            command_plan=command_plan,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+
+        assert export.target_session_id == "other-session"
+        assert "command.target_session_mismatch" in export.human_gate_blockers
+        assert "workflow.target_session_mismatch" in export.human_gate_blockers
+        assert "workflow.target_session_mismatch=True" in export.evidence_refs
 
 
 class TestPrimeAutonomyInput:
