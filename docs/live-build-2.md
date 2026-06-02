@@ -10,12 +10,17 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+<<<<<<< HEAD
 Goal: repair close/archive write-through proof permission timing so Session Lifecycle proof stays deterministic.
+=======
+Goal: add Session Lifecycle V3 Goal Runtime checkpoint/update proof packet, display-safe and non-executable.
+>>>>>>> 69541f488 (Mark V3 goal checkpoint proof ready)
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
 
 Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
 
+<<<<<<< HEAD
 Task:
 - Repair `build_close_archive_write_through_proof()` or its permission helper so close/archive proof permission evaluation uses the proof timestamp (`observed_at`) instead of wall-clock time.
 - Preserve proof-only behavior: no session closing, archiving, stopping, process/session inspection, model/provider calls, UI/Bifrost/FileMap edits, branch/worktree/main movement, or Polaris.
@@ -47,6 +52,20 @@ Completion:
 - Regression tests added: `test_close_proof_permission_gate_uses_observed_at_not_wallclock`, `test_archive_proof_no_permission_blocker_when_observed_at_inside_window`.
 - Proof: 127 tests passed; `git diff --check` clean. Worktree branch: `codex/build-2-v3-goal-checkpoint-proof-20260602-1327`.
 - 2026-06-04 12:58 UTC — Ready for Codex Review. Coordinator movement required after Reviews A clearance.
+=======
+Task: add a deterministic proof/checkpoint packet for V3 Goal Runtime update discipline. Record checkpoint id, goal id/title, owning lane/session label, update surface (`git`, `obsidian`, `review`, `handoff`), cadence expectation, token/time budget summary, latest Git/Obsidian refs, reviewer/lease gate refs, blocker/continuation state, evidence refs, and explicit `is_executable_now=False` without writing Git/Obsidian, creating automation, moving branches, spawning sessions, or touching Polaris.
+
+Completion:
+
+- Build 2 completed the V3 Goal Runtime checkpoint/update proof packet in local worktree commit `a0d4db8e`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+- Evidence: added `GoalRuntimeCheckpointSurface`, `GoalRuntimeCheckpointCadence`, `GoalRuntimeContinuationState`, frozen `V3GoalRuntimeCheckpointProofPacket`, and `build_v3_goal_runtime_checkpoint_proof_packet()` to serialize display-safe, non-executable V3 checkpoint/update proof metadata. The packet preserves checkpoint id, goal id/title, owner/session labels, update surface, cadence expectation, token/time budget summaries, latest Git/Obsidian refs, reviewer/lease gates, blockers, continuation state, evidence refs, and explicit `is_executable_now=False`.
+- Display-safety evidence: raw prompt/chat, Windows/path-like refs, and movement-like branch/worktree/main tokens are redacted from serialized packet fields and evidence refs; regression coverage includes `SECRET_RAW_PROMPT`, `SECRET_WORKER_CHAT`, `branch_move_request`, `move_main`, `worktree_switch`, `stash_pop`, `merge_main`, `rebase_main`, `cherry_pick`, and a `C:\Users\...` path sentinel.
+- Regression evidence: preserved close/archive proof expectations by evaluating archive permission against the proof timestamp, and full session lifecycle tests remained green.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 125 tests; `git diff --check` passed with only Git line-ending normalization warnings for edited files.
+- Ready for Codex Review.
+- Next Candidate: bind reviewed V3 Goal Runtime proof packets into Prime/Beacon advisory serialization when assigned, or route any Reviews A findings.
+>>>>>>> 69541f488 (Mark V3 goal checkpoint proof ready)
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -3584,6 +3603,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-04 13:31:42 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 2 of 3; idle polling
 2026-06-04 13:33:40 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 2 of 3; idle polling
 2026-06-04 13:35:40 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 2 of 3; idle polling
+2026-06-04 13:37:38 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 2 of 3; idle polling
 ```
 
 ## Write/Completion Log
