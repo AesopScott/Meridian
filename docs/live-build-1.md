@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: harden the reviewed Relay visible prompt payload meter consumer surface with focused edge behavior for downstream frontend/runtime consumers.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: add deterministic display-safe handling for missing prompt payload snapshots, unknown token/budget metadata fallbacks, zero/under-1k/decimal-k labels, rounded budget percentages, signed growth deltas, Q-mode prompt-drag warning/degraded/blocker tags, provider/model/route continuity refs, and decision-record fallback. Preserve adapter/model request payload semantics exactly and do not expose raw prompt text, provider responses, credentials, live provider calls, UI/Bifrost/FileMap/session/process/main/Polaris leakage, or branch movement.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02.
+- Commit: `fd2d3206` (`feat: Harden Relay prompt meter edge consumers`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (213 passed); `git diff --check` (passed); `git diff --cached --check` (passed).
+- Concrete evidence: Relay prompt meter evidence now rounds budget/growth percentages to one decimal, adds display-safe fallback warning tags for missing snapshots, missing estimated-token evidence, and unknown budgets, and builds decision-record meter evidence even when lane execution fails. Edge tests prove under-1k labels, signed growth deltas, missing metadata tags, Q-mode degraded warning/blocker tags, provider/model/route continuity refs, decision-record fallback, and no raw prompt/provider-error leakage in consumer views.
+- Next Candidate: connect reviewed prompt meter edge consumer evidence to the downstream Bifrost/runtime display surface, or bind prompt-drag blockers into reviewed retry/fallback planning.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement the Relay/runtime side of the V2 visible prompt payload meter from `docs/v2-progress-tracker.md`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
