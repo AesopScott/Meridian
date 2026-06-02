@@ -790,13 +790,34 @@ _SAFE_PROMPT_PACKET_EVIDENCE_PREFIXES = (
     "packet-proof-",
 )
 
+_UNSAFE_HANDOFF_EVIDENCE_TERMS = frozenset(
+    {
+        "branch",
+        "cherry-pick",
+        "credential",
+        "git",
+        "main",
+        "main-write",
+        "merge",
+        "prompt",
+        "raw",
+        "rebase",
+        "reset",
+        "stash",
+        "stash-pop",
+        "worktree",
+    }
+)
+
 
 def _is_safe_handoff_evidence_id(tag: str) -> bool:
     for prefix in _SAFE_PROMPT_PACKET_EVIDENCE_PREFIXES:
         if not tag.startswith(prefix):
             continue
         suffix = tag[len(prefix) :]
-        return bool(suffix) and all(
+        if not suffix or any(term in suffix for term in _UNSAFE_HANDOFF_EVIDENCE_TERMS):
+            return False
+        return all(
             character.islower() or character.isdigit() or character == "-"
             for character in suffix
         )

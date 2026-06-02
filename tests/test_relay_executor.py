@@ -3506,6 +3506,35 @@ class TestRelayAegisPromptPacketHandoffSummary:
 
         assert result == ("redacted_downstream_tag", "packet_hash_unavailable")
 
+    def test_display_safe_handoff_tag_contract_redacts_source_git_commands(
+        self,
+    ) -> None:
+        result = relay_display_safe_handoff_tags(
+            (
+                "git reset --hard origin/main",
+                "merge origin/main into worktree",
+                "rebase current branch",
+                "cherry-pick review commit",
+                "stash-pop across worktrees",
+                "unapproved_main_write_request",
+                "packet-proof-git-reset-hard",
+                "aegis-proof-main-write-request",
+                "packet_hash_missing",
+                "packet-proof-safe",
+                "aegis-proof-safe",
+                "human approval required before dispatch",
+            ),
+            fallback="redacted_source_git_handoff",
+        )
+
+        assert result == (
+            "redacted_source_git_handoff",
+            "packet_hash_missing",
+            "packet-proof-safe",
+            "aegis-proof-safe",
+            "human approval required before dispatch",
+        )
+
     def test_handoff_empty_when_policy_not_evaluated(self) -> None:
         summary = RelayExecutionSummary(results=(), errors=(), decision_record=None)
 
@@ -3685,6 +3714,47 @@ class TestRelayAegisPromptPacketHandoffSummary:
             "branch_move_request",
         ):
             assert sentinel not in rendered
+
+    def test_handoff_redacts_source_git_main_write_policy_surfaces(self) -> None:
+        unsafe_values = (
+            "git reset --hard origin/main",
+            "merge origin/main",
+            "rebase current branch",
+            "cherry-pick review commit",
+            "stash-pop across worktrees",
+            "unapproved_main_write_request",
+            "packet-proof-git-reset-hard",
+            "aegis-proof-main-write-request",
+        )
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="block",
+            severity="error",
+            reason="git reset --hard origin/main",
+            evidence_ids=unsafe_values,
+            blockers=unsafe_values,
+            warnings=unsafe_values,
+            packet_id=_PACKET_ID,
+            packet_hash="packet-hash-safe",
+            prompt_budget_ref="budget:safe",
+            packet_proof_metadata_ref="prompt-packet-proof:safe",
+        )
+        summary = RelayExecutionSummary(
+            results=(),
+            errors=(),
+            prompt_packet_policy_evidence=evidence,
+        )
+
+        handoff = summary.aegis_prompt_packet_policy_handoff().to_dict()
+        rendered = " ".join(str(value) for value in handoff.values())
+
+        assert handoff["aegis_evidence_ids"] == ("redacted_evidence_id",)
+        assert handoff["blockers"] == ("redacted_policy_blocker",)
+        assert handoff["warnings"] == ("redacted_policy_warning",)
+        assert handoff["reason_tags"] == ("redacted_policy_reason",)
+        for sentinel in unsafe_values:
+            assert sentinel not in rendered
+        for token in ("reset --hard", "merge origin", "rebase", "cherry-pick", "stash-pop"):
+            assert token not in rendered
 
     def test_handoff_preserves_known_structured_tags_and_fixed_phrases(self) -> None:
         evidence = RelayPromptPacketPolicyEvidence(
