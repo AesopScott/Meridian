@@ -8,6 +8,9 @@ from meridian_core.aegis import (
     AegisEvidence,
     AggregateGateSummary,
     ApprovalRecord,
+    CommandStagingUiReviewDecision,
+    CommandStagingUiReviewInput,
+    CommandStagingUiReviewPolicyResult,
     EvidenceSeverity,
     EvidenceStatus,
     EvidenceType,
@@ -26,6 +29,7 @@ from meridian_core.aegis import (
     PromptPacketProofPolicyResult,
     WaiverRecord,
     evidence_from_cross_check,
+    evaluate_command_staging_ui_review_advisory,
     evaluate_prompt_payload_meter_advisory,
     evaluate_provider_result_validation_advisory,
     evaluate_prompt_packet_proof_policy,
@@ -40,6 +44,7 @@ from meridian_core.aegis import (
     gate_unknown_proof_requirement,
     gate_unknown_route_class,
     gate_unsafe_fallback,
+    serialize_command_staging_ui_review_policy_result,
     serialize_prompt_payload_meter_policy_result,
     serialize_provider_result_validation_policy_result,
     serialize_prompt_packet_policy_result,
@@ -145,6 +150,31 @@ def _prompt_payload_meter_metadata(**overrides) -> PromptPayloadMeterInput:
     }
     base.update(overrides)
     return PromptPayloadMeterInput(**base)
+
+
+def _command_staging_ui_review_metadata(**overrides) -> CommandStagingUiReviewInput:
+    base = {
+        "staged_command_kind": "restart",
+        "recommended_action": "restart",
+        "required_operation": "restart",
+        "target_session_id": "build-2-staging",
+        "ready_for_review": True,
+        "human_gate_rationale": "Scott UI review required before live control.",
+        "ui_review_required": True,
+        "permission_state": "unlocked_temporary",
+        "blockers": (),
+        "evidence_refs": (
+            "staging:id:cmd-001",
+            "permission:unlocked-temporary",
+        ),
+        "prime_advisory_action": "review_required",
+        "beacon_evidence_refs": (
+            "beacon:staging.restart",
+            "beacon:permission.state",
+        ),
+    }
+    base.update(overrides)
+    return CommandStagingUiReviewInput(**base)
 
 
 # ---------------------------------------------------------------------------
@@ -1514,6 +1544,207 @@ class TestAggregateGateSummary:
         assert aggregate.gate_details[0].gate_id == "gate_a"
         assert aggregate.gate_details[1].gate_id == "gate_b"
         assert len(aggregate.gate_details) == 2
+
+
+# ---------------------------------------------------------------------------
+# Command Staging UI-Review Advisory
+# ---------------------------------------------------------------------------
+
+
+class TestCommandStagingUiReviewAdvisory:
+    def test_review_ready_command_staging_metadata_allows(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata()
+        )
+        assert result.decision is CommandStagingUiReviewDecision.ALLOW
+        assert result.severity == "info"
+        assert result.blockers == ()
+        assert result.warnings == ()
+        assert result.target_session_id == "build-2-staging"
+
+    def test_not_ready_blocks_fail_closed(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(ready_for_review=False)
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "staged_command_not_ready_for_review" in result.blockers
+
+    def test_missing_ui_review_blocks_fail_closed(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(ui_review_required=False)
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "ui_review_required_missing" in result.blockers
+
+    def test_locked_permission_blocks_fail_closed(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(permission_state="locked_by_default")
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "permission_locked_by_default" in result.blockers
+
+    def test_missing_human_gate_rationale_blocks(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(human_gate_rationale="")
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "missing_human_gate_rationale" in result.blockers
+
+    def test_recommended_action_required_operation_mismatch_blocks(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(
+                recommended_action="resteer",
+                required_operation="restart",
+            )
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "recommended_action_required_operation_mismatch" in result.blockers
+
+    def test_prime_advisory_not_review_required_warns(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(prime_advisory_action="inspect")
+        )
+        assert result.decision is CommandStagingUiReviewDecision.WARN
+        assert result.blockers == ()
+        assert result.warnings == ("prime_advisory_not_review_required",)
+
+    def test_missing_evidence_refs_block(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(evidence_refs=())
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "missing_command_staging_evidence_refs" in result.blockers
+
+    def test_missing_beacon_evidence_refs_block(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(beacon_evidence_refs=())
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "missing_beacon_evidence_refs" in result.blockers
+
+    def test_blocker_tags_block(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(blockers=("permission.unlock_expired",))
+        )
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert result.blockers == ("permission.unlock_expired",)
+
+    def test_command_staging_advisory_has_stable_keys(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata()
+        )
+        display = serialize_command_staging_ui_review_policy_result(result)
+        assert tuple(display.keys()) == (
+            "decision",
+            "severity",
+            "reason",
+            "staged_command_kind",
+            "recommended_action",
+            "required_operation",
+            "target_session_id",
+            "ready_for_review",
+            "human_gate_rationale",
+            "ui_review_required",
+            "permission_state",
+            "prime_advisory_action",
+            "evidence_refs",
+            "beacon_evidence_refs",
+            "blockers",
+            "warnings",
+            "reason_tags",
+            "relay_advisory",
+            "bifrost_advisory",
+            "execution_authorized",
+        )
+
+    def test_command_staging_to_advisory_dict_matches_helper(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata()
+        )
+        assert result.to_advisory_dict() == serialize_command_staging_ui_review_policy_result(
+            result
+        )
+
+    def test_command_staging_advisory_serializes_allow_state(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata()
+        )
+        display = result.to_advisory_dict()
+        assert display["decision"] == "allow"
+        assert display["severity"] == "info"
+        assert display["staged_command_kind"] == "restart"
+        assert display["recommended_action"] == "restart"
+        assert display["required_operation"] == "restart"
+        assert display["target_session_id"] == "build-2-staging"
+        assert display["ready_for_review"] is True
+        assert display["ui_review_required"] is True
+        assert display["permission_state"] == "unlocked_temporary"
+        assert display["prime_advisory_action"] == "review_required"
+        assert display["reason_tags"] == ("command_staging_ui_review_allowed",)
+        assert display["bifrost_advisory"] == "display_review_ready"
+        assert display["execution_authorized"] is False
+
+    def test_command_staging_advisory_redacts_unsafe_strings(self):
+        result = CommandStagingUiReviewPolicyResult(
+            decision=CommandStagingUiReviewDecision.BLOCK,
+            severity="error",
+            reason="raw_prompt: do not show this",
+            staged_command_kind="restart",
+            recommended_action="restart",
+            required_operation="restart",
+            target_session_id="session-safe",
+            ready_for_review=True,
+            human_gate_rationale="provider_response:raw",
+            ui_review_required=True,
+            permission_state="unlocked_temporary",
+            prime_advisory_action="review_required",
+            evidence_refs=("staging:safe", "account_id=abc"),
+            beacon_evidence_refs=("beacon:safe", "process_id=123"),
+            blockers=("raw_provider_response", "missing_beacon_evidence_refs"),
+            warnings=("api_key=secret",),
+        )
+        display = result.to_advisory_dict()
+        assert display["reason"] == "[redacted]"
+        assert display["human_gate_rationale"] == "[redacted]"
+        assert display["evidence_refs"] == ("staging:safe", "[redacted]")
+        assert display["beacon_evidence_refs"] == ("beacon:safe", "[redacted]")
+        assert display["blockers"] == ("[redacted]", "missing_beacon_evidence_refs")
+        assert display["warnings"] == ("[redacted]",)
+        assert display["reason_tags"] == ("[redacted]", "missing_beacon_evidence_refs")
+
+    def test_command_staging_policy_is_deterministic(self):
+        metadata = _command_staging_ui_review_metadata(
+            ready_for_review=False,
+            permission_state="locked_by_default",
+            blockers=("permission.unlock_expired",),
+            prime_advisory_action="block",
+        )
+        first = evaluate_command_staging_ui_review_advisory(metadata)
+        second = evaluate_command_staging_ui_review_advisory(metadata)
+        assert first == second
+        assert first.to_advisory_dict() == second.to_advisory_dict()
+
+    def test_unsafe_command_staging_inputs_fail_closed_without_raw_exposure(self):
+        result = evaluate_command_staging_ui_review_advisory(
+            _command_staging_ui_review_metadata(
+                target_session_id="process_id=123",
+                human_gate_rationale="raw_prompt:leak",
+                evidence_refs=("provider_response:raw",),
+                beacon_evidence_refs=("account_id=abc",),
+                blockers=("api_key=secret",),
+            )
+        )
+        display = result.to_advisory_dict()
+        assert result.decision is CommandStagingUiReviewDecision.BLOCK
+        assert "unsafe_target_session_id" in result.blockers
+        assert "unsafe_human_gate_rationale" in result.blockers
+        assert "unsafe_command_staging_evidence_ref" in result.blockers
+        assert "unsafe_beacon_evidence_ref" in result.blockers
+        assert "unsafe_command_staging_blocker_tag" in result.blockers
+        assert display["target_session_id"] == "[redacted]"
+        assert display["human_gate_rationale"] == "[redacted]"
+        assert display["evidence_refs"] == ("[redacted]",)
+        assert display["beacon_evidence_refs"] == ("[redacted]",)
 
 
 # ---------------------------------------------------------------------------
