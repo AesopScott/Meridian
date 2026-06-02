@@ -1,4 +1,4 @@
-"""Tests for the Relay logic snapshot consumed by visible harnesses."""
+﻿"""Tests for the Relay logic snapshot consumed by visible harnesses."""
 
 from __future__ import annotations
 
@@ -77,6 +77,8 @@ def test_snapshot_exposes_capability_sections_for_harness_headers():
     section_titles = [section["title"] for section in snapshot["capabilitySections"]]
 
     assert section_titles == [
+        "Prime Directives",
+        "Prime Directive Proofs",
         "Relay Job",
         "Risk Tier Routing",
         "Model Lane Logic",

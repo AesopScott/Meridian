@@ -1,4 +1,4 @@
-"""Serializable Relay model-routing logic snapshot for UI harnesses."""
+﻿"""Serializable Relay model-routing logic snapshot for UI harnesses."""
 
 from __future__ import annotations
 
@@ -165,6 +165,16 @@ def _capability_sections(tiers: list[dict[str, Any]]) -> list[dict[str, Any]]:
         for tier in tiers
     ]
     return [
+        {
+            "title": "Prime Directives",
+            "summary": "Prime's Relay-facing routing principles are first-class section headers so the visible harness list cannot omit them.",
+            "rows": [(item["name"], item["logic"]) for item in PRIME_DIRECTIVES],
+        },
+        {
+            "title": "Prime Directive Proofs",
+            "summary": "Prime's proof questions stay next to the Relay route logic they validate.",
+            "rows": [(item["question"], item["proves"]) for item in PRIME_DIRECTIVE_PROOFS],
+        },
         {
             "title": "Relay Job",
             "summary": "Relay is the model-routing brain: it answers which model route Prime should use, why, with what proof burden, and what must block fallback.",
