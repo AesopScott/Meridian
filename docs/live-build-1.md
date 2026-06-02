@@ -10,6 +10,27 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement a narrow provider-result validation evidence runtime surface using reviewed provider transport metadata envelope/pass-through work and the reviewed provider-result validation checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: keep the result-validation runtime provider-neutral and fail-closed. Summarize adapter/provider-return metadata only as display-safe evidence; do not include raw provider responses, credentials/account probing, live provider calls, UI/Bifrost/FileMap/session/process edits, branch/main movement, or metadata at the adapter request boundary.
+
+Tests: `python -m pytest tests/test_relay_executor.py -q` plus `git diff --check`.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02 08:41 -06:00.
+- Commit: `8c5fd86e` (`feat: Add Relay provider result validation evidence`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (204 passed); `git diff --check` (passed; Git reported line-ending normalization warnings only).
+- Concrete evidence: Relay now builds immutable `RelayProviderResultValidationEvidence` after adapter/model-call return, carrying provider id, exact model id, route kind, trust/proof state, proof refs, external-review state, prompt budget/drag continuity, safe output length/hash, telemetry availability statuses, validation status, and deterministic warning/blocker tags. `RelayExecutionSummary.provider_result_validation_consumer_view()` exposes display-safe aggregate evidence, and decision records carry the first-lane result evidence when requested. Tests prove raw prompt text, raw provider/model output text, credentials, account/process/Polaris sentinels are absent; missing metadata, pending external review, empty results, unsupported telemetry, and fail-closed metadata produce deterministic tags. Adapter/provider request boundaries remain approved payload text only; no live provider calls, credentials/account probing, UI/Bifrost/FileMap/session/process edits, branch movement, shared-main writes, pushes, or Polaris work were added.
+- Next Candidate: bind result-validation blockers/warnings into the reviewed Aegis policy input path after review, or connect the reviewed validation envelope to provider transport once the provider transport runtime lane is ready.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: expose the reviewed `RelayDispatchMetadataEnvelope` in deterministic Relay summary/decision-record consumer views without changing adapter/provider calls.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
