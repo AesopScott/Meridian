@@ -3545,3 +3545,11 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 - Code/doc changes in session: 0 of 3
 - Next Candidate Task: awaiting Prime/Codex promotion
 - Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-02 16:45 UTC (Heartbeat Poll, cadence 3/3)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" section found
+- Note: "Coordinator Override - Blocked" section present (commit 3608b218) — model harness metadata task blocked; requires coordinator decision before re-queue
+- Latest origin/main: commit `3608b218` (docs: Record Build 1 model metadata blocker)
+- Code/doc changes in session: 0 of 3 (cadence 3 of 3 — Codex review queued)
+- Next Candidate Task: awaiting Prime/Codex promotion from Blocked to Active Now
+- Build 1 idle and polling for next task assignment
