@@ -244,6 +244,15 @@ def test_index_prime_harness_uses_backend_runtime_snapshot():
     assert "renderPrimeLogic" in doc
 
 
+def test_index_prime_runtime_directives_render_first_and_fail_visible():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert doc.index("renderRelayPrimeDirectives(snapshot)") < doc.index("relaySection('Prime backend source'")
+    assert "prime directive payload unavailable" in doc
+    assert "prime directive proof payload unavailable" in doc
+    assert "const directiveBody = directives.length" in doc
+    assert "const proofBody = proofs.length" in doc
+
+
 def test_index_wired_harness_titles_use_runtime_logic_naming():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Prime Runtime Logic" in doc

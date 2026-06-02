@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || '',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4173,15 +4173,21 @@ body {
   const renderRelayPrimeDirectives = (snapshot) => {
     const directives = Array.isArray(snapshot.primeDirectives) ? snapshot.primeDirectives : [];
     const proofs = Array.isArray(snapshot.primeDirectiveProofs) ? snapshot.primeDirectiveProofs : [];
+    const directiveBody = directives.length
+      ? relayGrid(directives.map((item, index) => [`${index + 1}`, `${item.name}: ${item.logic}`]))
+      : relaySummary('prime directive payload unavailable');
+    const proofBody = proofs.length
+      ? relayGrid(proofs.map((item, index) => [`${index + 1}`, `${item.question} Proof: ${item.proves}`]))
+      : relaySummary('prime directive proof payload unavailable');
     return [
       relaySection(
         'Prime Directives',
-        relayGrid(directives.map((item, index) => [`${index + 1}`, `${item.name}: ${item.logic}`])),
+        directiveBody,
         true,
       ),
       relaySection(
         'Prime Directive Proofs',
-        relayGrid(proofs.map((item, index) => [`${index + 1}`, `${item.question} Proof: ${item.proves}`])),
+        proofBody,
         true,
       ),
     ].join('');
