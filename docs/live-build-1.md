@@ -23,7 +23,7 @@ Task: prove Relay handoff and consumer-view surfaces intended for Bifrost, Prime
 Completion:
 - Status: Ready for Codex Review.
 - Completed: 2026-06-02.
-- Commit: `f2abf7b8` (`test: Harden Relay handoff negative paths`).
+- Commit: `32232b3a` (`test: Harden Relay handoff negative paths`).
 - Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 - Tests run: `python -m pytest tests/test_relay_executor.py -q` (216 passed); `git diff --check` (passed with Git line-ending normalization warnings only); path-scope check limited changes to allowed files.
 - Concrete evidence: PromptPacket handoff now sanitizes policy evidence ids, blockers, warnings, and reason tags into structured display-safe tags while preserving existing known fixed policy phrases. Negative tests inject raw prompt, worker chat, credential, branch movement, provider-output, arbitrary exception, and free-text blocker sentinels across Relay proof/evidence/consumer/handoff surfaces and prove downstream rendered handoff data omits them.
