@@ -10,6 +10,31 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Completed / Ready For Codex Review
 
+Goal: keep FileMap current after latest Build 1/2/4/5 movement and review provenance through `9198bcbe`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: fresh FileMap audit after current-main movement through `9198bcbe`, especially Relay dispatch metadata consumer views and stale-session recovery sample rendering.
+
+Completion:
+
+- Build 3 audited current `origin/main` at `9198bcbe` after movement commits from `58d3862c` through `9198bcbe`, including Relay dispatch metadata envelope/consumer work, provider transport envelope review, live-control permission gate advice, stale-session recovery sample rendering, and Reviews A/B provenance.
+- Inspected required/current movement paths from `fd6e7893..HEAD`, all five live-build queue files, both live review provenance files, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Inspected called-out paths: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, plus Session Lifecycle permission-gate paths and `docs/provider-transport-metadata-pass-through-checklist.md`.
+- No missing existing artifacts were found. No runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` registration changes were needed.
+- Audit evidence: focused coverage check across 48 inspected changed/referenced existing paths found zero gaps.
+- Files changed: `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Diff proof: `git diff --check` - passed.
+- Commit: this queue-marker commit.
+- Next Candidate: bind runtime validation or review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
 Goal: keep FileMap current after latest Build 2, Build 3, Build 4, Reviews A/B movement through `fd6e7893`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
