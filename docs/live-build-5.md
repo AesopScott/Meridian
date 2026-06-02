@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: connect the review-cleared Relay/Aegis handoff summary adapter into deterministic Bifrost cockpit view-model rendering.
 
@@ -22,7 +22,15 @@ Task: wire the pure adapter into the deterministic cockpit view-model/sample pat
 
 Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
 
-Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect reviewed Relay runtime summaries after review.
+Completion:
+
+- Build 5 connected the reviewed Relay/Aegis handoff summary adapter into deterministic Bifrost cockpit sample/view-model rendering in commit `a3ba4de6`.
+- Files changed: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 235 tests; `git diff --check` passed.
+- Concrete evidence: `sample_cockpit_view_model()` now feeds structured Relay/Aegis summary dictionaries through `relay_aegis_policy_handoff_from_summary()` before rendering, while preserving deterministic no-argument sample output. Tests cover human-gate summaries, fail-closed missing metadata placeholders, escaping/redaction, deterministic ordering, prompt payload visibility, provider balance, dispatch hardening, PromptPacket proof metadata, proof-state preview, stale-session recovery actions, and cockpit layout preservation.
+- Ready for Codex Review.
+
+Next Candidate: bind review findings or connect reviewed Relay runtime summaries after review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
