@@ -146,6 +146,14 @@ Replacement coordinator supervised routing trial - 2026-06-02:
 - No branch/worktree movement was approved. No worker implementation files were edited. No shared-main implementation contamination was observed.
 - Follow-up needed after current-orchestrator review: fast-forward or otherwise sync the clean affected worker worktrees only if approved/needed so Build 3 and Reviews B can consume these current-main queue updates.
 
+Replacement coordinator sync follow-up - 2026-06-02:
+
+- Current orchestrator review thread was still in progress when checked; no correction had been received yet.
+- Thread search did not expose clearly named Build 1-5 / Reviews A-B session threads, so no direct worker-thread prompts were sent.
+- Movement gate before sync: fetched `origin/main`; verified shared main on `main`, aligned with `origin/main`, and clean. Verified Build 3, Build 4, Build 5, Reviews A, and Reviews B worktrees were clean and behind-only.
+- Fast-forwarded clean behind-only worktrees Build 3, Build 4, Build 5, Reviews A, and Reviews B to `7b086b7f` using `git pull --ff-only origin main`. Build 1 and Build 2 were not synced because they remain clean but divergent with local ahead history.
+- Purpose: ensure Build 3 and Reviews B can see the supervised escalation queue updates in their assigned worktrees, and keep Build 4/5/Reviews A current with the corrected handoff/ledger without touching worker implementation files.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
