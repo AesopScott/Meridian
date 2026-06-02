@@ -154,6 +154,17 @@ class PermissionContext:
     task_scope: Optional[str]
     last_permission_change: datetime
 
+    def __post_init__(self) -> None:
+        """Enforce construction-time invariants for permission states."""
+        if self.branch_permission_state == PermissionState.UNLOCKED_TEMPORARY:
+            if self.unlock_expiry is None:
+                raise ValueError("UNLOCKED_TEMPORARY requires unlock_expiry to be set")
+            if self.task_scope is None:
+                raise ValueError("UNLOCKED_TEMPORARY requires task_scope to be set")
+        elif self.branch_permission_state == PermissionState.UNLOCKED_PERMANENT:
+            if self.approved_by_secondary is None:
+                raise ValueError("UNLOCKED_PERMANENT requires approved_by_secondary (dual approval)")
+
     def is_operation_approved(self, operation: OperationScope) -> bool:
         """True if operation is in approval scope."""
         return operation in self.approval_scope
@@ -330,6 +341,8 @@ class SessionLifecycleState:
             return False
         if self.permission_context.is_unlock_expired():
             return False
+        if not self.permission_context.is_unlock_task_scoped(self.current_task_id):
+            return False
         return True
 
     def heartbeat_stale(self, threshold_seconds: int = 1800) -> bool:
@@ -396,10 +409,7 @@ class SessionLifecycleState:
 
     def can_execute_operation(self, operation: OperationScope) -> bool:
         """True if operation can execute without escalation."""
-        return (
-            self.permission_context.is_operation_approved(operation)
-            and not self.permission_context.escalation_gate
-        )
+        return self.permission_context.can_execute_operation(operation, self.current_task_id)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to JSON-safe dict for Bifrost."""

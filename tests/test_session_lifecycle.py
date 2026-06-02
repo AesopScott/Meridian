@@ -30,6 +30,7 @@ class TestSessionLifecycleState:
     def healthy_state(self):
         """Create a healthy session state."""
         now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
         permission_context = PermissionContext(
             approved_by="scott",
             approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
@@ -37,8 +38,8 @@ class TestSessionLifecycleState:
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
             approved_by_secondary=None,
-            unlock_expiry=None,
-            task_scope=None,
+            unlock_expiry=future,
+            task_scope="task-1",
             last_permission_change=now,
         )
         return SessionLifecycleState(
@@ -53,7 +54,7 @@ class TestSessionLifecycleState:
             status=SessionStatus.POLLING,
             worktree_path="/worktree/build-2",
             branch_name="main",
-            current_task_id=None,
+            current_task_id="task-1",
             last_queue_read_at=now,
             last_queue_write_at=now,
             last_prompt_sent_at=now,
@@ -81,6 +82,88 @@ class TestSessionLifecycleState:
     def test_can_accept_work(self, healthy_state):
         """Test can_accept_work() method."""
         assert healthy_state.can_accept_work()
+
+    def test_can_accept_work_rejects_out_of_scope_task(self):
+        """Test that can_accept_work rejects when current_task_id doesn't match task_scope."""
+        now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="scott",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=future,
+            task_scope="task-1",
+            last_permission_change=now,
+        )
+        state = SessionLifecycleState(
+            session_id="session-1",
+            session_name="Build 2",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.POLLING,
+            worktree_path="/worktree/build-2",
+            branch_name="main",
+            current_task_id="task-2",  # Doesn't match task_scope
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=5000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.QUEUE_READ,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        # Should not be able to accept work when task_id doesn't match task_scope
+        assert not state.can_accept_work()
+
+    def test_can_accept_work_accepts_matching_scope_task(self):
+        """Test that can_accept_work accepts when current_task_id matches task_scope."""
+        now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="scott",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=future,
+            task_scope="task-1",
+            last_permission_change=now,
+        )
+        state = SessionLifecycleState(
+            session_id="session-1",
+            session_name="Build 2",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.POLLING,
+            worktree_path="/worktree/build-2",
+            branch_name="main",
+            current_task_id="task-1",  # Matches task_scope
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=5000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.QUEUE_READ,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        # Should be able to accept work when task_id matches task_scope
+        assert state.can_accept_work()
 
     def test_heartbeat_stale_fresh(self, healthy_state):
         """Test heartbeat_stale() with recent read."""
@@ -397,8 +480,9 @@ class TestPermissionContext:
 
     @pytest.fixture
     def unlocked_context(self):
-        """Create an unlocked permission context."""
+        """Create an unlocked permission context (temporary with expiry and task scope)."""
         now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
         return PermissionContext(
             approved_by="prime",
             approval_scope=frozenset([OperationScope.BRANCH_MOVE, OperationScope.RESTART]),
@@ -406,8 +490,8 @@ class TestPermissionContext:
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
             approved_by_secondary=None,
-            unlock_expiry=None,
-            task_scope=None,
+            unlock_expiry=future,
+            task_scope="task-1",
             last_permission_change=now,
         )
 
@@ -446,6 +530,93 @@ class TestPermissionContext:
         assert serialized["approved_by"] == "prime"
         assert "branch_move" in serialized["approval_scope"]
         assert serialized["branch_permission_state"] == "unlocked_temporary"
+
+    def test_temporary_unlock_requires_expiry(self):
+        """Test that UNLOCKED_TEMPORARY requires unlock_expiry."""
+        now = datetime.now(timezone.utc)
+        with pytest.raises(ValueError, match="UNLOCKED_TEMPORARY requires unlock_expiry"):
+            PermissionContext(
+                approved_by="scott",
+                approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+                escalation_gate=False,
+                escalation_reason=None,
+                branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+                approved_by_secondary=None,
+                unlock_expiry=None,  # Invalid: must be set for temporary unlock
+                task_scope="task-1",
+                last_permission_change=now,
+            )
+
+    def test_temporary_unlock_requires_task_scope(self):
+        """Test that UNLOCKED_TEMPORARY requires task_scope."""
+        now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
+        with pytest.raises(ValueError, match="UNLOCKED_TEMPORARY requires task_scope"):
+            PermissionContext(
+                approved_by="scott",
+                approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+                escalation_gate=False,
+                escalation_reason=None,
+                branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+                approved_by_secondary=None,
+                unlock_expiry=future,
+                task_scope=None,  # Invalid: must be set for temporary unlock
+                last_permission_change=now,
+            )
+
+    def test_permanent_unlock_requires_secondary_approval(self):
+        """Test that UNLOCKED_PERMANENT requires dual approval."""
+        now = datetime.now(timezone.utc)
+        with pytest.raises(ValueError, match="UNLOCKED_PERMANENT requires approved_by_secondary"):
+            PermissionContext(
+                approved_by="scott",
+                approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+                escalation_gate=False,
+                escalation_reason=None,
+                branch_permission_state=PermissionState.UNLOCKED_PERMANENT,
+                approved_by_secondary=None,  # Invalid: must be set for permanent unlock
+                unlock_expiry=None,
+                task_scope=None,
+                last_permission_change=now,
+            )
+
+    def test_can_execute_operation_respects_task_scope_match(self):
+        """Test that can_execute_operation rejects when task_scope doesn't match."""
+        now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
+        context = PermissionContext(
+            approved_by="scott",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=future,
+            task_scope="task-1",
+            last_permission_change=now,
+        )
+        # Operation can execute when task_scope matches
+        assert context.can_execute_operation(OperationScope.BRANCH_MOVE, "task-1")
+        # Operation cannot execute when task_scope doesn't match
+        assert not context.can_execute_operation(OperationScope.BRANCH_MOVE, "task-2")
+
+    def test_can_execute_operation_respects_expiry(self):
+        """Test that can_execute_operation rejects when unlock has expired."""
+        now = datetime.now(timezone.utc)
+        past = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        context = PermissionContext(
+            approved_by="scott",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=past,  # Expired
+            task_scope="task-1",
+            last_permission_change=now,
+        )
+        # Operation cannot execute when unlock has expired
+        assert not context.can_execute_operation(OperationScope.BRANCH_MOVE, "task-1")
 
 
 class TestRestartResteerFinding:
@@ -491,7 +662,7 @@ class TestPrimeAutonomyInput:
             approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
             escalation_gate=False,
             escalation_reason=None,
-            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            branch_permission_state=PermissionState.LOCKED_BY_DEFAULT,
             approved_by_secondary=None,
             unlock_expiry=None,
             task_scope=None,
@@ -586,8 +757,9 @@ class TestSessionLifecycleStatePermissions:
 
     @pytest.fixture
     def unlocked_state(self):
-        """Create a session with unlocked permissions."""
+        """Create a session with unlocked permissions (temporary with expiry and task scope)."""
         now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
         permission_context = PermissionContext(
             approved_by="scott",
             approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
@@ -595,8 +767,8 @@ class TestSessionLifecycleStatePermissions:
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
             approved_by_secondary=None,
-            unlock_expiry=None,
-            task_scope=None,
+            unlock_expiry=future,
+            task_scope="task-1",
             last_permission_change=now,
         )
         return SessionLifecycleState(
@@ -611,7 +783,7 @@ class TestSessionLifecycleStatePermissions:
             status=SessionStatus.POLLING,
             worktree_path="/worktree/build-2",
             branch_name="main",
-            current_task_id=None,
+            current_task_id="task-1",
             last_queue_read_at=now,
             last_queue_write_at=now,
             last_prompt_sent_at=now,
@@ -646,3 +818,44 @@ class TestSessionLifecycleStatePermissions:
     def test_can_execute_operation_not_approved(self, locked_state):
         """Test can_execute_operation when not approved."""
         assert not locked_state.can_execute_operation(OperationScope.BRANCH_MOVE)
+
+    def test_can_execute_operation_rejects_out_of_scope_task(self):
+        """Test that can_execute_operation rejects when current_task_id doesn't match task_scope."""
+        now = datetime.now(timezone.utc)
+        future = datetime(2099, 1, 1, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="scott",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=future,
+            task_scope="task-1",
+            last_permission_change=now,
+        )
+        state = SessionLifecycleState(
+            session_id="session-1",
+            session_name="Build 2",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.POLLING,
+            worktree_path="/worktree/build-2",
+            branch_name="main",
+            current_task_id="task-2",  # Doesn't match task_scope
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=5000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.QUEUE_READ,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        # should not be able to execute when task_id doesn't match task_scope
+        assert not state.can_execute_operation(OperationScope.BRANCH_MOVE)
