@@ -206,9 +206,20 @@ def test_index_vulcan_harness_uses_backend_logic_snapshot():
 def test_index_prime_harness_uses_backend_runtime_snapshot():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Prime Runtime Logic" in doc
+    assert "Runtime logic" in doc
+    assert "Prime backend source" in doc
+    assert "Runtime truth map" in doc
+    assert "Typed interaction request" in doc
+    assert "Decision and owner logic" in doc
+    assert "No drift audit logic" in doc
+    assert "Backend context logic" in doc
     assert "Aegis risk logic" in doc
-    assert "Interaction request" in doc
-    assert "No drift audit" in doc
+    assert "Backend source refs" in doc
+    assert "Proof and invalidation logic" in doc
+    assert "Visible-to-Scott declaration" in doc
+    assert "Execution blockers" in doc
+    assert "demoted gates" in doc
+    assert "visibleToScott" in doc
     assert "data-prime-logic" in doc
     assert "bridgeUrl('prime-logic')" in doc
     assert "renderPrimeDecisionSnapshot" in doc

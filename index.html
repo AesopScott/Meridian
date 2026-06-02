@@ -1579,6 +1579,55 @@ body {
   box-shadow: 0 0 5px rgba(var(--session-electric), 0.6);
 }
 
+.prime-logic-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.prime-logic-cell {
+  min-width: 0;
+  border: 1px solid rgba(var(--session-electric), 0.24);
+  background: rgba(0, 0, 0, 0.36);
+  padding: 7px;
+}
+
+.prime-logic-label {
+  color: rgba(var(--session-electric-soft), 0.52);
+  font-size: 0.78em;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prime-logic-value {
+  margin-top: 4px;
+  color: rgba(var(--session-electric-soft), 0.94);
+  overflow-wrap: anywhere;
+}
+
+.prime-logic-proof {
+  display: grid;
+  gap: 7px;
+}
+
+.prime-logic-proof-item {
+  border-left: 2px solid rgba(var(--session-electric), 0.6);
+  padding-left: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.prime-logic-proof-question {
+  color: rgba(var(--session-electric-soft), 0.94);
+}
+
+.prime-logic-proof-answer,
+.prime-logic-proof-invalidates {
+  color: rgba(var(--session-electric-soft), 0.68);
+  overflow-wrap: anywhere;
+}
+
 .session-output-entry {
   margin: 0 0 12px;
 }
@@ -3921,6 +3970,21 @@ body {
   };
   const relaySummary = (value) => `<div class="relay-models-summary">${escapeHtml(value || '')}</div>`;
   const relayText = (value) => String(value || 'none').replaceAll('_', ' ').replaceAll('-', ' ');
+  const relayJoin = (items) => (Array.isArray(items) ? items : []).map(relayText).join(' | ') || 'none';
+  const primeBool = (value) => (value ? 'yes' : 'no');
+  const primeLogicStrip = (items) => `<div class="prime-logic-strip">${items.map(([label, value]) => `
+    <div class="prime-logic-cell">
+      <div class="prime-logic-label">${escapeHtml(label)}</div>
+      <div class="prime-logic-value">${escapeHtml(value)}</div>
+    </div>
+  `).join('')}</div>`;
+  const primeProofList = (proof) => `<div class="prime-logic-proof">${proof.map((item) => `
+    <div class="prime-logic-proof-item">
+      <div class="prime-logic-proof-question">${escapeHtml(item.question || 'proof question unavailable')}</div>
+      <div class="prime-logic-proof-answer">${escapeHtml(item.answer || 'proof answer unavailable')}</div>
+      <div class="prime-logic-proof-invalidates">${escapeHtml(`Invalidates when: ${item.invalidatesWhen || 'unknown'}`)}</div>
+    </div>
+  `).join('')}</div>`;
   const relayUnique = (items) => Array.from(new Set(items.filter(Boolean)));
   const relayTierLabel = (tier) => `Tier ${tier.tier}: ${relayText(tier.mode)}`;
   const relayTierSummary = (tier) => [
@@ -4032,39 +4096,51 @@ body {
     const aegisRisk = context.aegisRisk || {};
     const proof = Array.isArray(decision.proof) ? decision.proof : [];
     const refs = Array.isArray(context.sourceRefs) ? context.sourceRefs : [];
+    const blockers = Array.isArray(decision.blockers) ? decision.blockers : [];
+    const visibleFields = Array.isArray(decision.visibleToScott) ? decision.visibleToScott : [];
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
     return [
-      relaySection('Prime logic source', relayGrid([
+      relaySection('Prime backend source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
         ['harness', snapshot.harness || 'Prime'],
+        ['service', snapshot.service || 'unknown'],
       ]), true),
-      relaySection('Prime summary', relaySummary(snapshot.summary || ''), true),
-      relaySection('Runtime decision', relayGrid([
+      relaySection('Runtime truth map', [
+        relaySummary(snapshot.summary || 'Prime runtime summary unavailable.'),
+        primeLogicStrip([
+          ['status', relayText(decision.status)],
+          ['owner', decision.ownerHarness || 'unknown'],
+          ['executable', primeBool(decision.executable)],
+        ]),
+      ].join(''), true),
+      relaySection('Typed interaction request', relayGrid([
+        ['request id', request.requestId || 'unknown'],
+        ['intent', relayText(request.intent)],
+        ['action', relayText(request.action)],
+        ['why', request.why || 'unknown'],
+        ['project', request.projectId || 'unknown'],
+        ['risk', relayText(request.risk)],
+        ['requires approval', primeBool(request.requiresApproval)],
+        ['requires clarification', primeBool(request.requiresClarification)],
+        ['visible prompt ref', request.visiblePromptRef || 'none'],
+      ]), true),
+      relaySection('Decision and owner logic', relayGrid([
         ['decision id', decision.decisionId || 'unknown'],
         ['status', relayText(decision.status)],
         ['owner harness', decision.ownerHarness || 'unknown'],
         ['action', relayText(decision.action)],
         ['risk', relayText(decision.risk)],
-        ['executable', decision.executable ? 'yes' : 'no'],
+        ['executable', primeBool(decision.executable)],
         ['why', decision.why || 'unknown'],
       ]), true),
-      relaySection('Interaction request', relayGrid([
-        ['request id', request.requestId || 'unknown'],
-        ['intent', relayText(request.intent)],
-        ['action', relayText(request.action)],
-        ['project', request.projectId || 'unknown'],
-        ['requires approval', request.requiresApproval ? 'yes' : 'no'],
-        ['requires clarification', request.requiresClarification ? 'yes' : 'no'],
-        ['visible prompt ref', request.visiblePromptRef || 'none'],
-      ]), true),
-      relaySection('No drift audit', relayGrid([
+      relaySection('No drift audit logic', relayGrid([
         ['status', relayText(driftAudit.status)],
-        ['clean', driftAudit.clean ? 'yes' : 'no'],
-        ['checks', (driftAudit.checks || []).map(relayText).join(' | ') || 'none'],
-        ['failures', (driftAudit.failures || []).map(relayText).join(' | ') || 'none'],
+        ['clean', primeBool(driftAudit.clean)],
+        ['checks', relayJoin(driftAudit.checks)],
+        ['failures', relayJoin(driftAudit.failures)],
       ]), true),
-      relaySection('Backend context', relayGrid([
+      relaySection('Backend context logic', relayGrid([
         ['project', context.projectId || 'unknown'],
         ['project logic', context.projectSummary || 'unknown'],
         ['session logic', context.sessionState || 'unknown'],
@@ -4075,20 +4151,21 @@ body {
         ['source', aegisRisk.source || 'unavailable'],
         ['aggregate action', relayText(aegisRisk.aggregateAction)],
         ['highest severity', relayText(aegisRisk.highestSeverity)],
-        ['blocking', aegisRisk.blocking ? 'yes' : 'no'],
-        ['requires approval', aegisRisk.requiresApproval ? 'yes' : 'no'],
-        ['blocked gates', (aegisRisk.blockedGates || []).map(relayText).join(' | ') || 'none'],
-        ['evidence required', (aegisRisk.evidenceRequired || []).map(relayText).join(' | ') || 'none'],
+        ['blocking', primeBool(aegisRisk.blocking)],
+        ['requires approval', primeBool(aegisRisk.requiresApproval)],
+        ['blocked gates', relayJoin(aegisRisk.blockedGates)],
+        ['demoted gates', relayJoin(aegisRisk.demotedGates)],
+        ['evidence required', relayJoin(aegisRisk.evidenceRequired)],
+        ['approvals present', relayJoin(aegisRisk.approvalsPresent)],
+        ['waivers present', relayJoin(aegisRisk.waiversPresent)],
       ]), true),
-      relaySection('Source refs', relayGrid(refs.map((source) => [
+      relaySection('Backend source refs', relayGrid(refs.map((source) => [
         source.harness || 'unknown',
         `${source.source || 'unknown'} | ${source.summary || ''}`,
       ])), true),
-      relaySection('Proof logic', relayGrid(proof.map((item) => [
-        item.question || 'proof',
-        `${item.answer || 'unknown'} Invalidates when: ${item.invalidatesWhen || 'unknown'}`,
-      ])), true),
-      relaySection('Blockers', decision.blockers?.length ? relayList(decision.blockers) : relaySummary('none'), false),
+      relaySection('Proof and invalidation logic', proof.length ? primeProofList(proof) : relaySummary('proof packet unavailable'), true),
+      relaySection('Visible-to-Scott declaration', visibleFields.length ? relayList(visibleFields) : relaySummary('visible field declaration unavailable'), true),
+      relaySection('Execution blockers', blockers.length ? relayList(blockers) : relaySummary('none'), false),
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };
@@ -4337,7 +4414,7 @@ body {
         <div class="relay-models-surface" role="region" aria-label="Prime runtime logic">
           <div class="relay-models-header">
             <div class="relay-models-title">Prime Runtime Logic</div>
-            <div class="relay-models-status">Backend decision</div>
+            <div class="relay-models-status">Runtime logic</div>
           </div>
           <div class="relay-models-body">
             <div data-prime-logic>${relaySection('Prime logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>

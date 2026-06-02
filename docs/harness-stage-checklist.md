@@ -16,7 +16,7 @@
 | V2 Backend | The backend requirement is represented in the V2 build plan/tracker. | `docs/v2-progress-tracker.md` has the build item and dependency status. |
 | Core Implementation | The harness has typed runtime/domain code. | Runtime module exists with unit tests and no UI-only logic. |
 | Prime Integration | Prime can consume the harness state or decision. | Prime packet/source refs/proof path include the harness without hidden interpretation. |
-| Runtime Logic UI | Clicking the harness shows `[Harness] Runtime Logic`. | Right-panel UI renders backend-sourced logic through a bridge/snapshot path. |
+| Runtime Logic UI | Clicking the harness shows `[Harness] Runtime Logic`. | Right-panel UI renders complete backend-sourced logic through a bridge/snapshot path; a titled shell or partial snapshot is not complete. |
 | Proofs / Review | The harness has proof gates, tests, and review status. | Tests pass; review state is explicit as cleared, awaiting review, or not started. |
 | Operations | The harness can safely execute or mutate live state. | Live actions are gated, auditable, and recoverable. |
 
@@ -24,7 +24,7 @@
 
 | Harness | Contract / Baseline | V2 Backend | Core Implementation | Prime Integration | Runtime Logic UI | Proofs / Review | Operations | Next Build |
 |---|---|---|---|---|---|---|---|---|
-| Prime | built | built-awaiting-review | built-awaiting-review | built-awaiting-review | wired | awaiting review | not live execution | Review Prime runtime contract; then bind live Compass/Vulcan/Relay inputs. |
+| Prime | built | built-awaiting-review | built-awaiting-review | built-awaiting-review | built-awaiting-review | awaiting review | not live execution | Review Prime Runtime Logic UI and runtime contract before binding live Compass/Vulcan/Relay inputs. |
 | Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening. |
 | Compass | baseline | needs build | snapshot only | partial via Prime source refs | wired | not reviewed as runtime | no writes | Project definition, bounds/scope, difference, cross-project handoff runtime. |
 | Vulcan / Session Lifecycle | baseline | needs build | partial | partial via Prime source refs | wired | partial | no live command execution | Live session state evidence, command-plan proof, permissions, close/archive write-through. |

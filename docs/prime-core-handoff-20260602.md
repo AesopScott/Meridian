@@ -220,7 +220,7 @@ Audit output:
 - `failures`
 - `clean`
 
-Prime Runtime Logic UI renders this as `No drift audit`.
+Prime Runtime Logic UI renders this as `No drift audit logic`.
 
 ### Prime Runtime Logic UI
 
@@ -231,17 +231,26 @@ The panel renders backend data from:
 - `/bridge/prime-logic`
 - `meridian_core.prime_runtime`
 
+Current status:
+
+- Prime Runtime Logic UI is built-awaiting-review.
+- It is not review-cleared.
+- Do not bind live execution or live Compass/Vulcan/Relay inputs until review acceptance.
+
 Visible sections currently include:
 
-- Runtime decision
-- Interaction request
-- No drift audit
-- Backend context
+- Prime backend source
+- Runtime truth map
+- Typed interaction request
+- Decision and owner logic
+- No drift audit logic
+- Backend context logic
 - Aegis risk logic
-- Source refs
-- Proof logic
-- Blockers
-- backend capability sections
+- Backend source refs
+- Proof and invalidation logic
+- Visible-to-Scott declaration
+- Execution blockers
+- Backend capability sections
 
 ### Harness Runtime Logic Naming
 
@@ -295,7 +304,7 @@ When `docs/harness-stage-checklist.md` changes, update `docs/harness-stage-check
 
 | Harness | Contract / Baseline | V2 Backend | Core Implementation | Prime Integration | Runtime Logic UI | Proofs / Review | Operations | Next Build |
 |---|---|---|---|---|---|---|---|---|
-| Prime | built | built-awaiting-review | built-awaiting-review | built-awaiting-review | wired | awaiting review | not live execution | Review Prime runtime contract; then bind live Compass/Vulcan/Relay inputs. |
+| Prime | built | built-awaiting-review | built-awaiting-review | built-awaiting-review | built-awaiting-review | awaiting review | not live execution | Review Prime Runtime Logic UI and runtime contract before binding live Compass/Vulcan/Relay inputs. |
 | Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening. |
 | Compass | baseline | needs build | snapshot only | partial via Prime source refs | wired | not reviewed as runtime | no writes | Project definition, bounds/scope, difference, cross-project handoff runtime. |
 | Vulcan / Session Lifecycle | baseline | needs build | partial | partial via Prime source refs | wired | partial | no live command execution | Live session state evidence, command-plan proof, permissions, close/archive write-through. |
@@ -329,9 +338,9 @@ From `docs/v2-progress-tracker.md`:
 - Federation Harness: 1 clear, total 1.
 - Total V2: 13 clear, 1 awaiting review, 9 baseline, 21 needs build, total 44.
 
-Important mismatch to fix later:
+Important correction:
 
-- `docs/v2-progress-tracker.md` currently says `Built But Awaiting Review - None currently`, but `In Progress / Stabilizing` lists Prime runtime as awaiting review. Do not treat Prime runtime as review-cleared until explicitly reviewed.
+- Prime Runtime Logic UI was previously overstated as wired before its frontend surface was complete. It now has a fuller frontend runtime logic renderer and is built-awaiting-review, not review-cleared.
 
 ## Current Priority
 
@@ -473,7 +482,7 @@ tests/test_prime_runtime.py
 
 3. If Scott asks to continue Prime:
 
-Recommended next build is **Prime review acceptance** or **live Compass/Vulcan/Relay inputs into Prime runtime**, depending on whether review gating is available.
+Recommended next step is **Prime Runtime Logic UI review acceptance** before live Compass/Vulcan/Relay inputs are bound.
 
 4. If Scott asks to build next harness:
 
@@ -481,7 +490,7 @@ Recommended next backend build is **Compass backend runtime** because Prime curr
 
 ## Open Questions / Known Gaps
 
-- Prime runtime is built but awaiting review.
+- Prime backend runtime packet and Prime Runtime Logic UI are built-awaiting-review, not review-cleared.
 - Compass Runtime Logic UI is wired, but Compass core runtime is not built.
 - Vulcan Runtime Logic UI is wired, but live session lifecycle state/command execution is not fully built.
 - Relay Runtime Logic UI is wired, but provider metadata, DeepSeek primary route, prompt payload visibility, and Auto routing are not complete.

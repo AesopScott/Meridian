@@ -64,7 +64,7 @@
 
 ## Built But Awaiting Review
 
-- None currently.
+- [ ] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-Scott declarations, execution blockers, and backend capability sections. Built awaiting review; not review-cleared.
 
 ## Contract Baselines Complete (Not Runtime Implementation)
 
@@ -97,7 +97,7 @@
 
 ## In Progress / Stabilizing
 
-- [ ] **Prime + Runtime Decision Contract:** `meridian_core/prime_runtime.py` backend packet assembles Compass, Vulcan, Relay, and Aegis source refs into a visible Prime decision with owner resolution, executability gates, proof packet, `/bridge/prime-logic`, and Prime harness rendering. Built in `9fac6846`, `7c7b3103`, `13c8b7af`, `f5b67f66`, `aa16e5e5`, and `723a5898`; awaiting review.
+- None currently.
 
 ## V3 Scope Note
 

@@ -219,7 +219,7 @@
 
     <div class="grid" aria-label="Harness summary">
       <div class="metric"><strong>18</strong><span>tracked harnesses</span></div>
-      <div class="metric"><strong>4</strong><span>wired runtime logic UIs</span></div>
+      <div class="metric"><strong>1</strong><span>Prime UI awaiting review</span></div>
       <div class="metric"><strong>3</strong><span>review-cleared core harnesses</span></div>
       <div class="metric"><strong>1</strong><span>Prime runtime awaiting review</span></div>
       <div class="metric"><strong>0</strong><span>live mutation-ready harnesses</span></div>
@@ -237,7 +237,7 @@
             <tr><td>V2 Backend</td><td>The backend requirement is represented in the V2 build plan/tracker.</td><td><code>docs/v2-progress-tracker.md</code> has the build item and dependency status.</td></tr>
             <tr><td>Core Implementation</td><td>The harness has typed runtime/domain code.</td><td>Runtime module exists with unit tests and no UI-only logic.</td></tr>
             <tr><td>Prime Integration</td><td>Prime can consume the harness state or decision.</td><td>Prime packet/source refs/proof path include the harness without hidden interpretation.</td></tr>
-            <tr><td>Runtime Logic UI</td><td>Clicking the harness shows <code>[Harness] Runtime Logic</code>.</td><td>Right-panel UI renders backend-sourced logic through a bridge/snapshot path.</td></tr>
+            <tr><td>Runtime Logic UI</td><td>Clicking the harness shows <code>[Harness] Runtime Logic</code>.</td><td>Right-panel UI renders complete backend-sourced logic through a bridge/snapshot path; a titled shell or partial snapshot is not complete.</td></tr>
             <tr><td>Proofs / Review</td><td>The harness has proof gates, tests, and review status.</td><td>Tests pass; review state is explicit as cleared, awaiting review, or not started.</td></tr>
             <tr><td>Operations</td><td>The harness can safely execute or mutate live state.</td><td>Live actions are gated, auditable, and recoverable.</td></tr>
           </tbody>
@@ -263,7 +263,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>Prime</td><td><span class="status built">built</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status wired">wired</span></td><td><span class="status awaiting">awaiting review</span></td><td><span class="status not-live">not live execution</span></td><td>Review Prime runtime contract; then bind live Compass/Vulcan/Relay inputs.</td></tr>
+            <tr><td>Prime</td><td><span class="status built">built</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">built-awaiting-review</span></td><td><span class="status awaiting">awaiting review</span></td><td><span class="status not-live">not live execution</span></td><td>Review Prime Runtime Logic UI and runtime contract before binding live Compass/Vulcan/Relay inputs.</td></tr>
             <tr><td>Relay / Model</td><td><span class="status built">built</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">Auto disabled</span></td><td>Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening.</td></tr>
             <tr><td>Compass</td><td><span class="status baseline">baseline</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">snapshot only</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status needs">not reviewed as runtime</span></td><td><span class="status not-live">no writes</span></td><td>Project definition, bounds/scope, difference, cross-project handoff runtime.</td></tr>
             <tr><td>Vulcan / Session Lifecycle</td><td><span class="status baseline">baseline</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">no live command execution</span></td><td>Live session state evidence, command-plan proof, permissions, close/archive write-through.</td></tr>
