@@ -8,6 +8,33 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 4 docs-only Relay/Bifrost visible prompt payload meter checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 4 prompt payload meter checklist commits `aef87e82` and `d586b148`. Verify docs-only scope, checklist covers `PromptPayloadSnapshot`/budget/growth flow through Relay dispatch and Bifrost cockpit visibility, display labels like under-1k and 12.4k, budget percent, growth delta, Q-mode prompt-drag degradation, provider/model route continuity, Aegis/Relay blockers, deterministic tests, escaping, and explicit exclusions for raw prompt/provider response leakage, live provider calls, credentials/account probing, autonomous routing, process/session control, FileMap edits, shared main writes, pushes, and Polaris.
+
+Proof: text/shape inspection plus `git diff --check aef87e82^..d586b148`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 09:05 -06:00:
+
+- Build 4 Relay/Bifrost prompt payload meter checklist passed. Commits `aef87e82` and `d586b148` changed only `docs/relay-bifrost-prompt-payload-meter-checklist.md` and `docs/live-build-4.md`.
+- The checklist is docs-only and covers `PromptPayloadSnapshot` identity, budget, growth, measurement, telemetry, and route-continuity fields flowing through Relay dispatch evidence into Bifrost cockpit visibility.
+- Meter label requirements include structured-token-only labels, `under-1k`, one-decimal labels such as `12.4k`, `0`, `unknown`, `over budget`, budget percent labels, and growth delta labels with deterministic rounding.
+- Queue/Q-mode prompt-drag degradation, DeepSeek direct-route flatness expectations, provider/model route continuity, Aegis/Relay fail-closed blockers, successful-output-not-clearing-blockers, Bifrost display expectations, escaping, deterministic tests, no-leak tests, and no-live-call tests are explicitly covered.
+- Scope check found no runtime/UI/FileMap edits, raw prompt/provider response leakage allowance, live provider calls, credentials/account probing, autonomous routing, process/session control, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- Text/shape inspection passed for the checklist and Ready marker.
+- `git diff --check aef87e82^..d586b148` passed.
+
+Completion: Build 4 Relay/Bifrost visible prompt payload meter checklist is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 4 provider-result validation Aegis advisory.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
