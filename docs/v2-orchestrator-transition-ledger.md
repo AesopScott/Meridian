@@ -358,6 +358,13 @@ Coordinator review clearance and fresh task promotion - 2026-06-02:
 - Promoted fresh executable build tasks: Build 1 PromptPacket proof metadata binding in Relay dispatch envelopes; Build 2 Prime-facing advisory consumption of SessionCommandPlan audit evidence; Build 3 FileMap audit for the current review-clearance/routing checkpoint; Build 4 Aegis PromptPacket proof policy checklist; Build 5 Bifrost PromptPacket proof metadata sample rendering.
 - Promoted review queue Active Now blocks: Reviews A polls/reviews the next current-main Ready marker from Build 1/2/3; Reviews B polls/reviews the next current-main Ready marker from Build 4/5. These poll tasks must not commit read-check-only progress.
 
+Coordinator Build 2/3 movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Build 2 and Build 3 worktrees clean before movement. Build 1 and Build 5 were dirty/in-progress and were not moved; Build 4 had no local completion commit yet.
+- Approved and completed path-limited movement of Build 2 Prime audit-evidence advisory commits `1aef9268` and `b61ce99f` onto shared main as `dcdce3cd` and `fff4e716`, limited to `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, and `docs/live-build-2.md`.
+- Approved and completed path-limited movement of Build 3 PromptPacket FileMap audit commits `46494c18` and `24499a79` onto shared main as `1072ae3c` and `f6e982de`, limited to `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_prime_autonomy.py tests/test_session_lifecycle.py -q` passed 148/148; `python -m pytest tests/test_filemap.py -q` passed 46/46; `git diff --check dcdce3cd^..HEAD` passed.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
