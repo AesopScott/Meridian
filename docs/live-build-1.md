@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind PromptPacket proof metadata into Relay decision records after Reviews A cleared envelope metadata.
 
@@ -17,6 +17,15 @@ Task: carry packet proof metadata refs/status from the dispatch envelope into `R
 Tests: `python -m pytest tests/test_relay_executor.py -q`.
 
 Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from this decision-record packet proof slice before further Relay/Model Harness work.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-01 22:40 -06:00.
+- Commit: `655c196a` (`feat: Bind PromptPacket proof metadata to Relay decisions`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (172 passed).
+- Concrete evidence: Relay decision records now carry PromptPacket proof metadata directly, including packet hash, prompt budget ref, source-lineage compliance, packet proof metadata ref, packet proof blocked tags, packet proof requirements, and Aegis evidence ids propagated from dispatch envelopes/proof trails without exposing raw prompt text or changing the model payload boundary.
+- Next Candidate: bind any review findings from this decision-record packet proof slice before further Relay/Model Harness work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
