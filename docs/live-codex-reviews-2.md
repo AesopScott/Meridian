@@ -8,7 +8,44 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
+Goal: review the next current-main Ready marker from Build 4 or Build 5 after their newly released tasks complete.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Allowed review files by lane:
+
+- Build 4 checklist review: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md`.
+- Build 5 stale-session recovery review: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md`.
+
+Task: poll `docs/live-build-4.md`, `docs/live-build-5.md`, and current `origin/main` for the next Ready for Codex Review marker. Prioritize whichever lane first provides a current-main commit for its released Active Now task. For Build 4, verify the Relay routing implementation checklist faithfully converts the reviewed logic into actionable build/test gates without authorizing runtime/model/account/process/UI/branch/Polaris work. For Build 5, verify stale-session recovery action sample rendering remains deterministic render/view-model only, blocks dead-target prompt routing implications, and passes the Bifrost cockpit tests.
+
+Proof commands:
+
+- Build 4: docs/architecture review; no pytest required unless runtime claims require proof.
+- Build 5: `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: if clean, mark the reviewed slice passed and promote the next candidate for that lane; if findings exist, route the smallest focused repair back to the owning build lane ahead of normal work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 4 account-first wrong-scope fallback repair.
+
+Status: passed by Codex Reviews B on 2026-06-01 19:23 -06:00. Current `HEAD` and `origin/main` contain Build 4 repair commit `fe0b0138`, and the prior wrong-scope fallback contradiction is closed.
+
+Review result:
+
+- `git merge-base --is-ancestor fe0b0138 HEAD` and `git merge-base --is-ancestor fe0b0138 origin/main` passed.
+- `git show --stat --oneline --name-only fe0b0138` shows the repair commit only changed `docs/relay-heartbeat-model-routing-logic.md`.
+- The account-first decision tree now explicitly treats wrong project, wrong role, and wrong tools as a Step 2 special case that must start a corrected session or block, not proceed to direct API or aggregator.
+- The fallback table keeps wrong project/role/tool paths on corrected-session/block behavior, while Tier 3+ missing/expired account-session fallback remains distinct: start/re-auth a controllable session, use direct API only when proof/audit is explicit and credentials are valid, or block.
+- `deepseek-chat` remains the exact DeepSeek direct API dispatch id; `v4-pro` and `v4-flash` remain metadata/variant labels only.
+- Scope check found no runtime code, model calls, account probing, process control, UI work, branch movement, or Polaris dependency in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 4 account-first wrong-scope fallback repair is review-cleared. Build 4 is released to the Relay routing implementation checklist task in `docs/live-build-4.md`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
@@ -27,6 +64,24 @@ Completion: if clean, mark passed, close the prior wrong-scope fallback finding,
 ## Coordinator Note - Current Finding
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 5 stale-target guard sample rendering.
+
+Status: passed by Codex Reviews B on 2026-06-01 19:23 -06:00. Current `HEAD` and `origin/main` contain Build 5 commit `31a92c8c`, and the stale-target guard sample rendering is review-cleared.
+
+Review result:
+
+- `git merge-base --is-ancestor 31a92c8c HEAD` passed in the review worktree.
+- `git show --stat --oneline --name-only 31a92c8c` shows the reviewed commit changed `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, and `tests/test_bifrost_cockpit.py`.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 178 tests.
+- Tests cover exclusion of blocked/done sessions from selectable options, selected routing-target state, stale guard display for closed/blocked sessions, stale session id metadata, and no "Next prompt target" implication for stale sessions.
+- Scope check found deterministic render/view-model work only: no session spawning, live process inspection, model calls, `index.html` edits, Polaris dependency, branch movement, or Build 4 Relay routing changes.
+
+Finding: none.
+
+Completion: Build 5 stale-target guard sample rendering is review-cleared. Build 5 is released to the stale-session recovery action sample rendering task in `docs/live-build-5.md`.
 
 ## Coordinator Override - Completed / Finding Routed
 

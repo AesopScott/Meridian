@@ -4,17 +4,33 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Hold - Review Gate Active
+## Coordinator Override - Active Now
 
-Status: Build 5 is not idle; it is blocked on Codex Reviews B for current-main commit `31a92c8c`.
+Goal: add stale-session recovery action sample rendering after stale-target guard cleared review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
 
-Required first command while polling: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
 
-Current blocker: Reviews B should review Build 5 stale-target guard sample rendering after the current Build 4 review clears. Do not start stale-session recovery action rendering until the stale-target guard passes review or Reviews B routes a focused finding.
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
 
-Next Candidate when the review gate clears: add stale-session recovery action sample rendering after stale-target guard clears review.
+Required sources: `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-codex-reviews-2.md`, and `docs/v2-progress-tracker.md`.
+
+Task: add deterministic sample rendering/tests for a stale-session recovery action in User Session mode. When the selected target is stale, closed, blocked, missing, or otherwise not routable, the User panel should offer a clear recovery-state sample such as reselect session, ask Prime to reopen/recover, or return to Sessions dropdown, while still not implying the next prompt will route to a dead target. Keep this view-model/render-only. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, add live process control, move branches, or alter Relay routing docs.
+
+Tests:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from stale-session recovery action rendering before unrelated Bifrost work.
+
+## Next Candidate Task
+
+Goal: bind any Codex review findings from stale-session recovery action rendering.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: if Codex Reviews B routes a finding from the stale-session recovery action rendering review, repair that finding before taking unrelated Bifrost work. If Reviews B passes the slice with no findings, Prime may replace this candidate with the next Bifrost Harness item from `docs/v2-progress-tracker.md`.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 

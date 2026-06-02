@@ -8,17 +8,31 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Hold - Review Gate Active
+## Coordinator Override - Active Now
 
-Status: Build 4 is not idle; it is blocked on Codex Reviews B for current-main commit `fe0b0138`.
+Goal: convert the deepened Relay harness model-selection logic into an implementation checklist.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
 
-Required first command while polling: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
 
-Current blocker: Reviews B has an executable Active Now task in `docs/live-codex-reviews-2.md` to review Build 4 commit `fe0b0138` for the account-first wrong-scope fallback repair. Do not convert the deepened Relay harness model-selection logic into an implementation checklist until Reviews B passes this repair or routes a focused finding.
+Allowed files only: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/live-build-4.md`.
 
-Next Candidate when the review gate clears: convert the deepened Relay harness model-selection logic into an implementation checklist.
+Required sources: `docs/relay-heartbeat-model-routing-logic.md`, `docs/relay-completeness-audit.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-codex-reviews-2.md`, and `docs/v2-progress-tracker.md`.
+
+Task: turn the reviewed Relay model/vendor/session routing logic into a build-ready implementation checklist. Include account-first routing, wrong-scope correction/blocking, API/direct/aggregator fallback gates, exact model id requirements, dual-model and external-review triggers, session lifecycle start/summarize/reset/transfer/archive decisions, cost/token/rate-limit/account exhaustion handling, block conditions, Bifrost visibility requirements, and tests/proofs needed before runtime routing is allowed. Keep this docs-only; do not edit runtime code, tests, FileMap, Bifrost UI, model/account/process code, branches, or Polaris.
+
+Tests: none required for docs-only; run text/shape inspection before marking complete.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, verification performed, and a concrete Next Candidate: bind any review findings from the implementation checklist before further Relay routing implementation.
+
+## Next Candidate Task
+
+Goal: bind any Codex review findings from the Relay routing implementation checklist.
+
+Allowed files only: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/live-build-4.md`.
+
+Task: if Codex Reviews B routes a finding from the checklist review, repair that finding before taking unrelated Relay/Aegis work. If Reviews B passes the slice with no findings, Prime may replace this candidate with the next Relay/Model Harness item from `docs/v2-progress-tracker.md`.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
