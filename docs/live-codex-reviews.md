@@ -10,6 +10,55 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 1 current-main Relay route metadata binding, then Build 3 current-main FileMap checkpoint audit if Build 1 passes.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:05 -06:00. Current `HEAD` and `origin/main` are `119807d0`. Build 1 commits `814bce76` and `d00f305c` are ancestors of current main; Build 3 commits `0b50287e` and `3fbd6c62` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check 814bce76^..d00f305c`
+
+Build 1 review result:
+
+- `git merge-base --is-ancestor 814bce76 HEAD` and `git merge-base --is-ancestor d00f305c HEAD` passed.
+- `git show --stat --oneline --name-only 814bce76 d00f305c` shows the implementation commit changed only `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 193 tests.
+- `git diff --check 814bce76^..d00f305c` passed.
+- Verified `ModelRouteMetadataBinding` and `bind_model_route_metadata()` carry provider-neutral capability tier, route tier, route cost/latency posture, context budget, prompt payload budget, trust state, external-review state, and optional prompt-drag metrics.
+- Verified registry-backed Relay execution attaches route metadata to lane results and decision records while preserving the payload-only model-call boundary; tests prove capability metadata does not enter model payloads.
+- Verified DeepSeek binding stays provider-neutral and preserves `deepseek-chat` as the dispatch identity while `deepseek-v4-pro` and `deepseek-v4-flash` remain metadata labels only.
+- Scoped side-effect scan found no new live model call, network path, credential handling, UI/Bifrost/FileMap edit, Polaris dependency, branch movement, or cross-worktree movement in the reviewed Build 1 slice.
+
+Build 1 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 0b50287e^..3fbd6c62`
+
+Build 3 review result:
+
+- `git merge-base --is-ancestor 0b50287e HEAD` and `git merge-base --is-ancestor 3fbd6c62 HEAD` passed.
+- `git show --stat --oneline --name-only 0b50287e 3fbd6c62` shows the FileMap checkpoint audit commit changed only `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 0b50287e^..3fbd6c62` passed.
+- Verified checkpoint queue/review/ledger coverage is aligned across runtime `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`, including the new `docs/live-build-3.md` entry and required-path coverage for existing `docs/live-codex-reviews.md`.
+- Verified `docs/live-build-3.md` records concrete audit evidence, files changed, proof command, commit marker, Ready marker, and next candidate; this is not read-check-only progress.
+- Scoped side-effect scan found no unrelated runtime behavior, UI/Bifrost/Polaris dependency, live process/model/account code, branch movement, or cross-worktree movement in the reviewed Build 3 slice.
+
+Build 3 finding: none.
+
+Completion: Build 1 Relay route metadata binding and Build 3 FileMap checkpoint audit are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 2 current-main Prime/Beacon advisory binding.
 
 Status: passed by Codex Reviews A on 2026-06-01 21:50 -06:00. Current `HEAD` and `origin/main` are `5677a3aa`, and relevant Build 2 commits `46c118f3` and `4096f0f5` are ancestors of current main.
