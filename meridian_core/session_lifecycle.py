@@ -140,6 +140,28 @@ class FindingType(Enum):
     RESTEER = "resteer"
 
 
+class WorkflowHeartbeatStatus(Enum):
+    """Display-safe workflow work-order heartbeat status."""
+
+    FRESH = "fresh"
+    WARNING = "warning"
+    STALE = "stale"
+    MISSING = "missing"
+
+
+class WorkflowResultKind(Enum):
+    """Display-safe workflow work-order result/error kind."""
+
+    PENDING = "pending"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+    TOOL_DENIED = "tool_denied"
+    GATE_REQUIRED = "gate_required"
+    RESTEER_REQUESTED = "resteer_requested"
+    INTERNAL_ERROR = "internal_error"
+
+
 @dataclass(frozen=True)
 class PermissionContext:
     """Approval scope and escalation state for session operations."""
@@ -272,6 +294,43 @@ class SessionPermissionSummary:
             ],
             "evidence": list(self.evidence),
             "can_accept_work": self.can_accept_work,
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
+class WorkflowWorkOrderRecoverySummary:
+    """Advisory heartbeat/result summary for bounded workflow recovery."""
+
+    work_order_id: str
+    target_session_id: str
+    heartbeat_age_seconds: Optional[int]
+    heartbeat_status: WorkflowHeartbeatStatus
+    result_kind: WorkflowResultKind
+    error_kind: Optional[str]
+    retry_resteer_recommendation: Optional[str]
+    recovery_action: SessionAction
+    permission_blockers: tuple[str, ...]
+    review_gate_blockers: tuple[str, ...]
+    stale_session_recovery_rationale: str
+    evidence: tuple[str, ...]
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize workflow recovery advice to display-safe metadata."""
+        return {
+            "work_order_id": self.work_order_id,
+            "target_session_id": self.target_session_id,
+            "heartbeat_age_seconds": self.heartbeat_age_seconds,
+            "heartbeat_status": self.heartbeat_status.value,
+            "result_kind": self.result_kind.value,
+            "error_kind": self.error_kind,
+            "retry_resteer_recommendation": self.retry_resteer_recommendation,
+            "recovery_action": self.recovery_action.value,
+            "permission_blockers": list(self.permission_blockers),
+            "review_gate_blockers": list(self.review_gate_blockers),
+            "stale_session_recovery_rationale": self.stale_session_recovery_rationale,
+            "evidence": list(self.evidence),
             "timestamp": self.timestamp.isoformat(),
         }
 
@@ -989,6 +1048,169 @@ def summarize_session_permission_states(
         )
         for session in sessions
     )
+
+
+def summarize_workflow_work_order_recovery(
+    session: SessionLifecycleState,
+    work_order_id: str,
+    heartbeat_emitted_at: Optional[datetime] = None,
+    result_kind: WorkflowResultKind = WorkflowResultKind.PENDING,
+    error_kind: Optional[str] = None,
+    retry_resteer_recommendation: Optional[str] = None,
+    heartbeat_stale_after_seconds: int = 300,
+    timestamp: Optional[datetime] = None,
+) -> WorkflowWorkOrderRecoverySummary:
+    """Summarize workflow work-order heartbeat/result state for recovery advice.
+
+    This is a pure advisory surface. It does not restart, resteer, archive, gate,
+    inspect, or mutate workflow or session runtime state.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+    heartbeat_age_seconds = _workflow_heartbeat_age_seconds(
+        heartbeat_emitted_at,
+        observed_at,
+    )
+    heartbeat_status = _workflow_heartbeat_status(
+        heartbeat_age_seconds,
+        heartbeat_stale_after_seconds,
+    )
+    permission_summary = summarize_session_permission_state(
+        session,
+        timestamp=observed_at,
+    )
+    permission_blockers = tuple(
+        blocker
+        for blocker in permission_summary.blockers
+        if blocker.startswith(
+            (
+                "permission.",
+                "approval.pending",
+            )
+        )
+    )
+    review_gate_blockers = permission_summary.review_gate_blockers
+    recovery_action = _workflow_recovery_action(
+        heartbeat_status,
+        result_kind,
+        permission_blockers,
+        review_gate_blockers,
+    )
+    rationale = _workflow_recovery_rationale(
+        heartbeat_status,
+        result_kind,
+        recovery_action,
+    )
+    evidence = [
+        f"work_order.id={work_order_id}",
+        f"target_session.id={session.session_id}",
+        f"heartbeat.status={heartbeat_status.value}",
+        "heartbeat.age_seconds="
+        + ("unknown" if heartbeat_age_seconds is None else str(heartbeat_age_seconds)),
+        f"result.kind={result_kind.value}",
+        f"recovery.action={recovery_action.value}",
+        f"recovery.rationale={rationale}",
+    ]
+    if error_kind is not None:
+        evidence.append(f"error.kind={error_kind}")
+    if retry_resteer_recommendation is not None:
+        evidence.append(
+            f"retry_resteer.recommendation={retry_resteer_recommendation}"
+        )
+    evidence.extend(f"blocker={blocker}" for blocker in permission_blockers)
+    evidence.extend(f"blocker={blocker}" for blocker in review_gate_blockers)
+
+    return WorkflowWorkOrderRecoverySummary(
+        work_order_id=work_order_id,
+        target_session_id=session.session_id,
+        heartbeat_age_seconds=heartbeat_age_seconds,
+        heartbeat_status=heartbeat_status,
+        result_kind=result_kind,
+        error_kind=error_kind,
+        retry_resteer_recommendation=retry_resteer_recommendation,
+        recovery_action=recovery_action,
+        permission_blockers=permission_blockers,
+        review_gate_blockers=review_gate_blockers,
+        stale_session_recovery_rationale=rationale,
+        evidence=tuple(evidence),
+        timestamp=observed_at,
+    )
+
+
+def _workflow_heartbeat_age_seconds(
+    heartbeat_emitted_at: Optional[datetime],
+    observed_at: datetime,
+) -> Optional[int]:
+    if heartbeat_emitted_at is None:
+        return None
+    return max(0, int((observed_at - _as_utc(heartbeat_emitted_at)).total_seconds()))
+
+
+def _workflow_heartbeat_status(
+    heartbeat_age_seconds: Optional[int],
+    heartbeat_stale_after_seconds: int,
+) -> WorkflowHeartbeatStatus:
+    if heartbeat_age_seconds is None:
+        return WorkflowHeartbeatStatus.MISSING
+    if heartbeat_age_seconds > heartbeat_stale_after_seconds:
+        return WorkflowHeartbeatStatus.STALE
+    if heartbeat_age_seconds >= int(heartbeat_stale_after_seconds * 0.8):
+        return WorkflowHeartbeatStatus.WARNING
+    return WorkflowHeartbeatStatus.FRESH
+
+
+def _workflow_recovery_action(
+    heartbeat_status: WorkflowHeartbeatStatus,
+    result_kind: WorkflowResultKind,
+    permission_blockers: tuple[str, ...],
+    review_gate_blockers: tuple[str, ...],
+) -> SessionAction:
+    if permission_blockers or review_gate_blockers:
+        return SessionAction.REQUEST_HUMAN_GATE
+    if result_kind == WorkflowResultKind.SUCCEEDED:
+        return SessionAction.ARCHIVE
+    if result_kind == WorkflowResultKind.RESTEER_REQUESTED:
+        return SessionAction.TRANSFER
+    if result_kind in (
+        WorkflowResultKind.GATE_REQUIRED,
+        WorkflowResultKind.TOOL_DENIED,
+        WorkflowResultKind.INTERNAL_ERROR,
+    ):
+        return SessionAction.REQUEST_HUMAN_GATE
+    if result_kind == WorkflowResultKind.TIMEOUT:
+        return SessionAction.START_NEW
+    if heartbeat_status in (
+        WorkflowHeartbeatStatus.MISSING,
+        WorkflowHeartbeatStatus.STALE,
+    ):
+        return SessionAction.START_NEW
+    return SessionAction.REUSE
+
+
+def _workflow_recovery_rationale(
+    heartbeat_status: WorkflowHeartbeatStatus,
+    result_kind: WorkflowResultKind,
+    recovery_action: SessionAction,
+) -> str:
+    if result_kind == WorkflowResultKind.SUCCEEDED:
+        return "Workflow completed; archive or record the typed result summary."
+    if result_kind == WorkflowResultKind.RESTEER_REQUESTED:
+        return "Workflow requested resteer; issue a new bounded work order from structured guidance."
+    if result_kind == WorkflowResultKind.TIMEOUT:
+        return "Workflow timed out; restart the same work order in a fresh bounded context."
+    if result_kind in (
+        WorkflowResultKind.GATE_REQUIRED,
+        WorkflowResultKind.TOOL_DENIED,
+        WorkflowResultKind.INTERNAL_ERROR,
+    ):
+        return "Workflow result needs human/Aegis gate review before recovery proceeds."
+    if heartbeat_status in (
+        WorkflowHeartbeatStatus.MISSING,
+        WorkflowHeartbeatStatus.STALE,
+    ):
+        return "Workflow heartbeat is stale or missing; restart the same work order in a fresh bounded context."
+    if recovery_action == SessionAction.REQUEST_HUMAN_GATE:
+        return "Workflow recovery is blocked by permission or review gates."
+    return "Workflow heartbeat is current; continue watching the bounded work order."
 
 
 def gather_prime_autonomy_input(

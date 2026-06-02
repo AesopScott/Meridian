@@ -12,6 +12,8 @@ from meridian_core.session_lifecycle import (
     HealthState,
     SessionAction,
     SessionActionReason,
+    WorkflowHeartbeatStatus,
+    WorkflowResultKind,
     PermissionState,
     OperationScope,
     FindingType,
@@ -19,6 +21,7 @@ from meridian_core.session_lifecycle import (
     RestartResteerFinding,
     PrimeAutonomyInput,
     SessionPermissionSummary,
+    WorkflowWorkOrderRecoverySummary,
     SessionLifecycleState,
     SessionCommandPlan,
     gather_prime_autonomy_input,
@@ -27,6 +30,7 @@ from meridian_core.session_lifecycle import (
     plan_command_from_session_action,
     summarize_session_permission_state,
     summarize_session_permission_states,
+    summarize_workflow_work_order_recovery,
 )
 
 
@@ -1550,6 +1554,161 @@ class TestSessionPermissionSummaryAggregation:
         assert advisory_input.to_dict()["permission_summaries"][0]["session_id"] == (
             summary_state.session_id
         )
+
+
+class TestWorkflowWorkOrderRecoverySummary:
+    """Tests for pure workflow work-order heartbeat/result recovery summaries."""
+
+    @pytest.fixture
+    def workflow_state(self):
+        """Create a healthy target session for workflow recovery summaries."""
+        now = datetime(2026, 6, 2, 8, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART, OperationScope.RESTEER]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="workflow-summary",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-workflow",
+            session_name="Build 2 Workflow",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.RUNNING,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-workflow-heartbeat-summary",
+            current_task_id="workflow-summary",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def test_stale_work_order_heartbeat_recommends_restart(self, workflow_state):
+        """Stale heartbeat recommends restarting the same bounded work order."""
+        observed_at = datetime(2026, 6, 2, 8, 10, tzinfo=timezone.utc)
+        summary = summarize_workflow_work_order_recovery(
+            workflow_state,
+            work_order_id="wo-stale",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+
+        assert isinstance(summary, WorkflowWorkOrderRecoverySummary)
+        assert summary.heartbeat_age_seconds == 600
+        assert summary.heartbeat_status == WorkflowHeartbeatStatus.STALE
+        assert summary.recovery_action == SessionAction.START_NEW
+        assert "heartbeat.status=stale" in summary.evidence
+        assert "restart the same work order" in summary.stale_session_recovery_rationale
+
+    def test_successful_work_order_result_recommends_archive(self, workflow_state):
+        """Successful typed result summaries can be archived/recorded."""
+        observed_at = datetime(2026, 6, 2, 8, 10, tzinfo=timezone.utc)
+        summary = summarize_workflow_work_order_recovery(
+            workflow_state,
+            work_order_id="wo-success",
+            heartbeat_emitted_at=observed_at - timedelta(seconds=10),
+            result_kind=WorkflowResultKind.SUCCEEDED,
+            timestamp=observed_at,
+        )
+
+        assert summary.heartbeat_status == WorkflowHeartbeatStatus.FRESH
+        assert summary.result_kind == WorkflowResultKind.SUCCEEDED
+        assert summary.recovery_action == SessionAction.ARCHIVE
+        assert "result.kind=succeeded" in summary.evidence
+
+    def test_resteer_requested_result_recommends_transfer(self, workflow_state):
+        """Resteer requests recommend a new bounded work order, not live steering."""
+        observed_at = datetime(2026, 6, 2, 8, 10, tzinfo=timezone.utc)
+        summary = summarize_workflow_work_order_recovery(
+            workflow_state,
+            work_order_id="wo-resteer",
+            heartbeat_emitted_at=observed_at - timedelta(seconds=30),
+            result_kind=WorkflowResultKind.RESTEER_REQUESTED,
+            error_kind="input_invalid",
+            retry_resteer_recommendation="narrow allowed_paths to docs/",
+            timestamp=observed_at,
+        )
+
+        assert summary.result_kind == WorkflowResultKind.RESTEER_REQUESTED
+        assert summary.recovery_action == SessionAction.TRANSFER
+        assert summary.retry_resteer_recommendation == "narrow allowed_paths to docs/"
+        assert "error.kind=input_invalid" in summary.evidence
+        assert "retry_resteer.recommendation=narrow allowed_paths to docs/" in (
+            summary.evidence
+        )
+
+    def test_permission_and_review_blockers_force_human_gate(self, workflow_state):
+        """Permission/review blockers are surfaced and prevent automatic recovery."""
+        observed_at = datetime(2026, 6, 2, 8, 10, tzinfo=timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(minutes=1),
+            task_scope="workflow-summary",
+            last_permission_change=observed_at,
+        )
+        gated_state = SessionLifecycleState(
+            **{
+                **workflow_state.__dict__,
+                "status": SessionStatus.REVIEW_GATED,
+                "review_cadence_state": ReviewCadenceState.REVIEW_GATED,
+                "permission_context": expired_context,
+            }
+        )
+
+        summary = summarize_workflow_work_order_recovery(
+            gated_state,
+            work_order_id="wo-gated",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            timestamp=observed_at,
+        )
+
+        assert summary.recovery_action == SessionAction.REQUEST_HUMAN_GATE
+        assert "permission.unlock_expired" in summary.permission_blockers
+        assert "review_gate.status=review_gated" in summary.review_gate_blockers
+        assert "blocker=permission.unlock_expired" in summary.evidence
+        assert "blocker=review_gate.status=review_gated" in summary.evidence
+
+    def test_missing_heartbeat_summary_serializes_display_safe_fields(self, workflow_state):
+        """Missing heartbeat summaries serialize without raw workflow context."""
+        observed_at = datetime(2026, 6, 2, 8, 10, tzinfo=timezone.utc)
+        summary = summarize_workflow_work_order_recovery(
+            workflow_state,
+            work_order_id="wo-missing",
+            result_kind=WorkflowResultKind.TIMEOUT,
+            error_kind="timeout",
+            timestamp=observed_at,
+        )
+
+        serialized = summary.to_dict()
+
+        assert serialized["work_order_id"] == "wo-missing"
+        assert serialized["target_session_id"] == workflow_state.session_id
+        assert serialized["heartbeat_age_seconds"] is None
+        assert serialized["heartbeat_status"] == "missing"
+        assert serialized["result_kind"] == "timeout"
+        assert serialized["recovery_action"] == "start_new"
+        assert serialized["timestamp"] == observed_at.isoformat()
 
 
 class TestPrimeAutonomyInput:
