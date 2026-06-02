@@ -3,10 +3,10 @@
 **Status:** V2 first-wave contract — domain slice not yet implemented; runtime in `meridian_core/echo.py` to be built by Build 1 (or other runtime lane) after this contract lands.
 **Owner harness:** Echo (durable memory).
 **Owner lane (doc):** Build 4 (Opus high-level thinking).
-**Audience:** Prime, Atlas, Relay, Aegis, Bifrost, Scott, future contributors.
+**Audience:** Prime, Atlas, Relay, Aegis, Bifrost, user, future contributors.
 **Purpose:** Define what Echo stores, how Prime queries it, how results rank, how it fails soft, and how it stays out of Relay's prompt budget without Aegis consent.
 
-Echo is Meridian's **durable memory harness**. It exists so Prime's effective memory is not bounded by any single model context window. Echo holds decisions, project facts, prior plans, gate outcomes, and Scott's standing instructions in a deterministic local store. Prime queries Echo through a typed surface; Atlas and Bifrost render Echo hits without ever feeding raw records into a model prompt.
+Echo is Meridian's **durable memory harness**. It exists so Prime's effective memory is not bounded by any single model context window. Echo holds decisions, project facts, prior plans, gate outcomes, and user's standing instructions in a deterministic local store. Prime queries Echo through a typed surface; Atlas and Bifrost render Echo hits without ever feeding raw records into a model prompt.
 
 This document is implementation-facing. It pins the domain shape, ranking rules, failure-soft behavior, prompt-drag guardrails, and the first runtime tests. It does not describe vector search, federation, or cross-Meridian sync — those belong to later horizons.
 
@@ -16,7 +16,7 @@ This document is implementation-facing. It pins the domain shape, ranking rules,
 
 Echo is not the chat history. Echo is not the worker log. Echo is not the FileMap. Echo is not the Review Console. Echo is not a vector database in the first slice.
 
-Echo only contains what Prime (or Scott via Prime) chose to remember. Writes are explicit. There is no background scraping of conversations, prompts, or queues.
+Echo only contains what Prime (or user via Prime) chose to remember. Writes are explicit. There is no background scraping of conversations, prompts, or queues.
 
 ---
 
@@ -27,7 +27,7 @@ Echo only contains what Prime (or Scott via Prime) chose to remember. Writes are
 | Store and retrieve memory records | Echo |
 | Decide what should be remembered | Prime |
 | Decide what enters a model prompt | Relay (with Aegis policy) |
-| Render Echo hits to Scott | Bifrost |
+| Render Echo hits to user | Bifrost |
 | Combine Echo hits with file/doc hits | Atlas (see `docs/atlas-retrieval-contract.md`) |
 | Gate destructive memory operations | Aegis + Review Console |
 
@@ -48,7 +48,7 @@ A single durable memory entry.
 - `kind` — `MemoryKind` enum: `DECISION`, `FACT`, `PLAN`, `GATE_OUTCOME`, `STANDING_INSTRUCTION`, `NOTE`.
 - `summary` — short human-readable string. This is what may be shown in Bifrost and what Atlas may surface in a hit excerpt.
 - `body` — longer text. Never injected raw into a prompt without Aegis consent (see prompt-drag guardrails).
-- `source` — `MemorySource` enum: `PRIME`, `SCOTT`, `REVIEW_CONSOLE`, `WORKER`, `IMPORT`.
+- `source` — `MemorySource` enum: `PRIME`, `USER`, `REVIEW_CONSOLE`, `WORKER`, `IMPORT`.
 - `created_at` — UTC timestamp.
 - `importance` — integer 1–5. Prime sets this when writing. Echo does not infer importance.
 - `pinned` — bool. Pinned records are always returned for a matching project query regardless of recency.
@@ -102,7 +102,7 @@ The scoring function must be a pure function of the record and query. Two calls 
 The first slice ships a single repository implementation backed by the local filesystem. There is no remote store, no shared mutable state across machines, no concurrent-writer protocol.
 
 - The repository exposes `add(record)`, `query(query) -> tuple[MemoryHit, ...]`, `get(record_id) -> MemoryRecord | None`, and `supersede(old_id, new_record) -> MemoryRecord`.
-- Storage layout, file format, and on-disk path are implementation details of the runtime lane and not pinned by this contract. They must be deterministic, replayable, and safe to commit to git if Scott chooses to.
+- Storage layout, file format, and on-disk path are implementation details of the runtime lane and not pinned by this contract. They must be deterministic, replayable, and safe to commit to git if user chooses to.
 - Reads are pure functions of on-disk state. Writes are append-only or supersede-only; there is no destructive in-place edit in the first slice.
 - The repository must work with zero records — an empty store returns empty results, never an exception.
 
@@ -135,7 +135,7 @@ The following rules are normative.
 
 1. **Echo never edits prompts.** Echo returns `MemoryHit` objects to its caller. The caller decides what, if anything, to render or inject.
 2. **Relay never injects `MemoryRecord.body` raw.** Only `summary` may flow into a model prompt, and only when Aegis's `CognitionPolicy` for the current action permits it.
-3. **`body` is for human inspection.** Bifrost may render `body` for Scott. Prime may quote portions of `body` only after summarizing through an Aegis-approved path.
+3. **`body` is for human inspection.** Bifrost may render `body` for user. Prime may quote portions of `body` only after summarizing through an Aegis-approved path.
 4. **Default injection is zero.** The default Relay behavior for any new action is "no Echo content in prompt." Inclusion is opt-in per route and per risk tier.
 5. **Hard cap on injected hits.** Even when injection is permitted, Relay must cap the number of Echo summaries per prompt (recommended ≤ 5 in first slice) and must record the count in `PromptPacket` telemetry.
 6. **Pinned ≠ injected.** Pinning controls retrieval ranking. It does not authorize prompt injection.
@@ -176,7 +176,7 @@ Build 1 (or whichever runtime lane picks up `meridian_core/echo.py`) should land
 - Querying with `project` matching no records returns an empty tuple.
 - Querying with an unknown project returns an empty tuple (no exception).
 - Querying with `kinds=(DECISION,)` excludes records of other kinds.
-- Querying with `tags=("scott",)` excludes records missing the tag.
+- Querying with `tags=("user",)` excludes records missing the tag.
 - Querying with `since=T` excludes records older than `T` unless pinned.
 
 ### Ranking

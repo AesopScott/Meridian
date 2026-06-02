@@ -1,4 +1,4 @@
-﻿# V2 Package API Surface Note
+# V2 Package API Surface Note
 
 \\\Status:\\\ V2 first-wave package API policy — defines which domain objects should eventually be public \meridian_core\ root exports once their runtime slices are built and review-cleared.
 
@@ -28,7 +28,7 @@ Until then, they live as module-level imports. This protects the public API from
 - \MemoryQuery\ — typed query with project, kinds, tags, since, limit, include_superseded.
 - \MemoryHit\ — ranked result with record, score, reason.
 - \MemoryKind\ enum — DECISION, FACT, PLAN, GATE_OUTCOME, STANDING_INSTRUCTION, NOTE.
-- \MemorySource\ enum — PRIME, SCOTT, REVIEW_CONSOLE, WORKER, IMPORT.
+- \MemorySource\ enum — PRIME, USER, REVIEW_CONSOLE, WORKER, IMPORT.
 
 \\\Why public:\\\ Prime, Atlas, Bifrost, and Aegis all consume these objects. A stable, public typing is load-bearing for V2.
 
@@ -86,7 +86,7 @@ Until then, they live as module-level imports. This protects the public API from
 - \SessionLifecycleState\ — immutable snapshot of current session state with timestamps, branch/worktree info, heartbeat history, and permission context.
 - \SessionCommandPlan\ — typed command to a session (spawn, watch, steer, stop, transfer, archive, stale_recovery, restart_request).
 
-\\\Why public:\\\ Prime coordinates session lifecycle. Scott views session state in Bifrost.
+\\\Why public:\\\ Prime coordinates session lifecycle. user views session state in Bifrost.
 
 \\\Stability guarantee:\\\ Once Session Lifecycle is built, the command vocabulary and state enum should be frozen.
 

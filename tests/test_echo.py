@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from datetime import datetime, timezone
 from meridian_core.echo import (
     MemoryKind, MemorySource, MemoryRecord, MemoryQuery, MemoryHit, EchoRepository
@@ -42,7 +42,7 @@ class TestDomainShape:
 
     def test_memory_source_enum(self):
         assert MemorySource.PRIME.value == "prime"
-        assert MemorySource.SCOTT.value == "scott"
+        assert MemorySource.USER.value == "user"
         assert MemorySource.REVIEW_CONSOLE.value == "review_console"
         assert MemorySource.WORKER.value == "worker"
         assert MemorySource.IMPORT.value == "import"
@@ -109,7 +109,7 @@ class TestAddAndQuery:
         rec1 = MemoryRecord(
             record_id="rec1", project="meridian", kind=MemoryKind.DECISION,
             summary="Decision", body="...", source=MemorySource.PRIME,
-            created_at=created, importance=3, pinned=False, tags=("scott", "important"),
+            created_at=created, importance=3, pinned=False, tags=("user", "important"),
         )
         rec2 = MemoryRecord(
             record_id="rec2", project="meridian", kind=MemoryKind.FACT,
@@ -118,10 +118,10 @@ class TestAddAndQuery:
         )
         repo.add(rec1)
         repo.add(rec2)
-        query = MemoryQuery(project="meridian", tags=("scott",))
+        query = MemoryQuery(project="meridian", tags=("user",))
         hits = repo.query(query)
         assert len(hits) == 1
-        assert "scott" in hits[0].record.tags
+        assert "user" in hits[0].record.tags
 
     def test_query_since_excludes_old_unpinned(self, repo):
         old_created = datetime.fromisoformat("2026-05-30T12:00:00Z".replace('Z', '+00:00'))

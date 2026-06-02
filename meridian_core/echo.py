@@ -24,7 +24,7 @@ class MemoryKind(Enum):
 class MemorySource(Enum):
     """Origin of the memory record."""
     PRIME = "prime"
-    SCOTT = "scott"
+    USER = "user"
     REVIEW_CONSOLE = "review_console"
     WORKER = "worker"
     IMPORT = "import"
