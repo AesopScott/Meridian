@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage after the current review clearance and fresh PromptPacket/Prime/Bifrost task routing checkpoint.
 
@@ -21,6 +21,19 @@ Task: audit whether newly landed review provenance, the PromptPacket proof metad
 Tests: `python -m pytest tests/test_filemap.py -q`.
 
 Completion: mark Ready for Codex Review with commit hash if changed, files changed or no-op evidence, tests run, and Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Completion:
+
+- Build 3 audited current-main changed queue/review/Bifrost routing paths from prior FileMap completion `f33b3764..HEAD` and the explicitly named PromptPacket proof metadata checklist.
+- Registered the one missing existing artifact: `docs/relay-promptpacket-proof-metadata-implementation-checklist.md`.
+- Audit evidence: focused coverage check across 13 existing audit paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration. `docs/aegis-promptpacket-proof-policy-checklist.md` was inspected and does not exist yet, so it was not registered.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Commit: `46494c18`.
+- Queue marker: this completion update.
+- Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
