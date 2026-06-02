@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: create a docs-only Model Harness runtime validation checklist that turns the reviewed metadata/checklist work into a build-ready runtime gate.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/model-harness-runtime-validation-checklist.md`, `docs/live-build-4.md`.
+
+Required sources: `docs/model-harness-v2-contract.md`, `docs/model-harness-metadata-implementation-checklist.md`, `docs/deepseek-candidate-trust-metadata-implementation-checklist.md`, `docs/deepseek-provider-validation-gate.md`, Reviews B clearance evidence in `docs/live-codex-reviews-2.md`, `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, and `docs/v2-progress-tracker.md`.
+
+Task: write a concise build-ready runtime validation checklist for provider-neutral Model Harness metadata before live provider enablement. Cover exact dispatch id/model id, direct-vs-aggregator route proof, candidate trust state, capability labels versus transport ids, prompt-drag telemetry, context/budget/growth fields, external-review requirements, fail-closed missing metadata behavior, Relay/Aegis policy binding, Bifrost display expectations, deterministic tests, validation evidence, and explicit exclusions for live provider calls, credential/account probing, raw prompts, raw provider responses, process/session control, FileMap edits, branch/worktree movement, shared-main writes, pushes to main, and Polaris. Keep this docs-only; do not edit runtime code or tests.
+
+Tests: docs-only; run text/shape inspection plus `git diff --check`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, verification performed, and Next Candidate: implement reviewed Model Harness runtime metadata validation.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create a docs-only DeepSeek candidate-trust and Model Harness metadata implementation checklist that can feed the next Model Harness runtime slice without waiting on live provider access.

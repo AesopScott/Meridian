@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add deterministic Bifrost candidate-trust and external-review badge rendering for Model Harness capability metadata.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/model-harness-v2-contract.md`, `docs/model-harness-metadata-implementation-checklist.md`, `docs/deepseek-candidate-trust-metadata-implementation-checklist.md`, `docs/bifrost-balance-payload-surface-contract.md`, Reviews B clearance evidence in `docs/live-codex-reviews-2.md`, and current cockpit capability metadata rendering.
+
+Task: extend the deterministic Bifrost Model Harness capability metadata sample so candidate trust and external-review state render as compact display badges beside the provider route metadata. Cover trusted, candidate, validation-blocked, external-review-required, and external-review-cleared states; include display-safe evidence refs and preserve exact model id, provider/direct-vs-aggregator route kind, context window, allowed/blocked task hints, prompt-drag budget/status/growth fields, provider balance/cost-pressure rendering, prompt payload visibility, dispatch hardening, PromptPacket proof metadata, Relay/Aegis handoff, proof-state preview, stale-session recovery actions, escaping, and cockpit layout. Do not call providers, inspect accounts, read credentials, spawn sessions, inspect live processes, edit `index.html`, touch Relay runtime, edit FileMap, move branches, main, or Polaris.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, concrete rendering evidence, and Next Candidate: bind reviewed runtime Model Harness validation results when available.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add deterministic Bifrost Model Harness capability metadata sample rendering for provider route inspection.
