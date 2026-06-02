@@ -301,6 +301,14 @@ Coordinator Build 1 payload evidence movement - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed 199/199; `git diff --check e6ab6af4^..334c952e` passed.
 - Next coordinator action: route Reviews A to review Build 1 after it completes the already assigned Build 2/3 review pass; continue polling Build 5 for Ready/blocker evidence.
 
+Coordinator Reviews B and Build 5 movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Reviews B and Build 5 worktrees clean before movement.
+- Approved and completed path-limited movement of Reviews B provenance commit `e8b1b4a5` onto shared main as `e27ca3c7`, limited to `docs/live-codex-reviews-2.md`. Reviews B passed the Build 4 Relay dispatch hardening checklist with no findings.
+- Approved and completed path-limited movement of Build 5 prompt payload visibility rendering onto shared main as `41412aee` (`feat: add prompt payload visibility sample`) and `8ca2390e` (`docs: mark payload visibility ready`), limited to `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- Proof rerun on shared main after Build 5 movement: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 193/193; `git diff --check 41412aee^..8ca2390e` passed.
+- Honest lane status: Build 1 and Build 5 are Ready for Codex Review on main; Reviews A is actively reviewing Build 2/3; Reviews B has cleared Build 4 and should be routed to Build 5 after the movement is pushed and the review worktree is current.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
