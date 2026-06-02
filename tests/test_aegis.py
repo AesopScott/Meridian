@@ -15,8 +15,11 @@ from meridian_core.aegis import (
     GateResult,
     GateSummary,
     ProofTrail,
+    PromptPacketProofDecision,
+    PromptPacketProofMetadata,
     WaiverRecord,
     evidence_from_cross_check,
+    evaluate_prompt_packet_proof_policy,
     format_aggregate_summary_for_display,
     format_gate_summary_for_display,
     gate_account_session_risk,
@@ -58,6 +61,37 @@ def _cc(
 
 def _blocking(id: str = "ev-block") -> AegisEvidence:
     return _cc(id=id, severity=EvidenceSeverity.ERROR)
+
+
+def _prompt_packet_metadata(**overrides) -> PromptPacketProofMetadata:
+    base = {
+        "packet_id": "packet-relay-001",
+        "packet_hash_status": "present",
+        "packet_hash": "sha256:abc123",
+        "prompt_tokens": 512,
+        "max_context_tokens": 2048,
+        "budget_ref": "budget:tier2:default",
+        "source_lineage": {"direct_input": 512},
+        "allowed_sources": ("direct_input", "atlas_retrieval"),
+        "aegis_evidence_ids": (
+            "packet:packet-relay-001",
+            "budget:budget-tier2-default",
+            "source:direct-input",
+        ),
+        "risk_tier": 2,
+        "proof_requirement": "artifact",
+        "selected_model_id": "gpt-4o-2026-06-01",
+        "model_trust_state": "trusted",
+        "snapshot_requirement": "not_required",
+        "snapshot_status": "not_required",
+        "human_gate_required": False,
+        "human_approval_present": False,
+        "dual_lane_required": False,
+        "dual_lane_proof_present": False,
+        "demotion_target_tier": None,
+    }
+    base.update(overrides)
+    return PromptPacketProofMetadata(**base)
 
 
 # ---------------------------------------------------------------------------
@@ -1427,3 +1461,236 @@ class TestAggregateGateSummary:
         assert aggregate.gate_details[0].gate_id == "gate_a"
         assert aggregate.gate_details[1].gate_id == "gate_b"
         assert len(aggregate.gate_details) == 2
+
+
+# ---------------------------------------------------------------------------
+# PromptPacket Proof Policy Evaluator
+# ---------------------------------------------------------------------------
+
+
+class TestPromptPacketProofPolicyEvaluator:
+    def test_valid_prompt_packet_metadata_allows(self):
+        result = evaluate_prompt_packet_proof_policy(_prompt_packet_metadata())
+        assert result.decision is PromptPacketProofDecision.ALLOW
+        assert result.severity == "info"
+        assert result.blockers == ()
+        assert result.evidence_ids == (
+            "packet:packet-relay-001",
+            "budget:budget-tier2-default",
+            "source:direct-input",
+        )
+
+    def test_missing_packet_id_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(_prompt_packet_metadata(packet_id=""))
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "missing_packet_id" in result.blockers
+
+    def test_missing_required_packet_hash_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(packet_hash_status="missing", packet_hash=None)
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "packet_hash_missing" in result.blockers
+
+    def test_hash_unavailable_warns_for_tier1(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                packet_hash_status="unavailable",
+                packet_hash=None,
+                risk_tier=1,
+                proof_requirement="telemetry",
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.WARN
+        assert result.severity == "warning"
+        assert "packet_hash_unavailable" in result.warnings
+
+    def test_hash_unavailable_demotes_for_tier2(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                packet_hash_status="unavailable",
+                packet_hash=None,
+                risk_tier=2,
+                demotion_target_tier=1,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.DEMOTE
+        assert result.demote_to_tier == 1
+        assert "packet_hash_unavailable_demote" in result.warnings
+
+    def test_hash_unavailable_blocks_for_tier3(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                packet_hash_status="unavailable",
+                packet_hash=None,
+                risk_tier=3,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "packet_hash_required_unavailable" in result.blockers
+
+    def test_over_budget_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(prompt_tokens=3000, max_context_tokens=2048)
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "prompt_packet_over_budget" in result.blockers
+
+    def test_missing_budget_ref_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(_prompt_packet_metadata(budget_ref=""))
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "missing_budget_ref" in result.blockers
+
+    def test_disallowed_source_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                source_lineage={"direct_input": 256, "unapproved_memory": 10},
+                allowed_sources=("direct_input",),
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "disallowed_source:unapproved_memory" in result.blockers
+
+    def test_negative_source_lineage_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(source_lineage={"direct_input": -1})
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "invalid_source_lineage:direct_input" in result.blockers
+
+    def test_source_lineage_total_above_prompt_tokens_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                prompt_tokens=100,
+                source_lineage={"direct_input": 80, "atlas_retrieval": 30},
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "source_lineage_exceeds_prompt_tokens" in result.blockers
+
+    def test_missing_evidence_ids_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(aegis_evidence_ids=())
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "missing_aegis_evidence_ids" in result.blockers
+
+    def test_duplicate_evidence_ids_block(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(aegis_evidence_ids=("packet:one", "packet:one"))
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "duplicate_aegis_evidence_ids" in result.blockers
+
+    def test_unsafe_evidence_id_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(aegis_evidence_ids=("packet:one", "raw_prompt:hello"))
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "unsafe_aegis_evidence_id" in result.blockers
+
+    def test_missing_direct_provider_snapshot_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                snapshot_requirement="direct_provider",
+                snapshot_status="missing",
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "snapshot_missing" in result.blockers
+
+    def test_snapshot_unavailable_warns_for_tier1(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                risk_tier=1,
+                snapshot_requirement="aggregator",
+                snapshot_status="unavailable",
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.WARN
+        assert "snapshot_unavailable" in result.warnings
+
+    def test_snapshot_unavailable_blocks_for_tier2(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                risk_tier=2,
+                snapshot_requirement="aggregator",
+                snapshot_status="unavailable",
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "snapshot_unavailable_for_tier" in result.blockers
+
+    def test_human_gate_result_when_approval_missing_and_packet_valid(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                risk_tier=4,
+                proof_requirement="human_gate",
+                human_gate_required=True,
+                human_approval_present=False,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.HUMAN_GATE
+        assert result.severity == "warning"
+        assert result.blockers == ()
+
+    def test_human_gate_invalid_packet_blocks_before_gate(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                packet_id=None,
+                risk_tier=4,
+                human_gate_required=True,
+                human_approval_present=False,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "missing_packet_id" in result.blockers
+
+    def test_human_gate_with_approval_allows_when_packet_valid(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                risk_tier=4,
+                proof_requirement="human_gate",
+                human_gate_required=True,
+                human_approval_present=True,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.ALLOW
+
+    def test_dual_lane_missing_proof_blocks(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                risk_tier=3,
+                dual_lane_required=True,
+                dual_lane_proof_present=False,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "dual_lane_proof_missing" in result.blockers
+
+    def test_dual_lane_with_proof_allows_when_packet_valid(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(
+                risk_tier=3,
+                dual_lane_required=True,
+                dual_lane_proof_present=True,
+            )
+        )
+        assert result.decision is PromptPacketProofDecision.ALLOW
+
+    def test_candidate_model_trust_blocks_high_tier(self):
+        result = evaluate_prompt_packet_proof_policy(
+            _prompt_packet_metadata(risk_tier=3, model_trust_state="candidate")
+        )
+        assert result.decision is PromptPacketProofDecision.BLOCK
+        assert "candidate_model_trust_for_high_tier" in result.blockers
+
+    def test_policy_result_is_deterministic(self):
+        metadata = _prompt_packet_metadata(
+            packet_hash_status="unavailable",
+            packet_hash=None,
+            risk_tier=2,
+        )
+        first = evaluate_prompt_packet_proof_policy(metadata)
+        second = evaluate_prompt_packet_proof_policy(metadata)
+        assert first == second

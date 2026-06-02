@@ -1083,3 +1083,265 @@ def format_aggregate_summary_for_display(aggregate: AggregateGateSummary) -> str
         lines.append(f"  approvals present: {', '.join(aggregate.approvals_present)}")
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# PromptPacket Proof Policy Evaluator
+# ---------------------------------------------------------------------------
+
+
+class PromptPacketProofDecision(Enum):
+    """Route-level outcome for PromptPacket proof metadata evaluation."""
+    ALLOW = "allow"
+    WARN = "warn"
+    DEMOTE = "demote"
+    BLOCK = "block"
+    HUMAN_GATE = "human_gate"
+
+
+@dataclass(frozen=True)
+class PromptPacketProofMetadata:
+    """Display-safe PromptPacket proof metadata evaluated by Aegis."""
+    packet_id: str | None
+    packet_hash_status: str
+    prompt_tokens: int
+    max_context_tokens: int
+    source_lineage: dict[str, int]
+    allowed_sources: tuple[str, ...]
+    aegis_evidence_ids: tuple[str, ...]
+    risk_tier: int
+    proof_requirement: str = "none"
+    packet_hash: str | None = None
+    budget_ref: str | None = None
+    selected_model_id: str | None = None
+    model_trust_state: str = "trusted"
+    snapshot_requirement: str = "not_required"
+    snapshot_status: str = "not_required"
+    human_gate_required: bool = False
+    human_approval_present: bool = False
+    dual_lane_required: bool = False
+    dual_lane_proof_present: bool = False
+    demotion_target_tier: int | None = None
+
+
+@dataclass(frozen=True)
+class PromptPacketProofPolicyResult:
+    """Deterministic Aegis decision for PromptPacket proof metadata."""
+    decision: PromptPacketProofDecision
+    severity: str
+    reason: str
+    evidence_ids: tuple[str, ...]
+    blockers: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+    demote_to_tier: int | None = None
+
+
+_PROMPT_PACKET_HASH_STATUSES = {
+    "present",
+    "not_required",
+    "unavailable",
+    "missing",
+    "mismatch",
+}
+_PROMPT_PACKET_SNAPSHOT_STATUSES = {
+    "present",
+    "not_required",
+    "unavailable",
+    "missing",
+    "stale",
+}
+_DIRECT_SNAPSHOT_REQUIREMENTS = {"direct_provider", "exact_model", "required"}
+_PROMPT_PACKET_UNSAFE_EVIDENCE_PATTERNS = (
+    "prompt:",
+    "raw_prompt",
+    "api_key",
+    "secret",
+    "credential",
+    "token=",
+)
+
+
+def _prompt_packet_severity(decision: PromptPacketProofDecision) -> str:
+    if decision is PromptPacketProofDecision.BLOCK:
+        return "error"
+    if decision in {
+        PromptPacketProofDecision.WARN,
+        PromptPacketProofDecision.DEMOTE,
+        PromptPacketProofDecision.HUMAN_GATE,
+    }:
+        return "warning"
+    return "info"
+
+
+def _append_unique(values: list[str], value: str) -> None:
+    if value not in values:
+        values.append(value)
+
+
+def _has_prompt_packet_evidence(metadata: PromptPacketProofMetadata) -> bool:
+    if not metadata.aegis_evidence_ids:
+        return False
+    return all(
+        isinstance(evidence_id, str) and evidence_id.strip()
+        for evidence_id in metadata.aegis_evidence_ids
+    )
+
+
+def _has_unsafe_prompt_packet_evidence(metadata: PromptPacketProofMetadata) -> bool:
+    for evidence_id in metadata.aegis_evidence_ids:
+        lowered = evidence_id.lower()
+        if any(pattern in lowered for pattern in _PROMPT_PACKET_UNSAFE_EVIDENCE_PATTERNS):
+            return True
+    return False
+
+
+def _prompt_packet_result(
+    decision: PromptPacketProofDecision,
+    reason: str,
+    evidence_ids: tuple[str, ...],
+    blockers: list[str],
+    warnings: list[str],
+    demote_to_tier: int | None = None,
+) -> PromptPacketProofPolicyResult:
+    return PromptPacketProofPolicyResult(
+        decision=decision,
+        severity=_prompt_packet_severity(decision),
+        reason=reason,
+        evidence_ids=evidence_ids,
+        blockers=tuple(blockers),
+        warnings=tuple(warnings),
+        demote_to_tier=demote_to_tier,
+    )
+
+
+def evaluate_prompt_packet_proof_policy(
+    metadata: PromptPacketProofMetadata,
+) -> PromptPacketProofPolicyResult:
+    """
+    Evaluate PromptPacket proof metadata before Relay dispatch.
+
+    Pure, deterministic Aegis helper: no Relay mutation, no model calls, no
+    account inspection, no Bifrost rendering, and no persistence side effects.
+    """
+    blockers: list[str] = []
+    warnings: list[str] = []
+    evidence_ids = metadata.aegis_evidence_ids
+
+    if not isinstance(metadata.packet_id, str) or not metadata.packet_id.strip():
+        _append_unique(blockers, "missing_packet_id")
+
+    if metadata.packet_hash_status not in _PROMPT_PACKET_HASH_STATUSES:
+        _append_unique(blockers, "unknown_packet_hash_status")
+    elif metadata.packet_hash_status in {"missing", "mismatch"}:
+        _append_unique(blockers, f"packet_hash_{metadata.packet_hash_status}")
+    elif metadata.packet_hash_status == "present" and not (
+        isinstance(metadata.packet_hash, str) and metadata.packet_hash.strip()
+    ):
+        _append_unique(blockers, "packet_hash_value_missing")
+
+    if metadata.prompt_tokens < 0:
+        _append_unique(blockers, "negative_prompt_tokens")
+    if metadata.max_context_tokens <= 0:
+        _append_unique(blockers, "invalid_budget_limit")
+    if metadata.max_context_tokens > 0 and metadata.prompt_tokens > metadata.max_context_tokens:
+        _append_unique(blockers, "prompt_packet_over_budget")
+    if not isinstance(metadata.budget_ref, str) or not metadata.budget_ref.strip():
+        _append_unique(blockers, "missing_budget_ref")
+
+    allowed_sources = set(metadata.allowed_sources)
+    lineage_total = 0
+    for source, token_count in metadata.source_lineage.items():
+        if source not in allowed_sources:
+            _append_unique(blockers, f"disallowed_source:{source}")
+        if not isinstance(token_count, int) or token_count < 0:
+            _append_unique(blockers, f"invalid_source_lineage:{source}")
+        elif token_count >= 0:
+            lineage_total += token_count
+    if lineage_total > metadata.prompt_tokens:
+        _append_unique(blockers, "source_lineage_exceeds_prompt_tokens")
+
+    if not _has_prompt_packet_evidence(metadata):
+        _append_unique(blockers, "missing_aegis_evidence_ids")
+    if len(set(evidence_ids)) != len(evidence_ids):
+        _append_unique(blockers, "duplicate_aegis_evidence_ids")
+    if _has_unsafe_prompt_packet_evidence(metadata):
+        _append_unique(blockers, "unsafe_aegis_evidence_id")
+
+    if metadata.snapshot_status not in _PROMPT_PACKET_SNAPSHOT_STATUSES:
+        _append_unique(blockers, "unknown_snapshot_status")
+    elif (
+        metadata.snapshot_requirement in _DIRECT_SNAPSHOT_REQUIREMENTS
+        and metadata.snapshot_status in {"missing", "stale", "unavailable"}
+    ):
+        _append_unique(blockers, f"snapshot_{metadata.snapshot_status}")
+    elif metadata.snapshot_status == "unavailable" and metadata.risk_tier >= 2:
+        _append_unique(blockers, "snapshot_unavailable_for_tier")
+    elif metadata.snapshot_status == "unavailable":
+        _append_unique(warnings, "snapshot_unavailable")
+
+    if metadata.packet_hash_status == "unavailable":
+        if (
+            metadata.risk_tier >= 3
+            or metadata.human_gate_required
+            or metadata.dual_lane_required
+            or metadata.snapshot_requirement in _DIRECT_SNAPSHOT_REQUIREMENTS
+        ):
+            _append_unique(blockers, "packet_hash_required_unavailable")
+        elif metadata.risk_tier == 2:
+            _append_unique(warnings, "packet_hash_unavailable_demote")
+        else:
+            _append_unique(warnings, "packet_hash_unavailable")
+
+    if metadata.model_trust_state == "candidate" and metadata.risk_tier >= 3:
+        _append_unique(blockers, "candidate_model_trust_for_high_tier")
+
+    if metadata.dual_lane_required and not metadata.dual_lane_proof_present:
+        _append_unique(blockers, "dual_lane_proof_missing")
+
+    if blockers:
+        return _prompt_packet_result(
+            PromptPacketProofDecision.BLOCK,
+            "; ".join(blockers),
+            evidence_ids,
+            blockers,
+            warnings,
+        )
+
+    if metadata.human_gate_required and not metadata.human_approval_present:
+        return _prompt_packet_result(
+            PromptPacketProofDecision.HUMAN_GATE,
+            "human approval required before dispatch",
+            evidence_ids,
+            blockers,
+            warnings,
+        )
+
+    if "packet_hash_unavailable_demote" in warnings:
+        demote_to_tier = metadata.demotion_target_tier
+        if demote_to_tier is None:
+            demote_to_tier = max(metadata.risk_tier - 1, 0)
+        return _prompt_packet_result(
+            PromptPacketProofDecision.DEMOTE,
+            "packet hash unavailable; demoting to lower proof tier",
+            evidence_ids,
+            blockers,
+            warnings,
+            demote_to_tier=demote_to_tier,
+        )
+
+    if warnings:
+        return _prompt_packet_result(
+            PromptPacketProofDecision.WARN,
+            "; ".join(warnings),
+            evidence_ids,
+            blockers,
+            warnings,
+        )
+
+    return _prompt_packet_result(
+        PromptPacketProofDecision.ALLOW,
+        "PromptPacket proof metadata satisfies Aegis policy",
+        evidence_ids,
+        blockers,
+        warnings,
+    )
