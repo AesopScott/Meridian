@@ -230,8 +230,8 @@ If the panel cannot show these, Relay is not ready for Auto.
 - `meridian_core/relay.py` owns deterministic route, tier, lane, session, proof, and blocker logic.
 - `meridian_core/relay_dispatch.py` owns immutable dispatch plan shape.
 - `meridian_core/relay_logic_snapshot.py` serializes the visible Relay harness snapshot.
-- `scripts/meridian-model-bridge.js` exposes `/api/relay-logic`.
-- `index.html` renders `/api/relay-logic` into collapsible Relay headers.
+- `scripts/meridian-model-bridge.js` exposes `/bridge/relay-logic`.
+- `index.html` renders `/bridge/relay-logic` into collapsible Relay headers.
 
 **Visible collapsible sections now include:**
 
@@ -256,9 +256,9 @@ If the panel cannot show these, Relay is not ready for Auto.
 
 - `python -m pytest tests\test_relay.py tests\test_relay_dispatch.py tests\test_relay_logic_snapshot.py -q` -> 163 passed.
 - `index.html` script parse passed.
-- Served `http://127.0.0.1:5500/index.html` includes `Prime Directives`, `Prime Directive Proofs`, and `/api/relay-logic`.
+- Served `http://127.0.0.1:5500/index.html` includes `Prime Directives`, `Prime Directive Proofs`, and `/bridge/relay-logic`.
 - Served page no longer includes old static `const relayModels`.
-- Live `/api/relay-logic` returns 3 directives, 3 proofs, and 10 capability sections.
+- Live `/bridge/relay-logic` returns 3 directives, 3 proofs, and 10 capability sections.
 - Relay snapshot contains no `heartbeat` text.
 
 **Current boundary:**

@@ -60,7 +60,7 @@ Completion: if clean, mark the reviewed slice passed and promote the next candid
 Review result:
 
 - Passed. `meridian_core/relay_logic_snapshot.py` builds deterministic serializable harness/configuration data from local Relay domain functions and dispatch-plan assembly; it does not call live models or expose prompt payload text.
-- Passed. `scripts/meridian-model-bridge.js` keeps `/api/relay-logic` on the Python snapshot path, separate from `/api/message` model CLI spawning.
+- Passed. `scripts/meridian-model-bridge.js` keeps `/bridge/relay-logic` on the Python snapshot path, separate from `/bridge/message` model CLI spawning.
 - Passed. `index.html` keeps the model selector default on Codex with Auto disabled and stored Auto coerced back to Codex; Relay shows `Auto disabled` and renders the backend snapshot into reviewable/collapsible `<details>` sections.
 - Passed. Spark/center UI and the Relay harness button remain present, with Relay opening the visible `Relay Model Logic` surface.
 - Passed. Scope check found no Polaris path, branch/worktree movement, hidden Auto routing, fake harness completion claim, or main-worktree write introduced by the reviewed slice.

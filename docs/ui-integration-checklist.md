@@ -58,7 +58,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 |---|---|---|---|---|
 | SEL1 | Model selector | Manual model selection. Defaults to Codex. Auto stays disabled until Prime/Relay logic exists. | partial | Served page has Codex selected and Auto disabled. |
 | SEL2 | Projects selector | Selects active project context for Prime and project-scoped UI state. | planned | Track `PRJ-*` subitems before wiring the selector. |
-| SEL3 | User Sessions selector | Selects from all open live sessions when the right panel is in User Session mode. | partial | Dropdown is populated from `/api/user-sessions`; selection routes User prompt with the selected session target id/cwd. |
+| SEL3 | User Sessions selector | Selects from all open live sessions when the right panel is in User Session mode. | partial | Dropdown is populated from `/bridge/user-sessions`; selection routes User prompt with the selected session target id/cwd. |
 
 ### Projects Selector Subitems
 
@@ -86,7 +86,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | ID | User Sessions Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | USE1 | Sessions dropdown placement | Adds a Sessions dropdown to the User panel in the equivalent position to Prime's Projects dropdown. | wired | User panel shows Sessions selector without moving approved layout. |
-| USE2 | Live sessions only | Lists only currently open/live sessions. | partial | `/api/user-sessions` exposes routable Meridian worktree-backed targets and excludes shared main. |
+| USE2 | Live sessions only | Lists only currently open/live sessions. | partial | `/bridge/user-sessions` exposes routable Meridian worktree-backed targets and excludes shared main. |
 | USE3 | Hidden sessions included | Includes hidden live sessions and marks them as hidden. | partial | Review-lane worktree targets appear with hidden state label. |
 | USE4 | Test-waiting sessions included | Includes sessions waiting for user test/try-it-out state and marks that state. | planned | Test-waiting session appears with test/waiting label. |
 | USE5 | Project grouping | Groups sessions under project headers. | wired | Dropdown visually groups sessions by project. |
@@ -94,7 +94,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | USE7 | Alphabetical session sort | Sorts sessions alphabetically within each project group. | wired | Session order inside project group is alphabetical. |
 | USE8 | Session title update | Changes the User panel title to the selected session name. | wired | Selecting a session updates the panel title immediately. |
 | USE9 | Immediate prompt routing | Selecting a session immediately sets that session as the User prompt target. | wired | Next User prompt is routed to selected session without extra confirmation. |
-| USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | partial | Reload restores the target only if `/api/user-sessions` still reports it as routable. |
+| USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | partial | Reload restores the target only if `/bridge/user-sessions` still reports it as routable. |
 | USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | partial | Live and hidden status appear in selector labels. |
 | USE12 | Stale target guard | If selected session closes or becomes unavailable, User prompt is blocked with a readable target warning. | partial | Sending without a bridge-confirmed target shows a target error instead of disappearing. |
 | USE13 | User mode restore | Returning from Settings/Harness mode restores prior selected live session if still available. | wired | Toggle away and back; previous routable session target returns. |
@@ -182,7 +182,7 @@ Reset is a UI/session-window recovery control. It clears visible prompt/transcri
 | RST11 | Reset failure visibility | Shows readable error if reset storage clearing fails. | planned | Failure does not silently pretend reset succeeded. |
 | RST12 | No extra Reset UI button | Reset remains the spark-ring control; no duplicate bottom button. | wired | Visual check shows no duplicate Reset UI button. |
 | RST13 | Reset is not Clear Memory | Does not claim to clear model memory, long-term knowledge, or archived context. | planned | UI language avoids "clear memory" unless that feature exists. |
-| RST14 | Restart model bridge | Reset asks the local Meridian bridge to restart before reloading the UI, so stale bridge code does not survive reset. | wired | Click Reset; `/api/models` returns `visibleTranscriptContext: true` after reload. |
+| RST14 | Restart model bridge | Reset asks the local Meridian bridge to restart before reloading the UI, so stale bridge code does not survive reset. | wired | Click Reset; `/bridge/models` returns `visibleTranscriptContext: true` after reload. |
 
 ### Reload Surface Subitems
 
@@ -199,7 +199,7 @@ Reload is a UI/cache recovery control. It refreshes the page and assets without 
 | RLD7 | Preserve model selector | Keeps selected model if valid; invalid/Auto falls back to Codex. | partial | Saved Auto becomes Codex; valid model remains. |
 | RLD8 | Do not archive | Reload does not archive or close any session. | planned | Archive/session counts unchanged. |
 | RLD9 | Do not reset model memory | Reload does not claim to reset CLI/model/session memory. | planned | UI copy distinguishes reload from reset/clear-memory. |
-| RLD10 | Bridge health recheck | Rechecks bridge/model readiness after reload. | partial | `/api/models` readiness updates after page reload. |
+| RLD10 | Bridge health recheck | Rechecks bridge/model readiness after reload. | partial | `/bridge/models` readiness updates after page reload. |
 | RLD11 | Visual baseline check | Reload preserves center image and approved layout. | partial | Center image and panel alignment remain after reload. |
 | RLD12 | Reload failure visibility | If reload cannot complete or served file is wrong, diagnose cache/root mismatch before more UI edits. | planned | Wrong served file triggers stop condition. |
 
@@ -255,7 +255,7 @@ The Models icon owns model visibility and manual override. It must not silently 
 
 | ID | Models Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| MOD1 | Available backends | Shows detected Codex, Max/Claude, and future model backends. | partial | `/api/models` populates backend availability without raw CLI errors. |
+| MOD1 | Available backends | Shows detected Codex, Max/Claude, and future model backends. | partial | `/bridge/models` populates backend availability without raw CLI errors. |
 | MOD2 | Default backend | Defaults manual prompt sends to Codex until Prime/Relay auto-routing exists. | wired | Fresh page load selects Codex. |
 | MOD3 | Auto routing disabled state | Shows Auto as unavailable until Relay owns the decision logic. | wired | Auto option is disabled or clearly unavailable. |
 | MOD4 | Per-role mapping | Lists planned roles such as orchestrator, builder, reviewer, verifier, researcher, and release operator. | planned | Roles appear as mappings, not as provider-first choices. |
@@ -264,7 +264,7 @@ The Models icon owns model visibility and manual override. It must not silently 
 | MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | planned | Metadata comes from Model Harness, not hand-written UI claims. |
 | MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | planned | Trust state comes from Aegis/Relay evidence. |
 | MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | planned | Uses Relay prompt payload metrics, not transcript length guesses. |
-| MOD10 | Recent model calls | Shows recent call metadata without prompt text. | partial | Uses `/api/recent-calls`; no prompt content stored. |
+| MOD10 | Recent model calls | Shows recent call metadata without prompt text. | partial | Uses `/bridge/recent-calls`; no prompt content stored. |
 | MOD11 | Model label display | Response UI shows actual backend/model label when known. | partial | Send prompt; label appears below/near response. |
 | MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | planned | Missing setup path is readable and non-technical enough to act on. |
 
@@ -275,7 +275,7 @@ The Balance icon owns provider balance, cost pressure, prompt payload, and routi
 | ID | Balance Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | planned | Health comes from bridge/harness checks. |
-| BAL2 | CLI/account readiness | Shows CLI installed/authenticated state for local backends. | partial | Codex and Max readiness match `/api/models`. |
+| BAL2 | CLI/account readiness | Shows CLI installed/authenticated state for local backends. | partial | Codex and Max readiness match `/bridge/models`. |
 | BAL3 | Token usage | Shows token use when a backend reports it. | planned | Unknown usage displays as unknown, not zero. |
 | BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | planned | Missing data produces no fake cost. |
 | BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | planned | Unknown quota displays as unavailable. |
@@ -480,8 +480,8 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | BR1 | Meridian model bridge | Receives UI prompts and routes to selected local CLI backend. | wired | `/health` returns ok plus bridge version/capabilities. |
 | BR2 | Codex backend | Sends selected prompts to Codex CLI. | wired | Select Codex; prompt returns Codex CLI response or readable setup error. |
 | BR3 | Max backend | Sends selected prompts to Claude CLI when available. | wired | Select Max; prompt returns Claude response or readable setup error. |
-| BR4 | CLI setup detection | Detects missing CLI/auth and gives install/login guidance. | wired | `/api/models` and failed calls return setup guidance. |
-| BR5 | Recent call diagnostics | Stores metadata only, never prompt text, and identifies the bridge generation. | wired | `/api/recent-calls` returns bridge version/capabilities plus request id/channel/backend/status/context counts. |
+| BR4 | CLI setup detection | Detects missing CLI/auth and gives install/login guidance. | wired | `/bridge/models` and failed calls return setup guidance. |
+| BR5 | Recent call diagnostics | Stores metadata only, never prompt text, and identifies the bridge generation. | wired | `/bridge/recent-calls` returns bridge version/capabilities plus request id/channel/backend/status/context counts. |
 | BR6 | Bridge origin guard | Accepts local Meridian UI and command-line checks; blocks arbitrary web origins from prompt/restart endpoints. | wired | Self-test proves `127.0.0.1:5500` is allowed and `example.com` is blocked. |
 | BR7 | Prime/Relay Auto routing | Future: Prime chooses model through Relay harness logic. | planned | Auto remains disabled until this contract exists. |
 
@@ -507,25 +507,25 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 |---|------|-------|
 | MB1 | Model selector defaults to Codex until Prime/Relay auto-routing exists. | Served page contains `value="codex" selected`; saved `auto` falls back to Codex. |
 | MB2 | Auto remains unavailable until Prime/Relay harness logic owns routing. | Served page contains disabled Auto option or equivalent unavailable state. |
-| MB3 | Selecting Codex sends through the Meridian bridge, not Polaris. | Request goes to `http://127.0.0.1:8767/api/message`; no Polaris path or process is touched. |
-| MB4 | Selecting Max sends through the Meridian bridge when the Claude CLI is available. | `/api/models` reports Max availability; bridge invokes Claude with print/json/no-session-persistence over stdin and parses the JSON result. |
+| MB3 | Selecting Codex sends through the Meridian bridge, not Polaris. | Request goes to `http://127.0.0.1:8767/bridge/message`; no Polaris path or process is touched. |
+| MB4 | Selecting Max sends through the Meridian bridge when the Claude CLI is available. | `/bridge/models` reports Max availability; bridge invokes Claude with print/json/no-session-persistence over stdin and parses the JSON result. |
 | MB5 | Public setup errors are readable. | Missing CLI or auth failure returns install/login guidance instead of a silent hang. |
-| MB6 | Request metadata is tracked without logging prompt text. | `/api/recent-calls` shows bridge version/capabilities plus request id, channel, backend, model label, duration, status, and visible-context counts only. |
+| MB6 | Request metadata is tracked without logging prompt text. | `/bridge/recent-calls` shows bridge version/capabilities plus request id, channel, backend, model label, duration, status, and visible-context counts only. |
 | MB7 | Model/context label appears below or near the response area when known. | Manual: send a follow-up request and confirm displayed model/source plus visible context count. |
-| MB8 | Visible session continuity | Follow-up prompts carry the visible panel transcript as bounded context, with no hidden backend memory. | Response metadata and `/api/recent-calls` record nonzero `sessionContextEntries` after a follow-up prompt. |
+| MB8 | Visible session continuity | Follow-up prompts carry the visible panel transcript as bounded context, with no hidden backend memory. | Response metadata and `/bridge/recent-calls` record nonzero `sessionContextEntries` after a follow-up prompt. |
 | MB9 | Bridge capability guard | UI blocks prompt sends when the running bridge does not advertise visible transcript context support. | Old bridge shows restart-required status instead of silently sending stateless follow-ups. |
-| MB10 | Bridge restart endpoint | Local bridge exposes a same-port restart endpoint for Reset recovery. | `POST /api/restart` returns accepted, then `/health` and `/api/models` come back with visible-context capability. |
-| MB11 | Bridge capability parity | `/health` and `/api/models` advertise the same bridge version and capability flags, and the UI readiness line shows the active bridge generation. | Both endpoints report `visibleTranscriptContext`, `recentCallContextDiagnostics`, and `samePortRestart`; session status includes the bridge version. |
+| MB10 | Bridge restart endpoint | Local bridge exposes a same-port restart endpoint for Reset recovery. | `POST /bridge/restart` returns accepted, then `/health` and `/bridge/models` come back with visible-context capability. |
+| MB11 | Bridge capability parity | `/health` and `/bridge/models` advertise the same bridge version and capability flags, and the UI readiness line shows the active bridge generation. | Both endpoints report `visibleTranscriptContext`, `recentCallContextDiagnostics`, and `samePortRestart`; session status includes the bridge version. |
 | MB12 | Local-origin bridge access | Browser access to bridge endpoints is limited to the Meridian local UI origins. | Disallowed origins get `403`; command-line checks without an Origin header still work. |
 | MB13 | Bridge readiness self-heal | UI rechecks bridge readiness when the page regains focus or visibility. | Restart bridge externally, return to the page, and status refreshes without manual reload. |
 | MB14 | Relay bridge visibility | Relay panel shows and refreshes live bridge access status from `/health`, not static copy. | Open Relay; Bridge route shows online/offline, version, visible-context state, and reset recovery state; focus/visibility refresh updates it. |
-| MB15 | Lost response recovery | If the browser loses a completed model response, the UI retrieves the short-lived local result by request id and renders it in the visible transcript. | `/api/call-result` returns output for a completed request id; `/api/recent-calls` remains metadata-only. |
-| MB16 | Relay logic snapshot | Relay panel renders model-routing logic from the backend/domain snapshot, not a duplicated static UI list. | `/api/relay-logic` returns `source=meridian_core.relay.route_from_tier`; Relay panel shows source, route precedence, tier logic, Tier 3 proof/blockers, and no Heartbeat text. |
-| MB17 | Relay dispatch visibility | Relay panel renders dispatch lane/order/payload policy from the backend dispatch plan snapshot. | `/api/relay-logic` includes `dispatch.source=meridian_core.relay_dispatch.build_relay_dispatch_plan`; panel shows dispatch logic without prompt payload text. |
-| MB18 | Relay audit depth | Relay panel renders fallback/rejection/proof/telemetry audit depth from the backend route audit. | `/api/relay-logic` includes `auditDepth`; panel shows silent fallback blocked, counts, primary blocker, and primary proof for Tier 3. |
-| MB19 | Relay collapsible capability headers | Relay panel exposes the expert Relay capability breakdown in collapsible headers sourced from the backend snapshot. | `/api/relay-logic` includes `capabilitySections`; panel shows Relay Job, Risk Tier Routing, Model Lane Logic, Access Route Precedence, Session Lifecycle Logic, Context Latency Privacy, Prompt Budget Logic, Audit Logic, Dispatch Logic, and Current Limits. |
-| MB20 | Relay prime directives | Relay panel opens with Prime Directives and Prime Directive Proofs before deeper capability sections. | `/api/relay-logic` includes `primeDirectives` and `primeDirectiveProofs`; panel shows the three principles and three proof questions at the top. |
-| MB21 | User session targets | Bridge exposes routable User Session targets from real Meridian worktrees. | `/api/user-sessions` returns `userSessionTargets=true`, excludes shared main, and User prompts send the selected `sessionTargetId`. |
+| MB15 | Lost response recovery | If the browser loses a completed model response, the UI retrieves the short-lived local result by request id and renders it in the visible transcript. | `/bridge/call-result` returns output for a completed request id; `/bridge/recent-calls` remains metadata-only. |
+| MB16 | Relay logic snapshot | Relay panel renders model-routing logic from the backend/domain snapshot, not a duplicated static UI list. | `/bridge/relay-logic` returns `source=meridian_core.relay.route_from_tier`; Relay panel shows source, route precedence, tier logic, Tier 3 proof/blockers, and no Heartbeat text. |
+| MB17 | Relay dispatch visibility | Relay panel renders dispatch lane/order/payload policy from the backend dispatch plan snapshot. | `/bridge/relay-logic` includes `dispatch.source=meridian_core.relay_dispatch.build_relay_dispatch_plan`; panel shows dispatch logic without prompt payload text. |
+| MB18 | Relay audit depth | Relay panel renders fallback/rejection/proof/telemetry audit depth from the backend route audit. | `/bridge/relay-logic` includes `auditDepth`; panel shows silent fallback blocked, counts, primary blocker, and primary proof for Tier 3. |
+| MB19 | Relay collapsible capability headers | Relay panel exposes the expert Relay capability breakdown in collapsible headers sourced from the backend snapshot. | `/bridge/relay-logic` includes `capabilitySections`; panel shows Relay Job, Risk Tier Routing, Model Lane Logic, Access Route Precedence, Session Lifecycle Logic, Context Latency Privacy, Prompt Budget Logic, Audit Logic, Dispatch Logic, and Current Limits. |
+| MB20 | Relay prime directives | Relay panel opens with Prime Directives and Prime Directive Proofs before deeper capability sections. | `/bridge/relay-logic` includes `primeDirectives` and `primeDirectiveProofs`; panel shows the three principles and three proof questions at the top. |
+| MB21 | User session targets | Bridge exposes routable User Session targets from real Meridian worktrees. | `/bridge/user-sessions` returns `userSessionTargets=true`, excludes shared main, and User prompts send the selected `sessionTargetId`. |
 
 ## Harness UI Rules
 
@@ -560,7 +560,7 @@ node --check $tmp
 node --check scripts\meridian-model-bridge.js
 node scripts\meridian-model-bridge.js --self-test
 Invoke-RestMethod http://127.0.0.1:8767/health -TimeoutSec 3
-Invoke-RestMethod http://127.0.0.1:8767/api/models -TimeoutSec 5
+Invoke-RestMethod http://127.0.0.1:8767/bridge/models -TimeoutSec 5
 ```
 
 For VS Code Live Server checks:
@@ -572,7 +572,7 @@ $r = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5500/index.html -Timeou
   'session-response-output',
   'value="codex" selected',
   'value="auto" disabled',
-  '/api/models',
+  '/bridge/models',
   'spark-center-final.png'
 ) | ForEach-Object {
   if ($r.Content.Contains($_)) { "served has: $_" } else { "served missing: $_" }
@@ -589,7 +589,7 @@ Pause and fix before continuing if any of these happen:
 | Any change touches Polaris | Stop; revert the Meridian task path and restart from Meridian-only context. |
 | A page refresh serves different UI than the edited `index.html` | Diagnose cache, Live Server root, browser cache, or service worker before editing more UI. |
 | Reset does not clear visible session transcripts | Fix reset/session storage behavior before adding new controls. |
-| A prompt disappears without a response or setup error | Check bridge health, `/api/models`, browser console, and recent call diagnostics before changing layout. |
+| A prompt disappears without a response or setup error | Check bridge health, `/bridge/models`, browser console, and recent call diagnostics before changing layout. |
 | Center image disappears while wiring behavior | Restore visual baseline before continuing behavior work. |
 | Model selector defaults to Auto before Prime/Relay routing exists | Revert to Codex default and keep Auto disabled. |
 | New button label conflicts with AI/session semantics | Rename or remove it before wiring. Example: do not use Clear for a visual wipe unless it really clears model/session memory. |

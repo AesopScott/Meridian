@@ -562,12 +562,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'GET' && req.url === '/api/models') {
+  if (req.method === 'GET' && req.url === '/bridge/models') {
     sendJson(res, 200, await modelStatus(), req);
     return;
   }
 
-  if (req.method === 'GET' && req.url === '/api/relay-logic') {
+  if (req.method === 'GET' && req.url === '/bridge/relay-logic') {
     const snapshot = await relayLogicSnapshot();
     sendJson(res, snapshot.ok ? 200 : 500, {
       service: 'meridian-model-bridge',
@@ -578,13 +578,13 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'GET' && req.url === '/api/user-sessions') {
+  if (req.method === 'GET' && req.url === '/bridge/user-sessions') {
     const snapshot = await userSessionTargets();
     sendJson(res, snapshot.ok ? 200 : 500, snapshot, req);
     return;
   }
 
-  if (req.method === 'GET' && req.url === '/api/recent-calls') {
+  if (req.method === 'GET' && req.url === '/bridge/recent-calls') {
     sendJson(res, 200, {
       ok: true,
       service: 'meridian-model-bridge',
@@ -595,7 +595,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'GET' && req.url.startsWith('/api/call-result')) {
+  if (req.method === 'GET' && req.url.startsWith('/bridge/call-result')) {
     const requestUrl = new URL(req.url, `http://${HOST}:${PORT}`);
     const requestId = String(requestUrl.searchParams.get('requestId') || '');
     const result = resultForRequestId(requestId);
@@ -614,13 +614,13 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/api/restart') {
+  if (req.method === 'POST' && req.url === '/bridge/restart') {
     sendJson(res, 202, { ok: true, restarting: true }, req);
     setTimeout(restartBridge, 25);
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/api/message') {
+  if (req.method === 'POST' && req.url === '/bridge/message') {
     try {
       const body = JSON.parse(await readBody(req));
       const backend = String(body.backend || '').toLowerCase();
