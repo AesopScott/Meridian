@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add a pure Aegis-side helper/test surface for provider-result validation advisory input.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: keep it primitive/provider-neutral so Aegis does not import Relay types: accept already-summarized validation status, warning/blocker tags, evidence refs, telemetry availability, and external-review state; return deterministic fail-closed policy/advisory metadata that Relay/Bifrost can consume later. Exclude live provider calls, credentials/account probing, raw responses/prompts, Relay runtime edits, FileMap/UI/session/process/main/Polaris work.
+
+Tests: `python -m pytest tests/test_aegis.py -q`.
+
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `pending local commit hash`
+- Files changed: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`
+- Tests run: `python -m pytest tests/test_aegis.py -q` (250 passed)
+- Verification performed: added provider-neutral `ProviderResultValidationInput` plus deterministic `evaluate_provider_result_validation_advisory()` and display-safe serialization; tests cover allow/warn/block outcomes, telemetry warnings, external-review fail-closed behavior, missing evidence, unsafe raw-response/raw-prompt/account strings, stable advisory keys, and deterministic output; `git diff --check` passed.
+- Next Candidate: implement reviewed Relay provider-result validation evidence runtime binding.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: create a docs-only implementation checklist for the next Relay post-transport validation evidence surface.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.

@@ -15,11 +15,15 @@ from meridian_core.aegis import (
     GateResult,
     GateSummary,
     ProofTrail,
+    ProviderResultValidationDecision,
+    ProviderResultValidationInput,
+    ProviderResultValidationPolicyResult,
     PromptPacketProofDecision,
     PromptPacketProofMetadata,
     PromptPacketProofPolicyResult,
     WaiverRecord,
     evidence_from_cross_check,
+    evaluate_provider_result_validation_advisory,
     evaluate_prompt_packet_proof_policy,
     format_aggregate_summary_for_display,
     format_gate_summary_for_display,
@@ -32,6 +36,7 @@ from meridian_core.aegis import (
     gate_unknown_proof_requirement,
     gate_unknown_route_class,
     gate_unsafe_fallback,
+    serialize_provider_result_validation_policy_result,
     serialize_prompt_packet_policy_result,
     summarize_aggregate_route_gates,
     summarize_gate_result,
@@ -94,6 +99,23 @@ def _prompt_packet_metadata(**overrides) -> PromptPacketProofMetadata:
     }
     base.update(overrides)
     return PromptPacketProofMetadata(**base)
+
+
+def _provider_result_metadata(**overrides) -> ProviderResultValidationInput:
+    base = {
+        "validation_status": "valid",
+        "warning_tags": (),
+        "blocker_tags": (),
+        "evidence_refs": (
+            "result:relay-dispatch-001",
+            "proof:direct-provider-route",
+            "budget:prompt-drag-ok",
+        ),
+        "telemetry_available": True,
+        "external_review_state": "not_required",
+    }
+    base.update(overrides)
+    return ProviderResultValidationInput(**base)
 
 
 # ---------------------------------------------------------------------------
@@ -1463,6 +1485,154 @@ class TestAggregateGateSummary:
         assert aggregate.gate_details[0].gate_id == "gate_a"
         assert aggregate.gate_details[1].gate_id == "gate_b"
         assert len(aggregate.gate_details) == 2
+
+
+# ---------------------------------------------------------------------------
+# Provider Result Validation Advisory
+# ---------------------------------------------------------------------------
+
+
+class TestProviderResultValidationAdvisory:
+    def test_valid_provider_result_metadata_allows(self):
+        result = evaluate_provider_result_validation_advisory(_provider_result_metadata())
+        assert result.decision is ProviderResultValidationDecision.ALLOW
+        assert result.severity == "info"
+        assert result.blockers == ()
+        assert result.warnings == ()
+        assert result.evidence_refs == (
+            "result:relay-dispatch-001",
+            "proof:direct-provider-route",
+            "budget:prompt-drag-ok",
+        )
+
+    def test_warning_status_warns_with_tags(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(
+                validation_status="warning",
+                warning_tags=("response_hash_unavailable",),
+            )
+        )
+        assert result.decision is ProviderResultValidationDecision.WARN
+        assert result.severity == "warning"
+        assert result.warnings == ("response_hash_unavailable",)
+
+    def test_missing_telemetry_warns_without_blocking_valid_result(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(telemetry_available=False)
+        )
+        assert result.decision is ProviderResultValidationDecision.WARN
+        assert result.blockers == ()
+        assert result.warnings == ("provider_result_telemetry_unavailable",)
+
+    def test_unknown_validation_status_blocks_fail_closed(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(validation_status="maybe")
+        )
+        assert result.decision is ProviderResultValidationDecision.BLOCK
+        assert "unknown_validation_status" in result.blockers
+
+    def test_blocker_tags_block_fail_closed(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(blocker_tags=("result_model_id_mismatch",))
+        )
+        assert result.decision is ProviderResultValidationDecision.BLOCK
+        assert result.blockers == ("result_model_id_mismatch",)
+
+    def test_missing_evidence_refs_block_fail_closed(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(evidence_refs=())
+        )
+        assert result.decision is ProviderResultValidationDecision.BLOCK
+        assert "missing_provider_result_evidence_refs" in result.blockers
+
+    def test_pending_external_review_blocks_fail_closed(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(external_review_state="pending")
+        )
+        assert result.decision is ProviderResultValidationDecision.BLOCK
+        assert "external_review_pending" in result.blockers
+
+    def test_provider_result_advisory_has_stable_keys(self):
+        result = evaluate_provider_result_validation_advisory(_provider_result_metadata())
+        display = serialize_provider_result_validation_policy_result(result)
+        assert tuple(display.keys()) == (
+            "decision",
+            "severity",
+            "reason",
+            "validation_status",
+            "external_review_state",
+            "telemetry_available",
+            "evidence_refs",
+            "blockers",
+            "warnings",
+            "reason_tags",
+            "relay_advisory",
+            "bifrost_advisory",
+        )
+
+    def test_provider_result_to_advisory_dict_matches_helper(self):
+        result = evaluate_provider_result_validation_advisory(_provider_result_metadata())
+        assert result.to_advisory_dict() == serialize_provider_result_validation_policy_result(
+            result
+        )
+
+    def test_provider_result_advisory_serializes_allow_state(self):
+        result = evaluate_provider_result_validation_advisory(_provider_result_metadata())
+        display = result.to_advisory_dict()
+        assert display["decision"] == "allow"
+        assert display["severity"] == "info"
+        assert display["validation_status"] == "valid"
+        assert display["external_review_state"] == "not_required"
+        assert display["telemetry_available"] is True
+        assert display["reason_tags"] == ("provider_result_allowed",)
+        assert display["relay_advisory"] == "allow"
+        assert display["bifrost_advisory"] == "display_allowed"
+
+    def test_provider_result_advisory_redacts_unsafe_strings(self):
+        result = ProviderResultValidationPolicyResult(
+            decision=ProviderResultValidationDecision.BLOCK,
+            severity="error",
+            reason="raw_response: do not show this",
+            validation_status="invalid",
+            external_review_state="failed",
+            telemetry_available=False,
+            evidence_refs=("result:safe", "provider_response:raw"),
+            blockers=("raw_prompt:leak", "missing_provider_result_evidence_refs"),
+            warnings=("account_id=abc",),
+        )
+        display = result.to_advisory_dict()
+        assert display["reason"] == "[redacted]"
+        assert display["evidence_refs"] == ("result:safe", "[redacted]")
+        assert display["blockers"] == ("[redacted]", "missing_provider_result_evidence_refs")
+        assert display["warnings"] == ("[redacted]",)
+        assert display["reason_tags"] == ("[redacted]", "missing_provider_result_evidence_refs")
+
+    def test_provider_result_policy_is_deterministic(self):
+        metadata = _provider_result_metadata(
+            validation_status="warning",
+            warning_tags=("response_hash_unavailable",),
+            telemetry_available=False,
+        )
+        first = evaluate_provider_result_validation_advisory(metadata)
+        second = evaluate_provider_result_validation_advisory(metadata)
+        assert first == second
+        assert first.to_advisory_dict() == second.to_advisory_dict()
+
+    def test_unsafe_inputs_fail_closed_without_exposing_raw_strings(self):
+        result = evaluate_provider_result_validation_advisory(
+            _provider_result_metadata(
+                evidence_refs=("provider_response:raw",),
+                blocker_tags=("raw_prompt:leak",),
+                warning_tags=("account_id=abc",),
+            )
+        )
+        display = result.to_advisory_dict()
+        assert result.decision is ProviderResultValidationDecision.BLOCK
+        assert "unsafe_provider_result_evidence_ref" in result.blockers
+        assert "unsafe_provider_result_blocker_tag" in result.blockers
+        assert "unsafe_provider_result_warning_tag" in result.warnings
+        assert "[redacted]" in display["evidence_refs"]
+        assert "[redacted]" not in display["validation_status"]
 
 
 # ---------------------------------------------------------------------------

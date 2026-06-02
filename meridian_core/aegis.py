@@ -1099,6 +1099,13 @@ class PromptPacketProofDecision(Enum):
     HUMAN_GATE = "human_gate"
 
 
+class ProviderResultValidationDecision(Enum):
+    """Aegis advisory outcome for post-transport provider-result metadata."""
+    ALLOW = "allow"
+    WARN = "warn"
+    BLOCK = "block"
+
+
 @dataclass(frozen=True)
 class PromptPacketProofMetadata:
     """Display-safe PromptPacket proof metadata evaluated by Aegis."""
@@ -1138,6 +1145,35 @@ class PromptPacketProofPolicyResult:
     def to_display_dict(self) -> dict[str, object]:
         """Return a display-safe serialization for Relay/Bifrost consumers."""
         return serialize_prompt_packet_policy_result(self)
+
+
+@dataclass(frozen=True)
+class ProviderResultValidationInput:
+    """Display-safe post-transport validation summary evaluated by Aegis."""
+    validation_status: str
+    warning_tags: tuple[str, ...]
+    blocker_tags: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    telemetry_available: bool
+    external_review_state: str = "not_required"
+
+
+@dataclass(frozen=True)
+class ProviderResultValidationPolicyResult:
+    """Deterministic Aegis advisory for provider-result validation metadata."""
+    decision: ProviderResultValidationDecision
+    severity: str
+    reason: str
+    validation_status: str
+    external_review_state: str
+    telemetry_available: bool
+    evidence_refs: tuple[str, ...]
+    blockers: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+
+    def to_advisory_dict(self) -> dict[str, object]:
+        """Return display-safe advisory metadata for future Relay/Bifrost use."""
+        return serialize_provider_result_validation_policy_result(self)
 
 
 _PROMPT_PACKET_HASH_STATUSES = {
@@ -1185,6 +1221,44 @@ _PROMPT_PACKET_UNSAFE_DISPLAY_PATTERNS = _PROMPT_PACKET_UNSAFE_EVIDENCE_PATTERNS
 )
 _PROMPT_PACKET_REDACTED = "[redacted]"
 
+_PROVIDER_RESULT_VALIDATION_STATUSES = {
+    "valid",
+    "warning",
+    "blocked",
+    "invalid",
+    "unavailable",
+    "transport_error",
+}
+_PROVIDER_RESULT_EXTERNAL_REVIEW_STATES = {
+    "not_required",
+    "passed",
+    "pending",
+    "failed",
+    "expired",
+    "required",
+    "unknown",
+}
+_PROVIDER_RESULT_EXTERNAL_REVIEW_BLOCKING_STATES = {
+    "pending",
+    "failed",
+    "expired",
+    "required",
+    "unknown",
+}
+_PROVIDER_RESULT_UNSAFE_DISPLAY_PATTERNS = _PROMPT_PACKET_UNSAFE_DISPLAY_PATTERNS + (
+    "raw_response",
+    "raw response",
+    "raw_output",
+    "raw output",
+    "raw_model",
+    "model_output:",
+    "provider_body",
+    "http_header",
+    "account_id",
+    "billing",
+    "quota",
+)
+
 
 def _prompt_packet_severity(decision: PromptPacketProofDecision) -> str:
     if decision is PromptPacketProofDecision.BLOCK:
@@ -1194,6 +1268,14 @@ def _prompt_packet_severity(decision: PromptPacketProofDecision) -> str:
         PromptPacketProofDecision.DEMOTE,
         PromptPacketProofDecision.HUMAN_GATE,
     }:
+        return "warning"
+    return "info"
+
+
+def _provider_result_severity(decision: ProviderResultValidationDecision) -> str:
+    if decision is ProviderResultValidationDecision.BLOCK:
+        return "error"
+    if decision is ProviderResultValidationDecision.WARN:
         return "warning"
     return "info"
 
@@ -1236,6 +1318,22 @@ def _display_safe_prompt_packet_tuple(values: tuple[str, ...]) -> tuple[str, ...
     return tuple(_display_safe_prompt_packet_value(value) for value in values)
 
 
+def _is_provider_result_display_safe(value: str) -> bool:
+    lowered = value.lower()
+    return not any(pattern in lowered for pattern in _PROVIDER_RESULT_UNSAFE_DISPLAY_PATTERNS)
+
+
+def _display_safe_provider_result_value(value: object) -> str:
+    text = str(value)
+    if not _is_provider_result_display_safe(text):
+        return _PROMPT_PACKET_REDACTED
+    return text
+
+
+def _display_safe_provider_result_tuple(values: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(_display_safe_provider_result_value(value) for value in values)
+
+
 def _prompt_packet_missing_field_from_tag(tag: str) -> str | None:
     if tag.startswith("missing_"):
         return tag.removeprefix("missing_")
@@ -1274,6 +1372,23 @@ def _prompt_packet_reason_tags(result: PromptPacketProofPolicyResult) -> tuple[s
     return ("policy_block",)
 
 
+def _provider_result_reason_tags(
+    result: ProviderResultValidationPolicyResult,
+) -> tuple[str, ...]:
+    tags: list[str] = []
+    for tag in result.blockers:
+        _append_unique(tags, _display_safe_provider_result_value(tag))
+    for tag in result.warnings:
+        _append_unique(tags, _display_safe_provider_result_value(tag))
+    if tags:
+        return tuple(tags)
+    if result.decision is ProviderResultValidationDecision.ALLOW:
+        return ("provider_result_allowed",)
+    if result.decision is ProviderResultValidationDecision.WARN:
+        return ("provider_result_warn",)
+    return ("provider_result_block",)
+
+
 def serialize_prompt_packet_policy_result(
     result: PromptPacketProofPolicyResult,
 ) -> dict[str, object]:
@@ -1297,6 +1412,45 @@ def serialize_prompt_packet_policy_result(
     }
 
 
+def serialize_provider_result_validation_policy_result(
+    result: ProviderResultValidationPolicyResult,
+) -> dict[str, object]:
+    """
+    Serialize provider-result validation policy metadata for Relay/Bifrost.
+
+    The result is primitive, deterministic, and display-safe. It contains only
+    summarized validation state, advisory tags, telemetry availability, and
+    evidence refs; it never includes raw prompts, provider responses,
+    credentials, provider accounts, transport payloads, or live-call data.
+    """
+    return {
+        "decision": result.decision.value,
+        "severity": _display_safe_provider_result_value(result.severity),
+        "reason": _display_safe_provider_result_value(result.reason),
+        "validation_status": _display_safe_provider_result_value(result.validation_status),
+        "external_review_state": _display_safe_provider_result_value(
+            result.external_review_state
+        ),
+        "telemetry_available": result.telemetry_available,
+        "evidence_refs": _display_safe_provider_result_tuple(result.evidence_refs),
+        "blockers": _display_safe_provider_result_tuple(result.blockers),
+        "warnings": _display_safe_provider_result_tuple(result.warnings),
+        "reason_tags": _provider_result_reason_tags(result),
+        "relay_advisory": result.decision.value,
+        "bifrost_advisory": _provider_result_bifrost_advisory(result),
+    }
+
+
+def _provider_result_bifrost_advisory(
+    result: ProviderResultValidationPolicyResult,
+) -> str:
+    if result.decision is ProviderResultValidationDecision.BLOCK:
+        return "display_blocked"
+    if result.decision is ProviderResultValidationDecision.WARN:
+        return "display_warning"
+    return "display_allowed"
+
+
 def _prompt_packet_result(
     decision: PromptPacketProofDecision,
     reason: str,
@@ -1313,6 +1467,107 @@ def _prompt_packet_result(
         blockers=tuple(blockers),
         warnings=tuple(warnings),
         demote_to_tier=demote_to_tier,
+    )
+
+
+def _provider_result_policy_result(
+    decision: ProviderResultValidationDecision,
+    reason: str,
+    metadata: ProviderResultValidationInput,
+    blockers: list[str],
+    warnings: list[str],
+) -> ProviderResultValidationPolicyResult:
+    return ProviderResultValidationPolicyResult(
+        decision=decision,
+        severity=_provider_result_severity(decision),
+        reason=reason,
+        validation_status=metadata.validation_status,
+        external_review_state=metadata.external_review_state,
+        telemetry_available=metadata.telemetry_available,
+        evidence_refs=metadata.evidence_refs,
+        blockers=tuple(blockers),
+        warnings=tuple(warnings),
+    )
+
+
+def evaluate_provider_result_validation_advisory(
+    metadata: ProviderResultValidationInput,
+) -> ProviderResultValidationPolicyResult:
+    """
+    Evaluate summarized provider-result validation metadata after transport.
+
+    Pure Aegis helper: accepts primitive, already-summarized inputs only. It
+    does not import Relay types, inspect accounts, call providers, read raw
+    prompts/responses, mutate runtime state, or render Bifrost UI.
+    """
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if not isinstance(metadata.validation_status, str) or not metadata.validation_status.strip():
+        _append_unique(blockers, "missing_validation_status")
+    elif metadata.validation_status not in _PROVIDER_RESULT_VALIDATION_STATUSES:
+        _append_unique(blockers, "unknown_validation_status")
+    elif metadata.validation_status in {"blocked", "invalid", "unavailable", "transport_error"}:
+        _append_unique(blockers, f"provider_result_{metadata.validation_status}")
+
+    if not isinstance(metadata.external_review_state, str) or not metadata.external_review_state.strip():
+        _append_unique(blockers, "missing_external_review_state")
+    elif metadata.external_review_state not in _PROVIDER_RESULT_EXTERNAL_REVIEW_STATES:
+        _append_unique(blockers, "unknown_external_review_state")
+    elif metadata.external_review_state in _PROVIDER_RESULT_EXTERNAL_REVIEW_BLOCKING_STATES:
+        _append_unique(blockers, f"external_review_{metadata.external_review_state}")
+
+    if not metadata.evidence_refs:
+        _append_unique(blockers, "missing_provider_result_evidence_refs")
+    for evidence_ref in metadata.evidence_refs:
+        if not isinstance(evidence_ref, str) or not evidence_ref.strip():
+            _append_unique(blockers, "invalid_provider_result_evidence_ref")
+        elif not _is_provider_result_display_safe(evidence_ref):
+            _append_unique(blockers, "unsafe_provider_result_evidence_ref")
+
+    for tag in metadata.blocker_tags:
+        if not isinstance(tag, str) or not tag.strip():
+            _append_unique(blockers, "invalid_provider_result_blocker_tag")
+        elif not _is_provider_result_display_safe(tag):
+            _append_unique(blockers, "unsafe_provider_result_blocker_tag")
+        else:
+            _append_unique(blockers, tag)
+
+    for tag in metadata.warning_tags:
+        if not isinstance(tag, str) or not tag.strip():
+            _append_unique(warnings, "invalid_provider_result_warning_tag")
+        elif not _is_provider_result_display_safe(tag):
+            _append_unique(warnings, "unsafe_provider_result_warning_tag")
+        else:
+            _append_unique(warnings, tag)
+
+    if metadata.validation_status == "warning" and not metadata.warning_tags:
+        _append_unique(warnings, "provider_result_validation_warning")
+    if not metadata.telemetry_available:
+        _append_unique(warnings, "provider_result_telemetry_unavailable")
+
+    if blockers:
+        return _provider_result_policy_result(
+            ProviderResultValidationDecision.BLOCK,
+            "; ".join(blockers),
+            metadata,
+            blockers,
+            warnings,
+        )
+    if warnings:
+        return _provider_result_policy_result(
+            ProviderResultValidationDecision.WARN,
+            "; ".join(warnings),
+            metadata,
+            blockers,
+            warnings,
+        )
+    return _provider_result_policy_result(
+        ProviderResultValidationDecision.ALLOW,
+        "provider result validation metadata satisfies Aegis advisory policy",
+        metadata,
+        blockers,
+        warnings,
     )
 
 
