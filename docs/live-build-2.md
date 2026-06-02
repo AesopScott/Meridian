@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind the review-cleared workflow work-order recovery summary into Prime/Beacon advisory recovery decisions.
 
@@ -22,7 +22,14 @@ Task: add a narrow pure advisory binding so workflow heartbeat/result summaries 
 
 Tests: `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` plus `git diff --check`.
 
-Completion: commit locally only, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or route the next Session Lifecycle workflow execution slice.
+Completion:
+
+- Build 2 completed the workflow-summary Prime/Beacon advisory recovery binding in local worktree commit `6483d74d`.
+- Files changed: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`.
+- Evidence: Prime now converts `WorkflowWorkOrderRecoverySummary` into advisory-only `PrimeNextAction` outcomes for stale restart, fresh poll/watch, archive, resteer, and human-gate blockers; Beacon now serializes workflow recovery summaries through `workflow_recovery_advisory_evidence()` with display-safe evidence and blockers. No recovery, movement, process, model, UI, FileMap, main, or Polaris action is executed.
+- Proof: `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 188 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or route the next Session Lifecycle workflow execution slice.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
