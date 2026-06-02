@@ -418,6 +418,7 @@ class RelayDecisionRecord:
     route_metadata: ModelRouteMetadataBinding | None = None
     payload_evidence: RelayPromptPayloadEvidence | None = None
     dispatch_envelope: RelayDispatchEnvelope | None = None
+    dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None
     packet_hash: str | None = None
     prompt_budget_ref: str | None = None
     source_lineage_compliant: bool | None = None
@@ -881,6 +882,43 @@ class RelayExecutionSummary:
         """Return display-safe metadata envelopes without provider payloads."""
         envelopes = [result.dispatch_metadata_envelope for result in self.results]
         return tuple(envelope for envelope in envelopes if envelope is not None)
+
+    def dispatch_metadata_consumer_view(self) -> dict[str, object]:
+        """Return deterministic metadata-only consumer data for Relay decisions."""
+        envelopes = self.dispatch_metadata_envelopes()
+        decision_envelope = (
+            self.decision_record.dispatch_metadata_envelope
+            if self.decision_record is not None
+            else None
+        )
+        if not envelopes and decision_envelope is not None:
+            envelopes = (decision_envelope,)
+        fail_closed_tags = tuple(
+            dict.fromkeys(
+                tag
+                for envelope in (*envelopes, decision_envelope)
+                if envelope is not None
+                for tag in envelope.fail_closed_tags
+            )
+        )
+        heartbeat_id = None
+        if decision_envelope is not None:
+            heartbeat_id = decision_envelope.heartbeat_id
+        elif envelopes:
+            heartbeat_id = envelopes[0].heartbeat_id
+        elif self.decision_record is not None:
+            heartbeat_id = self.decision_record.heartbeat_id
+        return {
+            "heartbeat_id": heartbeat_id,
+            "consumer_view_kind": "relay_dispatch_metadata",
+            "serialization_only": True,
+            "envelopes": tuple(envelope.to_dict() for envelope in envelopes),
+            "decision_record_envelope": (
+                decision_envelope.to_dict() if decision_envelope is not None else None
+            ),
+            "fail_closed_advisory": bool(fail_closed_tags),
+            "fail_closed_tags": fail_closed_tags,
+        }
 
 
 class RelayProofGateError(RuntimeError):
@@ -1842,6 +1880,7 @@ def _build_decision_record(
     route_metadata: ModelRouteMetadataBinding | None = None,
     payload_evidence: RelayPromptPayloadEvidence | None = None,
     dispatch_envelope: RelayDispatchEnvelope | None = None,
+    dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None,
     prompt_packet_policy_evidence: RelayPromptPacketPolicyEvidence | None = None,
     aegis_gate_decision: str | None = None,
     aegis_explanation: str = "",
@@ -2001,6 +2040,17 @@ def _build_decision_record(
         if dispatch_envelope and dispatch_envelope.aegis_evidence_ids
         else (packet_proof.aegis_evidence_ids if packet_proof else ())
     )
+    if dispatch_metadata_envelope is None:
+        dispatch_metadata_envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=first_builder_lane.role if first_builder_lane else None,
+            requested_model_id=(
+                first_builder_lane.preferred_model if first_builder_lane else model_id
+            ),
+            route_metadata=route_metadata,
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
 
     return RelayDecisionRecord(
         heartbeat_id=packet.packet_id,
@@ -2037,6 +2087,7 @@ def _build_decision_record(
         route_metadata=route_metadata,
         payload_evidence=payload_evidence,
         dispatch_envelope=dispatch_envelope,
+        dispatch_metadata_envelope=dispatch_metadata_envelope,
         packet_hash=packet_proof.packet_hash if packet_proof else None,
         prompt_budget_ref=packet_proof.prompt_budget_ref if packet_proof else None,
         source_lineage_compliant=(
@@ -2151,6 +2202,9 @@ def execute_relay_dispatch_plan(
             first_snapshot,
             payload_evidence=first_payload_evidence,
             dispatch_envelope=dispatch_envelopes[0] if dispatch_envelopes else None,
+            dispatch_metadata_envelope=(
+                dispatch_metadata_envelopes[0] if dispatch_metadata_envelopes else None
+            ),
         )
 
     return RelayExecutionSummary(
@@ -2297,6 +2351,7 @@ def execute_relay_plan_with_registry(
             first_route_metadata,
             first_payload_evidence,
             dispatch_envelopes[0] if dispatch_envelopes else None,
+            dispatch_metadata_envelopes[0] if dispatch_metadata_envelopes else None,
         )
 
     return RelayExecutionSummary(

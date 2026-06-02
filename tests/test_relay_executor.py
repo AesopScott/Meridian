@@ -1916,6 +1916,75 @@ class TestRelayDispatchMetadataEnvelope:
         assert "provider response" not in rendered_metadata.lower()
         assert "Polaris" not in rendered_metadata
 
+    def test_decision_record_carries_metadata_envelope_consumer_view(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            include_decision_record=True,
+        )
+
+        result_envelope = summary.results[0].dispatch_metadata_envelope
+        decision_envelope = summary.decision_record.dispatch_metadata_envelope
+        assert decision_envelope is result_envelope
+        assert decision_envelope.exact_model_id == "deepseek-chat"
+        assert decision_envelope.provider_route_kind == "direct"
+        assert decision_envelope.external_review_status == "pending"
+        assert adapter.received_payloads == [_PROMPT]
+
+    def test_summary_metadata_consumer_view_is_deterministic_and_display_safe(self) -> None:
+        plan = _make_plan(1)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter(
+                "raw provider response should stay private",
+                metadata=deepseek_candidate_metadata_preset("fast"),
+            ),
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            include_decision_record=True,
+        )
+        first = summary.dispatch_metadata_consumer_view()
+        second = summary.dispatch_metadata_consumer_view()
+        rendered = " ".join(str(value) for value in first.values())
+
+        assert first == second
+        assert first["heartbeat_id"] == plan.packet.packet_id
+        assert first["consumer_view_kind"] == "relay_dispatch_metadata"
+        assert first["serialization_only"] is True
+        assert len(first["envelopes"]) == 1
+        assert first["decision_record_envelope"] == first["envelopes"][0]
+        assert first["fail_closed_advisory"] is True
+        assert "external_review_pending" in first["fail_closed_tags"]
+        assert _PROMPT not in rendered
+        assert "raw provider response" not in rendered
+        assert "credential" not in rendered.lower()
+
+    def test_summary_metadata_consumer_view_falls_back_to_decision_record(self) -> None:
+        plan = _make_plan(2)
+        record = _build_decision_record(plan)
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=record)
+
+        view = summary.dispatch_metadata_consumer_view()
+
+        assert view["heartbeat_id"] == plan.packet.packet_id
+        assert len(view["envelopes"]) == 1
+        assert view["decision_record_envelope"] == view["envelopes"][0]
+        assert "model_metadata_missing" in view["envelopes"][0]["validation_tags"]
+        assert "vendor_unknown" in view["fail_closed_tags"]
+
 
 class TestRelayDecisionRecord:
     """Tests for provider-neutral decision records exposing route rationale for Prime."""
