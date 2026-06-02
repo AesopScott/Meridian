@@ -10,6 +10,23 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement the Bifrost/frontend display-only surface for Session Lifecycle live-control command-plan staging review.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: add deterministic cockpit sample rendering for staged restart, resteer, and archive command-plan intents. Show target session id, recommended action, required operation, ready flag, non-executable state, UI-review blocker, permission state, human-gate rationale, blockers, evidence refs, and Prime/Beacon advisory continuity. Preserve existing Bifrost display-only surfaces and avoid execution controls, live calls, raw prompt/provider response text, Relay runtime/FileMap/main/Polaris leakage.
+
+Ready for Codex Review:
+- Commit: `e9729b5c` (`Add command staging review surface`).
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Tests run: `python -m pytest tests/test_bifrost_cockpit.py -q` (277 passed); `git diff --check` (passed; Git emitted only line-ending normalization warnings).
+- Concrete rendering evidence: Session Lifecycle now renders `aria-label="Live-Control Command-Plan Staging Review"` with source `session-lifecycle-command-staging-sample`, staged restart/resteer/archive cards for target `build-5-bifrost`, required operations, ready/executable/UI-review flags, permission states, human-gate rationale, `command_plan.ui_review_required` blockers, display-safe staging evidence refs, and Prime/Beacon advisory refs including `prime-advisory:command-staging-review` and `beacon:staging_restart`.
+- Next Candidate: bind reviewed runtime `SessionLiveControlCommandPlanStagingRecord` and Beacon staging advisory evidence when available.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement the Bifrost/frontend side of the V2 visible prompt payload meter.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
