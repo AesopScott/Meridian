@@ -799,3 +799,76 @@ class TestCommandPlanAuditAdvisorySelection:
         assert "permission.proof=permission_validated" in action.evidence
         assert "blocker=permission boundary blocks restart" in action.evidence
         assert action.target_harness == "Session Lifecycle"
+
+    def test_malformed_serialized_audit_pauses_safely(self):
+        """Malformed serialized audit evidence cannot become executable."""
+        action = select_next_action_from_command_plan_audit(
+            audit_evidence={"plan": "not-a-dict", "blockers": "not-a-list"}
+        )
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.risk_tier == PrimeActionRiskTier.HIGH
+        assert action.is_executable() is False
+        assert "not_executable_now" in action.blockers
+        assert "plan.action=unknown" in action.evidence
+        assert "plan.executable=False" in action.evidence
+
+    def test_string_false_executable_does_not_become_true(self):
+        """Serialized string booleans are parsed deterministically."""
+        action = select_next_action_from_command_plan_audit(
+            audit_evidence={
+                "plan": {
+                    "action": "poll_queue",
+                    "reason": "serialized false executable",
+                    "is_executable": "false",
+                },
+                "review_gate": {"human_approval_required": "false"},
+            }
+        )
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is False
+        assert action.is_executable() is False
+        assert "not_executable_now" in action.blockers
+        assert "plan.executable=False" in action.evidence
+
+    def test_string_true_human_gate_blocks_execution(self):
+        """Serialized human-gate truth blocks Prime advisory execution."""
+        action = select_next_action_from_command_plan_audit(
+            audit_evidence={
+                "plan": {
+                    "action": "restart",
+                    "reason": "review gate",
+                    "is_executable": "true",
+                },
+                "review_gate": {
+                    "human_approval_required": "true",
+                    "cadence_gate_required": "true",
+                    "cadence_gate_status": "review_gated",
+                },
+                "blockers": ["human_approval_required"],
+            }
+        )
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is True
+        assert action.is_executable() is False
+        assert "review.required=True" in action.evidence
+        assert "blocker=human_approval_required" in action.evidence
+
+    def test_evidence_string_format_is_deterministic(self, poll_plan):
+        """Prime evidence strings retain stable order and key formatting."""
+        action = select_next_action_from_command_plan_audit(command_plan=poll_plan)
+
+        assert action.evidence == frozenset(
+            [
+                "plan.action=poll_queue",
+                "plan.reason=Poll queue after review clearance",
+                "plan.executable=True",
+                "permission.proof=queue_read",
+                "permission.branch=codex/aligned-build-2-prime-audit",
+                "review.required=False",
+                "review.status=none",
+                "recovery.note=No recovery needed.",
+            ]
+        )

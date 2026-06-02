@@ -408,15 +408,27 @@ def select_next_action_from_session_lifecycle_advisory(
 
 
 def _audit_section(audit_evidence: dict[str, Any], section: str) -> dict[str, Any]:
+    if not isinstance(audit_evidence, dict):
+        return {}
     value = audit_evidence.get(section, {})
     return value if isinstance(value, dict) else {}
 
 
 def _audit_list(audit_evidence: dict[str, Any], section: str) -> list[str]:
+    if not isinstance(audit_evidence, dict):
+        return []
     value = audit_evidence.get(section, [])
     if isinstance(value, (list, tuple)):
         return [str(item) for item in value]
     return []
+
+
+def _audit_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() == "true"
+    return False
 
 
 def _prime_evidence_from_command_audit(audit_evidence: dict[str, Any]) -> list[str]:
@@ -427,14 +439,14 @@ def _prime_evidence_from_command_audit(audit_evidence: dict[str, Any]) -> list[s
     blockers = _audit_list(audit_evidence, "blockers")
 
     evidence = [
-        f"plan.action={plan.get('action')}",
-        f"plan.reason={plan.get('reason')}",
-        f"plan.executable={plan.get('is_executable')}",
-        f"permission.proof={permission.get('proof_requirement')}",
-        f"permission.branch={permission.get('branch_affected')}",
-        f"review.required={review_gate.get('cadence_gate_required')}",
-        f"review.status={review_gate.get('cadence_gate_status')}",
-        f"recovery.note={recovery.get('rollback_or_recovery_note')}",
+        f"plan.action={plan.get('action', 'unknown')}",
+        f"plan.reason={plan.get('reason', 'unknown')}",
+        f"plan.executable={_audit_bool(plan.get('is_executable'))}",
+        f"permission.proof={permission.get('proof_requirement', 'unknown')}",
+        f"permission.branch={permission.get('branch_affected', 'unknown')}",
+        f"review.required={_audit_bool(review_gate.get('cadence_gate_required'))}",
+        f"review.status={review_gate.get('cadence_gate_status', 'unknown')}",
+        f"recovery.note={recovery.get('rollback_or_recovery_note', 'unknown')}",
     ]
     evidence.extend(f"blocker={blocker}" for blocker in blockers)
     return evidence
@@ -472,9 +484,11 @@ def select_next_action_from_command_plan_audit(
     evidence = _prime_evidence_from_command_audit(audit)
     action_name = str(plan.get("action") or "unknown")
     reason = str(plan.get("reason") or "no reason supplied")
-    executable = bool(plan.get("is_executable"))
-    human_gate_required = bool(review_gate.get("human_approval_required"))
+    executable = _audit_bool(plan.get("is_executable"))
+    human_gate_required = _audit_bool(review_gate.get("human_approval_required"))
     is_blocked = bool(blockers) or human_gate_required or not executable
+    if is_blocked and not blockers:
+        blockers = ["not_executable_now"]
 
     if action_name == "poll_queue" and executable:
         return make_prime_next_action(
