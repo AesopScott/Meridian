@@ -472,6 +472,13 @@ Coordinator rolling-pipeline routing - 2026-06-02:
 - Promoted fresh executable queue heads: Build 1 Relay/Aegis PromptPacket policy runtime integration, Build 2 Session Lifecycle permission summary aggregation, Build 3 rolling FileMap audit, Build 4 Aegis PromptPacket policy edge coverage, Build 5 Bifrost Relay/Aegis handoff summary rendering.
 - Review routing: Reviews A must first review Build 3 commits `c8c7cc22`/`007a1217`, then poll Build 1/2 Ready markers. Reviews B polls Build 4/5 Ready markers and commits only pass/finding provenance.
 
+Coordinator Reviews A FileMap clearance movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Reviews A worktree clean before movement.
+- Approved and completed path-limited movement of Reviews A Build 3 FileMap audit pass provenance commit `f4fdef55` onto shared main as `298459ad`, limited to `docs/live-codex-reviews.md`.
+- Reported proof: Reviews A verified Build 3 FileMap audit commits `c8c7cc22` and `007a1217` with `python -m pytest tests/test_filemap.py -q` passing 46/46 and `git diff --check c8c7cc22^..007a1217` passing.
+- Honest lane status after this clearance: Build 3 latest FileMap audit is review-cleared. Build 1, Build 2, Build 4, and Build 5 remain actively working on the rolling-pipeline implementation slices. Reviews B is temporarily idle/polling because Build 4/5 have not yet marked Ready on current main.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
