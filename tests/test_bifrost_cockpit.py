@@ -2237,6 +2237,8 @@ def test_sample_view_model_has_voice_state():
     assert isinstance(vm.voice, VoiceIOState)
     assert vm.voice.listening is True
     assert vm.voice.muted is False
+    assert vm.voice.boot_status == "status-ready"
+    assert vm.voice.permission_state == "available"
 
 
 def test_voice_listening_state_renders():
@@ -2277,6 +2279,15 @@ def test_voice_blocked_state_renders():
     doc = render_cockpit_html(vm)
     assert "voice blocked" in doc
     assert 'voice-blocked' in doc or 'class="voice-state voice-blocked"' in doc
+    assert 'data-blocked="true"' in doc
+
+
+def test_voice_idle_state_renders_when_no_activity_or_boot():
+    vm = sample_cockpit_view_model()
+    vm.voice = VoiceIOState(boot_status="")
+    doc = render_cockpit_html(vm)
+    assert "voice idle" in doc
+    assert 'voice-idle' in doc
 
 
 def test_voice_multiple_states_all_render():
@@ -2294,6 +2305,7 @@ def test_voice_muted_state_shows_unmute_button():
     doc = render_cockpit_html(vm)
     assert 'data-action="unmute"' in doc
     assert "Unmute" in doc
+    assert 'data-muted="true"' in doc
 
 
 def test_voice_not_muted_shows_mute_button():
@@ -2302,6 +2314,54 @@ def test_voice_not_muted_shows_mute_button():
     doc = render_cockpit_html(vm)
     assert 'data-action="mute"' in doc
     assert "Mute" in doc
+    assert 'data-muted="false"' in doc
+
+
+def test_voice_runtime_metadata_renders():
+    vm = sample_cockpit_view_model()
+    vm.voice = VoiceIOState(
+        listening=True,
+        boot_status="boot-call-ready",
+        input_mode="browser-mic",
+        output_mode="read-aloud",
+        permission_state="aegis-gated",
+        status_call="ready for status call",
+        last_intent_ref="voice-intent:mission-status",
+    )
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Voice runtime metadata"' in doc
+    assert "boot: boot-call-ready" in doc
+    assert "input: browser-mic" in doc
+    assert "output: read-aloud" in doc
+    assert "permission: aegis-gated" in doc
+    assert "status: ready for status call" in doc
+    assert "intent: voice-intent:mission-status" in doc
+
+
+def test_voice_read_aloud_control_renders():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'data-action="read-aloud"' in doc
+    assert 'aria-label="Read Prime output aloud"' in doc
+
+
+def test_voice_runtime_metadata_escapes_dynamic_values():
+    vm = sample_cockpit_view_model()
+    vm.voice = VoiceIOState(
+        boot_status="<boot>",
+        input_mode="<mic>",
+        output_mode="<speaker>",
+        permission_state="<blocked>",
+        status_call="<status>",
+        last_intent_ref="<intent>",
+    )
+    doc = render_cockpit_html(vm)
+    assert "&lt;boot&gt;" in doc
+    assert "&lt;mic&gt;" in doc
+    assert "&lt;speaker&gt;" in doc
+    assert "&lt;blocked&gt;" in doc
+    assert "&lt;status&gt;" in doc
+    assert "&lt;intent&gt;" in doc
+    assert "<boot>" not in doc
 
 
 def test_voice_strip_always_renders():
@@ -2559,7 +2619,7 @@ def test_session_lifecycle_recovery_readiness_renders_action_advisories():
     assert 'data-readiness-state="recommended"' in doc
     assert 'data-readiness-state="blocked"' in doc
     assert 'data-permission-state="requires_prime"' in doc
-    assert 'data-permission-state="requires_scott"' in doc
+    assert 'data-permission-state="requires_user"' in doc
     assert "evidence:session-restart-request" in doc
     assert "evidence:prime-resteer-required" in doc
     assert "evidence:archive-context-preserved" in doc
@@ -2672,7 +2732,7 @@ def test_session_lifecycle_command_staging_review_renders_review_gates_and_advis
 
     assert "UI review required before future live-control command execution." in doc
     assert "Human or Aegis gate required before future live-control command staging." in doc
-    assert "Archive intent remains blocked until Scott or review lane clears the gate." in doc
+    assert "Archive intent remains blocked until user or review lane clears the gate." in doc
     assert "prime-advisory:command-staging-review" in doc
     assert "prime-advisory:resteer-review-required" in doc
     assert "prime-advisory:archive-human-gate" in doc

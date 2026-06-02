@@ -318,11 +318,31 @@ summary {
 .voice-strip {
   grid-area: voice;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  grid-template-columns: minmax(0, 1.1fr) minmax(190px, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.voice-states,
+.voice-meta,
+.voice-controls {
+  display: flex;
+  align-items: center;
   gap: 7px;
+  min-width: 0;
+}
+
+.voice-states,
+.voice-meta {
+  flex-wrap: wrap;
+}
+
+.voice-controls {
+  justify-content: flex-end;
 }
 
 .voice-state,
+.voice-meta span,
 .icon-btn {
   border: 1px solid rgba(65, 217, 255, 0.28);
   background: rgba(3, 12, 22, 0.78);
@@ -337,6 +357,19 @@ summary {
 .voice-thinking { color: var(--cyan); }
 .voice-speaking { color: var(--amber); border-color: rgba(255, 203, 107, 0.32); }
 .voice-boot { color: var(--violet); border-color: rgba(169, 135, 255, 0.34); }
+.voice-idle { color: var(--muted); }
+.voice-blocked { color: var(--red); border-color: rgba(255, 94, 122, 0.42); }
+
+.voice-meta span {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.voice-controls .icon-btn {
+  min-width: 54px;
+  min-height: 32px;
+  text-align: center;
+}
 
 .hud-stage {
   grid-area: hud;
@@ -2604,7 +2637,12 @@ summary {
   }
 
   .voice-strip {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .voice-controls {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .prime-header h1 {
