@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create a Relay/Aegis PromptPacket policy integration checklist after Reviews B cleared the Aegis policy evaluator.
 
@@ -20,7 +20,15 @@ Task: write a build-ready docs-only checklist for wiring `evaluate_prompt_packet
 
 Tests: docs-only; run text/shape inspection plus `git diff --check` before marking complete.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, inspection evidence, and Next Candidate: bind any review findings from this integration checklist before Relay runtime integration.
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `pending local commit hash`
+- Files changed: `docs/relay-aegis-promptpacket-policy-integration-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Verification performed: text/shape inspection confirmed the checklist exists and covers Relay construction of `PromptPacketProofMetadata`, Aegis evaluator call site, allow/warn/demote/block/human-gate outcome mapping, decision-record behavior, raw-prompt and credential exclusions, Bifrost-visible proof summaries, fail-closed missing metadata handling, deterministic tests, and FileMap routing; staged diff passes `git diff --cached --check`.
+- Next Candidate: bind any review findings from this integration checklist before Relay runtime integration.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
