@@ -10,6 +10,26 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement Session Lifecycle + Close/Archive Write-Through proof slice from `docs/v2-progress-tracker.md`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: add deterministic, display-safe proof metadata for close, archive, stop-before-close, and write-through actions as explicit Vulcan/Session Lifecycle actions. Keep it proof-only and fail-closed: no session closing, archiving, stopping, process/session inspection, model/provider calls, UI/Bifrost/FileMap edits, branch/worktree/main movement, or Polaris.
+
+Completion:
+
+- Build 2 completed the close/archive write-through proof slice in local worktree commit `6dfabea0`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Evidence: added `CloseArchiveWriteThroughAction`, frozen `SessionCloseArchiveWriteThroughProof`, and `build_close_archive_write_through_proof()` to produce non-executable proof metadata for close, archive, stop-before-close, and write-through review. The proof preserves target session id, intended action, required write-through condition, failure visibility, human/permission gate state, rollback/preservation note, blockers, evidence refs, and explicit `is_executable_now=False`.
+- Display-safety evidence: optional caller-supplied visibility/preservation text is bounded to fixed review tags instead of copied verbatim, and sentinel tests prove raw worker chat / raw prompt strings do not appear in serialized proof or evidence refs.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 122 tests; `git diff --check` passed with only Git line-ending normalization warnings for edited files.
+- Ready for Codex Review.
+- Next Candidate: repair the separately routed Session Lifecycle state-evidence blocker-summary raw-text finding, or bind reviewed close/archive proof into Prime/Beacon advisory serialization when assigned.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: add Session Lifecycle command-preview proof fields for V2 tracker item `Session Lifecycle + Command Plan Proof`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
@@ -1634,6 +1654,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-02 16:57:36 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 1 of 3; idle polling
 2026-06-02 16:59:35 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 1 of 3; idle polling
 2026-06-02 17:01:35 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 1 of 3; idle polling
+2026-06-02 17:03:35 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 1 of 3; idle polling
 ```
 
 ## Write/Completion Log

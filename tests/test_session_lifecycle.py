@@ -14,6 +14,7 @@ from meridian_core.session_lifecycle import (
     SessionActionReason,
     WorkflowHeartbeatStatus,
     WorkflowResultKind,
+    CloseArchiveWriteThroughAction,
     PermissionState,
     OperationScope,
     FindingType,
@@ -28,10 +29,12 @@ from meridian_core.session_lifecycle import (
     SessionLiveControlCommandPlanStagingRecord,
     SessionCommandStagingReviewPacket,
     SessionCommandPreviewProof,
+    SessionCloseArchiveWriteThroughProof,
     SessionLifecycleState,
     SessionCommandPlan,
     build_command_staging_review_packet,
     build_command_preview_proof,
+    build_close_archive_write_through_proof,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
@@ -2801,6 +2804,222 @@ class TestSessionCommandPreviewProof:
             preview_state.status,
         )
         assert "preview.expected_transition=stale->stale" in proof.evidence_refs
+
+
+class TestSessionCloseArchiveWriteThroughProof:
+    """Tests for close/archive/write-through proof-only metadata."""
+
+    @pytest.fixture
+    def close_state(self):
+        """Create a running session with scoped archive permission."""
+        now = datetime(2026, 6, 2, 17, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.ARCHIVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="close-archive-write-through",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-close-proof",
+            session_name="Build 2 Close Proof",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.RUNNING,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/build-2-close-archive-write-through",
+            current_task_id="close-archive-write-through",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=9000,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=ProofState.COMMAND_STAGED,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def test_close_proof_is_non_executable_and_requires_stop_before_close(
+        self,
+        close_state,
+    ):
+        """Close proof preserves target and fail-closed stop-before-close blocker."""
+        observed_at = datetime(2026, 6, 2, 17, 5, tzinfo=timezone.utc)
+
+        proof = build_close_archive_write_through_proof(
+            close_state,
+            CloseArchiveWriteThroughAction.CLOSE,
+            write_through_completed=True,
+            human_gate_approved=True,
+            timestamp=observed_at,
+        )
+        serialized = proof.to_dict()
+
+        assert isinstance(proof, SessionCloseArchiveWriteThroughProof)
+        assert proof.target_session_id == close_state.session_id
+        assert proof.intended_action == CloseArchiveWriteThroughAction.CLOSE
+        assert proof.required_operation == OperationScope.ARCHIVE
+        assert proof.write_through_completed is True
+        assert proof.permission_gate_state == "approved"
+        assert proof.human_gate_state == "approved"
+        assert proof.is_executable_now is False
+        assert "close.stop_before_close_required" in proof.blockers
+        assert "proof.is_executable_now_false" in proof.blockers
+        assert serialized["intended_action"] == "close"
+        assert serialized["is_executable_now"] is False
+
+    def test_archive_proof_serializes_write_through_and_visibility(
+        self,
+        close_state,
+    ):
+        """Archive proof records durable write-through and visibility metadata."""
+        observed_at = datetime(2026, 6, 2, 17, 5, tzinfo=timezone.utc)
+        stopped_state = SessionLifecycleState(
+            **{**close_state.__dict__, "status": SessionStatus.STOPPED}
+        )
+
+        proof = build_close_archive_write_through_proof(
+            stopped_state,
+            CloseArchiveWriteThroughAction.ARCHIVE,
+            write_through_completed=True,
+            human_gate_approved=True,
+            timestamp=observed_at,
+        )
+        serialized = proof.to_dict()
+
+        assert proof.intended_action == CloseArchiveWriteThroughAction.ARCHIVE
+        assert proof.blockers == ("proof.is_executable_now_false",)
+        assert proof.approval_required is True
+        assert proof.failure_visibility == (
+            "write_through_verified_for_vulcan_and_session_lifecycle_review"
+        )
+        assert "Archive requires durable queue/result write-through proof" in (
+            proof.required_write_through_condition
+        )
+        assert "close_archive.intended_action=archive" in proof.evidence_refs
+        assert serialized["required_operation"] == "archive"
+        assert serialized["permission_state"] == "unlocked_temporary"
+
+    def test_stop_before_close_proof_preserves_state_without_execution(
+        self,
+        close_state,
+    ):
+        """Stop-before-close proof is explicit but still non-executable."""
+        observed_at = datetime(2026, 6, 2, 17, 5, tzinfo=timezone.utc)
+
+        proof = build_close_archive_write_through_proof(
+            close_state,
+            CloseArchiveWriteThroughAction.STOP_BEFORE_CLOSE,
+            write_through_completed=True,
+            human_gate_approved=True,
+            timestamp=observed_at,
+        )
+
+        assert proof.intended_action == CloseArchiveWriteThroughAction.STOP_BEFORE_CLOSE
+        assert proof.required_operation == OperationScope.ARCHIVE
+        assert proof.is_executable_now is False
+        assert proof.rollback_or_preservation_note == (
+            "Preserve queue, proof, and blocker state before any later close "
+            "or archive review."
+        )
+        assert "close_archive.intended_action=stop_before_close" in proof.evidence_refs
+
+    def test_write_through_failure_visibility_blocks_review(self, close_state):
+        """Missing write-through remains visible and blocked."""
+        observed_at = datetime(2026, 6, 2, 17, 5, tzinfo=timezone.utc)
+
+        proof = build_close_archive_write_through_proof(
+            close_state,
+            CloseArchiveWriteThroughAction.WRITE_THROUGH,
+            write_through_completed=False,
+            human_gate_approved=True,
+            timestamp=observed_at,
+        )
+
+        assert proof.intended_action == CloseArchiveWriteThroughAction.WRITE_THROUGH
+        assert proof.required_operation is None
+        assert proof.failure_visibility == (
+            "write_through_failure_visible_to_vulcan_and_session_lifecycle"
+        )
+        assert "write_through.required" in proof.blockers
+        assert "write_through.review_required" in proof.blockers
+        assert proof.permission_gate_state == "approved"
+        assert proof.is_executable_now is False
+
+    def test_blocked_permission_state_records_gate_blocker(self, close_state):
+        """Locked archive permission is surfaced as a proof blocker."""
+        observed_at = datetime(2026, 6, 2, 17, 5, tzinfo=timezone.utc)
+        locked_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset(),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.LOCKED_BY_DEFAULT,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
+            last_permission_change=observed_at,
+        )
+        locked_state = SessionLifecycleState(
+            **{**close_state.__dict__, "permission_context": locked_context}
+        )
+
+        proof = build_close_archive_write_through_proof(
+            locked_state,
+            CloseArchiveWriteThroughAction.ARCHIVE,
+            write_through_completed=True,
+            human_gate_approved=True,
+            timestamp=observed_at,
+        )
+
+        assert proof.permission_state == PermissionState.LOCKED_BY_DEFAULT
+        assert proof.permission_gate_state == "blocked"
+        assert "permission.archive_required" in proof.blockers
+        assert "close_archive.permission_allowed=False" in proof.evidence_refs
+        assert proof.is_executable_now is False
+
+    def test_close_archive_proof_excludes_raw_prompt_and_chat_sentinels(
+        self,
+        close_state,
+    ):
+        """Caller text is bounded before serialization or evidence refs."""
+        observed_at = datetime(2026, 6, 2, 17, 5, tzinfo=timezone.utc)
+        raw_worker_chat = "SECRET_WORKER_CHAT: close this UI now"
+        raw_prompt = "SECRET_RAW_PROMPT: move branches now"
+
+        proof = build_close_archive_write_through_proof(
+            close_state,
+            CloseArchiveWriteThroughAction.ARCHIVE,
+            write_through_completed=False,
+            human_gate_approved=False,
+            failure_visibility=raw_worker_chat,
+            rollback_or_preservation_note=raw_prompt,
+            timestamp=observed_at,
+        )
+        serialized_text = repr(proof.to_dict())
+        evidence_text = repr(proof.evidence_refs)
+
+        assert proof.raw_worker_chat_included is False
+        assert proof.raw_prompt_included is False
+        assert proof.failure_visibility == "custom_failure_visibility_provided_for_review"
+        assert proof.rollback_or_preservation_note == (
+            "custom_preservation_note_provided_for_review"
+        )
+        assert raw_worker_chat not in serialized_text
+        assert raw_worker_chat not in evidence_text
+        assert raw_prompt not in serialized_text
+        assert raw_prompt not in evidence_text
+        assert "SECRET_WORKER_CHAT" not in serialized_text
+        assert "SECRET_RAW_PROMPT" not in serialized_text
 
 
 class TestPrimeAutonomyInput:

@@ -162,6 +162,15 @@ class WorkflowResultKind(Enum):
     INTERNAL_ERROR = "internal_error"
 
 
+class CloseArchiveWriteThroughAction(Enum):
+    """Proof-only close/archive/write-through action family."""
+
+    CLOSE = "close"
+    ARCHIVE = "archive"
+    STOP_BEFORE_CLOSE = "stop_before_close"
+    WRITE_THROUGH = "write_through"
+
+
 @dataclass(frozen=True)
 class PermissionContext:
     """Approval scope and escalation state for session operations."""
@@ -628,6 +637,59 @@ class SessionCommandPreviewProof:
             "permission_state": self.permission_state.value,
             "blockers": list(self.blockers),
             "evidence_refs": list(self.evidence_refs),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
+class SessionCloseArchiveWriteThroughProof:
+    """Display-safe proof metadata for close/archive write-through review."""
+
+    proof_id: str
+    target_session_id: str
+    session_name: str
+    intended_action: CloseArchiveWriteThroughAction
+    required_write_through_condition: str
+    write_through_completed: bool
+    failure_visibility: str
+    human_gate_required: bool
+    human_gate_state: str
+    permission_state: PermissionState
+    permission_gate_state: str
+    required_operation: Optional[OperationScope]
+    is_executable_now: bool
+    approval_required: bool
+    rollback_or_preservation_note: str
+    blockers: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    raw_worker_chat_included: bool
+    raw_prompt_included: bool
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize close/archive write-through proof to JSON-safe metadata."""
+        return {
+            "proof_id": self.proof_id,
+            "target_session_id": self.target_session_id,
+            "session_name": self.session_name,
+            "intended_action": self.intended_action.value,
+            "required_write_through_condition": self.required_write_through_condition,
+            "write_through_completed": self.write_through_completed,
+            "failure_visibility": self.failure_visibility,
+            "human_gate_required": self.human_gate_required,
+            "human_gate_state": self.human_gate_state,
+            "permission_state": self.permission_state.value,
+            "permission_gate_state": self.permission_gate_state,
+            "required_operation": (
+                self.required_operation.value if self.required_operation else None
+            ),
+            "is_executable_now": self.is_executable_now,
+            "approval_required": self.approval_required,
+            "rollback_or_preservation_note": self.rollback_or_preservation_note,
+            "blockers": list(self.blockers),
+            "evidence_refs": list(self.evidence_refs),
+            "raw_worker_chat_included": self.raw_worker_chat_included,
+            "raw_prompt_included": self.raw_prompt_included,
             "timestamp": self.timestamp.isoformat(),
         }
 
@@ -1968,6 +2030,82 @@ def build_command_preview_proof(
     )
 
 
+def build_close_archive_write_through_proof(
+    session: SessionLifecycleState,
+    intended_action: CloseArchiveWriteThroughAction,
+    write_through_completed: bool = False,
+    human_gate_approved: bool = False,
+    failure_visibility: Optional[str] = None,
+    rollback_or_preservation_note: Optional[str] = None,
+    timestamp: Optional[datetime] = None,
+) -> SessionCloseArchiveWriteThroughProof:
+    """Build non-executable close/archive/write-through proof metadata.
+
+    This is fail-closed proof only. It does not close, archive, stop, inspect
+    processes, spawn sessions, call models, write UI/FileMap, or move branches.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+    required_operation = _close_archive_required_operation(intended_action)
+    permission_allowed = (
+        session.can_execute_operation(required_operation)
+        if required_operation is not None
+        else True
+    )
+    blockers = _close_archive_write_through_blockers(
+        session,
+        intended_action,
+        write_through_completed,
+        human_gate_approved,
+        permission_allowed,
+    )
+    evidence_refs = _close_archive_write_through_evidence_refs(
+        session,
+        intended_action,
+        write_through_completed,
+        human_gate_approved,
+        permission_allowed,
+        required_operation,
+        blockers,
+    )
+    visibility = _close_archive_failure_visibility(
+        intended_action,
+        write_through_completed,
+        failure_visibility is not None,
+    )
+    return SessionCloseArchiveWriteThroughProof(
+        proof_id=(
+            f"{session.session_id}:{intended_action.value}:write_through:"
+            f"{observed_at.isoformat()}"
+        ),
+        target_session_id=session.session_id,
+        session_name=session.session_name,
+        intended_action=intended_action,
+        required_write_through_condition=_close_archive_write_through_condition(
+            intended_action
+        ),
+        write_through_completed=write_through_completed,
+        failure_visibility=visibility,
+        human_gate_required=not human_gate_approved,
+        human_gate_state="approved" if human_gate_approved else "required",
+        permission_state=session.permission_context.branch_permission_state,
+        permission_gate_state=(
+            "approved" if permission_allowed else "blocked"
+        ),
+        required_operation=required_operation,
+        is_executable_now=False,
+        approval_required=bool(blockers),
+        rollback_or_preservation_note=_close_archive_preservation_note(
+            intended_action,
+            rollback_or_preservation_note is not None,
+        ),
+        blockers=blockers,
+        evidence_refs=evidence_refs,
+        raw_worker_chat_included=False,
+        raw_prompt_included=False,
+        timestamp=observed_at,
+    )
+
+
 def _workflow_heartbeat_age_seconds(
     heartbeat_emitted_at: Optional[datetime],
     observed_at: datetime,
@@ -1988,6 +2126,141 @@ def _command_preview_expected_transition(
     if command_kind == CommandIntent.ARCHIVE:
         return (current_status, SessionStatus.ARCHIVED)
     return (current_status, current_status)
+
+
+def _close_archive_required_operation(
+    intended_action: CloseArchiveWriteThroughAction,
+) -> Optional[OperationScope]:
+    if intended_action in (
+        CloseArchiveWriteThroughAction.CLOSE,
+        CloseArchiveWriteThroughAction.ARCHIVE,
+        CloseArchiveWriteThroughAction.STOP_BEFORE_CLOSE,
+    ):
+        return OperationScope.ARCHIVE
+    return None
+
+
+def _close_archive_write_through_condition(
+    intended_action: CloseArchiveWriteThroughAction,
+) -> str:
+    conditions = {
+        CloseArchiveWriteThroughAction.CLOSE: (
+            "Session close requires durable write-through proof and "
+            "stop-before-close review when the session is still running."
+        ),
+        CloseArchiveWriteThroughAction.ARCHIVE: (
+            "Archive requires durable queue/result write-through proof before "
+            "the session may leave active lifecycle state."
+        ),
+        CloseArchiveWriteThroughAction.STOP_BEFORE_CLOSE: (
+            "Stop-before-close requires preservation proof before any close or "
+            "archive action is reviewed."
+        ),
+        CloseArchiveWriteThroughAction.WRITE_THROUGH: (
+            "Write-through requires durable result/queue preservation proof "
+            "before close or archive review can proceed."
+        ),
+    }
+    return conditions[intended_action]
+
+
+def _close_archive_failure_visibility(
+    intended_action: CloseArchiveWriteThroughAction,
+    write_through_completed: bool,
+    custom_visibility_provided: bool = False,
+) -> str:
+    if custom_visibility_provided:
+        return "custom_failure_visibility_provided_for_review"
+    if write_through_completed:
+        return (
+            "write_through_verified_for_vulcan_and_session_lifecycle_review"
+        )
+    if intended_action == CloseArchiveWriteThroughAction.WRITE_THROUGH:
+        return "write_through_failure_visible_to_vulcan_and_session_lifecycle"
+    return (
+        f"{intended_action.value}_write_through_failure_visible_to_"
+        "vulcan_and_session_lifecycle"
+    )
+
+
+def _close_archive_preservation_note(
+    intended_action: CloseArchiveWriteThroughAction,
+    custom_note_provided: bool = False,
+) -> str:
+    if custom_note_provided:
+        return "custom_preservation_note_provided_for_review"
+    if intended_action == CloseArchiveWriteThroughAction.STOP_BEFORE_CLOSE:
+        return (
+            "Preserve queue, proof, and blocker state before any later close "
+            "or archive review."
+        )
+    if intended_action == CloseArchiveWriteThroughAction.WRITE_THROUGH:
+        return (
+            "Record durable state before closure; no session close or archive "
+            "is performed by this proof."
+        )
+    return (
+        "Close/archive is proof-only and non-executable; preserve recoverable "
+        "session state until an approved write-through action is reviewed."
+    )
+
+
+def _close_archive_write_through_blockers(
+    session: SessionLifecycleState,
+    intended_action: CloseArchiveWriteThroughAction,
+    write_through_completed: bool,
+    human_gate_approved: bool,
+    permission_allowed: bool,
+) -> tuple[str, ...]:
+    blockers = []
+    if not write_through_completed:
+        blockers.append("write_through.required")
+    if not human_gate_approved:
+        blockers.append("human_gate.required")
+    if not permission_allowed:
+        blockers.append("permission.archive_required")
+    if (
+        intended_action == CloseArchiveWriteThroughAction.CLOSE
+        and session.status == SessionStatus.RUNNING
+    ):
+        blockers.append("close.stop_before_close_required")
+    if intended_action == CloseArchiveWriteThroughAction.WRITE_THROUGH:
+        blockers.append("write_through.review_required")
+    blockers.append("proof.is_executable_now_false")
+    return tuple(dict.fromkeys(blockers))
+
+
+def _close_archive_write_through_evidence_refs(
+    session: SessionLifecycleState,
+    intended_action: CloseArchiveWriteThroughAction,
+    write_through_completed: bool,
+    human_gate_approved: bool,
+    permission_allowed: bool,
+    required_operation: Optional[OperationScope],
+    blockers: tuple[str, ...],
+) -> tuple[str, ...]:
+    refs = [
+        f"close_archive.target_session_id={session.session_id}",
+        f"close_archive.session_status={session.status.value}",
+        f"close_archive.intended_action={intended_action.value}",
+        f"close_archive.queue_file={session.assigned_queue_file}",
+        f"close_archive.worktree={session.worktree_path}",
+        f"close_archive.branch={session.branch_name}",
+        f"close_archive.write_through_completed={write_through_completed}",
+        "close_archive.failure_visibility=required",
+        f"close_archive.human_gate_approved={human_gate_approved}",
+        f"close_archive.permission_state={session.permission_context.branch_permission_state.value}",
+        f"close_archive.permission_allowed={permission_allowed}",
+        "close_archive.is_executable_now=False",
+        "close_archive.raw_worker_chat_included=False",
+        "close_archive.raw_prompt_included=False",
+    ]
+    refs.append(
+        "close_archive.required_operation="
+        + (required_operation.value if required_operation else "none")
+    )
+    refs.extend(f"close_archive.blocker={blocker}" for blocker in blockers)
+    return tuple(dict.fromkeys(refs))
 
 
 def _review_packet_prime_advisory(
