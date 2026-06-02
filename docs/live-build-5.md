@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add deterministic Bifrost validation-envelope sample rendering for Model Harness runtime metadata.
 
@@ -22,7 +22,12 @@ Task: add a static deterministic Bifrost sample for runtime validation-envelope 
 
 Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check`.
 
-Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, changed files, tests run, concrete rendering evidence, and Next Candidate: bind reviewed runtime validation envelopes when available.
+Ready for Codex Review:
+- Commit: `151306f3` (`Add Bifrost validation envelope rendering`).
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Tests run: `python -m pytest tests/test_bifrost_cockpit.py -q` (254 passed); `git diff --check` (passed; Git emitted only line-ending normalization warnings).
+- Concrete rendering evidence: cockpit now renders `aria-label="Model Harness Runtime Validation Envelopes"` beside Model Harness capability metadata with deterministic envelopes for `validation:claude-direct-ready`, `validation:deepseek-review-pending`, and `validation:openrouter-aggregator-blocked`; visible fields include validation state, fail-closed reason, provider, exact model, dispatch id, route kind, route proof refs, candidate trust badges, external-review status, proof strength, prompt budget/growth/percent/delta fields, blockers, warnings, and display-safe evidence refs.
+- Next Candidate: bind reviewed runtime validation envelopes when available.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
