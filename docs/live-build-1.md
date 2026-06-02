@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind PromptPacket proof metadata into Relay dispatch envelopes after Reviews A cleared dispatch envelope helpers and Reviews B cleared the PromptPacket proof metadata checklist.
 
@@ -17,6 +17,15 @@ Task: add deterministic packet proof metadata for Relay dispatch envelopes and a
 Tests: `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q`.
 
 Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from the PromptPacket proof metadata slice before further Relay/Model Harness work.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-01 22:30 -06:00.
+- Commit: `83d48b35` (`feat: Bind PromptPacket proof metadata to Relay envelopes`).
+- Files changed: `meridian_core/prompt_packet.py`, `meridian_core/relay_packet.py`, `meridian_core/relay_executor.py`, `tests/test_prompt_packet.py`, `tests/test_relay_packet.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q` (234 passed).
+- Concrete evidence: PromptPacket now builds immutable proof metadata with packet hash, budget ref, source-lineage compliance, proof requirements, and safe blocked/gap tags; Relay packet assembly passes route proof requirements; Relay dispatch envelopes carry packet proof refs/hash/budget/compliance and proof-trail Aegis evidence ids without changing `model_payload()` or exposing raw prompt text.
+- Next Candidate: bind any review findings from the PromptPacket proof metadata slice before further Relay/Model Harness work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
