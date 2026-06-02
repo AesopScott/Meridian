@@ -3368,6 +3368,16 @@ body {
     const status = session.status && session.status !== 'live' ? ` (${session.status.replaceAll('_', ' ')})` : '';
     return `${session.sessionName}${status}`;
   };
+  const userSessionStatusText = () => {
+    const selected = selectedUserSession();
+    if (!selected) return 'select live session';
+    const status = selected.status && selected.status !== 'live' ? ` (${selected.status.replaceAll('_', ' ')})` : '';
+    return `target ${selected.sessionName}${status}`;
+  };
+  const updateUserSessionStatus = () => {
+    const input = userInput();
+    if (input) setStatus(input, userSessionStatusText());
+  };
   const renderUserSessionSelect = () => {
     if (!userSessionSelect) return;
     const stored = localStorage.getItem(userSessionTargetKey) || '';
@@ -3379,6 +3389,7 @@ body {
       option.textContent = 'No live sessions';
       userSessionSelect.append(option);
       updateUserSessionTitle();
+      updateUserSessionStatus();
       return;
     }
     const projects = Array.from(new Set(userSessions.map((session) => session.projectName || 'Meridian'))).sort((a, b) => a.localeCompare(b));
@@ -3399,6 +3410,7 @@ body {
     userSessionSelect.value = userSessions.some((session) => session.sessionId === current) ? current : userSessions[0].sessionId;
     localStorage.setItem(userSessionTargetKey, userSessionSelect.value);
     updateUserSessionTitle();
+    updateUserSessionStatus();
   };
   const loadUserSessions = async () => {
     if (!userSessionSelect) return;
@@ -3643,7 +3655,7 @@ body {
     if (input) {
       input.value = localStorage.getItem(draftKey(input)) || '';
       renderTranscript(input);
-      setStatus(input, selectedUserSession() ? `target ${selectedUserSession().sessionName}` : 'select live session');
+      updateUserSessionStatus();
     }
   });
   updateModelReadiness();
