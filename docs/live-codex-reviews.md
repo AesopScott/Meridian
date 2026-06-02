@@ -24,6 +24,70 @@ Use current `origin/main` at or after `c111eed9`. Verify containment, path scope
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop.
 
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Ready markers in order: Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:19 -06:00. Current `HEAD` and `origin/main` are `a2c02267`. Build 2 commits `7bd603a2` and `14d3e398`, Build 1 commit `eead7f27`, and Build 3 commits `a9de0f5f` and `f33b3764` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 7bd603a2^..14d3e398`
+
+Build 2 review result:
+
+- Containment checks for `7bd603a2` and `14d3e398` passed.
+- Scope check shows runtime/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 82 tests.
+- `git diff --check 7bd603a2^..14d3e398` passed.
+- Verified `SessionCommandPlan.audit_evidence()` and serialized `audit_evidence` are deterministic, display-safe metadata covering plan action/reason, blockers, permission proof/gate data, review-gate state, and recovery notes without live control.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, branch movement, UI/Bifrost/FileMap edits, Polaris dependency, or autonomous movement in the reviewed Build 2 slice.
+
+Build 2 finding: none.
+
+Build 1 review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check eead7f27^..eead7f27`
+
+Build 1 review result:
+
+- Containment check for `eead7f27` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 204 tests.
+- `git diff --check eead7f27^..eead7f27` passed.
+- Verified `RelayDispatchEnvelope` carries exact/requested model id, provider/route/trust metadata, payload evidence references, Aegis/proof fields, blocked/error tags, safe dispatch status, and audit fields without storing raw prompts, credentials, raw provider responses, account internals, UI state, or transcripts.
+- Verified envelope construction is deterministic metadata around existing dispatch flow; no live provider calls, UI/Bifrost rendering, FileMap edits, branch movement, Polaris dependency, or cross-worktree movement were introduced.
+
+Build 1 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check a9de0f5f^..f33b3764`
+
+Build 3 review result:
+
+- Containment checks for `a9de0f5f` and `f33b3764` passed.
+- Scope check shows FileMap registration changes limited to `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check a9de0f5f^..f33b3764` passed.
+- Verified `docs/relay-dispatch-hardening-implementation-checklist.md` is registered in runtime `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified the Build 3 Ready marker records concrete audit evidence, files changed, proof command, commit marker, and next candidate; this is not read-check-only progress.
+
+Build 3 finding: none.
+
+Completion: Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit are review-cleared. No repair routed.
+
 ## Coordinator Override - Active Now
 
 Goal: poll and review the next current-main Ready marker from Build 1, Build 2, or Build 3 after fresh lane reactivation.
