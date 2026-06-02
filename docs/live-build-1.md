@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add DeepSeek candidate metadata presets to the provider-neutral Model Harness.
 
@@ -25,6 +25,18 @@ Tests:
 - `python -m pytest tests/test_model_adapter.py -q`
 
 Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from the DeepSeek metadata preset slice before further Relay/Model work.
+
+Completion:
+
+- Build 1 completed DeepSeek candidate metadata presets on 2026-06-01 21:24 -06:00.
+- Commit: `1a923862` (feat: Add DeepSeek candidate metadata presets).
+- Files changed: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`.
+- Tests: `python -m pytest tests/test_model_adapter.py -q` (32 passed).
+- Implementation: Added immutable provider-neutral DeepSeek candidate route presets and metadata helpers for `default_quality` (`deepseek-v4-pro`) and `fast` (`deepseek-v4-flash`) lanes. Both preserve `deepseek-chat` as the only direct API dispatch identity, use the fixed direct endpoint metadata, remain candidate trust with external review pending, and explicitly deny review clearing, branch movement, Relay/Aegis bypass, and autonomous coding authority.
+- Scope exclusions verified: no network access, credentials, live model calls, UI/Bifrost rendering, branch movement, Polaris dependency, merge, rebase, reset, cherry-pick, or cross-worktree movement.
+- Next Candidate: bind any review findings from the DeepSeek metadata preset slice before further Relay/Model work.
+
+Ready for Codex Review.
 
 ## Next Candidate Task
 
