@@ -10,11 +10,11 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the latest current-main Build 3 FileMap audit, then keep Build 1/2/3 review hot under the rolling two-stage pipeline.
+Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: first review the landed Build 3 post-Build-4/5 FileMap audit commits `c8c7cc22` and `007a1217` on current `origin/main`. Verify containment, path scope, concrete audit evidence, `python -m pytest tests/test_filemap.py -q`, and `git diff --check c8c7cc22^..007a1217`. If it fails, route the smallest focused Build 3 repair and stop. If it passes, record pass provenance and then poll for the next Ready marker from Build 1 or Build 2 without committing read-check-only polling.
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` and `docs/live-build-2.md`. Review the oldest Ready marker from Build 1 or Build 2 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Relay/Aegis runtime integration or Build 2 Session Lifecycle permission summary when either marks Ready for Codex Review.
 

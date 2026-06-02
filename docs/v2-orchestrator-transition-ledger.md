@@ -478,6 +478,7 @@ Coordinator Reviews A FileMap clearance movement - 2026-06-02:
 - Approved and completed path-limited movement of Reviews A Build 3 FileMap audit pass provenance commit `f4fdef55` onto shared main as `298459ad`, limited to `docs/live-codex-reviews.md`.
 - Reported proof: Reviews A verified Build 3 FileMap audit commits `c8c7cc22` and `007a1217` with `python -m pytest tests/test_filemap.py -q` passing 46/46 and `git diff --check c8c7cc22^..007a1217` passing.
 - Honest lane status after this clearance: Build 3 latest FileMap audit is review-cleared. Build 1, Build 2, Build 4, and Build 5 remain actively working on the rolling-pipeline implementation slices. Reviews B is temporarily idle/polling because Build 4/5 have not yet marked Ready on current main.
+- Queue maintenance: updated Reviews A top Active Now block to poll/review Build 1 and Build 2 Ready markers only, because the Build 3 FileMap audit is now review-cleared on shared main.
 
 ## Full Takeover Criteria
 
