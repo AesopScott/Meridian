@@ -143,6 +143,58 @@ def test_index_user_session_mode_names_target_and_preserves_storage():
     assert "Select a live User Session target before sending" in doc
 
 
+def test_compass_logic_snapshot_documents_project_context_harness():
+    from meridian_core.compass_logic_snapshot import compass_logic_snapshot
+
+    snapshot = compass_logic_snapshot()
+    titles = [section["title"] for section in snapshot["capabilitySections"]]
+    assert snapshot["source"] == "meridian_core.compass_logic_snapshot.compass_logic_snapshot"
+    assert "Project Selector Logic" in titles
+    assert "Prime Prompt Context" in titles
+    assert "Portfolio Boundary" in titles
+    assert "User Session Independence" not in titles
+
+
+def test_vulcan_logic_snapshot_documents_session_lifecycle_harness():
+    from meridian_core.vulcan_logic_snapshot import vulcan_logic_snapshot
+
+    snapshot = vulcan_logic_snapshot()
+    titles = [section["title"] for section in snapshot["capabilitySections"]]
+    assert snapshot["source"] == "meridian_core.vulcan_logic_snapshot.vulcan_logic_snapshot"
+    assert "User Session Independence" in titles
+    assert "Project-Aware Session Grouping" in titles
+    assert "Stale Target Guard" in titles
+    assert "Portfolio Boundary" not in titles
+
+
+def test_index_projects_selector_is_compass_context_not_user_routing():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
+    assert "screen.dataset.projectContext" in doc
+    assert "Compass project context:" in doc
+    assert "projectContext" in doc
+    assert "renderUserSessionSelect();" in doc
+    assert "localStorage.setItem(userSessionTargetKey, projectSelect.value" not in doc
+
+
+def test_index_compass_harness_uses_backend_logic_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Compass Project Logic" in doc
+    assert "data-compass-logic" in doc
+    assert "bridgeUrl('compass-logic')" in doc
+    assert "renderCompassLogicSnapshot" in doc
+    assert "renderCompassProjectLogic" in doc
+
+
+def test_index_vulcan_harness_uses_backend_logic_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Vulcan Session Logic" in doc
+    assert "data-vulcan-logic" in doc
+    assert "bridgeUrl('vulcan-logic')" in doc
+    assert "renderVulcanLogicSnapshot" in doc
+    assert "renderVulcanSessionLogic" in doc
+
+
 def test_sample_view_model_has_progress_events():
     vm = sample_cockpit_view_model()
     assert len(vm.progress_events) >= 1

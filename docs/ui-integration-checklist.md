@@ -59,7 +59,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SEL1 | Model selector | Manual model selection. Defaults to Codex. Auto stays disabled until Prime/Relay logic exists. | partial | Served page has Codex selected and Auto disabled. |
-| SEL2 | Projects selector | Selects active project context for Prime and project-scoped UI state. | planned | Track `PRJ-*` subitems before wiring the selector. |
+| SEL2 | Projects selector | Selects active project context for Prime and project-scoped UI state. | wired | Projects selector writes Compass project context, persists `meridian.session.project`, and does not retarget User Sessions. |
 | SEL3 | User Sessions selector | Selects from all open live sessions when the right panel is in User Session mode. | partial | Dropdown is populated from `/bridge/user-sessions`; selection routes User prompt with the selected session target id/cwd. |
 
 ### Projects Selector Subitems
@@ -68,18 +68,18 @@ The Prime panel's Projects dropdown selects the active project context for Prime
 
 | ID | Projects Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| PRJ1 | Project dropdown placement | Keeps the Projects dropdown in the approved Prime panel position. | partial | Dropdown sits above the Prime line with right edge aligned to the line. |
-| PRJ2 | Active project context | Sets the active project for Prime/orchestrator context. | planned | Prime prompt metadata names selected project. |
-| PRJ3 | Alphabetical project sort | Sorts project options alphabetically by project name. | planned | Project list order is alphabetical. |
-| PRJ4 | Current project label | Displays the selected project name clearly. | partial | Selected project remains visible after selection. |
-| PRJ5 | Last project restore | Restores last selected project when allowed by Settings. | planned | Reload restores project only when persistence is enabled. |
+| PRJ1 | Project dropdown placement | Keeps the Projects dropdown in the approved Prime panel position. | wired | Dropdown remains in `.session-project-select` above the Prime line with the approved right-edge alignment. |
+| PRJ2 | Active project context | Sets the active project for Prime/orchestrator context. | wired | Prime prompt payload metadata and recent-call metadata include `projectContext`. |
+| PRJ3 | Alphabetical project sort | Sorts project options alphabetically by project name. | wired | Seeded project options render as Bifrost, Meridian, Spark after the placeholder. |
+| PRJ4 | Current project label | Displays the selected project name clearly. | wired | Selected project stays visible in the dropdown and Prime status reads `Compass project <project>`. |
+| PRJ5 | Last project restore | Restores last selected project when allowed by Settings. | wired | Reload restores `meridian.session.project`; invalid/missing stored value falls back to Meridian. |
 | PRJ6 | Project-scoped surfaces | Updates project-scoped backlog, review, progress, and session lists. | planned | Changing project updates dependent surfaces together. |
-| PRJ7 | User session independence | Does not silently route User prompts until a User session is selected. | planned | Changing project alone does not send or retarget a User prompt. |
-| PRJ8 | Session list filtering | User Sessions dropdown filters/group-emphasizes sessions for selected project while still showing all live sessions by project. | planned | Session dropdown grouping remains complete and project-aware. |
-| PRJ9 | Missing project state | Handles project with no live sessions or no loaded metadata clearly. | planned | Empty project state is readable and non-fake. |
+| PRJ7 | User session independence | Does not silently route User prompts until a User session is selected. | wired | Vulcan owns this session lifecycle guard: project change updates Compass context only; User send remains blocked without a bridge-confirmed live session target. |
+| PRJ8 | Session list filtering | User Sessions dropdown filters/group-emphasizes sessions for selected project while still showing all live sessions by project. | wired | Vulcan owns this session lifecycle grouping: all projects remain visible and the active Compass project optgroup is marked `(active project)`. |
+| PRJ9 | Missing project state | Handles project with no live sessions or no loaded metadata clearly. | wired | Vulcan owns this empty live-session state: active project with no sessions shows `No live sessions for active project` without faking a route. |
 | PRJ10 | Project metadata | Shows or links working directory, repo, branch, and project status when that surface exists. | planned | Metadata comes from project state, not hard-coded labels. |
 | PRJ11 | Project switch guard | Warns before switching away from unsaved prompt/session edits if needed. | planned | Dirty prompt/session state is preserved or explicitly discarded. |
-| PRJ12 | Portfolio boundary | Keeps repo, project, initiative, and venture concepts distinct. | planned | Project selector does not pretend repo equals project. |
+| PRJ12 | Portfolio boundary | Keeps repo, project, initiative, and venture concepts distinct. | wired | Compass backend snapshot documents project/repository/initiative/venture boundaries in the visible harness. |
 
 ### User Sessions Selector Subitems
 
@@ -440,8 +440,8 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 | HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | partial | Click updates session title/focus without fake heartbeat details. |
 | HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon should become Security before wiring actions. |
 | HN6 | Aegis | Opens/focuses proof/cross-check surface. | partial | Click updates session title/focus without fake proof status. |
-| HN7 | Compass | Opens/focuses mission/project bearing surface. | partial | Click updates session title/focus. |
-| HN8 | Vulcan / Session Lifecycle | Opens/focuses session lifecycle controls. | partial | Click updates session title/focus; no live worker control until wired. |
+| HN7 | Compass | Opens/focuses mission/project bearing surface. | wired | Click opens Compass Project Logic with backend-sourced project selector, Prime prompt context, and portfolio boundary sections. |
+| HN8 | Vulcan / Session Lifecycle | Opens/focuses session lifecycle controls. | wired | Click opens Vulcan Session Logic with backend-sourced User Session independence, project-aware session grouping, stale target guard, and lifecycle boundary sections. |
 | HN9 | Atlas | Opens/focuses knowledge/context retrieval surface. | planned | Until wired, no fake retrieved context. |
 | HN10 | Charon / FileMap | Opens/focuses navigation/FileMap surface. | partial | Click updates session title/focus; future view should read FileMap. |
 | HN11 | Arbiter / Codex Reviews | Opens/focuses review queue surface. | partial | Click updates session title/focus; no fake review findings. |

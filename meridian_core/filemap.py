@@ -278,6 +278,13 @@ def make_default_map() -> FileMap:
             notes="Functional seed for Prime's work intention.",
         ),
         FileMapEntry(
+            path="meridian_core/compass_logic_snapshot.py",
+            area=FileArea.COMPASS,
+            purpose="Backend snapshot for Compass project-context logic shown in the visible harness panel.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="Bifrost consumes this through /bridge/compass-logic; keeps Compass UI documentation backend-sourced.",
+        ),
+        FileMapEntry(
             path="meridian_core/objectives.py",
             area=FileArea.OBJECTIVES,
             purpose="Stable on-demand API for Compass-derived mission objectives.",
@@ -794,6 +801,13 @@ def make_default_map() -> FileMap:
             purpose="Session Lifecycle domain objects: typed enums and frozen dataclasses for session state, command planning, legality checking, and executability gates per V2 contract.",
             related_tests=["tests/test_session_lifecycle.py"],
             notes="Core harness implementation; read the v2-contract and implementation-checklist before modifying.",
+        ),
+        FileMapEntry(
+            path="meridian_core/vulcan_logic_snapshot.py",
+            area=FileArea.BIFROST,
+            purpose="Backend snapshot for Vulcan Session Lifecycle logic shown in the visible harness panel.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="Bifrost consumes this through /bridge/vulcan-logic; keeps session target and lifecycle UI documentation Vulcan-owned.",
         ),
         FileMapEntry(
             path="tests/test_session_lifecycle.py",

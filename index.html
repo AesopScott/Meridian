@@ -3297,14 +3297,43 @@ body {
   const modelSelect = document.querySelector('.session-model-select');
   const projectSelect = document.querySelector('.session-project-select');
   const projectSelectKey = 'meridian.session.project';
+  const projectOptions = ['Bifrost', 'Meridian', 'Spark'];
+  const activeProjectContext = () => projectSelect?.value || 'Meridian';
+  const updateProjectContextAuthority = () => {
+    const project = activeProjectContext();
+    window.meridianActiveProject = project;
+    screen.dataset.projectContext = project;
+    if (primeWindow) primeWindow.dataset.projectContext = project;
+    if (projectSelect) {
+      projectSelect.dataset.projectContext = project;
+      projectSelect.title = `Compass project context: ${project}. User Session target is selected separately.`;
+    }
+  };
   if (projectSelect) {
     const storedProject = localStorage.getItem(projectSelectKey);
-    if (storedProject && Array.from(projectSelect.options).some((option) => option.value === storedProject)) {
-      projectSelect.value = storedProject;
-    }
-    projectSelect.addEventListener('change', () => {
-      localStorage.setItem(projectSelectKey, projectSelect.value || '');
+    projectSelect.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.textContent = 'Projects';
+    projectSelect.append(placeholder);
+    projectOptions.slice().sort((a, b) => a.localeCompare(b)).forEach((project) => {
+      const option = document.createElement('option');
+      option.value = project;
+      option.textContent = project;
+      projectSelect.append(option);
     });
+    projectSelect.value = projectOptions.includes(storedProject) ? storedProject : 'Meridian';
+    localStorage.setItem(projectSelectKey, projectSelect.value);
+    updateProjectContextAuthority();
+    projectSelect.addEventListener('change', () => {
+      localStorage.setItem(projectSelectKey, projectSelect.value || 'Meridian');
+      updateProjectContextAuthority();
+      renderUserSessionSelect();
+      updatePrimeProjectStatus();
+    });
+  } else {
+    updateProjectContextAuthority();
   }
   if (modelSelect) {
     const storedModel = localStorage.getItem('meridian.session.model');
@@ -3393,6 +3422,10 @@ body {
     const input = userInput();
     if (input) setStatus(input, userSessionStatusText());
   };
+  const updatePrimeProjectStatus = () => {
+    const input = primeWindow?.querySelector('.session-prompt-input');
+    if (input) setStatus(input, `Compass project ${activeProjectContext()}`);
+  };
   const renderUserSessionSelect = () => {
     if (!userSessionSelect) return;
     const stored = localStorage.getItem(userSessionTargetKey) || '';
@@ -3407,10 +3440,21 @@ body {
       updateUserSessionStatus();
       return;
     }
+    const activeProject = activeProjectContext();
     const projects = Array.from(new Set(userSessions.map((session) => session.projectName || 'Meridian'))).sort((a, b) => a.localeCompare(b));
+    if (activeProject && !projects.includes(activeProject)) {
+      const group = document.createElement('optgroup');
+      group.label = `${activeProject} (active project)`;
+      const option = document.createElement('option');
+      option.value = '';
+      option.disabled = true;
+      option.textContent = 'No live sessions for active project';
+      group.append(option);
+      userSessionSelect.append(group);
+    }
     projects.forEach((project) => {
       const group = document.createElement('optgroup');
-      group.label = project;
+      group.label = project === activeProject ? `${project} (active project)` : project;
       userSessions
         .filter((session) => (session.projectName || 'Meridian') === project)
         .sort((left, right) => left.sessionName.localeCompare(right.sessionName))
@@ -3548,18 +3592,18 @@ body {
     if (!modelReadiness.length) await updateModelReadiness();
     if (!bridgeOnline) {
       setStatus(input, 'model bridge offline');
-      pushEntry(input, 'error', 'Error: Meridian model bridge is not running on 127.0.0.1:8767.', backend, { requestedBackend: selectedBackend });
+      pushEntry(input, 'error', 'Error: Meridian model bridge is not running on 127.0.0.1:8767.', backend, { requestedBackend: selectedBackend, projectContext: activeProjectContext() });
       return;
     }
     if (!bridgeCapabilities.visibleTranscriptContext) {
       setStatus(input, 'model bridge restart required');
-      pushEntry(input, 'error', 'Error: Restart the Meridian model bridge so follow-up prompts carry visible session context.', backend, { requestedBackend: selectedBackend });
+      pushEntry(input, 'error', 'Error: Restart the Meridian model bridge so follow-up prompts carry visible session context.', backend, { requestedBackend: selectedBackend, projectContext: activeProjectContext() });
       return;
     }
     const selectedReadiness = readinessForBackend(backend);
     if (selectedReadiness && !selectedReadiness.installed) {
       setStatus(input, `${selectedReadiness.cli} setup required`);
-      pushEntry(input, 'setup', `Error: ${selectedReadiness.setupHint || 'Install and sign in to the selected model CLI.'}`, selectedReadiness.label || backend, { requestedBackend: selectedBackend });
+      pushEntry(input, 'setup', `Error: ${selectedReadiness.setupHint || 'Install and sign in to the selected model CLI.'}`, selectedReadiness.label || backend, { requestedBackend: selectedBackend, projectContext: activeProjectContext() });
       return;
     }
     const visibleTranscript = readTranscript(input).slice(-12).map((entry) => ({
@@ -3571,11 +3615,12 @@ body {
     const targetSession = sessionChannel(input) === 'user' ? selectedUserSession() : null;
     if (sessionChannel(input) === 'user' && !targetSession) {
       setStatus(input, 'select live session');
-      pushEntry(input, 'error', 'Error: Select a live User Session target before sending.', backend, { requestedBackend: selectedBackend });
+      pushEntry(input, 'error', 'Error: Select a live User Session target before sending.', backend, { requestedBackend: selectedBackend, projectContext: activeProjectContext() });
       return;
     }
     input.dataset.sessionSending = 'true';
-    pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '' });
+    const projectContext = activeProjectContext();
+    pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '', projectContext });
     input.value = '';
     localStorage.setItem(draftKey(input), '');
     setStatus(input, `${backend} running`);
@@ -3591,6 +3636,7 @@ body {
           backend,
           requestedBackend: selectedBackend,
           channel: sessionChannel(input),
+          projectContext,
           requestId,
           prompt,
           transcript: visibleTranscript,
@@ -3612,6 +3658,7 @@ body {
         sessionContextEntries: result.sessionContextEntries || 0,
         sessionContextChars: result.sessionContextChars || 0,
         sessionTargetId: result.sessionTarget?.sessionId || targetSession?.sessionId || '',
+        projectContext: result.projectContext || projectContext,
       });
     } catch (error) {
       setStatus(input, backend);
@@ -3627,6 +3674,7 @@ body {
           sessionContextChars: recovered.sessionContextChars || 0,
           recoveredFromBridge: true,
           sessionTargetId: recovered.sessionTarget?.sessionId || targetSession?.sessionId || '',
+          projectContext: recovered.projectContext || projectContext,
         });
         return;
       }
@@ -3688,6 +3736,7 @@ body {
   });
   updateModelReadiness();
   loadUserSessions();
+  updatePrimeProjectStatus();
   window.meridianRefreshUserSessionTarget = () => {
     updateUserSessionTitle();
     updateUserSessionStatus();
@@ -3917,6 +3966,58 @@ body {
       index < 3,
     );
   };
+  const normalizedRows = (rows) => (Array.isArray(rows) ? rows : []).map((row) => (
+    Array.isArray(row) ? row : [row?.key || 'item', row?.value || '']
+  ));
+  const renderCompassCapabilitySection = (section, index) => {
+    const rows = normalizedRows(section?.rows);
+    const bullets = Array.isArray(section?.bullets) ? section.bullets : [];
+    return relaySection(
+      section?.title || `Compass Section ${index + 1}`,
+      [
+        relaySummary(section?.summary || ''),
+        rows.length ? relayGrid(rows) : '',
+        bullets.length ? relayList(bullets) : '',
+      ].join(''),
+      index < 3,
+    );
+  };
+  const renderCompassLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Compass logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Compass logic snapshot unavailable'],
+      ]), true);
+    }
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    return [
+      relaySection('Compass logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Compass'],
+      ]), true),
+      relaySection('Compass summary', relaySummary(snapshot.summary || ''), true),
+      ...capabilitySections.map(renderCompassCapabilitySection),
+    ].join('');
+  };
+  const renderVulcanLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Vulcan logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Vulcan logic snapshot unavailable'],
+      ]), true);
+    }
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    return [
+      relaySection('Vulcan logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Vulcan / Session Lifecycle'],
+      ]), true),
+      relaySection('Vulcan summary', relaySummary(snapshot.summary || ''), true),
+      ...capabilitySections.map(renderCompassCapabilitySection),
+    ].join('');
+  };
   const renderRelayPrimeDirectives = (snapshot) => {
     const directives = Array.isArray(snapshot.primeDirectives) ? snapshot.primeDirectives : [];
     const proofs = Array.isArray(snapshot.primeDirectiveProofs) ? snapshot.primeDirectiveProofs : [];
@@ -3989,6 +4090,28 @@ body {
       logicNode.innerHTML = renderRelayLogicSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderRelayLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadCompassLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-compass-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('compass-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderCompassLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderCompassLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadVulcanLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-vulcan-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('vulcan-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderVulcanLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderVulcanLogicSnapshot({ ok: false, error: error.message });
     }
   };
   const relayBridgeRows = (status, detail) => [
@@ -4119,6 +4242,68 @@ body {
       return false;
     }
   };
+  const renderCompassProjectLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Compass project logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Compass Project Logic</div>
+            <div class="relay-models-status">Project context</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-compass-logic>${relaySection('Compass logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadCompassLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
+  const renderVulcanSessionLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Vulcan session lifecycle logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Vulcan Session Logic</div>
+            <div class="relay-models-status">Session lifecycle</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-vulcan-logic>${relaySection('Vulcan logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadVulcanLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
@@ -4132,6 +4317,8 @@ body {
   };
   const refreshRelayPanel = () => {
     if (rightWorkspace?.querySelector('.relay-models-surface')) renderRelayBridgeStatus();
+    if (rightWorkspace?.querySelector('[data-compass-logic]')) loadCompassLogic();
+    if (rightWorkspace?.querySelector('[data-vulcan-logic]')) loadVulcanLogic();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
@@ -4334,7 +4521,11 @@ body {
     screen.classList.remove('session-theme-green');
     if (userTitle) userTitle.textContent = button.dataset.sessionTitle || button.dataset.harness || 'User';
     clearRightPanelSurface();
-    const rendered = button.dataset.harness === 'Relay' ? renderRelayModels() : renderHarnessSurface(button);
+    const rendered = button.dataset.harness === 'Relay'
+      ? renderRelayModels()
+      : (button.dataset.harness === 'Compass'
+        ? renderCompassProjectLogic()
+        : (button.dataset.harness === 'Session Lifecycle' ? renderVulcanSessionLogic() : renderHarnessSurface(button)));
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });
