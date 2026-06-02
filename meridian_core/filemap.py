@@ -343,11 +343,25 @@ def make_default_map() -> FileMap:
             notes="V2 Relay runtime execution layer. Consumes RelayRoute decisions and executes dispatch to adapters.",
         ),
         FileMapEntry(
+            path="meridian_core/relay_logic_snapshot.py",
+            area=FileArea.RELAY_ROUTING,
+            purpose="Serializable Relay model-routing logic snapshot consumed by visible harnesses, including route precedence, audit depth, dispatch lanes, and proof prompts.",
+            related_tests=["tests/test_relay_logic_snapshot.py"],
+            notes="Run before changing Relay harness snapshot payloads or the /api/relay-logic bridge contract.",
+        ),
+        FileMapEntry(
             path="tests/test_relay_executor.py",
             area=FileArea.RELAY_DISPATCH,
             purpose="Test suite for meridian_core/relay_executor.py: coverage for dispatch execution, provider routing, error handling, and state transitions.",
             related_tests=[],
             notes="Run before changing meridian_core/relay_executor.py or Relay execution behavior.",
+        ),
+        FileMapEntry(
+            path="tests/test_relay_logic_snapshot.py",
+            area=FileArea.RELAY_ROUTING,
+            purpose="Test suite for meridian_core/relay_logic_snapshot.py: proves the visible Relay harness snapshot stays JSON-serializable, source-identified, account/session-first, and free of prompt text leakage.",
+            related_tests=[],
+            notes="Run before changing Relay snapshot fields, bridge exposure, or harness logic rendering.",
         ),
         FileMapEntry(
             path="tests/test_relay.py",
@@ -912,6 +926,20 @@ def make_default_map() -> FileMap:
         ),
 
         # -- V1 Electron cockpit app -----------------------------------
+        FileMapEntry(
+            path="index.html",
+            area=FileArea.BIFROST,
+            purpose="Browser-hosted Meridian cockpit shell: renders the harness dock, session panels, model bridge status, and Relay model logic surface.",
+            related_tests=["tests/test_relay_logic_snapshot.py"],
+            notes="Root static UI. Reads local bridge endpoints such as /api/models and /api/relay-logic; keep UI behavior in sync with scripts/meridian-model-bridge.js.",
+        ),
+        FileMapEntry(
+            path="scripts/meridian-model-bridge.js",
+            area=FileArea.BIFROST,
+            purpose="Local Node model bridge for the browser cockpit: exposes model message, recent-call, restart, health, and Relay logic snapshot endpoints.",
+            related_tests=["tests/test_relay_logic_snapshot.py"],
+            notes="Development bridge on 127.0.0.1:8767. Spawns meridian_core.relay_logic_snapshot for /api/relay-logic.",
+        ),
         FileMapEntry(
             path="package.json",
             area=FileArea.BIFROST,
