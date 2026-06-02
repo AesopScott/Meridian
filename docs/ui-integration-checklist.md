@@ -523,6 +523,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | MB17 | Relay dispatch visibility | Relay panel renders dispatch lane/order/payload policy from the backend dispatch plan snapshot. | `/api/relay-logic` includes `dispatch.source=meridian_core.relay_dispatch.build_relay_dispatch_plan`; panel shows dispatch logic without prompt payload text. |
 | MB18 | Relay audit depth | Relay panel renders fallback/rejection/proof/telemetry audit depth from the backend route audit. | `/api/relay-logic` includes `auditDepth`; panel shows silent fallback blocked, counts, primary blocker, and primary proof for Tier 3. |
 | MB19 | Relay collapsible capability headers | Relay panel exposes the expert Relay capability breakdown in collapsible headers sourced from the backend snapshot. | `/api/relay-logic` includes `capabilitySections`; panel shows Relay Job, Risk Tier Routing, Model Lane Logic, Access Route Precedence, Session Lifecycle Logic, Context Latency Privacy, Prompt Budget Logic, Audit Logic, Dispatch Logic, and Current Limits. |
+| MB20 | Relay prime directives | Relay panel opens with Prime Directives and Prime Directive Proofs before deeper capability sections. | `/api/relay-logic` includes `primeDirectives` and `primeDirectiveProofs`; panel shows the three principles and three proof questions at the top. |
 
 ## Harness UI Rules
 

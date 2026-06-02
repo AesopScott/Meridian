@@ -15,6 +15,34 @@ SNAPSHOT_VERSION = "relay-domain-v1"
 SNAPSHOT_SOURCE = "meridian_core.relay.route_from_tier"
 DISPATCH_SOURCE = "meridian_core.relay_dispatch.build_relay_dispatch_plan"
 SNAPSHOT_PROMPT = "Relay dispatch snapshot placeholder."
+PRIME_DIRECTIVES = (
+    {
+        "name": "Account/session-first, never silent fallback",
+        "logic": "Relay tries the safest observable account/session route first, then local CLI, direct API, and aggregator only as explicit fallback or comparison.",
+    },
+    {
+        "name": "Risk tier determines model depth",
+        "logic": "Relay maps risk to lane depth: no model, single lane, independent review, dual-model proof, or human gate.",
+    },
+    {
+        "name": "No drift between route, proof, and visible harness",
+        "logic": "Relay route decisions, proof burden, blockers, dispatch lanes, prompt budget, and harness evidence come from the same backend snapshot.",
+    },
+)
+PRIME_DIRECTIVE_PROOFS = (
+    {
+        "question": "What route was tried first, what route was selected, and what alternatives were rejected?",
+        "proves": "account/session-first precedence and no silent fallback",
+    },
+    {
+        "question": "What risk tier was assigned, and what model-lane depth did that tier require?",
+        "proves": "risk-tier routing depth and autonomy limits",
+    },
+    {
+        "question": "Where is the visible proof in the harness for the route, blockers, dispatch lanes, prompt budget, and audit reason?",
+        "proves": "no drift between backend Relay and visible harness evidence",
+    },
+)
 
 
 def _value(item: Any) -> Any:
@@ -267,6 +295,8 @@ def relay_logic_snapshot() -> dict[str, Any]:
         "source": SNAPSHOT_SOURCE,
         "dispatchSource": DISPATCH_SOURCE,
         "autoRouting": "disabled_until_prime_relay_contract",
+        "primeDirectives": list(PRIME_DIRECTIVES),
+        "primeDirectiveProofs": list(PRIME_DIRECTIVE_PROOFS),
         "routePrecedence": tiers[1]["audit"]["routePrecedence"],
         "capabilitySections": _capability_sections(tiers),
         "tiers": tiers,
