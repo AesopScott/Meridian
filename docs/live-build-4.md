@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create a Relay dispatch hardening implementation checklist after Reviews B cleared the prompt-payload visibility checklist.
 
@@ -24,7 +24,15 @@ Task: produce a build-ready checklist for provider-neutral Relay dispatch harden
 
 Tests: none required for docs-only; run text/shape inspection plus `git diff --check` before marking complete.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, verification run, and a concrete Next Candidate: bind any review findings from this checklist before dispatch-hardening runtime work.
+Completion: completed 2026-06-01.
+
+Ready for Codex Review:
+
+- Commit: pending local commit hash
+- Files changed: `docs/relay-dispatch-hardening-implementation-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only)
+- Verification performed: text/shape inspection confirmed the checklist exists and covers transport envelope boundaries, exact model id handling, payload evidence propagation, Aegis proof policy hooks, blocked/error states, credential/raw prompt exclusions, Bifrost handoff, deterministic tests, and FileMap routing requirements; staged diff passes `git diff --cached --check`.
+- Next Candidate: bind any review findings from this checklist before dispatch-hardening runtime work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
