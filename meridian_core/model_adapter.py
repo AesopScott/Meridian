@@ -17,6 +17,10 @@ from typing import Callable, Mapping, Protocol
 from .relay import ModelRole
 
 
+class ModelAdapterConfigError(RuntimeError):
+    """Raised when a live model adapter is missing required configuration."""
+
+
 @dataclass(frozen=True)
 class ModelHarnessMetadata:
     """Provider-neutral Model Harness metadata for capability and budget tracking."""
@@ -30,6 +34,137 @@ class ModelHarnessMetadata:
     requires_external_review: bool
     deepseek_candidate_state: Mapping[str, str] | None = None
 
+    def __post_init__(self) -> None:
+        if self.deepseek_candidate_state is not None:
+            object.__setattr__(
+                self,
+                "deepseek_candidate_state",
+                MappingProxyType(dict(self.deepseek_candidate_state)),
+            )
+
+
+@dataclass(frozen=True)
+class ModelCandidateRoutePreset:
+    """Provider-neutral candidate-route metadata before a live adapter is wired."""
+
+    provider_name: str
+    dispatch_model: str
+    variant_label: str
+    lane: str
+    api_mode: str
+    trust_state: str
+    requires_external_review: bool
+    external_review_status: str
+    direct_api_endpoint: str
+    capability_tier: str
+    context_budget: int
+    prompt_payload_budget: int
+    allowed_task_types: tuple[str, ...]
+    blocked_task_types: tuple[str, ...]
+    max_risk_tier: int
+    q_mode_flat: bool
+    can_clear_reviews: bool
+    can_move_branches: bool
+    bypasses_relay_aegis: bool
+    autonomous_coding_allowed: bool
+    known_authorities: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if self.provider_name == "deepseek" and self.dispatch_model != DEEPSEEK_DIRECT_MODEL:
+            raise ModelAdapterConfigError(
+                "DeepSeek direct candidate presets must dispatch with deepseek-chat"
+            )
+        if self.variant_label == self.dispatch_model:
+            raise ModelAdapterConfigError("variant_label must not masquerade as dispatch_model")
+
+    def to_metadata(self) -> ModelHarnessMetadata:
+        """Return the legacy adapter metadata surface for this candidate preset."""
+        return ModelHarnessMetadata(
+            provider_name=self.provider_name,
+            model_name=self.dispatch_model,
+            capability_tier=self.capability_tier,
+            context_budget=self.context_budget,
+            prompt_payload_budget=self.prompt_payload_budget,
+            trust_state=self.trust_state,
+            requires_external_review=self.requires_external_review,
+            deepseek_candidate_state={
+                "api_mode": self.api_mode,
+                "variant_label": self.variant_label,
+                "lane": self.lane,
+                "direct_api_endpoint": self.direct_api_endpoint,
+                "external_review_status": self.external_review_status,
+                "allowed_task_types": ",".join(self.allowed_task_types),
+                "blocked_task_types": ",".join(self.blocked_task_types),
+                "max_risk_tier": str(self.max_risk_tier),
+                "q_mode_flat": str(self.q_mode_flat).lower(),
+                "can_clear_reviews": str(self.can_clear_reviews).lower(),
+                "can_move_branches": str(self.can_move_branches).lower(),
+                "bypasses_relay_aegis": str(self.bypasses_relay_aegis).lower(),
+                "autonomous_coding_allowed": str(self.autonomous_coding_allowed).lower(),
+                "known_authorities": ",".join(self.known_authorities),
+            },
+        )
+
+
+DEEPSEEK_DIRECT_MODEL = "deepseek-chat"
+DEEPSEEK_DIRECT_ENDPOINT = "https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_CONTEXT_BUDGET = 65536
+DEEPSEEK_PROMPT_PAYLOAD_BUDGET = 57344
+
+
+def deepseek_candidate_route_presets() -> tuple[ModelCandidateRoutePreset, ...]:
+    """Return direct-provider DeepSeek candidate presets without creating live calls."""
+    shared = {
+        "provider_name": "deepseek",
+        "dispatch_model": DEEPSEEK_DIRECT_MODEL,
+        "api_mode": "direct",
+        "trust_state": "candidate",
+        "requires_external_review": True,
+        "external_review_status": "pending",
+        "direct_api_endpoint": DEEPSEEK_DIRECT_ENDPOINT,
+        "context_budget": DEEPSEEK_CONTEXT_BUDGET,
+        "prompt_payload_budget": DEEPSEEK_PROMPT_PAYLOAD_BUDGET,
+        "allowed_task_types": ("verify", "explain"),
+        "blocked_task_types": (
+            "build",
+            "review",
+            "release",
+            "destructive",
+            "branch_movement",
+            "review_clearance",
+            "autonomous_coding",
+        ),
+        "max_risk_tier": 1,
+        "q_mode_flat": True,
+        "can_clear_reviews": False,
+        "can_move_branches": False,
+        "bypasses_relay_aegis": False,
+        "autonomous_coding_allowed": False,
+        "known_authorities": ("deepseek-official-endpoint", "direct-api-only"),
+    }
+    return (
+        ModelCandidateRoutePreset(
+            **shared,
+            variant_label="deepseek-v4-pro",
+            lane="default_quality",
+            capability_tier="candidate-quality",
+        ),
+        ModelCandidateRoutePreset(
+            **shared,
+            variant_label="deepseek-v4-flash",
+            lane="fast",
+            capability_tier="candidate-fast",
+        ),
+    )
+
+
+def deepseek_candidate_metadata_preset(lane: str = "default_quality") -> ModelHarnessMetadata:
+    """Return Model Harness metadata for a named DeepSeek direct candidate lane."""
+    for preset in deepseek_candidate_route_presets():
+        if preset.lane == lane:
+            return preset.to_metadata()
+    raise ModelAdapterConfigError(f"Unknown DeepSeek candidate lane: {lane}")
+
 
 class ModelAdapter(Protocol):
     """Callable boundary: receive approved payload text, return model text."""
@@ -40,10 +175,6 @@ class ModelAdapter(Protocol):
     def metadata(self) -> ModelHarnessMetadata:
         """Return Model Harness metadata for this adapter."""
         ...
-
-
-class ModelAdapterConfigError(RuntimeError):
-    """Raised when a live model adapter is missing required configuration."""
 
 
 @dataclass(frozen=True)

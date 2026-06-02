@@ -2,17 +2,24 @@
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 from meridian_core.model_adapter import (
     AdapterRegistry,
+    DEEPSEEK_DIRECT_ENDPOINT,
+    DEEPSEEK_DIRECT_MODEL,
     EnvConfiguredModelAdapter,
     FakeModelAdapter,
     HttpJsonModelAdapter,
     HttpModelAdapterConfig,
     MissingAdapterError,
+    ModelCandidateRoutePreset,
     ModelAdapterConfig,
     ModelAdapterConfigError,
+    deepseek_candidate_metadata_preset,
+    deepseek_candidate_route_presets,
 )
 from meridian_core.relay import ModelRole
 
@@ -168,6 +175,107 @@ class TestAdapterRegistry:
         registry = AdapterRegistry().register_model("fast-default", FakeModelAdapter())
         with pytest.raises(MissingAdapterError, match="primary-default"):
             registry.resolve(ModelRole.BUILDER, "primary-default")
+
+
+class TestDeepSeekCandidatePresets:
+    def test_presets_include_default_quality_and_fast_lanes(self) -> None:
+        presets = deepseek_candidate_route_presets()
+        assert tuple(p.lane for p in presets) == ("default_quality", "fast")
+        assert tuple(p.variant_label for p in presets) == (
+            "deepseek-v4-pro",
+            "deepseek-v4-flash",
+        )
+
+    def test_presets_use_deepseek_chat_as_only_dispatch_identity(self) -> None:
+        for preset in deepseek_candidate_route_presets():
+            assert preset.provider_name == "deepseek"
+            assert preset.dispatch_model == DEEPSEEK_DIRECT_MODEL
+            assert preset.dispatch_model == "deepseek-chat"
+            assert preset.variant_label != preset.dispatch_model
+
+    def test_default_quality_metadata_keeps_variant_out_of_dispatch_model(self) -> None:
+        metadata = deepseek_candidate_metadata_preset()
+        assert metadata.provider_name == "deepseek"
+        assert metadata.model_name == "deepseek-chat"
+        assert metadata.deepseek_candidate_state is not None
+        assert metadata.deepseek_candidate_state["variant_label"] == "deepseek-v4-pro"
+        assert metadata.deepseek_candidate_state["lane"] == "default_quality"
+
+    def test_fast_metadata_keeps_variant_out_of_dispatch_model(self) -> None:
+        metadata = deepseek_candidate_metadata_preset("fast")
+        assert metadata.provider_name == "deepseek"
+        assert metadata.model_name == "deepseek-chat"
+        assert metadata.deepseek_candidate_state is not None
+        assert metadata.deepseek_candidate_state["variant_label"] == "deepseek-v4-flash"
+        assert metadata.deepseek_candidate_state["lane"] == "fast"
+
+    def test_presets_remain_candidate_direct_provider_routes(self) -> None:
+        for preset in deepseek_candidate_route_presets():
+            assert preset.api_mode == "direct"
+            assert preset.trust_state == "candidate"
+            assert preset.requires_external_review is True
+            assert preset.external_review_status == "pending"
+            assert preset.direct_api_endpoint == DEEPSEEK_DIRECT_ENDPOINT
+            assert preset.known_authorities == (
+                "deepseek-official-endpoint",
+                "direct-api-only",
+            )
+
+    def test_presets_preserve_validation_gate_blocks(self) -> None:
+        for preset in deepseek_candidate_route_presets():
+            assert preset.allowed_task_types == ("verify", "explain")
+            assert "build" in preset.blocked_task_types
+            assert "review" in preset.blocked_task_types
+            assert "branch_movement" in preset.blocked_task_types
+            assert "review_clearance" in preset.blocked_task_types
+            assert "autonomous_coding" in preset.blocked_task_types
+            assert preset.max_risk_tier == 1
+            assert preset.can_clear_reviews is False
+            assert preset.can_move_branches is False
+            assert preset.bypasses_relay_aegis is False
+            assert preset.autonomous_coding_allowed is False
+
+    def test_metadata_candidate_state_is_read_only(self) -> None:
+        metadata = deepseek_candidate_metadata_preset()
+        assert metadata.deepseek_candidate_state is not None
+        with pytest.raises(TypeError):
+            metadata.deepseek_candidate_state["trust_state"] = "trusted"  # type: ignore[index]
+
+    def test_preset_is_frozen(self) -> None:
+        preset = deepseek_candidate_route_presets()[0]
+        with pytest.raises(FrozenInstanceError):
+            preset.variant_label = "deepseek-chat"  # type: ignore[misc]
+
+    def test_rejects_deepseek_marketing_label_as_dispatch_model(self) -> None:
+        template = deepseek_candidate_route_presets()[0]
+        with pytest.raises(ModelAdapterConfigError, match="deepseek-chat"):
+            ModelCandidateRoutePreset(
+                provider_name=template.provider_name,
+                dispatch_model="deepseek-v4-pro",
+                variant_label=template.variant_label,
+                lane=template.lane,
+                api_mode=template.api_mode,
+                trust_state=template.trust_state,
+                requires_external_review=template.requires_external_review,
+                external_review_status=template.external_review_status,
+                direct_api_endpoint=template.direct_api_endpoint,
+                capability_tier=template.capability_tier,
+                context_budget=template.context_budget,
+                prompt_payload_budget=template.prompt_payload_budget,
+                allowed_task_types=template.allowed_task_types,
+                blocked_task_types=template.blocked_task_types,
+                max_risk_tier=template.max_risk_tier,
+                q_mode_flat=template.q_mode_flat,
+                can_clear_reviews=template.can_clear_reviews,
+                can_move_branches=template.can_move_branches,
+                bypasses_relay_aegis=template.bypasses_relay_aegis,
+                autonomous_coding_allowed=template.autonomous_coding_allowed,
+                known_authorities=template.known_authorities,
+            )
+
+    def test_unknown_preset_lane_raises(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="Unknown DeepSeek candidate lane"):
+            deepseek_candidate_metadata_preset("review_clearance")
 
 
 class TestHttpJsonModelAdapter:
