@@ -41,6 +41,7 @@ _REQUIRED_PATHS = [
     "docs/deepseek-candidate-trust-metadata-implementation-checklist.md",
     "docs/model-harness-v2-contract.md",
     "docs/model-harness-metadata-implementation-checklist.md",
+    "docs/model-harness-runtime-validation-checklist.md",
     "meridian_core/models.py",
     "meridian_core/mission.py",
     "meridian_core/wake.py",
