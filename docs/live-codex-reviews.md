@@ -8,6 +8,1489 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+<<<<<<< HEAD
+=======
+## Coordinator Override - Active Now
+
+Goal: review current-main Build 1 DeepSeek candidate metadata presets, then Build 2 runtime-state export.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: review current-main Ready markers in order: Build 1 DeepSeek candidate metadata preset commits `bfada8b1` and `1fcad364`, then Build 2 runtime-state export commits `93bf40dd` and `d0179bb0`. For Build 1, verify metadata-only scope, no live transport, exact `deepseek-chat` dispatch id, variant labels as metadata only, route proof refs, candidate trust/external-review states, prompt-drag defaults, evidence refs, and no Relay/Bifrost/FileMap/branch/main/Polaris leakage. For Build 2, verify pure serializable runtime-state export, permission/workflow/command summary fields, advisory-only behavior, no recovery execution, and no process/model/UI/Bifrost/FileMap/branch/main/Polaris leakage.
+
+Proof: for Build 1, `python -m pytest tests/test_model_adapter.py -q` plus `git diff --check bfada8b1^..1fcad364`. For Build 2, `python -m pytest tests/test_session_lifecycle.py -q` plus `git diff --check 93bf40dd^..d0179bb0`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 1/2 polling after these current-main reviews.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 1 Relay visible prompt payload meter edge-consumer hardening.
+
+Status: passed by Codex Reviews A on 2026-06-02 09:29 -06:00. Candidate `HEAD` is `bca290d8`, and Build 1 commits `fd2d3206` and `bca290d8` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check fd2d3206^..bca290d8`
+
+Review result:
+
+- Containment checks for `fd2d3206` and `bca290d8` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with Build 1 queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 213 tests.
+- `git diff --check fd2d3206^..bca290d8` passed.
+- Verified Relay prompt payload meter edge handling is deterministic and display-safe for missing snapshots, missing token metadata, unknown budgets, under-1k and one-decimal-k labels, over-budget/degraded status, one-decimal budget/growth percent rounding, and signed growth deltas.
+- Verified Q-mode prompt-drag warning/degraded/blocker tags, provider/model/route continuity refs, and decision-record meter fallback are preserved without exposing raw prompt text, provider response text, credentials, or model error text in consumer views.
+- Verified adapter/model request payload semantics are unchanged: model calls and adapters still receive only `lane.payload`; meter evidence is attached as summary/decision-record metadata only.
+- Verified no live provider calls, UI/Bifrost/FileMap/session/process edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 1 Relay visible prompt payload meter edge-consumer hardening is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 2 Prime/Beacon command-staging advisory consumers.
+
+Status: passed by Codex Reviews A on 2026-06-02 09:14 -06:00. Candidate `HEAD` is `683e364b`, and Build 2 commits `0f63b726` and `683e364b` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check 0f63b726^..683e364b`
+
+Review result:
+
+- Containment checks for `0f63b726` and `683e364b` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with Build 2 queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 106 tests.
+- `git diff --check 0f63b726^..683e364b` passed.
+- Verified Prime consumes `SessionLiveControlCommandPlanStagingRecord` through `select_next_action_from_command_plan_staging_record()` as advisory-only state: UI-review-only records become non-executable `ADVISE_SESSION_RECOVERY`, and permission/stageability blockers pause safely.
+- Verified Beacon consumes the same staging record through `command_plan_staging_advisory_evidence()` as display-safe serializable evidence only, preserving target session id, command kind, recommended action, required operation, ready flag, non-executable flag, UI-review gate, permission state, blockers, and evidence refs.
+- Verified no restart, resteer, archive execution, process/session/model/provider calls, UI/Bifrost/FileMap edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 Prime/Beacon command-staging advisory consumers are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 3 prompt payload meter FileMap registration.
+
+Status: passed by Codex Reviews A on 2026-06-02 09:21 -06:00. Candidate `HEAD` is `b8e9b7ed`, and Build 3 commit `b8e9b7ed` is the assigned FileMap registration candidate.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check b8e9b7ed^..b8e9b7ed`
+
+Review result:
+
+- Containment check for `b8e9b7ed` passed on the assigned candidate branch.
+- Scope check shows changes limited to runtime FileMap, `docs/FileMap.md`, required-path test coverage, and Build 3 queue provenance.
+- `python -m pytest tests/test_filemap.py -q` passed with 47 tests.
+- `git diff --check b8e9b7ed^..b8e9b7ed` passed.
+- Verified `docs/relay-bifrost-prompt-payload-meter-checklist.md` is registered consistently in `meridian_core/filemap.py`, mirrored in `docs/FileMap.md`, and included in `tests/test_filemap.py` `_REQUIRED_PATHS`.
+- Verified `.mcp.json` is documented only as out-of-scope Polaris MCP connector evidence in `docs/live-build-3.md` and is not registered in runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS`.
+- Verified no unrelated FileMap churn, runtime/UI/session/process/main/Polaris leakage, branch/worktree movement, or read-check-only progress was introduced.
+
+Finding: none.
+
+Completion: Build 3 prompt payload meter FileMap registration is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 2 live-control command-plan staging.
+
+Status: passed by Codex Reviews A on 2026-06-02 09:05 -06:00. Candidate `HEAD` is `15ebb598`, and Build 2 commits `a240ea4d` and `15ebb598` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check a240ea4d^..15ebb598`
+
+Review result:
+
+- Containment checks for `a240ea4d` and `15ebb598` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with Build 2 queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 110 tests.
+- `git diff --check a240ea4d^..15ebb598` passed.
+- Verified `SessionLiveControlCommandPlanStagingRecord` is frozen, deterministic, display-safe, serializable staging metadata and `stage_live_control_command_plan_from_readiness()` only copies reviewed readiness fields into a non-executable record.
+- Verified target session id, command kind, recommended action, required operation, ready flag, human-gate rationale, blockers, evidence refs, and permission state are preserved.
+- Verified the staging record always forces `is_executable_now=False`, `ui_review_required=True`, `human_gate_required=True`, and includes explicit `command_plan.ui_review_required` / `staging.is_executable_now=False` / `staging.ui_review_required=True` evidence.
+- Verified no restart, resteer, archive execution, process/session/model/provider/UI/Bifrost/FileMap side effect, branch/worktree movement, main write, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 live-control command-plan staging is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 2 Prime/Beacon recovery-readiness advisory consumers.
+
+Status: passed by Codex Reviews A on 2026-06-02 08:53 -06:00. Candidate `HEAD` is `8e288664`, and Build 2 commits `d0644f77` and `8e288664` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check d0644f77^..8e288664`
+
+Review result:
+
+- Containment checks for `d0644f77` and `8e288664` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with Build 2 queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 101 tests.
+- `git diff --check d0644f77^..8e288664` passed.
+- Verified Prime consumes `SessionRecoveryReadinessSummary` through `select_next_action_from_recovery_readiness_summary()` as advisory-only state: readiness-cleared recovery still returns non-executable `ADVISE_SESSION_RECOVERY` with a command-plan staging blocker, while blocked summaries pause with human-gate rationale and blockers preserved.
+- Verified Beacon consumes the same summary through `recovery_readiness_advisory_evidence()` as display-safe serializable evidence only, preserving readiness status, command kind, recommended action, required operation, ready flag, blockers, evidence refs, and human-gate state.
+- Verified no restart, resteer, archive execution, session/process/model/UI/Bifrost/FileMap side effect, branch/worktree movement, main write, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 Prime/Beacon recovery-readiness advisory consumers are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: bounded post-landing smoke review of Build 1 provider-result validation runtime.
+
+Status: passed by Codex Reviews A on 2026-06-02 08:48 -06:00. Current `HEAD` and `origin/main` are `aa926f07`, and landing range `d6007b21^..aa926f07` is present on current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, pushed landing provenance, and `docs/live-codex-reviews.md` for Reviews A smoke provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check d6007b21^..aa926f07`
+
+Review result:
+
+- Containment checks for `d6007b21` and `aa926f07` passed.
+- Scope check shows runtime/test changes in `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, Build 1 queue provenance in `docs/live-build-1.md`, and landing review provenance in `docs/live-codex-reviews-2.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 204 tests.
+- `git diff --check d6007b21^..aa926f07` passed.
+- Verified `RelayProviderResultValidationEvidence` remains provider-neutral, immutable, serialization-only, and display-safe, carrying route/model/provider metadata, proof refs, output length/hash, telemetry availability statuses, warning tags, blocker tags, and validation status without storing raw provider output text.
+- Verified `RelayExecutionSummary.provider_result_validation_consumer_view()` is deterministic, dedupes blocker/warning tags, and does not expose raw prompts, raw provider responses, credentials, or account internals.
+- Verified adapter/provider request boundary is unchanged: dispatch still calls `model_call(lane.payload)` or `adapter(lane.payload)` only; no metadata crosses into the request payload.
+- Verified no live provider/model calls, credential/account probing, UI/Bifrost/FileMap/session/process edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 1 provider-result validation runtime landing smoke is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 recovery-readiness advisory summary.
+
+Status: passed by Codex Reviews A on 2026-06-02 08:39 -06:00. Current `HEAD` and `origin/main` are `aff606fb`, and Build 2 commits `2620ea65` and `954cde56` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 2620ea65^..954cde56`
+
+Review result:
+
+- Containment checks for `2620ea65` and `954cde56` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 107 tests.
+- `git diff --check 2620ea65^..954cde56` passed.
+- Verified `SessionRecoveryReadinessSummary` is a frozen, display-safe, JSON-safe advisory value object and `summarize_recovery_readiness()` only composes existing `SessionRuntimeStateExport` and `SessionLiveControlPermissionGate` inputs.
+- Verified no restart, resteer, archive, session movement, process inspection, model call, UI/Bifrost/FileMap edit, branch/worktree movement, main write, or Polaris dependency is introduced.
+- Verified blockers from runtime export and permission gate are deduped, mismatch blockers are preserved, evidence refs are deduped, and summary fields preserve permission gate state plus runtime export heartbeat/result/permission fields.
+- Verified permission-gate and runtime export behavior remains intact for command kind, recommended action, required operation, readiness flag, human-gate rationale, permission state, heartbeat status, result kind, blockers, and evidence refs.
+
+Finding: none.
+
+Completion: Build 2 recovery-readiness advisory summary is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Relay dispatch metadata consumer view.
+
+Status: passed by Codex Reviews A on 2026-06-02 07:59 -06:00. Current `HEAD` and `origin/main` are `9198bcbe`, and Build 1 commits `3da6edac` and `428313ef` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 3da6edac^..428313ef`
+
+Review result:
+
+- Containment checks for `3da6edac` and `428313ef` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 200 tests.
+- `git diff --check 3da6edac^..428313ef` passed.
+- Verified `RelayExecutionSummary.dispatch_metadata_consumer_view()` is deterministic, serialization-only, display-safe, dedupes fail-closed advisory tags, and falls back to decision-record metadata envelopes when results are absent.
+- Verified `RelayDecisionRecord` carries the reviewed first-lane `RelayDispatchMetadataEnvelope` when execution builds one, or a metadata-only fallback when decision records are built directly.
+- Verified adapter/provider payload boundary is unchanged: execution still forwards only `lane.payload` to `model_call` or adapter calls.
+- Verified no live provider/model calls, credential/account probing, raw prompt text, raw provider responses, UI/Bifrost/FileMap edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 1 Relay dispatch metadata consumer view is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 live-control permission gate.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:32 -06:00. Current `HEAD` and `origin/main` are `c78b1441`, and Build 2 commits `09ba07c6` and `4cf3c7c6` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 09ba07c6^..4cf3c7c6`
+
+Review result:
+
+- Containment checks for `09ba07c6` and `4cf3c7c6` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 104 tests.
+- `git diff --check 09ba07c6^..4cf3c7c6` passed.
+- Verified `SessionLiveControlPermissionGate` and `evaluate_live_control_permission_gate()` are pure readiness/advisory surfaces only; they emit deterministic permission-gate metadata and do not execute recovery, spawn or inspect processes, call models, write UI/Bifrost/FileMap, move branches/worktrees/sessions, write main, or touch Polaris.
+- Verified command/action mapping covers restart, resteer, and archive readiness: `START_NEW` maps to `RESTART`, `TRANSFER` maps to `RESTEER`, and `ARCHIVE` maps to `ARCHIVE`, with required permission operations preserved.
+- Verified target-session mismatches, unsupported/missing command kinds, missing operations, locked/expired/out-of-scope permissions, escalation gates, and existing runtime human/review blockers remain non-executable blockers with display-safe evidence refs and human-gate rationale.
+
+Finding: none.
+
+Completion: Build 2 live-control permission gate is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Relay dispatch metadata envelope.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:27 -06:00. Current `HEAD` and `origin/main` are `052ee32c`, and Build 1 commits `58d3862c` and `7ec21a2b` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 58d3862c^..7ec21a2b`
+
+Review result:
+
+- Containment checks for `58d3862c` and `7ec21a2b` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 196 tests.
+- `git diff --check 58d3862c^..7ec21a2b` passed.
+- Verified `RelayDispatchMetadataEnvelope` and `RelayExecutionSummary.dispatch_metadata_envelopes()` are provider-neutral, display-safe, serialization-only metadata surfaces for exact model id, provider route kind, trust state, context window, prompt budget/status/growth, external-review state, evidence refs, validation tags, and fail-closed advisory tags.
+- Verified missing/unknown route metadata and pending external review become fail-closed advisory state without executing recovery or transport behavior.
+- Verified adapter/model-call payload boundary is unchanged: execution still forwards only `lane.payload`; metadata envelopes are attached to results and do not alter transport payloads.
+- Verified no live provider/model calls, credentials/account probing, raw prompt text, raw provider responses, UI/Bifrost/FileMap edits, process/session code, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 1 Relay dispatch metadata envelope is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 Session Runtime State Export Prime/Beacon advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:24 -06:00. Current `HEAD` and `origin/main` are `fd6e7893`, and Build 2 commits `dd02fa33` and `e85c9221` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check dd02fa33^..e85c9221`
+
+Review result:
+
+- Containment checks for `dd02fa33` and `e85c9221` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 96 tests.
+- `git diff --check dd02fa33^..e85c9221` passed.
+- Verified Prime consumes `SessionRuntimeStateExport` through `select_next_action_from_runtime_state_export()` as advisory state only: blockers pause behind human/review/permission gates, recovery recommendations become non-executable recovery advice, and reuse/no-recovery cases stay on safe polling.
+- Verified Beacon serializes `SessionRuntimeStateExport` through `runtime_state_advisory_evidence()` with display-safe evidence, blocker preservation, human-gate propagation, and no recovery execution.
+- Verified no session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 Session Runtime State Export Prime/Beacon advisory binding is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 DeepSeek candidate metadata presets, then Build 2 runtime-state export.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:20 -06:00. Current `HEAD` and `origin/main` are `a89135c2`, and Build 1 commits `bfada8b1` and `1fcad364`, plus Build 2 commits `93bf40dd` and `d0179bb0`, are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py -q`
+- `git diff --check bfada8b1^..1fcad364`
+
+Build 1 review result:
+
+- Containment checks for `bfada8b1` and `1fcad364` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/model_adapter.py` and `tests/test_model_adapter.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py -q` passed with 43 tests.
+- `git diff --check bfada8b1^..1fcad364` passed.
+- Verified DeepSeek candidate presets remain metadata-only and preserve exact dispatch identity `deepseek-chat`; `deepseek-v4-pro` and `deepseek-v4-flash` remain variant labels only.
+- Verified candidate trust remains pending/direct with external review required, max risk tier 1, no review clearance, no branch movement, no Relay/Aegis bypass, no autonomous coding authority, and display-safe route proof/evidence refs.
+- Verified no live provider transport, credentials/account probing, raw prompt text, provider responses, Relay/Bifrost/FileMap edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Build 1 finding: none.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 93bf40dd^..d0179bb0`
+
+Build 2 review result:
+
+- Containment checks for `93bf40dd` and `d0179bb0` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 100 tests.
+- `git diff --check 93bf40dd^..d0179bb0` passed.
+- Verified `SessionRuntimeStateExport` and `export_session_runtime_state_for_workflow_recovery()` are deterministic serializable advisory exports combining session lifecycle state, optional command-plan intent, permission summary, and workflow recovery summary.
+- Verified exported fields cover state id, active command kind, target session id, recommended recovery action, stale heartbeat/result status, permission blockers, review-gate blockers, human-gate blockers, and evidence refs.
+- Verified no recovery execution, session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency was introduced.
+
+Build 2 finding: none.
+
+Completion: Build 1 DeepSeek candidate metadata presets and Build 2 runtime-state export are review-cleared. No repair routed.
+
+## Coordinator Override - Active Now
+
+Goal: review current-main Build 1 Model Harness metadata binding, then Build 2 workflow advisory binding.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: review current-main Ready markers in order: Build 1 Model Harness metadata binding commits `fe51ffd6` and `0ea4ddb4`, then Build 2 workflow summary advisory binding commits `ad9a4969` and `e18c0d7b`. For Build 1, verify provider-neutral metadata binding, dispatch evidence/summary shape, external-review and evidence refs, prompt-drag/budget metadata, no raw prompt/provider/credential leakage, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage. For Build 2, verify Prime/Beacon advisory-only workflow summary consumption, blocker/evidence serialization, no recovery action execution, and no process/model/UI/Bifrost/FileMap/branch/main/Polaris leakage.
+
+Proof: for Build 1, `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` plus `git diff --check fe51ffd6^..0ea4ddb4`. For Build 2, `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` plus `git diff --check ad9a4969^..e18c0d7b`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 1/2 polling after these current-main reviews.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Model Harness metadata binding, then Build 2 workflow advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:10 -06:00. Current `HEAD` and `origin/main` are `0c5931d0`, and Build 1 commits `fe51ffd6` and `0ea4ddb4`, plus Build 2 commits `ad9a4969` and `e18c0d7b`, are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check fe51ffd6^..0ea4ddb4`
+
+Build 1 review result:
+
+- Containment checks for `fe51ffd6` and `0ea4ddb4` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 230 tests.
+- `git diff --check fe51ffd6^..0ea4ddb4` passed.
+- Verified Model Harness route metadata carries provider route kind, external-review status, model metadata refs, external-review evidence refs, capability tier, trust state, context window, prompt payload budget/status, and prompt-drag fields as provider-neutral structured data.
+- Verified Relay payload evidence and `RelayExecutionSummary.model_capability_metadata_summary()` expose display-safe exact model id, provider route kind, capability tier, trust state, context window, prompt payload budget/status, growth/degraded tags, external-review requirement/status, metadata refs, and payload evidence refs.
+- Verified no raw prompt text, raw provider responses, credentials/account probing, live provider calls, UI/Bifrost/FileMap edits, process/session control, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Build 1 finding: none.
+
+Build 2 review scope: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check ad9a4969^..e18c0d7b`
+
+Build 2 review result:
+
+- Containment checks for `ad9a4969` and `e18c0d7b` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 188 tests.
+- `git diff --check ad9a4969^..e18c0d7b` passed.
+- Verified Prime converts `WorkflowWorkOrderRecoverySummary` into advisory-only `PrimeNextAction` outcomes for stale restart advice, fresh polling/watch, archive advice, resteer advice, and human-gate blockers without executing recovery.
+- Verified Beacon serializes workflow recovery summaries through `workflow_recovery_advisory_evidence()` with display-safe evidence and blockers.
+- Verified no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency was introduced.
+
+Build 2 finding: none.
+
+Completion: Build 1 Model Harness metadata binding and Build 2 workflow advisory binding are review-cleared. No repair routed.
+
+## Coordinator Override - Active Now
+
+Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` and `docs/live-build-2.md`. Review the oldest Ready marker from Build 1 or Build 2 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Model Harness metadata binding or Build 2 workflow summary advisory binding when either marks Ready for Codex Review.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Relay policy disposition runtime, then Build 2 workflow work-order recovery summary.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:54 -06:00. Current `HEAD` and `origin/main` are `4f745973`, and Build 1 commits `52b593f9` and `5e0aa795`, plus Build 2 commits `b8b2f49a` and `4b820044`, are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 52b593f9^..5e0aa795`
+
+Build 1 review result:
+
+- Containment checks for `52b593f9` and `5e0aa795` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 190 tests.
+- `git diff --check 52b593f9^..5e0aa795` passed.
+- Verified `RelayPromptPacketPolicyDisposition` is deterministic advisory data derived from already evaluated PromptPacket policy evidence before provider transport.
+- Verified allow/warn dispositions permit dispatch, while demote, human-gate, block, unknown-decision, and missing-metadata outcomes fail closed before `model_call` / adapter transport.
+- Verified demotion disposition records target tier, authorization state, no-silent-fallback tags, and fresh PromptPacket/Aegis rerun requirements rather than silently falling back.
+- Verified `PromptPacket.model_payload()` / lane payload remains the only model-bound prompt text and scoped scans found no raw prompt, credential, provider-response, UI/Bifrost/FileMap, branch/main, model-account/process, or Polaris leakage introduced by the slice.
+
+Build 1 finding: none.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check b8b2f49a^..4b820044`
+
+Build 2 review result:
+
+- Containment checks for `b8b2f49a` and `4b820044` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 97 tests.
+- `git diff --check b8b2f49a^..4b820044` passed.
+- Verified `WorkflowWorkOrderRecoverySummary` and `summarize_workflow_work_order_recovery()` provide deterministic, serializable workflow work-order recovery advice with work order id, target session id, heartbeat age/status, result/error kind, retry/resteer recommendation, permission blockers, review-gate blockers, recovery action, and rationale.
+- Verified recovery actions are advisory only: stale/missing/timeout maps to staged `start_new`, successful results map to `archive`, resteer requests map to `transfer`, and permission/review-gate blockers force `request_human_gate`.
+- Verified the helper does not spawn sessions, inspect processes, call models, edit UI/Bifrost/FileMap, move branches/worktrees, write main, introduce autonomous movement, or touch Polaris.
+
+Build 2 finding: none.
+
+Completion: Build 1 Relay policy disposition runtime and Build 2 workflow work-order recovery summary are review-cleared. No repair routed.
+
+## Coordinator Override - Active Now
+
+Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` and `docs/live-build-2.md`. Review the oldest Ready marker from Build 1 or Build 2 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Relay/Aegis runtime integration or Build 2 Session Lifecycle permission summary when either marks Ready for Codex Review.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Relay/Aegis handoff summary, then Build 2 permission summary advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:40 -06:00. Local `HEAD` is the assigned `b75e26d4`; `origin/main` was observed at `8b5eca62` after the route assignment, so Reviews A did not move the branch. Build 1 commits `99d6a64e` and `a0b8ac68`, plus Build 2 commits `c57306f0` and `b75e26d4`, are ancestors of local `HEAD`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 99d6a64e^..a0b8ac68`
+
+Build 1 review result:
+
+- Containment checks for `99d6a64e` and `a0b8ac68` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 184 tests.
+- `git diff --check 99d6a64e^..a0b8ac68` passed.
+- Verified `RelayExecutionSummary.aegis_prompt_packet_policy_handoff()` is a deterministic display-safe projection from already evaluated PromptPacket policy evidence and dispatch-envelope proof metadata.
+- Verified the handoff carries decision, severity, packet id/hash status, prioritized proof requirement, Aegis evidence ids, blockers, warnings, missing metadata fields, reason tags, demotion target, human-gate state, fail-closed state, prompt budget ref, and packet proof metadata ref.
+- Verified the slice does not add policy/runtime transport behavior, does not alter `PromptPacket.model_payload()` / model-bound payload handling, and does not expose raw prompt text, credentials, raw provider responses, account internals, UI/Bifrost rendering, FileMap edits, branch/main movement, or Polaris dependencies.
+
+Build 1 finding: none.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check c57306f0^..b75e26d4`
+
+Build 2 review result:
+
+- Containment checks for `c57306f0` and `b75e26d4` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 178 tests.
+- `git diff --check c57306f0^..b75e26d4` passed.
+- Verified `SessionPermissionSummary` evidence remains display-safe and deterministic, including blocker and recovery recommendation strings for stale recovery, pending approvals, review-gate blockers, expired unlocks, locked permissions, and out-of-scope permissions.
+- Verified Prime consumes summary-generated restart/resteer findings and permission blockers as advisory `PrimeNextAction` evidence only; blocked paths remain human-gated and movement-sensitive recovery remains blocked without explicit operation permission evidence.
+- Verified Beacon serializes permission summary advisory evidence without executing recovery or movement.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency introduced by the slice.
+
+Build 2 finding: none.
+
+Completion: Build 1 Relay/Aegis handoff summary and Build 2 permission summary advisory binding are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 permission summary expiry repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:26 -06:00. Current `HEAD` and `origin/main` are `d7d5f930`, and Build 2 commits `65e2a97f` and `d9dd6354` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 65e2a97f^..d9dd6354`
+
+Review result:
+
+- Containment checks for `65e2a97f` and `d9dd6354` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 92 tests.
+- `git diff --check 65e2a97f^..d9dd6354` passed.
+- Verified `_permission_unlock_expired_at()` now normalizes aware datetimes through `_as_utc(...).astimezone(timezone.utc)` before expiry comparison and preserves naive-as-UTC handling.
+- Re-ran the Reviews A repro: `observed_at=2026-06-02T02:00:00-06:00` normalizes to `2026-06-02T08:00:00+00:00`; with `unlock_expiry=2026-06-02T07:00:00+00:00`, helper and expected comparison both return expired.
+- Verified the added regression covers non-UTC aware timestamp expiry and `permission.unlock_expired` evidence in `summarize_session_permission_state()`.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, main writes, Polaris dependency, or autonomous movement introduced by the repair.
+
+Finding: none.
+
+Completion: Build 2 permission summary expiry repair is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 Relay/Aegis PromptPacket policy runtime repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:23 -06:00. Current `HEAD` and `origin/main` are `193ba4b2`, and Build 1 commits `3a27163b` and `193ba4b2` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 3a27163b^..193ba4b2`
+
+Review result:
+
+- Containment checks for `3a27163b` and `193ba4b2` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 178 tests.
+- `git diff --check 3a27163b^..193ba4b2` passed.
+- Verified the policy-aware Relay path adapts sealed PromptPacket and dispatch-envelope proof fields into Aegis `PromptPacketProofMetadata` and calls `evaluate_prompt_packet_proof_policy()` before delegating to provider adapter transport.
+- Verified blocked or human-gated PromptPacket policy decisions raise `RelayProofGateError` before `model_call`, including unsafe evidence ids, missing proof metadata, unknown proof requirements, missing dual-lane proof, candidate Tier 3 trust, and unavailable required hashes.
+- Verified clean Tier 2 dual-lane proof and clean Tier 4 human-gate approval allow dispatch while preserving `PromptPacket.model_payload()` / `RelayDispatchLane.payload` as the only model-bound prompt text.
+- Verified Relay policy evidence and decision records remain display-safe and do not expose raw prompt text, credentials, raw provider responses, account internals, UI/Bifrost rendering, FileMap edits, model-account/process code, branch/main movement, or Polaris dependencies.
+
+Finding: none.
+
+Completion: Build 1 Relay/Aegis PromptPacket policy runtime repair is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Finding Routed
+
+Goal: review current-main Build 2 Session Lifecycle permission summary aggregation.
+
+Status: finding routed by Codex Reviews A on 2026-06-01 23:14 -06:00. Current `HEAD` and `origin/main` are `333f5b6d`, and Build 2 commits `1b56a098` and `777171fe` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 1b56a098^..777171fe`
+
+Proof result:
+
+- Containment checks for `1b56a098` and `777171fe` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 91 tests.
+- `git diff --check 1b56a098^..777171fe` passed.
+
+Finding:
+
+- MEDIUM: `meridian_core/session_lifecycle.py:846` uses `observed_at.replace(tzinfo=timezone.utc)` and `permission.unlock_expiry.replace(tzinfo=timezone.utc)` in `_permission_unlock_expired_at()`. For aware non-UTC timestamps this rewrites the clock label instead of converting the instant, so an actually expired temporary unlock can be reported unexpired in permission summaries. Repro from the review worktree: `observed_at=2026-06-02T02:00:00-06:00` (08:00 UTC) and `unlock_expiry=2026-06-02T07:00:00+00:00` returns `helper_expired=False` while normalized UTC comparison is `True`.
+
+Smallest repair route:
+
+- Build 2 should normalize aware datetimes with `astimezone(timezone.utc)` before comparing expiry in `_permission_unlock_expired_at()` and add a regression test using a non-UTC aware `timestamp` proving `summarize_session_permission_state()` records `permission.unlock_expired` deterministically for the same instant.
+
+Completion: Build 2 permission summary aggregation is not review-cleared. Repair routed; review stopped before any Build 1/2 follow-on review.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 3 post-Build-4/5 FileMap audit, then poll Build 1/2 Ready markers.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:09 -06:00. Current `HEAD` and `origin/main` are `2fe41d69`, and Build 3 commits `c8c7cc22` and `007a1217` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check c8c7cc22^..007a1217`
+
+Review result:
+
+- Containment checks for `c8c7cc22` and `007a1217` passed.
+- Scope check shows FileMap changes limited to `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check c8c7cc22^..007a1217` passed.
+- Verified `docs/relay-aegis-promptpacket-policy-integration-checklist.md` is registered in runtime FileMap, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified existing coverage for `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, and `docs/v2-orchestrator-transition-ledger.md` across the runtime FileMap, docs mirror, and required-path tests.
+- Verified the live-build marker records concrete audit evidence, changed files, tests, commit, and next-candidate routing rather than read-check-only progress.
+
+Build 3 finding: none.
+
+Build 1/2 poll result: no Ready marker reviewed after Build 3 pass. `docs/live-build-1.md` shows an Active Now Relay/Aegis PromptPacket policy runtime integration task; `docs/live-build-2.md` shows an Active Now Session Lifecycle permission summary aggregation task. No Build 1/2 read-check-only commit was made.
+
+Completion: Build 3 post-Build-4/5 FileMap audit is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 permission-aware Prime/Beacon advisory evidence.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:01 -06:00. Current `HEAD` and `origin/main` are `a8913ca3`, and Build 2 commits `225a5108` and `fe8ed0ec` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check 225a5108^..fe8ed0ec`
+
+Review result:
+
+- Containment checks for `225a5108` and `fe8ed0ec` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 168 tests.
+- `git diff --check 225a5108^..fe8ed0ec` passed.
+- Verified `SessionCommandPlan.audit_evidence()` carries display-safe permission state, task scope, unlock expiry, approved operations, required operation, operation permission result, and permission evidence for Prime/Beacon consumers.
+- Verified branch/worktree movement-sensitive intents map to explicit `BRANCH_MOVE` / `WORKTREE_CREATE` permission operations and add deterministic blockers unless that operation is explicitly allowed by permission evidence.
+- Verified Prime and Beacon convert command-plan audit payloads into deterministic advisory evidence strings/blockers only, without executing restart, resteer, branch movement, worktree movement, session control, or autonomous movement.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, Polaris dependency, branch/worktree movement implementation, or live-control path in the reviewed Build 2 slice.
+
+Finding: none.
+
+Completion: Build 2 permission-aware Prime/Beacon advisory evidence is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review the current-main Build 1 and Build 3 Aegis wave slices.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:54 -06:00. Review branch `HEAD` is `2ee547d8`, `origin/main` is `34a761b9`, and requested commits `3cffeaa2`, `41582efb`, `b962197f`, and `53ee81d9` are ancestors of the review branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 3cffeaa2^..41582efb`
+
+Build 1 review result:
+
+- Containment checks for `3cffeaa2` and `41582efb` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 172 tests.
+- `git diff --check 3cffeaa2^..41582efb` passed.
+- Verified Relay decision records expose PromptPacket proof refs/status (`packet_hash`, `prompt_budget_ref`, source-lineage compliance, metadata ref, blocked tags, proof requirements, and Aegis evidence ids) as audit/display metadata.
+- Verified missing or blocked packet proof metadata contributes fail-closed fallback blockers, while `RelayDispatchLane.payload` / model calls still receive only approved prompt text.
+- Scoped side-effect scan found no raw prompt/proof leakage into decision metadata, credential handling, raw provider response storage, account internals, UI/Bifrost rendering, FileMap edits, Polaris dependency, branch/worktree movement, or autonomous movement in the reviewed Build 1 slice.
+
+Build 1 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check b962197f^..53ee81d9`
+
+Build 3 review result:
+
+- Containment checks for `b962197f` and `53ee81d9` passed.
+- Scope check shows FileMap changes limited to `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check b962197f^..53ee81d9` passed.
+- Verified `docs/aegis-promptpacket-proof-policy-checklist.md`, `tests/test_prompt_packet.py`, and `tests/test_relay_packet.py` are registered in runtime FileMap, mirrored or cross-referenced in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified the live-build marker records concrete audit evidence, changed files, tests, commit, and next-candidate routing rather than read-check-only progress.
+- Scoped side-effect scan found no unrelated runtime/UI/Polaris/branch movement behavior in the reviewed Build 3 slice.
+
+Build 3 finding: none.
+
+Completion: Build 1 Relay decision-record packet proof binding and Build 3 Aegis PromptPacket FileMap audit are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 Prime audit-evidence edge coverage.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:43 -06:00. Current `HEAD` and `origin/main` are `de626d5f`, and Build 2 commits `d13947a2` and `be83f294` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py -q`
+- `git diff --check d13947a2^..be83f294`
+
+Review result:
+
+- Containment checks for `d13947a2` and `be83f294` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py -q` passed with 70 tests.
+- `git diff --check d13947a2^..be83f294` passed.
+- Verified malformed serialized audit payloads fall back to non-executable advisory state with display-safe unknown/default evidence instead of crashing or executing.
+- Verified serialized string booleans parse deterministically, including `"false"` staying non-executable and `"true"` human-gate evidence blocking execution.
+- Verified permission-boundary, review-gate, and human-gate blockers remain deterministic display-safe evidence strings/blockers with stable `PrimeNextAction.evidence` key formatting.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, branch/worktree movement, UI/Bifrost/FileMap edits, Polaris dependency, or autonomous movement in the reviewed Build 2 slice.
+
+Finding: none.
+
+Completion: Build 2 Prime audit-evidence edge coverage is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 PromptPacket proof metadata binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:33 -06:00. Current `HEAD` and `origin/main` are `46315779`, and Build 1 commits `f1acf65c` and `5c6a6a28` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prompt_packet.py`, `meridian_core/relay_packet.py`, `meridian_core/relay_executor.py`, `tests/test_prompt_packet.py`, `tests/test_relay_packet.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q`
+- `git diff --check f1acf65c^..5c6a6a28`
+
+Review result:
+
+- Containment checks for `f1acf65c` and `5c6a6a28` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prompt_packet.py`, `meridian_core/relay_packet.py`, `meridian_core/relay_executor.py`, `tests/test_prompt_packet.py`, `tests/test_relay_packet.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q` passed with 234 tests.
+- `git diff --check f1acf65c^..5c6a6a28` passed.
+- Verified `PromptPacketProofMetadata` is immutable display/audit metadata carrying packet hash, budget/source-lineage proof, proof requirements, Aegis evidence ids, snapshot/hash fields, and blocked tags without storing raw prompt text.
+- Verified `PromptPacket.model_payload()` still returns only the raw `serialized_prompt`; packet metadata, hash, budget refs, source-lineage keys, credentials, provider responses, and account internals do not cross that model-bound payload.
+- Verified Relay dispatch envelopes carry packet proof refs/hash/budget/compliance/proof fields and fail closed through blocked tags when packet proof metadata or other required safe metadata is missing/unavailable.
+- Scoped side-effect scan found no live provider call path, credential handling, raw provider response storage, UI/Bifrost rendering, FileMap edits, Polaris dependency, branch movement, or cross-worktree movement in the reviewed Build 1 slice.
+
+Finding: none.
+
+Completion: Build 1 PromptPacket proof metadata binding is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Ready markers from Build 2 Prime audit-evidence advisory binding and Build 3 PromptPacket FileMap audit.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:30 -06:00. Current `HEAD` and `origin/main` are `c6a1c14b`. Build 2 commits `dcdce3cd` and `fff4e716`, and Build 3 commits `1072ae3c` and `f6e982de`, are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 2 review scope: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_session_lifecycle.py -q`
+- `git diff --check dcdce3cd^..fff4e716`
+
+Build 2 review result:
+
+- Containment checks for `dcdce3cd` and `fff4e716` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_session_lifecycle.py -q` passed with 148 tests.
+- `git diff --check dcdce3cd^..fff4e716` passed.
+- Verified `select_next_action_from_command_plan_audit()` consumes either a `SessionCommandPlan` or serialized `audit_evidence`, converts display-safe action/reason/blocker/permission/review/recovery metadata into immutable `PrimeNextAction.evidence`, and preserves human-gated pause behavior.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, branch/worktree movement, UI/Bifrost/FileMap edits, Polaris dependency, or autonomous movement in the reviewed Build 2 slice.
+
+Build 2 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 1072ae3c^..f6e982de`
+
+Build 3 review result:
+
+- Containment checks for `1072ae3c` and `f6e982de` passed.
+- Scope check shows FileMap registration changes limited to `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 1072ae3c^..f6e982de` passed.
+- Verified `docs/relay-promptpacket-proof-metadata-implementation-checklist.md` is registered in runtime `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified the Build 3 Ready marker records concrete audit evidence, including the inspected non-existent `docs/aegis-promptpacket-proof-policy-checklist.md` being intentionally unregistered, plus files changed, proof command, commit marker, and next candidate.
+
+Build 3 finding: none.
+
+Completion: Build 2 Prime audit-evidence advisory binding and Build 3 PromptPacket FileMap audit are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Ready markers in order: Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:19 -06:00. Current `HEAD` and `origin/main` are `a2c02267`. Build 2 commits `7bd603a2` and `14d3e398`, Build 1 commit `eead7f27`, and Build 3 commits `a9de0f5f` and `f33b3764` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 7bd603a2^..14d3e398`
+
+Build 2 review result:
+
+- Containment checks for `7bd603a2` and `14d3e398` passed.
+- Scope check shows runtime/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 82 tests.
+- `git diff --check 7bd603a2^..14d3e398` passed.
+- Verified `SessionCommandPlan.audit_evidence()` and serialized `audit_evidence` are deterministic, display-safe metadata covering plan action/reason, blockers, permission proof/gate data, review-gate state, and recovery notes without live control.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, branch movement, UI/Bifrost/FileMap edits, Polaris dependency, or autonomous movement in the reviewed Build 2 slice.
+
+Build 2 finding: none.
+
+Build 1 review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check eead7f27^..eead7f27`
+
+Build 1 review result:
+
+- Containment check for `eead7f27` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 204 tests.
+- `git diff --check eead7f27^..eead7f27` passed.
+- Verified `RelayDispatchEnvelope` carries exact/requested model id, provider/route/trust metadata, payload evidence references, Aegis/proof fields, blocked/error tags, safe dispatch status, and audit fields without storing raw prompts, credentials, raw provider responses, account internals, UI state, or transcripts.
+- Verified envelope construction is deterministic metadata around existing dispatch flow; no live provider calls, UI/Bifrost rendering, FileMap edits, branch movement, Polaris dependency, or cross-worktree movement were introduced.
+
+Build 1 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check a9de0f5f^..f33b3764`
+
+Build 3 review result:
+
+- Containment checks for `a9de0f5f` and `f33b3764` passed.
+- Scope check shows FileMap registration changes limited to `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check a9de0f5f^..f33b3764` passed.
+- Verified `docs/relay-dispatch-hardening-implementation-checklist.md` is registered in runtime `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified the Build 3 Ready marker records concrete audit evidence, files changed, proof command, commit marker, and next candidate; this is not read-check-only progress.
+
+Build 3 finding: none.
+
+Completion: Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit are review-cleared. No repair routed.
+
+## Coordinator Override - Active Now
+
+Goal: poll and review the next current-main Ready marker from Build 1, Build 2, or Build 3 after fresh lane reactivation.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md`, `docs/live-build-2.md`, and `docs/live-build-3.md`. If a real Ready marker exists, review the oldest ready slice using that lane's proof. If none is ready, report checked HEAD and make no local commit. Do not commit read-check-only progress.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 1 current-main Relay prompt payload evidence binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:06 -06:00. Current `HEAD` and `origin/main` are `f4873bba`, and relevant Build 1 commits `e6ab6af4` and `334c952e` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check e6ab6af4^..334c952e`
+
+Review result:
+
+- `git merge-base --is-ancestor e6ab6af4 HEAD` and `git merge-base --is-ancestor 334c952e HEAD` passed.
+- `git show --stat --oneline --name-only e6ab6af4 334c952e` shows the implementation commit changed only `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 199 tests.
+- `git diff --check e6ab6af4^..334c952e` passed.
+- Verified `RelayPromptPayloadEvidence` carries prompt source, heartbeat/route/lane context, provider/model context, token estimate, budget percent/status/compliance, growth state, snapshot/telemetry support flags, tokenizer family, and explicit missing-telemetry tags.
+- Verified payload evidence is built before the adapter/model-call loop and attached to per-lane `RelayExecutionResult` records and the first-lane `RelayDecisionRecord` without forwarding route metadata into the adapter payload.
+- Verified tests cover raw prompt exclusion from evidence dictionaries, prompt snapshot hashing only when supported, and missing telemetry tags when adapter metadata is absent.
+- Scoped side-effect scan found no new raw prompt text storage in evidence, credential exposure, raw provider response storage, full transcript storage, live model/network call path, UI/Bifrost rendering, FileMap edit, Polaris dependency, branch movement, or cross-worktree movement in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 1 Relay prompt payload evidence binding is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 2 current-main Session Lifecycle command-plan edge coverage, then Build 3 current-main FileMap prompt payload visibility coverage if Build 2 passes.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:01 -06:00. Current `HEAD` and `origin/main` are `4dd951ff`. Build 2 commits `ee00bc4a` and `42783048` are ancestors of current main; Build 3 commits `4ee53306` and `e1e35d9c` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check ee00bc4a^..42783048`
+
+Build 2 review result:
+
+- `git merge-base --is-ancestor ee00bc4a HEAD` and `git merge-base --is-ancestor 42783048 HEAD` passed.
+- `git show --stat --oneline --name-only ee00bc4a 42783048` shows the implementation commit changed only `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 76 tests.
+- `git diff --check ee00bc4a^..42783048` passed.
+- Verified `plan_command_from_session_action()` maps routing/recovery decisions into typed `SessionCommandPlan` advisory state without executing control.
+- Verified deterministic edge handling for summarize/reset, transfer, start-new, archive/no-session, stale recovery, review-gate human approval, and permission-boundary blockers.
+- Verified human-gated transfer/start-new/restart/archive/review/permission plans are non-executable, permission-boundary proof remains required, and archive/no-session does not fabricate a command target.
+- Scoped side-effect scan found no session spawning, live process inspection, branch movement, model/network/credential calls, UI/Bifrost/FileMap/Polaris edits, or autonomous branch movement in the reviewed Build 2 slice.
+
+Build 2 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 4ee53306^..e1e35d9c`
+
+Build 3 review result:
+
+- `git merge-base --is-ancestor 4ee53306 HEAD` and `git merge-base --is-ancestor e1e35d9c HEAD` passed.
+- `git show --stat --oneline --name-only 4ee53306 e1e35d9c` shows the FileMap registration commit changed only `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 4ee53306^..e1e35d9c` passed.
+- Verified `docs/relay-prompt-payload-visibility-implementation-checklist.md` is registered in runtime `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified `docs/live-build-3.md` records concrete audit evidence, files changed, proof command, commit marker, Ready marker, and next candidate; this is not read-check-only progress.
+- Scoped side-effect scan found no unrelated runtime behavior, live process/model/account code, UI/runtime mutation, Polaris dependency, branch movement, or cross-worktree movement in the reviewed Build 3 slice.
+
+Build 3 finding: none.
+
+Completion: Build 2 Session Lifecycle command-plan edge coverage and Build 3 FileMap prompt payload visibility coverage are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 1 current-main Relay route metadata binding, then Build 3 current-main FileMap checkpoint audit if Build 1 passes.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:05 -06:00. Current `HEAD` and `origin/main` are `119807d0`. Build 1 commits `814bce76` and `d00f305c` are ancestors of current main; Build 3 commits `0b50287e` and `3fbd6c62` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check 814bce76^..d00f305c`
+
+Build 1 review result:
+
+- `git merge-base --is-ancestor 814bce76 HEAD` and `git merge-base --is-ancestor d00f305c HEAD` passed.
+- `git show --stat --oneline --name-only 814bce76 d00f305c` shows the implementation commit changed only `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed with 193 tests.
+- `git diff --check 814bce76^..d00f305c` passed.
+- Verified `ModelRouteMetadataBinding` and `bind_model_route_metadata()` carry provider-neutral capability tier, route tier, route cost/latency posture, context budget, prompt payload budget, trust state, external-review state, and optional prompt-drag metrics.
+- Verified registry-backed Relay execution attaches route metadata to lane results and decision records while preserving the payload-only model-call boundary; tests prove capability metadata does not enter model payloads.
+- Verified DeepSeek binding stays provider-neutral and preserves `deepseek-chat` as the dispatch identity while `deepseek-v4-pro` and `deepseek-v4-flash` remain metadata labels only.
+- Scoped side-effect scan found no new live model call, network path, credential handling, UI/Bifrost/FileMap edit, Polaris dependency, branch movement, or cross-worktree movement in the reviewed Build 1 slice.
+
+Build 1 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 0b50287e^..3fbd6c62`
+
+Build 3 review result:
+
+- `git merge-base --is-ancestor 0b50287e HEAD` and `git merge-base --is-ancestor 3fbd6c62 HEAD` passed.
+- `git show --stat --oneline --name-only 0b50287e 3fbd6c62` shows the FileMap checkpoint audit commit changed only `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 0b50287e^..3fbd6c62` passed.
+- Verified checkpoint queue/review/ledger coverage is aligned across runtime `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`, including the new `docs/live-build-3.md` entry and required-path coverage for existing `docs/live-codex-reviews.md`.
+- Verified `docs/live-build-3.md` records concrete audit evidence, files changed, proof command, commit marker, Ready marker, and next candidate; this is not read-check-only progress.
+- Scoped side-effect scan found no unrelated runtime behavior, UI/Bifrost/Polaris dependency, live process/model/account code, branch movement, or cross-worktree movement in the reviewed Build 3 slice.
+
+Build 3 finding: none.
+
+Completion: Build 1 Relay route metadata binding and Build 3 FileMap checkpoint audit are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 2 current-main Prime/Beacon advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:50 -06:00. Current `HEAD` and `origin/main` are `5677a3aa`, and relevant Build 2 commits `46c118f3` and `4096f0f5` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for review provenance only.
+
+Task: verify the Prime/Beacon advisory binding is pure advisory state only, preserves branch/worktree permission rules, stale heartbeat safety, review-gate human approval, and permission-boundary blocking, and does not spawn sessions, inspect live processes, move branches, call models, edit UI/Bifrost/FileMap/Polaris, or add autonomous branch movement.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py -q`
+- `git diff --check 46c118f3^..4096f0f5`
+
+Review result:
+
+- `git merge-base --is-ancestor 46c118f3 HEAD` and `git merge-base --is-ancestor 4096f0f5 HEAD` passed.
+- `git show --stat --oneline --name-only 46c118f3 4096f0f5` shows the implementation commit changed only `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `tests/test_session_lifecycle.py`, and `tests/test_prime_autonomy.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py -q` passed with 130 tests.
+- `git diff --check 46c118f3^..4096f0f5` passed.
+- Verified `generate_restart_finding()`, `generate_resteer_finding()`, and `gather_prime_autonomy_input()` produce immutable advisory state and evidence without restarting, steering, inspecting, or mutating live sessions.
+- Verified `select_next_action_from_session_lifecycle_advisory()` returns pause/advisory/poll actions only; restart/resteer findings remain human-gated and blocked by command-plan approval requirements.
+- Verified review-gated sessions pause with human approval required, permission-boundary failures pause with blockers, and operation checks use `SessionLifecycleState.can_execute_operation()` with task-scoped permission context.
+- Scoped side-effect scan found no session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, Polaris dependency, or autonomous branch movement in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 2 Prime/Beacon advisory binding is review-cleared. Next Candidate: bind any review findings from this advisory binding slice before unrelated Session Lifecycle work; none routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 3 current-main FileMap maintenance movement.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:40 -06:00. Current `HEAD` and `origin/main` are `f09f0b2a`, and relevant Build 3 commits `0cfd5bfa` and `1df7e081` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for review provenance only.
+
+Task: verify the newly registered V2/domain/checklist/current-main artifacts belong in FileMap, the runtime FileMap, required-path tests, and docs mirror remain aligned, the live-build marker records real completion evidence rather than read-check-only progress, and no unrelated runtime/UI/Polaris/branch movement was introduced.
+
+Proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 0cfd5bfa^..1df7e081`
+
+Review result:
+
+- `git merge-base --is-ancestor 0cfd5bfa HEAD` and `git merge-base --is-ancestor 1df7e081 HEAD` passed.
+- `git show --stat --oneline --name-only 0cfd5bfa 1df7e081` shows the FileMap maintenance commit changed only `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 0cfd5bfa^..1df7e081` passed.
+- Verified the newly registered V2/domain/checklist/current-main artifacts are present across runtime `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`, including DeepSeek, Relay, Aegis, PromptPacket, live-build queue, orchestrator, Echo/Atlas, and Session Lifecycle permission artifacts.
+- Verified `docs/live-build-3.md` records concrete completion evidence: registered artifacts, changed files, test proof, commit evidence, audit result, and Ready marker. The marker names worker commit `25bc316b`; its FileMap content matches current-main commit `0cfd5bfa`, so the current-main review target is equivalent and proofable.
+- Scoped diff/side-effect scan found no unrelated runtime behavior, UI/Bifrost/Polaris dependency, live process/model/account code, branch movement, or cross-worktree movement in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 3 FileMap maintenance movement is review-cleared. Next Candidate: bind any review findings from this FileMap slice before unrelated FileMap cleanup; none routed.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 1 DeepSeek candidate metadata preset slice when it is marked Ready for Codex Review on current main.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:30 -06:00. Current `HEAD` and `origin/main` are `00c4ab0d`, and relevant Build 1 commits `d41e33cd` and `0b7f1bc4` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Allowed review files: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/model-harness-v2-contract.md`, `docs/deepseek-provider-validation-gate.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for review provenance/routing only.
+
+Task: poll `docs/live-build-1.md` and current `origin/main` for the Build 1 DeepSeek candidate metadata preset completion. When Build 1 marks the slice Ready for Codex Review on a current-main commit, verify the Model Harness can represent DeepSeek direct-provider candidate routes for a default quality lane and fast lane while preserving validation-gate constraints: DeepSeek remains candidate trust, cannot clear reviews, cannot move branches, cannot bypass Relay/Aegis, and cannot run autonomous coding lanes until validation proof exists. Verify `deepseek-chat` remains the direct API dispatch id and any `deepseek-v4-pro` / `deepseek-v4-flash` labels are metadata/variant labels only, not dispatch keys. Confirm no network access, credentials, live model calls, UI/Bifrost rendering, branch movement, or Polaris dependency was added.
+
+Proof command:
+
+- `python -m pytest tests/test_model_adapter.py -q`
+
+Review result:
+
+- `git merge-base --is-ancestor d41e33cd HEAD` and `git merge-base --is-ancestor 0b7f1bc4 HEAD` passed.
+- `git show --stat --oneline --name-only d41e33cd 0b7f1bc4` shows the runtime commit only changed `meridian_core/model_adapter.py` and `tests/test_model_adapter.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py -q` passed with 32 tests.
+- Verified `deepseek_candidate_route_presets()` provides `default_quality` and `fast` candidate lanes, keeps `deepseek-chat` as the sole dispatch model, and keeps `deepseek-v4-pro` / `deepseek-v4-flash` as metadata variant labels only.
+- Verified DeepSeek remains candidate trust with external review pending and explicit blocks for review clearance, branch movement, Relay/Aegis bypass, and autonomous coding.
+- Scoped side-effect scan found no new network/live model call path, credentials handling, UI/Bifrost rendering, branch movement, or Polaris dependency in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 1 DeepSeek candidate metadata preset slice is review-cleared. Next Relay/Model Harness candidate for coordinator/Prime selection from `docs/v2-progress-tracker.md`: continue remaining Relay/Model Harness build work such as visible prompt payload meter wiring or metadata/pass-through hardening; DeepSeek must remain candidate-gated until validation proof exists.
+
+Completion: if clean, mark passed and promote the next Relay/Model Harness candidate from `docs/v2-progress-tracker.md`; if findings exist, route the smallest focused repair to Build 1 ahead of unrelated Relay work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+## Next Candidate Task - Completed / Passed
+
+Goal: review Build 2 Session Lifecycle restart/resteer recovery tests when marked Ready for Codex Review on current main.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:30 -06:00. Current `HEAD` and `origin/main` are `00c4ab0d`, and relevant Build 2 commits `636d946c` and `2b7011fb` are ancestors of current main.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for review provenance/routing only.
+
+Task: after the active Build 1 DeepSeek candidate metadata preset review is passed or repair-routed, poll `docs/live-build-2.md` and current `origin/main` for the Build 2 restart/resteer recovery test slice. Verify the tests cover stale heartbeat, context-fill summarize/reset, reasoning-shift transfer/start-new-session, review-gate human approval, and permission-boundary blocking while preserving reviewed permission invariants and no-live-control boundaries.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Review result:
+
+- `git merge-base --is-ancestor 636d946c HEAD` and `git merge-base --is-ancestor 2b7011fb HEAD` passed.
+- `git show --stat --oneline --name-only 636d946c 2b7011fb` shows the test commit only changed `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 65 tests.
+- Verified recovery coverage for stale heartbeat restart advisory/gated plan, context-fill summarize/reset and start-new paths, reasoning-shift start-new plus transfer recovery, review-gate human approval, and permission-boundary blocking with expiry/task-scope invariants preserved.
+- Scoped side-effect scan found no session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 2 restart/resteer recovery test slice is review-cleared. Next Session Lifecycle candidate for coordinator/Prime selection from `docs/v2-progress-tracker.md`: wire the restart/resteer evaluator into Prime/Beacon runtime state while preserving branch/worktree permission boundaries.
+
+Completion: if clean, mark passed and promote the next Session Lifecycle candidate from `docs/v2-progress-tracker.md`; if findings exist, route the smallest focused repair to Build 2 ahead of unrelated Session Lifecycle work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 Session Lifecycle permission-invariant repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 19:23 -06:00. Current `HEAD` and `origin/main` contain Build 2 repair commit `e41851ae`, and the prior HIGH permission-invariant findings are closed.
+
+Review result:
+
+- `git merge-base --is-ancestor e41851ae HEAD` and `git merge-base --is-ancestor e41851ae origin/main` passed.
+- `git show --stat --oneline --name-only e41851ae` shows the repair commit only changed `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 60 tests.
+- Closed: invalid temporary/permanent `PermissionContext` states are rejected; temporary unlocks require expiry and task scope; permanent unlocks require dual approval; work acceptance and operation execution enforce expiry/task scope against the session's current task id.
+- Scoped side-effect scan found no subprocess/session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency in `meridian_core/session_lifecycle.py` / `tests/test_session_lifecycle.py`.
+
+Finding: none.
+
+Completion: Build 2 Session Lifecycle permission-invariant repair is review-cleared. Build 2 is released to the next Session Lifecycle restart/resteer recovery test slice in `docs/live-build-2.md`. The prior next-candidate Build 1 checklist commit `455ed63c` is not on current `main`, so Reviews A is now tracking the current Build 1 DeepSeek metadata preset slice instead of reviving stale branch movement.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for review provenance/routing only.
+
+Task: review current `origin/main` commit `e41851ae` for the Build 2 repair of the remaining Session Lifecycle permission-invariant gaps. Verify invalid temporary/permanent `PermissionContext` states are rejected; temporary unlocks require expiry and task scope; permanent unlocks require dual approval; `can_accept_work()` and `can_execute_operation()` enforce expiry and task scope against the current session task id; closed heartbeat and immutable PrimeAutonomyInput repairs remain intact; and no live process control, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency was added.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: if clean, mark passed, close the prior HIGH permission-invariant findings, and leave the next executable Reviews A candidate: review Build 1 Relay proof payload downstream-consumer checklist commit `455ed63c`. If findings exist, route the smallest focused repair back to Build 2 ahead of normal work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review current-main Build 2 Session Lifecycle permissions contract-completeness repair.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 18:21 -06:00. Current `HEAD` and `origin/main` contain Build 2 repair commit `e486de2d`, and the required proof passes, but two permission-gate invariants remain incomplete.
+
+Review result:
+
+- `git merge-base --is-ancestor e486de2d HEAD` and `git merge-base --is-ancestor e486de2d origin/main` passed.
+- `git show --stat --oneline --name-only e486de2d` and `git diff-tree --no-commit-id --name-only -r e486de2d` show the repair commit only changed `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 52 tests.
+- Closed: `heartbeat_stale()` now uses `last_prompt_sent_at` with seconds semantics, and `PrimeAutonomyInput` stores immutable tuple/frozenset containers with defensive serialized lists/dicts.
+- Scoped side-effect scan found no subprocess/session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency.
+
+Findings:
+
+- HIGH: `meridian_core/session_lifecycle.py:144` - `PermissionContext` now has `approved_by_secondary`, `unlock_expiry`, and `task_scope`, but it still has no construction-time invariants enforcing the checklist requirements that temporary unlocks have explicit expiry/task scope and permanent unlocks require Aegis + Scott/two independent approvers (`docs/session-lifecycle-permissions-implementation-checklist.md:123`, `docs/session-lifecycle-permissions-implementation-checklist.md:124`, `docs/session-lifecycle-permissions-implementation-checklist.md:186`, `docs/session-lifecycle-permissions-implementation-checklist.md:187`). Required repair: Build 2 must enforce these invariants in construction/helper paths and add regression tests proving invalid temporary/permanent permission contexts are rejected.
+- HIGH: `meridian_core/session_lifecycle.py:318` and `meridian_core/session_lifecycle.py:397` - `can_accept_work()` checks locked/expired permission state but cannot enforce `task_scope`, and `SessionLifecycleState.can_execute_operation()` bypasses `PermissionContext.can_execute_operation()` so it ignores unlock expiry and task scope entirely. This leaves the prior permission-boundary finding partially open against checklist requirements for expiry, task scope, and approval-scope filtering (`docs/session-lifecycle-permissions-implementation-checklist.md:101`, `docs/session-lifecycle-permissions-implementation-checklist.md:127`, `docs/session-lifecycle-permissions-implementation-checklist.md:153`, `docs/session-lifecycle-permissions-implementation-checklist.md:154`). Required repair: Build 2 must pass/currently use the session task id through permission checks and add tests proving expired or out-of-scope unlocks cannot accept work or execute operations.
+
+Completion: routed the narrower permission-invariant repair to Build 2 in `docs/live-build-2.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 2 provides a current-main repair target.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `e486de2d` for the Build 2 Session Lifecycle permissions contract-completeness repair. Verify the prior HIGH/MEDIUM findings are closed: `PermissionContext` includes secondary approval, unlock expiry, and task scope with invariants/tests; `SessionLifecycleState.can_accept_work()` enforces permission lock, expiry, and scope; `heartbeat_stale()` uses the reviewed prompt-sent/seconds semantics or explicitly reconciles contract language; and `PrimeAutonomyInput` no longer exposes mutable containers by reference. Confirm `python -m pytest tests/test_session_lifecycle.py -q` passes and no live process control, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 2; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review current-main Build 2 Session Lifecycle permissions and Prime/Beacon binding implementation.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 18:14 -06:00. Current `HEAD` and `origin/main` contain Build 2 commit `7e96994a`, and the required proof passes, but the implementation does not yet satisfy the reviewed permissions/Prime-Beacon checklist invariants.
+
+Review result:
+
+- `git merge-base --is-ancestor 7e96994a HEAD` and `git merge-base --is-ancestor 7e96994a origin/main` passed.
+- `git show --stat --oneline --name-only 7e96994a` and `git diff-tree --no-commit-id --name-only -r 7e96994a` show the implementation commit only changed `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 52 tests.
+- Scoped side-effect scan found no subprocess/session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency in `meridian_core/session_lifecycle.py` / `tests/test_session_lifecycle.py`.
+
+Findings:
+
+- HIGH: `meridian_core/session_lifecycle.py:144` - `PermissionContext` omits the reviewed checklist fields and invariants for `approved_by_secondary`, `unlock_expiry`, and `task_scope` (`docs/session-lifecycle-permissions-implementation-checklist.md:16`, `docs/session-lifecycle-permissions-implementation-checklist.md:21`, `docs/session-lifecycle-permissions-implementation-checklist.md:22`, `docs/session-lifecycle-permissions-implementation-checklist.md:186`, `docs/session-lifecycle-permissions-implementation-checklist.md:187`). Without expiry/task scope and dual-signer support, temporary unlocks are not timestamp-bound/task-scoped and permanent unlocks cannot require Aegis + Scott approval. Required repair: Build 2 must add the missing fields/invariants and regression tests for expiry, task scope, and dual-signer permanent unlocks.
+- HIGH: `meridian_core/session_lifecycle.py:292` - `SessionLifecycleState.can_accept_work()` ignores `permission_context`, so a healthy locked session can still accept work despite the checklist requiring `can_accept_work()` to be false while permission is locked or an unlock is expired (`docs/session-lifecycle-permissions-implementation-checklist.md:101`, `docs/session-lifecycle-permissions-implementation-checklist.md:151`, `docs/session-lifecycle-permissions-implementation-checklist.md:153`, `docs/session-lifecycle-permissions-implementation-checklist.md:154`). Required repair: Build 2 must make work acceptance enforce permission lock, expiry, and task scope, with tests proving locked/expired/out-of-scope sessions cannot accept work.
+- MEDIUM: `meridian_core/session_lifecycle.py:305` - `heartbeat_stale()` uses `last_queue_read_at` and a minutes threshold, but the permissions checklist defines staleness from `last_prompt_sent_at` with a seconds threshold (`docs/session-lifecycle-permissions-implementation-checklist.md:37`, `docs/session-lifecycle-permissions-implementation-checklist.md:102`, `docs/session-lifecycle-permissions-implementation-checklist.md:132`, `docs/session-lifecycle-permissions-implementation-checklist.md:133`). Required repair: Build 2 must align heartbeat staleness with `last_prompt_sent_at` / seconds semantics or update the reviewed contract before implementation.
+- MEDIUM: `meridian_core/session_lifecycle.py:206` - `PrimeAutonomyInput` is a frozen dataclass but stores mutable `list`/`dict` fields and `to_dict()` returns those containers by reference at `meridian_core/session_lifecycle.py:220` through `meridian_core/session_lifecycle.py:223`. This violates the checklist's immutable/deterministic Prime input requirement (`docs/session-lifecycle-permissions-implementation-checklist.md:147`, `docs/session-lifecycle-permissions-implementation-checklist.md:181`, `docs/session-lifecycle-permissions-implementation-checklist.md:190`). Required repair: Build 2 must normalize Prime input containers to immutable representations or defensive copies and add mutation-resistance tests.
+
+Completion: routed the focused contract-completeness repair to Build 2 in `docs/live-build-2.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 2 provides a current-main repair target.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-v2-contract.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `7e96994a` for the Build 2 Session Lifecycle permissions and Prime/Beacon binding implementation. Verify the typed/frozen PermissionState, OperationScope, FindingType, PermissionContext, RestartResteerFinding, and PrimeAutonomyInput surfaces match the reviewed contracts/checklists; SessionLifecycleState preserves existing command-plan behavior and unique-worktree/assigned-queue invariants; permission helpers block or require approval for scoped operations correctly; Beacon findings and Prime selection inputs are represented without live process control. Confirm `python -m pytest tests/test_session_lifecycle.py -q` passes and the change does not spawn sessions, inspect live processes, call models, edit UI/Bifrost/FileMap/review queues beyond provenance, move branches, or touch Polaris. If findings exist, route the smallest focused repair to Build 2; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review Build 2 Session Lifecycle permissions and Prime/Beacon binding implementation.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 18:08 -06:00. The assigned implementation commit `6e2f2a5f` exists locally, but it is not an ancestor of current `HEAD` / `origin/main`, so Reviews A cannot run the required proof command against the queued implementation slice on current main.
+
+Review result:
+
+- `git merge-base --is-ancestor 6e2f2a5f HEAD` failed.
+- `git merge-base --is-ancestor 6e2f2a5f origin/main` failed.
+- `git branch --contains 6e2f2a5f --all` shows the commit only on `worktree-build-2-session-lifecycle` and `origin/worktree-build-2-session-lifecycle`.
+- `git show --stat --oneline --name-only 6e2f2a5f` shows the worker commit changed only `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`.
+- `git diff --stat 6e2f2a5f..HEAD -- meridian_core/session_lifecycle.py tests/test_session_lifecycle.py` shows current main lacks the queued permissions/Prime-Beacon binding implementation and tests, so running `python -m pytest tests/test_session_lifecycle.py -q` here would not prove the assigned slice.
+
+Finding:
+
+- HIGH: review provenance/branch visibility - Build 2 implementation commit `6e2f2a5f` is not reviewable on current `origin/main`. Required repair: Build 2/coordinator must land the intended Session Lifecycle permissions and Prime/Beacon binding implementation on current main through the approved path or requeue a current-main review target; then Reviews A can rerun `python -m pytest tests/test_session_lifecycle.py -q` and verify the typed/frozen permission, Beacon finding, Prime autonomy input, command-plan invariant, and no-live-process-control requirements.
+
+Completion: routed the focused visibility repair to Build 2 in `docs/live-build-2.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 2/coordinator provides a current-main review target.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-v2-contract.md`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` Build 2 commit `6e2f2a5f` for the Session Lifecycle permissions and Prime/Beacon binding implementation. Verify the typed/frozen PermissionState, OperationScope, FindingType, PermissionContext, RestartResteerFinding, and PrimeAutonomyInput surfaces match the reviewed contracts/checklists; SessionLifecycleState preserves existing command-plan behavior and unique-worktree/assigned-queue invariants; permission helpers block or require approval for scoped operations correctly; Beacon findings and Prime selection inputs are represented without live process control. Confirm `python -m pytest tests/test_session_lifecycle.py -q` passes and the change does not spawn sessions, inspect live processes, call models, edit UI/Bifrost/FileMap/review queues beyond provenance, move branches, or touch Polaris. If findings exist, route the smallest focused repair to Build 2; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 1 Relay proof payload deterministic test-collection repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 18:02 -06:00. Current `HEAD` and `origin/main` contain Build 1 repair commit `0641aa44`, and the duplicate deterministic test collection finding is closed.
+
+Review result:
+
+- `git merge-base --is-ancestor 0641aa44 HEAD` and `git merge-base --is-ancestor 0641aa44 origin/main` passed.
+- `git show --stat --oneline --name-only 0641aa44` shows the repair commit only changed `tests/test_relay_executor.py`.
+- `git show --stat --oneline --name-only 708a5f7e` shows the Build 1 provenance marker only changed `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 152 tests.
+- `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q` collected 19 tests, including both `test_evidence_summary_to_dict_multiple_calls_identical` and `test_evidence_summary_to_dict_multiple_calls_identical_with_partial_evidence`.
+
+Finding: none. Prior MEDIUM duplicate test method name / collection shadowing finding is closed.
+
+Completion: Build 1 Relay proof payload deterministic test-collection repair is review-cleared. Next Candidate: no executable Reviews A task remains; continue polling for the next coordinator-promoted Ready marker.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `0641aa44` and Build 1 queue marker `708a5f7e` for the focused test-only repair to the Relay proof payload negative-path deterministic test collection. Verify the duplicate `TestAegisGateEvidenceSummary.test_evidence_summary_to_dict_multiple_calls_identical` shadowing issue is fixed by a uniquely named deterministic incomplete/partial-evidence test, `python -m pytest tests/test_relay_executor.py -q` passes, and `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q` collects the repaired test without duplicate-name shadowing. Confirm the repair changed only `tests/test_relay_executor.py` plus queue provenance and added no Relay runtime, Bifrost, Aegis, Session Lifecycle, FileMap, UI, process/model/account code, branch movement, or Polaris dependency. If findings exist, route the smallest focused repair to Build 1; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate. Do not edit implementation files from the review worktree.
+
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review current-main Build 1 Relay proof payload negative-path tests after visibility repair.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 17:53 -06:00. Current `HEAD` and `origin/main` contain worker commit `26a71632` and merge commit `6de2c4d5`, and the required Relay executor proof passes, but one test collection gap remains in the landed negative-path test slice.
+
+Review result:
+
+- `git merge-base --is-ancestor 26a71632 HEAD` and `git merge-base --is-ancestor 26a71632 origin/main` passed.
+- `git merge-base --is-ancestor 6de2c4d5 origin/main` passed.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 151 tests.
+- `git diff-tree --no-commit-id --name-only -r 26a71632` shows the worker commit only changed `tests/test_relay_executor.py`.
+- The added tests cover empty evidence IDs, absent waiver default, demote/no blockers, empty explanation with a decision, no gate decision shape, and mixed empty/full evidence fields.
+
+Finding:
+
+- MEDIUM: `tests/test_relay_executor.py` defines `TestAegisGateEvidenceSummary.test_evidence_summary_to_dict_multiple_calls_identical` twice. The later existing definition shadows the newly added negative-path deterministic test, and `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q` collects only one method with that name. Required repair: Build 1 should rename the newly added deterministic negative-path test, or otherwise add a uniquely named test that proves deterministic immutable `to_dict()` output for incomplete/partial evidence. Keep the repair test-only unless coordinator expands scope.
+
+Completion: routed the focused test-collection repair to Build 1 in `docs/live-build-1.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 1 provides the repair target.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `tests/test_relay_executor.py`, `meridian_core/relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` containing Build 1 merge commit `6de2c4d5` and worker commit `26a71632` for the Relay proof payload negative-path tests. First verify `26a71632` is now an ancestor of current `HEAD` / `origin/main`, then run the proof command. Confirm the added tests cover incomplete/empty evidence ids, absent waiver/approval evidence, fallback blockers, no-gate/blocked decision shape, and deterministic immutable output for incomplete evidence. Confirm no Bifrost, Aegis, Session Lifecycle, FileMap, UI, process/model/account code, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 1; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate. Do not edit implementation files from the review worktree.
+
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review Build 1 Relay proof payload negative-path tests.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 17:45 -06:00. The assigned worker commit `26a71632` exists, but it is not an ancestor of current `HEAD` / `origin/main`, so Reviews A cannot run the required proof command against the queued test slice on current main.
+
+Review result:
+
+- `git merge-base --is-ancestor 26a71632 HEAD` failed, proving the assigned test commit is not present in current main.
+- `git branch --contains 26a71632 --all` shows the commit only on `worktree-build-1-v2-relay` and `origin/worktree-build-1-v2-relay`.
+- `git show --stat --oneline --name-only 26a71632` shows the worker commit changes only `tests/test_relay_executor.py`.
+- `git diff --stat 26a71632..HEAD -- tests/test_relay_executor.py meridian_core/relay_executor.py` shows current main lacks the queued negative-path test additions, so running `python -m pytest tests/test_relay_executor.py -q` here would not prove the assigned slice.
+
+Finding:
+
+- HIGH: review provenance/branch visibility - Build 1 worker commit `26a71632` is not reviewable on current `origin/main`. Required repair: Build 1/coordinator must land the negative-path test commit on current main through the approved path or requeue a current-main review target, then Reviews A can rerun `python -m pytest tests/test_relay_executor.py -q` and verify the required incomplete-evidence, absent-evidence, fallback-blocker, no-gate/blocked-shape, and deterministic immutable-output coverage.
+
+Completion: routed the focused visibility repair to Build 1 in `docs/live-build-1.md`. No implementation files were changed by Reviews A. Next Candidate: no executable Reviews A task remains until Build 1/coordinator provides a current-main review target.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `tests/test_relay_executor.py`, `meridian_core/relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review Build 1 worker commit `26a71632` for the Relay proof payload negative-path tests. Verify the commit is present on the reviewable branch/current main or route a visibility repair if it is not. If reviewable, run `python -m pytest tests/test_relay_executor.py -q`, confirm the added tests cover incomplete/empty evidence ids, absent waiver/approval evidence, fallback blockers, no-gate/blocked decision shape, and deterministic immutable output for incomplete evidence. Confirm no Bifrost, Aegis, Session Lifecycle, FileMap, UI, process/model/account code, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 1; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 2 Prime command-plan tests after coordinator provenance repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 17:32 -06:00. Current `origin/main` contains coordinator-scoped repair commit `17d70c9d`, and the required Session Lifecycle proof passes with the added Prime command-plan coverage.
+
+Review result:
+
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 34 tests.
+- `git merge-base --is-ancestor 17d70c9d HEAD` passed, proving the reviewed current-main repair commit is present.
+- `git diff-tree --no-commit-id --name-only -r 17d70c9d` shows the repair commit only changed `tests/test_session_lifecycle.py`.
+- `tests/test_session_lifecycle.py` now covers command-plan consumption for archive, request-human-gate, summarize/reset, transfer, context-fill, review-gate, and permission-boundary routing signals through typed helpers and command intents.
+- Scoped inspection found no live session spawning, model calls, process control, UI work, branch movement by the worker, or Polaris dependency in the reviewed commit.
+
+Finding: none. The prior HIGH review provenance/branch visibility finding is closed.
+
+Completion: Build 2 Prime command-plan test repair is review-cleared. Next Candidate: no executable Reviews A task remains; continue polling for the next coordinator-promoted Ready marker.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `17d70c9d`, the coordinator-scoped cherry-pick of Build 2 worker commit `f69d6683`, for the Prime command-plan tests consuming Session Lifecycle routing actions/reasons. Verify the commit is now an ancestor of current `HEAD` / `origin/main`, `python -m pytest tests/test_session_lifecycle.py -q` passes with the added command-plan coverage, and the change is limited to `tests/test_session_lifecycle.py`. Confirm no live session spawning, model calls, process control, UI work, branch movement by the worker, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 2; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review Build 2 Prime command-plan tests for Session Lifecycle routing actions and reasons.
+
+Status: repair routed by Codex Reviews A on 2026-06-01 17:27 -06:00. The assigned commit `f69d6683` exists locally, but it is not an ancestor of current `HEAD` / `origin/main`, so the required proof command executed current-main tests rather than the queued Build 2 test slice.
+
+Review result:
+
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 24 tests in the current checkout.
+- `git merge-base --is-ancestor f69d6683 HEAD` failed, proving the reviewed Ready marker commit is not present in current `HEAD` / `origin/main`.
+- `git branch --contains f69d6683 --all` shows the commit only on `worktree-build-2-session-lifecycle`.
+- `git diff --stat f69d6683..HEAD -- tests/test_session_lifecycle.py meridian_core/session_lifecycle.py` shows current `HEAD` lacks the queued commit's added test content.
+
+Finding:
+
+- HIGH: review provenance/branch visibility - Reviews A cannot clear Build 2 commit `f69d6683` because it is not present on current `origin/main`. Required repair: Build 2/coordinator must land the intended Prime command-plan test commit on `origin/main` through the approved path or requeue a current-main review target; then Reviews A can rerun `python -m pytest tests/test_session_lifecycle.py -q` and verify the typed command-plan coverage.
+
+Completion: routed the focused provenance/visibility repair to Build 2 in this review queue. No implementation files were changed by Reviews A.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `f69d6683` and the Build 2 queue marker for the Prime command-plan tests consuming Session Lifecycle routing actions/reasons. Verify the tests prove Prime-facing command plans can consume archive, request-human-gate, summarize/reset, transfer, context-fill, review-gate, and permission-boundary routing signals through typed helpers only. Confirm no live session spawning, model calls, process control, UI work, branch movement, or Polaris dependency was added. If findings exist, route the smallest focused repair to Build 2; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+>>>>>>> dbeaed55 (chore: Record Reviews A prompt meter edge pass)
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 2 Session Lifecycle routing-action repair implementation.
