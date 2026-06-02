@@ -10,15 +10,16 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the current-main Build 2 Prime audit-evidence edge coverage slice.
+Goal: review the current-main Build 1 and Build 3 Aegis wave slices.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: review the landed current-main Build 2 slice:
+Task: review the landed current-main slices in this order, stopping and routing a focused finding if any slice fails:
 
-- Build 2 Prime audit-evidence edge coverage, commits `d13947a2` and `be83f294`.
+- Build 1 Relay decision-record packet proof binding, commits `3cffeaa2` and `41582efb`.
+- Build 3 Aegis PromptPacket FileMap audit, commits `b962197f` and `53ee81d9`.
 
-Use current `origin/main` at or after `1744928e`. Verify containment, path scope, and the proof commands recorded in the Build 2 queue. Do not commit read-check-only progress.
+Use current `origin/main` at or after `33d2a48c`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop.
 
