@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining Session Lifecycle permission-invariant gaps.
 
@@ -27,7 +27,14 @@ Tests:
 
 - `python -m pytest tests/test_session_lifecycle.py -q`
 
-Completion: record the current-main repair commit hash, changed files, proof result, push status, and Ready for Codex Review marker in this queue.
+Completion:
+
+- Build 2 completed the remaining permission-invariant repair in current-main commit `e41851ae`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Repairs applied: invalid temporary/permanent `PermissionContext` states are rejected; temporary unlocks require expiry and task scope; permanent unlocks require dual approval; work acceptance and operation execution enforce expiry/task scope against the session's current task id.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 60 tests from clean main.
+- Push: commit is present on `origin/main`.
+- Ready for Codex Review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -1065,6 +1072,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-01 18:28 -06:00 - Build 2 completed enforce remaining Session Lifecycle permission-invariant gaps; commit e41851ae on main; all fixes applied and tested 60/60 passing; queue updated; Ready for Codex Review; cadence 1 of 3; no new Active Task; returning to polling
 2026-06-01 18:29 -06:00 - Build 2 checked queue; Active Now task (permission-invariant repair) marked complete at e41851ae; no new Active Task assigned; cadence 1 of 3; idle polling
 2026-06-01 18:30 -06:00 - Build 2 checked queue; prior Active Task (permission-invariant repair) still showing in Active Now section (not yet moved to Completed by coordinator); no executable task; cadence 1 of 3; idle polling
+2026-06-01 18:32 -06:00 - Build 2 checked queue; Active Now task already complete (e41851ae verified: __post_init__ present, 60/60 tests pass); no new Active Task from coordinator; cadence 1 of 3; idle polling
 ```
 
 ## Write/Completion Log
