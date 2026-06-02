@@ -92,6 +92,21 @@ def test_snapshot_exposes_capability_sections_for_harness_headers():
     assert all(section["rows"] for section in snapshot["capabilitySections"])
 
 
+def test_snapshot_exposes_relay_prime_directives_and_proofs():
+    snapshot = relay_logic_snapshot()
+
+    assert [item["name"] for item in snapshot["primeDirectives"]] == [
+        "Account/session-first, never silent fallback",
+        "Risk tier determines model depth",
+        "No drift between route, proof, and visible harness",
+    ]
+    assert [item["proves"] for item in snapshot["primeDirectiveProofs"]] == [
+        "account/session-first precedence and no silent fallback",
+        "risk-tier routing depth and autonomy limits",
+        "no drift between backend Relay and visible harness evidence",
+    ]
+
+
 def test_capability_sections_include_expert_relay_depth():
     rendered = json.dumps(relay_logic_snapshot()["capabilitySections"], sort_keys=True)
 

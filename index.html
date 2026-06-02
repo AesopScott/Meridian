@@ -3690,6 +3690,22 @@ body {
       index < 3,
     );
   };
+  const renderRelayPrimeDirectives = (snapshot) => {
+    const directives = Array.isArray(snapshot.primeDirectives) ? snapshot.primeDirectives : [];
+    const proofs = Array.isArray(snapshot.primeDirectiveProofs) ? snapshot.primeDirectiveProofs : [];
+    return [
+      relaySection(
+        'Prime Directives',
+        relayGrid(directives.map((item, index) => [`${index + 1}`, `${item.name}: ${item.logic}`])),
+        true,
+      ),
+      relaySection(
+        'Prime Directive Proofs',
+        relayGrid(proofs.map((item, index) => [`${index + 1}`, `${item.question} Proof: ${item.proves}`])),
+        true,
+      ),
+    ].join('');
+  };
   const renderRelayLogicSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Relay logic source', relayGrid([
@@ -3706,6 +3722,7 @@ body {
     const telemetryItems = relayUnique(tiers.flatMap((tier) => tier.audit?.telemetryRequired || []));
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
     return [
+      renderRelayPrimeDirectives(snapshot),
       relaySection('Relay logic source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
