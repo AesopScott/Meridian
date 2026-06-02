@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: connect reviewed non-executable live-control command-plan staging records to Prime/Beacon advisory consumers.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`.
+
+Task: add Prime and Beacon advisory consumers for `SessionLiveControlCommandPlanStagingRecord`, preserving target session id, command kind/recommended action, required operation, ready flag, human-gate rationale, UI-review blocker, permission state, blockers, and evidence refs. Keep it pure/advisory and serializable only: no restart/resteer/archive execution, process/session/model/provider calls, UI/Bifrost/FileMap side effects, branch/main movement, or Polaris.
+
+Completion:
+
+- Build 2 completed the command-staging Prime/Beacon advisory consumer binding in local worktree commit `0f63b726`.
+- Files changed: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`.
+- Evidence: Prime now consumes `SessionLiveControlCommandPlanStagingRecord` through `select_next_action_from_command_plan_staging_record()` and either surfaces non-executable `ADVISE_SESSION_RECOVERY` review-needed advice when only the UI-review blocker remains or pauses safely when permission/stageability blockers exist. Beacon now serializes the same staging record through `command_plan_staging_advisory_evidence()` with target, command kind, recommended action, required operation, readiness flag, non-executable flag, UI-review gate, permission state, blockers, and evidence refs.
+- Proof: `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 106 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or route the next live-control UI-review evidence slice.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: add a pure live-control command-plan staging gate after reviewed recovery-readiness advisory consumers.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
