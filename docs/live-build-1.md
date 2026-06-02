@@ -8,6 +8,23 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Blocked
+
+Goal: implement Model Harness capability metadata and prompt-drag telemetry fields from `docs/v2-progress-tracker.md`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-model-harness-metadata-20260602-1028`.
+
+Allowed files only: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
+
+Blocker:
+- Status: Blocked before commit.
+- Evidence: required status guard showed a clean worktree on the correct branch. Multiple attempts to add provider-neutral metadata classes/fields to `meridian_core/model_adapter.py` using `apply_patch`, then a deterministic local text transform after patch instability, did not persist reliably. In several cases one verification command showed inserted symbols such as `class ProviderCapability`, `class ModelMetadataBundle`, or `class TrustMode`, while the next immediate read showed those symbols absent and `git status --porcelain` returned clean. A partial route-binding/test state briefly produced `python -m pytest tests/test_model_adapter.py -q` failure because tests referenced fields that the implementation file had not retained; after the subsequent status guard, the tree was clean again.
+- Proof attempted: `python -m pytest tests/test_model_adapter.py -q` reached 42 passing / 1 failing during the transient partial state; `git diff --check` passed with only line-ending warnings when a transient test edit existed.
+- Files changed: `docs/live-build-1.md` only for blocker provenance.
+- Next Candidate: coordinator should verify whether this worktree is being refreshed or overwritten, then re-run the same provider-neutral metadata slice on a stable branch/worktree.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: harden the reviewed Relay visible prompt payload meter consumer surface with focused edge behavior for downstream frontend/runtime consumers.
