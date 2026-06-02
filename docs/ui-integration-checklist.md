@@ -519,6 +519,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | MB13 | Bridge readiness self-heal | UI rechecks bridge readiness when the page regains focus or visibility. | Restart bridge externally, return to the page, and status refreshes without manual reload. |
 | MB14 | Relay bridge visibility | Relay panel shows and refreshes live bridge access status from `/health`, not static copy. | Open Relay; Bridge route shows online/offline, version, visible-context state, and reset recovery state; focus/visibility refresh updates it. |
 | MB15 | Lost response recovery | If the browser loses a completed model response, the UI retrieves the short-lived local result by request id and renders it in the visible transcript. | `/api/call-result` returns output for a completed request id; `/api/recent-calls` remains metadata-only. |
+| MB16 | Relay logic snapshot | Relay panel renders model-routing logic from the backend/domain snapshot, not a duplicated static UI list. | `/api/relay-logic` returns `source=meridian_core.relay.route_from_tier`; Relay panel shows source, route precedence, tier logic, Tier 3 proof/blockers, and no Heartbeat text. |
 
 ## Harness UI Rules
 

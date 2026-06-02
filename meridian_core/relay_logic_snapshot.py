@@ -1,0 +1,97 @@
+"""Serializable Relay model-routing logic snapshot for UI harnesses."""
+
+from __future__ import annotations
+
+import json
+from enum import Enum
+from typing import Any
+
+from .relay import route_from_tier
+
+
+SNAPSHOT_VERSION = "relay-domain-v1"
+SNAPSHOT_SOURCE = "meridian_core.relay.route_from_tier"
+
+
+def _value(item: Any) -> Any:
+    if isinstance(item, Enum):
+        return item.value
+    return item
+
+
+def _tuple_values(items: tuple[Any, ...]) -> list[Any]:
+    return [_value(item) for item in items]
+
+
+def _lane_snapshot(lane: Any) -> dict[str, Any]:
+    return {
+        "role": _value(lane.role),
+        "preferredModel": lane.preferred_model,
+        "independent": lane.independent,
+    }
+
+
+def _prompt_budget_snapshot(route: Any) -> dict[str, Any]:
+    budget = route.prompt_budget
+    return {
+        "tier": _value(budget.tier),
+        "maxContextTokens": budget.max_context_tokens,
+        "allowedSources": list(budget.allowed_sources),
+        "reason": budget.reason,
+    }
+
+
+def _audit_snapshot(route: Any) -> dict[str, Any]:
+    audit = route.audit
+    return {
+        "routeKind": _value(audit.route_kind),
+        "routeClass": _value(audit.route_class),
+        "sessionAction": _value(audit.session_action),
+        "trustState": _value(audit.trust_state),
+        "routePrecedence": _tuple_values(audit.route_precedence),
+        "alternativesRejected": list(audit.alternatives_rejected),
+        "fallbackBlockers": list(audit.fallback_blockers),
+        "proofRequired": list(audit.proof_required),
+        "telemetryRequired": list(audit.telemetry_required),
+    }
+
+
+def _tier_snapshot(tier: int) -> dict[str, Any]:
+    route = route_from_tier(tier)
+    return {
+        "tier": route.risk_tier,
+        "mode": _value(route.mode),
+        "reason": route.reason,
+        "costPosture": _value(route.cost_posture),
+        "requiresIndependence": route.requires_independence,
+        "requiresHumanGate": route.requires_human_gate,
+        "lanes": [_lane_snapshot(lane) for lane in route.lanes],
+        "contextStrategy": _value(route.context_strategy),
+        "contextHealth": _value(route.context_health),
+        "latencyPosture": _value(route.latency_posture),
+        "privacyLevel": _value(route.privacy_level),
+        "promptBudget": _prompt_budget_snapshot(route),
+        "audit": _audit_snapshot(route),
+    }
+
+
+def relay_logic_snapshot() -> dict[str, Any]:
+    """Return the canonical Relay logic that visible harnesses should render."""
+    tiers = [_tier_snapshot(tier) for tier in range(5)]
+    return {
+        "ok": True,
+        "service": "meridian-relay-logic",
+        "version": SNAPSHOT_VERSION,
+        "source": SNAPSHOT_SOURCE,
+        "autoRouting": "disabled_until_prime_relay_contract",
+        "routePrecedence": tiers[1]["audit"]["routePrecedence"],
+        "tiers": tiers,
+    }
+
+
+def main() -> None:
+    print(json.dumps(relay_logic_snapshot(), sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
