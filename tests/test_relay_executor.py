@@ -49,6 +49,7 @@ from meridian_core.relay_executor import (
     execute_relay_dispatch_plan,
     execute_relay_dispatch_plan_with_policy,
     execute_relay_plan_with_registry,
+    relay_display_safe_handoff_tags,
     relay_execution_summary_to_proof_trail,
 )
 from meridian_core.relay_packet import assemble_relay_packet
@@ -3467,6 +3468,44 @@ class TestAegisGateEvidenceSummary:
 class TestRelayAegisPromptPacketHandoffSummary:
     """Test display-safe PromptPacket policy handoff for Bifrost."""
 
+    def test_display_safe_handoff_tag_contract_redacts_unsafe_downstream_values(
+        self,
+    ) -> None:
+        result = relay_display_safe_handoff_tags(
+            (
+                "credential:sk-test-secret",
+                "raw_prompt_secret",
+                "branch_move_request",
+                "packet-proof-credential:sk-test-secret",
+                "packet_hash_missing",
+                "packet-proof-safe",
+                "aegis-proof-safe",
+                "PromptPacket proof metadata satisfies Aegis policy",
+            ),
+            fallback="redacted_downstream_tag",
+        )
+
+        assert result == (
+            "redacted_downstream_tag",
+            "packet_hash_missing",
+            "packet-proof-safe",
+            "aegis-proof-safe",
+            "PromptPacket proof metadata satisfies Aegis policy",
+        )
+
+    def test_display_safe_handoff_tag_contract_dedupes_redactions(self) -> None:
+        result = relay_display_safe_handoff_tags(
+            (
+                "credential:sk-test-secret",
+                "raw_prompt_secret",
+                "packet_hash_unavailable",
+                "packet_hash_unavailable",
+            ),
+            fallback="redacted_downstream_tag",
+        )
+
+        assert result == ("redacted_downstream_tag", "packet_hash_unavailable")
+
     def test_handoff_empty_when_policy_not_evaluated(self) -> None:
         summary = RelayExecutionSummary(results=(), errors=(), decision_record=None)
 
@@ -3615,7 +3654,10 @@ class TestRelayAegisPromptPacketHandoffSummary:
             decision="block",
             severity="error",
             reason="raw_prompt_secret",
-            evidence_ids=("credential:sk-test-secret",),
+            evidence_ids=(
+                "credential:sk-test-secret",
+                "packet-proof-credential:sk-test-secret",
+            ),
             blockers=("branch_move_request",),
             warnings=("raw_prompt_secret",),
             packet_id=_PACKET_ID,
@@ -3638,6 +3680,7 @@ class TestRelayAegisPromptPacketHandoffSummary:
         assert handoff["reason_tags"] == ("redacted_policy_reason",)
         for sentinel in (
             "credential:sk-test-secret",
+            "packet-proof-credential:sk-test-secret",
             "raw_prompt_secret",
             "branch_move_request",
         ):
