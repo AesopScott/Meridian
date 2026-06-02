@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add deterministic Bifrost Model Harness capability metadata sample rendering for provider route inspection.
 
@@ -22,7 +22,15 @@ Task: add a static, deterministic Bifrost sample surface for Model Harness capab
 
 Tests: `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check`.
 
-Completion: commit locally only, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or connect reviewed runtime Model Harness metadata when available.
+Completion:
+
+- Build 5 completed deterministic Bifrost Model Harness capability metadata sample rendering in commit `20447018`.
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 247 tests; `git diff --check` passed.
+- Concrete evidence: Bifrost now renders a Model Harness capability metadata sample beside provider balance, including exact model id, provider direct-vs-aggregator route kind, trust state, context window, cost posture, latency, tokenizer family, streaming/Q-mode flags, allowed/blocked task hints, external-review requirement, prompt budget/growth/delta fields, and display-safe evidence refs. Tests preserve provider balance/cost-pressure rendering, prompt payload visibility, dispatch hardening, PromptPacket proof metadata, Relay/Aegis handoff, proof-state preview, stale-session recovery actions, escaping, and cockpit layout.
+- Ready for Codex Review.
+
+Next Candidate: bind review findings or connect reviewed runtime Model Harness metadata when available.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
