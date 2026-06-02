@@ -177,6 +177,13 @@ Replacement coordinator pressure-lane replacement - 2026-06-02:
 - Launched replacement focused Reviews B Relay UI/runtime review thread `019e864a-0536-7250-8057-19bf8a8a85b3`, constrained to `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`, with no shared-main writes or main push allowed.
 - Initial thread readback: both replacement sessions are active, verified clean assigned worktrees, and began inspecting the required files. Await local branch commit/verdict evidence before any coordinator movement.
 
+Replacement coordinator pressure-lane evidence - 2026-06-02:
+
+- Additional shared-main containment recovery: local implementation commit `2a697273 Persist active harness panel mode` touching `index.html` was found on shared main, preserved on quarantine branch `codex/quarantine-main-impl-2a697273-20260601-210740`, then shared main was restored clean/aligned to `origin/main` at `7707e50a`.
+- Build 3 replacement thread produced local worktree branch commits `4c9060c3` (`chore: Register Relay UI runtime FileMap coverage`) and `969172d0` (`chore: Record Relay UI FileMap audit completion`). Reported proof: `python -m pytest tests/test_filemap.py -q` passed 46/46 and all four missing paths were registered.
+- Reviews B replacement thread produced local worktree branch commit `207a101e` (`Review Relay harness UI integration`). Reported proof: `python -m pytest tests/test_relay_logic_snapshot.py -q` passed 11 tests, bridge self-test passed, and verdict was passed with no findings/blockers.
+- Movement status: no worker/review commits have been moved to main yet. Current orchestrator review/approval was requested for a path-limited movement plan covering Build 3 files (`meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`) and Reviews B provenance (`docs/live-codex-reviews-2.md`).
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
