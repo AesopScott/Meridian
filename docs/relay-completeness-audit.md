@@ -200,3 +200,69 @@ The Relay harness panel should show this audit as logic items:
 - explanation for Prime.
 
 If the panel cannot show these, Relay is not ready for Auto.
+
+## Current Implementation Snapshot -- 2026-06-02
+
+**Git state:** Relay harness work has been restored onto `main`.
+
+**Main commits now carrying the visible Relay harness depth:**
+
+- `1af564f9` -- Relay panel reads backend/domain snapshot instead of static UI copy.
+- `1d809d06` -- Relay dispatch lane/order/payload policy is visible.
+- `fb0dd4c9` -- Relay audit depth is visible.
+- `98a2c137` -- Relay capability sections render as collapsible harness headers.
+- `24e15ba5` -- Relay Prime Directives and Prime Directive Proofs render at the top of the harness.
+
+**Visible Relay harness now starts with Prime Directives:**
+
+1. Account/session-first, never silent fallback.
+2. Risk tier determines model depth.
+3. No drift between route, proof, and visible harness.
+
+**Visible Relay harness then shows Prime Directive Proofs:**
+
+1. What route was tried first, what route was selected, and what alternatives were rejected?
+2. What risk tier was assigned, and what model-lane depth did that tier require?
+3. Where is the visible proof in the harness for the route, blockers, dispatch lanes, prompt budget, and audit reason?
+
+**Backend source of truth:**
+
+- `meridian_core/relay.py` owns deterministic route, tier, lane, session, proof, and blocker logic.
+- `meridian_core/relay_dispatch.py` owns immutable dispatch plan shape.
+- `meridian_core/relay_logic_snapshot.py` serializes the visible Relay harness snapshot.
+- `scripts/meridian-model-bridge.js` exposes `/api/relay-logic`.
+- `index.html` renders `/api/relay-logic` into collapsible Relay headers.
+
+**Visible collapsible sections now include:**
+
+- Prime Directives
+- Prime Directive Proofs
+- Relay logic source
+- Relay Job
+- Risk Tier Routing
+- Model Lane Logic
+- Access Route Precedence
+- Session Lifecycle Logic
+- Context Latency Privacy
+- Prompt Budget Logic
+- Audit Logic
+- Dispatch Logic
+- Current Limits
+- Tier 3 dual-model logic
+- Fallback blocker logic
+- Proof and telemetry logic
+
+**Verification recorded in Git context:**
+
+- `python -m pytest tests\test_relay.py tests\test_relay_dispatch.py tests\test_relay_logic_snapshot.py -q` -> 163 passed.
+- `index.html` script parse passed.
+- Served `http://127.0.0.1:5500/index.html` includes `Prime Directives`, `Prime Directive Proofs`, and `/api/relay-logic`.
+- Served page no longer includes old static `const relayModels`.
+- Live `/api/relay-logic` returns 3 directives, 3 proofs, and 10 capability sections.
+- Relay snapshot contains no `heartbeat` text.
+
+**Current boundary:**
+
+Relay is now visible enough for Prime integration planning. Auto routing remains disabled until Prime consumes this route contract end to end. Heartbeat mechanics still belong outside Relay; the Relay directives/proofs are only the model-routing guardrails Heartbeat will later trigger Prime to ask against.
+
+**Obsidian update status:** This section is the durable Obsidian-facing context update for the current Relay harness state.

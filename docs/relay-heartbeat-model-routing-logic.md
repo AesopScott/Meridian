@@ -28,6 +28,19 @@ This document is the first model/vendor routing list for Meridian. It is not run
 8. DeepSeek direct is a candidate primary route, not automatically trusted.
 9. Auto routing stays disabled until Relay logic, metadata, and proof are implemented.
 
+## Relay Harness Prime Directives
+
+These are the top-of-harness Relay guardrails that will matter when Heartbeat later points Prime at model-routing work. They are Relay logic and proof questions, not Heartbeat mechanics.
+
+| Type | Text | Purpose |
+|---|---|---|
+| Prime Directive 1 | Account/session-first, never silent fallback. | Proves Relay does not silently jump routes or downgrade trust. |
+| Prime Directive 2 | Risk tier determines model depth. | Proves model lane depth follows risk instead of habit. |
+| Prime Directive 3 | No drift between route, proof, and visible harness. | Proves backend routing and visible harness evidence stay linked. |
+| Proof 1 | What route was tried first, what route was selected, and what alternatives were rejected? | Confirms account/session-first precedence and no silent fallback. |
+| Proof 2 | What risk tier was assigned, and what model-lane depth did that tier require? | Confirms tier-driven lane depth and autonomy limits. |
+| Proof 3 | Where is the visible proof in the harness for the route, blockers, dispatch lanes, prompt budget, and audit reason? | Confirms no hidden backend state and no fake harness copy. |
+
 ## Top-To-Bottom Relay Flow
 
 | Step | Relay Question | Logic |
