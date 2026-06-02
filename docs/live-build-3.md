@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: keep FileMap current after the review-clearance and fresh routing checkpoint at `312dccf9`.
 
@@ -23,6 +23,21 @@ Task: audit FileMap coverage after coordinator commits `a97fecff` and `312dccf9`
 Tests: `python -m pytest tests/test_filemap.py -q`.
 
 Completion: commit locally only in the assigned worktree if coverage changes or concrete no-op evidence is recorded, mark Ready for Codex Review with commit hash or no-op evidence, files changed, tests run, and Next Candidate: bind review findings before unrelated FileMap cleanup.
+
+Completion:
+
+- Build 3 audited current `origin/main` at `9e589c4e` after coordinator commits `a97fecff` and `312dccf9` plus the routing checkpoint.
+- Inspected required sources: all five live-build queue files, both live review provenance files, `docs/v2-orchestrator-transition-ledger.md`, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Inspected changed paths from `a97fecff`, `312dccf9`, and `9e589c4e`, plus existing docs/code artifacts referenced by the new Active Task blocks.
+- Registered the one partial existing artifact gap: `docs/v2-progress-tracker.md` was already in runtime FileMap and `_REQUIRED_PATHS`, and is now mirrored in `docs/FileMap.md`.
+- Audit evidence: focused coverage check across 47 inspected changed/referenced existing paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `docs/FileMap.md`, `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Diff proof: `git diff --check` - passed.
+- Commit: this queue-marker commit.
+- Next Candidate: bind review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
