@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review the latest current-main Build 4 DeepSeek trust metadata checklist and Build 5 Model Harness capability metadata rendering slices.
 
@@ -17,6 +17,23 @@ Task: review current-main Ready markers in order: Build 4 DeepSeek candidate-tru
 Proof: text/shape inspection plus `git diff --check a6064da3^..bae1e641`; `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check e6744bdb^..7d4bc196`.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 polling after these current-main reviews.
+
+Review result - 2026-06-01 23:57 -06:00:
+
+- Build 4 DeepSeek candidate-trust metadata checklist passed. Commits `a6064da3` and `bae1e641` changed only `docs/deepseek-candidate-trust-metadata-implementation-checklist.md` and `docs/live-build-4.md`.
+- The checklist is docs-only and covers `deepseek-chat` dispatch identity versus `deepseek-v4-pro` / `deepseek-v4-flash` variant labels, candidate trust before validation, direct-vs-aggregator route proof, prompt-drag telemetry, allowed/blocked task types, external-review requirements, Relay/Aegis binding, Bifrost expectations, deterministic tests, validation-gate evidence, and exclusions.
+- Build 5 Model Harness capability metadata rendering passed. Commits `e6744bdb` and `7d4bc196` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The Bifrost slice is deterministic sample/rendering only and displays exact model id, provider route kind/trust state, context window, cost posture, latency, tokenizer family, streaming and Q-mode flags, allowed/blocked task hints, external-review state, prompt budget/growth/delta fields, and display-safe evidence refs.
+- Focused tests cover capability metadata fields, route/trust/context display, task hints, external review, prompt-drag fields, evidence refs, escaping, provider balance/cost-pressure preservation, prompt payload visibility, dispatch hardening, PromptPacket proof metadata, Relay/Aegis handoff, proof-state preview, stale-session recovery actions, and cockpit layout. Scope check found no live provider/account/session/process calls, Relay runtime wiring, FileMap edit, `index.html` edit, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- Text/shape inspection passed for the Build 4 checklist and Ready marker.
+- `git diff --check a6064da3^..bae1e641` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 247 tests.
+- `git diff --check e6744bdb^..7d4bc196` passed.
+
+Completion: Build 4 DeepSeek candidate-trust metadata checklist and Build 5 Model Harness capability metadata rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
