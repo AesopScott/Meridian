@@ -36,6 +36,9 @@ class TestSessionLifecycleState:
             escalation_gate=False,
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
             last_permission_change=now,
         )
         return SessionLifecycleState(
@@ -81,7 +84,7 @@ class TestSessionLifecycleState:
 
     def test_heartbeat_stale_fresh(self, healthy_state):
         """Test heartbeat_stale() with recent read."""
-        assert not healthy_state.heartbeat_stale(threshold_minutes=30)
+        assert not healthy_state.heartbeat_stale(threshold_seconds=1800)
 
     def test_to_dict(self, healthy_state):
         """Test serialization to dict."""
@@ -386,6 +389,9 @@ class TestPermissionContext:
             escalation_gate=False,
             escalation_reason=None,
             branch_permission_state=PermissionState.LOCKED_BY_DEFAULT,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
             last_permission_change=now,
         )
 
@@ -399,6 +405,9 @@ class TestPermissionContext:
             escalation_gate=False,
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
             last_permission_change=now,
         )
 
@@ -483,6 +492,9 @@ class TestPrimeAutonomyInput:
             escalation_gate=False,
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
             last_permission_change=now,
         )
         session = SessionLifecycleState(
@@ -509,11 +521,11 @@ class TestPrimeAutonomyInput:
             permission_context=permission_context,
         )
         return PrimeAutonomyInput(
-            current_sessions=[session],
-            queues_by_harness={"build": ["docs/live-build-2.md"]},
-            approvals_pending=[("session-1", "branch merge requires approval")],
-            restart_resteer_findings=[],
-            recent_completions=["commit-abc123"],
+            current_sessions=(session,),
+            queues_by_harness=frozenset([("build", ("docs/live-build-2.md",))]),
+            approvals_pending=(("session-1", "branch merge requires approval"),),
+            restart_resteer_findings=(),
+            recent_completions=("commit-abc123",),
             timestamp=now,
         )
 
@@ -543,6 +555,9 @@ class TestSessionLifecycleStatePermissions:
             escalation_gate=False,
             escalation_reason=None,
             branch_permission_state=PermissionState.LOCKED_BY_DEFAULT,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
             last_permission_change=now,
         )
         return SessionLifecycleState(
@@ -579,6 +594,9 @@ class TestSessionLifecycleStatePermissions:
             escalation_gate=False,
             escalation_reason=None,
             branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=None,
+            task_scope=None,
             last_permission_change=now,
         )
         return SessionLifecycleState(

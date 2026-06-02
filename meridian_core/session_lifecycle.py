@@ -149,6 +149,9 @@ class PermissionContext:
     escalation_gate: bool
     escalation_reason: Optional[str]
     branch_permission_state: PermissionState
+    approved_by_secondary: Optional[str]
+    unlock_expiry: Optional[datetime]
+    task_scope: Optional[str]
     last_permission_change: datetime
 
     def is_operation_approved(self, operation: OperationScope) -> bool:
@@ -159,9 +162,29 @@ class PermissionContext:
         """True if branch is currently locked."""
         return self.branch_permission_state == PermissionState.LOCKED_BY_DEFAULT
 
+    def is_unlock_expired(self) -> bool:
+        """True if temporary unlock has expired."""
+        if self.unlock_expiry is None:
+            return False
+        return datetime.now(timezone.utc) > self.unlock_expiry.replace(tzinfo=timezone.utc)
+
+    def is_unlock_task_scoped(self, current_task_id: Optional[str]) -> bool:
+        """True if unlock is restricted to specific task and current task matches."""
+        if self.task_scope is None:
+            return True
+        return self.task_scope == current_task_id
+
     def requires_approval_for_operation(self, operation: OperationScope) -> bool:
         """True if operation requires explicit approval."""
         return self.is_permission_locked() and not self.is_operation_approved(operation)
+
+    def can_execute_operation(self, operation: OperationScope, current_task_id: Optional[str] = None) -> bool:
+        """True if operation can execute without further approval."""
+        if self.is_unlock_expired():
+            return False
+        if not self.is_unlock_task_scoped(current_task_id):
+            return False
+        return self.is_operation_approved(operation) and not self.escalation_gate
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to JSON-safe dict."""
@@ -171,6 +194,9 @@ class PermissionContext:
             "escalation_gate": self.escalation_gate,
             "escalation_reason": self.escalation_reason,
             "branch_permission_state": self.branch_permission_state.value,
+            "approved_by_secondary": self.approved_by_secondary,
+            "unlock_expiry": self.unlock_expiry.isoformat() if self.unlock_expiry else None,
+            "task_scope": self.task_scope,
             "last_permission_change": self.last_permission_change.isoformat(),
         }
 
@@ -206,21 +232,21 @@ class RestartResteerFinding:
 class PrimeAutonomyInput:
     """What Prime receives when selecting next action."""
 
-    current_sessions: list["SessionLifecycleState"]
-    queues_by_harness: dict[str, list[str]]
-    approvals_pending: list[tuple[str, str]]
-    restart_resteer_findings: list[RestartResteerFinding]
-    recent_completions: list[str]
+    current_sessions: tuple["SessionLifecycleState", ...]
+    queues_by_harness: frozenset[tuple[str, tuple[str, ...]]]
+    approvals_pending: tuple[tuple[str, str], ...]
+    restart_resteer_findings: tuple[RestartResteerFinding, ...]
+    recent_completions: tuple[str, ...]
     timestamp: datetime
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to JSON-safe dict."""
         return {
             "current_sessions": [s.to_dict() for s in self.current_sessions],
-            "queues_by_harness": self.queues_by_harness,
-            "approvals_pending": self.approvals_pending,
+            "queues_by_harness": {k: list(v) for k, v in self.queues_by_harness},
+            "approvals_pending": list(self.approvals_pending),
             "restart_resteer_findings": [f.to_dict() for f in self.restart_resteer_findings],
-            "recent_completions": self.recent_completions,
+            "recent_completions": list(self.recent_completions),
             "timestamp": self.timestamp.isoformat(),
         }
 
@@ -291,23 +317,27 @@ class SessionLifecycleState:
 
     def can_accept_work(self) -> bool:
         """True if able to transition to RUNNING."""
-        return (
-            self.status
-            not in (
-                SessionStatus.BLOCKED,
-                SessionStatus.STALE,
-                SessionStatus.ARCHIVED,
-                SessionStatus.CAPACITY_LIMITED,
-            )
-            and self.is_healthy()
-        )
+        if self.status in (
+            SessionStatus.BLOCKED,
+            SessionStatus.STALE,
+            SessionStatus.ARCHIVED,
+            SessionStatus.CAPACITY_LIMITED,
+        ):
+            return False
+        if not self.is_healthy():
+            return False
+        if self.permission_context.is_permission_locked():
+            return False
+        if self.permission_context.is_unlock_expired():
+            return False
+        return True
 
-    def heartbeat_stale(self, threshold_minutes: int = 30) -> bool:
-        """True if last_queue_read_at is older than threshold."""
-        elapsed = datetime.now(timezone.utc) - self.last_queue_read_at.replace(
+    def heartbeat_stale(self, threshold_seconds: int = 1800) -> bool:
+        """True if last_prompt_sent_at is older than threshold (in seconds)."""
+        elapsed = datetime.now(timezone.utc) - self.last_prompt_sent_at.replace(
             tzinfo=timezone.utc
         )
-        return elapsed.total_seconds() > (threshold_minutes * 60)
+        return elapsed.total_seconds() > threshold_seconds
 
     def suggest_routing_action(
         self,
