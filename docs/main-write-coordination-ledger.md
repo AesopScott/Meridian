@@ -96,6 +96,20 @@ No active write lease.
 Start new entries below this line.
 
 ```text
+Time: 2026-06-02 17:00 -06:00
+Writer: Meridian coordinator
+Intent: user-requested Relay Runtime Logic section-list repair after Prime Directives and Prime Directive Proofs were present as top-level data but absent from the visible Relay section list.
+Action completed: added Prime Directives and Prime Directive Proofs as the first two `capabilitySections` in `meridian_core.relay_logic_snapshot`, preserving the existing top-level arrays for compatibility.
+Commit(s): 8b256c0b
+Pushed to origin/main: yes
+Files changed: meridian_core/relay_logic_snapshot.py, tests/test_relay_logic_snapshot.py
+Proof run: shared main clean/aligned before movement; Relay snapshot smoke confirmed 12 sections with Prime Directives and Prime Directive Proofs first; `python -m pytest tests/test_relay_logic_snapshot.py tests/test_bifrost_cockpit.py -q` passed 295 tests; bridge self-test returned `ok: true`; `git diff --check` passed before commit.
+Final shared main status: clean/aligned after push/fetch check.
+Notes/blockers: frontend Model Harness toggle write lease was explicitly denied/deferred because it overlaps `index.html` and `tests/test_bifrost_cockpit.py` while this Relay repair was active. No Polaris work included.
+Status: Complete
+```
+
+```text
 Time: 2026-06-02 16:48 -06:00
 Writer: Meridian coordinator
 Intent: retroactive containment record for urgent Relay Runtime Logic restore after user reported missing Prime Directives, Prime Directive Proofs, and detailed Relay sections.
