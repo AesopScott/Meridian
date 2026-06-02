@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind the reviewed Session Lifecycle runtime-state export into Prime/Beacon advisory input without executing recovery.
 
@@ -22,7 +22,14 @@ Task: add pure advisory adapters so Prime and Beacon can consume `SessionRuntime
 
 Tests: `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` plus `git diff --check`.
 
-Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, changed files, proof, and Next Candidate: bind review findings or route the next live-control permission gate.
+Completion:
+
+- Build 2 completed the reviewed Session Lifecycle runtime-state export Prime/Beacon advisory binding in local worktree commit `b159e09b`.
+- Files changed: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`.
+- Evidence: Prime now consumes `SessionRuntimeStateExport` through `select_next_action_from_runtime_state_export()` and keeps recovery advisory-only while preserving command kind, stale workflow status, recommended recovery action, human-gate blockers, and permission/review rationale; Beacon now serializes the same export through `runtime_state_advisory_evidence()` with display-safe evidence and blockers. No recovery, movement, process, model, UI, FileMap, main, or Polaris action is executed.
+- Proof: `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 96 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or route the next live-control permission gate.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
