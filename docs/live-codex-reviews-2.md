@@ -6,6 +6,18 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: review current-main Build 4 demotion/retry/Bifrost handoff checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 4 current-main checklist commits `1ec2573a` and `a6fcb977`. Verify the slice is docs-only, build-ready, and covers demotion target handling, retry/fallback boundaries, fail-closed missing metadata, human-gate decisions, display-safe handoff summary shape, Bifrost adapter expectations, deterministic tests, and explicit exclusions for raw prompts, credentials, provider responses, process/session control, branch/worktree movement, FileMap edits, main writes, and Polaris.
+
+Proof: text/shape inspection plus `git diff --check 1ec2573a^..a6fcb977`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 current-main Ready-marker polling after this checklist review.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: keep Build 4/5 review hot under the rolling two-stage pipeline.
