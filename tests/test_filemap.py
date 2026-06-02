@@ -86,6 +86,7 @@ _REQUIRED_PATHS = [
     "meridian_core/filemap.py",
     "docs/v0-build-readiness-map.md",
     "docs/prime-orchestration-state-model.md",
+    "docs/prime-core-handoff-20260602.md",
     "docs/prime-restart-resteer-contract.md",
     "docs/bifrost-v0-cockpit-layout-brief.md",
     "docs/bifrost-harness-dashboard-brief.md",

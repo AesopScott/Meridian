@@ -202,6 +202,13 @@ def make_default_map() -> FileMap:
             notes="Update with docs/harness-stage-checklist.md in the same checkpoint.",
         ),
         FileMapEntry(
+            path="docs/prime-core-handoff-20260602.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Current handoff for the Prime core and harness-stage work: active worktree, commits, Prime runtime internals, bridge/UI wiring, harness matrix, verification, rules, and next build recommendations.",
+            related_tests=["tests/test_filemap.py"],
+            notes="Read first when continuing this thread in a new session.",
+        ),
+        FileMapEntry(
             path="docs/prime-planning-harness-answers.md",
             area=FileArea.PLANNING,
             purpose="First Council-run planning answer brief: answers all Planning Harness questions for V0 Relay model/API dispatch and records the recommended adapter-first path.",
