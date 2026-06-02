@@ -27,12 +27,16 @@ from meridian_core.aegis import (
     PromptPacketProofDecision,
     PromptPacketProofMetadata,
     PromptPacketProofPolicyResult,
+    V3GoalCheckpointDisciplineDecision,
+    V3GoalCheckpointDisciplineInput,
+    V3GoalCheckpointDisciplinePolicyResult,
     WaiverRecord,
     evidence_from_cross_check,
     evaluate_command_staging_ui_review_advisory,
     evaluate_prompt_payload_meter_advisory,
     evaluate_provider_result_validation_advisory,
     evaluate_prompt_packet_proof_policy,
+    evaluate_v3_goal_checkpoint_discipline_advisory,
     format_aggregate_summary_for_display,
     format_gate_summary_for_display,
     gate_account_session_risk,
@@ -48,6 +52,7 @@ from meridian_core.aegis import (
     serialize_prompt_payload_meter_policy_result,
     serialize_provider_result_validation_policy_result,
     serialize_prompt_packet_policy_result,
+    serialize_v3_goal_checkpoint_discipline_policy_result,
     summarize_aggregate_route_gates,
     summarize_gate_result,
     summarize_gate_results,
@@ -175,6 +180,27 @@ def _command_staging_ui_review_metadata(**overrides) -> CommandStagingUiReviewIn
     }
     base.update(overrides)
     return CommandStagingUiReviewInput(**base)
+
+
+def _v3_goal_checkpoint_metadata(**overrides) -> V3GoalCheckpointDisciplineInput:
+    base = {
+        "goal_objective_present": True,
+        "active_owner_lane": "prime_compass",
+        "last_git_checkpoint_ref": "git-checkpoint:goal-runtime-001",
+        "last_obsidian_checkpoint_ref": "obsidian-checkpoint:goal-runtime-001",
+        "checkpoint_cadence_state": "current",
+        "token_budget_status": "within_budget",
+        "time_budget_status": "within_budget",
+        "review_gate_refs": ("review:goal-runtime-ready",),
+        "lease_gate_refs": ("lease:goal-runtime-active",),
+        "blocker_policy_state": "defined",
+        "proof_refs": (
+            "proof:v3-parking-lot-goal-runtime",
+            "proof:agentic-framework-long-term-goals",
+        ),
+    }
+    base.update(overrides)
+    return V3GoalCheckpointDisciplineInput(**base)
 
 
 # ---------------------------------------------------------------------------
@@ -1745,6 +1771,234 @@ class TestCommandStagingUiReviewAdvisory:
         assert display["human_gate_rationale"] == "[redacted]"
         assert display["evidence_refs"] == ("[redacted]",)
         assert display["beacon_evidence_refs"] == ("[redacted]",)
+
+
+# ---------------------------------------------------------------------------
+# V3 Goal Runtime Checkpoint Discipline Advisory
+# ---------------------------------------------------------------------------
+
+
+class TestV3GoalCheckpointDisciplineAdvisory:
+    def test_current_checkpoint_discipline_allows(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata()
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.ALLOW
+        assert result.severity == "info"
+        assert result.blockers == ()
+        assert result.warnings == ()
+        assert result.active_owner_lane == "prime_compass"
+
+    def test_missing_goal_objective_blocks_fail_closed(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(goal_objective_present=False)
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "missing_goal_objective" in result.blockers
+
+    def test_unassigned_owner_lane_blocks(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(active_owner_lane="unassigned")
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "active_owner_lane_unassigned" in result.blockers
+
+    def test_missing_git_and_obsidian_checkpoints_block(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(
+                last_git_checkpoint_ref="",
+                last_obsidian_checkpoint_ref=None,
+            )
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "missing_last_git_checkpoint_ref" in result.blockers
+        assert "missing_last_obsidian_checkpoint_ref" in result.blockers
+
+    def test_stale_or_missing_cadence_blocks(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(checkpoint_cadence_state="stale")
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "checkpoint_cadence_stale" in result.blockers
+
+    def test_budget_watch_warns_without_blocking(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(
+                token_budget_status="watch",
+                time_budget_status="watch",
+            )
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.WARN
+        assert result.blockers == ()
+        assert result.warnings == (
+            "token_budget_status_watch",
+            "time_budget_status_watch",
+        )
+
+    def test_over_budget_blocks_fail_closed(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(
+                token_budget_status="over_budget",
+                time_budget_status="missing",
+            )
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "token_budget_status_over_budget" in result.blockers
+        assert "time_budget_status_missing" in result.blockers
+
+    def test_missing_review_lease_or_proof_refs_block(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(
+                review_gate_refs=(),
+                lease_gate_refs=(),
+                proof_refs=(),
+            )
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "missing_review_gate_refs" in result.blockers
+        assert "missing_lease_gate_refs" in result.blockers
+        assert "missing_v3_goal_checkpoint_proof_refs" in result.blockers
+
+    def test_blocker_policy_must_be_defined(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(blocker_policy_state="ambiguous")
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "blocker_policy_ambiguous" in result.blockers
+
+    def test_unknown_states_block(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(
+                active_owner_lane="goal_owner",
+                checkpoint_cadence_state="recent-ish",
+                token_budget_status="probably_ok",
+                blocker_policy_state="maybe",
+            )
+        )
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "unknown_active_owner_lane" in result.blockers
+        assert "unknown_checkpoint_cadence_state" in result.blockers
+        assert "unknown_token_budget_status" in result.blockers
+        assert "unknown_blocker_policy_state" in result.blockers
+
+    def test_v3_goal_checkpoint_advisory_has_stable_keys(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata()
+        )
+        display = serialize_v3_goal_checkpoint_discipline_policy_result(result)
+        assert tuple(display.keys()) == (
+            "decision",
+            "severity",
+            "reason",
+            "goal_objective_present",
+            "active_owner_lane",
+            "last_git_checkpoint_ref",
+            "last_obsidian_checkpoint_ref",
+            "checkpoint_cadence_state",
+            "token_budget_status",
+            "time_budget_status",
+            "review_gate_refs",
+            "lease_gate_refs",
+            "blocker_policy_state",
+            "proof_refs",
+            "blockers",
+            "warnings",
+            "reason_tags",
+            "prime_advisory",
+            "compass_advisory",
+            "self_approval_granted",
+            "execution_authorized",
+        )
+
+    def test_v3_goal_checkpoint_to_advisory_dict_matches_helper(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata()
+        )
+        assert result.to_advisory_dict() == serialize_v3_goal_checkpoint_discipline_policy_result(
+            result
+        )
+
+    def test_v3_goal_checkpoint_advisory_serializes_display_only_allow_state(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata()
+        )
+        display = result.to_advisory_dict()
+        assert display["decision"] == "allow"
+        assert display["severity"] == "info"
+        assert display["goal_objective_present"] is True
+        assert display["active_owner_lane"] == "prime_compass"
+        assert display["checkpoint_cadence_state"] == "current"
+        assert display["reason_tags"] == ("v3_goal_checkpoint_discipline_allowed",)
+        assert display["prime_advisory"] == "display_review_ready"
+        assert display["compass_advisory"] == "display_review_ready"
+        assert display["self_approval_granted"] is False
+        assert display["execution_authorized"] is False
+
+    def test_v3_goal_checkpoint_advisory_redacts_unsafe_strings(self):
+        result = V3GoalCheckpointDisciplinePolicyResult(
+            decision=V3GoalCheckpointDisciplineDecision.BLOCK,
+            severity="error",
+            reason="raw_prompt: do not show this",
+            goal_objective_present=True,
+            active_owner_lane="Scott personal lane",
+            last_git_checkpoint_ref="git push origin main",
+            last_obsidian_checkpoint_ref=r"C:\Users\scott\vault\goal.md",
+            checkpoint_cadence_state="current",
+            token_budget_status="within_budget",
+            time_budget_status="within_budget",
+            review_gate_refs=("review:safe", "chat:raw"),
+            lease_gate_refs=("lease:safe", "command:restart"),
+            blocker_policy_state="defined",
+            proof_refs=("proof:safe", "provider:account"),
+            blockers=("unsafe_last_git_checkpoint_ref", "branch movement to main"),
+            warnings=("account_id=abc",),
+        )
+        display = result.to_advisory_dict()
+        assert display["reason"] == "[redacted]"
+        assert display["active_owner_lane"] == "[redacted]"
+        assert display["last_git_checkpoint_ref"] == "[redacted]"
+        assert display["last_obsidian_checkpoint_ref"] == "[redacted]"
+        assert display["review_gate_refs"] == ("review:safe", "[redacted]")
+        assert display["lease_gate_refs"] == ("lease:safe", "[redacted]")
+        assert display["proof_refs"] == ("proof:safe", "[redacted]")
+        assert display["blockers"] == ("unsafe_last_git_checkpoint_ref", "[redacted]")
+        assert display["warnings"] == ("[redacted]",)
+
+    def test_unsafe_checkpoint_inputs_fail_closed_without_raw_exposure(self):
+        result = evaluate_v3_goal_checkpoint_discipline_advisory(
+            _v3_goal_checkpoint_metadata(
+                active_owner_lane="Scott personal lane",
+                last_git_checkpoint_ref="git push origin main",
+                last_obsidian_checkpoint_ref=r"C:\Users\scott\vault\goal.md",
+                review_gate_refs=("chat:raw",),
+                lease_gate_refs=("command:restart",),
+                proof_refs=("provider:openai-account",),
+            )
+        )
+        display = result.to_advisory_dict()
+        assert result.decision is V3GoalCheckpointDisciplineDecision.BLOCK
+        assert "unsafe_active_owner_lane" in result.blockers
+        assert "unsafe_last_git_checkpoint_ref" in result.blockers
+        assert "unsafe_last_obsidian_checkpoint_ref" in result.blockers
+        assert "unsafe_review_gate_ref" in result.blockers
+        assert "unsafe_lease_gate_ref" in result.blockers
+        assert "unsafe_v3_goal_checkpoint_proof_ref" in result.blockers
+        rendered = str(display)
+        assert "Scott personal lane" not in rendered
+        assert "git push origin main" not in rendered
+        assert "provider:openai-account" not in rendered
+
+    def test_v3_goal_checkpoint_policy_is_deterministic(self):
+        metadata = _v3_goal_checkpoint_metadata(
+            goal_objective_present=False,
+            active_owner_lane="unknown",
+            checkpoint_cadence_state="stale",
+            token_budget_status="watch",
+        )
+        first = evaluate_v3_goal_checkpoint_discipline_advisory(metadata)
+        second = evaluate_v3_goal_checkpoint_discipline_advisory(metadata)
+        assert first == second
+        assert first.to_advisory_dict() == second.to_advisory_dict()
 
 
 # ---------------------------------------------------------------------------

@@ -1120,6 +1120,13 @@ class CommandStagingUiReviewDecision(Enum):
     BLOCK = "block"
 
 
+class V3GoalCheckpointDisciplineDecision(Enum):
+    """Aegis advisory outcome for V3 Goal Runtime checkpoint discipline."""
+    ALLOW = "allow"
+    WARN = "warn"
+    BLOCK = "block"
+
+
 @dataclass(frozen=True)
 class PromptPacketProofMetadata:
     """Display-safe PromptPacket proof metadata evaluated by Aegis."""
@@ -1265,6 +1272,47 @@ class CommandStagingUiReviewPolicyResult:
     def to_advisory_dict(self) -> dict[str, object]:
         """Return display-safe advisory metadata for Relay/Bifrost/UI consumers."""
         return serialize_command_staging_ui_review_policy_result(self)
+
+
+@dataclass(frozen=True)
+class V3GoalCheckpointDisciplineInput:
+    """Display-safe V3 goal checkpoint discipline summary evaluated by Aegis."""
+    goal_objective_present: bool
+    active_owner_lane: str
+    last_git_checkpoint_ref: str | None
+    last_obsidian_checkpoint_ref: str | None
+    checkpoint_cadence_state: str
+    token_budget_status: str
+    time_budget_status: str
+    review_gate_refs: tuple[str, ...]
+    lease_gate_refs: tuple[str, ...]
+    blocker_policy_state: str
+    proof_refs: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class V3GoalCheckpointDisciplinePolicyResult:
+    """Deterministic Aegis advisory for V3 goal checkpoint discipline."""
+    decision: V3GoalCheckpointDisciplineDecision
+    severity: str
+    reason: str
+    goal_objective_present: bool
+    active_owner_lane: str
+    last_git_checkpoint_ref: str | None
+    last_obsidian_checkpoint_ref: str | None
+    checkpoint_cadence_state: str
+    token_budget_status: str
+    time_budget_status: str
+    review_gate_refs: tuple[str, ...]
+    lease_gate_refs: tuple[str, ...]
+    blocker_policy_state: str
+    proof_refs: tuple[str, ...]
+    blockers: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+
+    def to_advisory_dict(self) -> dict[str, object]:
+        """Return display-safe advisory metadata for Prime/Compass/Aegis."""
+        return serialize_v3_goal_checkpoint_discipline_policy_result(self)
 
 
 _PROMPT_PACKET_HASH_STATUSES = {
@@ -1451,6 +1499,59 @@ _COMMAND_STAGING_PRIME_ADVISORY_ACTIONS = {
     "no_action",
     "unknown",
 }
+_V3_GOAL_CHECKPOINT_OWNER_LANES = {
+    "prime",
+    "compass",
+    "prime_compass",
+    "unknown",
+    "unassigned",
+}
+_V3_GOAL_CHECKPOINT_BLOCKING_OWNER_LANES = {"unknown", "unassigned"}
+_V3_GOAL_CHECKPOINT_CADENCE_STATES = {
+    "current",
+    "stale",
+    "missing",
+    "unknown",
+}
+_V3_GOAL_BUDGET_STATUSES = {
+    "within_budget",
+    "watch",
+    "over_budget",
+    "missing",
+    "unknown",
+}
+_V3_GOAL_BLOCKER_POLICY_STATES = {
+    "defined",
+    "missing",
+    "ambiguous",
+    "blocked",
+    "unknown",
+}
+_V3_GOAL_CHECKPOINT_UNSAFE_DISPLAY_PATTERNS = _PROVIDER_RESULT_UNSAFE_DISPLAY_PATTERNS + (
+    "scott",
+    "c:\\",
+    "users\\",
+    "\\",
+    "../",
+    "..\\",
+    "git ",
+    "checkout ",
+    "cherry-pick",
+    "rebase",
+    "reset",
+    "merge ",
+    "push origin main",
+    "stash-pop",
+    "salvage",
+    "move branch",
+    "branch movement",
+    "provider:",
+    "account:",
+    "account_id",
+    "obsidian://",
+    "chat:",
+    "command:",
+)
 
 
 def _prompt_packet_severity(decision: PromptPacketProofDecision) -> str:
@@ -1487,6 +1588,16 @@ def _command_staging_ui_review_severity(
     if decision is CommandStagingUiReviewDecision.BLOCK:
         return "error"
     if decision is CommandStagingUiReviewDecision.WARN:
+        return "warning"
+    return "info"
+
+
+def _v3_goal_checkpoint_discipline_severity(
+    decision: V3GoalCheckpointDisciplineDecision,
+) -> str:
+    if decision is V3GoalCheckpointDisciplineDecision.BLOCK:
+        return "error"
+    if decision is V3GoalCheckpointDisciplineDecision.WARN:
         return "warning"
     return "info"
 
@@ -1559,6 +1670,28 @@ def _display_safe_command_staging_value(value: object) -> str:
 
 def _display_safe_command_staging_tuple(values: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(_display_safe_command_staging_value(value) for value in values)
+
+
+def _is_v3_goal_checkpoint_display_safe(value: str) -> bool:
+    if "\n" in value or "\r" in value:
+        return False
+    if len(value) > 120:
+        return False
+    lowered = value.lower()
+    return not any(
+        pattern in lowered for pattern in _V3_GOAL_CHECKPOINT_UNSAFE_DISPLAY_PATTERNS
+    )
+
+
+def _display_safe_v3_goal_checkpoint_value(value: object) -> str:
+    text = str(value)
+    if not _is_v3_goal_checkpoint_display_safe(text):
+        return _PROMPT_PACKET_REDACTED
+    return text
+
+
+def _display_safe_v3_goal_checkpoint_tuple(values: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(_display_safe_v3_goal_checkpoint_value(value) for value in values)
 
 
 def _prompt_packet_missing_field_from_tag(tag: str) -> str | None:
@@ -1648,6 +1781,23 @@ def _command_staging_ui_review_reason_tags(
     if result.decision is CommandStagingUiReviewDecision.WARN:
         return ("command_staging_ui_review_warn",)
     return ("command_staging_ui_review_block",)
+
+
+def _v3_goal_checkpoint_discipline_reason_tags(
+    result: V3GoalCheckpointDisciplinePolicyResult,
+) -> tuple[str, ...]:
+    tags: list[str] = []
+    for tag in result.blockers:
+        _append_unique(tags, _display_safe_v3_goal_checkpoint_value(tag))
+    for tag in result.warnings:
+        _append_unique(tags, _display_safe_v3_goal_checkpoint_value(tag))
+    if tags:
+        return tuple(tags)
+    if result.decision is V3GoalCheckpointDisciplineDecision.ALLOW:
+        return ("v3_goal_checkpoint_discipline_allowed",)
+    if result.decision is V3GoalCheckpointDisciplineDecision.WARN:
+        return ("v3_goal_checkpoint_discipline_warn",)
+    return ("v3_goal_checkpoint_discipline_block",)
 
 
 def serialize_prompt_packet_policy_result(
@@ -1788,6 +1938,63 @@ def serialize_command_staging_ui_review_policy_result(
     }
 
 
+def serialize_v3_goal_checkpoint_discipline_policy_result(
+    result: V3GoalCheckpointDisciplinePolicyResult,
+) -> dict[str, object]:
+    """
+    Serialize V3 Goal Runtime checkpoint discipline advisory metadata.
+
+    The result is primitive, deterministic, display-safe, and advisory-only.
+    It summarizes checkpoint discipline without writing Git/Obsidian, creating
+    automations, moving branches/worktrees, touching sessions, or executing.
+    """
+    return {
+        "decision": result.decision.value,
+        "severity": _display_safe_v3_goal_checkpoint_value(result.severity),
+        "reason": _display_safe_v3_goal_checkpoint_value(result.reason),
+        "goal_objective_present": result.goal_objective_present,
+        "active_owner_lane": _display_safe_v3_goal_checkpoint_value(
+            result.active_owner_lane
+        ),
+        "last_git_checkpoint_ref": (
+            None
+            if result.last_git_checkpoint_ref is None
+            else _display_safe_v3_goal_checkpoint_value(result.last_git_checkpoint_ref)
+        ),
+        "last_obsidian_checkpoint_ref": (
+            None
+            if result.last_obsidian_checkpoint_ref is None
+            else _display_safe_v3_goal_checkpoint_value(
+                result.last_obsidian_checkpoint_ref
+            )
+        ),
+        "checkpoint_cadence_state": _display_safe_v3_goal_checkpoint_value(
+            result.checkpoint_cadence_state
+        ),
+        "token_budget_status": _display_safe_v3_goal_checkpoint_value(
+            result.token_budget_status
+        ),
+        "time_budget_status": _display_safe_v3_goal_checkpoint_value(
+            result.time_budget_status
+        ),
+        "review_gate_refs": _display_safe_v3_goal_checkpoint_tuple(
+            result.review_gate_refs
+        ),
+        "lease_gate_refs": _display_safe_v3_goal_checkpoint_tuple(result.lease_gate_refs),
+        "blocker_policy_state": _display_safe_v3_goal_checkpoint_value(
+            result.blocker_policy_state
+        ),
+        "proof_refs": _display_safe_v3_goal_checkpoint_tuple(result.proof_refs),
+        "blockers": _display_safe_v3_goal_checkpoint_tuple(result.blockers),
+        "warnings": _display_safe_v3_goal_checkpoint_tuple(result.warnings),
+        "reason_tags": _v3_goal_checkpoint_discipline_reason_tags(result),
+        "prime_advisory": _v3_goal_checkpoint_prime_advisory(result),
+        "compass_advisory": _v3_goal_checkpoint_prime_advisory(result),
+        "self_approval_granted": False,
+        "execution_authorized": False,
+    }
+
+
 def _command_staging_ui_review_bifrost_advisory(
     result: CommandStagingUiReviewPolicyResult,
 ) -> str:
@@ -1816,6 +2023,16 @@ def _provider_result_bifrost_advisory(
     if result.decision is ProviderResultValidationDecision.WARN:
         return "display_warning"
     return "display_allowed"
+
+
+def _v3_goal_checkpoint_prime_advisory(
+    result: V3GoalCheckpointDisciplinePolicyResult,
+) -> str:
+    if result.decision is V3GoalCheckpointDisciplineDecision.BLOCK:
+        return "display_blocked"
+    if result.decision is V3GoalCheckpointDisciplineDecision.WARN:
+        return "display_warning"
+    return "display_review_ready"
 
 
 def _prompt_packet_result(
@@ -1907,6 +2124,33 @@ def _command_staging_ui_review_policy_result(
     )
 
 
+def _v3_goal_checkpoint_discipline_policy_result(
+    decision: V3GoalCheckpointDisciplineDecision,
+    reason: str,
+    metadata: V3GoalCheckpointDisciplineInput,
+    blockers: list[str],
+    warnings: list[str],
+) -> V3GoalCheckpointDisciplinePolicyResult:
+    return V3GoalCheckpointDisciplinePolicyResult(
+        decision=decision,
+        severity=_v3_goal_checkpoint_discipline_severity(decision),
+        reason=reason,
+        goal_objective_present=metadata.goal_objective_present,
+        active_owner_lane=metadata.active_owner_lane,
+        last_git_checkpoint_ref=metadata.last_git_checkpoint_ref,
+        last_obsidian_checkpoint_ref=metadata.last_obsidian_checkpoint_ref,
+        checkpoint_cadence_state=metadata.checkpoint_cadence_state,
+        token_budget_status=metadata.token_budget_status,
+        time_budget_status=metadata.time_budget_status,
+        review_gate_refs=metadata.review_gate_refs,
+        lease_gate_refs=metadata.lease_gate_refs,
+        blocker_policy_state=metadata.blocker_policy_state,
+        proof_refs=metadata.proof_refs,
+        blockers=tuple(blockers),
+        warnings=tuple(warnings),
+    )
+
+
 def _append_safe_ref_blockers(
     values: tuple[str, ...],
     missing_tag: str,
@@ -1921,6 +2165,147 @@ def _append_safe_ref_blockers(
             _append_unique(blockers, invalid_tag)
         elif not _is_provider_result_display_safe(value):
             _append_unique(blockers, unsafe_tag)
+
+
+def _append_v3_goal_checkpoint_ref_blockers(
+    values: tuple[str, ...],
+    missing_tag: str,
+    invalid_tag: str,
+    unsafe_tag: str,
+    blockers: list[str],
+) -> None:
+    if not values:
+        _append_unique(blockers, missing_tag)
+    for value in values:
+        if not isinstance(value, str) or not value.strip():
+            _append_unique(blockers, invalid_tag)
+        elif not _is_v3_goal_checkpoint_display_safe(value):
+            _append_unique(blockers, unsafe_tag)
+
+
+def evaluate_v3_goal_checkpoint_discipline_advisory(
+    metadata: V3GoalCheckpointDisciplineInput,
+) -> V3GoalCheckpointDisciplinePolicyResult:
+    """
+    Evaluate summarized V3 Goal Runtime checkpoint discipline metadata.
+
+    Pure Aegis helper: no Git/Obsidian writes, automation creation, filesystem
+    movement, UI/Bifrost/Relay/Session/FileMap edits, provider/model calls,
+    shared-main writes, self-approval, or execution authority.
+    """
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if not metadata.goal_objective_present:
+        _append_unique(blockers, "missing_goal_objective")
+
+    if not isinstance(metadata.active_owner_lane, str) or not metadata.active_owner_lane.strip():
+        _append_unique(blockers, "missing_active_owner_lane")
+    elif not _is_v3_goal_checkpoint_display_safe(metadata.active_owner_lane):
+        _append_unique(blockers, "unsafe_active_owner_lane")
+    elif metadata.active_owner_lane not in _V3_GOAL_CHECKPOINT_OWNER_LANES:
+        _append_unique(blockers, "unknown_active_owner_lane")
+    elif metadata.active_owner_lane in _V3_GOAL_CHECKPOINT_BLOCKING_OWNER_LANES:
+        _append_unique(blockers, f"active_owner_lane_{metadata.active_owner_lane}")
+
+    if not isinstance(metadata.last_git_checkpoint_ref, str) or not metadata.last_git_checkpoint_ref.strip():
+        _append_unique(blockers, "missing_last_git_checkpoint_ref")
+    elif not _is_v3_goal_checkpoint_display_safe(metadata.last_git_checkpoint_ref):
+        _append_unique(blockers, "unsafe_last_git_checkpoint_ref")
+
+    if (
+        not isinstance(metadata.last_obsidian_checkpoint_ref, str)
+        or not metadata.last_obsidian_checkpoint_ref.strip()
+    ):
+        _append_unique(blockers, "missing_last_obsidian_checkpoint_ref")
+    elif not _is_v3_goal_checkpoint_display_safe(metadata.last_obsidian_checkpoint_ref):
+        _append_unique(blockers, "unsafe_last_obsidian_checkpoint_ref")
+
+    if (
+        not isinstance(metadata.checkpoint_cadence_state, str)
+        or not metadata.checkpoint_cadence_state.strip()
+    ):
+        _append_unique(blockers, "missing_checkpoint_cadence_state")
+    elif not _is_v3_goal_checkpoint_display_safe(metadata.checkpoint_cadence_state):
+        _append_unique(blockers, "unsafe_checkpoint_cadence_state")
+    elif metadata.checkpoint_cadence_state not in _V3_GOAL_CHECKPOINT_CADENCE_STATES:
+        _append_unique(blockers, "unknown_checkpoint_cadence_state")
+    elif metadata.checkpoint_cadence_state != "current":
+        _append_unique(blockers, f"checkpoint_cadence_{metadata.checkpoint_cadence_state}")
+
+    for field_name, value in (
+        ("token_budget_status", metadata.token_budget_status),
+        ("time_budget_status", metadata.time_budget_status),
+    ):
+        if not isinstance(value, str) or not value.strip():
+            _append_unique(blockers, f"missing_{field_name}")
+        elif not _is_v3_goal_checkpoint_display_safe(value):
+            _append_unique(blockers, f"unsafe_{field_name}")
+        elif value not in _V3_GOAL_BUDGET_STATUSES:
+            _append_unique(blockers, f"unknown_{field_name}")
+        elif value in {"over_budget", "missing", "unknown"}:
+            _append_unique(blockers, f"{field_name}_{value}")
+        elif value == "watch":
+            _append_unique(warnings, f"{field_name}_watch")
+
+    _append_v3_goal_checkpoint_ref_blockers(
+        metadata.review_gate_refs,
+        "missing_review_gate_refs",
+        "invalid_review_gate_ref",
+        "unsafe_review_gate_ref",
+        blockers,
+    )
+    _append_v3_goal_checkpoint_ref_blockers(
+        metadata.lease_gate_refs,
+        "missing_lease_gate_refs",
+        "invalid_lease_gate_ref",
+        "unsafe_lease_gate_ref",
+        blockers,
+    )
+
+    if (
+        not isinstance(metadata.blocker_policy_state, str)
+        or not metadata.blocker_policy_state.strip()
+    ):
+        _append_unique(blockers, "missing_blocker_policy_state")
+    elif not _is_v3_goal_checkpoint_display_safe(metadata.blocker_policy_state):
+        _append_unique(blockers, "unsafe_blocker_policy_state")
+    elif metadata.blocker_policy_state not in _V3_GOAL_BLOCKER_POLICY_STATES:
+        _append_unique(blockers, "unknown_blocker_policy_state")
+    elif metadata.blocker_policy_state != "defined":
+        _append_unique(blockers, f"blocker_policy_{metadata.blocker_policy_state}")
+
+    _append_v3_goal_checkpoint_ref_blockers(
+        metadata.proof_refs,
+        "missing_v3_goal_checkpoint_proof_refs",
+        "invalid_v3_goal_checkpoint_proof_ref",
+        "unsafe_v3_goal_checkpoint_proof_ref",
+        blockers,
+    )
+
+    if blockers:
+        return _v3_goal_checkpoint_discipline_policy_result(
+            V3GoalCheckpointDisciplineDecision.BLOCK,
+            "; ".join(blockers),
+            metadata,
+            blockers,
+            warnings,
+        )
+    if warnings:
+        return _v3_goal_checkpoint_discipline_policy_result(
+            V3GoalCheckpointDisciplineDecision.WARN,
+            "; ".join(warnings),
+            metadata,
+            blockers,
+            warnings,
+        )
+    return _v3_goal_checkpoint_discipline_policy_result(
+        V3GoalCheckpointDisciplineDecision.ALLOW,
+        "V3 Goal Runtime checkpoint discipline metadata satisfies Aegis advisory policy",
+        metadata,
+        blockers,
+        warnings,
+    )
 
 
 def evaluate_command_staging_ui_review_advisory(
