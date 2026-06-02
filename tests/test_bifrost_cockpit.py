@@ -124,6 +124,25 @@ def test_index_stale_user_session_target_is_not_silently_replaced():
     assert "Sessions unavailable" in doc
 
 
+def test_index_right_panel_mode_has_single_authority_and_recovery():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "validRightPanelModes" in doc
+    assert "setRightPanelAuthority" in doc
+    assert "dataset.panelMode" in doc
+    assert "dataset.rightPanelMode" in doc
+    assert "surface unavailable; User Session restored" in doc
+    assert "return false;" in doc
+
+
+def test_index_user_session_mode_names_target_and_preserves_storage():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "User Session:" in doc
+    assert "window.meridianRefreshUserSessionTarget = () =>" in doc
+    assert "meridian.user-session.target.v1" in doc
+    assert "localStorage.setItem(userSessionTargetKey, userSessionSelect.value)" in doc
+    assert "Select a live User Session target before sending" in doc
+
+
 def test_sample_view_model_has_progress_events():
     vm = sample_cockpit_view_model()
     assert len(vm.progress_events) >= 1

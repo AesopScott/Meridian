@@ -88,17 +88,17 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | ID | User Sessions Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | USE1 | Sessions dropdown placement | Adds a Sessions dropdown to the User panel in the equivalent position to Prime's Projects dropdown. | wired | User panel shows Sessions selector without moving approved layout. |
-| USE2 | Live sessions only | Lists only currently open/live sessions. | partial | `/bridge/user-sessions` exposes routable Meridian worktree-backed targets and excludes shared main. |
-| USE3 | Hidden sessions included | Includes hidden live sessions and marks them as hidden. | partial | Review-lane worktree targets appear with hidden state label. |
+| USE2 | Live sessions only | Lists only currently open/live sessions. | wired | `/bridge/user-sessions` exposes routable Meridian worktree-backed targets and self-test proves shared main is excluded. |
+| USE3 | Hidden sessions included | Includes hidden live sessions and marks them as hidden. | wired | Review-lane worktree targets appear with hidden state label and bridge self-test proves hidden classification. |
 | USE4 | Test-waiting sessions included | Includes sessions waiting for user test/try-it-out state and marks that state. | wired | Worktree/branch names containing test-waiting or waiting-for-test appear with waiting label. |
 | USE5 | Project grouping | Groups sessions under project headers. | wired | Dropdown visually groups sessions by project. |
 | USE6 | Alphabetical project sort | Sorts project groups alphabetically by project name. | wired | Project group order is alphabetical. |
 | USE7 | Alphabetical session sort | Sorts sessions alphabetically within each project group. | wired | Session order inside project group is alphabetical. |
 | USE8 | Session title update | Changes the User panel title to the selected session name. | wired | Selecting a session updates the panel title immediately. |
 | USE9 | Immediate prompt routing | Selecting a session immediately sets that session as the User prompt target. | wired | Next User prompt is routed to selected session without extra confirmation. |
-| USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | partial | Reload restores the target only if `/bridge/user-sessions` still reports it as routable. |
-| USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | partial | Live, hidden, and waiting status appear in selector labels, and the User prompt status line names the loaded target after discovery/restore. |
-| USE12 | Stale target guard | If selected session closes or becomes unavailable, User prompt is blocked with a readable target warning. | partial | Sending without a bridge-confirmed target shows a target error; failed target-list loading shows `Sessions unavailable` / `session list unavailable` instead of pretending no sessions exist. |
+| USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | wired | Reload and mode restore keep `meridian.user-session.target.v1` only if `/bridge/user-sessions` still reports it as routable. |
+| USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | wired | Live, hidden, and waiting status appear in selector labels, and the User prompt status line names the loaded target after discovery/restore. |
+| USE12 | Stale target guard | If selected session closes or becomes unavailable, User prompt is blocked with a readable target warning. | wired | Sending without a bridge-confirmed target shows a target error; stale target loading shows `Selected session unavailable` / `selected session unavailable` instead of silently rerouting. |
 | USE13 | User mode restore | Returning from Settings/Harness mode restores prior selected live session if still available. | wired | Toggle away and back; previous routable session target returns. |
 
 ### Spark Ring Icons
@@ -127,17 +127,17 @@ Spark is Prime's voice/core and the visual focus point for moving between right-
 | ID | Spark Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SPK1 | Prime voice/core identity | Keeps Spark visually tied to Prime, speech, and system focus. | partial | Center image remains visible and labeled as Spark/Prime voice. |
-| SPK2 | Surface focus entry | Acts as the visual entry point for changing right-panel surface focus. | planned | Interaction can open/switch surfaces without layout drift. |
+| SPK2 | Surface focus entry | Acts as the visual entry point for changing right-panel surface focus. | wired | Spark and harness controls call the shared right-panel authority path and expose panel mode/selection data without layout drift. |
 | SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | planned | State is visible and not faked. |
-| SPK4 | Surface mode indication | Makes it clear whether the right panel is User Session, Settings, or a harness. | planned | Active surface label/title changes with mode. |
-| SPK5 | Preserve prior session target | Switching away from User Session mode preserves the selected live session target. | planned | Return to User Session restores previous target if live. |
-| SPK6 | Stale target warning | If prior session target closes while away, returning shows a readable warning. | planned | Stale target is not silently reused. |
-| SPK7 | No implicit reset | Spark surface interaction does not clear prompts/transcripts. | planned | Toggle modes and return; prior panel state remains unless reset was confirmed. |
-| SPK8 | No implicit archive/close | Spark surface interaction does not archive, close, stop, or delete sessions. | planned | Session/archive counts unchanged after surface switches. |
-| SPK9 | Active mode visibility | Active right-panel mode is visible before interaction. | planned | Surface shows User Session, Settings, or Harness mode clearly. |
+| SPK4 | Surface mode indication | Makes it clear whether the right panel is User Session, Settings, or a harness. | wired | Active title/status plus `data-panel-mode` / `data-right-panel-mode` expose User Session, Spark/Settings, or Harness mode. |
+| SPK5 | Preserve prior session target | Switching away from User Session mode preserves the selected live session target. | wired | Return to User Session restores the prior `meridian.user-session.target.v1` target if still live. |
+| SPK6 | Stale target warning | If prior session target closes while away, returning shows a readable warning. | wired | Stale target restore shows `Selected session unavailable` / `selected session unavailable` and blocks send. |
+| SPK7 | No implicit reset | Spark surface interaction does not clear prompts/transcripts. | wired | Surface switching changes only panel mode/selection; prompt/transcript clearing remains confined to confirmed Reset. |
+| SPK8 | No implicit archive/close | Spark surface interaction does not archive, close, stop, or delete sessions. | wired | Surface switching calls no archive/close/delete controls; bridge targets remain read-only until prompt send. |
+| SPK9 | Active mode visibility | Active right-panel mode is visible before interaction. | wired | Surface shows User Session, Settings/Spark, or Harness title/status and matching data attributes. |
 | SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | planned | Surface switch is visually clear, not disorienting. |
 | SPK11 | Keyboard accessibility | Surface switching can be done without mouse-only interaction. | planned | Keyboard focus reaches surface controls. |
-| SPK12 | Recovery on bad surface | If a surface cannot load, return to prior usable surface with error. | planned | Failed surface load does not blank the right panel. |
+| SPK12 | Recovery on bad surface | If a surface cannot load, return to prior usable surface with error. | wired | Failed/missing stored surface restores User Session and shows `surface unavailable; User Session restored`. |
 
 ### Right Panel Surface Toggle Subitems
 
@@ -151,18 +151,18 @@ Mode meanings:
 
 | ID | Surface Toggle Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| SUR1 | User Session mode | Right panel targets user review/decision work Prime has surfaced in a project-specific context. | planned | Title and routing target match selected project/session context. |
+| SUR1 | User Session mode | Right panel targets user review/decision work Prime has surfaced in a project-specific context. | wired | User mode title reads `User Session` / `User Session: <target>` and the routing target comes from the selected live session. |
 | SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | partial | Settings title replaces User session target, prompt UI is absent, and unwired backend mutation is visibly blocked. |
 | SUR3 | Harness mode | Right panel uses full panel for selected harness logic items, with no prompt window. | partial | Harness title replaces User session target and displays logic/backend-link sections. |
 | SUR4 | Immediate interaction switch | Switching surface immediately changes the right-panel interaction model. | wired | User Session shows prompt; Settings/Harness show item lists. |
-| SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | planned | Return to prior surface restores previous target. |
+| SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | wired | Right-panel mode/selection and User Session target persist independently through storage keys. |
 | SUR6 | Surface-specific layout | Layout reflects active surface: prompt/response for User Session, full-panel items for Settings/Harness. | wired | User can tell what mode is active before interacting. |
-| SUR7 | Surface state preservation | Unsaved drafts or item edits are preserved per surface unless reset/close confirms otherwise. | planned | Switch away/back preserves relevant surface state. |
+| SUR7 | Surface state preservation | Unsaved drafts or item edits are preserved per surface unless reset/close confirms otherwise. | wired | Switching surfaces does not call prompt/transcript clearing and User drafts remain keyed by selected target. |
 | SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | wired | Close returns Settings/Harness surfaces to User mode without destroying session state. |
 | SUR9 | Harness item actions | Harness mode actions apply only to selected harness logic items. | planned | Unsupported harness action is blocked with readable warning. |
 | SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | partial | Settings surface blocks mutation until an explicit settings backend exists and does not send to live session accidentally. |
-| SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | planned | Prompt does not disappear into a dead target. |
-| SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | planned | Visual regression check passes after switches. |
+| SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | wired | Missing/stale selected target shows a readable target warning and send emits a visible target error. |
+| SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | wired | Surface switching reuses the existing right-panel workspace, hides prompt controls only in surface mode, and preserves Spark media references. |
 | SUR13 | Active mode persistence | User, Settings/Spark, and Harness modes persist as the right-panel mode across reload/reset/focus churn. | wired | Open Relay or Settings, reload/reset the UI, and confirm the right panel does not revert to User. |
 
 ### Reset Surface Subitems

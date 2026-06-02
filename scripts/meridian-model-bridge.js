@@ -84,12 +84,24 @@ if (process.argv.includes('--self-test')) {
     branch: 'refs/heads/worktree-build-5-test-waiting',
     head: 'def456',
   });
+  const hiddenSession = sessionTargetFromWorktree({
+    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\codex-reviews-b',
+    branch: 'refs/heads/codex-reviews-b',
+    head: 'fed789',
+  });
+  const sharedMainSession = sessionTargetFromWorktree({
+    path: 'C:\\Users\\scott\\Code\\Meridian',
+    branch: 'refs/heads/main',
+    head: 'abc789',
+  });
   const sessionTargetsOk = (
     BRIDGE_CAPABILITIES.userSessionTargets &&
     sampleSession?.sessionId === 'build-5-bifrost' &&
     sampleSession.routable &&
     sampleSession.status === 'live' &&
-    waitingSession?.status === 'waiting'
+    waitingSession?.status === 'waiting' &&
+    hiddenSession?.status === 'hidden' &&
+    sharedMainSession === null
   );
   const versionOk = BRIDGE_VERSION === 'local-bridge-routes-v2';
   const routeNamesOk = Object.values(BRIDGE_ROUTES).every((route) => route.startsWith('/bridge/') && !route.startsWith('/api/'));

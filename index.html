@@ -3374,13 +3374,14 @@ body {
   const updateUserSessionTitle = () => {
     const title = userWindow?.querySelector('.session-title');
     const selected = selectedUserSession();
-    if (title && !userWindow?.classList.contains('is-panel-surface')) title.textContent = selected ? `User: ${selected.sessionName}` : 'User';
+    if (title && !userWindow?.classList.contains('is-panel-surface')) title.textContent = selected ? `User Session: ${selected.sessionName}` : 'User Session';
   };
   const sessionOptionLabel = (session) => {
     const status = session.status && session.status !== 'live' ? ` (${session.status.replaceAll('_', ' ')})` : '';
     return `${session.sessionName}${status}`;
   };
   const userSessionStatusText = () => {
+    if (window.meridianRightPanelRecoveryWarning) return window.meridianRightPanelRecoveryWarning;
     if (userSessionsLoadFailed) return 'session list unavailable';
     const selected = selectedUserSession();
     if (!selected && localStorage.getItem(userSessionTargetKey)) return 'selected session unavailable';
@@ -3687,7 +3688,10 @@ body {
   });
   updateModelReadiness();
   loadUserSessions();
-  window.meridianRefreshUserSessionTarget = updateUserSessionTitle;
+  window.meridianRefreshUserSessionTarget = () => {
+    updateUserSessionTitle();
+    updateUserSessionStatus();
+  };
   const refreshSessionBridgeState = () => {
     updateModelReadiness();
     loadUserSessions();
@@ -3800,23 +3804,47 @@ body {
   let harnessDisabledUntil = 0;
   const rightPanelModeKey = 'meridian.right-panel.mode.v1';
   const rightPanelSelectionKey = 'meridian.right-panel.selection.v1';
+  const validRightPanelModes = new Set(['user', 'spark', 'harness']);
+  let rightPanelRecoveryWarning = '';
   const readStoredRightPanel = () => {
     try {
+      const mode = localStorage.getItem(rightPanelModeKey) || 'user';
+      const selection = localStorage.getItem(rightPanelSelectionKey) || 'User';
+      if (!validRightPanelModes.has(mode)) return { mode: 'user', selection: 'User', warning: 'surface unavailable; User Session restored' };
       return {
-        mode: localStorage.getItem(rightPanelModeKey) || 'user',
-        selection: localStorage.getItem(rightPanelSelectionKey) || 'User',
+        mode,
+        selection,
       };
     } catch {
       return { mode: 'user', selection: 'User' };
     }
   };
   const storeRightPanel = (mode, selection) => {
+    if (!validRightPanelModes.has(mode)) return;
     try {
       localStorage.setItem(rightPanelModeKey, mode);
       localStorage.setItem(rightPanelSelectionKey, selection || 'User');
     } catch {
       // The live panel still changes even if browser storage is unavailable.
     }
+  };
+  const setRightPanelAuthority = (mode, selection, { persist = true, warning = '' } = {}) => {
+    const safeMode = validRightPanelModes.has(mode) ? mode : 'user';
+    const safeSelection = selection || (safeMode === 'user' ? 'User' : safeMode);
+    rightPanelRecoveryWarning = warning || '';
+    window.meridianRightPanelRecoveryWarning = rightPanelRecoveryWarning;
+    if (rightWindow) {
+      rightWindow.dataset.panelMode = safeMode;
+      rightWindow.dataset.panelSelection = safeSelection;
+      rightWindow.dataset.panelWarning = rightPanelRecoveryWarning;
+    }
+    if (rightWorkspace) {
+      rightWorkspace.dataset.panelMode = safeMode;
+      rightWorkspace.dataset.panelSelection = safeSelection;
+    }
+    screen.dataset.rightPanelMode = safeMode;
+    screen.dataset.rightPanelSelection = safeSelection;
+    if (persist) storeRightPanel(safeMode, safeSelection);
   };
   if (buttons[0]) buttons[0].classList.add('is-selected');
   if (mockupButtons[0]) mockupButtons[0].classList.add('is-selected');
@@ -3992,29 +4020,35 @@ body {
     rightWorkspace.querySelectorAll('.relay-models-surface, .right-panel-surface').forEach((node) => node.remove());
   };
   const renderRightPanelSurface = ({ title, status, sections }) => {
-    if (!rightWindow || !rightWorkspace) return;
-    clearRightPanelSurface();
-    rightWindow.classList.add('is-panel-surface');
-    rightWorkspace.removeAttribute('aria-hidden');
-    rightWorkspace.insertAdjacentHTML('beforeend', `
-      <div class="right-panel-surface" role="region" aria-label="${escapeHtml(title)}">
-        <div class="relay-models-header">
-          <div class="relay-models-title">${escapeHtml(title)}</div>
-          <div class="relay-models-status">${escapeHtml(status)}</div>
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="right-panel-surface" role="region" aria-label="${escapeHtml(title)}">
+          <div class="relay-models-header">
+            <div class="relay-models-title">${escapeHtml(title)}</div>
+            <div class="relay-models-status">${escapeHtml(status)}</div>
+          </div>
+          <div class="relay-models-body">${sections.join('')}</div>
         </div>
-        <div class="relay-models-body">${sections.join('')}</div>
-      </div>
-    `);
-    rightWorkspace.querySelector('.right-panel-surface')?.addEventListener('toggle', (event) => {
-      const section = event.target;
-      if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
-      const state = relaySectionState();
-      state[section.dataset.relaySection] = section.open;
-      localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
-    }, true);
+      `);
+      rightWorkspace.querySelector('.right-panel-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
   };
   const renderSparkSurface = (label) => {
-    renderRightPanelSurface({
+    return renderRightPanelSurface({
       title: `${label || 'Settings'} Surface`,
       status: 'planned',
       sections: [
@@ -4034,7 +4068,7 @@ body {
   const renderHarnessSurface = (button) => {
     const harness = button?.dataset.harness || 'Harness';
     const title = button?.dataset.sessionTitle || harness;
-    renderRightPanelSurface({
+    return renderRightPanelSurface({
       title,
       status: button?.dataset.status || 'planned',
       sections: [
@@ -4052,44 +4086,49 @@ body {
     });
   };
   const renderRelayModels = () => {
-    if (!rightWindow || !rightWorkspace) return;
-    clearRightPanelSurface();
-    rightWindow.classList.add('is-panel-surface');
-    rightWindow.classList.add('is-relay-models');
-    rightWorkspace.removeAttribute('aria-hidden');
-    rightWorkspace.insertAdjacentHTML('beforeend', `
-      <div class="relay-models-surface" role="region" aria-label="Relay models">
-        <div class="relay-models-header">
-          <div class="relay-models-title">Relay Model Logic</div>
-          <div class="relay-models-status">Auto disabled</div>
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWindow.classList.add('is-relay-models');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Relay models">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Relay Model Logic</div>
+            <div class="relay-models-status">Auto disabled</div>
+          </div>
+          <div class="relay-models-body">
+            ${relaySection('Bridge route', '<div data-relay-bridge-status></div>', true)}
+            <div data-relay-logic>${relaySection('Relay logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
         </div>
-        <div class="relay-models-body">
-          ${relaySection('Bridge route', '<div data-relay-bridge-status></div>', true)}
-          <div data-relay-logic>${relaySection('Relay logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
-        </div>
-      </div>
-    `);
-    rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
-      const section = event.target;
-      if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
-      const state = relaySectionState();
-      state[section.dataset.relaySection] = section.open;
-      localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
-    }, true);
-    renderRelayBridgeStatus();
-    loadRelayLogic();
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      renderRelayBridgeStatus();
+      loadRelayLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
   };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
   };
-  const restoreUserPanel = ({ persist = true } = {}) => {
+  const restoreUserPanel = ({ persist = true, warning = '' } = {}) => {
     screen.classList.add('session-theme-aqua');
     screen.classList.remove('session-theme-green');
     clearRightPanelSurface();
-    if (userTitle) userTitle.textContent = 'User';
+    setRightPanelAuthority('user', 'User', { persist, warning });
     window.meridianRefreshUserSessionTarget?.();
-    if (persist) storeRightPanel('user', 'User');
   };
   const refreshRelayPanel = () => {
     if (rightWorkspace?.querySelector('.relay-models-surface')) renderRelayBridgeStatus();
@@ -4295,12 +4334,12 @@ body {
     screen.classList.remove('session-theme-green');
     if (userTitle) userTitle.textContent = button.dataset.sessionTitle || button.dataset.harness || 'User';
     clearRightPanelSurface();
-    if (button.dataset.harness === 'Relay') renderRelayModels();
-    else renderHarnessSurface(button);
+    const rendered = button.dataset.harness === 'Relay' ? renderRelayModels() : renderHarnessSurface(button);
+    if (!rendered) return;
     screen.classList.add('sessions-visible');
+    setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });
     harnessDisabledUntil = Date.now() + 2000;
     harnessDock.classList.remove('harness-dock-open');
-    if (persist) storeRightPanel('harness', button.dataset.harness || '');
   };
   const activateSparkButton = (button, { persist = true } = {}) => {
     if (!button) return;
@@ -4310,9 +4349,10 @@ body {
     screen.classList.remove('session-theme-aqua');
     screen.classList.add('session-theme-green');
     if (userTitle) userTitle.textContent = actionLabel || 'Spark';
-    renderSparkSurface(actionLabel || 'Spark');
+    const rendered = renderSparkSurface(actionLabel || 'Spark');
+    if (!rendered) return;
     screen.classList.add('sessions-visible');
-    if (persist) storeRightPanel('spark', actionLabel || 'Spark');
+    setRightPanelAuthority('spark', actionLabel || 'Spark', { persist });
     openSpark();
   };
   buttons.forEach((button) => {
@@ -4381,14 +4421,17 @@ body {
     if (stored.mode === 'harness') {
       const button = harnessButtons.find((item) => item.dataset.harness === stored.selection);
       if (button) activateHarnessButton(button, { persist: false });
+      else restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
       return;
     }
     if (stored.mode === 'spark') {
       const button = buttons.find((item) => item.getAttribute('aria-label') === stored.selection);
       if (button && stored.selection !== 'Reset' && stored.selection !== 'Reload') activateSparkButton(button, { persist: false });
+      else restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
       return;
     }
-    restoreUserPanel({ persist: false });
+    if (stored.warning) restoreUserPanel({ warning: stored.warning });
+    else restoreUserPanel({ persist: false });
   };
   restoreStoredRightPanel();
   menu.addEventListener('pointerenter', openSpark);
