@@ -200,6 +200,81 @@ class RelayDispatchEnvelope:
 
 
 @dataclass(frozen=True)
+class RelayDispatchMetadataEnvelope:
+    """Provider-neutral metadata envelope for future transport binding."""
+
+    envelope_id: str
+    heartbeat_id: str
+    lane_id: str | None = None
+    role: str | None = None
+    requested_model_id: str | None = None
+    exact_model_id: str | None = None
+    selected_provider: str | None = None
+    provider_route_kind: str = "unknown"
+    trust_state: str = "unknown"
+    capability_tier: str | None = None
+    context_window_tokens: int | None = None
+    prompt_payload_budget_tokens: int | None = None
+    prompt_payload_status: str = "unknown"
+    estimated_prompt_tokens: int | None = None
+    prompt_budget_percent: float | None = None
+    prompt_growth_tokens: int | None = None
+    prompt_growth_percent: float | None = None
+    growth_state: str = "unknown"
+    prompt_drag_tags: tuple[str, ...] = ()
+    requires_external_review: bool = False
+    external_review_status: str = "not_required"
+    model_metadata_ref: str | None = None
+    external_review_evidence_ref: str | None = None
+    payload_evidence_ref: str | None = None
+    payload_snapshot_hash: str | None = None
+    dispatch_envelope_ref: str | None = None
+    packet_proof_metadata_ref: str | None = None
+    validation_tags: tuple[str, ...] = ()
+    fail_closed_advisory: bool = False
+    fail_closed_tags: tuple[str, ...] = ()
+    transport_payload_kind: str = "metadata_only"
+    serialization_only: bool = True
+
+    def to_dict(self) -> dict[str, object]:
+        """Return stable display-safe metadata for future provider transport handoff."""
+        return {
+            "envelope_id": self.envelope_id,
+            "heartbeat_id": self.heartbeat_id,
+            "lane_id": self.lane_id,
+            "role": self.role,
+            "requested_model_id": self.requested_model_id,
+            "exact_model_id": self.exact_model_id,
+            "selected_provider": self.selected_provider,
+            "provider_route_kind": self.provider_route_kind,
+            "trust_state": self.trust_state,
+            "capability_tier": self.capability_tier,
+            "context_window_tokens": self.context_window_tokens,
+            "prompt_payload_budget_tokens": self.prompt_payload_budget_tokens,
+            "prompt_payload_status": self.prompt_payload_status,
+            "estimated_prompt_tokens": self.estimated_prompt_tokens,
+            "prompt_budget_percent": self.prompt_budget_percent,
+            "prompt_growth_tokens": self.prompt_growth_tokens,
+            "prompt_growth_percent": self.prompt_growth_percent,
+            "growth_state": self.growth_state,
+            "prompt_drag_tags": self.prompt_drag_tags,
+            "requires_external_review": self.requires_external_review,
+            "external_review_status": self.external_review_status,
+            "model_metadata_ref": self.model_metadata_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
+            "payload_evidence_ref": self.payload_evidence_ref,
+            "payload_snapshot_hash": self.payload_snapshot_hash,
+            "dispatch_envelope_ref": self.dispatch_envelope_ref,
+            "packet_proof_metadata_ref": self.packet_proof_metadata_ref,
+            "validation_tags": self.validation_tags,
+            "fail_closed_advisory": self.fail_closed_advisory,
+            "fail_closed_tags": self.fail_closed_tags,
+            "transport_payload_kind": self.transport_payload_kind,
+            "serialization_only": self.serialization_only,
+        }
+
+
+@dataclass(frozen=True)
 class RelayPromptPacketPolicyEvidence:
     """Display-safe Relay record of Aegis PromptPacket policy evaluation."""
 
@@ -334,6 +409,7 @@ class RelayExecutionResult:
     route_metadata: ModelRouteMetadataBinding | None = None
     payload_evidence: RelayPromptPayloadEvidence | None = None
     dispatch_envelope: RelayDispatchEnvelope | None = None
+    dispatch_metadata_envelope: RelayDispatchMetadataEnvelope | None = None
 
 
 @dataclass(frozen=True)
@@ -770,6 +846,11 @@ class RelayExecutionSummary:
             lanes=tuple(lane_summaries),
             missing_metadata_tags=tuple(dict.fromkeys(missing_tags)),
         )
+
+    def dispatch_metadata_envelopes(self) -> tuple[RelayDispatchMetadataEnvelope, ...]:
+        """Return display-safe metadata envelopes without provider payloads."""
+        envelopes = [result.dispatch_metadata_envelope for result in self.results]
+        return tuple(envelope for envelope in envelopes if envelope is not None)
 
 
 class RelayProofGateError(RuntimeError):
@@ -1436,6 +1517,208 @@ def _build_dispatch_envelope(
     )
 
 
+def _build_dispatch_metadata_envelope(
+    plan: RelayDispatchPlan,
+    *,
+    lane_role: ModelRole | None = None,
+    requested_model_id: str | None = None,
+    route_metadata: ModelRouteMetadataBinding | None = None,
+    payload_evidence: RelayPromptPayloadEvidence | None = None,
+    dispatch_envelope: RelayDispatchEnvelope | None = None,
+) -> RelayDispatchMetadataEnvelope:
+    """Serialize already-bound model metadata for future provider transports."""
+    route = plan.route
+    packet = plan.packet
+    lane_id = (
+        payload_evidence.lane_id
+        if payload_evidence is not None
+        else (f"{lane_role.value}:{requested_model_id}" if lane_role else None)
+    )
+    role = lane_role.value if lane_role else (dispatch_envelope.role if dispatch_envelope else None)
+    exact_model_id = (
+        route_metadata.model_name
+        if route_metadata is not None
+        else (
+            payload_evidence.selected_model
+            if payload_evidence is not None and payload_evidence.selected_model is not None
+            else (dispatch_envelope.exact_model_id if dispatch_envelope else requested_model_id)
+        )
+    )
+    selected_provider = (
+        route_metadata.provider_name
+        if route_metadata is not None
+        else (
+            payload_evidence.selected_provider
+            if payload_evidence is not None
+            else (dispatch_envelope.selected_provider if dispatch_envelope else None)
+        )
+    )
+    provider_route_kind = (
+        route_metadata.provider_route_kind
+        if route_metadata is not None
+        else (
+            payload_evidence.provider_route_kind
+            if payload_evidence is not None
+            else "unknown"
+        )
+    )
+    trust_state = (
+        route_metadata.trust_state
+        if route_metadata is not None
+        else (
+            payload_evidence.trust_state
+            if payload_evidence is not None
+            else (dispatch_envelope.trust_state if dispatch_envelope else "unknown")
+        )
+    )
+    context_window = (
+        route_metadata.context_budget
+        if route_metadata is not None
+        else (
+            payload_evidence.model_context_window_tokens
+            if payload_evidence is not None
+            else None
+        )
+    )
+    prompt_budget = (
+        route_metadata.prompt_payload_budget
+        if route_metadata is not None
+        else (payload_evidence.prompt_budget_tokens if payload_evidence is not None else None)
+    )
+    prompt_status = (
+        route_metadata.prompt_payload_status
+        if route_metadata is not None and route_metadata.prompt_payload_status is not None
+        else (payload_evidence.budget_status if payload_evidence is not None else "unknown")
+    )
+    requires_external_review = (
+        route_metadata.requires_external_review
+        if route_metadata is not None
+        else (
+            payload_evidence.requires_external_review
+            if payload_evidence is not None
+            else False
+        )
+    )
+    external_review_status = (
+        route_metadata.external_review_status
+        if route_metadata is not None
+        else (
+            payload_evidence.external_review_status
+            if payload_evidence is not None
+            else "not_required"
+        )
+    )
+
+    validation_tags: list[str] = []
+    if route_metadata is None:
+        validation_tags.append("model_metadata_missing")
+    if selected_provider is None:
+        validation_tags.append("selected_provider_missing")
+    if exact_model_id is None:
+        validation_tags.append("exact_model_id_missing")
+    if provider_route_kind == "unknown":
+        validation_tags.append("provider_route_kind_unknown")
+    if trust_state == "unknown":
+        validation_tags.append("trust_state_unknown")
+    if context_window is None:
+        validation_tags.append("context_window_unknown")
+    if prompt_budget is None:
+        validation_tags.append("prompt_payload_budget_unknown")
+    if prompt_status == "unknown":
+        validation_tags.append("prompt_payload_status_unknown")
+    if requires_external_review and external_review_status != "passed":
+        validation_tags.append(f"external_review_{external_review_status}")
+    if dispatch_envelope is not None and dispatch_envelope.blocked_error_tags:
+        validation_tags.extend(dispatch_envelope.blocked_error_tags)
+
+    fail_closed_tags = tuple(
+        tag
+        for tag in dict.fromkeys(validation_tags)
+        if tag.endswith("_missing")
+        or tag.endswith("_unknown")
+        or tag.startswith("external_review_")
+        or tag in {"vendor_unknown", "model_id_unknown", "packet_proof_metadata_missing"}
+    )
+    fail_closed_advisory = bool(fail_closed_tags) or (
+        dispatch_envelope is not None and not dispatch_envelope.safe_to_dispatch
+    )
+
+    lane_label = role or "no-lane"
+    model_label = exact_model_id or requested_model_id or "unknown-model"
+    return RelayDispatchMetadataEnvelope(
+        envelope_id=f"relay-dispatch-metadata:{packet.packet_id}:{lane_label}:{model_label}",
+        heartbeat_id=packet.packet_id,
+        lane_id=lane_id,
+        role=role,
+        requested_model_id=requested_model_id,
+        exact_model_id=exact_model_id,
+        selected_provider=selected_provider,
+        provider_route_kind=provider_route_kind,
+        trust_state=trust_state,
+        capability_tier=(
+            route_metadata.capability_tier
+            if route_metadata is not None
+            else (
+                payload_evidence.capability_tier
+                if payload_evidence is not None
+                else (dispatch_envelope.capability_tier if dispatch_envelope else None)
+            )
+        ),
+        context_window_tokens=context_window,
+        prompt_payload_budget_tokens=prompt_budget,
+        prompt_payload_status=prompt_status,
+        estimated_prompt_tokens=(
+            route_metadata.prompt_payload_estimated_tokens
+            if route_metadata is not None
+            else (
+                payload_evidence.estimated_prompt_tokens
+                if payload_evidence is not None
+                else None
+            )
+        ),
+        prompt_budget_percent=(
+            route_metadata.prompt_payload_budget_percent
+            if route_metadata is not None
+            else (payload_evidence.budget_percent if payload_evidence is not None else None)
+        ),
+        prompt_growth_tokens=(
+            payload_evidence.delta_tokens if payload_evidence is not None else None
+        ),
+        prompt_growth_percent=(
+            payload_evidence.delta_percent if payload_evidence is not None else None
+        ),
+        growth_state=payload_evidence.growth_state if payload_evidence is not None else "unknown",
+        prompt_drag_tags=payload_evidence.prompt_drag_tags if payload_evidence is not None else (),
+        requires_external_review=requires_external_review,
+        external_review_status=external_review_status,
+        model_metadata_ref=(
+            route_metadata.model_metadata_ref
+            if route_metadata is not None
+            else (payload_evidence.model_metadata_ref if payload_evidence is not None else None)
+        ),
+        external_review_evidence_ref=(
+            route_metadata.external_review_evidence_ref
+            if route_metadata is not None
+            else (
+                payload_evidence.external_review_evidence_ref
+                if payload_evidence is not None
+                else None
+            )
+        ),
+        payload_evidence_ref=_payload_evidence_ref(payload_evidence),
+        payload_snapshot_hash=(
+            payload_evidence.prompt_payload_snapshot_hash if payload_evidence else None
+        ),
+        dispatch_envelope_ref=dispatch_envelope.envelope_id if dispatch_envelope else None,
+        packet_proof_metadata_ref=(
+            dispatch_envelope.packet_proof_metadata_ref if dispatch_envelope else None
+        ),
+        validation_tags=tuple(dict.fromkeys(validation_tags)),
+        fail_closed_advisory=fail_closed_advisory,
+        fail_closed_tags=fail_closed_tags,
+    )
+
+
 def _build_decision_record(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
@@ -1699,12 +1982,27 @@ def execute_relay_dispatch_plan(
         )
         for lane, payload_evidence in zip(plan.lanes, payload_evidences)
     )
+    dispatch_metadata_envelopes = tuple(
+        _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=lane.role,
+            requested_model_id=lane.preferred_model,
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+        for lane, payload_evidence, dispatch_envelope in zip(
+            plan.lanes,
+            payload_evidences,
+            dispatch_envelopes,
+        )
+    )
 
-    for lane, snapshot, payload_evidence, dispatch_envelope in zip(
+    for lane, snapshot, payload_evidence, dispatch_envelope, dispatch_metadata_envelope in zip(
         plan.lanes,
         snapshots,
         payload_evidences,
         dispatch_envelopes,
+        dispatch_metadata_envelopes,
     ):
         try:
             output = model_call(lane.payload)
@@ -1716,6 +2014,7 @@ def execute_relay_dispatch_plan(
                     payload_snapshot=snapshot,
                     payload_evidence=payload_evidence,
                     dispatch_envelope=dispatch_envelope,
+                    dispatch_metadata_envelope=dispatch_metadata_envelope,
                 )
             )
         except Exception as exc:  # noqa: BLE001
@@ -1817,14 +2116,31 @@ def execute_relay_plan_with_registry(
             payload_evidences,
         )
     )
+    dispatch_metadata_envelopes = tuple(
+        _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=lane.role,
+            requested_model_id=lane.preferred_model,
+            route_metadata=route_metadata,
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+        for lane, route_metadata, payload_evidence, dispatch_envelope in zip(
+            plan.lanes,
+            resolved_route_metadata,
+            payload_evidences,
+            dispatch_envelopes,
+        )
+    )
 
-    for lane, adapter, snapshot, route_metadata, payload_evidence, dispatch_envelope in zip(
+    for lane, adapter, snapshot, route_metadata, payload_evidence, dispatch_envelope, dispatch_metadata_envelope in zip(
         plan.lanes,
         resolved_adapters,
         snapshots,
         resolved_route_metadata,
         payload_evidences,
         dispatch_envelopes,
+        dispatch_metadata_envelopes,
     ):
         try:
             output = adapter(lane.payload)
@@ -1838,6 +2154,7 @@ def execute_relay_plan_with_registry(
                     route_metadata=route_metadata,
                     payload_evidence=payload_evidence,
                     dispatch_envelope=dispatch_envelope,
+                    dispatch_metadata_envelope=dispatch_metadata_envelope,
                 )
             )
         except Exception as exc:  # noqa: BLE001

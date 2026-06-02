@@ -28,6 +28,7 @@ from meridian_core.relay_executor import (
     RelayAegisPromptPacketHandoffSummary,
     RelayDecisionRecord,
     RelayDispatchEnvelope,
+    RelayDispatchMetadataEnvelope,
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
@@ -38,6 +39,7 @@ from meridian_core.relay_executor import (
     RelayProofGateError,
     _build_decision_record,
     _build_dispatch_envelope,
+    _build_dispatch_metadata_envelope,
     _evaluate_relay_prompt_packet_policy,
     _relay_prompt_packet_policy_disposition,
     execute_relay_dispatch_plan,
@@ -1702,6 +1704,163 @@ class TestRelayDispatchEnvelope:
             "safe_to_dispatch",
             "transport_payload_kind",
             "audit_fields",
+        )
+
+
+class TestRelayDispatchMetadataEnvelope:
+    """Tests for provider-neutral metadata-only dispatch envelopes."""
+
+    def test_registry_result_metadata_envelope_uses_reviewed_model_metadata(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=7200,
+            estimated_tokens=2100,
+            budget_tokens=2000,
+            prior_estimated_tokens=1500,
+            queue_mode=True,
+        )
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            payload_snapshots=(snapshot,),
+        )
+
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert isinstance(envelope, RelayDispatchMetadataEnvelope)
+        assert envelope.exact_model_id == "deepseek-chat"
+        assert envelope.selected_provider == "deepseek"
+        assert envelope.provider_route_kind == "direct"
+        assert envelope.trust_state == "candidate"
+        assert envelope.context_window_tokens == 65536
+        assert envelope.prompt_payload_budget_tokens == 57344
+        assert envelope.prompt_payload_status == "degraded"
+        assert envelope.growth_state == "over_budget"
+        assert envelope.requires_external_review is True
+        assert envelope.external_review_status == "pending"
+        assert envelope.model_metadata_ref == "model-harness-metadata:deepseek:deepseek-chat"
+        assert envelope.external_review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
+        assert envelope.fail_closed_advisory is True
+        assert "external_review_pending" in envelope.fail_closed_tags
+        assert envelope.transport_payload_kind == "metadata_only"
+        assert envelope.serialization_only is True
+        assert adapter.received_payloads == [_PROMPT]
+
+    def test_metadata_envelope_without_route_metadata_has_fail_closed_advisories(self) -> None:
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("response"),
+        )
+
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.selected_provider is None
+        assert envelope.exact_model_id == plan.lanes[0].preferred_model
+        assert envelope.fail_closed_advisory is True
+        assert "model_metadata_missing" in envelope.validation_tags
+        assert "selected_provider_missing" in envelope.fail_closed_tags
+        assert "provider_route_kind_unknown" in envelope.fail_closed_tags
+        assert "context_window_unknown" in envelope.fail_closed_tags
+        assert "vendor_unknown" in envelope.fail_closed_tags
+
+    def test_metadata_envelope_helper_is_display_safe_and_stable(self) -> None:
+        plan = _make_plan(1)
+        payload_evidence = summary_evidence = RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            heartbeat_id=plan.packet.packet_id,
+            lane_id=f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}",
+            selected_provider="provider",
+            selected_model="exact-model",
+            capability_tier="standard",
+            provider_route_kind="direct",
+            trust_state="trusted",
+            model_context_window_tokens=8192,
+            prompt_budget_tokens=4096,
+            budget_status="healthy",
+            external_review_status="passed",
+            model_metadata_ref="model-harness-metadata:provider:exact-model",
+        )
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=summary_evidence,
+        )
+
+        envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+        rendered = " ".join(str(value) for value in envelope.to_dict().values())
+
+        assert envelope.to_dict() == envelope.to_dict()
+        assert tuple(envelope.to_dict().keys()) == (
+            "envelope_id",
+            "heartbeat_id",
+            "lane_id",
+            "role",
+            "requested_model_id",
+            "exact_model_id",
+            "selected_provider",
+            "provider_route_kind",
+            "trust_state",
+            "capability_tier",
+            "context_window_tokens",
+            "prompt_payload_budget_tokens",
+            "prompt_payload_status",
+            "estimated_prompt_tokens",
+            "prompt_budget_percent",
+            "prompt_growth_tokens",
+            "prompt_growth_percent",
+            "growth_state",
+            "prompt_drag_tags",
+            "requires_external_review",
+            "external_review_status",
+            "model_metadata_ref",
+            "external_review_evidence_ref",
+            "payload_evidence_ref",
+            "payload_snapshot_hash",
+            "dispatch_envelope_ref",
+            "packet_proof_metadata_ref",
+            "validation_tags",
+            "fail_closed_advisory",
+            "fail_closed_tags",
+            "transport_payload_kind",
+            "serialization_only",
+        )
+        assert _PROMPT not in rendered
+        assert "raw response" not in rendered
+        assert "credential" not in rendered.lower()
+
+    def test_summary_returns_metadata_envelopes(self) -> None:
+        plan = _make_plan(1)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=deepseek_candidate_metadata_preset("fast")),
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelopes = summary.dispatch_metadata_envelopes()
+        assert len(envelopes) == 1
+        assert envelopes[0] is summary.results[0].dispatch_metadata_envelope
+        assert envelopes[0].payload_evidence_ref == (
+            f"relay-payload-evidence:{_PACKET_ID}:"
+            f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}"
         )
 
 
