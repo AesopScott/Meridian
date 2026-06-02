@@ -10,7 +10,39 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
+Goal: review Build 1 DeepSeek candidate metadata preset slice when it is marked Ready for Codex Review on current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+
+Allowed review files: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/model-harness-v2-contract.md`, `docs/deepseek-provider-validation-gate.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for review provenance/routing only.
+
+Task: poll `docs/live-build-1.md` and current `origin/main` for the Build 1 DeepSeek candidate metadata preset completion. When Build 1 marks the slice Ready for Codex Review on a current-main commit, verify the Model Harness can represent DeepSeek direct-provider candidate routes for a default quality lane and fast lane while preserving validation-gate constraints: DeepSeek remains candidate trust, cannot clear reviews, cannot move branches, cannot bypass Relay/Aegis, and cannot run autonomous coding lanes until validation proof exists. Verify `deepseek-chat` remains the direct API dispatch id and any `deepseek-v4-pro` / `deepseek-v4-flash` labels are metadata/variant labels only, not dispatch keys. Confirm no network access, credentials, live model calls, UI/Bifrost rendering, branch movement, or Polaris dependency was added.
+
+Proof command:
+
+- `python -m pytest tests/test_model_adapter.py -q`
+
+Completion: if clean, mark passed and promote the next Relay/Model Harness candidate from `docs/v2-progress-tracker.md`; if findings exist, route the smallest focused repair to Build 1 ahead of unrelated Relay work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 2 Session Lifecycle permission-invariant repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 19:23 -06:00. Current `HEAD` and `origin/main` contain Build 2 repair commit `e41851ae`, and the prior HIGH permission-invariant findings are closed.
+
+Review result:
+
+- `git merge-base --is-ancestor e41851ae HEAD` and `git merge-base --is-ancestor e41851ae origin/main` passed.
+- `git show --stat --oneline --name-only e41851ae` shows the repair commit only changed `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 60 tests.
+- Closed: invalid temporary/permanent `PermissionContext` states are rejected; temporary unlocks require expiry and task scope; permanent unlocks require dual approval; work acceptance and operation execution enforce expiry/task scope against the session's current task id.
+- Scoped side-effect scan found no subprocess/session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch movement, or Polaris dependency in `meridian_core/session_lifecycle.py` / `tests/test_session_lifecycle.py`.
+
+Finding: none.
+
+Completion: Build 2 Session Lifecycle permission-invariant repair is review-cleared. Build 2 is released to the next Session Lifecycle restart/resteer recovery test slice in `docs/live-build-2.md`. The prior next-candidate Build 1 checklist commit `455ed63c` is not on current `main`, so Reviews A is now tracking the current Build 1 DeepSeek metadata preset slice instead of reviving stale branch movement.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 

@@ -8,17 +8,33 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Hold - Review Gate Active
+## Coordinator Override - Active Now
 
-Status: Build 2 is not idle; it is blocked on Codex Reviews A for current-main commit `e41851ae`.
+Goal: add Session Lifecycle restart/resteer recovery tests after permissions binding cleared review.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
 
-Required first command while polling: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
+Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
 
-Current blocker: Reviews A has an executable Active Now task in `docs/live-codex-reviews.md` to review Build 2 commit `e41851ae` for the remaining Session Lifecycle permission-invariant repair. Do not start the restart/resteer recovery test candidate until Reviews A passes this repair or routes a focused finding.
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
 
-Next Candidate when the review gate clears: add Session Lifecycle restart/resteer recovery tests after permissions binding clears review.
+Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/live-codex-reviews.md`, and `docs/v2-progress-tracker.md`.
+
+Task: add focused restart/resteer recovery tests now that Codex Reviews A cleared current-main commit `e41851ae`. Prove the Session Lifecycle surface preserves safe recovery decisions around stale heartbeat, context-fill summarize/reset, reasoning-shift transfer/start-new-session, review-gate human approval, and permission-boundary blocking while preserving the reviewed permission invariants. Keep the slice pure runtime/test coverage; do not spawn sessions, inspect live processes, call models, edit UI/Bifrost/FileMap/Polaris, move branches, or add live control.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from the restart/resteer recovery test slice before unrelated Session Lifecycle work.
+
+## Next Candidate Task
+
+Goal: bind any Codex review findings from the restart/resteer recovery test slice.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: if Codex Reviews A routes a finding from the restart/resteer recovery tests, repair that finding before taking unrelated Session Lifecycle work. If Reviews A passes the slice with no findings, Prime may replace this candidate with the next Session Lifecycle Harness item from `docs/v2-progress-tracker.md`.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
