@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review current-main Build 4 demotion/retry/Bifrost handoff checklist.
 
@@ -17,6 +17,19 @@ Task: review Build 4 current-main checklist commits `1ec2573a` and `a6fcb977`. V
 Proof: text/shape inspection plus `git diff --check 1ec2573a^..a6fcb977`.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 current-main Ready-marker polling after this checklist review.
+
+Review result - 2026-06-01 23:42 -06:00:
+
+- Build 4 demotion/retry/Bifrost handoff checklist passed. Commits `1ec2573a` and `a6fcb977` changed only `docs/relay-aegis-demotion-retry-handoff-checklist.md` and `docs/live-build-4.md`.
+- The checklist is docs-only and build-ready. It covers explicit lower-tier demotion target handling, retry/fallback boundaries, fail-closed missing or unsafe metadata before provider transport, human-gate pause/resume behavior, display-safe handoff summary shape, Bifrost adapter expectations, deterministic test expectations, and runtime enablement gates.
+- Exclusion coverage includes raw prompts, raw source text, credentials, provider request/response bodies, account state, process/session control, FileMap edits, branch/worktree movement, shared-main writes, pushes to main, and Polaris.
+
+Proof:
+
+- Text/shape inspection passed for the checklist body and Ready marker.
+- `git diff --check 1ec2573a^..a6fcb977` passed.
+
+Completion: Build 4 demotion/retry/Bifrost handoff checklist is review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
