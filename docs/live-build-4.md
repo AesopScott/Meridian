@@ -24,7 +24,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `0e4529c8`
 - Files changed: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`
 - Tests run: `python -m pytest tests/test_aegis.py -q` (250 passed)
 - Verification performed: added provider-neutral `ProviderResultValidationInput` plus deterministic `evaluate_provider_result_validation_advisory()` and display-safe serialization; tests cover allow/warn/block outcomes, telemetry warnings, external-review fail-closed behavior, missing evidence, unsafe raw-response/raw-prompt/account strings, stable advisory keys, and deterministic output; `git diff --check` passed.
