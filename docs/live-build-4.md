@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: extend Aegis PromptPacket proof policy edge coverage for Relay integration inputs.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Required sources: `docs/relay-aegis-promptpacket-policy-integration-checklist.md`, existing `PromptPacketProofMetadata` and `evaluate_prompt_packet_proof_policy()` in `meridian_core/aegis.py`, and Reviews B clearance evidence in `docs/live-codex-reviews-2.md`.
+
+Task: add focused pure-domain coverage and any minimal Aegis-side normalization needed for Relay integration edge inputs: empty/unknown source lineage, missing allowed sources, missing or conflicting proof requirement, demotion target presence/absence, human-gate/dual-lane proof flags, unsafe evidence ids, and deterministic blocker/warning tags. Do not change Relay runtime, Bifrost/UI/FileMap, model/account/process code, branches, main, or Polaris.
+
+Tests: `python -m pytest tests/test_aegis.py -q`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or leave Aegis stable for Relay runtime integration.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create a Relay/Aegis PromptPacket policy integration checklist after Reviews B cleared the Aegis policy evaluator.

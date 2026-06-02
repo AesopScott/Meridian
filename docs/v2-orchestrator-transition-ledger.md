@@ -465,6 +465,13 @@ Coordinator Build 3 and review-clearance movement - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_filemap.py tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py tests/test_bifrost_cockpit.py -q` passed 434/434; `git diff --check c8c7cc22^..HEAD` passed.
 - Honest lane status after this clearance: Build 1 is unblocked for Relay/Aegis runtime integration, Build 2 is review-cleared and needs a fresh executable task, Build 3 is ready for review of the latest FileMap audit, and Build 4/5 are review-cleared from the checklist/rendering wave.
 
+Coordinator rolling-pipeline routing - 2026-06-02:
+
+- Routing gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified all five build worktrees plus Reviews A and Reviews B worktrees clean before queue edits.
+- Efficiency change: adopted a rolling two-stage pipeline. Dependent runtime chains remain review-gated after one slice, while independent docs/UI/FileMap/test-hardening slices may run in parallel and are capped at bounded Ready-marker review before dependent work consumes them.
+- Promoted fresh executable queue heads: Build 1 Relay/Aegis PromptPacket policy runtime integration, Build 2 Session Lifecycle permission summary aggregation, Build 3 rolling FileMap audit, Build 4 Aegis PromptPacket policy edge coverage, Build 5 Bifrost Relay/Aegis handoff summary rendering.
+- Review routing: Reviews A must first review Build 3 commits `c8c7cc22`/`007a1217`, then poll Build 1/2 Ready markers. Reviews B polls Build 4/5 Ready markers and commits only pass/finding provenance.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:

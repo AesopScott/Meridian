@@ -10,18 +10,13 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the current-main Build 1 and Build 3 Aegis wave slices.
+Goal: review the latest current-main Build 3 FileMap audit, then keep Build 1/2/3 review hot under the rolling two-stage pipeline.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: review the landed current-main slices in this order, stopping and routing a focused finding if any slice fails:
+Task: first review the landed Build 3 post-Build-4/5 FileMap audit commits `c8c7cc22` and `007a1217` on current `origin/main`. Verify containment, path scope, concrete audit evidence, `python -m pytest tests/test_filemap.py -q`, and `git diff --check c8c7cc22^..007a1217`. If it fails, route the smallest focused Build 3 repair and stop. If it passes, record pass provenance and then poll for the next Ready marker from Build 1 or Build 2 without committing read-check-only polling.
 
-- Build 1 Relay decision-record packet proof binding, commits `3cffeaa2` and `41582efb`.
-- Build 3 Aegis PromptPacket FileMap audit, commits `b962197f` and `53ee81d9`.
-
-Use current `origin/main` at or after `33d2a48c`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
-
-Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop.
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Relay/Aegis runtime integration or Build 2 Session Lifecycle permission summary when either marks Ready for Codex Review.
 
 ## Coordinator Override - Completed / Passed
 

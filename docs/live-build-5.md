@@ -4,6 +4,26 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Queue Authority
+
+Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
+
+## Coordinator Override - Active Now
+
+Goal: add Bifrost Relay/Aegis policy handoff summary rendering for the rolling runtime integration.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/relay-aegis-promptpacket-policy-integration-checklist.md`, existing Aegis PromptPacket policy rendering in `bifrost/cockpit.py`, and Reviews B clearance evidence in `docs/live-codex-reviews-2.md`.
+
+Task: add deterministic static rendering/tests for the display-safe Relay handoff summary that will come from Relay after Aegis PromptPacket policy evaluation: decision, severity, packet id/hash refs, proof requirement, evidence ids, blockers/warnings, demotion target when present, human-gate state, and missing-metadata fail-closed state. Preserve existing prompt payload visibility, provider balance, dispatch hardening, PromptPacket proof metadata, proof-state preview, stale-session recovery, and escaping behavior. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Relay runtime, edit FileMap, move branches, main, or Polaris.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect the view-model to Relay runtime summaries after review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add edge coverage for Bifrost Aegis PromptPacket policy decision rendering after Reviews B cleared the base slice.

@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add Session Lifecycle permission summary aggregation for Prime/Beacon advisory input after Reviews A cleared permission evidence.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Required sources: `docs/session-lifecycle-v2-contract.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, and Reviews A clearance evidence in `docs/live-codex-reviews.md`.
+
+Task: add a pure deterministic helper that summarizes current session permission state into Prime/Beacon-safe advisory input, including locked/expired/out-of-scope permission blockers, approved operations, approvals pending, review-gate blockers, stale/restart/resteer findings, and display-safe evidence strings. Keep this advisory and serializable only: no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris.
+
+Tests: `python -m pytest tests/test_session_lifecycle.py -q`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or wire the summary into Prime/Beacon consumers after review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add permission-aware Prime/Beacon advisory evidence for Session Lifecycle command plans after Reviews A cleared the Prime audit-edge slice.
