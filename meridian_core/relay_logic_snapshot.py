@@ -117,6 +117,125 @@ def _dispatch_snapshot(route: Any) -> dict[str, Any]:
     }
 
 
+def _capability_sections(tiers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    tier3 = tiers[3]
+    tier4 = tiers[4]
+    tier3_lanes = [
+        f"{lane['role']} -> {lane['preferredModel']}"
+        f"{' independent' if lane['independent'] else ''}"
+        for lane in tier3["lanes"]
+    ]
+    budgets = [
+        (
+            f"Tier {tier['tier']}",
+            (
+                f"{tier['promptBudget']['tier']}, "
+                f"{tier['promptBudget']['maxContextTokens']} tokens, "
+                f"sources: {', '.join(tier['promptBudget']['allowedSources'])}"
+            ),
+        )
+        for tier in tiers
+    ]
+    return [
+        {
+            "title": "Relay Job",
+            "summary": "Relay is the model-routing brain: it answers which model route Prime should use, why, with what proof burden, and what must block fallback.",
+            "rows": [
+                ("owns", "model/vendor/session route selection logic"),
+                ("does not own", "non-model cadence, UI liveness, or general chat"),
+                ("prime asks", "which route, why, risk, proof, context/session lifecycle, and blockers"),
+                ("no drift point", "the harness reads this backend snapshot instead of a separate static UI list"),
+            ],
+        },
+        {
+            "title": "Risk Tier Routing",
+            "summary": "Relay maps task risk to deterministic model-use posture from no model through human gate.",
+            "rows": [(f"Tier {tier['tier']}: {tier['mode']}", tier["reason"]) for tier in tiers],
+        },
+        {
+            "title": "Model Lane Logic",
+            "summary": "Relay thinks in model roles and lane independence before vendor names.",
+            "rows": [
+                ("builder", "primary work producer"),
+                ("reviewer", "independent critique/comparison lane"),
+                ("verifier", "proof/validation lane"),
+                ("explainer", "human-gate explanation lane"),
+                ("tier 3 lanes", " | ".join(tier3_lanes)),
+            ],
+        },
+        {
+            "title": "Access Route Precedence",
+            "summary": "Relay is account/session-first: it does not silently jump to APIs or aggregators.",
+            "rows": [
+                (str(index + 1), route)
+                for index, route in enumerate(tiers[1]["audit"]["routePrecedence"])
+            ],
+            "bullets": [
+                "account/session routes come first when observable and safe",
+                "local CLI routes follow when cwd/auth/model identity are clear",
+                "direct API routes matter for pinned model id, clean payload control, cost tracking, and auditability",
+                "aggregator API is fallback/comparison only, never hidden authority for Tier 3+",
+            ],
+        },
+        {
+            "title": "Session Lifecycle Logic",
+            "summary": "Session action is part of routing, not cleanup after the fact.",
+            "rows": [
+                ("actions", "no_session | reuse | start_new | summarize_and_reset | transfer"),
+                ("default strategy", "focused_packet"),
+                ("tier 3 action", tier3["audit"]["sessionAction"]),
+                ("why", "prevents prompt drag, stale session bleed, polluted context reuse, and wrong-role routing"),
+            ],
+        },
+        {
+            "title": "Context Latency Privacy",
+            "summary": "Relay tags each route with context health, latency posture, and privacy level for Prime/Bifrost visibility.",
+            "rows": [
+                ("tier 3 context", tier3["contextHealth"]),
+                ("tier 3 latency", tier3["latencyPosture"]),
+                ("tier 3 privacy", tier3["privacyLevel"]),
+                ("tier 4 trust", tier4["audit"]["trustState"]),
+            ],
+        },
+        {
+            "title": "Prompt Budget Logic",
+            "summary": "Budgets are tier-locked so model prompts cannot grow by hidden UI or diagnostic drag.",
+            "rows": budgets,
+        },
+        {
+            "title": "Audit Logic",
+            "summary": "Relay records route class, session action, trust state, alternatives rejected, blockers, proof, and telemetry.",
+            "rows": [
+                ("tier 3 trust", tier3["auditDepth"]["trustState"]),
+                ("tier 3 silent fallback", "blocked" if tier3["auditDepth"]["silentFallbackBlocked"] else "allowed"),
+                ("tier 3 primary blocker", tier3["auditDepth"]["primaryFallbackBlocker"]),
+                ("tier 3 primary proof", tier3["auditDepth"]["primaryProofRequirement"]),
+                ("tier 4 gate", tier4["auditDepth"]["primaryFallbackBlocker"]),
+            ],
+        },
+        {
+            "title": "Dispatch Logic",
+            "summary": "Relay builds an immutable dispatch plan without calling a model.",
+            "rows": [
+                ("source", DISPATCH_SOURCE),
+                ("tier 3 lane count", str(tier3["dispatch"]["laneCount"])),
+                ("tier 3 lane order", " | ".join(tier3["dispatch"]["laneOrder"])),
+                ("payload policy", tier3["dispatch"]["payloadPolicy"]),
+                ("payload text visible", "no" if not tier3["dispatch"]["payloadTextVisible"] else "yes"),
+            ],
+        },
+        {
+            "title": "Current Limits",
+            "summary": "Relay is domain-complete enough for Prime integration, but Auto routing is intentionally still gated.",
+            "rows": [
+                ("not yet live", "Prime is not yet asking Relay for production Auto routing decisions"),
+                ("not yet bound", "real provider availability, cost, quota, and trust telemetry are not fully wired"),
+                ("still blocked", "Auto stays disabled until Prime consumes this route contract end to end"),
+            ],
+        },
+    ]
+
+
 def _tier_snapshot(tier: int) -> dict[str, Any]:
     route = route_from_tier(tier)
     return {
@@ -149,6 +268,7 @@ def relay_logic_snapshot() -> dict[str, Any]:
         "dispatchSource": DISPATCH_SOURCE,
         "autoRouting": "disabled_until_prime_relay_contract",
         "routePrecedence": tiers[1]["audit"]["routePrecedence"],
+        "capabilitySections": _capability_sections(tiers),
         "tiers": tiers,
     }
 

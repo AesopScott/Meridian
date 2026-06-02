@@ -72,6 +72,36 @@ def test_tier4_audit_depth_blocks_autonomous_fallback():
     assert audit_depth["primaryProofRequirement"] == "human_gate_approval"
 
 
+def test_snapshot_exposes_capability_sections_for_harness_headers():
+    snapshot = relay_logic_snapshot()
+    section_titles = [section["title"] for section in snapshot["capabilitySections"]]
+
+    assert section_titles == [
+        "Relay Job",
+        "Risk Tier Routing",
+        "Model Lane Logic",
+        "Access Route Precedence",
+        "Session Lifecycle Logic",
+        "Context Latency Privacy",
+        "Prompt Budget Logic",
+        "Audit Logic",
+        "Dispatch Logic",
+        "Current Limits",
+    ]
+    assert all(section["summary"] for section in snapshot["capabilitySections"])
+    assert all(section["rows"] for section in snapshot["capabilitySections"])
+
+
+def test_capability_sections_include_expert_relay_depth():
+    rendered = json.dumps(relay_logic_snapshot()["capabilitySections"], sort_keys=True)
+
+    assert "model-routing brain" in rendered
+    assert "account/session-first" in rendered
+    assert "dual-lane" in rendered
+    assert "model_payload_only" in rendered
+    assert "Auto stays disabled" in rendered
+
+
 def test_tier4_exposes_human_gate_block():
     tier4 = relay_logic_snapshot()["tiers"][4]
 
