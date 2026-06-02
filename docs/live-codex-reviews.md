@@ -10,6 +10,37 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 3 current-main FileMap maintenance movement.
+
+Status: passed by Codex Reviews A on 2026-06-01 21:40 -06:00. Current `HEAD` and `origin/main` are `f09f0b2a`, and relevant Build 3 commits `0cfd5bfa` and `1df7e081` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for review provenance only.
+
+Task: verify the newly registered V2/domain/checklist/current-main artifacts belong in FileMap, the runtime FileMap, required-path tests, and docs mirror remain aligned, the live-build marker records real completion evidence rather than read-check-only progress, and no unrelated runtime/UI/Polaris/branch movement was introduced.
+
+Proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 0cfd5bfa^..1df7e081`
+
+Review result:
+
+- `git merge-base --is-ancestor 0cfd5bfa HEAD` and `git merge-base --is-ancestor 1df7e081 HEAD` passed.
+- `git show --stat --oneline --name-only 0cfd5bfa 1df7e081` shows the FileMap maintenance commit changed only `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 0cfd5bfa^..1df7e081` passed.
+- Verified the newly registered V2/domain/checklist/current-main artifacts are present across runtime `make_default_map()`, `docs/FileMap.md`, and `_REQUIRED_PATHS`, including DeepSeek, Relay, Aegis, PromptPacket, live-build queue, orchestrator, Echo/Atlas, and Session Lifecycle permission artifacts.
+- Verified `docs/live-build-3.md` records concrete completion evidence: registered artifacts, changed files, test proof, commit evidence, audit result, and Ready marker. The marker names worker commit `25bc316b`; its FileMap content matches current-main commit `0cfd5bfa`, so the current-main review target is equivalent and proofable.
+- Scoped diff/side-effect scan found no unrelated runtime behavior, UI/Bifrost/Polaris dependency, live process/model/account code, branch movement, or cross-worktree movement in the reviewed slice.
+
+Finding: none.
+
+Completion: Build 3 FileMap maintenance movement is review-cleared. Next Candidate: bind any review findings from this FileMap slice before unrelated FileMap cleanup; none routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 1 DeepSeek candidate metadata preset slice when it is marked Ready for Codex Review on current main.
 
 Status: passed by Codex Reviews A on 2026-06-01 21:30 -06:00. Current `HEAD` and `origin/main` are `00c4ab0d`, and relevant Build 1 commits `d41e33cd` and `0b7f1bc4` are ancestors of current main.
