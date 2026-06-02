@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage after the Build 3/4/5 review-clearance and Build 1/2 task-promotion checkpoint.
 
@@ -27,6 +27,19 @@ Tests:
 - `python -m pytest tests/test_filemap.py -q`
 
 Completion: mark Ready for Codex Review with commit hash if changed, files changed or no-op evidence, tests run, and a concrete Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Completion:
+
+- Build 3 audited checkpoint changes from `1df7e081..HEAD`: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`, and `docs/v2-orchestrator-transition-ledger.md`.
+- Registered missing/partial FileMap coverage for `docs/live-build-3.md` across runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`; added required-path coverage for existing `docs/live-codex-reviews.md` registration.
+- Audit evidence: focused coverage check over checkpoint paths found no remaining runtime/mirror/required gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Commit: `0186f71c`.
+- Queue marker: this completion update.
+- Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
