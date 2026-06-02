@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Session Lifecycle restart/resteer recovery tests after permissions binding cleared review.
 
@@ -26,7 +26,14 @@ Tests:
 
 - `python -m pytest tests/test_session_lifecycle.py -q`
 
-Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and a concrete Next Candidate: bind any review findings from the restart/resteer recovery test slice before unrelated Session Lifecycle work.
+Completion:
+
+- Build 2 completed the restart/resteer recovery test slice in local worktree commit `b74155ce`.
+- Files changed: `tests/test_session_lifecycle.py`.
+- Coverage added: stale-heartbeat restart advisory/gated plan, context pressure summarize/reset plan, reasoning-shift start-new plus transfer recovery, review-gate human approval, and permission-boundary blocking with expiry/task-scope invariants preserved.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 65 tests.
+- Ready for Codex Review.
+- Next Candidate: bind any review findings from the restart/resteer recovery test slice before unrelated Session Lifecycle work.
 
 ## Next Candidate Task
 
