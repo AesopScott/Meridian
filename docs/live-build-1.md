@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement the first Relay/Aegis PromptPacket policy runtime integration slice after Reviews B cleared the integration checklist.
 
@@ -25,6 +25,15 @@ Task: add a narrow deterministic Relay call site/helper that builds `PromptPacke
 Tests: `python -m pytest tests/test_relay_executor.py -q`.
 
 Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or extend the integration to demotion/retry/Bifrost handoff after review.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-01 23:19 -06:00.
+- Commit: `e3a2ae31` (`fix: Integrate Relay PromptPacket policy with repaired Aegis rules`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (178 passed).
+- Concrete evidence: Relay now adapts sealed PromptPacket and dispatch-envelope proof fields into Aegis `PromptPacketProofMetadata`, maps Relay proof labels into current-main Aegis proof requirements, evaluates `evaluate_prompt_packet_proof_policy()` before model transport on the policy-aware path, records display-safe policy evidence on summaries and decision records, and blocks before adapter calls for unsafe evidence, missing metadata, candidate Tier 3 trust, missing dual-lane proof, unknown proof requirements, and unavailable required hashes. Clean Tier 2 dual-lane proof and clean Tier 4 human-gate approval are covered.
+- Next Candidate: bind review findings or extend the integration to demotion/retry/Bifrost handoff after review.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
