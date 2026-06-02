@@ -38,6 +38,7 @@ _REQUIRED_PATHS = [
     "docs/deepseek-provider-validation-gate.md",
     "docs/deepseek-validation-benchmark-plan.md",
     "docs/deepseek-direct-provider-implementation-handoff.md",
+    "docs/deepseek-candidate-trust-metadata-implementation-checklist.md",
     "docs/model-harness-v2-contract.md",
     "docs/model-harness-metadata-implementation-checklist.md",
     "meridian_core/models.py",

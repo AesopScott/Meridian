@@ -427,6 +427,13 @@ def make_default_map() -> FileMap:
             notes="Model Harness handoff. Read before adding DeepSeek direct provider runtime behavior or changing DeepSeek trust gates.",
         ),
         FileMapEntry(
+            path="docs/deepseek-candidate-trust-metadata-implementation-checklist.md",
+            area=FileArea.MODEL_HARNESS,
+            purpose="Build-ready checklist for DeepSeek candidate-trust metadata, exact dispatch identity, direct-versus-aggregator proof, prompt-drag telemetry, and Bifrost-safe display.",
+            related_tests=["tests/test_model_adapter.py", "tests/test_bifrost_cockpit.py"],
+            notes="Runtime implementation is not authorized by the checklist alone. Read before wiring DeepSeek candidate trust metadata into Model Harness, Relay, Aegis, or Bifrost.",
+        ),
+        FileMapEntry(
             path="docs/model-harness-v2-contract.md",
             area=FileArea.MODEL_HARNESS,
             purpose="Model harness V2 contract: provider capability metadata, prompt-drag telemetry, trust state, route ownership, direct-vs-aggregator evidence, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding.",
