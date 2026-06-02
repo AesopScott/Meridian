@@ -171,6 +171,34 @@ class CloseArchiveWriteThroughAction(Enum):
     WRITE_THROUGH = "write_through"
 
 
+class GoalRuntimeCheckpointSurface(Enum):
+    """Display-safe V3 Goal Runtime checkpoint/update surface."""
+
+    GIT = "git"
+    OBSIDIAN = "obsidian"
+    REVIEW = "review"
+    HANDOFF = "handoff"
+
+
+class GoalRuntimeCheckpointCadence(Enum):
+    """Display-safe checkpoint cadence expectation."""
+
+    REGULAR = "regular"
+    BEFORE_CONTINUATION = "before_continuation"
+    BEFORE_BLOCKER_HANDOFF = "before_blocker_handoff"
+    REVIEW_GATED = "review_gated"
+
+
+class GoalRuntimeContinuationState(Enum):
+    """Display-safe V3 Goal Runtime checkpoint continuation state."""
+
+    ACTIVE = "active"
+    PAUSED_FOR_REVIEW = "paused_for_review"
+    BLOCKED = "blocked"
+    READY_FOR_HANDOFF = "ready_for_handoff"
+    USAGE_LIMITED = "usage_limited"
+
+
 @dataclass(frozen=True)
 class PermissionContext:
     """Approval scope and escalation state for session operations."""
@@ -688,6 +716,57 @@ class SessionCloseArchiveWriteThroughProof:
             "rollback_or_preservation_note": self.rollback_or_preservation_note,
             "blockers": list(self.blockers),
             "evidence_refs": list(self.evidence_refs),
+            "raw_worker_chat_included": self.raw_worker_chat_included,
+            "raw_prompt_included": self.raw_prompt_included,
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
+class V3GoalRuntimeCheckpointProofPacket:
+    """Display-safe, non-executable V3 Goal Runtime checkpoint/update proof."""
+
+    checkpoint_id: str
+    goal_id: str
+    goal_title: str
+    owning_lane: str
+    owning_session_label: str
+    update_surface: GoalRuntimeCheckpointSurface
+    checkpoint_cadence: GoalRuntimeCheckpointCadence
+    token_budget_summary: str
+    time_budget_summary: str
+    latest_git_ref: str
+    latest_obsidian_ref: str
+    reviewer_gate_refs: tuple[str, ...]
+    lease_gate_refs: tuple[str, ...]
+    blockers: tuple[str, ...]
+    continuation_state: GoalRuntimeContinuationState
+    evidence_refs: tuple[str, ...]
+    is_executable_now: bool
+    raw_worker_chat_included: bool
+    raw_prompt_included: bool
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize checkpoint/update proof to JSON-safe metadata."""
+        return {
+            "checkpoint_id": self.checkpoint_id,
+            "goal_id": self.goal_id,
+            "goal_title": self.goal_title,
+            "owning_lane": self.owning_lane,
+            "owning_session_label": self.owning_session_label,
+            "update_surface": self.update_surface.value,
+            "checkpoint_cadence": self.checkpoint_cadence.value,
+            "token_budget_summary": self.token_budget_summary,
+            "time_budget_summary": self.time_budget_summary,
+            "latest_git_ref": self.latest_git_ref,
+            "latest_obsidian_ref": self.latest_obsidian_ref,
+            "reviewer_gate_refs": list(self.reviewer_gate_refs),
+            "lease_gate_refs": list(self.lease_gate_refs),
+            "blockers": list(self.blockers),
+            "continuation_state": self.continuation_state.value,
+            "evidence_refs": list(self.evidence_refs),
+            "is_executable_now": self.is_executable_now,
             "raw_worker_chat_included": self.raw_worker_chat_included,
             "raw_prompt_included": self.raw_prompt_included,
             "timestamp": self.timestamp.isoformat(),
@@ -1290,6 +1369,19 @@ def _session_can_accept_work_at(
     if not session.permission_context.is_unlock_task_scoped(session.current_task_id):
         return False
     return True
+
+
+def _permission_context_can_execute_operation_at(
+    permission: PermissionContext,
+    operation: OperationScope,
+    current_task_id: Optional[str],
+    observed_at: datetime,
+) -> bool:
+    if _permission_unlock_expired_at(permission, observed_at):
+        return False
+    if not permission.is_unlock_task_scoped(current_task_id):
+        return False
+    return permission.is_operation_approved(operation) and not permission.escalation_gate
 
 
 def summarize_session_permission_state(
@@ -2047,7 +2139,12 @@ def build_close_archive_write_through_proof(
     observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
     required_operation = _close_archive_required_operation(intended_action)
     permission_allowed = (
-        session.can_execute_operation(required_operation)
+        _permission_context_can_execute_operation_at(
+            session.permission_context,
+            required_operation,
+            session.current_task_id,
+            observed_at,
+        )
         if required_operation is not None
         else True
     )
@@ -2100,6 +2197,128 @@ def build_close_archive_write_through_proof(
         ),
         blockers=blockers,
         evidence_refs=evidence_refs,
+        raw_worker_chat_included=False,
+        raw_prompt_included=False,
+        timestamp=observed_at,
+    )
+
+
+def build_v3_goal_runtime_checkpoint_proof_packet(
+    checkpoint_id: str,
+    goal_id: str,
+    goal_title: str,
+    owning_lane: str,
+    owning_session_label: str,
+    update_surface: GoalRuntimeCheckpointSurface,
+    checkpoint_cadence: GoalRuntimeCheckpointCadence,
+    token_budget_summary: str,
+    time_budget_summary: str,
+    latest_git_ref: Optional[str] = None,
+    latest_obsidian_ref: Optional[str] = None,
+    reviewer_gate_refs: tuple[str, ...] | list[str] = (),
+    lease_gate_refs: tuple[str, ...] | list[str] = (),
+    blocker_tags: tuple[str, ...] | list[str] = (),
+    continuation_state: GoalRuntimeContinuationState = (
+        GoalRuntimeContinuationState.PAUSED_FOR_REVIEW
+    ),
+    evidence_refs: tuple[str, ...] | list[str] = (),
+    timestamp: Optional[datetime] = None,
+) -> V3GoalRuntimeCheckpointProofPacket:
+    """Build display-safe checkpoint/update proof for future V3 Goal Runtime.
+
+    This packet is advisory serialization only. It does not write Git or
+    Obsidian, create automations, spawn sessions, call models, or move branches.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+    safe_checkpoint_id = _goal_checkpoint_safe_token(
+        checkpoint_id,
+        "checkpoint_id_redacted",
+    )
+    safe_goal_id = _goal_checkpoint_safe_token(goal_id, "goal_id_redacted")
+    safe_goal_title = _goal_checkpoint_safe_summary(
+        goal_title,
+        "goal_title_present",
+    )
+    safe_owning_lane = _goal_checkpoint_safe_token(
+        owning_lane,
+        "owning_lane_redacted",
+    )
+    safe_session_label = _goal_checkpoint_safe_summary(
+        owning_session_label,
+        "owning_session_label_present",
+    )
+    safe_git_ref = _goal_checkpoint_safe_ref(
+        latest_git_ref,
+        "git_ref_missing",
+        "git_ref_redacted",
+    )
+    safe_obsidian_ref = _goal_checkpoint_safe_ref(
+        latest_obsidian_ref,
+        "obsidian_ref_missing",
+        "obsidian_ref_redacted",
+    )
+    safe_reviewer_refs = _goal_checkpoint_safe_refs(
+        reviewer_gate_refs,
+        "reviewer_gate_ref_redacted",
+    )
+    safe_lease_refs = _goal_checkpoint_safe_refs(
+        lease_gate_refs,
+        "lease_gate_ref_redacted",
+    )
+    blockers = _goal_checkpoint_blockers(
+        blocker_tags,
+        safe_git_ref,
+        safe_obsidian_ref,
+        safe_reviewer_refs,
+        safe_lease_refs,
+    )
+    safe_evidence = _goal_checkpoint_evidence_refs(
+        checkpoint_id=safe_checkpoint_id,
+        goal_id=safe_goal_id,
+        owning_lane=safe_owning_lane,
+        update_surface=update_surface,
+        checkpoint_cadence=checkpoint_cadence,
+        token_budget_summary=_goal_checkpoint_budget_summary(
+            token_budget_summary,
+            "token_budget_summary_present",
+        ),
+        time_budget_summary=_goal_checkpoint_budget_summary(
+            time_budget_summary,
+            "time_budget_summary_present",
+        ),
+        latest_git_ref=safe_git_ref,
+        latest_obsidian_ref=safe_obsidian_ref,
+        reviewer_gate_refs=safe_reviewer_refs,
+        lease_gate_refs=safe_lease_refs,
+        continuation_state=continuation_state,
+        blockers=blockers,
+        evidence_refs=evidence_refs,
+    )
+
+    return V3GoalRuntimeCheckpointProofPacket(
+        checkpoint_id=safe_checkpoint_id,
+        goal_id=safe_goal_id,
+        goal_title=safe_goal_title,
+        owning_lane=safe_owning_lane,
+        owning_session_label=safe_session_label,
+        update_surface=update_surface,
+        checkpoint_cadence=checkpoint_cadence,
+        token_budget_summary=_goal_checkpoint_budget_summary(
+            token_budget_summary,
+            "token_budget_summary_present",
+        ),
+        time_budget_summary=_goal_checkpoint_budget_summary(
+            time_budget_summary,
+            "time_budget_summary_present",
+        ),
+        latest_git_ref=safe_git_ref,
+        latest_obsidian_ref=safe_obsidian_ref,
+        reviewer_gate_refs=safe_reviewer_refs,
+        lease_gate_refs=safe_lease_refs,
+        blockers=blockers,
+        continuation_state=continuation_state,
+        evidence_refs=safe_evidence,
+        is_executable_now=False,
         raw_worker_chat_included=False,
         raw_prompt_included=False,
         timestamp=observed_at,
@@ -2260,6 +2479,152 @@ def _close_archive_write_through_evidence_refs(
         + (required_operation.value if required_operation else "none")
     )
     refs.extend(f"close_archive.blocker={blocker}" for blocker in blockers)
+    return tuple(dict.fromkeys(refs))
+
+
+_GOAL_CHECKPOINT_UNSAFE_FRAGMENTS = (
+    "secret_raw_prompt",
+    "secret_worker_chat",
+    "raw_prompt",
+    "worker_chat",
+    "move_main",
+    "branch_move",
+    "branch_move_request",
+    "worktree_switch",
+    "stash_pop",
+    "merge_main",
+    "rebase_main",
+    "cherry_pick",
+    "switch_branch",
+    "write_main",
+    "users\\",
+    "users/",
+    "c:\\",
+    "../",
+    "..\\",
+)
+
+
+def _goal_checkpoint_safe_token(value: str, fallback: str) -> str:
+    raw_candidate = str(value or "").strip().lower()
+    if any(fragment in raw_candidate for fragment in _GOAL_CHECKPOINT_UNSAFE_FRAGMENTS):
+        return fallback
+    candidate = raw_candidate.replace(" ", "_")
+    candidate = "".join(
+        char for char in candidate if char.isalnum() or char in ("_", "-", ".")
+    )
+    if not candidate or len(candidate) > 80:
+        return fallback
+    return candidate
+
+
+def _goal_checkpoint_safe_summary(value: str, fallback: str) -> str:
+    candidate = str(value or "").strip()
+    if not candidate:
+        return "missing"
+    safe_candidate = _goal_checkpoint_safe_token(candidate, fallback)
+    if safe_candidate != fallback:
+        return safe_candidate
+    return fallback
+
+
+def _goal_checkpoint_budget_summary(value: str, fallback: str) -> str:
+    candidate = _goal_checkpoint_safe_token(value, fallback)
+    if candidate == fallback:
+        return fallback if str(value or "").strip() else "missing"
+    return candidate
+
+
+def _goal_checkpoint_safe_ref(
+    value: Optional[str],
+    missing: str,
+    fallback: str,
+) -> str:
+    if value is None or not str(value).strip():
+        return missing
+    return _goal_checkpoint_safe_token(str(value), fallback)
+
+
+def _goal_checkpoint_safe_refs(
+    refs: tuple[str, ...] | list[str],
+    fallback: str,
+) -> tuple[str, ...]:
+    safe_refs = [
+        _goal_checkpoint_safe_token(ref, fallback)
+        for ref in refs
+    ]
+    return tuple(dict.fromkeys(safe_refs))
+
+
+def _goal_checkpoint_blockers(
+    blocker_tags: tuple[str, ...] | list[str],
+    latest_git_ref: str,
+    latest_obsidian_ref: str,
+    reviewer_gate_refs: tuple[str, ...],
+    lease_gate_refs: tuple[str, ...],
+) -> tuple[str, ...]:
+    blockers = [
+        _goal_checkpoint_safe_token(blocker, "blocker_tag_redacted")
+        for blocker in blocker_tags
+    ]
+    if latest_git_ref == "git_ref_missing":
+        blockers.append("goal_checkpoint.git_ref_missing")
+    if latest_obsidian_ref == "obsidian_ref_missing":
+        blockers.append("goal_checkpoint.obsidian_ref_missing")
+    if not reviewer_gate_refs:
+        blockers.append("goal_checkpoint.reviewer_gate_refs_missing")
+    if not lease_gate_refs:
+        blockers.append("goal_checkpoint.lease_gate_refs_missing")
+    blockers.append("goal_checkpoint.is_executable_now_false")
+    blockers.append("goal_checkpoint.serialization_only")
+    return tuple(dict.fromkeys(blockers))
+
+
+def _goal_checkpoint_evidence_refs(
+    checkpoint_id: str,
+    goal_id: str,
+    owning_lane: str,
+    update_surface: GoalRuntimeCheckpointSurface,
+    checkpoint_cadence: GoalRuntimeCheckpointCadence,
+    token_budget_summary: str,
+    time_budget_summary: str,
+    latest_git_ref: str,
+    latest_obsidian_ref: str,
+    reviewer_gate_refs: tuple[str, ...],
+    lease_gate_refs: tuple[str, ...],
+    continuation_state: GoalRuntimeContinuationState,
+    blockers: tuple[str, ...],
+    evidence_refs: tuple[str, ...] | list[str],
+) -> tuple[str, ...]:
+    refs = [
+        f"v3_goal_checkpoint.checkpoint_id={checkpoint_id}",
+        f"v3_goal_checkpoint.goal_id={goal_id}",
+        f"v3_goal_checkpoint.owning_lane={owning_lane}",
+        f"v3_goal_checkpoint.update_surface={update_surface.value}",
+        f"v3_goal_checkpoint.checkpoint_cadence={checkpoint_cadence.value}",
+        f"v3_goal_checkpoint.token_budget_summary={token_budget_summary}",
+        f"v3_goal_checkpoint.time_budget_summary={time_budget_summary}",
+        f"v3_goal_checkpoint.latest_git_ref={latest_git_ref}",
+        f"v3_goal_checkpoint.latest_obsidian_ref={latest_obsidian_ref}",
+        f"v3_goal_checkpoint.continuation_state={continuation_state.value}",
+        "v3_goal_checkpoint.is_executable_now=False",
+        "v3_goal_checkpoint.raw_worker_chat_included=False",
+        "v3_goal_checkpoint.raw_prompt_included=False",
+    ]
+    refs.extend(
+        f"v3_goal_checkpoint.reviewer_gate_ref={ref}"
+        for ref in reviewer_gate_refs
+    )
+    refs.extend(
+        f"v3_goal_checkpoint.lease_gate_ref={ref}"
+        for ref in lease_gate_refs
+    )
+    refs.extend(f"v3_goal_checkpoint.blocker={blocker}" for blocker in blockers)
+    refs.extend(
+        "v3_goal_checkpoint.evidence_ref="
+        + _goal_checkpoint_safe_token(ref, "evidence_ref_redacted")
+        for ref in evidence_refs
+    )
     return tuple(dict.fromkeys(refs))
 
 

@@ -15,6 +15,9 @@ from meridian_core.session_lifecycle import (
     WorkflowHeartbeatStatus,
     WorkflowResultKind,
     CloseArchiveWriteThroughAction,
+    GoalRuntimeCheckpointSurface,
+    GoalRuntimeCheckpointCadence,
+    GoalRuntimeContinuationState,
     PermissionState,
     OperationScope,
     FindingType,
@@ -30,11 +33,13 @@ from meridian_core.session_lifecycle import (
     SessionCommandStagingReviewPacket,
     SessionCommandPreviewProof,
     SessionCloseArchiveWriteThroughProof,
+    V3GoalRuntimeCheckpointProofPacket,
     SessionLifecycleState,
     SessionCommandPlan,
     build_command_staging_review_packet,
     build_command_preview_proof,
     build_close_archive_write_through_proof,
+    build_v3_goal_runtime_checkpoint_proof_packet,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
@@ -3020,6 +3025,158 @@ class TestSessionCloseArchiveWriteThroughProof:
         assert raw_prompt not in evidence_text
         assert "SECRET_WORKER_CHAT" not in serialized_text
         assert "SECRET_RAW_PROMPT" not in serialized_text
+
+
+class TestV3GoalRuntimeCheckpointProofPacket:
+    """Tests for V3 Goal Runtime checkpoint/update proof metadata."""
+
+    def test_goal_runtime_checkpoint_packet_serializes_non_executable_update(self):
+        """Checkpoint proof preserves bounded update metadata."""
+        observed_at = datetime(2026, 6, 2, 20, 15, tzinfo=timezone.utc)
+
+        packet = build_v3_goal_runtime_checkpoint_proof_packet(
+            checkpoint_id="checkpoint-20260602-001",
+            goal_id="goal-runtime-v3-001",
+            goal_title="native_goal_runtime",
+            owning_lane="prime",
+            owning_session_label="build-2-goal-runtime",
+            update_surface=GoalRuntimeCheckpointSurface.GIT,
+            checkpoint_cadence=GoalRuntimeCheckpointCadence.REGULAR,
+            token_budget_summary="tokens_ok",
+            time_budget_summary="time_ok",
+            latest_git_ref="commit.85dd4714",
+            latest_obsidian_ref="obsidian.goal-runtime-proof",
+            reviewer_gate_refs=("reviews-a.goal-checkpoint",),
+            lease_gate_refs=("lease.prime-goal-runtime",),
+            blocker_tags=("v3.not_active_scope",),
+            continuation_state=GoalRuntimeContinuationState.READY_FOR_HANDOFF,
+            evidence_refs=("v3-parking-lot.native-goal-runtime",),
+            timestamp=observed_at,
+        )
+        serialized = packet.to_dict()
+
+        assert isinstance(packet, V3GoalRuntimeCheckpointProofPacket)
+        assert packet.checkpoint_id == "checkpoint-20260602-001"
+        assert packet.goal_id == "goal-runtime-v3-001"
+        assert packet.goal_title == "native_goal_runtime"
+        assert packet.update_surface == GoalRuntimeCheckpointSurface.GIT
+        assert packet.checkpoint_cadence == GoalRuntimeCheckpointCadence.REGULAR
+        assert packet.token_budget_summary == "tokens_ok"
+        assert packet.time_budget_summary == "time_ok"
+        assert packet.latest_git_ref == "commit.85dd4714"
+        assert packet.latest_obsidian_ref == "obsidian.goal-runtime-proof"
+        assert packet.continuation_state == (
+            GoalRuntimeContinuationState.READY_FOR_HANDOFF
+        )
+        assert packet.is_executable_now is False
+        assert packet.raw_worker_chat_included is False
+        assert packet.raw_prompt_included is False
+        assert serialized["update_surface"] == "git"
+        assert serialized["checkpoint_cadence"] == "regular"
+        assert serialized["is_executable_now"] is False
+        assert "v3_goal_checkpoint.update_surface=git" in packet.evidence_refs
+        assert "v3_goal_checkpoint.latest_git_ref=commit.85dd4714" in (
+            packet.evidence_refs
+        )
+        assert "v3_goal_checkpoint.evidence_ref=v3-parking-lot.native-goal-runtime" in (
+            packet.evidence_refs
+        )
+
+    def test_goal_runtime_checkpoint_packet_records_missing_gate_blockers(self):
+        """Missing Git/Obsidian and gate refs remain visible as fixed blockers."""
+        observed_at = datetime(2026, 6, 2, 20, 15, tzinfo=timezone.utc)
+
+        packet = build_v3_goal_runtime_checkpoint_proof_packet(
+            checkpoint_id="checkpoint-20260602-002",
+            goal_id="goal-runtime-v3-002",
+            goal_title="goal_runtime_checkpoint",
+            owning_lane="compass",
+            owning_session_label="build-2",
+            update_surface=GoalRuntimeCheckpointSurface.REVIEW,
+            checkpoint_cadence=GoalRuntimeCheckpointCadence.REVIEW_GATED,
+            token_budget_summary="tokens_limited",
+            time_budget_summary="time_limited",
+            continuation_state=GoalRuntimeContinuationState.PAUSED_FOR_REVIEW,
+            timestamp=observed_at,
+        )
+
+        assert packet.latest_git_ref == "git_ref_missing"
+        assert packet.latest_obsidian_ref == "obsidian_ref_missing"
+        assert "goal_checkpoint.git_ref_missing" in packet.blockers
+        assert "goal_checkpoint.obsidian_ref_missing" in packet.blockers
+        assert "goal_checkpoint.reviewer_gate_refs_missing" in packet.blockers
+        assert "goal_checkpoint.lease_gate_refs_missing" in packet.blockers
+        assert "goal_checkpoint.is_executable_now_false" in packet.blockers
+        assert "v3_goal_checkpoint.blocker=goal_checkpoint.git_ref_missing" in (
+            packet.evidence_refs
+        )
+        assert packet.is_executable_now is False
+
+    def test_goal_runtime_checkpoint_packet_redacts_raw_path_and_movement_text(self):
+        """Raw prompt/chat/path/movement strings do not serialize."""
+        observed_at = datetime(2026, 6, 2, 20, 15, tzinfo=timezone.utc)
+        raw_prompt = "SECRET_RAW_PROMPT: move branches now"
+        raw_chat = "SECRET_WORKER_CHAT: write obsidian now"
+        path_value = "C:\\Users\\scott\\vault\\goal.md"
+        movement_id = "branch_move_request"
+        movement_ref = "move_main"
+
+        packet = build_v3_goal_runtime_checkpoint_proof_packet(
+            checkpoint_id=movement_id,
+            goal_id=movement_ref,
+            goal_title=raw_prompt,
+            owning_lane="worktree_switch",
+            owning_session_label=raw_chat,
+            update_surface=GoalRuntimeCheckpointSurface.OBSIDIAN,
+            checkpoint_cadence=GoalRuntimeCheckpointCadence.BEFORE_CONTINUATION,
+            token_budget_summary=raw_prompt,
+            time_budget_summary="stash_pop",
+            latest_git_ref="merge_main",
+            latest_obsidian_ref=path_value,
+            reviewer_gate_refs=("cherry_pick", "reviews-a.safe_ref"),
+            lease_gate_refs=("worktree_switch", "lease.safe_ref"),
+            blocker_tags=("rebase_main", raw_chat),
+            continuation_state=GoalRuntimeContinuationState.BLOCKED,
+            evidence_refs=(path_value, raw_prompt),
+            timestamp=observed_at,
+        )
+        serialized_text = repr(packet.to_dict())
+        evidence_text = repr(packet.evidence_refs)
+
+        assert packet.checkpoint_id == "checkpoint_id_redacted"
+        assert packet.goal_id == "goal_id_redacted"
+        assert packet.goal_title == "goal_title_present"
+        assert packet.owning_lane == "owning_lane_redacted"
+        assert packet.owning_session_label == "owning_session_label_present"
+        assert packet.token_budget_summary == "token_budget_summary_present"
+        assert packet.time_budget_summary == "time_budget_summary_present"
+        assert packet.latest_git_ref == "git_ref_redacted"
+        assert packet.latest_obsidian_ref == "obsidian_ref_redacted"
+        for unsafe in (
+            raw_prompt,
+            raw_chat,
+            path_value,
+            movement_id,
+            movement_ref,
+            "SECRET_RAW_PROMPT",
+            "SECRET_WORKER_CHAT",
+            "worktree_switch",
+            "stash_pop",
+            "merge_main",
+            "rebase_main",
+            "cherry_pick",
+        ):
+            assert unsafe not in serialized_text
+            assert unsafe not in evidence_text
+        assert "v3_goal_checkpoint.reviewer_gate_ref=reviewer_gate_ref_redacted" in (
+            packet.evidence_refs
+        )
+        assert "v3_goal_checkpoint.lease_gate_ref=lease_gate_ref_redacted" in (
+            packet.evidence_refs
+        )
+        assert "v3_goal_checkpoint.evidence_ref=evidence_ref_redacted" in (
+            packet.evidence_refs
+        )
 
 
 class TestPrimeAutonomyInput:
