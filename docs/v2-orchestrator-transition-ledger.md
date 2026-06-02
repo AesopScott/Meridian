@@ -161,6 +161,14 @@ Current orchestrator review of supervised routing trial - 2026-06-02:
 - Approved next step: Build 3 and Reviews B should execute the queued tasks in their assigned unique worktrees and record pass/finding/blocker evidence.
 - Takeover remains incomplete: full takeover still waits on Build 3 and Reviews B evidence plus explicit takeover approval in this ledger.
 
+Replacement coordinator follow-up poll - 2026-06-02:
+
+- Refreshed shared main: clean, on `main`, aligned with `origin/main` at `8257aa19`.
+- Rechecked Build 3 and Reviews B queue headers on main. Both still show the supervised escalation blocks as active; neither has recorded pass, finding, completion, or concrete blocker evidence after the sync.
+- Fast-forwarded clean behind-only worktrees Build 3, Build 4, Build 5, Reviews A, and Reviews B to `8257aa19`. Build 1 and Build 2 remain clean but divergent with local ahead history and were not moved.
+- Thread discovery did not expose clearly named worker/review session threads for Build 1-5 or Reviews A-B, so no direct thread prompt was sent to those sessions.
+- Next coordinator action: monitor for Build 3 and Reviews B evidence on their queues. If they remain silent on the next check, route replacement/parallel focused sessions or request current-orchestrator/user approval to replace those lanes; do not accept idle/read-check-only progress.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
