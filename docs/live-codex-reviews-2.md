@@ -10,7 +10,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Finding Routed
 
 Goal: review Build 5 Sessions dropdown sample data rendering.
 
@@ -25,6 +25,25 @@ Proof command:
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 
 Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
+Review result:
+
+- Finding 1: `bifrost/cockpit.py` renders every `SessionItem` passed to `UserSessionModeView.sessions` into the Sessions dropdown, including statuses outside the open/live set. `_render_user_session_mode()` lines 1094-1135 groups and renders all sessions and only changes the label when `status != "live"`; the focused tests cover live, hidden, and waiting, but do not prove closed/done/blocked sessions are excluded. Why it matters: the active task and `docs/bifrost-right-panel-mode-contract.md` require the dropdown to show open live sessions only while still labeling hidden and test-waiting live sessions; a closed or blocked sample session could remain routable in the dropdown. Recommended owning lane: Build 5.
+- Finding 2: `bifrost/cockpit.py` reflects the selected session in the title and selected `<option>`, but the rendered User Session surface does not expose a separate immediate routing target state for the next prompt. The only selected-session surface is the title at lines 1139-1145 and the selected option at lines 1118-1129; tests verify those, but no test asserts an explicit prompt target label or metadata such as a target session id on the prompt area/form. Why it matters: the contract and active review task require session selection to update the immediate routing target state, not only the visual dropdown selection. Recommended owning lane: Build 5.
+- Scope check: no runtime code, model calls, live process inspection, process control, `index.html`, Polaris dependency, branch movement, or Build 4 Relay routing repair changes were made by this review.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 166 tests.
+- Inspected `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, and `docs/live-build-5.md`.
+
+Repair routing:
+
+- Routed focused repair to Build 5 in `docs/live-build-5.md`.
+
+Next Candidate:
+
+- Re-review Build 5 Sessions dropdown sample data rendering after Build 5 marks the focused repair Ready for Codex Review.
 
 ## Coordinator Override - Completed / Finding Routed
 
@@ -2695,6 +2714,33 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 18:03 -06:00 - files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff. Push status: pending at write time; see final handoff. Obsidian update status: not updated; queue provenance only.
+
+## Read Checks
+
+- 2026-06-01 18:06 -06:00 - attempted `git pull --ff-only origin main`; fetch completed but the working-tree fast-forward was blocked by unrelated local lane state during the pull. Read `docs/live-codex-reviews-2.md`. Active Reviews B task is promoted: review Build 5 Sessions dropdown sample data rendering. Executed the active review against the current checked-out files and recorded Build 5 queue state.
+
+## Completed / Finding Routed
+
+Goal: review Build 5 Sessions dropdown sample data rendering.
+
+Review result:
+
+- Finding 1: `bifrost/cockpit.py` renders every `SessionItem` passed to `UserSessionModeView.sessions` into the Sessions dropdown, including statuses outside the open/live set. Why it matters: the active task and right-panel contract require open live sessions only while still labeling hidden and test-waiting live sessions; closed/non-open sample sessions could remain selectable routing targets. Recommended owning lane: Build 5.
+- Finding 2: `bifrost/cockpit.py` reflects the selected session in the title and selected `<option>`, but does not expose a separate immediate User prompt routing target state. Why it matters: the active task requires selection to update the immediate routing target state, not only the visual dropdown selection. Recommended owning lane: Build 5.
+- Scope check: no runtime code, model calls, live process inspection, process control, `index.html`, Polaris dependency, branch movement, or Build 4 Relay routing repair changes were made by this review.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 166 tests.
+- Inspected allowed Build 5 review files and routed focused repair to `docs/live-build-5.md`.
+
+Next Candidate:
+
+- Re-review Build 5 Sessions dropdown sample data rendering after Build 5 marks the focused repair Ready for Codex Review.
+
+## Write / Completion Log
+
+- 2026-06-01 18:06 -06:00 - files changed: `docs/live-codex-reviews-2.md` provenance/disposition and `docs/live-build-5.md` repair routing only. Tests run: `python -m pytest tests/test_bifrost_cockpit.py -q` (166 passed). Commit hash: pending at write time; see final handoff. Push status: pending at write time; see final handoff. Obsidian update status: not updated; queue provenance/routing only.
 
 ## Write / Completion Log
 
