@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add a pure Aegis-side helper/test surface for live-control command-staging UI-review advisory input.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: based on landed Session Lifecycle non-executable command-plan staging and Prime/Beacon advisory surfaces, accept already-summarized staged command kind/recommended action/required operation, target session id, ready flag, human-gate rationale, UI-review-required flag, permission state, blockers, evidence refs, Prime advisory action, and Beacon evidence refs; return deterministic fail-closed advisory metadata for Relay/Bifrost/UI consumers. Exclude Relay imports/types, Bifrost/FileMap edits, restart/resteer/archive execution, process/session/model/provider calls, credentials/account probing, raw prompts/provider responses, main, and Polaris.
+
+Tests: `python -m pytest tests/test_aegis.py -q`.
+
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `pending local commit hash`
+- Files changed: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`
+- Tests run: `python -m pytest tests/test_aegis.py -q` (282 passed)
+- Verification performed: added provider-neutral `CommandStagingUiReviewInput`, deterministic `evaluate_command_staging_ui_review_advisory()`, and display-safe advisory serialization with `execution_authorized=False`; tests cover review-ready allow, not-ready/UI-review/permission/human-gate fail-closed blockers, Prime advisory warning, evidence and Beacon evidence refs, blocker tags, stable advisory keys, redaction, no execution authority, and repeat determinism; `git diff --check` passed.
+- Next Candidate: implement reviewed Relay/Bifrost/UI command-staging review surface without execution authority.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement a pure Aegis-side helper/test surface for visible prompt payload meter advisory input.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.

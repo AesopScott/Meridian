@@ -1113,6 +1113,13 @@ class PromptPayloadMeterDecision(Enum):
     BLOCK = "block"
 
 
+class CommandStagingUiReviewDecision(Enum):
+    """Aegis advisory outcome for command-staging UI-review metadata."""
+    ALLOW = "allow"
+    WARN = "warn"
+    BLOCK = "block"
+
+
 @dataclass(frozen=True)
 class PromptPacketProofMetadata:
     """Display-safe PromptPacket proof metadata evaluated by Aegis."""
@@ -1216,6 +1223,48 @@ class PromptPayloadMeterPolicyResult:
     def to_advisory_dict(self) -> dict[str, object]:
         """Return display-safe advisory metadata for future Relay/Bifrost use."""
         return serialize_prompt_payload_meter_policy_result(self)
+
+
+@dataclass(frozen=True)
+class CommandStagingUiReviewInput:
+    """Display-safe live-control command-staging summary evaluated by Aegis."""
+    staged_command_kind: str
+    recommended_action: str
+    required_operation: str
+    target_session_id: str
+    ready_for_review: bool
+    human_gate_rationale: str | None
+    ui_review_required: bool
+    permission_state: str
+    blockers: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    prime_advisory_action: str
+    beacon_evidence_refs: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class CommandStagingUiReviewPolicyResult:
+    """Deterministic Aegis advisory for command-staging UI-review metadata."""
+    decision: CommandStagingUiReviewDecision
+    severity: str
+    reason: str
+    staged_command_kind: str
+    recommended_action: str
+    required_operation: str
+    target_session_id: str
+    ready_for_review: bool
+    human_gate_rationale: str | None
+    ui_review_required: bool
+    permission_state: str
+    prime_advisory_action: str
+    evidence_refs: tuple[str, ...]
+    beacon_evidence_refs: tuple[str, ...]
+    blockers: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+
+    def to_advisory_dict(self) -> dict[str, object]:
+        """Return display-safe advisory metadata for Relay/Bifrost/UI consumers."""
+        return serialize_command_staging_ui_review_policy_result(self)
 
 
 _PROMPT_PACKET_HASH_STATUSES = {
@@ -1339,6 +1388,69 @@ _PROMPT_PAYLOAD_Q_MODE_BLOCKING_STATES = {
     "blocked",
     "unknown",
 }
+_COMMAND_STAGING_COMMAND_KINDS = {
+    "restart",
+    "resteer",
+    "archive",
+    "stop",
+    "transfer",
+    "recover",
+    "watch",
+    "unknown",
+}
+_COMMAND_STAGING_RECOMMENDED_ACTIONS = {
+    "restart",
+    "resteer",
+    "archive",
+    "stop",
+    "transfer",
+    "recover",
+    "watch",
+    "inspect",
+    "no_action",
+    "block",
+    "unknown",
+}
+_COMMAND_STAGING_REQUIRED_OPERATIONS = {
+    "restart",
+    "resteer",
+    "archive",
+    "stop",
+    "transfer",
+    "recover",
+    "watch",
+    "none",
+    "unknown",
+}
+_COMMAND_STAGING_PERMISSION_STATES = {
+    "locked_by_default",
+    "unlocked_temporary",
+    "unlocked_permanent",
+    "requires_prime",
+    "requires_scott",
+    "expired",
+    "denied",
+    "unknown",
+}
+_COMMAND_STAGING_BLOCKING_PERMISSION_STATES = {
+    "locked_by_default",
+    "requires_prime",
+    "requires_scott",
+    "expired",
+    "denied",
+    "unknown",
+}
+_COMMAND_STAGING_PRIME_ADVISORY_ACTIONS = {
+    "allow",
+    "review_required",
+    "block",
+    "restart",
+    "resteer",
+    "archive",
+    "inspect",
+    "no_action",
+    "unknown",
+}
 
 
 def _prompt_packet_severity(decision: PromptPacketProofDecision) -> str:
@@ -1365,6 +1477,16 @@ def _prompt_payload_meter_severity(decision: PromptPayloadMeterDecision) -> str:
     if decision is PromptPayloadMeterDecision.BLOCK:
         return "error"
     if decision is PromptPayloadMeterDecision.WARN:
+        return "warning"
+    return "info"
+
+
+def _command_staging_ui_review_severity(
+    decision: CommandStagingUiReviewDecision,
+) -> str:
+    if decision is CommandStagingUiReviewDecision.BLOCK:
+        return "error"
+    if decision is CommandStagingUiReviewDecision.WARN:
         return "warning"
     return "info"
 
@@ -1429,6 +1551,14 @@ def _display_safe_prompt_payload_meter_value(value: object) -> str:
 
 def _display_safe_prompt_payload_meter_tuple(values: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(_display_safe_prompt_payload_meter_value(value) for value in values)
+
+
+def _display_safe_command_staging_value(value: object) -> str:
+    return _display_safe_provider_result_value(value)
+
+
+def _display_safe_command_staging_tuple(values: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(_display_safe_command_staging_value(value) for value in values)
 
 
 def _prompt_packet_missing_field_from_tag(tag: str) -> str | None:
@@ -1501,6 +1631,23 @@ def _prompt_payload_meter_reason_tags(
     if result.decision is PromptPayloadMeterDecision.WARN:
         return ("prompt_payload_meter_warn",)
     return ("prompt_payload_meter_block",)
+
+
+def _command_staging_ui_review_reason_tags(
+    result: CommandStagingUiReviewPolicyResult,
+) -> tuple[str, ...]:
+    tags: list[str] = []
+    for tag in result.blockers:
+        _append_unique(tags, _display_safe_command_staging_value(tag))
+    for tag in result.warnings:
+        _append_unique(tags, _display_safe_command_staging_value(tag))
+    if tags:
+        return tuple(tags)
+    if result.decision is CommandStagingUiReviewDecision.ALLOW:
+        return ("command_staging_ui_review_allowed",)
+    if result.decision is CommandStagingUiReviewDecision.WARN:
+        return ("command_staging_ui_review_warn",)
+    return ("command_staging_ui_review_block",)
 
 
 def serialize_prompt_packet_policy_result(
@@ -1590,6 +1737,67 @@ def serialize_prompt_payload_meter_policy_result(
     }
 
 
+def serialize_command_staging_ui_review_policy_result(
+    result: CommandStagingUiReviewPolicyResult,
+) -> dict[str, object]:
+    """
+    Serialize command-staging UI-review advisory metadata.
+
+    The result is primitive, deterministic, and display-safe. It conveys review
+    readiness and blockers only; it never executes restart, resteer, archive,
+    process/session control, model/provider calls, credential/account probing,
+    or Relay/Bifrost/FileMap behavior.
+    """
+    return {
+        "decision": result.decision.value,
+        "severity": _display_safe_command_staging_value(result.severity),
+        "reason": _display_safe_command_staging_value(result.reason),
+        "staged_command_kind": _display_safe_command_staging_value(
+            result.staged_command_kind
+        ),
+        "recommended_action": _display_safe_command_staging_value(
+            result.recommended_action
+        ),
+        "required_operation": _display_safe_command_staging_value(
+            result.required_operation
+        ),
+        "target_session_id": _display_safe_command_staging_value(
+            result.target_session_id
+        ),
+        "ready_for_review": result.ready_for_review,
+        "human_gate_rationale": (
+            None
+            if result.human_gate_rationale is None
+            else _display_safe_command_staging_value(result.human_gate_rationale)
+        ),
+        "ui_review_required": result.ui_review_required,
+        "permission_state": _display_safe_command_staging_value(result.permission_state),
+        "prime_advisory_action": _display_safe_command_staging_value(
+            result.prime_advisory_action
+        ),
+        "evidence_refs": _display_safe_command_staging_tuple(result.evidence_refs),
+        "beacon_evidence_refs": _display_safe_command_staging_tuple(
+            result.beacon_evidence_refs
+        ),
+        "blockers": _display_safe_command_staging_tuple(result.blockers),
+        "warnings": _display_safe_command_staging_tuple(result.warnings),
+        "reason_tags": _command_staging_ui_review_reason_tags(result),
+        "relay_advisory": result.decision.value,
+        "bifrost_advisory": _command_staging_ui_review_bifrost_advisory(result),
+        "execution_authorized": False,
+    }
+
+
+def _command_staging_ui_review_bifrost_advisory(
+    result: CommandStagingUiReviewPolicyResult,
+) -> str:
+    if result.decision is CommandStagingUiReviewDecision.BLOCK:
+        return "display_blocked"
+    if result.decision is CommandStagingUiReviewDecision.WARN:
+        return "display_warning"
+    return "display_review_ready"
+
+
 def _prompt_payload_meter_bifrost_advisory(
     result: PromptPayloadMeterPolicyResult,
 ) -> str:
@@ -1672,6 +1880,33 @@ def _prompt_payload_meter_policy_result(
     )
 
 
+def _command_staging_ui_review_policy_result(
+    decision: CommandStagingUiReviewDecision,
+    reason: str,
+    metadata: CommandStagingUiReviewInput,
+    blockers: list[str],
+    warnings: list[str],
+) -> CommandStagingUiReviewPolicyResult:
+    return CommandStagingUiReviewPolicyResult(
+        decision=decision,
+        severity=_command_staging_ui_review_severity(decision),
+        reason=reason,
+        staged_command_kind=metadata.staged_command_kind,
+        recommended_action=metadata.recommended_action,
+        required_operation=metadata.required_operation,
+        target_session_id=metadata.target_session_id,
+        ready_for_review=metadata.ready_for_review,
+        human_gate_rationale=metadata.human_gate_rationale,
+        ui_review_required=metadata.ui_review_required,
+        permission_state=metadata.permission_state,
+        prime_advisory_action=metadata.prime_advisory_action,
+        evidence_refs=metadata.evidence_refs,
+        beacon_evidence_refs=metadata.beacon_evidence_refs,
+        blockers=tuple(blockers),
+        warnings=tuple(warnings),
+    )
+
+
 def _append_safe_ref_blockers(
     values: tuple[str, ...],
     missing_tag: str,
@@ -1686,6 +1921,127 @@ def _append_safe_ref_blockers(
             _append_unique(blockers, invalid_tag)
         elif not _is_provider_result_display_safe(value):
             _append_unique(blockers, unsafe_tag)
+
+
+def evaluate_command_staging_ui_review_advisory(
+    metadata: CommandStagingUiReviewInput,
+) -> CommandStagingUiReviewPolicyResult:
+    """
+    Evaluate summarized live-control command-staging UI-review metadata.
+
+    Pure Aegis helper: accepts primitive, already-summarized inputs only. It
+    never imports Relay/Bifrost/FileMap types, executes live-control commands,
+    calls sessions/processes/models/providers, probes credentials/accounts, or
+    reads raw prompts/provider responses.
+    """
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if not isinstance(metadata.staged_command_kind, str) or not metadata.staged_command_kind.strip():
+        _append_unique(blockers, "missing_staged_command_kind")
+    elif metadata.staged_command_kind not in _COMMAND_STAGING_COMMAND_KINDS:
+        _append_unique(blockers, "unknown_staged_command_kind")
+    elif metadata.staged_command_kind == "unknown":
+        _append_unique(blockers, "staged_command_kind_unknown")
+
+    if not isinstance(metadata.recommended_action, str) or not metadata.recommended_action.strip():
+        _append_unique(blockers, "missing_recommended_action")
+    elif metadata.recommended_action not in _COMMAND_STAGING_RECOMMENDED_ACTIONS:
+        _append_unique(blockers, "unknown_recommended_action")
+    elif metadata.recommended_action in {"block", "unknown"}:
+        _append_unique(blockers, f"recommended_action_{metadata.recommended_action}")
+
+    if not isinstance(metadata.required_operation, str) or not metadata.required_operation.strip():
+        _append_unique(blockers, "missing_required_operation")
+    elif metadata.required_operation not in _COMMAND_STAGING_REQUIRED_OPERATIONS:
+        _append_unique(blockers, "unknown_required_operation")
+    elif metadata.required_operation == "unknown":
+        _append_unique(blockers, "required_operation_unknown")
+
+    if not isinstance(metadata.target_session_id, str) or not metadata.target_session_id.strip():
+        _append_unique(blockers, "missing_target_session_id")
+    elif not _is_provider_result_display_safe(metadata.target_session_id):
+        _append_unique(blockers, "unsafe_target_session_id")
+
+    if not metadata.ready_for_review:
+        _append_unique(blockers, "staged_command_not_ready_for_review")
+
+    if not metadata.ui_review_required:
+        _append_unique(blockers, "ui_review_required_missing")
+
+    if not isinstance(metadata.human_gate_rationale, str) or not metadata.human_gate_rationale.strip():
+        _append_unique(blockers, "missing_human_gate_rationale")
+    elif not _is_provider_result_display_safe(metadata.human_gate_rationale):
+        _append_unique(blockers, "unsafe_human_gate_rationale")
+
+    if not isinstance(metadata.permission_state, str) or not metadata.permission_state.strip():
+        _append_unique(blockers, "missing_permission_state")
+    elif metadata.permission_state not in _COMMAND_STAGING_PERMISSION_STATES:
+        _append_unique(blockers, "unknown_permission_state")
+    elif metadata.permission_state in _COMMAND_STAGING_BLOCKING_PERMISSION_STATES:
+        _append_unique(blockers, f"permission_{metadata.permission_state}")
+
+    if not isinstance(metadata.prime_advisory_action, str) or not metadata.prime_advisory_action.strip():
+        _append_unique(blockers, "missing_prime_advisory_action")
+    elif metadata.prime_advisory_action not in _COMMAND_STAGING_PRIME_ADVISORY_ACTIONS:
+        _append_unique(blockers, "unknown_prime_advisory_action")
+    elif metadata.prime_advisory_action in {"block", "unknown"}:
+        _append_unique(blockers, f"prime_advisory_{metadata.prime_advisory_action}")
+    elif metadata.prime_advisory_action != "review_required":
+        _append_unique(warnings, "prime_advisory_not_review_required")
+
+    if (
+        metadata.required_operation != "none"
+        and metadata.recommended_action != metadata.required_operation
+    ):
+        _append_unique(blockers, "recommended_action_required_operation_mismatch")
+
+    _append_safe_ref_blockers(
+        metadata.evidence_refs,
+        "missing_command_staging_evidence_refs",
+        "invalid_command_staging_evidence_ref",
+        "unsafe_command_staging_evidence_ref",
+        blockers,
+    )
+    _append_safe_ref_blockers(
+        metadata.beacon_evidence_refs,
+        "missing_beacon_evidence_refs",
+        "invalid_beacon_evidence_ref",
+        "unsafe_beacon_evidence_ref",
+        blockers,
+    )
+
+    for tag in metadata.blockers:
+        if not isinstance(tag, str) or not tag.strip():
+            _append_unique(blockers, "invalid_command_staging_blocker_tag")
+        elif not _is_provider_result_display_safe(tag):
+            _append_unique(blockers, "unsafe_command_staging_blocker_tag")
+        else:
+            _append_unique(blockers, tag)
+
+    if blockers:
+        return _command_staging_ui_review_policy_result(
+            CommandStagingUiReviewDecision.BLOCK,
+            "; ".join(blockers),
+            metadata,
+            blockers,
+            warnings,
+        )
+    if warnings:
+        return _command_staging_ui_review_policy_result(
+            CommandStagingUiReviewDecision.WARN,
+            "; ".join(warnings),
+            metadata,
+            blockers,
+            warnings,
+        )
+    return _command_staging_ui_review_policy_result(
+        CommandStagingUiReviewDecision.ALLOW,
+        "command-staging UI-review metadata satisfies Aegis advisory policy",
+        metadata,
+        blockers,
+        warnings,
+    )
 
 
 def evaluate_prompt_payload_meter_advisory(
