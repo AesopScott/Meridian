@@ -3665,6 +3665,14 @@ body {
   updateModelReadiness();
   loadUserSessions();
   window.meridianRefreshUserSessionTarget = updateUserSessionTitle;
+  const refreshSessionBridgeState = () => {
+    updateModelReadiness();
+    loadUserSessions();
+  };
+  window.addEventListener('focus', refreshSessionBridgeState);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshSessionBridgeState();
+  });
   sessionWindows.forEach((windowEl) => {
     const input = windowEl.querySelector('.session-prompt-input');
     windowEl.querySelectorAll('.session-outside-icon').forEach((button) => {
