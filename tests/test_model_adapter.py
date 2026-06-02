@@ -363,6 +363,10 @@ class TestModelRouteMetadataBinding:
             "prompt_payload_budget",
             "trust_state",
             "requires_external_review",
+            "provider_route_kind",
+            "external_review_status",
+            "model_metadata_ref",
+            "external_review_evidence_ref",
             "prompt_payload_status",
             "prompt_payload_estimated_tokens",
             "prompt_payload_budget_percent",
@@ -397,6 +401,12 @@ class TestModelRouteMetadataBinding:
         assert binding.capability_tier == "candidate-fast"
         assert binding.trust_state == "candidate"
         assert binding.requires_external_review is True
+        assert binding.provider_route_kind == "direct"
+        assert binding.external_review_status == "pending"
+        assert binding.model_metadata_ref == "model-harness-metadata:deepseek:deepseek-chat"
+        assert binding.external_review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
 
     def test_deepseek_candidate_metadata_declares_direct_telemetry_support(self) -> None:
         metadata = deepseek_candidate_metadata_preset()

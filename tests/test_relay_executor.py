@@ -17,6 +17,7 @@ from meridian_core.model_adapter import (
     FakeModelAdapter,
     MissingAdapterError,
     ModelHarnessMetadata,
+    deepseek_candidate_metadata_preset,
 )
 from meridian_core.prompt_payload_meter import PayloadStatus, PromptPayloadSnapshot
 from meridian_core.relay import ModelRole, route_from_tier
@@ -30,6 +31,7 @@ from meridian_core.relay_executor import (
     RelayExecutionError,
     RelayExecutionResult,
     RelayExecutionSummary,
+    RelayModelCapabilityMetadataSummary,
     RelayPromptPacketPolicyDisposition,
     RelayPromptPacketPolicyEvidence,
     RelayPromptPayloadEvidence,
@@ -2280,6 +2282,110 @@ class TestRelayDecisionRecord:
         assert evidence.budget_status == "watch"
         assert evidence.telemetry_error_tags == ()
         assert _PROMPT not in " ".join(str(value) for value in evidence.to_dict().values())
+
+    def test_payload_evidence_carries_model_capability_metadata(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=7200,
+            estimated_tokens=2100,
+            budget_tokens=2000,
+            prior_estimated_tokens=1200,
+            queue_mode=True,
+        )
+        metadata = deepseek_candidate_metadata_preset("fast")
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=metadata),
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            payload_snapshots=(snapshot,),
+            include_decision_record=True,
+        )
+
+        evidence = summary.decision_record.payload_evidence
+        assert evidence.capability_tier == "candidate-fast"
+        assert evidence.provider_route_kind == "direct"
+        assert evidence.trust_state == "candidate"
+        assert evidence.requires_external_review is True
+        assert evidence.external_review_status == "pending"
+        assert evidence.model_metadata_ref == "model-harness-metadata:deepseek:deepseek-chat"
+        assert evidence.external_review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
+        assert evidence.prompt_drag_tags == (
+            "prompt_drag_over_budget",
+            "prompt_drag_degraded",
+            "prompt_drag_growth",
+        )
+        assert "budget_exceeded" in evidence.telemetry_error_tags
+        rendered = " ".join(str(value) for value in evidence.to_dict().values())
+        assert _PROMPT not in rendered
+        assert "credential" not in rendered
+
+    def test_execution_summary_model_capability_metadata_summary(self) -> None:
+        plan = _make_plan(1)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=5000,
+            estimated_tokens=1600,
+            budget_tokens=2000,
+            prior_estimated_tokens=1600,
+            queue_mode=True,
+        )
+        metadata = ModelHarnessMetadata(
+            provider_name="provider",
+            model_name=plan.lanes[0].preferred_model,
+            capability_tier="standard",
+            context_budget=8192,
+            prompt_payload_budget=4096,
+            trust_state="trusted",
+            requires_external_review=False,
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            FakeModelAdapter("response", metadata=metadata),
+        )
+
+        summary = execute_relay_plan_with_registry(
+            plan,
+            registry,
+            payload_snapshots=(snapshot,),
+            include_decision_record=True,
+        )
+        capability_summary = summary.model_capability_metadata_summary()
+        first = capability_summary.to_dict()
+        second = summary.model_capability_metadata_summary().to_dict()
+
+        assert isinstance(capability_summary, RelayModelCapabilityMetadataSummary)
+        assert first == second
+        assert first["missing_metadata_tags"] == ()
+        assert len(first["lanes"]) == 1
+        lane = first["lanes"][0]
+        assert lane["selected_provider"] == "provider"
+        assert lane["exact_model_id"] == plan.lanes[0].preferred_model
+        assert lane["capability_tier"] == "standard"
+        assert lane["trust_state"] == "trusted"
+        assert lane["context_window_tokens"] == 8192
+        assert lane["prompt_payload_budget_tokens"] == 4096
+        assert lane["prompt_payload_status"] == "watch"
+        assert lane["prompt_drag_tags"] == ("prompt_drag_flat",)
+        assert lane["requires_external_review"] is False
+        assert lane["external_review_status"] == "not_required"
+        assert lane["model_metadata_ref"] == (
+            f"model-harness-metadata:provider:{plan.lanes[0].preferred_model}"
+        )
+        assert lane["payload_evidence_ref"] == (
+            f"relay-payload-evidence:{plan.packet.packet_id}:"
+            f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}"
+        )
+        rendered = " ".join(str(value) for value in first.values())
+        assert _PROMPT not in rendered
 
     def test_decision_record_route_metadata_uses_first_lane_even_if_first_lane_errors(self) -> None:
         plan = _make_plan(2)

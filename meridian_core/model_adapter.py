@@ -192,6 +192,10 @@ class ModelRouteMetadataBinding:
     prompt_payload_budget: int
     trust_state: str
     requires_external_review: bool
+    provider_route_kind: str = "unknown"
+    external_review_status: str = "not_required"
+    model_metadata_ref: str | None = None
+    external_review_evidence_ref: str | None = None
     prompt_payload_status: str | None = None
     prompt_payload_estimated_tokens: int | None = None
     prompt_payload_budget_percent: float | None = None
@@ -219,6 +223,10 @@ class ModelRouteMetadataBinding:
             "prompt_payload_budget": self.prompt_payload_budget,
             "trust_state": self.trust_state,
             "requires_external_review": self.requires_external_review,
+            "provider_route_kind": self.provider_route_kind,
+            "external_review_status": self.external_review_status,
+            "model_metadata_ref": self.model_metadata_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
             "prompt_payload_status": self.prompt_payload_status,
             "prompt_payload_estimated_tokens": self.prompt_payload_estimated_tokens,
             "prompt_payload_budget_percent": self.prompt_payload_budget_percent,
@@ -229,6 +237,36 @@ class ModelRouteMetadataBinding:
 
 def _metadata_value(value: Any) -> str:
     return value.value if hasattr(value, "value") else str(value)
+
+
+def _metadata_candidate_value(
+    adapter_metadata: ModelHarnessMetadata,
+    key: str,
+) -> str | None:
+    if adapter_metadata.deepseek_candidate_state is None:
+        return None
+    value = adapter_metadata.deepseek_candidate_state.get(key)
+    return str(value) if value is not None else None
+
+
+def _external_review_status(adapter_metadata: ModelHarnessMetadata) -> str:
+    status = _metadata_candidate_value(adapter_metadata, "external_review_status")
+    if status:
+        return status
+    return "required_unknown" if adapter_metadata.requires_external_review else "not_required"
+
+
+def _model_metadata_ref(adapter_metadata: ModelHarnessMetadata) -> str:
+    return f"model-harness-metadata:{adapter_metadata.provider_name}:{adapter_metadata.model_name}"
+
+
+def _external_review_evidence_ref(adapter_metadata: ModelHarnessMetadata) -> str | None:
+    if not adapter_metadata.requires_external_review:
+        return None
+    return (
+        f"external-review:{adapter_metadata.provider_name}:"
+        f"{adapter_metadata.model_name}:{_external_review_status(adapter_metadata)}"
+    )
 
 
 def bind_model_route_metadata(
@@ -251,6 +289,10 @@ def bind_model_route_metadata(
         prompt_payload_budget=adapter_metadata.prompt_payload_budget,
         trust_state=adapter_metadata.trust_state,
         requires_external_review=adapter_metadata.requires_external_review,
+        provider_route_kind=_metadata_candidate_value(adapter_metadata, "api_mode") or "unknown",
+        external_review_status=_external_review_status(adapter_metadata),
+        model_metadata_ref=_model_metadata_ref(adapter_metadata),
+        external_review_evidence_ref=_external_review_evidence_ref(adapter_metadata),
         prompt_payload_status=(
             _metadata_value(payload_snapshot.status)
             if payload_snapshot is not None and hasattr(payload_snapshot, "status")

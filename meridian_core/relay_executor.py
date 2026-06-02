@@ -54,8 +54,15 @@ class RelayPromptPayloadEvidence:
     lane_id: str | None = None
     selected_provider: str | None = None
     selected_model: str | None = None
+    capability_tier: str | None = None
     route_class: str | None = None
     route_kind: str | None = None
+    provider_route_kind: str = "unknown"
+    trust_state: str = "unknown"
+    requires_external_review: bool = False
+    external_review_status: str = "not_required"
+    model_metadata_ref: str | None = None
+    external_review_evidence_ref: str | None = None
     estimated_prompt_tokens: int | None = None
     prompt_budget_tokens: int | None = None
     model_context_window_tokens: int | None = None
@@ -70,6 +77,7 @@ class RelayPromptPayloadEvidence:
     delta_percent: float | None = None
     comparison_scope: str = "dispatch"
     growth_state: str = "unknown"
+    prompt_drag_tags: tuple[str, ...] = ()
     expected_growth_reason: str | None = None
     prompt_payload_snapshot_hash: str | None = None
     response_payload_snapshot_hash: str | None = None
@@ -91,8 +99,15 @@ class RelayPromptPayloadEvidence:
             "lane_id": self.lane_id,
             "selected_provider": self.selected_provider,
             "selected_model": self.selected_model,
+            "capability_tier": self.capability_tier,
             "route_class": self.route_class,
             "route_kind": self.route_kind,
+            "provider_route_kind": self.provider_route_kind,
+            "trust_state": self.trust_state,
+            "requires_external_review": self.requires_external_review,
+            "external_review_status": self.external_review_status,
+            "model_metadata_ref": self.model_metadata_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
             "estimated_prompt_tokens": self.estimated_prompt_tokens,
             "prompt_budget_tokens": self.prompt_budget_tokens,
             "model_context_window_tokens": self.model_context_window_tokens,
@@ -107,6 +122,7 @@ class RelayPromptPayloadEvidence:
             "delta_percent": self.delta_percent,
             "comparison_scope": self.comparison_scope,
             "growth_state": self.growth_state,
+            "prompt_drag_tags": self.prompt_drag_tags,
             "expected_growth_reason": self.expected_growth_reason,
             "prompt_payload_snapshot_hash": self.prompt_payload_snapshot_hash,
             "response_payload_snapshot_hash": self.response_payload_snapshot_hash,
@@ -407,6 +423,68 @@ class RelayAegisPromptPacketHandoffSummary:
 
 
 @dataclass(frozen=True)
+class RelayModelCapabilityLaneSummary:
+    """Display-safe model capability metadata for one Relay lane."""
+
+    lane_id: str | None = None
+    selected_provider: str | None = None
+    exact_model_id: str | None = None
+    capability_tier: str | None = None
+    provider_route_kind: str = "unknown"
+    trust_state: str = "unknown"
+    context_window_tokens: int | None = None
+    prompt_payload_budget_tokens: int | None = None
+    prompt_payload_status: str = "unknown"
+    estimated_prompt_tokens: int | None = None
+    prompt_budget_percent: float | None = None
+    growth_state: str = "unknown"
+    prompt_drag_tags: tuple[str, ...] = ()
+    requires_external_review: bool = False
+    external_review_status: str = "not_required"
+    model_metadata_ref: str | None = None
+    external_review_evidence_ref: str | None = None
+    payload_evidence_ref: str | None = None
+    telemetry_error_tags: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "lane_id": self.lane_id,
+            "selected_provider": self.selected_provider,
+            "exact_model_id": self.exact_model_id,
+            "capability_tier": self.capability_tier,
+            "provider_route_kind": self.provider_route_kind,
+            "trust_state": self.trust_state,
+            "context_window_tokens": self.context_window_tokens,
+            "prompt_payload_budget_tokens": self.prompt_payload_budget_tokens,
+            "prompt_payload_status": self.prompt_payload_status,
+            "estimated_prompt_tokens": self.estimated_prompt_tokens,
+            "prompt_budget_percent": self.prompt_budget_percent,
+            "growth_state": self.growth_state,
+            "prompt_drag_tags": self.prompt_drag_tags,
+            "requires_external_review": self.requires_external_review,
+            "external_review_status": self.external_review_status,
+            "model_metadata_ref": self.model_metadata_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
+            "payload_evidence_ref": self.payload_evidence_ref,
+            "telemetry_error_tags": self.telemetry_error_tags,
+        }
+
+
+@dataclass(frozen=True)
+class RelayModelCapabilityMetadataSummary:
+    """Deterministic collection of display-safe Model Harness lane metadata."""
+
+    lanes: tuple[RelayModelCapabilityLaneSummary, ...] = ()
+    missing_metadata_tags: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "lanes": tuple(lane.to_dict() for lane in self.lanes),
+            "missing_metadata_tags": self.missing_metadata_tags,
+        }
+
+
+@dataclass(frozen=True)
 class RelayExecutionSummary:
     """Immutable collection of per-lane results and errors from one plan execution."""
 
@@ -536,6 +614,163 @@ class RelayExecutionSummary:
             packet_proof_metadata_ref=packet_proof_metadata_ref,
         )
 
+    def model_capability_metadata_summary(self) -> RelayModelCapabilityMetadataSummary:
+        """Return display-safe provider-neutral Model Harness metadata by lane."""
+        lane_summaries: list[RelayModelCapabilityLaneSummary] = []
+        missing_tags: list[str] = []
+
+        for result in self.results:
+            evidence = result.payload_evidence
+            route_metadata = result.route_metadata
+            lane_id = (
+                evidence.lane_id
+                if evidence is not None
+                else f"{result.role.value}:{result.preferred_model}"
+            )
+            payload_ref = _payload_evidence_ref(evidence)
+            if route_metadata is None and evidence is None:
+                missing_tags.append(f"model_metadata_missing:{lane_id}")
+            lane_summaries.append(
+                RelayModelCapabilityLaneSummary(
+                    lane_id=lane_id,
+                    selected_provider=(
+                        route_metadata.provider_name
+                        if route_metadata is not None
+                        else (evidence.selected_provider if evidence is not None else None)
+                    ),
+                    exact_model_id=(
+                        route_metadata.model_name
+                        if route_metadata is not None
+                        else (evidence.selected_model if evidence is not None else None)
+                    ),
+                    capability_tier=(
+                        route_metadata.capability_tier
+                        if route_metadata is not None
+                        else (evidence.capability_tier if evidence is not None else None)
+                    ),
+                    provider_route_kind=(
+                        route_metadata.provider_route_kind
+                        if route_metadata is not None
+                        else (evidence.provider_route_kind if evidence is not None else "unknown")
+                    ),
+                    trust_state=(
+                        route_metadata.trust_state
+                        if route_metadata is not None
+                        else (evidence.trust_state if evidence is not None else "unknown")
+                    ),
+                    context_window_tokens=(
+                        route_metadata.context_budget
+                        if route_metadata is not None
+                        else (
+                            evidence.model_context_window_tokens
+                            if evidence is not None
+                            else None
+                        )
+                    ),
+                    prompt_payload_budget_tokens=(
+                        route_metadata.prompt_payload_budget
+                        if route_metadata is not None
+                        else (evidence.prompt_budget_tokens if evidence is not None else None)
+                    ),
+                    prompt_payload_status=(
+                        route_metadata.prompt_payload_status
+                        if route_metadata is not None
+                        and route_metadata.prompt_payload_status is not None
+                        else (evidence.budget_status if evidence is not None else "unknown")
+                    ),
+                    estimated_prompt_tokens=(
+                        route_metadata.prompt_payload_estimated_tokens
+                        if route_metadata is not None
+                        and route_metadata.prompt_payload_estimated_tokens is not None
+                        else (
+                            evidence.estimated_prompt_tokens
+                            if evidence is not None
+                            else None
+                        )
+                    ),
+                    prompt_budget_percent=(
+                        route_metadata.prompt_payload_budget_percent
+                        if route_metadata is not None
+                        and route_metadata.prompt_payload_budget_percent is not None
+                        else (evidence.budget_percent if evidence is not None else None)
+                    ),
+                    growth_state=evidence.growth_state if evidence is not None else "unknown",
+                    prompt_drag_tags=(
+                        evidence.prompt_drag_tags if evidence is not None else ()
+                    ),
+                    requires_external_review=(
+                        route_metadata.requires_external_review
+                        if route_metadata is not None
+                        else (
+                            evidence.requires_external_review
+                            if evidence is not None
+                            else False
+                        )
+                    ),
+                    external_review_status=(
+                        route_metadata.external_review_status
+                        if route_metadata is not None
+                        else (
+                            evidence.external_review_status
+                            if evidence is not None
+                            else "not_required"
+                        )
+                    ),
+                    model_metadata_ref=(
+                        route_metadata.model_metadata_ref
+                        if route_metadata is not None
+                        else (evidence.model_metadata_ref if evidence is not None else None)
+                    ),
+                    external_review_evidence_ref=(
+                        route_metadata.external_review_evidence_ref
+                        if route_metadata is not None
+                        else (
+                            evidence.external_review_evidence_ref
+                            if evidence is not None
+                            else None
+                        )
+                    ),
+                    payload_evidence_ref=payload_ref,
+                    telemetry_error_tags=(
+                        evidence.telemetry_error_tags if evidence is not None else ()
+                    ),
+                )
+            )
+
+        if not lane_summaries and self.decision_record is not None:
+            evidence = self.decision_record.payload_evidence
+            if evidence is None:
+                missing_tags.append("model_metadata_missing:decision_record")
+            else:
+                lane_summaries.append(
+                    RelayModelCapabilityLaneSummary(
+                        lane_id=evidence.lane_id,
+                        selected_provider=evidence.selected_provider,
+                        exact_model_id=evidence.selected_model,
+                        capability_tier=evidence.capability_tier,
+                        provider_route_kind=evidence.provider_route_kind,
+                        trust_state=evidence.trust_state,
+                        context_window_tokens=evidence.model_context_window_tokens,
+                        prompt_payload_budget_tokens=evidence.prompt_budget_tokens,
+                        prompt_payload_status=evidence.budget_status,
+                        estimated_prompt_tokens=evidence.estimated_prompt_tokens,
+                        prompt_budget_percent=evidence.budget_percent,
+                        growth_state=evidence.growth_state,
+                        prompt_drag_tags=evidence.prompt_drag_tags,
+                        requires_external_review=evidence.requires_external_review,
+                        external_review_status=evidence.external_review_status,
+                        model_metadata_ref=evidence.model_metadata_ref,
+                        external_review_evidence_ref=evidence.external_review_evidence_ref,
+                        payload_evidence_ref=_payload_evidence_ref(evidence),
+                        telemetry_error_tags=evidence.telemetry_error_tags,
+                    )
+                )
+
+        return RelayModelCapabilityMetadataSummary(
+            lanes=tuple(lane_summaries),
+            missing_metadata_tags=tuple(dict.fromkeys(missing_tags)),
+        )
+
 
 class RelayProofGateError(RuntimeError):
     """Raised when Aegis proof blocks a high-risk Relay dispatch."""
@@ -620,10 +855,59 @@ def _payload_evidence_growth_state(snapshot: PromptPayloadSnapshot | None) -> st
     return "growing_expected"
 
 
+def _payload_evidence_prompt_drag_tags(
+    snapshot: PromptPayloadSnapshot | None,
+    *,
+    over_budget: bool,
+) -> tuple[str, ...]:
+    tags: list[str] = []
+    if snapshot is None:
+        return ()
+    if over_budget:
+        tags.append("prompt_drag_over_budget")
+    if snapshot.queue_mode and snapshot.status.value == "degraded":
+        tags.append("prompt_drag_degraded")
+    if snapshot.growth_tokens > 0:
+        tags.append("prompt_drag_growth")
+    elif snapshot.growth_tokens == 0:
+        tags.append("prompt_drag_flat")
+    return tuple(tags)
+
+
+def _adapter_metadata_candidate_value(
+    adapter_metadata: ModelHarnessMetadata | None,
+    key: str,
+) -> str | None:
+    if adapter_metadata is None or adapter_metadata.deepseek_candidate_state is None:
+        return None
+    value = adapter_metadata.deepseek_candidate_state.get(key)
+    return str(value) if value is not None else None
+
+
+def _adapter_external_review_status(
+    adapter_metadata: ModelHarnessMetadata | None,
+) -> str:
+    if adapter_metadata is None:
+        return "unknown"
+    status = _adapter_metadata_candidate_value(adapter_metadata, "external_review_status")
+    if status:
+        return status
+    return "required_unknown" if adapter_metadata.requires_external_review else "not_required"
+
+
+def _adapter_model_metadata_ref(
+    adapter_metadata: ModelHarnessMetadata | None,
+) -> str | None:
+    if adapter_metadata is None:
+        return None
+    return f"model-harness-metadata:{adapter_metadata.provider_name}:{adapter_metadata.model_name}"
+
+
 def _build_payload_evidence(
     plan: RelayDispatchPlan,
     payload_snapshot: PromptPayloadSnapshot | None = None,
     adapter_metadata: ModelHarnessMetadata | None = None,
+    route_metadata: ModelRouteMetadataBinding | None = None,
     *,
     prompt_source: str = "relay",
     lane_id: str | None = None,
@@ -639,6 +923,30 @@ def _build_payload_evidence(
     provider = adapter_metadata.provider_name if adapter_metadata else None
     selected_model = adapter_metadata.model_name if adapter_metadata else None
     context_window = adapter_metadata.context_budget if adapter_metadata else None
+    capability_tier = adapter_metadata.capability_tier if adapter_metadata else None
+    trust_state = adapter_metadata.trust_state if adapter_metadata else audit.trust_state.value
+    requires_external_review = (
+        adapter_metadata.requires_external_review if adapter_metadata else False
+    )
+    provider_route_kind = _adapter_metadata_candidate_value(adapter_metadata, "api_mode") or "unknown"
+    external_review_status = _adapter_external_review_status(adapter_metadata)
+    model_metadata_ref = _adapter_model_metadata_ref(adapter_metadata)
+    external_review_evidence_ref = (
+        f"external-review:{provider}:{selected_model}:{external_review_status}"
+        if requires_external_review and provider is not None and selected_model is not None
+        else None
+    )
+    if route_metadata is not None:
+        provider = route_metadata.provider_name
+        selected_model = route_metadata.model_name
+        context_window = route_metadata.context_budget
+        capability_tier = route_metadata.capability_tier
+        trust_state = route_metadata.trust_state
+        requires_external_review = route_metadata.requires_external_review
+        provider_route_kind = route_metadata.provider_route_kind
+        external_review_status = route_metadata.external_review_status
+        model_metadata_ref = route_metadata.model_metadata_ref
+        external_review_evidence_ref = route_metadata.external_review_evidence_ref
     prompt_budget = (
         payload_snapshot.budget_tokens
         if payload_snapshot is not None and payload_snapshot.budget_tokens is not None
@@ -683,8 +991,15 @@ def _build_payload_evidence(
         lane_id=lane_id,
         selected_provider=provider,
         selected_model=selected_model,
+        capability_tier=capability_tier,
         route_class=audit.route_class.value if audit.route_class else None,
         route_kind=audit.route_kind.value,
+        provider_route_kind=provider_route_kind,
+        trust_state=trust_state,
+        requires_external_review=requires_external_review,
+        external_review_status=external_review_status,
+        model_metadata_ref=model_metadata_ref,
+        external_review_evidence_ref=external_review_evidence_ref,
         estimated_prompt_tokens=estimated_tokens,
         prompt_budget_tokens=prompt_budget,
         model_context_window_tokens=context_window,
@@ -703,6 +1018,10 @@ def _build_payload_evidence(
         delta_percent=payload_snapshot.growth_percent if payload_snapshot else None,
         comparison_scope=comparison_scope,
         growth_state=_payload_evidence_growth_state(payload_snapshot),
+        prompt_drag_tags=_payload_evidence_prompt_drag_tags(
+            payload_snapshot,
+            over_budget=over_budget,
+        ),
         expected_growth_reason=expected_growth_reason,
         prompt_payload_snapshot_hash=prompt_hash,
         response_payload_snapshot_hash=None,
@@ -1189,6 +1508,7 @@ def _build_decision_record(
             plan,
             payload_snapshot,
             adapter_metadata,
+            route_metadata,
         )
 
     # Populate vendor from adapter metadata or mark unknown for nontrivial tiers
@@ -1470,9 +1790,15 @@ def execute_relay_plan_with_registry(
             plan,
             snapshot,
             adapter.metadata,
+            route_metadata,
             lane_id=f"{lane.role.value}:{lane.preferred_model}",
         )
-        for lane, adapter, snapshot in zip(plan.lanes, resolved_adapters, snapshots)
+        for lane, adapter, route_metadata, snapshot in zip(
+            plan.lanes,
+            resolved_adapters,
+            resolved_route_metadata,
+            snapshots,
+        )
     )
     dispatch_envelopes = tuple(
         _build_dispatch_envelope(
