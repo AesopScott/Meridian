@@ -700,6 +700,120 @@ summary {
   text-transform: uppercase;
 }
 
+.recovery-readiness-advisory {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(65, 217, 255, 0.26);
+  border-left: 3px solid var(--cyan);
+  border-radius: 6px;
+  background: rgba(4, 12, 22, 0.74);
+}
+
+.recovery-readiness-header,
+.recovery-readiness-lists,
+.recovery-readiness-list,
+.recovery-readiness-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recovery-readiness-title,
+.recovery-readiness-recommended,
+.recovery-readiness-permission,
+.recovery-readiness-human-gate {
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 6px;
+  border: 1px solid rgba(93, 157, 255, 0.22);
+  border-radius: 4px;
+  background: rgba(93, 157, 255, 0.1);
+}
+
+.recovery-readiness-summary {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recovery-readiness-list {
+  flex: 1 1 180px;
+}
+
+.recovery-readiness-list-title {
+  width: 100%;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.recovery-readiness-chip {
+  font-size: 9px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.recovery-readiness-blocker {
+  color: var(--amber);
+  background: rgba(255, 198, 94, 0.12);
+  border: 1px solid rgba(255, 198, 94, 0.28);
+}
+
+.recovery-readiness-evidence {
+  color: var(--green);
+  background: rgba(101, 240, 170, 0.12);
+  border: 1px solid rgba(101, 240, 170, 0.28);
+}
+
+.recovery-readiness-empty {
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.recovery-readiness-action {
+  display: grid;
+  gap: 3px;
+  flex: 1 1 145px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid rgba(93, 157, 255, 0.24);
+  border-radius: 4px;
+  background: rgba(8, 22, 42, 0.72);
+}
+
+.recovery-readiness-action[data-readiness-state="recommended"] {
+  border-color: rgba(101, 240, 170, 0.35);
+}
+
+.recovery-readiness-action[data-readiness-state="blocked"] {
+  border-color: rgba(255, 111, 123, 0.38);
+  background: rgba(35, 12, 18, 0.5);
+}
+
+.recovery-readiness-action-label {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.recovery-readiness-action-status,
+.recovery-readiness-action-evidence {
+  color: var(--amber);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.recovery-readiness-action-advisory {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 .session-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

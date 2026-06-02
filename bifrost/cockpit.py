@@ -300,9 +300,34 @@ class SessionLifecycleItem:
 
 
 @dataclass
+class RecoveryReadinessAction:
+    action_id: str
+    action_label: str
+    readiness_state: str
+    permission_state: str
+    evidence_ref: str
+    advisory: str
+
+
+@dataclass
+class RecoveryReadinessAdvisory:
+    advisory_id: str = ""
+    target_session_id: str = ""
+    readiness_state: str = "unknown"
+    recommended_action: str = "watch"
+    permission_state: str = "display_only"
+    human_gate_state: str = "not_required"
+    summary: str = ""
+    blockers: list[str] = field(default_factory=list)
+    evidence_refs: list[str] = field(default_factory=list)
+    actions: list[RecoveryReadinessAction] = field(default_factory=list)
+
+
+@dataclass
 class SessionLifecycleView:
     sessions: list[SessionLifecycleItem] = field(default_factory=list)
     active_session_id: str = ""
+    recovery_readiness: RecoveryReadinessAdvisory = field(default_factory=RecoveryReadinessAdvisory)
 
 
 @dataclass
@@ -964,6 +989,63 @@ def sample_cockpit_view_model(
                 ),
             ],
             active_session_id="build-5-bifrost",
+            recovery_readiness=RecoveryReadinessAdvisory(
+                advisory_id="recovery-readiness:build-5-stale-workflow",
+                target_session_id="build-5-bifrost",
+                readiness_state="advisory_ready",
+                recommended_action="resteer",
+                permission_state="display_only",
+                human_gate_state="required_for_execution",
+                summary="Stale workflow recovery is ready for Prime review; Bifrost displays advisory state only.",
+                blockers=["no_live_control_execution", "human_gate_required"],
+                evidence_refs=[
+                    "session-lifecycle:recovery-advisory",
+                    "stale-target:sample-actions",
+                    "proof:display-safe-only",
+                ],
+                actions=[
+                    RecoveryReadinessAction(
+                        action_id="restart-session",
+                        action_label="Restart",
+                        readiness_state="ready",
+                        permission_state="requires_prime",
+                        evidence_ref="evidence:session-restart-request",
+                        advisory="Fresh session can be requested after Prime confirms stale context.",
+                    ),
+                    RecoveryReadinessAction(
+                        action_id="resteer-session",
+                        action_label="Resteer",
+                        readiness_state="recommended",
+                        permission_state="requires_prime",
+                        evidence_ref="evidence:prime-resteer-required",
+                        advisory="Recommended path preserves current objective and blocker summary.",
+                    ),
+                    RecoveryReadinessAction(
+                        action_id="archive-session",
+                        action_label="Archive",
+                        readiness_state="available",
+                        permission_state="archive_only",
+                        evidence_ref="evidence:archive-context-preserved",
+                        advisory="Archive is display-safe and does not close or delete active work.",
+                    ),
+                    RecoveryReadinessAction(
+                        action_id="poll-watch-session",
+                        action_label="Poll/watch",
+                        readiness_state="watching",
+                        permission_state="display_only",
+                        evidence_ref="evidence:lifecycle-watch-only",
+                        advisory="Watch state remains safe while awaiting lifecycle freshness.",
+                    ),
+                    RecoveryReadinessAction(
+                        action_id="human-gated-blocked",
+                        action_label="Human gate blocked",
+                        readiness_state="blocked",
+                        permission_state="requires_scott",
+                        evidence_ref="evidence:human-gate-required",
+                        advisory="Automated recovery is blocked until Scott or review lane clears the gate.",
+                    ),
+                ],
+            ),
         ),
         proof_state=ProofStateView(
             proof_status="executed",
@@ -2120,6 +2202,55 @@ def _render_session_lifecycle(lifecycle: SessionLifecycleView) -> str:
     if not lifecycle.sessions:
         return ""
 
+    advisory_html = ""
+    advisory = lifecycle.recovery_readiness
+    if advisory.advisory_id:
+        blockers = "".join(
+            f'<span class="recovery-readiness-chip recovery-readiness-blocker">{_e(blocker)}</span>'
+            for blocker in advisory.blockers
+        ) or '<span class="recovery-readiness-chip recovery-readiness-empty">none</span>'
+        evidence = "".join(
+            f'<span class="recovery-readiness-chip recovery-readiness-evidence">{_e(ref)}</span>'
+            for ref in advisory.evidence_refs
+        ) or '<span class="recovery-readiness-chip recovery-readiness-empty">no_evidence_refs</span>'
+        actions = "".join(
+            '<span class="recovery-readiness-action"'
+            f' data-readiness-action="{_e(action.action_id)}"'
+            f' data-readiness-state="{_e(action.readiness_state)}"'
+            f' data-permission-state="{_e(action.permission_state)}"'
+            f' data-evidence-ref="{_e(action.evidence_ref)}">'
+            f'<span class="recovery-readiness-action-label">{_e(action.action_label)}</span>'
+            f'<span class="recovery-readiness-action-status">{_e(action.readiness_state)} / {_e(action.permission_state)}</span>'
+            f'<span class="recovery-readiness-action-advisory">{_e(action.advisory)}</span>'
+            f'<span class="recovery-readiness-action-evidence">{_e(action.evidence_ref)}</span>'
+            "</span>"
+            for action in advisory.actions
+        )
+        advisory_html = (
+            '<div class="recovery-readiness-advisory" aria-label="Recovery Readiness Advisory Summary"'
+            f' data-advisory-id="{_e(advisory.advisory_id)}"'
+            f' data-target-session-id="{_e(advisory.target_session_id)}">'
+            '<div class="recovery-readiness-header">'
+            f'<span class="recovery-readiness-title">Recovery readiness: {_e(advisory.readiness_state)}</span>'
+            f'<span class="recovery-readiness-recommended">Recommended: {_e(advisory.recommended_action)}</span>'
+            f'<span class="recovery-readiness-permission">Permission: {_e(advisory.permission_state)}</span>'
+            f'<span class="recovery-readiness-human-gate">Human gate: {_e(advisory.human_gate_state)}</span>'
+            "</div>"
+            f'<span class="recovery-readiness-summary">{_e(advisory.summary)}</span>'
+            '<div class="recovery-readiness-lists">'
+            '<div class="recovery-readiness-list" aria-label="Recovery Readiness Blockers"><span class="recovery-readiness-list-title">Blockers</span>'
+            + blockers
+            + "</div>"
+            '<div class="recovery-readiness-list" aria-label="Recovery Readiness Evidence Refs"><span class="recovery-readiness-list-title">Evidence</span>'
+            + evidence
+            + "</div>"
+            "</div>"
+            '<div class="recovery-readiness-actions" aria-label="Recovery Readiness Action Advisories">'
+            + actions
+            + "</div>"
+            "</div>"
+        )
+
     session_cards = []
     for session in lifecycle.sessions:
         is_active = session.session_id == lifecycle.active_session_id
@@ -2157,7 +2288,8 @@ def _render_session_lifecycle(lifecycle: SessionLifecycleView) -> str:
         '<div class="session-header-main">'
         '<h3>Session Lifecycle</h3>'
         "</div>"
-        '<div class="session-cards">'
+        + advisory_html
+        + '<div class="session-cards">'
         + "".join(session_cards)
         + "</div>"
         + "</section>"

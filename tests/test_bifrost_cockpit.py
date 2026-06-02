@@ -30,6 +30,8 @@ from bifrost.cockpit import (
     ProofPreviewItem,
     ProofStateView,
     RelayAegisPolicyHandoffView,
+    RecoveryReadinessAction,
+    RecoveryReadinessAdvisory,
     SessionItem,
     SessionLifecycleItem,
     SessionLifecycleView,
@@ -2406,6 +2408,110 @@ def test_session_lifecycle_no_blocker_when_empty():
     )
     doc = render_cockpit_html(vm)
     assert 'class="session-blocker"' not in doc
+
+
+def test_session_lifecycle_renders_recovery_readiness_summary():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Recovery Readiness Advisory Summary"' in doc
+    assert 'data-advisory-id="recovery-readiness:build-5-stale-workflow"' in doc
+    assert 'data-target-session-id="build-5-bifrost"' in doc
+    assert "Recovery readiness: advisory_ready" in doc
+    assert "Recommended: resteer" in doc
+    assert "Permission: display_only" in doc
+    assert "Human gate: required_for_execution" in doc
+    assert "Stale workflow recovery is ready for Prime review" in doc
+    assert "no_live_control_execution" in doc
+    assert "human_gate_required" in doc
+
+
+def test_session_lifecycle_recovery_readiness_renders_action_advisories():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    for action_id in (
+        "restart-session",
+        "resteer-session",
+        "archive-session",
+        "poll-watch-session",
+        "human-gated-blocked",
+    ):
+        assert f'data-readiness-action="{action_id}"' in doc
+    assert 'data-readiness-state="recommended"' in doc
+    assert 'data-readiness-state="blocked"' in doc
+    assert 'data-permission-state="requires_prime"' in doc
+    assert 'data-permission-state="requires_scott"' in doc
+    assert "evidence:session-restart-request" in doc
+    assert "evidence:prime-resteer-required" in doc
+    assert "evidence:archive-context-preserved" in doc
+    assert "evidence:lifecycle-watch-only" in doc
+    assert "evidence:human-gate-required" in doc
+    assert "Archive is display-safe and does not close or delete active work." in doc
+
+
+def test_session_lifecycle_recovery_readiness_escapes_structured_fields():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.session_lifecycle = SessionLifecycleView(
+        sessions=[
+            SessionLifecycleItem(
+                session_id="test",
+                session_name="Test",
+                project_name="TestProj",
+                harness_role="build",
+                status="running",
+                health_state="healthy",
+            )
+        ],
+        recovery_readiness=RecoveryReadinessAdvisory(
+            advisory_id="<script>advisory</script>",
+            target_session_id="<img src=x>",
+            readiness_state="<bad>",
+            recommended_action="resteer:<bad>",
+            permission_state="permission:<bad>",
+            human_gate_state="<script>gate</script>",
+            summary="summary:<bad>",
+            blockers=["blocker:<bad>"],
+            evidence_refs=["evidence:<bad>"],
+            actions=[
+                RecoveryReadinessAction(
+                    action_id="<script>action</script>",
+                    action_label="<Action>",
+                    readiness_state="<state>",
+                    permission_state="<permission>",
+                    evidence_ref="proof:<bad>",
+                    advisory="advisory:<bad>",
+                )
+            ],
+        ),
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert 'data-advisory-id="&lt;script&gt;advisory&lt;/script&gt;"' in doc
+    assert 'data-target-session-id="&lt;img src=x&gt;"' in doc
+    assert "Recovery readiness: &lt;bad&gt;" in doc
+    assert "Human gate: &lt;script&gt;gate&lt;/script&gt;" in doc
+    assert "summary:&lt;bad&gt;" in doc
+    assert "blocker:&lt;bad&gt;" in doc
+    assert "evidence:&lt;bad&gt;" in doc
+    assert "data-readiness-action=\"&lt;script&gt;action&lt;/script&gt;\"" in doc
+    assert "&lt;Action&gt;" in doc
+    assert "proof:&lt;bad&gt;" in doc
+    assert "advisory:&lt;bad&gt;" in doc
+
+
+def test_session_lifecycle_recovery_readiness_preserves_stale_recovery_samples():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-readiness-session", "Closed Readiness Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-readiness-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Recovery Readiness Advisory Summary"' in doc
+    assert 'class="stale-recovery-actions"' in doc
+    assert 'data-recovery-action="restart-session"' in doc
+    assert 'data-recovery-action="resteer-session"' in doc
+    assert 'data-recovery-action="archive-session"' in doc
+    assert 'data-recovery-action="poll-watch-session"' in doc
+    assert 'data-recovery-action="human-gated-blocked"' in doc
 
 
 # Proof State Tests
