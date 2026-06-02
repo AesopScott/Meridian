@@ -14,6 +14,8 @@ Show a compact checklist status roughly every three UI/build prompts while activ
 
 Working cadence: respond to the user's latest message, state the next checklist intent with presumed alignment answers, then continue on those assumptions unless the user corrects direction.
 
+Scope rule: every UI/build change must name exactly one owning harness or one Spark setting/control before implementation. Work may touch adjacent bridge or session support only when that support is required to make the named harness/control truthful in the visible interface; the checklist entry and build log must record that scope.
+
 ## Control Inventory
 
 Use this as the working UI checklist. Every visible icon, selector, session control, and harness button gets its own row. Status values:
