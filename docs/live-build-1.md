@@ -4,6 +4,22 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add Relay proof payload downstream-consumer checklist now that negative-path tests cleared review.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `docs/relay-bifrost-proof-payload-consumer-checklist.md`, `docs/live-build-1.md`.
+
+Required sources: `docs/relay-bifrost-proof-payload-contract.md`, `docs/bifrost-right-panel-mode-contract.md`, `docs/FileMap.md`, `tests/test_relay_executor.py`, and Reviews A clearance for the deterministic test-collection repair in `docs/live-codex-reviews.md`.
+
+Task: write a concise docs-only checklist for downstream consumers of the Relay proof payload. Cover what Bifrost/Prime may display, which proof fields are human-facing versus audit-only, how to handle absent/empty evidence fields, fallback blockers, waiver/approval absence, no-gate blocked shapes, deterministic immutable output expectations, and what must remain out of scope. Keep this as a handoff/checklist only. Do not edit Relay runtime/tests, Bifrost runtime/CSS/tests, FileMap, review queues, UI `index.html`, model/account/process code, branch state, or Polaris.
+
+Tests: docs-only; no pytest required. Run a targeted text review before marking ready.
+
+Completion: commit only the allowed files from your unique worktree branch, push your worker branch, mark Ready for Codex Review here with commit hash/files/tests, and leave the Next Candidate below in place unless the work changes it.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Relay proof payload negative-path deterministic test collection.
