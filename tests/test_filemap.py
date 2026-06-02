@@ -149,6 +149,7 @@ _REQUIRED_PATHS = [
     "package.json",
     "electron/main.js",
     "bifrost/preview.py",
+    "bifrost/preview.html",
     "tests/test_bifrost_preview.py",
     "docs/prime-queue-reconciliation-requirement.md",
     "docs/relay-completeness-audit.md",

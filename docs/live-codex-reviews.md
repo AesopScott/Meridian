@@ -22,6 +22,37 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 2 close/archive write-through proof slice.
+
+Status: passed by Codex Reviews A on 2026-06-02 10:52 -06:00. Candidate `HEAD` is `ad9fc03f`, and Build 2 commits `6dfabea0` and `ad9fc03f` are ancestors of the assigned candidate branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 6dfabea0^..ad9fc03f`
+
+Review result:
+
+- Containment checks for `6dfabea0` and `ad9fc03f` passed on the assigned candidate branch.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with Build 2 queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 122 tests.
+- `git diff --check 6dfabea0^..ad9fc03f` passed.
+- Verified close/archive/write-through proof behavior is deterministic, display-safe, fail-closed, and non-executable; it records intended action, write-through condition/completion, failure visibility, human gate, permission gate, archive operation requirement, preservation note, blockers, and evidence refs.
+- Verified close from running sessions requires stop-before-close review; archive requires durable write-through proof; write-through failures remain visible; locked archive permission is surfaced as a blocker.
+- Verified custom free-text failure visibility and preservation note inputs are converted to bounded review tags, and tests prove raw worker chat/raw prompt sentinel strings do not appear in serialization or evidence refs.
+- Verified this candidate does not include the unresolved Build 2 state-evidence candidate: commits `72cf38b5` and `98a93a7f` are not ancestors of this branch, and `SessionLiveStateEvidencePayload` / `build_live_state_evidence_payload()` are absent from the implementation.
+- Verified no process/session inspection, restart/resteer/archive execution, model/provider calls, UI/Bifrost/FileMap edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 close/archive write-through proof slice is review-cleared. The prior Reviews A finding `d9954f93` for the separate state-evidence candidate remains unresolved and is not treated as passed here.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 2 Session Lifecycle command-preview proof fields.
 
 Status: passed by Codex Reviews A on 2026-06-02 10:01 -06:00. Candidate `HEAD` is `34a7bbe7`, and Build 2 commits `fa5f2f82` and `34a7bbe7` are ancestors of the assigned candidate branch.

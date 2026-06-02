@@ -10,6 +10,33 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Completed / Ready For Codex Review
 
+Goal: keep FileMap current after the repaired Bifrost voice runtime/status surface landed on current `origin/main`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: concrete FileMap audit after the repaired Bifrost voice landing, including Bifrost runtime/frontend/test paths, live queue provenance, Reviews B clearance, and existing voice/source docs.
+
+Completion:
+
+- First status check was clean on `codex/build-3-filemap-post-voice-main-20260602-1110`; the branch was behind `origin/main`, so Build 3 audited visible `origin/main` refs without merge, rebase, reset, cherry-pick, branch movement, shared-main writes, or Polaris access.
+- Refreshed audit evidence against visible `origin/main` at `c256a8d1`; current `HEAD..origin/main` changed-path scope was 7 paths: `docs/FileMap.md`, `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
+- Inspected called-out voice landing paths: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `bifrost/preview.html`, `tests/test_bifrost_cockpit.py`, and `docs/live-codex-reviews-2.md`.
+- Inspected current FileMap surfaces, all five live-build queues, both live review provenance files, and existing Bifrost voice/source docs including `docs/bifrost-voice-command-contract.md`, `docs/bifrost-v2-cockpit-extensions.md`, `bifrost/preview.py`, and `tests/test_bifrost_preview.py`.
+- Registered missing existing artifact: `bifrost/preview.html` in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Repaired mirror-only drift in `docs/FileMap.md` for existing registered artifacts: `docs/bifrost-voice-command-contract.md`, `bifrost/preview.py`, and `tests/test_bifrost_preview.py`.
+- Audit evidence: focused coverage check across 47 inspected current-scope FileMap-relevant existing paths found zero remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 47 passed.
+- Diff proof: `git diff --check` - passed with line-ending normalization warnings only.
+- Commit: this queue-marker commit.
+- Next Candidate: bind runtime validation or review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
 Goal: keep FileMap current after Build 2 command-staging review packet and Reviews A provenance landing on main.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
