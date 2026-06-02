@@ -8,29 +8,35 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the next current-main Ready marker from Build 4 or Build 5 after their newly released tasks complete.
+Goal: review the current-main Relay harness UI/runtime integration landing.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
 Required first command for this task: verify you are in your assigned unique worktree and not in `C:\Users\scott\Code\Meridian`; you are not allowed to write to main, move data between worktrees or branches, cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage without coordinator approval.
 
-Allowed review files by lane:
+Allowed review files:
 
-- Build 4 checklist review: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/relay-heartbeat-model-routing-logic.md`, `docs/model-harness-v2-contract.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/live-build-4.md`, and `docs/live-codex-reviews-2.md`.
-- Build 5 stale-session recovery review: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md`.
+- `index.html`
+- `scripts/meridian-model-bridge.js`
+- `meridian_core/relay_logic_snapshot.py`
+- `tests/test_relay_logic_snapshot.py`
+- `docs/relay-completeness-audit.md`
+- `docs/relay-heartbeat-model-routing-logic.md`
+- `docs/ui-integration-checklist.md`
+- `docs/live-codex-reviews-2.md` for review provenance/routing only
 
-Task: poll `docs/live-build-4.md`, `docs/live-build-5.md`, and current `origin/main` for the next Ready for Codex Review marker. Prioritize whichever lane first provides a current-main commit for its released Active Now task. For Build 4, verify the Relay routing implementation checklist faithfully converts the reviewed logic into actionable build/test gates without authorizing runtime/model/account/process/UI/branch/Polaris work. For Build 5, verify stale-session recovery action sample rendering remains deterministic render/view-model only, blocks dead-target prompt routing implications, and passes the Bifrost cockpit tests.
+Task: review current `origin/main` commits `1b9c43db` through `7b50ab8e`, which landed the Relay harness panel integration after the coordinator quarantine loop. Verify the UI/bridge snapshot remains deterministic, does not call live models from Relay snapshot generation, does not touch Polaris, does not introduce branch/worktree movement, keeps Relay logic as visible harness/configuration data rather than hidden Auto routing, and preserves the user-approved UI semantics: no model selector default to Auto, no fake completion claims, center/spark UI remains present, and Relay panel content is reviewable/collapsible. Verify the bridge endpoint and snapshot tests cover the new behavior. If findings exist, route the smallest focused repair to the appropriate build lane ahead of normal work; otherwise mark passed and return Reviews B to the Build 4/Build 5 current-main Ready-marker polling task.
 
 Proof commands:
 
-- Build 4: docs/architecture review; no pytest required unless runtime claims require proof.
-- Build 5: `python -m pytest tests/test_bifrost_cockpit.py -q`
+- `python -m pytest tests/test_relay_logic_snapshot.py -q`
+- Run bridge/self-test or syntax checks only if the review scope needs stronger proof.
 
 Completion: if clean, mark the reviewed slice passed and promote the next candidate for that lane; if findings exist, route the smallest focused repair back to the owning build lane ahead of normal work. Commit only review-queue/provenance updates and push to `origin/main`.
 
 ## Next Candidate Task
 
-Goal: review the other Build 4 or Build 5 current-main Ready marker that was not consumed by the active review poll.
+Goal: resume review of the next current-main Ready marker from Build 4 or Build 5 after the Relay harness UI/runtime integration review is closed.
 
 Allowed review files by lane remain the same as the Active Now task:
 

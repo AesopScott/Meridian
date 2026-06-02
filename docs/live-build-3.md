@@ -10,7 +10,7 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Active Task
 
-Goal: audit FileMap coverage for Relay/Session Lifecycle review-cleared runtime artifacts after the Relay-Bifrost proof payload contract docs registration clears review.
+Goal: audit FileMap coverage for the current-main Relay UI/runtime integration landing.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
 
@@ -18,9 +18,9 @@ Required first command for this task: verify you are in your assigned unique wor
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
 
-Required sources: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`, `docs/v2-progress-tracker.md`, current runtime FileMap entries, and `docs/FileMap.md`.
+Required sources: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`, `docs/v2-progress-tracker.md`, current runtime FileMap entries, `docs/FileMap.md`, and current `origin/main` commits `1b9c43db` through `7b50ab8e`.
 
-Task: compare the current review-cleared Relay and Session Lifecycle runtime/test/documentation artifacts against runtime FileMap, `docs/FileMap.md`, and required-path coverage. Register only existing missing files. Keep this mechanical; do not edit Relay, Session Lifecycle, Bifrost, Aegis, review queues, process/model/account code, branches, or Polaris.
+Task: compare the current-main Relay harness UI/runtime integration files against runtime FileMap, `docs/FileMap.md`, and required-path coverage. At minimum inspect `meridian_core/relay_logic_snapshot.py`, `tests/test_relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, `index.html`, `docs/relay-completeness-audit.md`, `docs/relay-heartbeat-model-routing-logic.md`, and `docs/ui-integration-checklist.md`. Register only missing existing files that belong in FileMap. Keep this mechanical; do not edit Relay behavior, Bifrost UI, Aegis, review queues, process/model/account code, branches, or Polaris.
 
 Tests:
 
