@@ -23,6 +23,7 @@ from bifrost.cockpit import (
     ProofGateStatus,
     ProofPreviewItem,
     ProofStateView,
+    RelayAegisPolicyHandoffView,
     SessionItem,
     SessionLifecycleItem,
     SessionLifecycleView,
@@ -783,6 +784,157 @@ def test_aegis_prompt_packet_policy_preserves_prior_bifrost_surfaces():
     assert 'class="stale-target-guard"' in doc
     assert 'data-recovery-action="ask-prime-recover"' in doc
     assert "Next prompt target: Closed Aegis Session" not in doc
+
+
+def test_relay_aegis_policy_handoff_sample_renders_required_summary_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Relay Aegis Policy Handoff Summary"' in doc
+    assert "Relay/Aegis Handoff" in doc
+    assert "handoff-decision-demote" in doc
+    assert "handoff-severity-warning" in doc
+    assert "Packet id: prompt-packet-001" in doc
+    assert "Packet hash status: present" in doc
+    assert "Proof requirement: tier2_payload_snapshot" in doc
+    assert "Demotion target: tier1:account-first" in doc
+    assert "Human gate: not_required" in doc
+    assert "Missing metadata fail closed: no" in doc
+    assert "Relay accepted Aegis demotion target" in doc
+
+
+def test_relay_aegis_policy_handoff_sample_renders_evidence_blockers_and_warnings():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'class="handoff-list handoff-evidence-ids"' in doc
+    assert 'class="handoff-list handoff-blockers"' in doc
+    assert 'class="handoff-list handoff-warnings"' in doc
+    assert "aegis:route-tier" in doc
+    assert "aegis:payload-proof" in doc
+    assert "demotion_route_required" in doc
+    assert "response_payload_hash_pending" in doc
+    assert "no_missing_metadata_fields" in doc
+
+
+def test_relay_aegis_policy_handoff_supports_all_policy_decisions():
+    cases = (
+        ("allow", "info", "not_applicable", "not_required"),
+        ("warn", "warning", "not_applicable", "not_required"),
+        ("demote", "warning", "tier0:review-safe", "not_required"),
+        ("block", "error", "not_applicable", "blocked"),
+        ("human_gate", "warning", "not_applicable", "required"),
+    )
+    for decision, severity, demotion_target, human_gate_state in cases:
+        vm = sample_cockpit_view_model()
+        vm.relay_aegis_policy_handoff = RelayAegisPolicyHandoffView(
+            decision=decision,
+            severity=severity,
+            packet_id=f"packet-{decision}",
+            packet_hash_status="present",
+            proof_requirement="tier2_payload_snapshot",
+            aegis_evidence_ids=["aegis:decision"],
+            blockers=[f"{decision}_blocker"] if decision in {"block", "human_gate"} else [],
+            warnings=[f"{decision}_warning"] if decision in {"warn", "demote"} else [],
+            demotion_target=demotion_target if decision == "demote" else "",
+            human_gate_state=human_gate_state,
+            explanation=f"{decision} summary",
+        )
+        doc = render_cockpit_html(vm)
+        assert f"Packet id: packet-{decision}" in doc
+        assert f"handoff-decision-{decision}" in doc
+        assert f"handoff-severity-{severity}" in doc
+        assert f"Human gate: {human_gate_state}" in doc
+        assert f"Demotion target: {demotion_target}" in doc
+        assert f"{decision} summary" in doc
+
+
+def test_relay_aegis_policy_handoff_renders_fail_closed_missing_metadata():
+    vm = sample_cockpit_view_model()
+    vm.relay_aegis_policy_handoff = RelayAegisPolicyHandoffView(
+        decision="block",
+        severity="error",
+        packet_id="",
+        packet_hash_status="missing",
+        proof_requirement="",
+        aegis_evidence_ids=[],
+        blockers=["aegis_gate_blocked", "proof_metadata_absent"],
+        warnings=[],
+        human_gate_state="unknown",
+        missing_metadata_fail_closed=True,
+        missing_metadata_fields=["packet_id", "budget_ref", "aegis_evidence_ids"],
+        explanation="Relay failed closed before adapter transport.",
+    )
+    doc = render_cockpit_html(vm)
+    assert "Packet id: packet_id_missing" in doc
+    assert "Packet hash status: missing" in doc
+    assert "Proof requirement: proof_requirement_missing" in doc
+    assert "Missing metadata fail closed: yes" in doc
+    assert "aegis_gate_blocked" in doc
+    assert "proof_metadata_absent" in doc
+    assert "packet_id" in doc
+    assert "budget_ref" in doc
+    assert "aegis_evidence_ids" in doc
+    assert "no_evidence_ids" in doc
+    assert "no_warnings" in doc
+
+
+def test_relay_aegis_policy_handoff_redacts_unsafe_metadata_and_escapes_html():
+    vm = sample_cockpit_view_model()
+    vm.relay_aegis_policy_handoff = RelayAegisPolicyHandoffView(
+        decision="block",
+        severity="error",
+        packet_id="<script>packet</script>",
+        packet_hash_status="serialized_prompt:RAW_PROMPT_SENTINEL",
+        proof_requirement="tier2:<bad>",
+        aegis_evidence_ids=["aegis:<safe>", "api_key:SECRET_VALUE"],
+        blockers=["provider_request:RAW_PROMPT_SENTINEL"],
+        warnings=["raw_provider_response:SECRET_VALUE"],
+        demotion_target="bearer token route",
+        human_gate_state="<img src=x>",
+        missing_metadata_fail_closed=True,
+        missing_metadata_fields=["authorization_header"],
+        explanation="model_payload RAW_PROMPT_SENTINEL SECRET_VALUE",
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;packet&lt;/script&gt;" in doc
+    assert "tier2:&lt;bad&gt;" in doc
+    assert "aegis:&lt;safe&gt;" in doc
+    assert "RAW_PROMPT_SENTINEL" not in doc
+    assert "SECRET_VALUE" not in doc
+    assert "api_key" not in doc
+    assert "provider_request" not in doc
+    assert "raw_provider_response" not in doc
+    assert "model_payload" not in doc
+    assert "unsafe_metadata_redacted" in doc
+
+
+def test_relay_aegis_policy_handoff_in_cockpit_main_not_hud_core():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    main_section = doc[doc.find('<main class="cockpit-main">'):doc.find('</main>')]
+    core_start = doc.find('class="hud-command-core"')
+    core_end = doc.find("</div>", core_start)
+    core_section = doc[core_start:core_end]
+    assert 'class="relay-aegis-handoff"' in main_section
+    assert "Relay/Aegis Handoff" not in core_section
+
+
+def test_relay_aegis_policy_handoff_preserves_prior_bifrost_surfaces():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-handoff-session", "Closed Handoff Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-handoff-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Relay Aegis Policy Handoff Summary"' in doc
+    assert 'aria-label="Aegis PromptPacket Policy Decision"' in doc
+    assert 'aria-label="PromptPacket Proof Metadata"' in doc
+    assert 'aria-label="Dispatch Hardening State"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert "Provider Balance" in doc
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Handoff Session" not in doc
 
 
 def test_render_harness_dashboard_present():

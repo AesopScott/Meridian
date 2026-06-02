@@ -175,6 +175,23 @@ class AegisPromptPacketPolicyView:
 
 
 @dataclass
+class RelayAegisPolicyHandoffView:
+    decision: str = ""
+    severity: str = "info"
+    packet_id: str = ""
+    packet_hash_status: str = "unknown"
+    proof_requirement: str = "unknown"
+    aegis_evidence_ids: list[str] = field(default_factory=list)
+    blockers: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    demotion_target: str = ""
+    human_gate_state: str = "not_required"
+    missing_metadata_fail_closed: bool = False
+    missing_metadata_fields: list[str] = field(default_factory=list)
+    explanation: str = ""
+
+
+@dataclass
 class ProofGateStatus:
     gate_id: str
     gate_name: str
@@ -294,6 +311,7 @@ class CockpitViewModel:
     dispatch_hardening: DispatchHardeningView = field(default_factory=DispatchHardeningView)
     prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
     aegis_prompt_packet_policy: AegisPromptPacketPolicyView = field(default_factory=AegisPromptPacketPolicyView)
+    relay_aegis_policy_handoff: RelayAegisPolicyHandoffView = field(default_factory=RelayAegisPolicyHandoffView)
     session_lifecycle: SessionLifecycleView = field(default_factory=SessionLifecycleView)
     proof_state: ProofStateView = field(default_factory=ProofStateView)
     user_session_mode: UserSessionModeView = field(default_factory=UserSessionModeView)
@@ -456,6 +474,28 @@ def sample_cockpit_view_model() -> CockpitViewModel:
                 "payload_snapshot_present",
                 "response_hash_pending",
             ],
+        ),
+        relay_aegis_policy_handoff=RelayAegisPolicyHandoffView(
+            decision="demote",
+            severity="warning",
+            packet_id="prompt-packet-001",
+            packet_hash_status="present",
+            proof_requirement="tier2_payload_snapshot",
+            aegis_evidence_ids=[
+                "aegis:route-tier",
+                "aegis:payload-proof",
+            ],
+            blockers=[
+                "demotion_route_required",
+            ],
+            warnings=[
+                "response_payload_hash_pending",
+            ],
+            demotion_target="tier1:account-first",
+            human_gate_state="not_required",
+            missing_metadata_fail_closed=False,
+            missing_metadata_fields=[],
+            explanation="Relay accepted Aegis demotion target with proof snapshot warning.",
         ),
         lanes=[
             LaneRow("Cockpit UI", "running", "hud"),
@@ -1304,6 +1344,91 @@ def _render_aegis_prompt_packet_policy(policy: AegisPromptPacketPolicyView) -> s
     )
 
 
+def _safe_handoff_value(value: object) -> str:
+    text = str(value)
+    lowered = text.lower()
+    unsafe_markers = (
+        "raw_prompt",
+        "serialized_prompt",
+        "model_payload",
+        "secret",
+        "api_key",
+        "bearer ",
+        "authorization",
+        "provider_request",
+        "raw_provider_response",
+        "process_id",
+    )
+    if any(marker in lowered for marker in unsafe_markers):
+        return "unsafe_metadata_redacted"
+    return text
+
+
+def _render_relay_aegis_policy_handoff(handoff: RelayAegisPolicyHandoffView) -> str:
+    if not handoff.decision:
+        return ""
+
+    packet_id = _safe_handoff_value(handoff.packet_id or "packet_id_missing")
+    packet_hash_status = _safe_handoff_value(handoff.packet_hash_status or "unknown")
+    proof_requirement = _safe_handoff_value(handoff.proof_requirement or "proof_requirement_missing")
+    human_gate_state = _safe_handoff_value(handoff.human_gate_state or "unknown")
+    demotion_target = _safe_handoff_value(handoff.demotion_target or "not_applicable")
+    fail_closed = "yes" if handoff.missing_metadata_fail_closed else "no"
+    evidence_items = "".join(
+        f'<span class="handoff-chip handoff-evidence">{_e(_safe_handoff_value(evidence_id))}</span>'
+        for evidence_id in handoff.aegis_evidence_ids
+    ) or '<span class="handoff-chip handoff-empty">no_evidence_ids</span>'
+    blocker_items = "".join(
+        f'<span class="handoff-chip handoff-blocker">{_e(_safe_handoff_value(blocker))}</span>'
+        for blocker in handoff.blockers
+    ) or '<span class="handoff-chip handoff-empty">no_blockers</span>'
+    warning_items = "".join(
+        f'<span class="handoff-chip handoff-warning">{_e(_safe_handoff_value(warning))}</span>'
+        for warning in handoff.warnings
+    ) or '<span class="handoff-chip handoff-empty">no_warnings</span>'
+    missing_metadata_items = "".join(
+        f'<span class="handoff-chip handoff-missing-metadata">{_e(_safe_handoff_value(field_name))}</span>'
+        for field_name in handoff.missing_metadata_fields
+    ) or '<span class="handoff-chip handoff-empty">no_missing_metadata_fields</span>'
+
+    return (
+        '<section class="relay-aegis-handoff" aria-label="Relay Aegis Policy Handoff Summary">'
+        '<div class="handoff-header-main">'
+        '<h3>Relay/Aegis Handoff</h3>'
+        f'<span class="handoff-severity handoff-severity-{_e(handoff.severity)}">{_e(_safe_handoff_value(handoff.severity))}</span>'
+        f'<span class="handoff-decision handoff-decision-{_e(handoff.decision)}">{_e(_safe_handoff_value(handoff.decision))}</span>'
+        "</div>"
+        '<div class="handoff-grid">'
+        f'<span class="handoff-field handoff-packet-id">Packet id: {_e(packet_id)}</span>'
+        f'<span class="handoff-field handoff-packet-hash">Packet hash status: {_e(packet_hash_status)}</span>'
+        f'<span class="handoff-field handoff-requirement">Proof requirement: {_e(proof_requirement)}</span>'
+        f'<span class="handoff-field handoff-demotion-target">Demotion target: {_e(demotion_target)}</span>'
+        f'<span class="handoff-field handoff-human-gate handoff-human-gate-{_e(human_gate_state)}">Human gate: {_e(human_gate_state)}</span>'
+        f'<span class="handoff-field handoff-fail-closed">Missing metadata fail closed: {fail_closed}</span>'
+        f'<span class="handoff-field handoff-explanation">Explanation: {_e(_safe_handoff_value(handoff.explanation))}</span>'
+        "</div>"
+        '<div class="handoff-lists">'
+        '<div class="handoff-list handoff-evidence-ids" aria-label="Relay Aegis Handoff Evidence IDs">'
+        '<span class="handoff-list-title">Evidence IDs</span>'
+        + evidence_items
+        + "</div>"
+        '<div class="handoff-list handoff-blockers" aria-label="Relay Aegis Handoff Blockers">'
+        '<span class="handoff-list-title">Blockers</span>'
+        + blocker_items
+        + "</div>"
+        '<div class="handoff-list handoff-warnings" aria-label="Relay Aegis Handoff Warnings">'
+        '<span class="handoff-list-title">Warnings</span>'
+        + warning_items
+        + "</div>"
+        '<div class="handoff-list handoff-missing-metadata-fields" aria-label="Relay Aegis Missing Metadata Fields">'
+        '<span class="handoff-list-title">Missing metadata</span>'
+        + missing_metadata_items
+        + "</div>"
+        + "</div>"
+        + "</section>"
+    )
+
+
 def _render_instrument_band(inst: InstrumentBand) -> str:
     def chip(label: str, status: str) -> str:
         return (
@@ -1632,6 +1757,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     dispatch_hardening = _render_dispatch_hardening(vm.dispatch_hardening)
     prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
     aegis_packet_policy = _render_aegis_prompt_packet_policy(vm.aegis_prompt_packet_policy)
+    relay_aegis_handoff = _render_relay_aegis_policy_handoff(vm.relay_aegis_policy_handoff)
     projects = _render_project_strip(vm.projects, vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
@@ -1665,6 +1791,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{dispatch_hardening}\n"
         f"{prompt_packet_proof}\n"
         f"{aegis_packet_policy}\n"
+        f"{relay_aegis_handoff}\n"
         f"{provider_balance}\n"
         f"{prompt_payload}\n"
         "</main>\n"
