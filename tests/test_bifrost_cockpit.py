@@ -17,6 +17,8 @@ from bifrost.cockpit import (
     InstrumentBand,
     LaneRow,
     ProgressEvent,
+    ProviderBalanceItem,
+    ProviderBalanceView,
     ProjectCard,
     PromptPayloadView,
     PromptPacketProofView,
@@ -301,6 +303,113 @@ def test_render_hud_command_core_is_quiet():
     # Provider Balance and Prompt Payload should appear somewhere else in the doc
     assert "Provider Balance" in doc
     assert "Prompt Payload" in doc
+
+
+def test_provider_balance_sample_renders_all_route_families_and_selected_provider():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Provider Balance"' in doc
+    assert 'class="provider-item provider-ok provider-pressure-low provider-credit-available"' in doc
+    assert 'data-provider="claude" data-selected="true"' in doc
+    assert "Selected: claude" in doc
+    for expected in ("Claude", "OpenAI", "DeepSeek", "OpenRouter", "Local"):
+        assert expected in doc
+    for route in ("Route: direct", "Route: aggregator", "Route: local"):
+        assert route in doc
+
+
+def test_provider_balance_sample_renders_credit_token_and_spend_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Context: 200000" in doc
+    assert "Tokens: 1240/4000" in doc
+    assert "Delta: 0" in doc
+    assert "Remaining: credit: available" in doc
+    assert "Spend: $0.18 estimated" in doc
+    assert "Quota: available" in doc
+    assert "Remaining: credit: limited" in doc
+    assert "Spend: $0.03 estimated" in doc
+
+
+def test_provider_balance_sample_renders_cost_pressure_states():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "provider-pressure-low" in doc
+    assert "provider-pressure-medium" in doc
+    assert "provider-pressure-high" in doc
+    assert "provider-pressure-degraded" in doc
+    assert "provider-pressure-blocked" in doc
+    assert "Pressure: low" in doc
+    assert "Pressure: medium" in doc
+    assert "Pressure: high" in doc
+    assert "Pressure: degraded" in doc
+    assert "Pressure: blocked" in doc
+
+
+def test_provider_balance_sample_renders_aggregator_and_local_status_details():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'data-provider="openrouter"' in doc
+    assert 'data-provider="local"' in doc
+    assert "Aggregator route lacks payload snapshot proof" in doc
+    assert "Local deterministic route unavailable" in doc
+    assert "Remaining: credit: provider-hidden" in doc
+    assert "Remaining: credit: n/a" in doc
+    assert "Quota: metered" in doc
+    assert "Quota: unavailable" in doc
+
+
+def test_provider_balance_escapes_extended_fields():
+    vm = sample_cockpit_view_model()
+    vm.provider_balance = ProviderBalanceView(
+        providers=[
+            ProviderBalanceItem(
+                provider_id="<script>provider</script>",
+                display_name="<img src=x>",
+                model_name="model:<bad>",
+                trust_state="<script>trust</script>",
+                health="degraded",
+                route_kind="<script>route</script>",
+                context_budget_tokens=1,
+                prompt_budget_tokens=2,
+                current_prompt_tokens=1,
+                prompt_budget_percent=50.0,
+                prompt_delta_tokens=1,
+                cost_pressure="<script>pressure</script>",
+                quota_state="quota:<bad>",
+                remaining_credit_label="credit:<bad>",
+                credit_status="limited",
+                estimated_spend_label="$<bad>",
+                notes="<script>notes</script>",
+            )
+        ],
+        selected_provider="<script>provider</script>",
+        routing_owner="Relay",
+        policy_state="warning",
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;provider&lt;/script&gt;" in doc
+    assert "model:&lt;bad&gt;" in doc
+    assert "Route: &lt;script&gt;route&lt;/script&gt;" in doc
+    assert "Remaining: credit:&lt;bad&gt;" in doc
+    assert "Spend: $&lt;bad&gt;" in doc
+
+
+def test_provider_balance_preserves_other_bifrost_surfaces_and_stale_recovery():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-provider-session", "Closed Provider Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-provider-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Provider Balance"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'aria-label="Dispatch Hardening State"' in doc
+    assert 'aria-label="PromptPacket Proof Metadata"' in doc
+    assert 'aria-label="Relay Aegis Policy Handoff Summary"' in doc
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Provider Session" not in doc
 
 
 def test_prompt_payload_sample_renders_structured_visibility_fields():

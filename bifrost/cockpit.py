@@ -92,6 +92,7 @@ class ProviderBalanceItem:
     model_name: str
     trust_state: str
     health: str
+    route_kind: str = ""
     context_budget_tokens: int = 0
     prompt_budget_tokens: int = 0
     current_prompt_tokens: int = 0
@@ -99,6 +100,9 @@ class ProviderBalanceItem:
     prompt_delta_tokens: int = 0
     cost_pressure: str = "none"
     quota_state: str = "unknown"
+    remaining_credit_label: str = ""
+    credit_status: str = "unknown"
+    estimated_spend_label: str = ""
     notes: str = ""
 
 
@@ -373,9 +377,10 @@ def sample_cockpit_view_model(
                 ProviderBalanceItem(
                     provider_id="claude",
                     display_name="Claude",
-                    model_name="claude-opus-4-7",
+                    model_name="claude-sonnet-4-20250514",
                     trust_state="trusted",
                     health="ok",
+                    route_kind="direct",
                     context_budget_tokens=200000,
                     prompt_budget_tokens=4000,
                     current_prompt_tokens=1240,
@@ -383,14 +388,18 @@ def sample_cockpit_view_model(
                     prompt_delta_tokens=0,
                     cost_pressure="low",
                     quota_state="available",
+                    remaining_credit_label="credit: available",
+                    credit_status="available",
+                    estimated_spend_label="$0.18 estimated",
                     notes="Primary provider ready",
                 ),
                 ProviderBalanceItem(
                     provider_id="openai",
                     display_name="OpenAI",
-                    model_name="gpt-4-turbo",
+                    model_name="gpt-4o",
                     trust_state="trusted",
                     health="ok",
+                    route_kind="direct",
                     context_budget_tokens=128000,
                     prompt_budget_tokens=3000,
                     current_prompt_tokens=890,
@@ -398,14 +407,18 @@ def sample_cockpit_view_model(
                     prompt_delta_tokens=50,
                     cost_pressure="medium",
                     quota_state="available",
+                    remaining_credit_label="quota: normal",
+                    credit_status="available",
+                    estimated_spend_label="$0.12 estimated",
                     notes="Secondary provider with minor growth",
                 ),
                 ProviderBalanceItem(
                     provider_id="deepseek",
                     display_name="DeepSeek",
-                    model_name="deepseek-v4-pro",
+                    model_name="deepseek-chat",
                     trust_state="candidate",
                     health="degraded",
+                    route_kind="direct",
                     context_budget_tokens=256000,
                     prompt_budget_tokens=5000,
                     current_prompt_tokens=2450,
@@ -413,7 +426,48 @@ def sample_cockpit_view_model(
                     prompt_delta_tokens=240,
                     cost_pressure="high",
                     quota_state="limited",
+                    remaining_credit_label="credit: limited",
+                    credit_status="limited",
+                    estimated_spend_label="$0.03 estimated",
                     notes="Q-mode prompt drag detected",
+                ),
+                ProviderBalanceItem(
+                    provider_id="openrouter",
+                    display_name="OpenRouter",
+                    model_name="deepseek-chat",
+                    trust_state="aggregator",
+                    health="degraded",
+                    route_kind="aggregator",
+                    context_budget_tokens=64000,
+                    prompt_budget_tokens=1800,
+                    current_prompt_tokens=1600,
+                    prompt_budget_percent=88.9,
+                    prompt_delta_tokens=360,
+                    cost_pressure="degraded",
+                    quota_state="metered",
+                    remaining_credit_label="credit: provider-hidden",
+                    credit_status="unknown",
+                    estimated_spend_label="$0.02 estimated",
+                    notes="Aggregator route lacks payload snapshot proof",
+                ),
+                ProviderBalanceItem(
+                    provider_id="local",
+                    display_name="Local",
+                    model_name="local-deterministic",
+                    trust_state="local",
+                    health="offline",
+                    route_kind="local",
+                    context_budget_tokens=32000,
+                    prompt_budget_tokens=1200,
+                    current_prompt_tokens=0,
+                    prompt_budget_percent=0.0,
+                    prompt_delta_tokens=0,
+                    cost_pressure="blocked",
+                    quota_state="unavailable",
+                    remaining_credit_label="credit: n/a",
+                    credit_status="unavailable",
+                    estimated_spend_label="$0.00 estimated",
+                    notes="Local deterministic route unavailable",
                 ),
             ],
             selected_provider="claude",
@@ -1123,18 +1177,27 @@ def _render_provider_balance(balance: ProviderBalanceView) -> str:
     provider_items = []
     for provider in balance.providers:
         status_class = f"provider-{_e(provider.health)}"
+        pressure_class = f"provider-pressure-{_e(provider.cost_pressure)}"
+        credit_class = f"provider-credit-{_e(provider.credit_status)}"
+        selected_attr = ' data-selected="true"' if provider.provider_id == balance.selected_provider else ""
         trust_label = f"[{_e(provider.trust_state)}]"
         provider_items.append(
-            f'<div class="provider-item {status_class}" data-provider="{_e(provider.provider_id)}">'
+            f'<div class="provider-item {status_class} {pressure_class} {credit_class}" data-provider="{_e(provider.provider_id)}"{selected_attr}>'
             f'<div class="provider-header">'
             f'<span class="provider-name">{_e(provider.display_name)}</span>'
             f'<span class="provider-trust">{trust_label}</span>'
             f'<span class="provider-model">{_e(provider.model_name)}</span>'
+            f'<span class="provider-route">Route: {_e(provider.route_kind)}</span>'
             f"</div>"
             f'<div class="provider-metrics">'
             f'<span class="metric">Budget: {provider.prompt_budget_percent:.0f}%</span>'
             f'<span class="metric">Tokens: {provider.current_prompt_tokens}/{provider.prompt_budget_tokens}</span>'
+            f'<span class="metric">Context: {provider.context_budget_tokens}</span>'
+            f'<span class="metric">Delta: {provider.prompt_delta_tokens}</span>'
             f'<span class="metric">Pressure: {_e(provider.cost_pressure)}</span>'
+            f'<span class="metric">Quota: {_e(provider.quota_state)}</span>'
+            f'<span class="metric provider-credit-label">Remaining: {_e(provider.remaining_credit_label or provider.credit_status)}</span>'
+            f'<span class="metric provider-spend">Spend: {_e(provider.estimated_spend_label or "unknown")}</span>'
             f"</div>"
             f'<span class="provider-notes">{_e(provider.notes)}</span>'
             f"</div>"
@@ -1145,6 +1208,7 @@ def _render_provider_balance(balance: ProviderBalanceView) -> str:
         '<div class="provider-header-main">'
         '<h3>Provider Balance</h3>'
         f'<span class="routing-owner">{_e(balance.routing_owner)}</span>'
+        f'<span class="selected-provider">Selected: {_e(balance.selected_provider or "none")}</span>'
         f'<span class="policy-state policy-{_e(balance.policy_state)}">{_e(balance.policy_state)}</span>'
         "</div>"
         '<div class="provider-items">'
