@@ -198,6 +198,7 @@ Coordinator routing refresh - 2026-06-02:
 - Queue update: promoted Build 3's FileMap maintenance candidate to an executable `Active Task`, requiring a concrete missing-file/no-op audit with `python -m pytest tests/test_filemap.py -q` proof. This prevents the completed Relay UI FileMap slice from leaving Build 3 idle.
 - Queue update: promoted Reviews B's Build 4/Build 5 Ready-marker polling candidate to `Coordinator Override - Active Now`, with Build 4 checklist review before Build 5 if both become ready. This keeps Reviews B executable after the Relay UI/runtime review pass.
 - Build 1, Build 2, Build 4, Build 5, and Reviews A already had executable Active Now tasks plus Next Candidates; their existing routes were left unchanged.
+- Sync follow-up: fast-forwarded clean behind-only worktrees Build 4, Build 5, and Reviews A to `cd709d81`. Build 1, Build 2, Build 3, and Reviews B were left unchanged because they contain local ahead history; Build 3 and Reviews B local ahead commits are the originals of the already-moved pressure-lane evidence and should be cleaned only by an explicit coordinator alignment step.
 - Takeover remains `In transition`. Remaining pressure is implementation/proof from Build 1, Build 2, Build 4, and Build 5, plus review follow-through as Ready markers land.
 
 ## Full Takeover Criteria
