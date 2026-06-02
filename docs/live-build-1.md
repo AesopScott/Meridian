@@ -8,6 +8,25 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: Relay Source/Git main-write coordination handoff display-safety audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-relay-source-git-handoff-audit-20260602-1324`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02.
+- Commit: `8320b768` (`test: Harden Relay source git handoff tags`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (222 passed); `git diff --check` (passed); path-scope check limited changes to allowed files.
+- Concrete evidence: `_is_safe_handoff_evidence_id()` now rejects command/source-control terms inside structured `packet-proof-*` and `aegis-proof-*` evidence ids. Focused tests prove raw Git/main-write coordination text and command-shaped evidence ids such as `git reset --hard origin/main`, `merge origin/main`, `rebase current branch`, `cherry-pick review commit`, `stash-pop across worktrees`, `unapproved_main_write_request`, `packet-proof-git-reset-hard`, and `aegis-proof-main-write-request` are redacted across blocker, warning, reason, and evidence-id handoff surfaces while `packet_hash_missing`, `packet-proof-safe`, `aegis-proof-safe`, and `human approval required before dispatch` survive.
+- Next Candidate: promote equivalent display-safety assertions into downstream Bifrost/Prime/Aegis Source/Git handoff renderers once those consumer views are active.
+
 ## Coordinator Override - Blocked
 
 Goal: implement provider-neutral Model Harness capability metadata and prompt-drag telemetry on a stable fresh branch.
