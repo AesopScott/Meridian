@@ -256,6 +256,14 @@ Coordinator Build 2 advisory movement - 2026-06-02:
 - Approved and completed path-limited movement of Build 2 Prime/Beacon advisory binding onto shared main as `46c118f3` (`feat: bind session recovery advisory state`) and `4096f0f5` (`docs: mark session recovery advisory ready`). Movement scope stayed limited to `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, and `docs/live-build-2.md`.
 - Proof rerun on shared main after movement: `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py -q` passed 130/130. Next coordinator action: route Reviews A to review Build 2 advisory binding while the other build lanes continue active work.
 
+Coordinator batch movement under token pressure - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean on `main` and aligned with `origin/main`; verified affected worktrees Build 1, Build 3, Build 4, Build 5, and Reviews A were present and clean before movement. Build 2 remained clean with already-moved local originals; Reviews B remained stale/idle and was not moved.
+- Approved and completed path-limited movement of clean local completions onto shared main: Build 1 commits `3a458293` and `d394e9ee` landed as `814bce76` and `d00f305c`; Build 3 commits `0186f71c` and `2cd5b9c6` landed as `0b50287e` and `3fbd6c62`; Build 4 commits `64a3d509` and `07a086a1` landed as `3f8a4ca1` and `14913655`; Build 5 commits `8fb01b24` and `29e6262e` landed as `f4880b76` and `eeab3768`; Reviews A commit `9b8ce041` landed as `47b008ea`.
+- Movement scope stayed limited to Build 1 Relay route metadata core/tests/docs; Build 3 FileMap core/docs/tests; Build 4 Relay prompt-payload checklist docs; Build 5 Bifrost cockpit preview code/CSS/tests/docs; and Reviews A provenance in `docs/live-codex-reviews.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` passed 193/193; `python -m pytest tests/test_filemap.py -q` passed 46/46; `python -m pytest tests/test_bifrost_cockpit.py -q` passed 187/187; `git diff --check HEAD~9..HEAD` passed.
+- Session honesty check: all five build lanes now have completed work on main or already-moved local originals, but they need fresh executable tasks to avoid idle state. Reviews A has completed Build 2 advisory review provenance on main. Reviews B is not currently working in a useful state; it is stale/idle and must be re-aligned and routed to review the newly landed Build 1, Build 3, Build 4, and Build 5 slices.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
