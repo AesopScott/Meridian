@@ -93,6 +93,26 @@ class PrimeExecutability:
 
 
 @dataclass(frozen=True)
+class PrimeDriftAudit:
+    """No-drift audit for a Prime decision packet."""
+
+    status: str
+    checks: tuple[str, ...] = ()
+    failures: tuple[str, ...] = ()
+
+    def is_clean(self) -> bool:
+        return self.status == "clean" and not self.failures
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "status": self.status,
+            "checks": list(self.checks),
+            "failures": list(self.failures),
+            "clean": self.is_clean(),
+        }
+
+
+@dataclass(frozen=True)
 class PrimeAegisRiskInput:
     """Aegis proof/risk state Prime can consume without calling Aegis internals."""
 
@@ -216,6 +236,7 @@ class PrimeDecision:
             "risk": self.risk,
             "request": self.request.to_dict() if self.request else None,
             "context": self.context.to_dict(),
+            "driftAudit": audit_prime_decision(self).to_dict(),
             "proof": [item.to_dict() for item in self.proof],
             "blockers": list(self.blockers),
             "visibleToScott": list(self.visible_to_scott),
@@ -320,6 +341,49 @@ def _available_harnesses(context: PrimeRuntimeContext) -> set[str]:
         for source in context.source_refs
         if source.source not in {"", "unknown", "pending"}
     }
+
+
+def audit_prime_decision(decision: PrimeDecision) -> PrimeDriftAudit:
+    """Audit that visible Prime fields match backend owner/context/proof state."""
+
+    checks = [
+        "request_project_matches_context",
+        "owner_source_available_or_prime",
+        "proof_sources_include_owner_or_prime",
+        "aegis_risk_visible_when_source_available",
+        "visible_fields_declared",
+    ]
+    failures: list[str] = []
+    available = _available_harnesses(decision.context)
+    proof_sources = {item.source for item in decision.proof}
+
+    if decision.request and decision.request.project_id != decision.context.project_id:
+        failures.append("request project does not match context project")
+
+    if decision.owner_harness != "Prime" and decision.owner_harness not in available:
+        failures.append(f"owner source unavailable: {decision.owner_harness}")
+
+    if decision.owner_harness not in proof_sources and decision.owner_harness != "Prime":
+        failures.append(f"proof packet missing owner source: {decision.owner_harness}")
+
+    if "Aegis" in available and decision.context.aegis_risk is None:
+        failures.append("Aegis source available but risk packet missing")
+
+    required_visible = {
+        "Prime decision status",
+        "owning harness",
+        "backend source refs",
+        "proof questions and answers",
+        "blockers before execution",
+    }
+    if not required_visible.issubset(set(decision.visible_to_scott)):
+        failures.append("visible field declaration incomplete")
+
+    return PrimeDriftAudit(
+        status="drift" if failures else "clean",
+        checks=tuple(checks),
+        failures=tuple(failures),
+    )
 
 
 def evaluate_prime_executability(
@@ -597,6 +661,16 @@ def prime_runtime_snapshot() -> dict[str, Any]:
                     {"key": "aggregate action", "value": context.aegis_risk.aggregate_action if context.aegis_risk else "unavailable"},
                     {"key": "highest severity", "value": context.aegis_risk.highest_severity if context.aegis_risk else "unavailable"},
                     {"key": "blocking", "value": "yes" if context.aegis_risk and context.aegis_risk.is_blocking() else "no"},
+                ],
+            },
+            {
+                "title": "No Drift Audit",
+                "summary": "Prime checks that request, context, owner, source refs, proof, and visible fields agree.",
+                "rows": [
+                    {"key": "status", "value": audit_prime_decision(decision).status},
+                    {"key": "clean", "value": "yes" if audit_prime_decision(decision).is_clean() else "no"},
+                    {"key": "checks", "value": ", ".join(audit_prime_decision(decision).checks)},
+                    {"key": "failures", "value": ", ".join(audit_prime_decision(decision).failures) or "none"},
                 ],
             },
             {

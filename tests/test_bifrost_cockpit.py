@@ -208,6 +208,7 @@ def test_index_prime_harness_uses_backend_runtime_snapshot():
     assert "Prime Runtime Logic" in doc
     assert "Aegis risk logic" in doc
     assert "Interaction request" in doc
+    assert "No drift audit" in doc
     assert "data-prime-logic" in doc
     assert "bridgeUrl('prime-logic')" in doc
     assert "renderPrimeDecisionSnapshot" in doc

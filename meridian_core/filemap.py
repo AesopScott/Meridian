@@ -506,7 +506,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="meridian_core/prime_runtime.py",
             area=FileArea.PRIME_AUTONOMY,
-            purpose="Prime runtime decision contract: assembles typed PrimeInteractionRequest plus Compass, Vulcan, Relay, and Aegis risk source refs into one visible PrimeDecision with owner resolution, executability gates, proof packet, and bridge snapshot.",
+            purpose="Prime runtime decision contract: assembles typed PrimeInteractionRequest plus Compass, Vulcan, Relay, and Aegis risk source refs into one visible PrimeDecision with owner resolution, executability gates, proof packet, no-drift audit, and bridge snapshot.",
             related_tests=["tests/test_prime_runtime.py", "tests/test_bifrost_cockpit.py"],
             notes="Bifrost consumes this through /bridge/prime-logic; Aegis aggregate gate summaries feed PrimeAegisRiskInput and request fields stay visible. Keep Prime harness logic backend-sourced.",
         ),

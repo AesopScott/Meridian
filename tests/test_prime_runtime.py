@@ -8,6 +8,7 @@ from meridian_core.prime_runtime import (
     PrimeIntentKind,
     aegis_risk_from_aggregate,
     assemble_prime_runtime_context,
+    audit_prime_decision,
     evaluate_prime_executability,
     make_prime_decision,
     resolve_prime_decision,
@@ -68,6 +69,8 @@ def test_prime_decision_shape_is_visible_and_executable():
         "Prime",
     }
     assert "visibleToScott" in payload
+    assert payload["driftAudit"]["status"] == "clean"
+    assert payload["driftAudit"]["clean"] is True
 
 
 def test_prime_decision_blockers_force_blocked_status():
@@ -225,6 +228,47 @@ def test_resolve_prime_interaction_uses_request_owner_and_payload():
     assert payload["request"]["requestId"] == "req-model-route"
     assert payload["request"]["intent"] == "model_route"
     assert payload["ownerHarness"] == "Relay"
+    assert payload["driftAudit"]["clean"] is True
+
+
+def test_prime_drift_audit_detects_project_mismatch():
+    context = assemble_prime_runtime_context(
+        compass_snapshot=compass_logic_snapshot(),
+        vulcan_snapshot=vulcan_logic_snapshot(),
+        relay_snapshot=relay_logic_snapshot(),
+        project_id="Meridian",
+    )
+    request = PrimeInteractionRequest(
+        request_id="req-wrong-project",
+        intent=PrimeIntentKind.ORCHESTRATION,
+        action="inspect_backend_context",
+        why="Test mismatch.",
+        project_id="Polaris",
+    )
+    decision = resolve_prime_interaction(context=context, request=request)
+    audit = audit_prime_decision(decision)
+
+    assert audit.status == "drift"
+    assert "request project does not match context project" in audit.failures
+
+
+def test_prime_drift_audit_detects_missing_owner_source():
+    context = assemble_prime_runtime_context(
+        compass_snapshot=compass_logic_snapshot(),
+        vulcan_snapshot=vulcan_logic_snapshot(),
+        relay_snapshot={},
+    )
+    request = PrimeInteractionRequest(
+        request_id="req-missing-relay",
+        intent=PrimeIntentKind.MODEL_ROUTE,
+        action="select_model_route",
+        why="Relay source is missing.",
+    )
+    decision = resolve_prime_interaction(context=context, request=request)
+    audit = audit_prime_decision(decision)
+
+    assert audit.status == "drift"
+    assert "owner source unavailable: Relay" in audit.failures
 
 
 def test_prime_executability_blocks_missing_owner_source():
@@ -314,6 +358,7 @@ def test_prime_runtime_snapshot_is_backend_visible_contract():
     assert snapshot["source"] == "meridian_core.prime_runtime.resolve_prime_decision"
     assert snapshot["decision"]["ownerHarness"] == "Prime"
     assert snapshot["decision"]["request"]["requestId"] == "prime-runtime-request-v1"
+    assert snapshot["decision"]["driftAudit"]["status"] == "clean"
     assert snapshot["decision"]["context"]["sourceRefs"][0]["harness"] == "Compass"
     assert snapshot["decision"]["context"]["aegisRisk"]["aggregateAction"] == "route_allowed"
     assert "Interaction Request" in titles
@@ -321,4 +366,5 @@ def test_prime_runtime_snapshot_is_backend_visible_contract():
     assert "Logic Hierarchy" in titles
     assert "Aegis Binding" in titles
     assert "Executability Logic" in titles
+    assert "No Drift Audit" in titles
     assert "Proof Packet" in titles
