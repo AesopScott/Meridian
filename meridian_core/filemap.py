@@ -434,6 +434,13 @@ def make_default_map() -> FileMap:
             notes="V2 entry-point. Read before implementing model capability metadata, trust routing, or provider telemetry integration.",
         ),
         FileMapEntry(
+            path="docs/model-harness-metadata-implementation-checklist.md",
+            area=FileArea.MODEL_HARNESS,
+            purpose="Build-ready checklist for provider capability metadata, trust state, prompt drag, direct-vs-aggregator evidence, and Bifrost-visible model harness status.",
+            related_tests=["tests/test_model_adapter.py", "tests/test_bifrost_cockpit.py"],
+            notes="Runtime implementation is not authorized by the checklist alone. Read before wiring model metadata into Relay, Aegis, or Bifrost surfaces.",
+        ),
+        FileMapEntry(
             path="meridian_core/restart_resteer.py",
             area=FileArea.DOMAIN_MODEL,
             purpose="Prime restart/resteer domain objects and evaluator: detects empty queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates.",
@@ -1084,6 +1091,20 @@ def make_default_map() -> FileMap:
             purpose="Cockpit CSS: V1 dark-mode palette, layout rules for Prime panel, lane strip, progress surface, and instrument band. Inlined into the HTML output by render_cockpit_html.",
             related_tests=[],
             notes="Loaded at render time via Path(__file__).parent / 'static' / 'cockpit.css'. Edit here to change cockpit visual style.",
+        ),
+        FileMapEntry(
+            path="bifrost/static/media/spark-center-final.png",
+            area=FileArea.BIFROST,
+            purpose="Bifrost cockpit visual asset for the central Prime/Spark presentation used by the rendered cockpit surface.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="Static media referenced by cockpit rendering/styling. Keep path stable when changing Bifrost visual assets.",
+        ),
+        FileMapEntry(
+            path="bifrost/static/media/spark-hud-reference.jpg",
+            area=FileArea.BIFROST,
+            purpose="Bifrost cockpit HUD reference visual asset used by the rendered cockpit surface.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="Static media referenced by cockpit rendering/styling. Keep path stable when changing Bifrost visual assets.",
         ),
         FileMapEntry(
             path="tests/test_bifrost_cockpit.py",

@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: keep FileMap current after the latest Build 3/4/5 movement to shared main.
 
@@ -23,6 +23,22 @@ Task: audit FileMap coverage after current-main commits `791373a9`, `5c6ea359`, 
 Tests: `python -m pytest tests/test_filemap.py -q` plus `git diff --check`.
 
 Completion: commit locally only in the assigned worktree if coverage changes or concrete no-op evidence is recorded, mark Ready for Codex Review with commit hash or no-op evidence, files changed, tests run, and Next Candidate: bind review findings before unrelated FileMap cleanup.
+
+Completion:
+
+- Build 3 audited current `origin/main` at `778daa93` after Build 3/4/5 movement and routing checkpoint commits `791373a9`, `5c6ea359`, `996fa89b`, `077ad3aa`, `fde47333`, and `778daa93`.
+- Inspected required sources: `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews-2.md`, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Inspected required minimum paths: `docs/model-harness-metadata-implementation-checklist.md`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-4.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md`.
+- Registered missing existing artifacts: `docs/model-harness-metadata-implementation-checklist.md`, `bifrost/static/media/spark-center-final.png`, and `bifrost/static/media/spark-hud-reference.jpg` in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Registered the partial existing artifact gap `docs/deepseek-provider-validation-gate.md` in `docs/FileMap.md`; it was already in runtime FileMap and `_REQUIRED_PATHS`.
+- Audit evidence: focused coverage check across 33 inspected changed/referenced existing paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Diff proof: `git diff --check` - passed.
+- Commit: this queue-marker commit.
+- Next Candidate: bind review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
