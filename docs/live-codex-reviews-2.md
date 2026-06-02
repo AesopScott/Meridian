@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: keep Build 4/5 review hot under the rolling two-stage pipeline.
 
@@ -15,6 +15,23 @@ Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 Task: poll current `origin/main` and the top blocks in `docs/live-build-4.md` and `docs/live-build-5.md`. Review the oldest Ready marker from Build 4 or Build 5 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no Relay runtime/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 4 Aegis serialization or Build 5 Bifrost handoff adapter when either marks Ready for Codex Review.
+
+Review result - 2026-06-01 23:26 -06:00:
+
+- Build 4 Aegis policy result display serialization passed. Commits `558e9a8f` and `5c203d79` changed only `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+- The Aegis helper remains pure/domain-only and serializes `PromptPacketProofPolicyResult` into stable display-safe keys for decision, severity, reason, evidence IDs, blockers, warnings, missing fields, reason tags, and demotion target while redacting raw prompt, credential, provider, process-id, and live-control sentinel strings.
+- Build 5 Relay/Aegis handoff summary adapter passed. Commits `e040a2a9` and `ee36565f` changed only `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The Bifrost adapter is pure dictionary-to-view-model normalization for structured Relay/Aegis summaries, preserves deterministic ordering for unordered containers, maps alias fields to the existing handoff view, normalizes fail-closed placeholders, and redacts unsafe metadata before rendering.
+- Scope check found no live Relay runtime wiring, model/process/session calls, `index.html` edit, FileMap edit, branch movement, Polaris dependency, shared-main write, or push.
+
+Proof:
+
+- `python -m pytest tests/test_aegis.py -q` passed: 237 tests.
+- `git diff --check 558e9a8f^..5c203d79` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 231 tests.
+- `git diff --check e040a2a9^..ee36565f` passed.
+
+Completion: Build 4 Aegis policy result display serialization and Build 5 Relay/Aegis handoff summary adapter are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
