@@ -147,6 +147,35 @@ class ModelCapabilityMetadataView:
 
 
 @dataclass
+class ModelValidationEnvelopeItem:
+    envelope_id: str
+    provider_id: str
+    exact_model_id: str
+    dispatch_id: str
+    route_kind: str
+    validation_state: str
+    fail_closed_reason: str = "none"
+    candidate_trust_state: str = "trusted"
+    external_review_status: str = "not_required"
+    proof_strength: str = "unknown"
+    prompt_budget_status: str = "unknown"
+    prompt_growth_state: str = "unknown"
+    prompt_budget_percent: float = 0.0
+    prompt_delta_tokens: int = 0
+    prompt_delta_percent: float = 0.0
+    route_proof_refs: list[str] = field(default_factory=list)
+    blocker_tags: list[str] = field(default_factory=list)
+    warning_tags: list[str] = field(default_factory=list)
+    evidence_refs: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ModelValidationEnvelopeView:
+    envelopes: list[ModelValidationEnvelopeItem] = field(default_factory=list)
+    source: str = "sample"
+
+
+@dataclass
 class PromptPayloadView:
     size_label: str = ""
     estimated_tokens: int = 0
@@ -344,6 +373,7 @@ class CockpitViewModel:
     voice: VoiceIOState = field(default_factory=VoiceIOState)
     provider_balance: ProviderBalanceView = field(default_factory=ProviderBalanceView)
     model_capabilities: ModelCapabilityMetadataView = field(default_factory=ModelCapabilityMetadataView)
+    model_validation_envelopes: ModelValidationEnvelopeView = field(default_factory=ModelValidationEnvelopeView)
     prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     dispatch_hardening: DispatchHardeningView = field(default_factory=DispatchHardeningView)
     prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
@@ -624,6 +654,74 @@ def sample_cockpit_view_model(
                     prompt_budget_status="near_limit",
                     prompt_growth_state="degraded",
                     prompt_delta_tokens=360,
+                    evidence_refs=["adapter:openrouter", "snapshot:unavailable"],
+                ),
+            ],
+        ),
+        model_validation_envelopes=ModelValidationEnvelopeView(
+            source="model-harness-runtime-validation-sample",
+            envelopes=[
+                ModelValidationEnvelopeItem(
+                    envelope_id="validation:claude-direct-ready",
+                    provider_id="claude",
+                    exact_model_id="claude-sonnet-4-20250514",
+                    dispatch_id="claude-sonnet-4-20250514",
+                    route_kind="direct",
+                    validation_state="allowed",
+                    fail_closed_reason="none",
+                    candidate_trust_state="trusted",
+                    external_review_status="not_required",
+                    proof_strength="strong",
+                    prompt_budget_status="within_budget",
+                    prompt_growth_state="flat",
+                    prompt_budget_percent=23.0,
+                    prompt_delta_tokens=0,
+                    prompt_delta_percent=0.0,
+                    route_proof_refs=["metadata:claude-direct", "snapshot:claude-payload"],
+                    blocker_tags=[],
+                    warning_tags=[],
+                    evidence_refs=["validation:claude-direct-ready", "payload:dispatch-latest"],
+                ),
+                ModelValidationEnvelopeItem(
+                    envelope_id="validation:deepseek-review-pending",
+                    provider_id="deepseek",
+                    exact_model_id="deepseek-chat",
+                    dispatch_id="deepseek-chat",
+                    route_kind="direct",
+                    validation_state="fail_closed",
+                    fail_closed_reason="external_review_required",
+                    candidate_trust_state="candidate",
+                    external_review_status="pending",
+                    proof_strength="weak",
+                    prompt_budget_status="watch",
+                    prompt_growth_state="unexpected_growth",
+                    prompt_budget_percent=72.0,
+                    prompt_delta_tokens=240,
+                    prompt_delta_percent=6.0,
+                    route_proof_refs=["endpoint:https://api.deepseek.com/v1/chat/completions"],
+                    blocker_tags=["external_review_required", "review_clearing_blocked"],
+                    warning_tags=["prompt_growth_watch"],
+                    evidence_refs=["adapter:deepseek", "validation:pending", "budget:deepseek-watch"],
+                ),
+                ModelValidationEnvelopeItem(
+                    envelope_id="validation:openrouter-aggregator-blocked",
+                    provider_id="openrouter",
+                    exact_model_id="deepseek-chat",
+                    dispatch_id="deepseek-chat",
+                    route_kind="aggregator",
+                    validation_state="fail_closed",
+                    fail_closed_reason="blocked_authority",
+                    candidate_trust_state="validation_blocked",
+                    external_review_status="pending",
+                    proof_strength="weak",
+                    prompt_budget_status="near_limit",
+                    prompt_growth_state="degraded",
+                    prompt_budget_percent=88.9,
+                    prompt_delta_tokens=360,
+                    prompt_delta_percent=12.0,
+                    route_proof_refs=["aggregator:openrouter", "direct-proof:unavailable"],
+                    blocker_tags=["aggregator_without_proof", "payload_snapshot_missing"],
+                    warning_tags=["aggregator_route_capped", "prompt_drag_degraded"],
                     evidence_refs=["adapter:openrouter", "snapshot:unavailable"],
                 ),
             ],
@@ -1455,6 +1553,81 @@ def _render_model_capabilities(metadata: ModelCapabilityMetadataView) -> str:
     )
 
 
+def _render_model_validation_envelopes(validation: ModelValidationEnvelopeView) -> str:
+    if not validation.envelopes:
+        return ""
+
+    envelope_markup = []
+    for envelope in validation.envelopes:
+        route_proofs = "".join(
+            f'<span class="validation-chip validation-proof-ref">{_e(ref)}</span>'
+            for ref in envelope.route_proof_refs
+        ) or '<span class="validation-chip validation-empty">no_route_proof_refs</span>'
+        blockers = "".join(
+            f'<span class="validation-chip validation-blocker">{_e(tag)}</span>'
+            for tag in envelope.blocker_tags
+        ) or '<span class="validation-chip validation-empty">none</span>'
+        warnings = "".join(
+            f'<span class="validation-chip validation-warning">{_e(tag)}</span>'
+            for tag in envelope.warning_tags
+        ) or '<span class="validation-chip validation-empty">none</span>'
+        evidence = "".join(
+            f'<span class="validation-chip validation-evidence">{_e(ref)}</span>'
+            for ref in envelope.evidence_refs
+        ) or '<span class="validation-chip validation-empty">no_evidence_refs</span>'
+        envelope_markup.append(
+            f'<div class="validation-envelope validation-state-{_e(envelope.validation_state)}" data-envelope="{_e(envelope.envelope_id)}" data-model="{_e(envelope.exact_model_id)}" data-provider="{_e(envelope.provider_id)}">'
+            '<div class="validation-envelope-header">'
+            f'<span class="validation-envelope-id">{_e(envelope.envelope_id)}</span>'
+            f'<span class="validation-state">Validation: {_e(envelope.validation_state)}</span>'
+            f'<span class="validation-fail-reason">Fail closed: {_e(envelope.fail_closed_reason)}</span>'
+            "</div>"
+            '<div class="validation-badges" aria-label="Validation Envelope Candidate Trust Badges">'
+            f'<span class="capability-badge capability-candidate-{_e(envelope.candidate_trust_state)}">Candidate trust: {_e(envelope.candidate_trust_state)}</span>'
+            f'<span class="capability-badge capability-review-{_e(envelope.external_review_status)}">External review status: {_e(envelope.external_review_status)}</span>'
+            f'<span class="capability-badge capability-proof-{_e(envelope.proof_strength)}">Proof: {_e(envelope.proof_strength)}</span>'
+            "</div>"
+            '<div class="validation-grid">'
+            f'<span>Provider: {_e(envelope.provider_id)}</span>'
+            f'<span>Exact model: {_e(envelope.exact_model_id)}</span>'
+            f'<span>Dispatch id: {_e(envelope.dispatch_id)}</span>'
+            f'<span>Route: {_e(envelope.route_kind)}</span>'
+            f'<span>Prompt budget: {_e(envelope.prompt_budget_status)}</span>'
+            f'<span>Prompt growth: {_e(envelope.prompt_growth_state)}</span>'
+            f'<span>Budget percent: {envelope.prompt_budget_percent:.1f}%</span>'
+            f'<span>Prompt delta: {envelope.prompt_delta_tokens}</span>'
+            f'<span>Delta percent: {envelope.prompt_delta_percent:.1f}%</span>'
+            "</div>"
+            '<div class="validation-lists">'
+            '<div class="validation-list validation-route-proofs" aria-label="Validation Envelope Route Proof Refs"><span class="validation-list-title">Route Proofs</span>'
+            + route_proofs
+            + "</div>"
+            '<div class="validation-list validation-blockers" aria-label="Validation Envelope Blockers"><span class="validation-list-title">Blockers</span>'
+            + blockers
+            + "</div>"
+            '<div class="validation-list validation-warnings" aria-label="Validation Envelope Warnings"><span class="validation-list-title">Warnings</span>'
+            + warnings
+            + "</div>"
+            '<div class="validation-list validation-evidence-refs" aria-label="Validation Envelope Evidence Refs"><span class="validation-list-title">Evidence</span>'
+            + evidence
+            + "</div>"
+            + "</div>"
+            + "</div>"
+        )
+
+    return (
+        '<section class="model-validation-envelopes" aria-label="Model Harness Runtime Validation Envelopes">'
+        '<div class="validation-header-main">'
+        '<h3>Runtime Validation Envelopes</h3>'
+        f'<span class="validation-source">Source: {_e(validation.source)}</span>'
+        "</div>"
+        '<div class="validation-envelope-items">'
+        + "".join(envelope_markup)
+        + "</div>"
+        + "</section>"
+    )
+
+
 def _render_prompt_payload(payload: PromptPayloadView) -> str:
     if not payload.size_label:
         return ""
@@ -2177,6 +2350,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     proof_state = _render_proof_state(vm.proof_state)
     provider_balance = _render_provider_balance(vm.provider_balance)
     model_capabilities = _render_model_capabilities(vm.model_capabilities)
+    model_validation_envelopes = _render_model_validation_envelopes(vm.model_validation_envelopes)
     prompt_payload = _render_prompt_payload(vm.prompt_payload)
     dispatch_hardening = _render_dispatch_hardening(vm.dispatch_hardening)
     prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
@@ -2218,6 +2392,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{relay_aegis_handoff}\n"
         f"{provider_balance}\n"
         f"{model_capabilities}\n"
+        f"{model_validation_envelopes}\n"
         f"{prompt_payload}\n"
         "</main>\n"
         '<aside class="right-panel">\n'

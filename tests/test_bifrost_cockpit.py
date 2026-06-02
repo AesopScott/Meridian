@@ -18,6 +18,8 @@ from bifrost.cockpit import (
     LaneRow,
     ModelCapabilityItem,
     ModelCapabilityMetadataView,
+    ModelValidationEnvelopeItem,
+    ModelValidationEnvelopeView,
     ProgressEvent,
     ProviderBalanceItem,
     ProviderBalanceView,
@@ -558,6 +560,7 @@ def test_model_capability_metadata_preserves_existing_surfaces_and_stale_recover
     vm.user_session_mode.selected_session_id = "closed-capability-session"
     doc = render_cockpit_html(vm)
     assert 'aria-label="Model Harness Capability Metadata"' in doc
+    assert 'aria-label="Model Harness Runtime Validation Envelopes"' in doc
     assert 'aria-label="Provider Balance"' in doc
     assert 'aria-label="Prompt Payload Visibility"' in doc
     assert 'aria-label="Dispatch Hardening State"' in doc
@@ -567,6 +570,97 @@ def test_model_capability_metadata_preserves_existing_surfaces_and_stale_recover
     assert 'class="stale-target-guard"' in doc
     assert 'data-recovery-action="ask-prime-recover"' in doc
     assert "Next prompt target: Closed Capability Session" not in doc
+
+
+def test_model_validation_envelopes_sample_renders_required_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Model Harness Runtime Validation Envelopes"' in doc
+    assert "Runtime Validation Envelopes" in doc
+    assert "Source: model-harness-runtime-validation-sample" in doc
+    assert 'data-envelope="validation:claude-direct-ready"' in doc
+    assert "Validation: allowed" in doc
+    assert "Fail closed: none" in doc
+    assert "Provider: claude" in doc
+    assert "Exact model: claude-sonnet-4-20250514" in doc
+    assert "Dispatch id: claude-sonnet-4-20250514" in doc
+    assert "Route: direct" in doc
+
+
+def test_model_validation_envelopes_sample_renders_fail_closed_proofs_and_badges():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "validation:deepseek-review-pending" in doc
+    assert "validation:openrouter-aggregator-blocked" in doc
+    assert "Validation: fail_closed" in doc
+    assert "Fail closed: external_review_required" in doc
+    assert "Fail closed: blocked_authority" in doc
+    assert "endpoint:https://api.deepseek.com/v1/chat/completions" in doc
+    assert "aggregator:openrouter" in doc
+    assert "direct-proof:unavailable" in doc
+    assert "Candidate trust: candidate" in doc
+    assert "Candidate trust: validation_blocked" in doc
+    assert "External review status: pending" in doc
+    assert "Proof: weak" in doc
+
+
+def test_model_validation_envelopes_sample_renders_prompt_drag_and_evidence():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Prompt budget: within_budget" in doc
+    assert "Prompt budget: watch" in doc
+    assert "Prompt budget: near_limit" in doc
+    assert "Prompt growth: flat" in doc
+    assert "Prompt growth: unexpected_growth" in doc
+    assert "Prompt growth: degraded" in doc
+    assert "Budget percent: 23.0%" in doc
+    assert "Budget percent: 88.9%" in doc
+    assert "Prompt delta: 360" in doc
+    assert "Delta percent: 12.0%" in doc
+    assert "review_clearing_blocked" in doc
+    assert "prompt_drag_degraded" in doc
+    assert "budget:deepseek-watch" in doc
+
+
+def test_model_validation_envelopes_escape_structured_fields():
+    vm = sample_cockpit_view_model()
+    vm.model_validation_envelopes = ModelValidationEnvelopeView(
+        source="<script>validation</script>",
+        envelopes=[
+            ModelValidationEnvelopeItem(
+                envelope_id="<script>envelope</script>",
+                provider_id="<img src=x>",
+                exact_model_id="<script>model</script>",
+                dispatch_id="dispatch:<bad>",
+                route_kind="<bad-route>",
+                validation_state="<bad-state>",
+                fail_closed_reason="reason:<bad>",
+                candidate_trust_state="<script>candidate</script>",
+                external_review_status="<script>review</script>",
+                proof_strength="<bad-proof>",
+                prompt_budget_status="<script>budget</script>",
+                prompt_growth_state="growth:<bad>",
+                prompt_budget_percent=9.5,
+                prompt_delta_tokens=7,
+                prompt_delta_percent=1.5,
+                route_proof_refs=["proof:<bad>"],
+                blocker_tags=["blocker:<bad>"],
+                warning_tags=["warning:<bad>"],
+                evidence_refs=["evidence:<bad>"],
+            )
+        ],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "Source: &lt;script&gt;validation&lt;/script&gt;" in doc
+    assert "data-envelope=\"&lt;script&gt;envelope&lt;/script&gt;\"" in doc
+    assert "Provider: &lt;img src=x&gt;" in doc
+    assert "Dispatch id: dispatch:&lt;bad&gt;" in doc
+    assert "Candidate trust: &lt;script&gt;candidate&lt;/script&gt;" in doc
+    assert "External review status: &lt;script&gt;review&lt;/script&gt;" in doc
+    assert "Proof: &lt;bad-proof&gt;" in doc
+    assert "proof:&lt;bad&gt;" in doc
+    assert "blocker:&lt;bad&gt;" in doc
+    assert "warning:&lt;bad&gt;" in doc
+    assert "evidence:&lt;bad&gt;" in doc
 
 
 def test_prompt_payload_sample_renders_structured_visibility_fields():
