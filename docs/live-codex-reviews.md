@@ -24,6 +24,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 1 PromptPacket proof metadata binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:33 -06:00. Current `HEAD` and `origin/main` are `46315779`, and Build 1 commits `f1acf65c` and `5c6a6a28` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prompt_packet.py`, `meridian_core/relay_packet.py`, `meridian_core/relay_executor.py`, `tests/test_prompt_packet.py`, `tests/test_relay_packet.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q`
+- `git diff --check f1acf65c^..5c6a6a28`
+
+Review result:
+
+- Containment checks for `f1acf65c` and `5c6a6a28` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prompt_packet.py`, `meridian_core/relay_packet.py`, `meridian_core/relay_executor.py`, `tests/test_prompt_packet.py`, `tests/test_relay_packet.py`, and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q` passed with 234 tests.
+- `git diff --check f1acf65c^..5c6a6a28` passed.
+- Verified `PromptPacketProofMetadata` is immutable display/audit metadata carrying packet hash, budget/source-lineage proof, proof requirements, Aegis evidence ids, snapshot/hash fields, and blocked tags without storing raw prompt text.
+- Verified `PromptPacket.model_payload()` still returns only the raw `serialized_prompt`; packet metadata, hash, budget refs, source-lineage keys, credentials, provider responses, and account internals do not cross that model-bound payload.
+- Verified Relay dispatch envelopes carry packet proof refs/hash/budget/compliance/proof fields and fail closed through blocked tags when packet proof metadata or other required safe metadata is missing/unavailable.
+- Scoped side-effect scan found no live provider call path, credential handling, raw provider response storage, UI/Bifrost rendering, FileMap edits, Polaris dependency, branch movement, or cross-worktree movement in the reviewed Build 1 slice.
+
+Finding: none.
+
+Completion: Build 1 PromptPacket proof metadata binding is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Ready markers from Build 2 Prime audit-evidence advisory binding and Build 3 PromptPacket FileMap audit.
 
 Status: passed by Codex Reviews A on 2026-06-01 22:30 -06:00. Current `HEAD` and `origin/main` are `c6a1c14b`. Build 2 commits `dcdce3cd` and `fff4e716`, and Build 3 commits `1072ae3c` and `f6e982de`, are ancestors of current main.
