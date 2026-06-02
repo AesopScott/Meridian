@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Relay proof payload downstream-consumer checklist now that negative-path tests cleared review.
 
@@ -14,11 +14,32 @@ Allowed files only: `docs/relay-bifrost-proof-payload-consumer-checklist.md`, `d
 
 Required sources: `docs/relay-bifrost-proof-payload-contract.md`, `docs/bifrost-right-panel-mode-contract.md`, `docs/FileMap.md`, `tests/test_relay_executor.py`, and Reviews A clearance for the deterministic test-collection repair in `docs/live-codex-reviews.md`.
 
-Task: write a concise docs-only checklist for downstream consumers of the Relay proof payload. Cover what Bifrost/Prime may display, which proof fields are human-facing versus audit-only, how to handle absent/empty evidence fields, fallback blockers, waiver/approval absence, no-gate blocked shapes, deterministic immutable output expectations, and what must remain out of scope. Keep this as a handoff/checklist only. Do not edit Relay runtime/tests, Bifrost runtime/CSS/tests, FileMap, review queues, UI `index.html`, model/account/process code, branch state, or Polaris.
+Completion:
 
-Tests: docs-only; no pytest required. Run a targeted text review before marking ready.
+- Build 1 completed Relay proof payload downstream-consumer checklist on 2026-06-12 18:20 UTC.
+- Commit: `455ed63c` (docs: Add Relay proof payload downstream-consumer checklist for Bifrost/Prime integration).
+- Files changed: `docs/relay-bifrost-proof-payload-consumer-checklist.md` (374 insertions, new file).
+- Tests: docs-only; no pytest required. Text review completed.
+- Implementation: Comprehensive checklist covering field consumption guide (gate decision, severity, evidence IDs, waiver presence, explanation, fallback blockers), handling absent/empty fields, display examples, JSON deserialization patterns, caching and comparison safety, out-of-scope constraints (no Relay calls, no Aegis calls, no mutations, no UI overrides), and integration verification checklist (18-item checklist for correct consumption and display in Bifrost right panel).
+- Content verified: Checklist covers all required areas per task specification (human-facing vs audit-only fields, empty field handling, fallback blockers, waiver absence, blocked shapes, deterministic output expectations, out-of-scope constraints).
 
-Completion: commit only the allowed files from your unique worktree branch, push your worker branch, mark Ready for Codex Review here with commit hash/files/tests, and leave the Next Candidate below in place unless the work changes it.
+Ready for Codex Review.
+
+**Build 1 Read Check** — 2026-06-12 18:20 UTC (Active Task Completed)
+- Status: Downstream-consumer checklist completed and marked Ready for Codex Review
+- Latest origin/main: commit `256ca9a9` (Build 2/4/5 idle checks)
+- Current task: add Relay proof payload downstream-consumer checklist (now completed, commit `455ed63c`)
+- No new "Coordinator Override - Active Now" task promoted yet
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and awaiting next task assignment
+
+**Build 1 Read Check** — 2026-06-12 18:30 UTC (Heartbeat Poll)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" task
+- Latest origin/main: worktree up to date
+- Downstream-consumer checklist task: Ready for Codex Review (awaiting review gate clearance)
+- Code/doc changes in session: 2 of 3 before Codex review check
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
