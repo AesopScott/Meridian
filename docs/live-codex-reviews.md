@@ -20,6 +20,54 @@ Proof: for Build 1, `python -m pytest tests/test_model_adapter.py -q` plus `git 
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 1/2 polling after these current-main reviews.
 
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 1 DeepSeek candidate metadata presets, then Build 2 runtime-state export.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:20 -06:00. Current `HEAD` and `origin/main` are `a89135c2`, and Build 1 commits `bfada8b1` and `1fcad364`, plus Build 2 commits `93bf40dd` and `d0179bb0`, are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_model_adapter.py -q`
+- `git diff --check bfada8b1^..1fcad364`
+
+Build 1 review result:
+
+- Containment checks for `bfada8b1` and `1fcad364` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/model_adapter.py` and `tests/test_model_adapter.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_model_adapter.py -q` passed with 43 tests.
+- `git diff --check bfada8b1^..1fcad364` passed.
+- Verified DeepSeek candidate presets remain metadata-only and preserve exact dispatch identity `deepseek-chat`; `deepseek-v4-pro` and `deepseek-v4-flash` remain variant labels only.
+- Verified candidate trust remains pending/direct with external review required, max risk tier 1, no review clearance, no branch movement, no Relay/Aegis bypass, no autonomous coding authority, and display-safe route proof/evidence refs.
+- Verified no live provider transport, credentials/account probing, raw prompt text, provider responses, Relay/Bifrost/FileMap edits, branch/worktree movement, main writes, or Polaris dependency was introduced.
+
+Build 1 finding: none.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 93bf40dd^..d0179bb0`
+
+Build 2 review result:
+
+- Containment checks for `93bf40dd` and `d0179bb0` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 100 tests.
+- `git diff --check 93bf40dd^..d0179bb0` passed.
+- Verified `SessionRuntimeStateExport` and `export_session_runtime_state_for_workflow_recovery()` are deterministic serializable advisory exports combining session lifecycle state, optional command-plan intent, permission summary, and workflow recovery summary.
+- Verified exported fields cover state id, active command kind, target session id, recommended recovery action, stale heartbeat/result status, permission blockers, review-gate blockers, human-gate blockers, and evidence refs.
+- Verified no recovery execution, session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency was introduced.
+
+Build 2 finding: none.
+
+Completion: Build 1 DeepSeek candidate metadata presets and Build 2 runtime-state export are review-cleared. No repair routed.
+
 ## Coordinator Override - Active Now
 
 Goal: review current-main Build 1 Model Harness metadata binding, then Build 2 workflow advisory binding.
