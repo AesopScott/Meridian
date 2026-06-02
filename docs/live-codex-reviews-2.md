@@ -63,7 +63,7 @@ Proof:
 
 Completion: Relay harness UI/runtime integration is review-cleared. Reviews B returns to the Build 4/Build 5 current-main Ready-marker polling task in the Next Candidate section.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Finding Routed
 
 Goal: resume review of the next current-main Ready marker from Build 4 or Build 5 after the Relay harness UI/runtime integration review is closed.
 
@@ -84,6 +84,23 @@ Proof commands:
 - Build 5: `python -m pytest tests/test_bifrost_cockpit.py -q`
 
 Completion: if clean, mark passed and promote the owning lane's next candidate; if findings exist, route the smallest focused repair ahead of normal work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+Review result - 2026-06-01 21:28 -06:00:
+
+- Build 4 finding routed. `docs/relay-heartbeat-model-routing-implementation-checklist.md` has a whitespace failure at line 197: `git diff --check a4652ce4^..e15a38a1` reports `new blank line at EOF`.
+- Why it matters: Build 4's Ready marker says verification included `git diff --check`, but the reviewed slice does not pass that proof. This is a smallest-scope repair in the Build 4 checklist slice.
+- Passed Build 4 scope/content checks before the proof failure: commits `a4652ce4` and `e15a38a1` changed only `docs/live-build-4.md` and `docs/relay-heartbeat-model-routing-implementation-checklist.md`; the checklist preserves account-first route precedence, wrong-scope correction/blocking, Tier 3+ start/re-auth/direct-with-proof/block choices, `deepseek-chat` exact dispatch identity, DeepSeek candidate trust gates, Bifrost visibility requirements, Auto-disabled/runtime-blocked boundaries, and FileMap routing for future new runtime/docs files.
+- Scope check found docs/architecture work only: no runtime code, model calls, account probing, session spawning, Bifrost UI edits, Polaris dependency, branch movement, shared-main write, or push.
+- Build 5 was not reviewed because the assignment says to proceed to Build 5 only if Build 4 passes with no routed finding.
+
+Proof:
+
+- `git diff --check a4652ce4^..e15a38a1` failed: `docs/relay-heartbeat-model-routing-implementation-checklist.md:197: new blank line at EOF`.
+- Build 4 is docs/architecture review; no pytest required.
+
+Next Candidate:
+
+- Re-review Build 4 Relay routing implementation checklist after Build 4 removes the EOF whitespace failure and marks the focused repair Ready for Codex Review. Review Build 5 stale-session recovery action sample rendering only after Build 4 passes.
 
 ## Coordinator Override - Completed / Passed
 
