@@ -188,11 +188,25 @@ def make_default_map() -> FileMap:
             notes="Obsidian mirror: G:\\My Drive\\Aesop Academy\\Obsidian\\Meridian_Build\\FileMap.md",
         ),
         FileMapEntry(
+            path="docs/main-write-coordination-handoff.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Main-write coordination handoff: protocol for shared main writes, ACK windows, path-limited movement, proof, and completion reporting.",
+            related_tests=[],
+            notes="Source/Git runtime logic source. Read before planning any shared main write, push, merge, rebase, cherry-pick, reset, cleanup, or salvage.",
+        ),
+        FileMapEntry(
+            path="docs/main-write-coordination-ledger.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Main-write coordination ledger: active lease source of truth, standing acknowledgements, intent/ACK/completion templates, and completed coordination log.",
+            related_tests=[],
+            notes="Source/Git runtime logic source. Re-read immediately before every shared main write attempt.",
+        ),
+        FileMapEntry(
             path="docs/harness-stage-checklist.md",
             area=FileArea.BUILD_PROCESS,
             purpose="Cross-harness stage tracker for Contract/Baseline, V2 Backend, Core Implementation, Prime Integration, Runtime Logic UI, Proofs/Review, and Operations status.",
             related_tests=["tests/test_filemap.py"],
-            notes="Use when Scott asks what stage a harness is in or requests a harness/stage-specific build.",
+            notes="Use when the user asks what stage a harness is in or requests a harness/stage-specific build.",
         ),
         FileMapEntry(
             path="docs/harness-stage-checklist.html",
@@ -200,6 +214,20 @@ def make_default_map() -> FileMap:
             purpose="Visual HTML dashboard for the harness stage checklist matrix; mirrors docs/harness-stage-checklist.md for easier status review.",
             related_tests=["tests/test_filemap.py"],
             notes="Update with docs/harness-stage-checklist.md in the same checkpoint.",
+        ),
+        FileMapEntry(
+            path="meridian_core/source_git_logic_snapshot.py",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Backend snapshot for Source/Git Runtime Logic UI: main-write coordination, clean-state gates, path-limited movement, proof, push status, and runtime mutation boundaries.",
+            related_tests=["tests/test_source_git_logic_snapshot.py", "tests/test_bifrost_cockpit.py"],
+            notes="Bifrost consumes this through /bridge/source-git-logic. Display-only; no commit, push, merge, rebase, reset, stash-pop, cherry-pick, or worktree movement.",
+        ),
+        FileMapEntry(
+            path="tests/test_source_git_logic_snapshot.py",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Regression tests for the Source/Git Runtime Logic backend snapshot, main-write protocol source refs, display-only boundary, and JSON serialization.",
+            related_tests=[],
+            notes="Run before changing meridian_core/source_git_logic_snapshot.py or the visible Source/Git harness logic payload.",
         ),
         FileMapEntry(
             path="docs/prime-core-handoff-20260602.md",
@@ -953,7 +981,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v0-v1-progress-tracker.md",
             area=FileArea.ARCHITECTURE,
-            purpose="Countable V0/V1 progress view for Prime, Codex, and Scott. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
+            purpose="Countable V0/V1 progress view for Prime, Codex, and user. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
             related_tests=[],
             notes="Update when a gate item status changes. Companion to v0-build-readiness-map.md.",
         ),
@@ -1032,7 +1060,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-cockpit-queue-status-brief.md",
             area=FileArea.BIFROST,
-            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
+            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What the user sees and how build-lane events surface without flooding the cockpit.",
             related_tests=[],
             notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
         ),
@@ -1046,7 +1074,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-harness-dashboard-brief.md",
             area=FileArea.BIFROST,
-            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
+            purpose="Harness dashboard surface brief: what opens when the user clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
             related_tests=[],
             notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
         ),
