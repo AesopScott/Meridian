@@ -201,6 +201,15 @@ Coordinator routing refresh - 2026-06-02:
 - Sync follow-up: fast-forwarded clean behind-only worktrees Build 4, Build 5, and Reviews A to `cd709d81`. Build 1, Build 2, Build 3, and Reviews B were left unchanged because they contain local ahead history; Build 3 and Reviews B local ahead commits are the originals of the already-moved pressure-lane evidence and should be cleaned only by an explicit coordinator alignment step.
 - Takeover remains `In transition`. Remaining pressure is implementation/proof from Build 1, Build 2, Build 4, and Build 5, plus review follow-through as Ready markers land.
 
+Coordinator containment and lane alignment - 2026-06-02:
+
+- Containment gate found shared main on `main`, aligned with `origin/main`, but dirty in `index.html` with non-coordinator UI implementation changes. The dirty work was preserved on local quarantine branch `codex/quarantine-main-dirty-index-20260601-211438` at commit `c537ce61`, then shared main was restored clean.
+- Current `origin/main` later advanced to `3d4254b1` (`Render non-prompt right panel surfaces`) touching `index.html` and `docs/ui-integration-checklist.md`; prior commit `afb91f6d` also touches those files. These are implementation/UI-history commits on main, so they are recorded as a containment concern, not as coordinator-approved worker movement. No revert was performed because explicit approval would be required to undo remote history.
+- Verified shared main clean before branch alignment. Non-destructively aligned the clean divergent worktree paths to fresh current-main branches while preserving the old divergent branches: Build 1 `codex/aligned-build-1-v2-relay-20260601-2119`, Build 2 `codex/aligned-build-2-session-lifecycle-20260601-2119`, Build 3 `codex/aligned-build-3-filemap-20260601-2119`, and Reviews B `codex/aligned-reviews-b-20260601-2119`.
+- Fast-forwarded clean behind-only worktrees Build 4, Build 5, and Reviews A to current `origin/main`. Final lane sweep: shared main clean at `3d4254b1`; Build 1, Build 2, Build 3, Build 4, Build 5, Reviews A, and Reviews B all present, clean, and aligned with `origin/main`.
+- Queue state remains executable: Build 1 DeepSeek metadata presets; Build 2 restart/resteer recovery tests; Build 3 FileMap maintenance audit; Build 4 Relay routing implementation checklist; Build 5 stale-session recovery rendering; Reviews A Build 1 Ready-marker polling; Reviews B Build 4/Build 5 Ready-marker polling.
+- Takeover remains `In transition`. Remaining blocker/decision: explicit disposition is needed for implementation/UI commits now present on `origin/main` if the coordinator-only main rule must be restored by revert or quarantine branch policy.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
