@@ -24,7 +24,7 @@ Completion: completed 2026-06-01.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `2ad5bcd6`
 - Files changed: `docs/aegis-promptpacket-proof-policy-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers packet id/hash presence, allowed-source compliance, budget/source-lineage gates, Aegis evidence id requirements, missing snapshot/hash handling, human-gate and dual-lane proof interactions, block/demote/warn outcomes, Bifrost handoff expectations, FileMap routing, and deterministic test expectations; staged diff passes `git diff --cached --check`.
