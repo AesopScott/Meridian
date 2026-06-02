@@ -20,6 +20,55 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 1 Relay/Aegis handoff summary, then Build 2 permission summary advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:40 -06:00. Local `HEAD` is the assigned `b75e26d4`; `origin/main` was observed at `8b5eca62` after the route assignment, so Reviews A did not move the branch. Build 1 commits `99d6a64e` and `a0b8ac68`, plus Build 2 commits `c57306f0` and `b75e26d4`, are ancestors of local `HEAD`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 1 review scope: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 1 proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `git diff --check 99d6a64e^..a0b8ac68`
+
+Build 1 review result:
+
+- Containment checks for `99d6a64e` and `a0b8ac68` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`, with queue provenance in `docs/live-build-1.md`.
+- `python -m pytest tests/test_relay_executor.py -q` passed with 184 tests.
+- `git diff --check 99d6a64e^..a0b8ac68` passed.
+- Verified `RelayExecutionSummary.aegis_prompt_packet_policy_handoff()` is a deterministic display-safe projection from already evaluated PromptPacket policy evidence and dispatch-envelope proof metadata.
+- Verified the handoff carries decision, severity, packet id/hash status, prioritized proof requirement, Aegis evidence ids, blockers, warnings, missing metadata fields, reason tags, demotion target, human-gate state, fail-closed state, prompt budget ref, and packet proof metadata ref.
+- Verified the slice does not add policy/runtime transport behavior, does not alter `PromptPacket.model_payload()` / model-bound payload handling, and does not expose raw prompt text, credentials, raw provider responses, account internals, UI/Bifrost rendering, FileMap edits, branch/main movement, or Polaris dependencies.
+
+Build 1 finding: none.
+
+Build 2 review scope: `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check c57306f0^..b75e26d4`
+
+Build 2 review result:
+
+- Containment checks for `c57306f0` and `b75e26d4` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py`, `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_session_lifecycle.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 178 tests.
+- `git diff --check c57306f0^..b75e26d4` passed.
+- Verified `SessionPermissionSummary` evidence remains display-safe and deterministic, including blocker and recovery recommendation strings for stale recovery, pending approvals, review-gate blockers, expired unlocks, locked permissions, and out-of-scope permissions.
+- Verified Prime consumes summary-generated restart/resteer findings and permission blockers as advisory `PrimeNextAction` evidence only; blocked paths remain human-gated and movement-sensitive recovery remains blocked without explicit operation permission evidence.
+- Verified Beacon serializes permission summary advisory evidence without executing recovery or movement.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency introduced by the slice.
+
+Build 2 finding: none.
+
+Completion: Build 1 Relay/Aegis handoff summary and Build 2 permission summary advisory binding are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 2 permission summary expiry repair.
 
 Status: passed by Codex Reviews A on 2026-06-01 23:26 -06:00. Current `HEAD` and `origin/main` are `d7d5f930`, and Build 2 commits `65e2a97f` and `d9dd6354` are ancestors of current main.
