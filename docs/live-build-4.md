@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement the reviewed provider transport metadata pass-through runtime slice from `docs/provider-transport-metadata-pass-through-checklist.md`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-4.md`.
+
+Task: keep the slice provider-neutral and fail-closed: metadata envelope only, exact model id/route kind/trust/proof refs/prompt-drag/external-review state, no live provider calls, no credentials/account probing, no raw provider responses, and adapter/provider request still receives approved payload text only.
+
+Tests: `python -m pytest tests/test_relay_executor.py -q`.
+
+Completion: completed 2026-06-02.
+
+Ready for Codex Review:
+
+- Commit: `pending local commit hash`
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-4.md`
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (197 passed)
+- Verification performed: added provider-neutral `RelayDispatchMetadataEnvelope` pass-through fields for trust mode, proof strength, direct/aggregator proof refs, validation evidence ref, allowed/blocked tasks, blocked authorities, max risk tier, telemetry flags, and metadata transport advisory state; registry-backed Relay execution now binds adapter metadata into the envelope while adapter/provider transport still receives approved lane payload text only; `git diff --check` passed.
+- Next Candidate: Reviews A/B review before implementing deeper Model Harness runtime validation or live provider routing.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: create a docs-only provider transport metadata pass-through checklist for Relay/Model Harness validation.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.

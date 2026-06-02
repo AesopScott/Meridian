@@ -211,8 +211,17 @@ class RelayDispatchMetadataEnvelope:
     exact_model_id: str | None = None
     selected_provider: str | None = None
     provider_route_kind: str = "unknown"
+    trust_mode: str = "unknown"
     trust_state: str = "unknown"
+    proof_strength: str = "unknown"
     capability_tier: str | None = None
+    direct_endpoint_evidence_ref: str | None = None
+    aggregator_evidence_ref: str | None = None
+    validation_evidence_ref: str | None = None
+    allowed_task_types: tuple[str, ...] = ()
+    blocked_task_types: tuple[str, ...] = ()
+    blocked_authority_tags: tuple[str, ...] = ()
+    max_risk_tier: int | None = None
     context_window_tokens: int | None = None
     prompt_payload_budget_tokens: int | None = None
     prompt_payload_status: str = "unknown"
@@ -230,9 +239,15 @@ class RelayDispatchMetadataEnvelope:
     payload_snapshot_hash: str | None = None
     dispatch_envelope_ref: str | None = None
     packet_proof_metadata_ref: str | None = None
+    supports_completion_tokens: bool = False
+    supports_latency_ms: bool = False
+    supports_payload_snapshot: bool = False
+    supports_response_hash: bool = False
     validation_tags: tuple[str, ...] = ()
     fail_closed_advisory: bool = False
     fail_closed_tags: tuple[str, ...] = ()
+    metadata_transport_allowed: bool = False
+    retry_requires_fresh_metadata: bool = False
     transport_payload_kind: str = "metadata_only"
     serialization_only: bool = True
 
@@ -247,8 +262,17 @@ class RelayDispatchMetadataEnvelope:
             "exact_model_id": self.exact_model_id,
             "selected_provider": self.selected_provider,
             "provider_route_kind": self.provider_route_kind,
+            "trust_mode": self.trust_mode,
             "trust_state": self.trust_state,
+            "proof_strength": self.proof_strength,
             "capability_tier": self.capability_tier,
+            "direct_endpoint_evidence_ref": self.direct_endpoint_evidence_ref,
+            "aggregator_evidence_ref": self.aggregator_evidence_ref,
+            "validation_evidence_ref": self.validation_evidence_ref,
+            "allowed_task_types": self.allowed_task_types,
+            "blocked_task_types": self.blocked_task_types,
+            "blocked_authority_tags": self.blocked_authority_tags,
+            "max_risk_tier": self.max_risk_tier,
             "context_window_tokens": self.context_window_tokens,
             "prompt_payload_budget_tokens": self.prompt_payload_budget_tokens,
             "prompt_payload_status": self.prompt_payload_status,
@@ -266,9 +290,15 @@ class RelayDispatchMetadataEnvelope:
             "payload_snapshot_hash": self.payload_snapshot_hash,
             "dispatch_envelope_ref": self.dispatch_envelope_ref,
             "packet_proof_metadata_ref": self.packet_proof_metadata_ref,
+            "supports_completion_tokens": self.supports_completion_tokens,
+            "supports_latency_ms": self.supports_latency_ms,
+            "supports_payload_snapshot": self.supports_payload_snapshot,
+            "supports_response_hash": self.supports_response_hash,
             "validation_tags": self.validation_tags,
             "fail_closed_advisory": self.fail_closed_advisory,
             "fail_closed_tags": self.fail_closed_tags,
+            "metadata_transport_allowed": self.metadata_transport_allowed,
+            "retry_requires_fresh_metadata": self.retry_requires_fresh_metadata,
             "transport_payload_kind": self.transport_payload_kind,
             "serialization_only": self.serialization_only,
         }
@@ -965,6 +995,29 @@ def _adapter_metadata_candidate_value(
     return str(value) if value is not None else None
 
 
+def _adapter_metadata_candidate_tuple(
+    adapter_metadata: ModelHarnessMetadata | None,
+    key: str,
+) -> tuple[str, ...]:
+    value = _adapter_metadata_candidate_value(adapter_metadata, key)
+    if not value:
+        return ()
+    return tuple(part.strip() for part in value.split(",") if part.strip())
+
+
+def _adapter_metadata_candidate_int(
+    adapter_metadata: ModelHarnessMetadata | None,
+    key: str,
+) -> int | None:
+    value = _adapter_metadata_candidate_value(adapter_metadata, key)
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
 def _adapter_external_review_status(
     adapter_metadata: ModelHarnessMetadata | None,
 ) -> str:
@@ -1522,6 +1575,7 @@ def _build_dispatch_metadata_envelope(
     *,
     lane_role: ModelRole | None = None,
     requested_model_id: str | None = None,
+    adapter_metadata: ModelHarnessMetadata | None = None,
     route_metadata: ModelRouteMetadataBinding | None = None,
     payload_evidence: RelayPromptPayloadEvidence | None = None,
     dispatch_envelope: RelayDispatchEnvelope | None = None,
@@ -1562,6 +1616,9 @@ def _build_dispatch_metadata_envelope(
             else "unknown"
         )
     )
+    trust_mode = _adapter_metadata_candidate_value(adapter_metadata, "trust_mode")
+    if trust_mode is None:
+        trust_mode = provider_route_kind if provider_route_kind != "unknown" else "unknown"
     trust_state = (
         route_metadata.trust_state
         if route_metadata is not None
@@ -1571,6 +1628,35 @@ def _build_dispatch_metadata_envelope(
             else (dispatch_envelope.trust_state if dispatch_envelope else "unknown")
         )
     )
+    proof_strength = _adapter_metadata_candidate_value(
+        adapter_metadata,
+        "proof_strength",
+    ) or "unknown"
+    direct_endpoint_evidence_ref = _adapter_metadata_candidate_value(
+        adapter_metadata,
+        "direct_endpoint_evidence_ref",
+    )
+    aggregator_evidence_ref = _adapter_metadata_candidate_value(
+        adapter_metadata,
+        "aggregator_evidence_ref",
+    )
+    validation_evidence_ref = _adapter_metadata_candidate_value(
+        adapter_metadata,
+        "validation_evidence_ref",
+    )
+    allowed_task_types = _adapter_metadata_candidate_tuple(
+        adapter_metadata,
+        "allowed_task_types",
+    )
+    blocked_task_types = _adapter_metadata_candidate_tuple(
+        adapter_metadata,
+        "blocked_task_types",
+    )
+    blocked_authority_tags = _adapter_metadata_candidate_tuple(
+        adapter_metadata,
+        "blocked_authorities",
+    )
+    max_risk_tier = _adapter_metadata_candidate_int(adapter_metadata, "max_risk_tier")
     context_window = (
         route_metadata.context_budget
         if route_metadata is not None
@@ -1618,8 +1704,16 @@ def _build_dispatch_metadata_envelope(
         validation_tags.append("exact_model_id_missing")
     if provider_route_kind == "unknown":
         validation_tags.append("provider_route_kind_unknown")
+    if trust_mode == "unknown":
+        validation_tags.append("trust_mode_unknown")
     if trust_state == "unknown":
         validation_tags.append("trust_state_unknown")
+    if provider_route_kind == "direct" and not direct_endpoint_evidence_ref:
+        validation_tags.append("direct_endpoint_evidence_missing")
+    if provider_route_kind == "aggregator" and direct_endpoint_evidence_ref:
+        validation_tags.append("aggregator_direct_endpoint_mismatch")
+    if provider_route_kind == "aggregator" and not aggregator_evidence_ref:
+        validation_tags.append("aggregator_evidence_missing")
     if context_window is None:
         validation_tags.append("context_window_unknown")
     if prompt_budget is None:
@@ -1637,6 +1731,7 @@ def _build_dispatch_metadata_envelope(
         if tag.endswith("_missing")
         or tag.endswith("_unknown")
         or tag.startswith("external_review_")
+        or tag.endswith("_mismatch")
         or tag in {"vendor_unknown", "model_id_unknown", "packet_proof_metadata_missing"}
     )
     fail_closed_advisory = bool(fail_closed_tags) or (
@@ -1654,7 +1749,9 @@ def _build_dispatch_metadata_envelope(
         exact_model_id=exact_model_id,
         selected_provider=selected_provider,
         provider_route_kind=provider_route_kind,
+        trust_mode=trust_mode,
         trust_state=trust_state,
+        proof_strength=proof_strength,
         capability_tier=(
             route_metadata.capability_tier
             if route_metadata is not None
@@ -1664,6 +1761,13 @@ def _build_dispatch_metadata_envelope(
                 else (dispatch_envelope.capability_tier if dispatch_envelope else None)
             )
         ),
+        direct_endpoint_evidence_ref=direct_endpoint_evidence_ref,
+        aggregator_evidence_ref=aggregator_evidence_ref,
+        validation_evidence_ref=validation_evidence_ref,
+        allowed_task_types=allowed_task_types,
+        blocked_task_types=blocked_task_types,
+        blocked_authority_tags=blocked_authority_tags,
+        max_risk_tier=max_risk_tier,
         context_window_tokens=context_window,
         prompt_payload_budget_tokens=prompt_budget,
         prompt_payload_status=prompt_status,
@@ -1713,9 +1817,21 @@ def _build_dispatch_metadata_envelope(
         packet_proof_metadata_ref=(
             dispatch_envelope.packet_proof_metadata_ref if dispatch_envelope else None
         ),
+        supports_completion_tokens=(
+            adapter_metadata.supports_completion_tokens if adapter_metadata else False
+        ),
+        supports_latency_ms=adapter_metadata.supports_latency_ms if adapter_metadata else False,
+        supports_payload_snapshot=(
+            adapter_metadata.supports_payload_snapshot if adapter_metadata else False
+        ),
+        supports_response_hash=(
+            adapter_metadata.supports_response_hash if adapter_metadata else False
+        ),
         validation_tags=tuple(dict.fromkeys(validation_tags)),
         fail_closed_advisory=fail_closed_advisory,
         fail_closed_tags=fail_closed_tags,
+        metadata_transport_allowed=not fail_closed_advisory,
+        retry_requires_fresh_metadata=fail_closed_advisory,
     )
 
 
@@ -2121,12 +2237,14 @@ def execute_relay_plan_with_registry(
             plan,
             lane_role=lane.role,
             requested_model_id=lane.preferred_model,
+            adapter_metadata=adapter.metadata,
             route_metadata=route_metadata,
             payload_evidence=payload_evidence,
             dispatch_envelope=dispatch_envelope,
         )
-        for lane, route_metadata, payload_evidence, dispatch_envelope in zip(
+        for lane, adapter, route_metadata, payload_evidence, dispatch_envelope in zip(
             plan.lanes,
+            resolved_adapters,
             resolved_route_metadata,
             payload_evidences,
             dispatch_envelopes,

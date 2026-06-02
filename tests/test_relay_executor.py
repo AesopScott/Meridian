@@ -1739,7 +1739,20 @@ class TestRelayDispatchMetadataEnvelope:
         assert envelope.exact_model_id == "deepseek-chat"
         assert envelope.selected_provider == "deepseek"
         assert envelope.provider_route_kind == "direct"
+        assert envelope.trust_mode == "direct"
         assert envelope.trust_state == "candidate"
+        assert envelope.proof_strength == "weak"
+        assert envelope.direct_endpoint_evidence_ref == (
+            "deepseek-direct-endpoint:"
+            "https://api.deepseek.com/v1/chat/completions"
+        )
+        assert envelope.validation_evidence_ref == (
+            "deepseek-validation:level-0:metadata-only"
+        )
+        assert envelope.allowed_task_types == ("verify", "explain")
+        assert "review_clearance" in envelope.blocked_task_types
+        assert "aggregator_authority" in envelope.blocked_authority_tags
+        assert envelope.max_risk_tier == 1
         assert envelope.context_window_tokens == 65536
         assert envelope.prompt_payload_budget_tokens == 57344
         assert envelope.prompt_payload_status == "degraded"
@@ -1754,6 +1767,10 @@ class TestRelayDispatchMetadataEnvelope:
         assert "external_review_pending" in envelope.fail_closed_tags
         assert envelope.transport_payload_kind == "metadata_only"
         assert envelope.serialization_only is True
+        assert envelope.metadata_transport_allowed is False
+        assert envelope.retry_requires_fresh_metadata is True
+        assert envelope.supports_payload_snapshot is True
+        assert envelope.supports_response_hash is True
         assert adapter.received_payloads == [_PROMPT]
 
     def test_metadata_envelope_without_route_metadata_has_fail_closed_advisories(self) -> None:
@@ -1817,8 +1834,17 @@ class TestRelayDispatchMetadataEnvelope:
             "exact_model_id",
             "selected_provider",
             "provider_route_kind",
+            "trust_mode",
             "trust_state",
+            "proof_strength",
             "capability_tier",
+            "direct_endpoint_evidence_ref",
+            "aggregator_evidence_ref",
+            "validation_evidence_ref",
+            "allowed_task_types",
+            "blocked_task_types",
+            "blocked_authority_tags",
+            "max_risk_tier",
             "context_window_tokens",
             "prompt_payload_budget_tokens",
             "prompt_payload_status",
@@ -1836,9 +1862,15 @@ class TestRelayDispatchMetadataEnvelope:
             "payload_snapshot_hash",
             "dispatch_envelope_ref",
             "packet_proof_metadata_ref",
+            "supports_completion_tokens",
+            "supports_latency_ms",
+            "supports_payload_snapshot",
+            "supports_response_hash",
             "validation_tags",
             "fail_closed_advisory",
             "fail_closed_tags",
+            "metadata_transport_allowed",
+            "retry_requires_fresh_metadata",
             "transport_payload_kind",
             "serialization_only",
         )
@@ -1862,6 +1894,27 @@ class TestRelayDispatchMetadataEnvelope:
             f"relay-payload-evidence:{_PACKET_ID}:"
             f"{plan.lanes[0].role.value}:{plan.lanes[0].preferred_model}"
         )
+
+    def test_metadata_envelope_preserves_payload_only_transport_boundary(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("default_quality"),
+        )
+        registry = AdapterRegistry().register_model(plan.lanes[0].preferred_model, adapter)
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        rendered_metadata = " ".join(
+            str(value)
+            for value in summary.dispatch_metadata_envelopes()[0].to_dict().values()
+        )
+        assert adapter.received_payloads == [plan.lanes[0].payload]
+        assert "direct_endpoint_evidence_ref" not in adapter.received_payloads[0]
+        assert "external_review" not in adapter.received_payloads[0]
+        assert "credential" not in rendered_metadata.lower()
+        assert "provider response" not in rendered_metadata.lower()
+        assert "Polaris" not in rendered_metadata
 
 
 class TestRelayDecisionRecord:
