@@ -8,6 +8,23 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 1 Relay proof payload deterministic test-collection repair.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Allowed review files: `tests/test_relay_executor.py`, `docs/live-build-1.md`, and `docs/live-codex-reviews.md` for provenance/routing only.
+
+Task: review current `origin/main` commit `0641aa44` and Build 1 queue marker `708a5f7e` for the focused test-only repair to the Relay proof payload negative-path deterministic test collection. Verify the duplicate `TestAegisGateEvidenceSummary.test_evidence_summary_to_dict_multiple_calls_identical` shadowing issue is fixed by a uniquely named deterministic incomplete/partial-evidence test, `python -m pytest tests/test_relay_executor.py -q` passes, and `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q` collects the repaired test without duplicate-name shadowing. Confirm the repair changed only `tests/test_relay_executor.py` plus queue provenance and added no Relay runtime, Bifrost, Aegis, Session Lifecycle, FileMap, UI, process/model/account code, branch movement, or Polaris dependency. If findings exist, route the smallest focused repair to Build 1; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof commands:
+
+- `python -m pytest tests/test_relay_executor.py -q`
+- `python -m pytest tests/test_relay_executor.py::TestAegisGateEvidenceSummary --collect-only -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate. Do not edit implementation files from the review worktree.
+
 ## Coordinator Override - Completed / Repair-Routed
 
 Goal: review current-main Build 1 Relay proof payload negative-path tests after visibility repair.
