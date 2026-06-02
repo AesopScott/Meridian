@@ -26,6 +26,8 @@ _REQUIRED_PATHS = [
     "docs/workflow-subagent-harness-contract.md",
     "docs/workflows-subagent-harness-architecture.md",
     "docs/workflow-subagent-usage-checklist.md",
+    "meridian_core/workflow_logic_snapshot.py",
+    "tests/test_workflow_logic_snapshot.py",
     "docs/echo-atlas-handoff-contract.md",
     "docs/session-lifecycle-v2-contract.md",
     "docs/session-lifecycle-implementation-checklist.md",

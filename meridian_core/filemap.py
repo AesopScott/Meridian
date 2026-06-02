@@ -192,7 +192,7 @@ def make_default_map() -> FileMap:
             area=FileArea.BUILD_PROCESS,
             purpose="Cross-harness stage tracker for Contract/Baseline, V2 Backend, Core Implementation, Prime Integration, Runtime Logic UI, Proofs/Review, and Operations status.",
             related_tests=["tests/test_filemap.py"],
-            notes="Use when Scott asks what stage a harness is in or requests a harness/stage-specific build.",
+            notes="Use when the user asks what stage a harness is in or requests a harness/stage-specific build.",
         ),
         FileMapEntry(
             path="docs/harness-stage-checklist.html",
@@ -880,6 +880,20 @@ def make_default_map() -> FileMap:
             notes="V2 workflow operating guide. Read before dispatching Echo, Atlas, Aegis, Relay, Bifrost, Beacon, or Session Lifecycle work into workflow contexts.",
         ),
         FileMapEntry(
+            path="meridian_core/workflow_logic_snapshot.py",
+            area=FileArea.ARCHITECTURE,
+            purpose="Backend snapshot for Workflow Runtime Logic UI: work-order, input, result, heartbeat, recovery, prompt-drag, and cross-harness boundaries.",
+            related_tests=["tests/test_workflow_logic_snapshot.py", "tests/test_bifrost_cockpit.py"],
+            notes="Bifrost consumes this through /bridge/workflow-logic. Display-only; workflow_dispatch runtime remains V2 implementation work.",
+        ),
+        FileMapEntry(
+            path="tests/test_workflow_logic_snapshot.py",
+            area=FileArea.ARCHITECTURE,
+            purpose="Regression tests for the Workflow Runtime Logic backend snapshot, enum exposure, display-only boundary, and JSON serialization.",
+            related_tests=[],
+            notes="Run before changing meridian_core/workflow_logic_snapshot.py or the visible Workflow harness logic payload.",
+        ),
+        FileMapEntry(
             path="docs/session-lifecycle-v2-contract.md",
             area=FileArea.BUILD_PROCESS,
             purpose="Session Lifecycle V2 contract: typed state and command-plan responsibilities for spawning, watching, steering, recovering, and handing off sessions.",
@@ -953,7 +967,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/v0-v1-progress-tracker.md",
             area=FileArea.ARCHITECTURE,
-            purpose="Countable V0/V1 progress view for Prime, Codex, and Scott. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
+            purpose="Countable V0/V1 progress view for Prime, Codex, and user. Totals-first format: built/in-progress/needs-build counts by gate item. Scope source: v0-build-readiness-map.md gate summary.",
             related_tests=[],
             notes="Update when a gate item status changes. Companion to v0-build-readiness-map.md.",
         ),
@@ -1032,7 +1046,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-cockpit-queue-status-brief.md",
             area=FileArea.BIFROST,
-            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What Scott sees and how build-lane events surface without flooding the cockpit.",
+            purpose="Design brief for how the Meridian cockpit displays queue-driven worker activity — display, not activation. What the user sees and how build-lane events surface without flooding the cockpit.",
             related_tests=[],
             notes="Companion to bifrost-session-queue-activation-brief.md. Owner: Build 5. Read before designing cockpit queue-status display.",
         ),
@@ -1046,7 +1060,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-harness-dashboard-brief.md",
             area=FileArea.BIFROST,
-            purpose="Harness dashboard surface brief: what opens when Scott clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
+            purpose="Harness dashboard surface brief: what opens when the user clicks the Harness button — observability of every harness (heartbeat, capabilities, maturity, recent events). Observation-first; no controls in V0.",
             related_tests=[],
             notes="Design-only. Owner: Build 5. Companion to bifrost-v0-cockpit-layout-brief.md.",
         ),
