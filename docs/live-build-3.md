@@ -8,6 +8,20 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: audit FileMap coverage after the Aegis PromptPacket policy checklist and Build 1/5 PromptPacket proof landings.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: audit whether newly landed PromptPacket proof runtime/test files, Bifrost proof rendering files, review provenance, and `docs/aegis-promptpacket-proof-policy-checklist.md` are discoverable in runtime FileMap, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`. Register missing existing files only in the allowed FileMap surfaces. If no missing files exist, record concrete no-op evidence; do not add read-check-only progress.
+
+Tests: `python -m pytest tests/test_filemap.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash if changed, files changed or no-op evidence, tests run, and Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
 ## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage after the current review clearance and fresh PromptPacket/Prime/Bifrost task routing checkpoint.

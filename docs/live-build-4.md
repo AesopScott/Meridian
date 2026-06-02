@@ -8,6 +8,20 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: implement a pure Aegis PromptPacket proof policy evaluator after Reviews B cleared the policy checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`.
+
+Task: add a deterministic Aegis helper for evaluating PromptPacket proof metadata into allow/warn/demote/block/human-gate outcomes using packet id/hash, source-lineage compliance, budget state, missing snapshot/hash, Aegis evidence ids, and proof requirements. Keep it domain-only: no Relay dispatch mutation, no Bifrost UI, no FileMap edits, no model/account/process code, no branches, and no Polaris.
+
+Tests: `python -m pytest tests/test_aegis.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from this Aegis policy evaluator before Relay integration.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create an Aegis PromptPacket proof policy checklist after Reviews B cleared the PromptPacket metadata checklist.

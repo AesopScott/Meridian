@@ -392,6 +392,11 @@ Coordinator Reviews A Build 1 clearance - 2026-06-02:
 - Approved and completed path-limited movement of Reviews A provenance commit `5b037c70` onto shared main as `dba54fe2`, limited to `docs/live-codex-reviews.md`.
 - Review result: Build 1 PromptPacket proof metadata binding passed with no findings. Reported proof: `python -m pytest tests/test_prompt_packet.py tests/test_relay_packet.py tests/test_relay_executor.py -q` passed 234/234; `git diff --check f1acf65c^..5c6a6a28` passed.
 
+Coordinator fresh task promotion after PromptPacket clearance - 2026-06-02:
+
+- Promoted fresh executable build tasks on shared main after review clearance: Build 1 Relay decision-record packet proof binding; Build 2 Prime audit-evidence edge coverage; Build 3 FileMap audit for Aegis/PromptPacket proof landings; Build 4 pure Aegis PromptPacket proof policy evaluator; Build 5 Bifrost Aegis PromptPacket policy decision rendering.
+- Promoted review queue Active Now blocks: Reviews A polls/reviews the next current-main Ready marker from Build 1/2/3; Reviews B polls/reviews the next current-main Ready marker from Build 4/5. These poll tasks must not commit read-check-only progress.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:

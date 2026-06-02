@@ -4,6 +4,20 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add Bifrost Aegis PromptPacket policy decision sample rendering after Reviews B cleared proof metadata rendering.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: add deterministic sample rendering/tests for Aegis PromptPacket policy decisions from structured data: allow/warn/demote/block/human-gate state, packet id, proof requirement, evidence ids, missing fields, and user-visible reason tags. Preserve prompt payload visibility, dispatch hardening, PromptPacket proof metadata, proof-state preview, and stale-session recovery. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, move branches, or alter Relay docs.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from Aegis policy decision rendering before unrelated Bifrost work.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Bifrost PromptPacket proof metadata sample rendering after Reviews B cleared dispatch hardening state.

@@ -10,17 +10,13 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the current-main Build 1 PromptPacket proof metadata slice.
+Goal: poll and review the next current-main Ready marker from Build 1, Build 2, or Build 3 after fresh task promotion.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: review the landed current-main Build 1 slice:
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md`, `docs/live-build-2.md`, and `docs/live-build-3.md`. If a real Ready marker exists, review the oldest ready slice using the proof listed in that lane queue. If none is ready, report checked HEAD and make no local commit. Do not commit read-check-only progress.
 
-- Build 1 PromptPacket proof metadata binding, commits `f1acf65c` and `5c6a6a28`.
-
-Use current `origin/main` at or after `51f75d98`. Verify containment, path scope, and the proof commands recorded in the Build 1 queue. Do not commit read-check-only progress.
-
-Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop.
+Completion: if a slice is reviewed, commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If no slice is ready, report no local commit and keep waiting for a real Ready marker.
 
 ## Coordinator Override - Completed / Passed
 
