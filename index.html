@@ -3689,7 +3689,7 @@ body {
           requestId,
           prompt,
           transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\scott\\Code\\Meridian',
+          cwd: targetSession?.cwd || '',
           sessionTargetId: targetSession?.sessionId || '',
         }),
       });
@@ -4082,6 +4082,30 @@ body {
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };
+  const renderFileMapLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Charon logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'FileMap logic snapshot unavailable'],
+      ]), true);
+    }
+    const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    const totals = snapshot.totals || {};
+    return [
+      relaySection('Charon logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Charon / FileMap'],
+      ]), true),
+      relaySection('FileMap coverage', relayGrid([
+        ['entries', totals.entries ?? 'unknown'],
+        ['areas', totals.areas ?? 'unknown'],
+        ['entries with tests', totals.entriesWithTests ?? 'unknown'],
+      ]), true),
+      relaySection('Charon summary', relaySummary(snapshot.summary || ''), true),
+      ...capabilitySections.map(renderCompassCapabilitySection),
+    ].join('');
+  };
   const renderPrimeDecisionSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Prime logic source', relayGrid([
@@ -4264,6 +4288,17 @@ body {
       logicNode.innerHTML = renderVulcanLogicSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVulcanLogicSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadFileMapLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-filemap-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('filemap-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderFileMapLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderFileMapLogicSnapshot({ ok: false, error: error.message });
     }
   };
   const loadPrimeLogic = async () => {
@@ -4498,6 +4533,37 @@ body {
       return false;
     }
   };
+  const renderFileMapNavigationLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Charon FileMap logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Charon Runtime Logic</div>
+            <div class="relay-models-status">FileMap navigation</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-filemap-logic>${relaySection('Charon logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadFileMapLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
@@ -4722,7 +4788,9 @@ body {
       ? renderRelayModels()
       : (button.dataset.harness === 'Compass'
         ? renderCompassProjectLogic()
-        : (button.dataset.harness === 'Session Lifecycle' ? renderVulcanSessionLogic() : renderHarnessSurface(button)));
+        : (button.dataset.harness === 'Session Lifecycle'
+          ? renderVulcanSessionLogic()
+          : (button.dataset.harness === 'FileMap' ? renderFileMapNavigationLogic() : renderHarnessSurface(button))));
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });

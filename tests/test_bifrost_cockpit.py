@@ -190,6 +190,22 @@ def test_vulcan_logic_snapshot_documents_session_lifecycle_harness():
     assert "Portfolio Boundary" not in titles
 
 
+def test_filemap_logic_snapshot_documents_charon_harness():
+    from meridian_core.filemap_logic_snapshot import filemap_logic_snapshot
+
+    snapshot = filemap_logic_snapshot()
+    titles = [section["title"] for section in snapshot["capabilitySections"]]
+    assert snapshot["source"] == "meridian_core.filemap_logic_snapshot.filemap_logic_snapshot"
+    assert snapshot["harness"] == "Charon / FileMap"
+    assert "Charon Job" in titles
+    assert "Registry Shape Logic" in titles
+    assert "Lookup Logic" in titles
+    assert "Required Path Coverage" in titles
+    assert "Memory Injection Logic" in titles
+    assert "Runtime Boundary" in titles
+    assert "Session Definition Logic" not in titles
+
+
 def test_index_projects_selector_is_compass_context_not_user_routing():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
@@ -216,6 +232,17 @@ def test_index_vulcan_harness_uses_backend_logic_snapshot():
     assert "bridgeUrl('vulcan-logic')" in doc
     assert "renderVulcanLogicSnapshot" in doc
     assert "renderVulcanSessionLogic" in doc
+
+
+def test_index_filemap_harness_uses_backend_logic_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Charon Runtime Logic" in doc
+    assert "data-filemap-logic" in doc
+    assert "bridgeUrl('filemap-logic')" in doc
+    assert "renderFileMapLogicSnapshot" in doc
+    assert "renderFileMapNavigationLogic" in doc
+    assert "button.dataset.harness === 'FileMap'" in doc
+    assert "FileMap coverage" in doc
 
 
 def test_index_prime_harness_uses_backend_runtime_snapshot():
@@ -250,6 +277,7 @@ def test_index_wired_harness_titles_use_runtime_logic_naming():
     assert "Relay Runtime Logic" in doc
     assert "Compass Runtime Logic" in doc
     assert "Vulcan Runtime Logic" in doc
+    assert "Charon Runtime Logic" in doc
 
 
 def test_bridge_exposes_prime_logic_route_and_capability():
@@ -258,6 +286,14 @@ def test_bridge_exposes_prime_logic_route_and_capability():
     assert "primeLogic: '/bridge/prime-logic'" in doc
     assert "meridian_core.prime_runtime" in doc
     assert "req.url === BRIDGE_ROUTES.primeLogic" in doc
+
+
+def test_bridge_exposes_filemap_logic_route_and_capability():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "filemapLogicSnapshot: true" in doc
+    assert "filemapLogic: '/bridge/filemap-logic'" in doc
+    assert "meridian_core.filemap_logic_snapshot" in doc
+    assert "req.url === BRIDGE_ROUTES.filemapLogic" in doc
 
 
 def test_ui_checklist_defers_deep_compass_and_vulcan_items_to_backend_tracker():
