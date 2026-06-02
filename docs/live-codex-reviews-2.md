@@ -6,6 +6,33 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Completed / Passed
+
+Goal: review current-main Build 4 pure Aegis-side live-control command-staging UI-review advisory helper.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 4 command-staging UI-review Aegis advisory commits `1bca9060` and `5c576c85`. Verify primitive/provider-neutral input/result fields, deterministic fail-closed metadata, explicit non-executable advisory behavior, display-safe serialization/redaction, preservation of staged command kind/recommended action/required operation/target session id/ready flag/human gate/UI-review requirement/permission state/blockers/evidence refs/Prime advisory/Beacon refs, stable advisory keys, no Relay imports/types, no Bifrost/FileMap edits, no restart/resteer/archive execution, no process/session/model/provider calls, no credentials/account probing, no raw prompt/provider response storage, no main/Polaris leakage, and no branch/worktree movement.
+
+Proof: `python -m pytest tests/test_aegis.py -q` plus `git diff --check 1bca9060^..5c576c85`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 09:35 -06:00:
+
+- Build 4 command-staging UI-review Aegis advisory passed. Commits `1bca9060` and `5c576c85` changed only `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+- The Aegis slice adds primitive/provider-neutral frozen `CommandStagingUiReviewInput`, `CommandStagingUiReviewPolicyResult`, `CommandStagingUiReviewDecision`, deterministic `evaluate_command_staging_ui_review_advisory()`, and display-safe `serialize_command_staging_ui_review_policy_result()`.
+- The helper preserves staged command kind, recommended action, required operation, target session id, ready-for-review flag, human-gate rationale, UI-review requirement, permission state, blockers, evidence refs, Prime advisory action, and Beacon evidence refs as advisory metadata while remaining non-executable.
+- Serialization exposes stable keys, `relay_advisory`, `bifrost_advisory`, reason tags, and `execution_authorized: False`, with redaction for unsafe raw prompt, provider response, account, credential, API key, process/session, and raw payload patterns.
+- Tests cover review-ready allow, not-ready/UI-review/permission/human-gate fail-closed blockers, Prime advisory warning, evidence and Beacon evidence refs, blocker tags, stable keys, redaction, no execution authority, and repeat determinism. Scope check found no Relay imports/types, Bifrost/FileMap edits, restart/resteer/archive execution, process/session/model/provider calls, credentials/account probing, raw prompt/provider response storage, branch/worktree/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- `python -m pytest tests/test_aegis.py -q` passed: 282 tests.
+- `git diff --check 1bca9060^..5c576c85` passed.
+
+Completion: Build 4 command-staging UI-review Aegis advisory is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
 ## Coordinator Note - Current Finding
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
