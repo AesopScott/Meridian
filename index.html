@@ -4308,7 +4308,8 @@ body {
     const logicNode = rightWorkspace?.querySelector('[data-relay-logic]');
     if (!logicNode) return;
     try {
-      const response = await fetch(bridgeUrl('relay-logic'), { cache: 'no-store' });
+      const relayLogicUrl = `${localBridgeBase}/relay-logic`;
+      const response = await fetch(relayLogicUrl, { cache: 'no-store' });
       const snapshot = await response.json();
       logicNode.innerHTML = renderRelayLogicSnapshot(snapshot);
     } catch (error) {
