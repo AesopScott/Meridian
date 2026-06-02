@@ -4,6 +4,20 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add provider-neutral Relay dispatch hardening envelope helpers after Reviews A cleared payload evidence and Reviews B cleared the dispatch hardening checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `meridian_core/model_adapter.py`, `tests/test_relay_executor.py`, `tests/test_model_adapter.py`, `docs/live-build-1.md`.
+
+Task: add deterministic dispatch-envelope helpers carrying exact model id, route/trust metadata, payload evidence refs, Aegis/proof tags, blocked/error tags, and safe transport/audit fields without live provider calls. Exclude credentials, raw prompts, raw provider responses, account internals, UI/Bifrost rendering, FileMap edits, branch movement, and Polaris.
+
+Tests: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind Relay prompt payload evidence into dispatch decision records after Reviews A cleared the route metadata binding.

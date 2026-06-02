@@ -8,6 +8,20 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add Session Lifecycle command-plan serialization/audit evidence after Reviews A cleared command-plan edge coverage.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: add deterministic, display-safe command-plan audit evidence for Session Lifecycle decisions so Prime/Bifrost can consume plan reason, action, blocker, permission, stale/review-gate, and recovery metadata without live control. No session spawning, process inspection, model calls, branch movement, UI/Bifrost/FileMap edits, Polaris, or autonomous movement.
+
+Tests: `python -m pytest tests/test_session_lifecycle.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Session Lifecycle command-plan edge coverage after Reviews A cleared the Prime/Beacon advisory binding.

@@ -18,6 +18,14 @@ Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md`, `
 
 Completion: if a slice is reviewed, commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If no slice is ready, report no local commit and keep waiting for a real Ready marker.
 
+## Coordinator Override - Active Now
+
+Goal: poll and review the next current-main Ready marker from Build 1, Build 2, or Build 3 after fresh lane reactivation.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md`, `docs/live-build-2.md`, and `docs/live-build-3.md`. If a real Ready marker exists, review the oldest ready slice using that lane's proof. If none is ready, report checked HEAD and make no local commit. Do not commit read-check-only progress.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 1 current-main Relay prompt payload evidence binding.

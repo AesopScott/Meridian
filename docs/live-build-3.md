@@ -8,6 +8,20 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: audit FileMap coverage after Build 4 dispatch hardening and Build 5 payload visibility landed.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: audit whether newly landed implementation docs, review provenance, and changed V2 artifacts are discoverable in runtime FileMap, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`. Register missing existing files only in allowed FileMap surfaces. If no missing files exist, record concrete no-op evidence; do not add read-check-only progress.
+
+Tests: `python -m pytest tests/test_filemap.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash if changed, files changed or no-op evidence, tests run, and Next Candidate.
+
 ## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage after the batch review-clearance and fresh build-task routing checkpoint.

@@ -4,6 +4,20 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: add Bifrost dispatch hardening state sample rendering after Reviews B cleared payload visibility.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task: add deterministic Bifrost sample rendering/tests for dispatch hardening state from structured data: provider, exact model id, route class/kind, trust state, proof strength, external-review status, blocked authorities, payload evidence state, fallback blockers, and dispatch error tags. Preserve prompt payload visibility, stale-session recovery, and proof-state preview behavior. Do not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, move branches, or alter Relay docs.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Bifrost prompt payload visibility sample rendering after Reviews B cleared the proof-state preview.

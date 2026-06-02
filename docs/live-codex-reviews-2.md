@@ -6,6 +6,14 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Active Now
+
+Goal: poll and review the next current-main Ready marker from Build 4 or Build 5 after fresh lane reactivation.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: poll current `origin/main` and the top blocks in `docs/live-build-4.md` and `docs/live-build-5.md`. If a real Ready marker exists, review the oldest ready slice using that lane's proof. If none is ready, report checked HEAD and make no local commit. Do not commit read-check-only progress.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 5 current-main Bifrost prompt payload visibility sample rendering.

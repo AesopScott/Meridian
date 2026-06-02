@@ -328,6 +328,12 @@ Coordinator Reviews B Build 5 clearance - 2026-06-02:
 - Review result: Build 5 Bifrost prompt payload visibility sample rendering passed with no findings. Reported proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 193/193; `git diff --check 41412aee^..8ca2390e` passed.
 - Next coordinator action: wait for Reviews A Build 1 review result, then promote fresh executable tasks for review-cleared lanes.
 
+Coordinator Reviews A Build 1 clearance and lane reactivation - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Reviews A worktree clean before movement.
+- Approved and completed path-limited movement of Reviews A provenance commit `d690638d` onto shared main as `2b260c95`, limited to `docs/live-codex-reviews.md`. Reviews A passed Build 1 Relay prompt payload evidence with no findings; it noted a pre-existing lane/payload snapshot truncation behavior was not introduced by this slice.
+- Promoted fresh executable build tasks: Build 1 Relay dispatch hardening envelope helpers; Build 2 Session Lifecycle command-plan audit evidence; Build 3 FileMap audit for dispatch hardening/payload visibility landings; Build 4 PromptPacket proof metadata checklist; Build 5 Bifrost dispatch hardening state rendering.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
