@@ -279,6 +279,12 @@ Coordinator review clearance and fresh task promotion - 2026-06-02:
 - Promoted review queue Active Now blocks: Reviews A polls/reviews the next current-main Ready marker from Build 1/2/3; Reviews B polls/reviews the next current-main Ready marker from Build 4/5. These poll tasks must not commit read-check-only progress.
 - Honest seven-lane status: all five build queues now have executable Active tasks and Next Candidate instructions; both review queues have executable polling/review tasks but are waiting for real Ready markers from the fresh build tasks.
 
+Coordinator containment recovery after post-review promotion - 2026-06-02:
+
+- During seven-worktree branch alignment, shared main was found locally ahead with UI/bridge implementation commits plus dirty UI files. No push was performed. The local implementation history and dirty follow-up were preserved on `codex/quarantine-main-impl-7commits-20260601-2215`, ending at `fc678f30` (`Prevent visible bridge restart process storms`).
+- Shared main was restored to clean `origin/main` at `0957fdef` after quarantine. Final shared-main check: on `main`, aligned with `origin/main`, no staged files, no dirty files, and no untracked worker artifacts.
+- Recovered the interrupted worktree alignment from the Git config-lock collision. All seven assigned worktrees were clean afterward: Build 1 `codex/aligned-build-1-payload-evidence-20260601-2210`; Build 2 `codex/aligned-build-2-command-plan-20260601-2210`; Build 3 `codex/aligned-build-3-filemap-clearance-20260601-2210`; Build 4 `codex/aligned-build-4-dispatch-hardening-checklist-20260601-2210`; Build 5 `codex/aligned-build-5-payload-visibility-20260601-2210`; Reviews A `codex/aligned-reviews-a-poll-20260601-2210`; Reviews B `codex/aligned-reviews-b-poll-20260601-2210`.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
