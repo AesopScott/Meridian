@@ -22,6 +22,35 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 2 Session Runtime State Export Prime/Beacon advisory binding.
+
+Status: passed by Codex Reviews A on 2026-06-02 00:24 -06:00. Current `HEAD` and `origin/main` are `fd6e7893`, and Build 2 commits `dd02fa33` and `e85c9221` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, `tests/test_beacon.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q`
+- `git diff --check dd02fa33^..e85c9221`
+
+Review result:
+
+- Containment checks for `dd02fa33` and `e85c9221` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py`, `meridian_core/beacon.py`, `tests/test_prime_autonomy.py`, and `tests/test_beacon.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_beacon.py -q` passed with 96 tests.
+- `git diff --check dd02fa33^..e85c9221` passed.
+- Verified Prime consumes `SessionRuntimeStateExport` through `select_next_action_from_runtime_state_export()` as advisory state only: blockers pause behind human/review/permission gates, recovery recommendations become non-executable recovery advice, and reuse/no-recovery cases stay on safe polling.
+- Verified Beacon serializes `SessionRuntimeStateExport` through `runtime_state_advisory_evidence()` with display-safe evidence, blocker preservation, human-gate propagation, and no recovery execution.
+- Verified no session spawning, live process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, autonomous movement, main writes, or Polaris dependency was introduced.
+
+Finding: none.
+
+Completion: Build 2 Session Runtime State Export Prime/Beacon advisory binding is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 1 DeepSeek candidate metadata presets, then Build 2 runtime-state export.
 
 Status: passed by Codex Reviews A on 2026-06-02 00:20 -06:00. Current `HEAD` and `origin/main` are `a89135c2`, and Build 1 commits `bfada8b1` and `1fcad364`, plus Build 2 commits `93bf40dd` and `d0179bb0`, are ancestors of current main.
