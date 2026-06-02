@@ -10,12 +10,14 @@ from enum import Enum
 from typing import Any, Optional, List, FrozenSet
 
 from meridian_core.session_lifecycle import (
+    CommandIntent,
     FindingType,
     OperationScope,
     PrimeAutonomyInput as SessionPrimeAutonomyInput,
     ReviewCadenceState,
     SessionAction,
     SessionCommandPlan,
+    SessionLiveControlCommandPlanStagingRecord,
     SessionPermissionSummary,
     SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
@@ -692,6 +694,95 @@ def select_next_action_from_recovery_readiness_summary(
         evidence=evidence,
         human_gate_required=True,
         blockers=["advisory only; recovery readiness command plan required"],
+    )
+
+
+def select_next_action_from_command_plan_staging_record(
+    staging_record: Optional[SessionLiveControlCommandPlanStagingRecord] = None,
+) -> PrimeNextAction:
+    """Convert non-executable command-plan staging into safe Prime advice."""
+    if staging_record is None:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.FALLBACK,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.ERROR_RECOVERY,
+            target_harness="Session Lifecycle",
+            rationale="No live-control command-plan staging record available.",
+        )
+
+    evidence = list(staging_record.evidence_refs)
+    evidence.extend(
+        [
+            f"staging.id={staging_record.staging_id}",
+            f"staging.target_session_id={staging_record.target_session_id}",
+            "staging.command_kind="
+            + (
+                staging_record.command_kind.value
+                if staging_record.command_kind
+                else "none"
+            ),
+            "staging.recommended_action="
+            + (
+                staging_record.recommended_action.value
+                if staging_record.recommended_action
+                else "none"
+            ),
+            "staging.required_operation="
+            + (
+                staging_record.required_operation.value
+                if staging_record.required_operation
+                else "none"
+            ),
+            f"staging.ready_for_execution={staging_record.ready_for_execution}",
+            f"staging.is_executable_now={staging_record.is_executable_now}",
+            f"permission.state={staging_record.permission_state.value}",
+        ]
+    )
+    blockers = list(staging_record.blockers)
+    non_review_blockers = [
+        blocker
+        for blocker in blockers
+        if blocker != "command_plan.ui_review_required"
+    ]
+    stageable_command = staging_record.command_kind in (
+        CommandIntent.RESTART,
+        CommandIntent.RESTEER,
+        CommandIntent.ARCHIVE,
+    )
+
+    if non_review_blockers or not stageable_command:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.HIGH,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness="Session Lifecycle",
+            target_lane=staging_record.target_session_id,
+            rationale=staging_record.human_gate_rationale,
+            evidence=evidence,
+            human_gate_required=True,
+            blockers=blockers or ["command-plan staging is not ready for review"],
+        )
+
+    return make_prime_next_action(
+        action_type=PrimeActionType.ADVISE_SESSION_RECOVERY,
+        confidence=PrimeActionConfidence.HIGH,
+        risk_tier=(
+            PrimeActionRiskTier.MEDIUM
+            if staging_record.recommended_action == SessionAction.ARCHIVE
+            else PrimeActionRiskTier.HIGH
+        ),
+        source=PrimeActionSource.SESSION_STATE,
+        target_harness="Session Lifecycle",
+        target_lane=staging_record.target_session_id,
+        rationale=(
+            "Live-control command-plan staging is non-executable and ready for "
+            "review."
+        ),
+        evidence=evidence,
+        human_gate_required=True,
+        blockers=blockers or ["command_plan.ui_review_required"],
     )
 
 

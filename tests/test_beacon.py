@@ -11,6 +11,7 @@ import pytest
 from meridian_core.beacon import (
     LivenessTarget,
     check_harness_liveness,
+    command_plan_staging_advisory_evidence,
     command_plan_advisory_evidence,
     permission_summary_advisory_evidence,
     recovery_readiness_advisory_evidence,
@@ -32,6 +33,7 @@ from meridian_core.session_lifecycle import (
     SessionStatus,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
+    stage_live_control_command_plan_from_readiness,
     summarize_recovery_readiness,
     summarize_session_permission_state,
     summarize_workflow_work_order_recovery,
@@ -536,3 +538,142 @@ class TestRecoveryReadinessAdvisoryEvidence:
         assert "permission.unlock_expired" in evidence.blockers
         assert "readiness.blocker=permission.unlock_expired" in evidence.evidence
         assert evidence.to_dict()["human_gate_required"] is True
+
+
+class TestCommandPlanStagingAdvisoryEvidence:
+    def test_command_plan_staging_record_becomes_beacon_evidence(self) -> None:
+        now = datetime(2026, 6, 2, 11, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="staging-summary",
+            last_permission_change=now,
+        )
+        session = SessionLifecycleState(
+            session_id="build-2-staging",
+            session_name="Build 2 Staging",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-command-staging-prime-beacon",
+            current_task_id="staging-summary",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            session,
+            work_order_id="wo-beacon-staging",
+            heartbeat_emitted_at=now - timedelta(minutes=10),
+            timestamp=now,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=now,
+        )
+        gate = evaluate_live_control_permission_gate(
+            session,
+            runtime_export,
+            timestamp=now,
+        )
+        readiness = summarize_recovery_readiness(runtime_export, gate, timestamp=now)
+        staging = stage_live_control_command_plan_from_readiness(
+            readiness,
+            timestamp=now,
+        )
+
+        evidence = command_plan_staging_advisory_evidence(staging, now=now)
+
+        assert evidence.harness_id == "build-2-staging"
+        assert evidence.advisory_type == "staging_restart"
+        assert evidence.human_gate_required is True
+        assert "command_plan.ui_review_required" in evidence.blockers
+        assert "staging.is_executable_now=False" in evidence.evidence
+        assert "staging.ui_review_required=True" in evidence.evidence
+        assert "permission.state=unlocked_temporary" in evidence.evidence
+        assert evidence.to_dict()["advisory_type"] == "staging_restart"
+
+    def test_blocked_command_plan_staging_beacon_evidence_preserves_blockers(
+        self,
+    ) -> None:
+        now = datetime(2026, 6, 2, 11, 0, tzinfo=timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now - timedelta(minutes=1),
+            task_scope="staging-summary",
+            last_permission_change=now,
+        )
+        session = SessionLifecycleState(
+            session_id="build-2-staging-blocked",
+            session_name="Build 2 Staging Blocked",
+            project_name="Meridian",
+            project_path="/path/to/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2",
+            branch_name="codex/rolling-build-2-command-staging-prime-beacon",
+            current_task_id="staging-summary",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now - timedelta(minutes=45),
+            last_prompt_payload_size=12000,
+            review_cadence_state=ReviewCadenceState.NONE,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=expired_context,
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            session,
+            work_order_id="wo-beacon-staging-blocked",
+            heartbeat_emitted_at=now - timedelta(minutes=10),
+            timestamp=now,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=now,
+        )
+        gate = evaluate_live_control_permission_gate(
+            session,
+            runtime_export,
+            timestamp=now,
+        )
+        readiness = summarize_recovery_readiness(runtime_export, gate, timestamp=now)
+        staging = stage_live_control_command_plan_from_readiness(
+            readiness,
+            timestamp=now,
+        )
+
+        evidence = command_plan_staging_advisory_evidence(staging, now=now)
+
+        assert evidence.advisory_type == "staging_unknown"
+        assert evidence.human_gate_required is True
+        assert "permission.unlock_expired" in evidence.blockers
+        assert "command_plan.command_kind_not_stageable" in evidence.blockers
+        assert "staging.blocker=permission.unlock_expired" in evidence.evidence

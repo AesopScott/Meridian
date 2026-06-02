@@ -16,6 +16,7 @@ from .models import Heartbeat, HeartbeatStatus
 from .session_lifecycle import (
     SessionAction,
     SessionCommandPlan,
+    SessionLiveControlCommandPlanStagingRecord,
     SessionPermissionSummary,
     SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
@@ -233,6 +234,52 @@ def recovery_readiness_advisory_evidence(
             readiness_summary.human_gate_required
             or bool(readiness_summary.blockers)
         ),
+        generated_at=_as_utc(now or datetime.now(timezone.utc)),
+    )
+
+
+def command_plan_staging_advisory_evidence(
+    staging_record: SessionLiveControlCommandPlanStagingRecord,
+    *,
+    now: datetime | None = None,
+) -> BeaconAdvisoryEvidence:
+    """Convert non-executable command-plan staging into Beacon evidence only."""
+    command_kind = (
+        staging_record.command_kind.value
+        if staging_record.command_kind
+        else "unknown"
+    )
+    evidence = list(staging_record.evidence_refs)
+    evidence.extend(
+        [
+            f"staging.id={staging_record.staging_id}",
+            f"staging.target_session_id={staging_record.target_session_id}",
+            f"staging.command_kind={command_kind}",
+            "staging.recommended_action="
+            + (
+                staging_record.recommended_action.value
+                if staging_record.recommended_action
+                else "none"
+            ),
+            "staging.required_operation="
+            + (
+                staging_record.required_operation.value
+                if staging_record.required_operation
+                else "none"
+            ),
+            f"staging.ready_for_execution={staging_record.ready_for_execution}",
+            f"staging.is_executable_now={staging_record.is_executable_now}",
+            f"staging.ui_review_required={staging_record.ui_review_required}",
+            f"permission.state={staging_record.permission_state.value}",
+        ]
+    )
+
+    return BeaconAdvisoryEvidence(
+        harness_id=staging_record.target_session_id,
+        advisory_type=f"staging_{command_kind}",
+        evidence=tuple(evidence),
+        blockers=staging_record.blockers,
+        human_gate_required=True,
         generated_at=_as_utc(now or datetime.now(timezone.utc)),
     )
 

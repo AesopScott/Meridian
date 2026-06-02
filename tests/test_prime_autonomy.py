@@ -12,6 +12,7 @@ from meridian_core.prime_autonomy import (
     ProjectStateSignal,
     select_prime_next_action,
     make_prime_next_action,
+    select_next_action_from_command_plan_staging_record,
     select_next_action_from_project_state,
     select_next_action_from_command_plan_audit,
     select_next_action_from_recovery_readiness_summary,
@@ -37,6 +38,7 @@ from meridian_core.session_lifecycle import (
     gather_prime_autonomy_input,
     generate_restart_finding,
     generate_resteer_finding,
+    stage_live_control_command_plan_from_readiness,
     summarize_recovery_readiness,
     summarize_workflow_work_order_recovery,
 )
@@ -1026,6 +1028,111 @@ class TestSessionLifecycleAdvisorySelection:
         assert "permission.unlock_expired" in action.blockers
         assert "readiness.blocker=permission.unlock_expired" in action.evidence
         assert action.rationale == readiness.human_gate_rationale
+
+    def test_none_command_plan_staging_record_pauses_safely(self):
+        """Missing staging records fall back to safe pause."""
+        action = select_next_action_from_command_plan_staging_record(None)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.FALLBACK
+        assert action.target_harness == "Session Lifecycle"
+
+    def test_command_plan_staging_record_advises_review_only(
+        self,
+        advisory_session,
+    ):
+        """Ready staging records become non-executable review advice."""
+        observed_at = datetime.now(timezone.utc)
+        workflow_summary = summarize_workflow_work_order_recovery(
+            advisory_session,
+            work_order_id="wo-staging-prime",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            heartbeat_stale_after_seconds=300,
+            timestamp=observed_at,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            advisory_session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        gate = evaluate_live_control_permission_gate(
+            advisory_session,
+            runtime_export,
+            timestamp=observed_at,
+        )
+        readiness = summarize_recovery_readiness(
+            runtime_export,
+            gate,
+            timestamp=observed_at,
+        )
+        staging = stage_live_control_command_plan_from_readiness(
+            readiness,
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_command_plan_staging_record(staging)
+
+        assert action.action_type == PrimeActionType.ADVISE_SESSION_RECOVERY
+        assert action.target_lane == advisory_session.session_id
+        assert action.human_gate_required is True
+        assert action.is_executable() is False
+        assert "command_plan.ui_review_required" in action.blockers
+        assert "staging.is_executable_now=False" in action.evidence
+        assert "permission.state=unlocked_temporary" in action.evidence
+
+    def test_blocked_command_plan_staging_record_pauses_prime(
+        self,
+        advisory_session,
+    ):
+        """Staging records with permission blockers pause Prime advice."""
+        observed_at = datetime.now(timezone.utc)
+        expired_context = PermissionContext(
+            approved_by="prime",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=observed_at - timedelta(minutes=1),
+            task_scope="task-1",
+            last_permission_change=observed_at,
+        )
+        blocked_session = SessionLifecycleState(
+            **{**advisory_session.__dict__, "permission_context": expired_context}
+        )
+        workflow_summary = summarize_workflow_work_order_recovery(
+            blocked_session,
+            work_order_id="wo-staging-blocked",
+            heartbeat_emitted_at=observed_at - timedelta(minutes=10),
+            timestamp=observed_at,
+        )
+        runtime_export = export_session_runtime_state_for_workflow_recovery(
+            blocked_session,
+            workflow_recovery_summary=workflow_summary,
+            timestamp=observed_at,
+        )
+        gate = evaluate_live_control_permission_gate(
+            blocked_session,
+            runtime_export,
+            timestamp=observed_at,
+        )
+        readiness = summarize_recovery_readiness(
+            runtime_export,
+            gate,
+            timestamp=observed_at,
+        )
+        staging = stage_live_control_command_plan_from_readiness(
+            readiness,
+            timestamp=observed_at,
+        )
+
+        action = select_next_action_from_command_plan_staging_record(staging)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is True
+        assert "permission.unlock_expired" in action.blockers
+        assert "command_plan.ui_review_required" in action.blockers
+        assert action.rationale == staging.human_gate_rationale
 
 
 class TestCommandPlanAuditAdvisorySelection:
