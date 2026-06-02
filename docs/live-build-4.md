@@ -34,6 +34,24 @@ Ready for Codex Review:
 - Verification performed: text/shape inspection confirmed the checklist exists, has the required section coverage, preserves `deepseek-chat` as the exact DeepSeek dispatch id, treats `deepseek-v4-pro`/`deepseek-v4-flash` as metadata labels only, changes only allowed files, and passes `git diff --check`.
 - Next Candidate: bind any review findings from the implementation checklist before further Relay routing implementation.
 
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: repair the Relay routing implementation checklist EOF whitespace finding from Codex Reviews B.
+
+Allowed files only: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/live-build-4.md`.
+
+Task: remove the blank line at EOF reported by `git diff --check a4652ce4^..e15a38a1` without rewriting checklist content.
+
+Completion: completed 2026-06-01.
+
+Ready for Codex Review:
+
+- Commit: pending repair commit hash
+- Files changed: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/live-build-4.md`
+- Tests: not required (docs-only whitespace repair)
+- Proof: `git diff --check a4652ce4^..HEAD` passes after removing the trailing blank line at EOF.
+- Next Candidate: bind any review findings from the implementation checklist before further Relay routing implementation.
+
 ## Next Candidate Task
 
 Goal: bind any Codex review findings from the Relay routing implementation checklist.

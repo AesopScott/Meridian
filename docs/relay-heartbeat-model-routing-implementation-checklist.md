@@ -194,4 +194,3 @@ Runtime routing may be enabled only after:
 - [ ] Tests above pass in the owning runtime lanes.
 - [ ] Codex review clears the implementation checklist and the runtime implementation.
 - [ ] Auto routing remains disabled until Scott or Prime explicitly promotes it after proof review.
-
