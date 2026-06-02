@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review current-main Build 4 runtime validation checklist, then Build 5 candidate-trust badge rendering.
 
@@ -17,6 +17,23 @@ Task: review current-main Ready markers in order: Build 4 Model Harness runtime 
 Proof: for Build 4, text/shape inspection plus `git diff --check ffa4e348^..8cb2754b`. For Build 5, `python -m pytest tests/test_bifrost_cockpit.py -q` plus `git diff --check 57984e4f^..fa088d9c`.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 4/5 polling after these current-main reviews.
+
+Review result - 2026-06-02 00:19 -06:00:
+
+- Build 4 Model Harness runtime validation checklist passed. Commits `ffa4e348` and `8cb2754b` changed only `docs/model-harness-runtime-validation-checklist.md` and `docs/live-build-4.md`.
+- The checklist is docs-only and covers exact dispatch/model id, direct-vs-aggregator route proof, candidate trust, capability labels versus transport ids, prompt-drag telemetry, context/budget/growth fields, external review, fail-closed missing metadata, Relay/Aegis/Bifrost binding, deterministic tests, validation evidence, and exclusions.
+- Build 5 candidate-trust/external-review badge rendering passed. Commits `57984e4f` and `fa088d9c` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The Bifrost slice is deterministic sample/rendering only and covers trusted, candidate, validation-blocked, external-review-required, external-review-cleared, review-pending, review-passed, proof-strength, blocked-authority, and display-safe evidence-ref badges while preserving exact model id, route kind, capability metadata, prompt-drag fields, escaping, and prior cockpit surfaces.
+- Scope check found no live provider/account/session/process calls, Relay runtime wiring, FileMap edit, `index.html` edit, branch/main movement, shared-main write, Polaris dependency, or push.
+
+Proof:
+
+- Text/shape inspection passed for the Build 4 checklist and Ready marker.
+- `git diff --check ffa4e348^..8cb2754b` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 250 tests.
+- `git diff --check 57984e4f^..fa088d9c` passed.
+
+Completion: Build 4 Model Harness runtime validation checklist and Build 5 candidate-trust/external-review badge rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Active Now
 
