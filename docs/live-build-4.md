@@ -26,7 +26,7 @@ Completion: completed 2026-06-02.
 
 Ready for Codex Review:
 
-- Commit: `pending local commit hash`
+- Commit: `8a2d5ffc`
 - Files changed: `docs/model-harness-metadata-implementation-checklist.md`, `docs/live-build-4.md`
 - Tests: not required (docs-only)
 - Verification performed: text/shape inspection confirmed the checklist exists and covers exact model id, provider direct-vs-aggregator route, trust state, context window, prompt token estimate, budget percent/status, growth delta, prompt-drag degraded state, external-review requirements, Aegis/Relay policy binding, Bifrost display expectations, deterministic tests, and exclusions for live model calls, credentials, raw prompts, raw provider responses, account probing, session/process control, branch/worktree movement, FileMap edits, main writes, and Polaris; staged diff passes `git diff --cached --check`.
