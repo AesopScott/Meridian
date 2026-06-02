@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: audit FileMap coverage after Build 4 dispatch hardening and Build 5 payload visibility landed.
 
@@ -21,6 +21,19 @@ Task: audit whether newly landed implementation docs, review provenance, and cha
 Tests: `python -m pytest tests/test_filemap.py -q`.
 
 Completion: mark Ready for Codex Review with commit hash if changed, files changed or no-op evidence, tests run, and Next Candidate.
+
+Completion:
+
+- Build 3 audited changed docs/runtime/test/UI paths from prior FileMap completion `e1e35d9c..HEAD` after Build 4 dispatch hardening and Build 5 payload visibility landed.
+- Registered the one missing existing artifact: `docs/relay-dispatch-hardening-implementation-checklist.md`.
+- Audit evidence: focused coverage check across 18 changed audit-window paths found no remaining runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` gaps after registration.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Commit: `98bf9dff`.
+- Queue marker: this completion update.
+- Next Candidate: bind any review findings from this FileMap audit before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
