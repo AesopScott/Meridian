@@ -96,6 +96,20 @@ No active write lease.
 Start new entries below this line.
 
 ```text
+Time: 2026-06-02 12:03 -06:00
+Writer: Meridian coordinator
+Intent: docs-only coordinator status checkpoint ACKed by front-end developer lane after shared-main clean/aligned check.
+Action completed: recorded updated coordinator goal requirement for regular Obsidian/Git checkpoints and current seven-lane routing/review state.
+Commit(s): this commit
+Pushed to origin/main: yes
+Files changed: docs/main-write-coordination-ledger.md, docs/v2-orchestrator-transition-ledger.md
+Proof run: git fetch origin main; fast-forwarded shared main cleanly; verified status clean/aligned before edits; git diff --check before commit.
+Final shared main status: pending final fetch/status after push.
+Notes/blockers: no worker implementation files, frontend branch movement, Build 1/2/3/4/5 movement, review provenance movement beyond coordinator status text, queue-only churn, or Polaris included. Reviews A found a likely Build 2 proof failure during active review; Build 1 blocker remains real.
+Status: Complete
+```
+
+```text
 Time: 2026-06-02 11:36 -06:00
 Writer: Meridian coordinator
 Intent: docs-only V3 Goal Runtime planning update ACKed by front-end developer lane through 2026-06-02 11:43 -06:00.

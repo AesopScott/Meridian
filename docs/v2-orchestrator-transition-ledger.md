@@ -511,6 +511,21 @@ Coordinator Build 1 movement rejection - 2026-06-02:
 - Next action: route Build 1 to repair/rebase-by-reimplementation on a fresh current-main branch. Do not move the old Build 1 commits until the repaired current-main proof passes.
 - Queue maintenance: added a Build 1 repair note to the top Active Now block naming the rejected commits and the stricter current-main Aegis edge cases that must pass before movement.
 
+Coordinator rolling checkpoint - 2026-06-02 12:03 -06:00:
+
+- Goal update: user added the requirement that the coordinator update Obsidian and Git regularly. Obsidian checkpoint was appended to `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\8-Logs.md`; this Git-tracked checkpoint records the same durable state under the frontend-ACKed docs-only lease.
+- Main-write coordination: frontend lane ACKed the docs-only checkpoint scope for `docs/main-write-coordination-ledger.md` and `docs/v2-orchestrator-transition-ledger.md`; no worker implementation movement or frontend branch movement is included.
+- Shared main gate before this checkpoint: fetched `origin/main`, fast-forwarded shared `main` cleanly by one queue-doc commit, verified `C:\Users\scott\Code\Meridian` on `main`, clean, and aligned with `origin/main`.
+- Build 1: Model Harness provider-neutral metadata retry produced concrete blocker `89ab8578`. Evidence says model adapter metadata edits were patched, staged, and tested once, then staged/working diffs disappeared; blocker is routed to Reviews A for provenance, not accepted as code completion.
+- Build 2: Workflow Sub-Agent dispatch proof packet completed locally as `8f35d333` and `2a6d8159`; Reviews A is reviewing it after recording the Build 1 blocker.
+- Build 3: Source/Git plus Federation FileMap audit completed locally as `fd0b7984`; it registered current-main Compass runtime/test gaps, mirrored `docs/federation-harness-horizon.md`, and excluded branch-only Federation/Source-Git snapshots.
+- Build 4: Compass handoff consumer `compass_question` repair completed locally as `76be89da` and `51ed18aa`; Reviews B passed the repair and closed prior finding `0030b9ac`.
+- Build 5: Source/Git render-contract audit completed locally as `81bed789` and `ed0e0363`; Reviews B passed it as tests/provenance-only.
+- Reviews A: active on Build 1 blocker provenance and Build 2 Workflow dispatch review. Early proof found Build 2 lifecycle tests failing in close/archive write-through proof tests, so Build 2 may require repair before clearance.
+- Reviews B: passed Build 4 repair and Build 5 Source/Git render audit as local provenance commit `eb615ff2`; next review queue should take Build 3 `fd0b7984` or repaired frontend Federation when available.
+- Frontend: Federation Runtime Logic branch scope finding `46b25c12` was routed to the frontend lane; frontend is repairing the branch to remove live-build queue files from `origin/main..branch`.
+- Containment: no Polaris work, no worker file write in shared main, no branch/worktree movement approval, no takeover-complete mark. Takeover remains in transition.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
