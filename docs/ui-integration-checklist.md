@@ -88,14 +88,14 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | USE1 | Sessions dropdown placement | Adds a Sessions dropdown to the User panel in the equivalent position to Prime's Projects dropdown. | wired | User panel shows Sessions selector without moving approved layout. |
 | USE2 | Live sessions only | Lists only currently open/live sessions. | partial | `/bridge/user-sessions` exposes routable Meridian worktree-backed targets and excludes shared main. |
 | USE3 | Hidden sessions included | Includes hidden live sessions and marks them as hidden. | partial | Review-lane worktree targets appear with hidden state label. |
-| USE4 | Test-waiting sessions included | Includes sessions waiting for user test/try-it-out state and marks that state. | planned | Test-waiting session appears with test/waiting label. |
+| USE4 | Test-waiting sessions included | Includes sessions waiting for user test/try-it-out state and marks that state. | wired | Worktree/branch names containing test-waiting or waiting-for-test appear with waiting label. |
 | USE5 | Project grouping | Groups sessions under project headers. | wired | Dropdown visually groups sessions by project. |
 | USE6 | Alphabetical project sort | Sorts project groups alphabetically by project name. | wired | Project group order is alphabetical. |
 | USE7 | Alphabetical session sort | Sorts sessions alphabetically within each project group. | wired | Session order inside project group is alphabetical. |
 | USE8 | Session title update | Changes the User panel title to the selected session name. | wired | Selecting a session updates the panel title immediately. |
 | USE9 | Immediate prompt routing | Selecting a session immediately sets that session as the User prompt target. | wired | Next User prompt is routed to selected session without extra confirmation. |
 | USE10 | Selection state persistence | Remembers selected live session during current UI session when possible. | partial | Reload restores the target only if `/bridge/user-sessions` still reports it as routable. |
-| USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | partial | Live and hidden status appear in selector labels. |
+| USE11 | Session status display | Shows concise status such as live, hidden, waiting for test, blocked, or done if still open. | partial | Live, hidden, and waiting status appear in selector labels. |
 | USE12 | Stale target guard | If selected session closes or becomes unavailable, User prompt is blocked with a readable target warning. | partial | Sending without a bridge-confirmed target shows a target error instead of disappearing. |
 | USE13 | User mode restore | Returning from Settings/Harness mode restores prior selected live session if still available. | wired | Toggle away and back; previous routable session target returns. |
 
