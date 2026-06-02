@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add a pure deterministic Session Lifecycle live-control permission gate for future restart/resteer/archive execution readiness after Reviews A cleared the runtime export advisory binding.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: add pure permission-gate/advisory helper for future restart/resteer/archive readiness without executing recovery, spawning or inspecting processes, moving sessions, calling models, writing UI/Bifrost/FileMap, or performing branch/worktree/main operations. Preserve blockers, human-gate rationale, target session id, command kind, recommended action, and display-safe evidence refs.
+
+Completion:
+
+- Build 2 completed the live-control permission gate slice in local worktree commit `2e0f117a`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Evidence: added frozen `SessionLiveControlPermissionGate` plus `evaluate_live_control_permission_gate()` to convert a reviewed `SessionRuntimeStateExport` and authoritative session snapshot into deterministic readiness advice for future restart/resteer/archive command staging. The helper maps recommended actions to command kind/permission operation, preserves human/permission/review blockers and target mismatches, records human-gate rationale, and emits display-safe evidence refs without executing recovery or touching process/model/UI/FileMap/branch/worktree/main/Polaris surfaces.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 104 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or connect the reviewed permission gate to Prime/Beacon advisory consumers.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: bind the reviewed Session Lifecycle runtime-state export into Prime/Beacon advisory input without executing recovery.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
