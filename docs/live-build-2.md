@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Session Lifecycle command-plan serialization/audit evidence after Reviews A cleared command-plan edge coverage.
 
@@ -20,7 +20,14 @@ Task: add deterministic, display-safe command-plan audit evidence for Session Li
 
 Tests: `python -m pytest tests/test_session_lifecycle.py -q`.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate.
+Completion:
+
+- Build 2 completed the command-plan serialization/audit evidence slice in local worktree commit `4513b9aa`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Audit evidence added: deterministic `SessionCommandPlan.audit_evidence()` plus serialized `audit_evidence` covering plan action/reason, blockers, permission metadata, review-gate state, and recovery notes without live control.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 82 tests.
+- Ready for Codex Review.
+- Next Candidate: bind any review findings from this command-plan audit evidence slice before unrelated Session Lifecycle work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
