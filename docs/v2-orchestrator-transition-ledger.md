@@ -365,6 +365,13 @@ Coordinator Build 2/3 movement - 2026-06-02:
 - Approved and completed path-limited movement of Build 3 PromptPacket FileMap audit commits `46494c18` and `24499a79` onto shared main as `1072ae3c` and `f6e982de`, limited to `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
 - Proof rerun on shared main after movement: `python -m pytest tests/test_prime_autonomy.py tests/test_session_lifecycle.py -q` passed 148/148; `python -m pytest tests/test_filemap.py -q` passed 46/46; `git diff --check dcdce3cd^..HEAD` passed.
 
+Coordinator Build 4/5 movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Build 4 and Build 5 worktrees clean before movement. Build 1 remained dirty/in-progress and was not moved.
+- Approved and completed path-limited movement of Build 4 Aegis PromptPacket proof policy checklist commits `2ad5bcd6` and `9592dc63` onto shared main as `9a6be911` and `e86f8019`, limited to `docs/aegis-promptpacket-proof-policy-checklist.md` and `docs/live-build-4.md`.
+- Approved and completed path-limited movement of Build 5 Bifrost PromptPacket proof metadata rendering commits `90b3ddf6` and `48c15f09` onto shared main as `6716a928` and `346c6c4e`, limited to `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 206/206; `git diff --check 9a6be911^..HEAD` passed; Aegis checklist shape scan found required packet id/hash, source-lineage, budget, Aegis evidence, human-gate, dual-lane, block/demote/warn, Bifrost, FileMap, and test terms.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
