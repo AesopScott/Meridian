@@ -169,6 +169,14 @@ Replacement coordinator follow-up poll - 2026-06-02:
 - Thread discovery did not expose clearly named worker/review session threads for Build 1-5 or Reviews A-B, so no direct thread prompt was sent to those sessions.
 - Next coordinator action: monitor for Build 3 and Reviews B evidence on their queues. If they remain silent on the next check, route replacement/parallel focused sessions or request current-orchestrator/user approval to replace those lanes; do not accept idle/read-check-only progress.
 
+Replacement coordinator pressure-lane replacement - 2026-06-02:
+
+- Before writing new coordinator state, shared main was found clean but locally ahead by implementation commit `270cede9 Make Relay headers aqua` touching `index.html`. This violated the coordinator-only main rule. The commit was preserved on quarantine branch `codex/quarantine-main-impl-270cede9-20260601-210451`, then shared main was restored clean/aligned to `origin/main` at `54c05552`.
+- Build 3 and Reviews B remained silent after the accepted supervised escalation and sync. No pass/finding/completion/blocker evidence was present in their queue headers.
+- Launched replacement focused Build 3 FileMap worker thread `019e8649-c8c7-75f3-927c-99c76c4ee255`, constrained to `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`, with no shared-main writes or main push allowed.
+- Launched replacement focused Reviews B Relay UI/runtime review thread `019e864a-0536-7250-8057-19bf8a8a85b3`, constrained to `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`, with no shared-main writes or main push allowed.
+- Initial thread readback: both replacement sessions are active, verified clean assigned worktrees, and began inspecting the required files. Await local branch commit/verdict evidence before any coordinator movement.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
