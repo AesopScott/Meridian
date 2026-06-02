@@ -10,6 +10,25 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: add a pure live-control command-plan staging gate after reviewed recovery-readiness advisory consumers.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Task: add a deterministic Session Lifecycle helper that turns a reviewed recovery-readiness/permission-gate summary into a non-executable command-plan staging record for future restart/resteer/archive UI review. Preserve target session id, command kind/recommended action, required operation, ready flag, human-gate rationale, blockers, evidence refs, and permission state. Keep it pure/advisory only: no restart/resteer/archive execution, process inspection, session spawning, model/provider calls, branch/worktree movement, or main writes.
+
+Completion:
+
+- Build 2 completed the live-control command-plan staging gate slice in local worktree commit `a240ea4d`.
+- Files changed: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`.
+- Evidence: added frozen `SessionLiveControlCommandPlanStagingRecord` plus `stage_live_control_command_plan_from_readiness()` to convert `SessionRecoveryReadinessSummary` into display-safe, non-executable staging metadata for future UI review. The record preserves target session id, command kind, recommended action, required operation, permission state, readiness flag, human-gate rationale, blockers, and evidence refs while forcing `is_executable_now=False` and `ui_review_required=True`.
+- Proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 110 tests; `git diff --check` passed.
+- Ready for Codex Review.
+- Next Candidate: bind review findings or connect the reviewed staging record to Prime/Beacon advisory surfaces.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: connect the reviewed `SessionRecoveryReadinessSummary` to Prime/Beacon advisory consumers.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
