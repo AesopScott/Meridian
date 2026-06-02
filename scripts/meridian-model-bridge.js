@@ -37,6 +37,7 @@ const ALLOWED_ORIGINS = new Set((process.env.MERIDIAN_MODEL_ALLOWED_ORIGINS || '
   .filter(Boolean));
 const recentCalls = [];
 const recentResults = [];
+let restartInProgress = false;
 
 if (process.argv.includes('--self-test')) {
   const samples = [
@@ -326,6 +327,7 @@ function spawnModelProcess(command, cwd) {
   return spawn(command.bin, command.args, {
     cwd: cwd || DEFAULT_CWD,
     shell: process.platform === 'win32',
+    windowsHide: true,
     env: {
       ...process.env,
       MERIDIAN_MODEL_BRIDGE: '1',
@@ -334,11 +336,14 @@ function spawnModelProcess(command, cwd) {
 }
 
 function restartBridge() {
+  if (restartInProgress) return;
+  restartInProgress = true;
   server.close(() => {
     const child = spawn(process.execPath, [__filename], {
       cwd: DEFAULT_CWD,
       detached: true,
       stdio: 'ignore',
+      windowsHide: true,
       env: process.env,
     });
     child.unref();
@@ -350,6 +355,7 @@ function checkCommandAvailable(bin) {
   return new Promise((resolve) => {
     const child = spawn(process.platform === 'win32' ? 'where' : 'command', process.platform === 'win32' ? [bin] : ['-v', bin], {
       shell: process.platform !== 'win32',
+      windowsHide: true,
     });
     child.on('error', () => resolve(false));
     child.on('close', (code) => resolve(code === 0));
@@ -393,6 +399,7 @@ function relayLogicSnapshot() {
     const child = spawn(pythonBin, ['-m', 'meridian_core.relay_logic_snapshot'], {
       cwd: DEFAULT_CWD,
       shell: process.platform === 'win32',
+      windowsHide: true,
       env: {
         ...process.env,
         PYTHONIOENCODING: 'utf-8',
@@ -468,6 +475,7 @@ function userSessionTargets() {
     const child = spawn('git', ['worktree', 'list', '--porcelain'], {
       cwd: DEFAULT_CWD,
       shell: process.platform === 'win32',
+      windowsHide: true,
     });
     let stdout = '';
     let stderr = '';
@@ -641,6 +649,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'POST' && req.url === BRIDGE_ROUTES.restart) {
+    if (restartInProgress) {
+      sendJson(res, 202, { ok: true, restarting: true, alreadyRestarting: true }, req);
+      return;
+    }
     sendJson(res, 202, { ok: true, restarting: true }, req);
     setTimeout(restartBridge, 25);
     return;
