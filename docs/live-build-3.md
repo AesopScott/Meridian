@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: register any remaining V2/V3 architecture or domain contract docs that have landed without FileMap coverage.
 
@@ -29,6 +29,20 @@ Tests:
 - `python -m pytest tests/test_filemap.py -q`
 
 Completion: mark Ready for Codex Review with commit hash, files changed, tests run, missing-file/no-op audit result, and a concrete Next Candidate: bind any review findings from this FileMap slice before unrelated FileMap cleanup.
+
+Completion:
+
+- Build 3 audited current-main V2/domain/contract/checklist coverage after coordinator sync and registered missing existing artifacts in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Registered missing docs/contracts/checklists: `docs/relay-heartbeat-model-routing-implementation-checklist.md`, `docs/deepseek-direct-provider-implementation-handoff.md`, `docs/aegis-relay-summary-handoff-contract.md`, `docs/echo-atlas-handoff-contract.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, `docs/session-lifecycle-permissions-implementation-checklist.md`, `docs/queue-runway-runtime-object.md`, `docs/live-build-active-polling-contract.md`, `docs/v2-orchestrator-handoff-20260601.md`, `docs/v2-orchestrator-transition-ledger.md`, `docs/relay-executor-api-policy.md`, `docs/relay-package-api-policy-note.md`, and `docs/prompt-packet-implementation-checklist.md`.
+- Registered newly audited queue/test artifacts missing partial coverage: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, and `tests/test_model_adapter.py`.
+- Verified newly named current-main runtime/test artifacts were covered: `meridian_core/model_adapter.py`, `tests/test_session_lifecycle.py`, `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, and `tests/test_bifrost_cockpit.py`.
+- Files changed: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 46 passed.
+- Commit: `25bc316b`.
+- Queue marker: this completion update.
+- Next Candidate: bind any review findings from this FileMap slice before unrelated FileMap cleanup.
+
+Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
