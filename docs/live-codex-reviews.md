@@ -16,6 +16,16 @@ Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
 Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` and `docs/live-build-2.md`. Review the oldest Ready marker from Build 1 or Build 2 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
 
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Relay demotion/retry runtime slice or Build 2 workflow heartbeat/result summary slice when either marks Ready for Codex Review.
+
+## Coordinator Override - Active Now
+
+Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md` and `docs/live-build-2.md`. Review the oldest Ready marker from Build 1 or Build 2 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no UI/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
+
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 1 Relay/Aegis runtime integration or Build 2 Session Lifecycle permission summary when either marks Ready for Codex Review.
 
 ## Coordinator Override - Completed / Passed

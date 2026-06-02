@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: implement the first Relay demotion/retry/fail-closed handoff runtime slice after Reviews A cleared the handoff summary and Reviews B cleared the demotion/retry checklist.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Required sources: Reviews A clearance evidence in `docs/live-codex-reviews.md`, Reviews B clearance evidence in `docs/live-codex-reviews-2.md`, `docs/relay-aegis-demotion-retry-handoff-checklist.md`, `meridian_core/aegis.py`, and current Relay PromptPacket policy handoff summary code.
+
+Task: add a narrow deterministic Relay runtime helper/path for Aegis PromptPacket policy `demote`, `human_gate`, and fail-closed missing metadata outcomes before provider transport. Preserve the reviewed handoff summary shape, rerun/rebuild requirements in the checklist as advisory decision/audit data only unless the existing policy-aware path already supports the transport boundary, and prove blocked/human-gated/missing-metadata outcomes do not call provider adapters. Keep `PromptPacket.model_payload()` as the only model-bound prompt text. Do not edit Aegis, Bifrost/UI/FileMap/model-account-process code, move branches, push main, or touch Polaris.
+
+Tests: `python -m pytest tests/test_relay_executor.py -q`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect reviewed handoff summaries to Bifrost after review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: extend the review-cleared Relay/Aegis PromptPacket policy runtime integration into a display-safe Relay handoff summary for Bifrost consumption.

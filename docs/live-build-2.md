@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add a pure Session Lifecycle workflow work-order heartbeat/result summary surface for bounded sub-agent recovery decisions.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Required sources: Reviews A clearance evidence in `docs/live-codex-reviews.md`, `docs/session-lifecycle-v2-contract.md`, `docs/workflow-subagent-harness-contract.md`, `docs/session-lifecycle-permissions-prime-beacon-contract.md`, and current `SessionLifecycleState` / `SessionCommandPlan` / permission summary behavior.
+
+Task: add a narrow deterministic, serializable summary surface for workflow/sub-agent work-order heartbeats and result/error summaries that Session Lifecycle can use to recommend restart, resteer, archive, or human-gate recovery without executing those actions. Include display-safe fields for work order id, target session id, heartbeat age/status, result/error kind, retry/resteer recommendation, permission/review blockers, and stale-session recovery rationale. Keep this pure/advisory only: no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, autonomous movement, main writes, or Polaris.
+
+Tests: `python -m pytest tests/test_session_lifecycle.py -q`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect the summary to Prime/Beacon after review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: bind review-cleared Session Lifecycle permission summaries into Prime/Beacon advisory recovery decisions.
