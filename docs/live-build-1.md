@@ -8,6 +8,27 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Completed / Ready For Codex Review
+
+Goal: harden Relay proof payload/evidence negative paths without touching the blocked Model Harness metadata path.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-v2-relay`.
+
+Branch: `codex/build-1-relay-proof-negative-paths-20260602-1134`.
+
+Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Task: add focused negative-path coverage proving Relay proof payload/evidence outputs do not leak raw prompt text, worker chat, credentials, branch movement requests, or arbitrary free-text blocker/error summaries. Keep any executor change provider-neutral and bounded to structured evidence fields.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-02.
+- Commit: `8081871d` (`test: Harden Relay proof payload negative paths`).
+- Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_relay_executor.py -q` (215 passed); `git diff --check` (passed with Git line-ending normalization warnings only).
+- Concrete evidence: Relay proof-trail error evidence now reports structured error length instead of raw exception text. Negative tests prove proof/evidence/consumer-view outputs omit raw prompt sentinels, worker chat markers, credential markers, branch movement requests, and arbitrary free-text blocker summaries while preserving raw model output only in the execution result object itself.
+- Next Candidate: after review, add similar negative-path coverage for downstream Relay/Bifrost handoff views once that display surface is promoted.
+
 ## Coordinator Override - Blocked
 
 Goal: implement Model Harness capability metadata and prompt-drag telemetry fields from `docs/v2-progress-tracker.md`.
