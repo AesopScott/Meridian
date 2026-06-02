@@ -24,6 +24,7 @@ from meridian_core.relay_dispatch import RelayDispatchLane, RelayDispatchPlan
 from meridian_core.cognition_policy import evaluate_cognition_policy
 from meridian_core.relay_executor import (
     AegisGateEvidenceSummary,
+    RelayAegisPromptPacketHandoffSummary,
     RelayDecisionRecord,
     RelayDispatchEnvelope,
     RelayExecutionError,
@@ -2428,6 +2429,194 @@ class TestAegisGateEvidenceSummary:
         assert evidence.waiver_present is False
         assert evidence.explanation == ""
         assert evidence.fallback_blockers_from_aegis == ()
+
+
+class TestRelayAegisPromptPacketHandoffSummary:
+    """Test display-safe PromptPacket policy handoff for Bifrost."""
+
+    def test_handoff_empty_when_policy_not_evaluated(self) -> None:
+        summary = RelayExecutionSummary(results=(), errors=(), decision_record=None)
+
+        handoff = summary.aegis_prompt_packet_policy_handoff()
+
+        assert handoff == RelayAegisPromptPacketHandoffSummary()
+        assert handoff.to_dict() == {
+            "decision": None,
+            "severity": None,
+            "packet_id": None,
+            "packet_hash_status": "missing",
+            "packet_hash": None,
+            "proof_requirement": None,
+            "aegis_evidence_ids": (),
+            "blockers": (),
+            "warnings": (),
+            "missing_metadata_fields": (),
+            "reason_tags": (),
+            "demotion_target_tier": None,
+            "human_gate_state": "not_required",
+            "fail_closed": False,
+            "missing_metadata": False,
+            "prompt_budget_ref": None,
+            "packet_proof_metadata_ref": None,
+        }
+
+    def test_handoff_projects_allow_policy_and_envelope_proof_metadata(self) -> None:
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            _constant_model_call("ok"),
+            proof_trail=_clean_proof_trail("packet-proof-tier2"),
+            include_decision_record=True,
+        )
+
+        handoff = summary.aegis_prompt_packet_policy_handoff()
+        result = handoff.to_dict()
+
+        assert result["decision"] == "allow"
+        assert result["severity"] == "info"
+        assert result["packet_id"] == _PACKET_ID
+        assert result["packet_hash_status"] == "present"
+        assert result["packet_hash"] == plan.packet.proof_metadata.packet_hash
+        assert result["proof_requirement"] == "independent_review_when_meaningful"
+        assert result["aegis_evidence_ids"] == ("packet-proof-tier2",)
+        assert result["blockers"] == ()
+        assert result["warnings"] == ()
+        assert result["missing_metadata_fields"] == ()
+        assert result["reason_tags"] == (
+            "PromptPacket proof metadata satisfies Aegis policy",
+        )
+        assert result["demotion_target_tier"] is None
+        assert result["human_gate_state"] == "not_required"
+        assert result["fail_closed"] is False
+        assert result["missing_metadata"] is False
+        assert result["prompt_budget_ref"] == plan.packet.proof_metadata.prompt_budget_ref
+        assert result["packet_proof_metadata_ref"] == (
+            f"prompt-packet-proof:{_PACKET_ID}"
+        )
+
+    def test_handoff_falls_back_to_decision_record_policy_evidence(self) -> None:
+        plan = _make_plan(1)
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="warn",
+            severity="warning",
+            reason="policy_warn",
+            evidence_ids=("packet-proof-warn",),
+            warnings=("packet_hash_unavailable",),
+            packet_id=_PACKET_ID,
+            packet_hash=None,
+            prompt_budget_ref="budget:test",
+            packet_proof_metadata_ref="relay-packet-proof:test",
+        )
+        envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            aegis_evidence_ids=("packet-proof-warn",),
+        )
+        envelope = dataclasses.replace(envelope, packet_hash=None)
+        record = _build_decision_record(plan, dispatch_envelope=envelope)
+        record = dataclasses.replace(
+            record,
+            dispatch_envelope=envelope,
+            prompt_packet_policy_evidence=evidence,
+        )
+        summary = RelayExecutionSummary(
+            results=(),
+            errors=(),
+            decision_record=record,
+            prompt_packet_policy_evidence=None,
+        )
+
+        handoff = summary.aegis_prompt_packet_policy_handoff()
+
+        assert handoff.decision == "warn"
+        assert handoff.packet_hash_status == "missing"
+        assert handoff.warnings == ("packet_hash_unavailable",)
+        assert handoff.reason_tags == ("packet_hash_unavailable",)
+        assert handoff.missing_metadata_fields == ("packet_hash",)
+        assert handoff.missing_metadata is True
+
+    def test_handoff_carries_human_gate_and_fail_closed_state(self) -> None:
+        plan = _make_plan(4)
+        evidence = _evaluate_relay_prompt_packet_policy(
+            plan,
+            proof_trail=_clean_proof_trail("packet-proof-human-gate"),
+            human_gate_approved=False,
+        )
+        envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            aegis_evidence_ids=("packet-proof-human-gate",),
+        )
+        record = _build_decision_record(
+            plan,
+            dispatch_envelope=envelope,
+            prompt_packet_policy_evidence=evidence,
+        )
+        summary = RelayExecutionSummary(
+            results=(),
+            errors=(),
+            decision_record=record,
+            prompt_packet_policy_evidence=evidence,
+        )
+
+        handoff = summary.aegis_prompt_packet_policy_handoff()
+
+        assert handoff.decision == "human_gate"
+        assert handoff.human_gate_state == "required"
+        assert handoff.fail_closed is True
+        assert handoff.reason_tags == ("human approval required before dispatch",)
+
+    def test_handoff_missing_metadata_fields_are_deterministic(self) -> None:
+        evidence = RelayPromptPacketPolicyEvidence(
+            decision="block",
+            severity="error",
+            reason="policy_block",
+            blockers=("packet_hash_missing",),
+        )
+        summary = RelayExecutionSummary(
+            results=(),
+            errors=(),
+            prompt_packet_policy_evidence=evidence,
+        )
+
+        handoff = summary.aegis_prompt_packet_policy_handoff()
+
+        assert handoff.fail_closed is True
+        assert handoff.missing_metadata is True
+        assert handoff.missing_metadata_fields == (
+            "packet_id",
+            "packet_hash",
+            "prompt_budget_ref",
+            "packet_proof_metadata_ref",
+            "proof_requirement",
+            "aegis_evidence_ids",
+        )
+        assert handoff.reason_tags == ("packet_hash_missing",)
+
+    def test_handoff_is_display_safe_and_deterministic(self) -> None:
+        plan = _make_plan(1)
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            _constant_model_call("raw provider secret should stay out"),
+            proof_trail=_clean_proof_trail("packet-proof-display-safe"),
+            include_decision_record=True,
+        )
+
+        first = summary.aegis_prompt_packet_policy_handoff().to_dict()
+        second = summary.aegis_prompt_packet_policy_handoff().to_dict()
+        rendered = " ".join(str(value) for value in first.values())
+
+        assert first == second
+        assert _PROMPT not in rendered
+        assert "raw provider secret" not in rendered
+        assert "packet-proof-display-safe" in rendered
+        assert isinstance(first["aegis_evidence_ids"], tuple)
+        assert isinstance(first["blockers"], tuple)
+        assert isinstance(first["warnings"], tuple)
+        assert isinstance(first["missing_metadata_fields"], tuple)
+        assert isinstance(first["reason_tags"], tuple)
 
     def test_evidence_summary_extracts_allow_decision(self) -> None:
         """Summary serializes allow gate decision without blockers."""

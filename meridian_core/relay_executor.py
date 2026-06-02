@@ -330,6 +330,51 @@ class AegisGateEvidenceSummary:
 
 
 @dataclass(frozen=True)
+class RelayAegisPromptPacketHandoffSummary:
+    """Display-safe PromptPacket policy summary for Bifrost handoff."""
+
+    decision: str | None = None
+    severity: str | None = None
+    packet_id: str | None = None
+    packet_hash_status: str = "missing"
+    packet_hash: str | None = None
+    proof_requirement: str | None = None
+    aegis_evidence_ids: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+    missing_metadata_fields: tuple[str, ...] = ()
+    reason_tags: tuple[str, ...] = ()
+    demotion_target_tier: int | None = None
+    human_gate_state: str = "not_required"
+    fail_closed: bool = False
+    missing_metadata: bool = False
+    prompt_budget_ref: str | None = None
+    packet_proof_metadata_ref: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        """Return deterministic handoff keys without prompt or transport payloads."""
+        return {
+            "decision": self.decision,
+            "severity": self.severity,
+            "packet_id": self.packet_id,
+            "packet_hash_status": self.packet_hash_status,
+            "packet_hash": self.packet_hash,
+            "proof_requirement": self.proof_requirement,
+            "aegis_evidence_ids": self.aegis_evidence_ids,
+            "blockers": self.blockers,
+            "warnings": self.warnings,
+            "missing_metadata_fields": self.missing_metadata_fields,
+            "reason_tags": self.reason_tags,
+            "demotion_target_tier": self.demotion_target_tier,
+            "human_gate_state": self.human_gate_state,
+            "fail_closed": self.fail_closed,
+            "missing_metadata": self.missing_metadata,
+            "prompt_budget_ref": self.prompt_budget_ref,
+            "packet_proof_metadata_ref": self.packet_proof_metadata_ref,
+        }
+
+
+@dataclass(frozen=True)
 class RelayExecutionSummary:
     """Immutable collection of per-lane results and errors from one plan execution."""
 
@@ -363,6 +408,99 @@ class RelayExecutionSummary:
             waiver_present=record.aegis_waiver_present,
             explanation=record.aegis_explanation,
             fallback_blockers_from_aegis=aegis_blockers,
+        )
+
+    def aegis_prompt_packet_policy_handoff(self) -> RelayAegisPromptPacketHandoffSummary:
+        """Project evaluated PromptPacket policy evidence into Bifrost-safe data."""
+        policy = self.prompt_packet_policy_evidence
+        if policy is None and self.decision_record is not None:
+            policy = self.decision_record.prompt_packet_policy_evidence
+        if policy is None:
+            return RelayAegisPromptPacketHandoffSummary()
+
+        record = self.decision_record
+        envelope = record.dispatch_envelope if record is not None else None
+        proof_required = (
+            envelope.proof_required
+            if envelope is not None
+            else (record.proof_required if record is not None else ())
+        )
+        if "human_gate_approval" in proof_required:
+            proof_requirement = "human_gate_approval"
+        elif "independent_dual_model_lanes" in proof_required:
+            proof_requirement = "independent_dual_model_lanes"
+        elif "independent_review_when_meaningful" in proof_required:
+            proof_requirement = "independent_review_when_meaningful"
+        elif "aegis_clean_proof_trail" in proof_required:
+            proof_requirement = "aegis_clean_proof_trail"
+        else:
+            proof_requirement = proof_required[0] if proof_required else None
+        packet_hash = (
+            policy.packet_hash
+            if policy.packet_hash is not None
+            else (envelope.packet_hash if envelope is not None else None)
+        )
+        prompt_budget_ref = (
+            policy.prompt_budget_ref
+            if policy.prompt_budget_ref is not None
+            else (envelope.prompt_budget_ref if envelope is not None else None)
+        )
+        packet_proof_metadata_ref = (
+            policy.packet_proof_metadata_ref
+            if policy.packet_proof_metadata_ref is not None
+            else (envelope.packet_proof_metadata_ref if envelope is not None else None)
+        )
+        human_gate_required = bool(
+            envelope.human_gate_required
+            if envelope is not None
+            else (record.human_gate_required if record is not None else False)
+        )
+        if policy.decision == PromptPacketProofDecision.HUMAN_GATE.value:
+            human_gate_state = "required"
+        elif human_gate_required:
+            human_gate_state = "approved"
+        else:
+            human_gate_state = "not_required"
+
+        missing_metadata_fields = []
+        if policy.packet_id is None:
+            missing_metadata_fields.append("packet_id")
+        if packet_hash is None:
+            missing_metadata_fields.append("packet_hash")
+        if prompt_budget_ref is None:
+            missing_metadata_fields.append("prompt_budget_ref")
+        if packet_proof_metadata_ref is None:
+            missing_metadata_fields.append("packet_proof_metadata_ref")
+        if proof_requirement is None:
+            missing_metadata_fields.append("proof_requirement")
+        if not policy.evidence_ids:
+            missing_metadata_fields.append("aegis_evidence_ids")
+
+        tags = tuple(policy.blockers or policy.warnings or (policy.reason,))
+        fail_closed = policy.decision in (
+            PromptPacketProofDecision.BLOCK.value,
+            PromptPacketProofDecision.HUMAN_GATE.value,
+        )
+        missing_metadata = bool(missing_metadata_fields)
+
+        return RelayAegisPromptPacketHandoffSummary(
+            decision=policy.decision,
+            severity=policy.severity,
+            packet_id=policy.packet_id,
+            packet_hash_status="present" if packet_hash else "missing",
+            packet_hash=packet_hash,
+            proof_requirement=proof_requirement,
+            aegis_evidence_ids=policy.evidence_ids,
+            blockers=policy.blockers,
+            warnings=policy.warnings,
+            missing_metadata_fields=tuple(missing_metadata_fields),
+            reason_tags=tags,
+            demotion_target_tier=policy.demote_to_tier,
+            human_gate_state=human_gate_state,
+            fail_closed=fail_closed,
+            missing_metadata=missing_metadata,
+            prompt_budget_ref=prompt_budget_ref,
+            packet_proof_metadata_ref=packet_proof_metadata_ref,
         )
 
 
