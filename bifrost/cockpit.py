@@ -115,6 +115,34 @@ class ProviderBalanceView:
 
 
 @dataclass
+class ModelCapabilityItem:
+    provider_id: str
+    exact_model_id: str
+    route_kind: str
+    trust_state: str
+    context_window_tokens: int = 0
+    cost_posture: str = "unknown"
+    latency_tier: str = "unknown"
+    tokenizer_family: str = "unknown"
+    supports_streaming: bool = False
+    q_mode_flat: bool = False
+    external_review_required: bool = False
+    allowed_task_hints: list[str] = field(default_factory=list)
+    blocked_task_hints: list[str] = field(default_factory=list)
+    prompt_budget_status: str = "unknown"
+    prompt_growth_state: str = "unknown"
+    prompt_delta_tokens: int = 0
+    evidence_refs: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ModelCapabilityMetadataView:
+    items: list[ModelCapabilityItem] = field(default_factory=list)
+    selected_model_id: str = ""
+    metadata_source: str = "sample"
+
+
+@dataclass
 class PromptPayloadView:
     size_label: str = ""
     estimated_tokens: int = 0
@@ -311,6 +339,7 @@ class CockpitViewModel:
     harnesses: list[HarnessCard] = field(default_factory=list)
     voice: VoiceIOState = field(default_factory=VoiceIOState)
     provider_balance: ProviderBalanceView = field(default_factory=ProviderBalanceView)
+    model_capabilities: ModelCapabilityMetadataView = field(default_factory=ModelCapabilityMetadataView)
     prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     dispatch_hardening: DispatchHardeningView = field(default_factory=DispatchHardeningView)
     prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
@@ -473,6 +502,88 @@ def sample_cockpit_view_model(
             selected_provider="claude",
             routing_owner="Relay",
             policy_state="warning",
+        ),
+        model_capabilities=ModelCapabilityMetadataView(
+            selected_model_id="claude-sonnet-4-20250514",
+            metadata_source="model-harness-sample",
+            items=[
+                ModelCapabilityItem(
+                    provider_id="claude",
+                    exact_model_id="claude-sonnet-4-20250514",
+                    route_kind="direct",
+                    trust_state="trusted",
+                    context_window_tokens=200000,
+                    cost_posture="premium",
+                    latency_tier="fast",
+                    tokenizer_family="claude",
+                    supports_streaming=True,
+                    q_mode_flat=False,
+                    external_review_required=False,
+                    allowed_task_hints=["build", "review", "explain"],
+                    blocked_task_hints=[],
+                    prompt_budget_status="within_budget",
+                    prompt_growth_state="flat",
+                    prompt_delta_tokens=0,
+                    evidence_refs=["adapter:claude", "telemetry:claude-payload"],
+                ),
+                ModelCapabilityItem(
+                    provider_id="openai",
+                    exact_model_id="gpt-4o",
+                    route_kind="direct",
+                    trust_state="trusted",
+                    context_window_tokens=128000,
+                    cost_posture="premium",
+                    latency_tier="fast",
+                    tokenizer_family="openai",
+                    supports_streaming=True,
+                    q_mode_flat=False,
+                    external_review_required=False,
+                    allowed_task_hints=["build", "verify", "explain"],
+                    blocked_task_hints=["tier4_human_gate"],
+                    prompt_budget_status="within_budget",
+                    prompt_growth_state="expected_growth",
+                    prompt_delta_tokens=50,
+                    evidence_refs=["adapter:openai", "telemetry:openai-payload"],
+                ),
+                ModelCapabilityItem(
+                    provider_id="deepseek",
+                    exact_model_id="deepseek-chat",
+                    route_kind="direct",
+                    trust_state="candidate",
+                    context_window_tokens=256000,
+                    cost_posture="minimal",
+                    latency_tier="normal",
+                    tokenizer_family="deepseek",
+                    supports_streaming=True,
+                    q_mode_flat=True,
+                    external_review_required=True,
+                    allowed_task_hints=["verify", "explain"],
+                    blocked_task_hints=["build", "review_clearing"],
+                    prompt_budget_status="watch",
+                    prompt_growth_state="unexpected_growth",
+                    prompt_delta_tokens=240,
+                    evidence_refs=["adapter:deepseek", "validation:pending"],
+                ),
+                ModelCapabilityItem(
+                    provider_id="openrouter",
+                    exact_model_id="deepseek-chat",
+                    route_kind="aggregator",
+                    trust_state="degraded",
+                    context_window_tokens=64000,
+                    cost_posture="unknown",
+                    latency_tier="unknown",
+                    tokenizer_family="deepseek",
+                    supports_streaming=True,
+                    q_mode_flat=False,
+                    external_review_required=True,
+                    allowed_task_hints=["explain"],
+                    blocked_task_hints=["payload_snapshot", "tier2_plus"],
+                    prompt_budget_status="near_limit",
+                    prompt_growth_state="degraded",
+                    prompt_delta_tokens=360,
+                    evidence_refs=["adapter:openrouter", "snapshot:unavailable"],
+                ),
+            ],
         ),
         prompt_payload=PromptPayloadView(
             size_label="(under 1k)",
@@ -1218,6 +1329,73 @@ def _render_provider_balance(balance: ProviderBalanceView) -> str:
     )
 
 
+def _render_model_capabilities(metadata: ModelCapabilityMetadataView) -> str:
+    if not metadata.items:
+        return ""
+
+    item_markup = []
+    for item in metadata.items:
+        selected_attr = ' data-selected="true"' if item.exact_model_id == metadata.selected_model_id else ""
+        allowed = "".join(
+            f'<span class="capability-chip capability-allowed">{_e(hint)}</span>'
+            for hint in item.allowed_task_hints
+        ) or '<span class="capability-chip capability-empty">none</span>'
+        blocked = "".join(
+            f'<span class="capability-chip capability-blocked">{_e(hint)}</span>'
+            for hint in item.blocked_task_hints
+        ) or '<span class="capability-chip capability-empty">none</span>'
+        evidence = "".join(
+            f'<span class="capability-chip capability-evidence">{_e(ref)}</span>'
+            for ref in item.evidence_refs
+        ) or '<span class="capability-chip capability-empty">no_evidence_refs</span>'
+        item_markup.append(
+            f'<div class="model-capability-item capability-route-{_e(item.route_kind)} capability-trust-{_e(item.trust_state)}" data-model="{_e(item.exact_model_id)}" data-provider="{_e(item.provider_id)}"{selected_attr}>'
+            '<div class="capability-header">'
+            f'<span class="capability-provider">{_e(item.provider_id)}</span>'
+            f'<span class="capability-model">Exact model: {_e(item.exact_model_id)}</span>'
+            f'<span class="capability-route">Route: {_e(item.route_kind)}</span>'
+            f'<span class="capability-trust">Trust: {_e(item.trust_state)}</span>'
+            "</div>"
+            '<div class="capability-grid">'
+            f'<span>Context window: {item.context_window_tokens}</span>'
+            f'<span>Cost posture: {_e(item.cost_posture)}</span>'
+            f'<span>Latency: {_e(item.latency_tier)}</span>'
+            f'<span>Tokenizer: {_e(item.tokenizer_family)}</span>'
+            f'<span>Streaming: {"yes" if item.supports_streaming else "no"}</span>'
+            f'<span>Q-mode flat: {"yes" if item.q_mode_flat else "no"}</span>'
+            f'<span>External review: {"required" if item.external_review_required else "not_required"}</span>'
+            f'<span>Prompt budget: {_e(item.prompt_budget_status)}</span>'
+            f'<span>Prompt growth: {_e(item.prompt_growth_state)}</span>'
+            f'<span>Prompt delta: {item.prompt_delta_tokens}</span>'
+            "</div>"
+            '<div class="capability-lists">'
+            '<div class="capability-list capability-allowed-tasks" aria-label="Allowed Task Hints"><span class="capability-list-title">Allowed</span>'
+            + allowed
+            + "</div>"
+            '<div class="capability-list capability-blocked-tasks" aria-label="Blocked Task Hints"><span class="capability-list-title">Blocked</span>'
+            + blocked
+            + "</div>"
+            '<div class="capability-list capability-evidence-refs" aria-label="Model Capability Evidence Refs"><span class="capability-list-title">Evidence</span>'
+            + evidence
+            + "</div>"
+            + "</div>"
+            + "</div>"
+        )
+
+    return (
+        '<section class="model-capabilities" aria-label="Model Harness Capability Metadata">'
+        '<div class="capability-header-main">'
+        '<h3>Model Harness Capability Metadata</h3>'
+        f'<span class="capability-source">Source: {_e(metadata.metadata_source)}</span>'
+        f'<span class="capability-selected">Selected model: {_e(metadata.selected_model_id or "none")}</span>'
+        "</div>"
+        '<div class="model-capability-items">'
+        + "".join(item_markup)
+        + "</div>"
+        + "</section>"
+    )
+
+
 def _render_prompt_payload(payload: PromptPayloadView) -> str:
     if not payload.size_label:
         return ""
@@ -1939,6 +2117,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     session_lifecycle = _render_session_lifecycle(vm.session_lifecycle)
     proof_state = _render_proof_state(vm.proof_state)
     provider_balance = _render_provider_balance(vm.provider_balance)
+    model_capabilities = _render_model_capabilities(vm.model_capabilities)
     prompt_payload = _render_prompt_payload(vm.prompt_payload)
     dispatch_hardening = _render_dispatch_hardening(vm.dispatch_hardening)
     prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
@@ -1979,6 +2158,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{aegis_packet_policy}\n"
         f"{relay_aegis_handoff}\n"
         f"{provider_balance}\n"
+        f"{model_capabilities}\n"
         f"{prompt_payload}\n"
         "</main>\n"
         '<aside class="right-panel">\n'

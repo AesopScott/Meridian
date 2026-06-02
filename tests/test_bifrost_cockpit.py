@@ -16,6 +16,8 @@ from bifrost.cockpit import (
     HarnessModeView,
     InstrumentBand,
     LaneRow,
+    ModelCapabilityItem,
+    ModelCapabilityMetadataView,
     ProgressEvent,
     ProviderBalanceItem,
     ProviderBalanceView,
@@ -410,6 +412,116 @@ def test_provider_balance_preserves_other_bifrost_surfaces_and_stale_recovery():
     assert 'class="stale-target-guard"' in doc
     assert 'data-recovery-action="ask-prime-recover"' in doc
     assert "Next prompt target: Closed Provider Session" not in doc
+
+
+def test_model_capability_metadata_sample_renders_required_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Model Harness Capability Metadata"' in doc
+    assert "Model Harness Capability Metadata" in doc
+    assert "Source: model-harness-sample" in doc
+    assert "Selected model: claude-sonnet-4-20250514" in doc
+    assert "Exact model: claude-sonnet-4-20250514" in doc
+    assert "Exact model: gpt-4o" in doc
+    assert "Exact model: deepseek-chat" in doc
+    assert 'data-model="claude-sonnet-4-20250514" data-provider="claude" data-selected="true"' in doc
+
+
+def test_model_capability_metadata_sample_renders_route_trust_and_context():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Route: direct" in doc
+    assert "Route: aggregator" in doc
+    assert "Trust: trusted" in doc
+    assert "Trust: candidate" in doc
+    assert "Trust: degraded" in doc
+    assert "Context window: 200000" in doc
+    assert "Context window: 256000" in doc
+    assert "Cost posture: premium" in doc
+    assert "Cost posture: minimal" in doc
+    assert "Latency: fast" in doc
+    assert "Tokenizer: deepseek" in doc
+
+
+def test_model_capability_metadata_sample_renders_task_hints_and_review_state():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'class="capability-list capability-allowed-tasks"' in doc
+    assert 'class="capability-list capability-blocked-tasks"' in doc
+    assert "build" in doc
+    assert "verify" in doc
+    assert "review_clearing" in doc
+    assert "payload_snapshot" in doc
+    assert "External review: required" in doc
+    assert "External review: not_required" in doc
+    assert "Streaming: yes" in doc
+    assert "Q-mode flat: yes" in doc
+    assert "Q-mode flat: no" in doc
+
+
+def test_model_capability_metadata_sample_renders_prompt_drag_and_evidence_refs():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert "Prompt budget: within_budget" in doc
+    assert "Prompt budget: watch" in doc
+    assert "Prompt budget: near_limit" in doc
+    assert "Prompt growth: flat" in doc
+    assert "Prompt growth: unexpected_growth" in doc
+    assert "Prompt growth: degraded" in doc
+    assert "Prompt delta: 240" in doc
+    assert "Prompt delta: 360" in doc
+    assert "adapter:deepseek" in doc
+    assert "validation:pending" in doc
+    assert "snapshot:unavailable" in doc
+
+
+def test_model_capability_metadata_escapes_structured_fields():
+    vm = sample_cockpit_view_model()
+    vm.model_capabilities = ModelCapabilityMetadataView(
+        selected_model_id="<script>model</script>",
+        metadata_source="<script>source</script>",
+        items=[
+            ModelCapabilityItem(
+                provider_id="<img src=x>",
+                exact_model_id="<script>model</script>",
+                route_kind="<bad>",
+                trust_state="<script>trust</script>",
+                context_window_tokens=1,
+                cost_posture="<script>cost</script>",
+                latency_tier="<bad>",
+                tokenizer_family="<script>tokenizer</script>",
+                allowed_task_hints=["<script>allowed</script>"],
+                blocked_task_hints=["blocked:<bad>"],
+                prompt_budget_status="<script>budget</script>",
+                prompt_growth_state="growth:<bad>",
+                prompt_delta_tokens=9,
+                evidence_refs=["evidence:<bad>"],
+            )
+        ],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;model&lt;/script&gt;" in doc
+    assert "Route: &lt;bad&gt;" in doc
+    assert "blocked:&lt;bad&gt;" in doc
+    assert "evidence:&lt;bad&gt;" in doc
+
+
+def test_model_capability_metadata_preserves_existing_surfaces_and_stale_recovery():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-capability-session", "Closed Capability Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-capability-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Model Harness Capability Metadata"' in doc
+    assert 'aria-label="Provider Balance"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'aria-label="Dispatch Hardening State"' in doc
+    assert 'aria-label="PromptPacket Proof Metadata"' in doc
+    assert 'aria-label="Relay Aegis Policy Handoff Summary"' in doc
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Capability Session" not in doc
 
 
 def test_prompt_payload_sample_renders_structured_visibility_fields():
