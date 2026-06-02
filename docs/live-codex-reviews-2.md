@@ -6,9 +6,11 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review the current-main Relay harness UI/runtime integration landing.
+
+Status: passed by Codex Reviews B on 2026-06-02. Current `HEAD` contains the Relay harness UI/runtime integration landing through `7b50ab8e`, and the visible Relay panel/runtime bridge snapshot is review-cleared.
 
 Coordinator nudge: this is not a passive poll. Review the landed Relay harness UI/runtime integration now, using current `origin/main` and the proof command below; either pass it with provenance or route a focused finding.
 
@@ -44,6 +46,22 @@ Proof commands:
 - Run bridge/self-test or syntax checks only if the review scope needs stronger proof.
 
 Completion: if clean, mark the reviewed slice passed and promote the next candidate for that lane; if findings exist, route the smallest focused repair back to the owning build lane ahead of normal work. Commit only review-queue/provenance updates and push to `origin/main`.
+
+Review result:
+
+- Passed. `meridian_core/relay_logic_snapshot.py` builds deterministic serializable harness/configuration data from local Relay domain functions and dispatch-plan assembly; it does not call live models or expose prompt payload text.
+- Passed. `scripts/meridian-model-bridge.js` keeps `/api/relay-logic` on the Python snapshot path, separate from `/api/message` model CLI spawning.
+- Passed. `index.html` keeps the model selector default on Codex with Auto disabled and stored Auto coerced back to Codex; Relay shows `Auto disabled` and renders the backend snapshot into reviewable/collapsible `<details>` sections.
+- Passed. Spark/center UI and the Relay harness button remain present, with Relay opening the visible `Relay Model Logic` surface.
+- Passed. Scope check found no Polaris path, branch/worktree movement, hidden Auto routing, fake harness completion claim, or main-worktree write introduced by the reviewed slice.
+- Passed. Tests cover snapshot source/version, account-session-first precedence, Tier 3 proof/dispatch/audit depth, Tier 4 human gate blocking, capability sections, Prime directives/proofs, Auto-disabled visible logic, JSON serialization, and Relay-only/no-heartbeat separation.
+
+Proof:
+
+- `python -m pytest tests/test_relay_logic_snapshot.py -q` passed: 11 tests.
+- Bridge self-test passed: `ok=True`, `capabilitiesOk=True`, `originOk=True`, `contextOk=True`, `resultRecoveryOk=True`.
+
+Completion: Relay harness UI/runtime integration is review-cleared. Reviews B returns to the Build 4/Build 5 current-main Ready-marker polling task in the Next Candidate section.
 
 ## Next Candidate Task
 
