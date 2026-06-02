@@ -489,6 +489,13 @@ Coordinator Build 2/4/5 rolling-slice movement - 2026-06-02:
 - Proof rerun on shared main after movement: `python -m pytest tests/test_session_lifecycle.py tests/test_aegis.py tests/test_bifrost_cockpit.py -q` passed 546/546; `git diff --check 1b56a098^..HEAD` passed.
 - Honest lane status after this movement: Build 2, Build 4, and Build 5 are Ready for Codex Review on current main. Build 1 remains actively working on Relay/Aegis runtime integration. Build 3 should audit FileMap after this movement batch.
 
+Coordinator Build 1 movement rejection - 2026-06-02:
+
+- Attempted path-limited movement of Build 1 Relay/Aegis PromptPacket policy runtime commits `d5c4c4c8` and `bfb0ae50` onto shared main as `cef647d4` and `43e646bc`.
+- Shared-main proof failed after movement: `python -m pytest tests/test_relay_executor.py -q` reported 5 failures because the Build 1 slice was built before the stricter Build 4 Aegis edge behavior now on current main.
+- Recovery: reverted the unverified Build 1 movement with `40b51b93` and `bd070858` before push; `python -m pytest tests/test_relay_executor.py -q` then passed 172/172.
+- Next action: route Build 1 to repair/rebase-by-reimplementation on a fresh current-main branch. Do not move the old Build 1 commits until the repaired current-main proof passes.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
