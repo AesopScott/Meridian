@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: poll/review the next current-main Ready markers from Build 4 and Build 5 after the Aegis-wave clearance.
 
@@ -15,6 +15,22 @@ Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 Task: watch for the next current-main Ready marker from Build 4 or Build 5. If Build 4's Relay/Aegis PromptPacket policy integration checklist is ready, review it first. If Build 5's Aegis policy rendering edge coverage is ready, review it next. Stop and route a focused finding if any slice fails; otherwise record pass provenance. Do not commit read-check-only polling.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If no Ready marker exists yet, stay in polling state and do not commit.
+
+Review result - 2026-06-01 23:00 -06:00:
+
+- Build 4 Relay/Aegis PromptPacket policy integration checklist passed. Commits `07f52228` and `0d275750` changed only `docs/relay-aegis-promptpacket-policy-integration-checklist.md` and `docs/live-build-4.md`.
+- The checklist covers Relay construction of `PromptPacketProofMetadata` from sealed packet and dispatch-envelope fields, Aegis pre-transport call site, allow/warn/demote/block/human-gate outcome mapping, decision-record behavior, raw-prompt/credential exclusions, Bifrost-visible proof summaries, fail-closed missing metadata, retry/fallback/demotion reruns, deterministic tests, and FileMap routing.
+- Build 5 Aegis policy rendering edge coverage passed. Commits `d76f61f7` and `ab071f2e` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The rendering edge coverage suppresses the policy card when packet id is missing, renders degraded placeholders for missing policy id, proof requirement, evidence ids, missing fields, and reason tags, covers human-gate edge states, and preserves escaping plus prior Bifrost surfaces.
+- Scope check found no runtime implementation in the Build 4 docs slice and no session spawning, live process/model calls, `index.html` edit, FileMap edit, Relay docs edit, branch movement, Polaris dependency, shared-main write, or push.
+
+Proof:
+
+- `git diff --check 07f52228^..0d275750` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 220 tests.
+- `git diff --check d76f61f7^..ab071f2e` passed.
+
+Completion: Build 4 Relay/Aegis PromptPacket policy integration checklist and Build 5 Aegis policy rendering edge coverage are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
