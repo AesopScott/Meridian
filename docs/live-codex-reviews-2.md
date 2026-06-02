@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: keep Build 4/5 review hot under the rolling two-stage pipeline.
 
@@ -15,6 +15,23 @@ Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 Task: poll current `origin/main` and the top blocks in `docs/live-build-4.md` and `docs/live-build-5.md`. Review the oldest Ready marker from Build 4 or Build 5 when one appears. If none is ready, do not commit read-check-only progress. When reviewing, verify containment, path scope, proof commands recorded in the lane queue, and no Relay runtime/Bifrost/FileMap/branch/main/Polaris scope leakage beyond the assigned lane.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: review Build 4 Aegis policy edge coverage or Build 5 Relay/Aegis handoff summary rendering when either marks Ready for Codex Review.
+
+Review result - 2026-06-01 23:14 -06:00:
+
+- Build 4 Aegis PromptPacket policy edge coverage passed. Commits `6c37c530` and `b7df268f` changed only `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+- The evaluator remains pure/domain-only and adds fail-closed normalization plus deterministic coverage for empty source lineage, missing allowed sources, blank lineage keys, missing/unknown/conflicting proof requirements, demotion target absence/invalidity, human-gate and dual-lane flag conflicts, unsafe evidence IDs, and stable blocker/warning tags.
+- Build 5 Relay/Aegis handoff summary rendering passed. Commits `58f99765` and `2362985d` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The static Bifrost handoff view renders decision, severity, packet id/hash status, proof requirement, evidence IDs, blockers, warnings, demotion target, human-gate state, missing-metadata fail-closed state, and display-safe redaction for raw prompt, secret, provider metadata, and process-id sentinels while preserving prior cockpit surfaces.
+- Scope check found no Relay runtime mutation, live process/model calls, session spawning, `index.html` edit, FileMap edit, branch movement, Polaris dependency, shared-main write, or push.
+
+Proof:
+
+- `python -m pytest tests/test_aegis.py -q` passed: 228 tests.
+- `git diff --check 6c37c530^..b7df268f` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 227 tests.
+- `git diff --check 58f99765^..2362985d` passed.
+
+Completion: Build 4 Aegis PromptPacket policy edge coverage and Build 5 Relay/Aegis handoff summary rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
