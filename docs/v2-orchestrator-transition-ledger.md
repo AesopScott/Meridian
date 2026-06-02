@@ -309,6 +309,11 @@ Coordinator Reviews B and Build 5 movement - 2026-06-02:
 - Proof rerun on shared main after Build 5 movement: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 193/193; `git diff --check 41412aee^..8ca2390e` passed.
 - Honest lane status: Build 1 and Build 5 are Ready for Codex Review on main; Reviews A is actively reviewing Build 2/3; Reviews B has cleared Build 4 and should be routed to Build 5 after the movement is pushed and the review worktree is current.
 
+Coordinator containment recovery for reset-confirmation UI dirt - 2026-06-02:
+
+- After pushing Build 5 movement, shared main was found dirty with uncommitted UI changes in `index.html` and `docs/ui-integration-checklist.md`. No worker movement or review routing was approved while main was dirty.
+- Preserved the dirty UI work on quarantine branch `codex/quarantine-main-dirty-reset-confirm-20260601-2223` at `3a8a3368` (`quarantine: Preserve reset confirmation UI changes`), then restored shared main clean/aligned to `origin/main` at `199ef1ee`.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
