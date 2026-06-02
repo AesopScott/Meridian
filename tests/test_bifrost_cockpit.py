@@ -14,6 +14,7 @@ from bifrost.cockpit import (
     ProgressEvent,
     ProjectCard,
     ProofGateStatus,
+    ProofPreviewItem,
     ProofStateView,
     SessionItem,
     SessionLifecycleItem,
@@ -1061,6 +1062,12 @@ def test_proof_state_sample_has_gates():
     assert len(vm.proof_state.gates) >= 3
 
 
+def test_proof_state_sample_has_preview_items():
+    vm = sample_cockpit_view_model()
+    states = {item.state for item in vm.proof_state.preview_items}
+    assert {"pending", "blocked", "passed", "needs-human-review"} <= states
+
+
 def test_proof_state_renders_with_sample_data():
     vm = sample_cockpit_view_model()
     doc = render_cockpit_html(vm)
@@ -1099,6 +1106,60 @@ def test_proof_state_shows_findings():
     vm = sample_cockpit_view_model()
     doc = render_cockpit_html(vm)
     assert 'class="finding-open"' in doc
+
+
+def test_proof_state_preview_renders_required_states():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert 'class="proof-preview-list"' in doc
+    for state in ("pending", "blocked", "passed", "needs-human-review"):
+        assert f'data-proof-state="{state}"' in doc
+        assert f"proof-preview-{state}" in doc
+
+
+def test_proof_state_preview_renders_owner_and_evidence():
+    vm = sample_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    assert "Session Lifecycle" in doc
+    assert "queue:build-5" in doc
+    assert "pytest:bifrost-cockpit" in doc
+    assert "review:codex" in doc
+
+
+def test_proof_state_preview_custom_item_escapes_content():
+    vm = CockpitViewModel(project="Test", bearing="test")
+    vm.proof_state = ProofStateView(
+        proof_status="verified",
+        preview_items=[
+            ProofPreviewItem(
+                proof_id='proof"><script>',
+                label="<script>label</script>",
+                state="blocked",
+                owner="<img src=x>",
+                evidence_ref="evidence:<bad>",
+                summary="<script>alert(1)</script>",
+            )
+        ],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;label&lt;/script&gt;" in doc
+    assert "evidence:&lt;bad&gt;" in doc
+
+
+def test_proof_state_preview_does_not_replace_stale_recovery_guard():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-proof-session", "Closed Proof Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-proof-session"
+    doc = render_cockpit_html(vm)
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Proof Session" not in doc
 
 
 def test_proof_state_with_default_status_renders():

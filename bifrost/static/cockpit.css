@@ -913,6 +913,68 @@ summary {
   line-height: 1.3;
 }
 
+.proof-preview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.proof-preview-item {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border-radius: 6px;
+  background: rgba(4, 12, 22, 0.68);
+  border: 1px solid rgba(93, 157, 255, 0.22);
+}
+
+.proof-preview-label {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.proof-preview-state {
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.proof-preview-owner,
+.proof-preview-evidence,
+.proof-preview-summary {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.proof-preview-pending .proof-preview-state {
+  color: var(--blue);
+  background: rgba(93, 157, 255, 0.14);
+  border: 1px solid rgba(93, 157, 255, 0.3);
+}
+
+.proof-preview-blocked .proof-preview-state {
+  color: var(--red);
+  background: rgba(255, 111, 123, 0.14);
+  border: 1px solid rgba(255, 111, 123, 0.3);
+}
+
+.proof-preview-passed .proof-preview-state {
+  color: var(--green);
+  background: rgba(52, 211, 153, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.proof-preview-needs-human-review .proof-preview-state {
+  color: var(--amber);
+  background: rgba(255, 202, 87, 0.14);
+  border: 1px solid rgba(255, 202, 87, 0.3);
+}
+
 .proof-summary {
   display: flex;
   gap: 10px;

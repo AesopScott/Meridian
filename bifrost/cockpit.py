@@ -130,9 +130,20 @@ class ProofGateStatus:
 
 
 @dataclass
+class ProofPreviewItem:
+    proof_id: str
+    label: str
+    state: str  # "pending" | "blocked" | "passed" | "needs-human-review"
+    owner: str
+    evidence_ref: str = ""
+    summary: str = ""
+
+
+@dataclass
 class ProofStateView:
     proof_status: str = "no_proof"  # "no_proof" | "queue_read" | "verified" | "executed"
     gates: list[ProofGateStatus] = field(default_factory=list)
+    preview_items: list[ProofPreviewItem] = field(default_factory=list)
     blocker_count: int = 0
     open_findings: int = 0
     waived_count: int = 0
@@ -499,6 +510,40 @@ def sample_cockpit_view_model() -> CockpitViewModel:
                     gate_name="Tier 3 Dual-Lane",
                     status="pass",
                     reason="risk_tier is Tier 2; dual-lane not required",
+                ),
+            ],
+            preview_items=[
+                ProofPreviewItem(
+                    proof_id="queue-proof-pending",
+                    label="Queue Proof",
+                    state="pending",
+                    owner="Session Lifecycle",
+                    evidence_ref="queue:build-5",
+                    summary="Awaiting next proof write after local tests",
+                ),
+                ProofPreviewItem(
+                    proof_id="relay-proof-blocked",
+                    label="Relay Route Proof",
+                    state="blocked",
+                    owner="Relay",
+                    evidence_ref="route:auto-disabled",
+                    summary="Auto routing remains blocked until checklist gates clear",
+                ),
+                ProofPreviewItem(
+                    proof_id="cockpit-proof-passed",
+                    label="Cockpit Render Proof",
+                    state="passed",
+                    owner="Bifrost",
+                    evidence_ref="pytest:bifrost-cockpit",
+                    summary="Static render tests passed for current preview",
+                ),
+                ProofPreviewItem(
+                    proof_id="human-review-needed",
+                    label="Human Review Gate",
+                    state="needs-human-review",
+                    owner="Aegis",
+                    evidence_ref="review:codex",
+                    summary="External review required before promotion",
                 ),
             ],
             blocker_count=0,
@@ -1004,6 +1049,19 @@ def _render_proof_state(proof: ProofStateView) -> str:
             f"</div>"
         )
 
+    preview_items = []
+    for item in proof.preview_items:
+        state_class = f"proof-preview-{_e(item.state)}"
+        preview_items.append(
+            f'<div class="proof-preview-item {state_class}" data-proof-id="{_e(item.proof_id)}" data-proof-state="{_e(item.state)}">'
+            f'<span class="proof-preview-label">{_e(item.label)}</span>'
+            f'<span class="proof-preview-state">{_e(item.state)}</span>'
+            f'<span class="proof-preview-owner">{_e(item.owner)}</span>'
+            f'<span class="proof-preview-evidence">{_e(item.evidence_ref)}</span>'
+            f'<span class="proof-preview-summary">{_e(item.summary)}</span>'
+            f"</div>"
+        )
+
     blocker_html = ""
     if proof.blocker_count > 0:
         blocker_html = f'<span class="blocker-count">{proof.blocker_count} gates blocking</span>'
@@ -1025,6 +1083,13 @@ def _render_proof_state(proof: ProofStateView) -> str:
         '<div class="proof-gates">'
         + "".join(gate_items)
         + "</div>"
+        + (
+            '<div class="proof-preview-list" aria-label="Proof State Preview">'
+            + "".join(preview_items)
+            + "</div>"
+            if preview_items
+            else ""
+        )
         + (
             f'<div class="proof-summary">{findings_html}</div>'
             if findings_html
