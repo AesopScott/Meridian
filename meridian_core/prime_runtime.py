@@ -20,6 +20,26 @@ class PrimeDecisionStatus(Enum):
     NEEDS_CLARIFICATION = "needs_clarification"
 
 
+class PrimeIntentKind(Enum):
+    """High-level intent Prime resolves to a single owning harness."""
+
+    PROJECT_CONTEXT = "project_context"
+    SESSION_LIFECYCLE = "session_lifecycle"
+    MODEL_ROUTE = "model_route"
+    PROOF_RISK = "proof_risk"
+    ORCHESTRATION = "orchestration"
+    UNKNOWN = "unknown"
+
+
+OWNER_BY_INTENT = {
+    PrimeIntentKind.PROJECT_CONTEXT: "Compass",
+    PrimeIntentKind.SESSION_LIFECYCLE: "Vulcan",
+    PrimeIntentKind.MODEL_ROUTE: "Relay",
+    PrimeIntentKind.PROOF_RISK: "Aegis",
+    PrimeIntentKind.ORCHESTRATION: "Prime",
+}
+
+
 @dataclass(frozen=True)
 class PrimeSourceRef:
     """A backend source Prime used to assemble its decision context."""
@@ -51,6 +71,21 @@ class PrimeProof:
             "answer": self.answer,
             "source": self.source,
             "invalidatesWhen": self.invalidates_when,
+        }
+
+
+@dataclass(frozen=True)
+class PrimeExecutability:
+    """Executable gate result for a Prime decision."""
+
+    status: PrimeDecisionStatus
+    blockers: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "status": self.status.value,
+            "blockers": list(self.blockers),
+            "executable": self.status == PrimeDecisionStatus.EXECUTABLE and not self.blockers,
         }
 
 
@@ -160,6 +195,114 @@ def assemble_prime_runtime_context(
     )
 
 
+def resolve_prime_owner(intent: PrimeIntentKind | str | None) -> str:
+    """Resolve intent to the harness that owns the next decision."""
+
+    if isinstance(intent, str):
+        normalized = intent.strip().lower().replace("-", "_").replace(" ", "_")
+        intent = PrimeIntentKind._value2member_map_.get(normalized, PrimeIntentKind.UNKNOWN)
+    if intent is None:
+        intent = PrimeIntentKind.UNKNOWN
+    if intent == PrimeIntentKind.UNKNOWN:
+        return "Prime"
+    return OWNER_BY_INTENT[intent]
+
+
+def _available_harnesses(context: PrimeRuntimeContext) -> set[str]:
+    return {
+        source.harness
+        for source in context.source_refs
+        if source.source not in {"", "unknown", "pending"}
+    }
+
+
+def evaluate_prime_executability(
+    *,
+    context: PrimeRuntimeContext,
+    owner_harness: str,
+    requires_approval: bool = False,
+    requires_clarification: bool = False,
+) -> PrimeExecutability:
+    """Gate a Prime decision before bridge/UI rendering or execution."""
+
+    blockers: list[str] = []
+    available = _available_harnesses(context)
+
+    if owner_harness != "Prime" and owner_harness not in available:
+        blockers.append(f"{owner_harness} source unavailable")
+
+    if owner_harness == "Relay" and "Relay" not in available:
+        blockers.append("model route proof unavailable")
+
+    if requires_approval:
+        return PrimeExecutability(
+            status=PrimeDecisionStatus.NEEDS_APPROVAL,
+            blockers=tuple(blockers + ["approval required"]),
+        )
+
+    if requires_clarification:
+        return PrimeExecutability(
+            status=PrimeDecisionStatus.NEEDS_CLARIFICATION,
+            blockers=tuple(blockers + ["clarification required"]),
+        )
+
+    if blockers:
+        return PrimeExecutability(
+            status=PrimeDecisionStatus.BLOCKED,
+            blockers=tuple(blockers),
+        )
+
+    return PrimeExecutability(status=PrimeDecisionStatus.EXECUTABLE)
+
+
+def build_prime_proof_packet(
+    *,
+    owner_harness: str,
+    context: PrimeRuntimeContext,
+) -> tuple[PrimeProof, ...]:
+    """Build proof questions for Prime's core no-drift hierarchy."""
+
+    available = _available_harnesses(context)
+    return (
+        PrimeProof(
+            question="Which harness owns the project boundary?",
+            answer=(
+                "Compass supplies project bounds before Prime selects an action."
+                if "Compass" in available
+                else "Compass project source is unavailable."
+            ),
+            source="Compass",
+            invalidates_when="Prime acts without a Compass project source ref.",
+        ),
+        PrimeProof(
+            question="Which harness owns runtime session lifecycle?",
+            answer=(
+                "Vulcan supplies session lifecycle before Prime routes execution."
+                if "Vulcan" in available
+                else "Vulcan session lifecycle source is unavailable."
+            ),
+            source="Vulcan",
+            invalidates_when="Prime changes session state without a Vulcan source ref.",
+        ),
+        PrimeProof(
+            question="Which harness owns model access and routing?",
+            answer=(
+                "Relay supplies model route logic before Prime can ask a model."
+                if "Relay" in available
+                else "Relay model route source is unavailable."
+            ),
+            source="Relay",
+            invalidates_when="Prime selects a model/vendor without Relay evidence.",
+        ),
+        PrimeProof(
+            question="Does the selected owner match the intent?",
+            answer=f"{owner_harness} owns this decision after Prime hierarchy resolution.",
+            source="Prime",
+            invalidates_when="The visible owner differs from backend owner resolution.",
+        ),
+    )
+
+
 def make_prime_decision(
     *,
     context: PrimeRuntimeContext,
@@ -172,26 +315,7 @@ def make_prime_decision(
 ) -> PrimeDecision:
     """Create a deterministic Prime decision with visible proof."""
 
-    proof = (
-        PrimeProof(
-            question="Which harness owns the project boundary?",
-            answer="Compass supplies project bounds before Prime selects an action.",
-            source="Compass",
-            invalidates_when="Prime acts without a Compass project source ref.",
-        ),
-        PrimeProof(
-            question="Which harness owns runtime session lifecycle?",
-            answer="Vulcan supplies session lifecycle before Prime routes execution.",
-            source="Vulcan",
-            invalidates_when="Prime changes session state without a Vulcan source ref.",
-        ),
-        PrimeProof(
-            question="Which harness owns model access and routing?",
-            answer="Relay supplies model route logic before Prime can ask a model.",
-            source="Relay",
-            invalidates_when="Prime selects a model/vendor without Relay evidence.",
-        ),
-    )
+    proof = build_prime_proof_packet(owner_harness=owner_harness, context=context)
     final_status = PrimeDecisionStatus.BLOCKED if blockers else status
     return PrimeDecision(
         decision_id="prime-runtime-decision-v1",
@@ -210,4 +334,34 @@ def make_prime_decision(
             "proof questions and answers",
             "blockers before execution",
         ),
+    )
+
+
+def resolve_prime_decision(
+    *,
+    context: PrimeRuntimeContext,
+    intent: PrimeIntentKind | str | None,
+    action: str,
+    why: str,
+    risk: str = "safe_read_only",
+    requires_approval: bool = False,
+    requires_clarification: bool = False,
+) -> PrimeDecision:
+    """Resolve owner, gate executability, and return the visible Prime decision."""
+
+    owner = resolve_prime_owner(intent)
+    gate = evaluate_prime_executability(
+        context=context,
+        owner_harness=owner,
+        requires_approval=requires_approval,
+        requires_clarification=requires_clarification,
+    )
+    return make_prime_decision(
+        context=context,
+        owner_harness=owner,
+        action=action,
+        why=why,
+        risk=risk,
+        status=gate.status,
+        blockers=gate.blockers,
     )
