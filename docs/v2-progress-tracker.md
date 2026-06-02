@@ -95,7 +95,7 @@
 
 ## In Progress / Stabilizing
 
-- [ ] **Prime + Runtime Decision Contract:** `meridian_core/prime_runtime.py` backend packet assembles Compass, Vulcan, Relay, and Aegis source refs into a visible Prime decision with owner resolution, executability gates, proof packet, `/bridge/prime-logic`, and Prime harness rendering. Built in `9fac6846`, `7c7b3103`, and `13c8b7af`; awaiting review.
+- [ ] **Prime + Runtime Decision Contract:** `meridian_core/prime_runtime.py` backend packet assembles Compass, Vulcan, Relay, and Aegis source refs into a visible Prime decision with owner resolution, executability gates, proof packet, `/bridge/prime-logic`, and Prime harness rendering. Built in `9fac6846`, `7c7b3103`, `13c8b7af`, `f5b67f66`, `aa16e5e5`, and `723a5898`; awaiting review.
 
 ## V3 Scope Note
 

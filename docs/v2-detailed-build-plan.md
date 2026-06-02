@@ -83,6 +83,9 @@ First wave deliverable:
 - Define a `PrimeDecision` runtime packet that assembles Compass, Vulcan, Relay, and Aegis source refs before visible orchestration.
 - Resolve the owning harness, executability status, blockers, proof questions, and invalidation conditions from backend state.
 - Expose the runtime packet through `/bridge/prime-logic` so the Prime harness renders backend logic directly.
+- Carry a typed `PrimeInteractionRequest` inside every decision packet so intent, action, project, risk, and visible prompt reference stay explicit.
+- Consume Aegis aggregate gate summaries as Prime risk input and preserve approval-needed status when proof/risk blocks execution.
+- Emit a no-drift audit proving request, context, owner, source refs, proof packet, Aegis risk, and visible fields agree.
 
 **Likely files/modules/docs:**
 
@@ -97,6 +100,7 @@ First wave deliverable:
 
 - Unit tests for priority ordering, blocked review gates, stale lanes, and human-gate required actions.
 - Runtime snapshot tests for backend source refs, owner resolution, executability gates, proof packet, and bridge-visible payload shape.
+- No-drift audit tests for project mismatch and missing owner-source failure.
 - No model calls in the first slice.
 
 **Out-of-scope guardrails:**
