@@ -4,6 +4,10 @@
 
 **Rule:** A harness is not complete because its button exists. Completion means backend capability, Prime integration, visible Runtime Logic UI, and proof/review are all aligned.
 
+**HTML view:** `docs/harness-stage-checklist.html`
+
+**Update rule:** When this checklist changes, update the HTML view in the same checkpoint.
+
 ## Stage Definitions
 
 | Stage | Meaning | Done When |

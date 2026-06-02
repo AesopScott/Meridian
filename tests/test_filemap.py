@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from meridian_core.filemap import FileArea, FileMap, FileMapEntry, make_default_map
@@ -12,6 +14,7 @@ _REQUIRED_PATHS = [
     "context.md",
     "docs/FileMap.md",
     "docs/harness-stage-checklist.md",
+    "docs/harness-stage-checklist.html",
     "docs/agentic-ai-framework-checklist.md",
     "docs/atlas-retrieval-contract.md",
     "meridian_core/atlas.py",
@@ -433,5 +436,24 @@ class TestDefaultMap:
         entry = fm.require("meridian_core/relay.py")
         assert "council_plan" in entry.notes, \
             "relay.py notes should reference the council_plan field"
+
+
+def test_harness_stage_html_dashboard_tracks_core_stages():
+    html = Path("docs/harness-stage-checklist.html").read_text(encoding="utf-8")
+    for expected in [
+        "Harness Stage Checklist",
+        "Contract / Baseline",
+        "V2 Backend",
+        "Core Implementation",
+        "Prime Integration",
+        "Runtime Logic UI",
+        "Proofs / Review",
+        "Operations",
+        "Prime",
+        "Relay / Model",
+        "Compass",
+        "Vulcan / Session Lifecycle",
+    ]:
+        assert expected in html
 
 

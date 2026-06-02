@@ -195,6 +195,13 @@ def make_default_map() -> FileMap:
             notes="Use when Scott asks what stage a harness is in or requests a harness/stage-specific build.",
         ),
         FileMapEntry(
+            path="docs/harness-stage-checklist.html",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Visual HTML dashboard for the harness stage checklist matrix; mirrors docs/harness-stage-checklist.md for easier status review.",
+            related_tests=["tests/test_filemap.py"],
+            notes="Update with docs/harness-stage-checklist.md in the same checkpoint.",
+        ),
+        FileMapEntry(
             path="docs/prime-planning-harness-answers.md",
             area=FileArea.PLANNING,
             purpose="First Council-run planning answer brief: answers all Planning Harness questions for V0 Relay model/API dispatch and records the recommended adapter-first path.",
