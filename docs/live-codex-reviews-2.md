@@ -6,7 +6,7 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
 Goal: review the current-main Ready markers from Build 4 and Build 5.
 
@@ -20,6 +20,23 @@ Task: review the landed current-main slices in this order, stopping and routing 
 Use current `origin/main` at or after `c111eed9`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
 
 Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop.
+
+Review result - 2026-06-01 22:18 -06:00:
+
+- Build 4 PromptPacket proof metadata checklist passed. Commits `b3cc9dff` and `b9ad9dd3` changed only `docs/relay-promptpacket-proof-metadata-implementation-checklist.md` and `docs/live-build-4.md`.
+- The checklist covers packet id/hash, allowed source lineage, proof requirement fields, Aegis evidence ids, payload budget refs, raw-prompt and secret exclusions, Relay envelope/audit integration, Bifrost structured handoff, FileMap routing for future implementation files, block conditions, and deterministic tests/proofs.
+- Build 5 dispatch hardening state sample rendering passed. Commits `ec139883` and `5bb4da7a` changed only `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- The static `DispatchHardeningView` and renderer expose provider, exact model id, route class/kind, trust state, proof strength, external-review status, blocked authorities, payload evidence state, fallback blockers, and dispatch error tags from structured sample data.
+- Focused tests cover required state fields, blocker/error tag rendering, candidate/blocked variants, escaping, cockpit-main placement outside the HUD core, and preservation of prompt payload visibility, stale-session recovery, and proof-state preview behavior.
+- Scope check found no runtime code in the Build 4 docs slice and no session spawning, live process/model calls, `index.html` edit, Polaris dependency, branch movement, Relay docs edit in Build 5, shared-main write, or push.
+
+Proof:
+
+- `git diff --check b3cc9dff^..b9ad9dd3` passed.
+- `python -m pytest tests/test_bifrost_cockpit.py -q` passed: 200 tests.
+- `git diff --check ec139883^..5bb4da7a` passed.
+
+Completion: Build 4 PromptPacket proof metadata checklist and Build 5 dispatch hardening state sample rendering are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
