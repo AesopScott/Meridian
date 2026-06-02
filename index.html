@@ -4178,7 +4178,10 @@ body {
       // Reset still reloads the UI; offline bridge status remains visible after reload.
     }
   };
+  let resetInProgress = false;
   const resetUi = async () => {
+    if (resetInProgress) return;
+    resetInProgress = true;
     clearSessionWindows();
     await restartModelBridge();
     hardReloadUi();
