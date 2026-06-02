@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Bifrost dispatch hardening state sample rendering after Reviews B cleared payload visibility.
 
@@ -16,7 +16,14 @@ Task: add deterministic Bifrost sample rendering/tests for dispatch hardening st
 
 Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate.
+Completion:
+
+- Build 5 completed Bifrost dispatch hardening state sample rendering in commit `409358c2`.
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 199 tests.
+- Ready for Codex Review.
+
+Next Candidate: bind any review findings from dispatch hardening state before unrelated Bifrost work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
