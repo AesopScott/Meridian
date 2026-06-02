@@ -8,6 +8,27 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: repair remaining Session Lifecycle permission-invariant gaps.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle`.
+
+Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
+
+Review findings routed by Codex Reviews A on 2026-06-01 18:21 -06:00:
+
+- HIGH: `meridian_core/session_lifecycle.py:144` - `PermissionContext` now has `approved_by_secondary`, `unlock_expiry`, and `task_scope`, but it still has no construction-time invariants enforcing the checklist requirements that temporary unlocks have explicit expiry/task scope and permanent unlocks require Aegis + Scott/two independent approvers (`docs/session-lifecycle-permissions-implementation-checklist.md:123`, `docs/session-lifecycle-permissions-implementation-checklist.md:124`, `docs/session-lifecycle-permissions-implementation-checklist.md:186`, `docs/session-lifecycle-permissions-implementation-checklist.md:187`).
+- HIGH: `meridian_core/session_lifecycle.py:318` and `meridian_core/session_lifecycle.py:397` - `can_accept_work()` checks locked/expired permission state but cannot enforce `task_scope`, and `SessionLifecycleState.can_execute_operation()` bypasses `PermissionContext.can_execute_operation()` so it ignores unlock expiry and task scope entirely. This leaves the prior permission-boundary finding partially open against checklist requirements for expiry, task scope, and approval-scope filtering (`docs/session-lifecycle-permissions-implementation-checklist.md:101`, `docs/session-lifecycle-permissions-implementation-checklist.md:127`, `docs/session-lifecycle-permissions-implementation-checklist.md:153`, `docs/session-lifecycle-permissions-implementation-checklist.md:154`).
+
+Task: enforce the remaining permission invariants. Reject invalid temporary/permanent `PermissionContext` states in construction/helper paths; make `SessionLifecycleState.can_accept_work()` and `can_execute_operation()` enforce expiry and task scope using the session's current task id; and add focused tests proving invalid temporary/permanent permissions are rejected and expired/out-of-scope unlocks cannot accept work or execute operations. Preserve the closed repairs for prompt-sent heartbeat semantics and immutable PrimeAutonomyInput containers. Do not edit UI/Bifrost/FileMap/Polaris or add live process control.
+
+Tests:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+
+Completion: record the current-main repair commit hash, changed files, proof result, push status, and Ready for Codex Review marker in this queue.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair Session Lifecycle permissions and Prime/Beacon binding contract completeness.
