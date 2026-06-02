@@ -389,7 +389,7 @@ def test_render_voice_first_states_present():
     doc = render_cockpit_html(sample_cockpit_view_model())
     assert "mic armed" in doc
     assert 'voice-listening' in doc or 'class="voice-state voice-listening"' in doc
-    assert 'data-action="mute"' in doc
+    assert 'data-voice-control="mute-status"' in doc
     assert 'aria-label="Voice I/O state"' in doc
 
 
@@ -2303,7 +2303,7 @@ def test_voice_muted_state_shows_unmute_button():
     vm = sample_cockpit_view_model()
     vm.voice = VoiceIOState(muted=True)
     doc = render_cockpit_html(vm)
-    assert 'data-action="unmute"' in doc
+    assert 'data-voice-control="unmute-status"' in doc
     assert "Unmute" in doc
     assert 'data-muted="true"' in doc
 
@@ -2312,7 +2312,7 @@ def test_voice_not_muted_shows_mute_button():
     vm = sample_cockpit_view_model()
     vm.voice = VoiceIOState(muted=False)
     doc = render_cockpit_html(vm)
-    assert 'data-action="mute"' in doc
+    assert 'data-voice-control="mute-status"' in doc
     assert "Mute" in doc
     assert 'data-muted="false"' in doc
 
@@ -2340,8 +2340,8 @@ def test_voice_runtime_metadata_renders():
 
 def test_voice_read_aloud_control_renders():
     doc = render_cockpit_html(sample_cockpit_view_model())
-    assert 'data-action="read-aloud"' in doc
-    assert 'aria-label="Read Prime output aloud"' in doc
+    assert 'data-voice-control="read-aloud-status"' in doc
+    assert 'aria-label="Read-aloud status"' in doc
 
 
 def test_voice_runtime_metadata_escapes_dynamic_values():
@@ -2377,7 +2377,20 @@ def test_voice_state_with_no_states_active():
     vm.voice = VoiceIOState()
     doc = render_cockpit_html(vm)
     assert 'class="voice-strip"' in doc
-    assert 'data-action="mute"' in doc or 'data-action="unmute"' in doc
+    assert 'data-voice-control="mute-status"' in doc or 'data-voice-control="unmute-status"' in doc
+
+
+def test_voice_strip_controls_are_display_only():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    start = doc.index('class="voice-strip"')
+    end = doc.index('<div class="hud-stage"', start)
+    voice_markup = doc[start:end]
+    assert 'data-action="voice"' not in voice_markup
+    assert 'data-action="read-aloud"' not in voice_markup
+    assert 'data-action="mute"' not in voice_markup
+    assert 'data-action="unmute"' not in voice_markup
+    assert 'data-voice-control="input-status"' in voice_markup
+    assert 'aria-disabled="true"' in voice_markup
 
 
 def test_snapshot_default_voice_state_listening():
