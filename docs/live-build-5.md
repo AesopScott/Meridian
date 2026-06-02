@@ -4,7 +4,7 @@
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add edge coverage for Bifrost Aegis PromptPacket policy decision rendering after Reviews B cleared the base slice.
 
@@ -16,7 +16,15 @@ Task: add focused deterministic rendering/tests for empty and degraded Aegis Pro
 
 Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
 
-Completion: mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind any review findings from Aegis policy rendering edge coverage before unrelated Bifrost work.
+Completion:
+
+- Build 5 completed Bifrost Aegis PromptPacket policy decision edge coverage in commit `ebc1aa7a`.
+- Files changed: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Proof: `python -m pytest tests/test_bifrost_cockpit.py -q` passed with 220 tests.
+- Concrete evidence: edge rendering now suppresses policy cards without packet ids, shows safe placeholders for missing policy id/proof requirement/empty evidence ids/empty missing fields/empty reason tags, styles human-gate edge states, and preserves prompt payload visibility, provider balance, dispatch hardening, PromptPacket proof metadata, proof-state preview, and stale-session recovery.
+- Ready for Codex Review.
+
+Next Candidate: bind any review findings from Aegis policy rendering edge coverage before unrelated Bifrost work.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
