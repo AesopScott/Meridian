@@ -21,7 +21,7 @@ Allowed files only: `meridian_core/relay_executor.py`, `tests/test_relay_executo
 Completion:
 - Status: Ready for Codex Review.
 - Completed: 2026-06-02.
-- Commit: `e8286272` (`test: Harden Relay goal handoff checkpoint tags`).
+- Commit: `d67aba66` (`test: Harden Relay goal handoff checkpoint tags`).
 - Files changed: `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
 - Tests run: `python -m pytest tests/test_relay_executor.py -q` (225 passed); `git diff --check` (passed); path-scope check limited changes to allowed files.
 - Concrete evidence: Relay's reusable handoff sanitizer now preserves only bounded V3 Goal Runtime/checkpoint tags such as `goal_objective_summary_present`, `lane_session_label_present`, `blocker_continuation_policy_required`, `goal_checkpoint_required`, `regular_git_checkpoint_expected`, `regular_obsidian_checkpoint_expected`, and safe `goal-proof-*` refs. Focused tests prove raw objective/chat text, provider/account tokens, personal-name paths, branch/worktree movement requests, Git command text, uncoordinated main-write requests, free-text blockers, and unsafe goal proof refs are redacted across evidence-id, blocker, warning, and reason surfaces.
