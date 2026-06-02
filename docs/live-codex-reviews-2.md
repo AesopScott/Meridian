@@ -10,6 +10,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Codex Reviews B cleared the current-main Build 4 premium-cost approval blocker in commit `f15e7ceb`. Continue with the Active Now item below; do not rerun the cleared Build 4 repair unless a new current-main regression appears.
 
+## Coordinator Override - Active Now
+
+Goal: review Build 5 Sessions dropdown sample data rendering.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Allowed review files: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/bifrost-right-panel-mode-contract.md`, `docs/ui-integration-checklist.md`, `docs/live-build-5.md`, and `docs/live-codex-reviews-2.md` for provenance/routing only.
+
+Task: review current `origin/main` Build 5 Sessions dropdown completion recorded in `docs/live-build-5.md`. Verify the User Session `Sessions` dropdown renders open live sessions only, includes hidden sessions labeled as hidden, includes test-waiting sessions labeled as waiting for user test, groups sessions alphabetically by project name, sorts session names within each group, reflects the current selection in the User panel title, and updates the immediate routing target state when a session is selected. Confirm the slice remains deterministic render/view-model only and does not spawn sessions, inspect live processes, call models, edit `index.html`, touch Polaris, add live process control, move branches, or alter Build 4 Relay routing repair state. If findings exist, route the smallest focused repair to Build 5; otherwise mark passed and leave a concrete Next Candidate.
+
+Proof command:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Completion: commit only review-queue/provenance updates, push to `origin/main`, and leave a concrete Next Candidate.
+
 ## Coordinator Override - Completed / Finding Routed
 
 Goal: review Build 4 remaining Relay routing logic consistency repair.
