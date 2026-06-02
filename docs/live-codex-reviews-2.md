@@ -8,11 +8,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: poll and review the next current-main Ready marker from Build 4 or Build 5 after fresh lane reactivation.
+Goal: review the current-main Ready markers from Build 4 and Build 5.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
-Task: poll current `origin/main` and the top blocks in `docs/live-build-4.md` and `docs/live-build-5.md`. If a real Ready marker exists, review the oldest ready slice using that lane's proof. If none is ready, report checked HEAD and make no local commit. Do not commit read-check-only progress.
+Task: review the landed current-main slices in this order, stopping and routing a focused finding if any slice fails:
+
+- Build 4 PromptPacket proof metadata checklist, commits `b3cc9dff` and `b9ad9dd3`.
+- Build 5 dispatch hardening state sample, commits `ec139883` and `5bb4da7a`.
+
+Use current `origin/main` at or after `c111eed9`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest focused repair route and stop.
 
 ## Coordinator Override - Completed / Passed
 

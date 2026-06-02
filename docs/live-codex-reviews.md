@@ -10,13 +10,19 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Active Now
 
-Goal: review the next current-main Ready marker from Build 1, Build 2, or Build 3 after the fresh post-clearance tasks complete.
+Goal: review the current-main Ready markers from Build 2, Build 1, and Build 3.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
-Task: poll current `origin/main` and the top blocks in `docs/live-build-1.md`, `docs/live-build-2.md`, and `docs/live-build-3.md`. If any of those lanes is marked Ready for Codex Review on current main, review the oldest ready slice first using the proof listed in that lane queue. If none is ready, record a concrete polling status with the checked HEAD and do not commit read-check-only progress.
+Task: review the landed current-main slices in this order, stopping and routing a focused finding if any slice fails:
 
-Completion: if a slice is reviewed, commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If no slice is ready, report no local commit and keep waiting for a real Ready marker.
+- Build 2 command-plan audit evidence, commits `7bd603a2` and `14d3e398`.
+- Build 1 Relay dispatch envelope helpers, commit `eead7f27`.
+- Build 3 FileMap dispatch audit, commits `a9de0f5f` and `f33b3764`.
+
+Use current `origin/main` at or after `c111eed9`. Verify containment, path scope, and the proof commands recorded in each build queue. Do not commit read-check-only progress.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop.
 
 ## Coordinator Override - Active Now
 
