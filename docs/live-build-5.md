@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: add deterministic Bifrost provider balance and cost-pressure sample rendering for the V2 cockpit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Required sources: `docs/bifrost-balance-payload-surface-contract.md`, `docs/model-harness-v2-contract.md`, `docs/v2-progress-tracker.md`, and current Reviews B clearance evidence in `docs/live-codex-reviews-2.md`.
+
+Task: add a static, deterministic provider balance/cost-pressure view-model and rendering sample for Claude, OpenAI, DeepSeek, and aggregator/local routes. Show provider health, route kind, remaining credit/status where provided, token usage/estimated spend where provided, and cost-pressure warning/degraded/block states for Prime routing. Preserve existing prompt payload visibility, provider balance placeholders if any, dispatch hardening, PromptPacket proof metadata, Relay/Aegis handoff, proof-state preview, stale-session recovery actions, escaping, and cockpit layout. Do not call providers, inspect accounts, read credentials, spawn sessions, inspect live processes, edit `index.html`, touch Relay runtime, edit FileMap, move branches, main, or Polaris.
+
+Tests: `python -m pytest tests/test_bifrost_cockpit.py -q`.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, tests run, and Next Candidate: bind review findings or connect reviewed Model Harness metadata after review.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: connect the review-cleared Relay/Aegis handoff summary adapter into deterministic Bifrost cockpit view-model rendering.

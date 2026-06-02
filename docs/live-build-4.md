@@ -8,6 +8,22 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: create a build-ready Model Harness metadata and prompt-drag telemetry implementation checklist for the next Relay/Model slice.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Allowed files only: `docs/model-harness-metadata-implementation-checklist.md`, `docs/live-build-4.md`.
+
+Required sources: `docs/model-harness-v2-contract.md`, `docs/v2-progress-tracker.md`, `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `docs/bifrost-balance-payload-surface-contract.md`, and current review clearance evidence in `docs/live-codex-reviews.md` / `docs/live-codex-reviews-2.md`.
+
+Task: write a concise implementation checklist for provider-neutral model capability metadata and prompt-drag telemetry fields: exact model id, provider/direct-vs-aggregator route, trust state, context window, prompt token estimate, budget percent/status, growth delta, prompt-drag degraded state, external-review requirements, Aegis/Relay policy binding, Bifrost display expectations, deterministic tests, and explicit exclusions for live model calls, credentials, raw prompts, raw provider responses, account probing, session/process control, branch/worktree movement, FileMap edits, main writes, and Polaris. Keep this docs-only; do not edit runtime code or tests.
+
+Tests: docs-only; run text/shape inspection plus `git diff --check` before marking complete.
+
+Completion: commit locally only in the assigned worktree, mark Ready for Codex Review with commit hash, files changed, verification run, and Next Candidate: review this checklist before Model Harness metadata runtime implementation.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: create a build-ready Relay/Aegis demotion, retry, and Bifrost handoff checklist after Reviews A/B cleared the policy runtime, Aegis serialization, and Bifrost adapter slices.
