@@ -8,15 +8,27 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair remaining account-first wrong-scope fallback contradiction from Codex Reviews B.
 
 Allowed files only: `docs/relay-heartbeat-model-routing-logic.md`, `docs/live-build-4.md`.
 
-Task: update `docs/relay-heartbeat-model-routing-logic.md` directly so the account-first decision tree no longer allows wrong project, wrong role, or wrong tools to fall through through the generic "rejected at any step" API/aggregator fallback. Keep the existing Step 2 rule that wrong scope must start a project-specific or role-matched controllable session, and make the generic rejection handling explicitly exclude wrong scope/tool mismatches unless a later table row allows the route. Wrong project/role/tools must start a corrected session or block; they must not silently bypass into direct API or aggregator.
+Task: update `docs/relay-heartbeat-model-routing-logic.md` directly so the account-first decision tree no longer allows wrong project, wrong role, or wrong tools to fall through the generic "rejected at any step" API/aggregator fallback. Keep the existing Step 2 rule that wrong scope must start a project-specific or role-matched controllable session, and make the generic rejection handling explicitly exclude wrong scope/tool mismatches unless a later table row allows the route. Wrong project/role/tools must start a corrected session or block; they must not silently bypass into direct API or aggregator.
 
-Completion: when repaired, record commit hash, files changed, tests/proof, and Ready for Codex Review status here.
+Completion: completed 2026-06-12 07:40 UTC.
+
+Ready for Codex Review:
+
+- Commit: `381080fa` (pushed to origin/main as `fe0b0138` after rebase)
+- Files changed: `docs/relay-heartbeat-model-routing-logic.md`
+- Tests: not required (docs-only)
+- Repair applied:
+  1. **Separated wrong-scope rejection handling:** Added explicit "Special case" section that prevents wrong project/role/tools rejections from falling through to API/aggregator fallback (lines 168-170)
+  2. **Clarified other rejections path:** Kept original fallback logic for Steps 1, 3, 4 rejections (lines 172-176)
+  3. **Preserved Step 2 rule:** Existing Step 2 rule intact (line 156) - wrong scope must start corrected session
+- Verification: Contradiction resolved - Step 2 rule and generic rejection handling now aligned
+- Ready for Codex Review; awaiting sweep
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
@@ -858,6 +870,7 @@ YYYY-MM-DD HH:MM TZ - Build 4 checked queue; status: idle/running/blocked
 2026-06-12 07:33 UTC - Build 4 checked queue; status: idle; origin/main pulled (already up to date); no executable Coordinator Override - Active Now section; Next Candidate Task (convert deepened logic into implementation checklist) awaits coordinator promotion
 2026-06-12 07:35 UTC - Build 4 checked queue; status: idle; origin/main already up to date; no executable Coordinator Override - Active Now section; Next Candidate Task (convert deepened logic into implementation checklist) awaits coordinator promotion
 2026-06-12 07:37 UTC - Build 4 checked queue; status: idle; origin/main synced; no executable Coordinator Override - Active Now section; Next Candidate Task awaits coordinator promotion
+2026-06-12 07:40 UTC - Build 4 found Active Task (repair account-first wrong-scope fallback contradiction); executed repair to docs/relay-heartbeat-model-routing-logic.md (separate wrong-scope rejection handling from other rejections, prevent API/aggregator bypass); commit 381080fa pushed as fe0b0138; moved task to Completed/Ready for Codex Review; awaiting Codex sweep
 ```
 
 ## Write/Completion Log
