@@ -25,6 +25,52 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Ready markers from Build 2 Prime audit-evidence advisory binding and Build 3 PromptPacket FileMap audit.
+
+Status: passed by Codex Reviews A on 2026-06-01 22:30 -06:00. Current `HEAD` and `origin/main` are `c6a1c14b`. Build 2 commits `dcdce3cd` and `fff4e716`, and Build 3 commits `1072ae3c` and `f6e982de`, are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Build 2 review scope: `meridian_core/prime_autonomy.py`, `tests/test_prime_autonomy.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 2 proof commands:
+
+- `python -m pytest tests/test_prime_autonomy.py tests/test_session_lifecycle.py -q`
+- `git diff --check dcdce3cd^..fff4e716`
+
+Build 2 review result:
+
+- Containment checks for `dcdce3cd` and `fff4e716` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/prime_autonomy.py` and `tests/test_prime_autonomy.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_prime_autonomy.py tests/test_session_lifecycle.py -q` passed with 148 tests.
+- `git diff --check dcdce3cd^..fff4e716` passed.
+- Verified `select_next_action_from_command_plan_audit()` consumes either a `SessionCommandPlan` or serialized `audit_evidence`, converts display-safe action/reason/blocker/permission/review/recovery metadata into immutable `PrimeNextAction.evidence`, and preserves human-gated pause behavior.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, branch/worktree movement, UI/Bifrost/FileMap edits, Polaris dependency, or autonomous movement in the reviewed Build 2 slice.
+
+Build 2 finding: none.
+
+Build 3 review scope: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Build 3 proof commands:
+
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check 1072ae3c^..f6e982de`
+
+Build 3 review result:
+
+- Containment checks for `1072ae3c` and `f6e982de` passed.
+- Scope check shows FileMap registration changes limited to `meridian_core/filemap.py`, `docs/FileMap.md`, and `tests/test_filemap.py`, with queue provenance in `docs/live-build-3.md`.
+- `python -m pytest tests/test_filemap.py -q` passed with 46 tests.
+- `git diff --check 1072ae3c^..f6e982de` passed.
+- Verified `docs/relay-promptpacket-proof-metadata-implementation-checklist.md` is registered in runtime `make_default_map()`, mirrored in `docs/FileMap.md`, and covered by `_REQUIRED_PATHS`.
+- Verified the Build 3 Ready marker records concrete audit evidence, including the inspected non-existent `docs/aegis-promptpacket-proof-policy-checklist.md` being intentionally unregistered, plus files changed, proof command, commit marker, and next candidate.
+
+Build 3 finding: none.
+
+Completion: Build 2 Prime audit-evidence advisory binding and Build 3 PromptPacket FileMap audit are review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Ready markers in order: Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit.
 
 Status: passed by Codex Reviews A on 2026-06-01 22:19 -06:00. Current `HEAD` and `origin/main` are `a2c02267`. Build 2 commits `7bd603a2` and `14d3e398`, Build 1 commit `eead7f27`, and Build 3 commits `a9de0f5f` and `f33b3764` are ancestors of current main.
