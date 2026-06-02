@@ -12,6 +12,35 @@ from typing import Any, Mapping
 
 SNAPSHOT_VERSION = "prime-runtime-v1"
 SNAPSHOT_SOURCE = "meridian_core.prime_runtime.resolve_prime_decision"
+PRIME_DIRECTIVES = (
+    {
+        "name": "Logic, not rules",
+        "logic": "Prime reasons from purpose, evidence, context, constraints, and consequences before choosing an action.",
+    },
+    {
+        "name": "Context precedes meaningful action",
+        "logic": "Prime verifies mission, project, source, and harness context before performing meaningful work.",
+    },
+    {
+        "name": "Intention must be visible before execution",
+        "logic": "Prime exposes the intended action, reason, scope, and expected effect before execution.",
+    },
+)
+PRIME_DIRECTIVE_PROOFS = (
+    {
+        "question": "What reasoning connects the current context, evidence, constraints, and desired outcome to this action?",
+        "proves": "logic-first action selection",
+    },
+    {
+        "question": "What mission/context/source state was read or verified before deciding this action was appropriate?",
+        "proves": "context before meaningful action",
+    },
+    {
+        "question": "Was the intended action, reason, scope, and expected effect made visible to the user before execution?",
+        "proves": "visible intention before execution",
+    },
+)
+
 
 
 class PrimeDecisionStatus(Enum):
@@ -221,7 +250,7 @@ class PrimeDecision:
     request: PrimeInteractionRequest | None = None
     proof: tuple[PrimeProof, ...] = field(default_factory=tuple)
     blockers: tuple[str, ...] = field(default_factory=tuple)
-    visible_to_scott: tuple[str, ...] = field(default_factory=tuple)
+    visible_to_user: tuple[str, ...] = field(default_factory=tuple)
 
     def is_executable(self) -> bool:
         return self.status == PrimeDecisionStatus.EXECUTABLE and not self.blockers
@@ -239,7 +268,7 @@ class PrimeDecision:
             "driftAudit": audit_prime_decision(self).to_dict(),
             "proof": [item.to_dict() for item in self.proof],
             "blockers": list(self.blockers),
-            "visibleToScott": list(self.visible_to_scott),
+            "visibleToUser": list(self.visible_to_user),
             "executable": self.is_executable(),
         }
 
@@ -376,7 +405,7 @@ def audit_prime_decision(decision: PrimeDecision) -> PrimeDriftAudit:
         "proof questions and answers",
         "blockers before execution",
     }
-    if not required_visible.issubset(set(decision.visible_to_scott)):
+    if not required_visible.issubset(set(decision.visible_to_user)):
         failures.append("visible field declaration incomplete")
 
     return PrimeDriftAudit(
@@ -516,7 +545,7 @@ def make_prime_decision(
         request=request,
         proof=proof,
         blockers=blockers,
-        visible_to_scott=(
+        visible_to_user=(
             "Prime decision status",
             "owning harness",
             "backend source refs",
@@ -610,6 +639,8 @@ def prime_runtime_snapshot() -> dict[str, Any]:
         "source": SNAPSHOT_SOURCE,
         "harness": "Prime",
         "summary": "Prime owns orchestration only after backend project, session, route, and proof context are assembled visibly.",
+        "primeDirectives": list(PRIME_DIRECTIVES),
+        "primeDirectiveProofs": list(PRIME_DIRECTIVE_PROOFS),
         "decision": decision.to_dict(),
         "capabilitySections": [
             {
@@ -650,7 +681,7 @@ def prime_runtime_snapshot() -> dict[str, Any]:
                     {"key": "executable", "value": "all required owner sources are available and no gate blocks action"},
                     {"key": "blocked", "value": "required backend source or route proof is missing"},
                     {"key": "needs approval", "value": "human gate or Aegis blocking/error risk requires approval before execution"},
-                    {"key": "needs clarification", "value": "intent/scope is ambiguous enough to require Scott-facing question"},
+                    {"key": "needs clarification", "value": "intent/scope is ambiguous enough to require user-facing question"},
                 ],
             },
             {

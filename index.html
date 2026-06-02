@@ -4097,9 +4097,10 @@ body {
     const proof = Array.isArray(decision.proof) ? decision.proof : [];
     const refs = Array.isArray(context.sourceRefs) ? context.sourceRefs : [];
     const blockers = Array.isArray(decision.blockers) ? decision.blockers : [];
-    const visibleFields = Array.isArray(decision.visibleToScott) ? decision.visibleToScott : [];
+    const visibleFields = Array.isArray(decision.visibleToUser) ? decision.visibleToUser : [];
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
     return [
+      renderRelayPrimeDirectives(snapshot),
       relaySection('Prime backend source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
@@ -4164,7 +4165,7 @@ body {
         `${source.source || 'unknown'} | ${source.summary || ''}`,
       ])), true),
       relaySection('Proof and invalidation logic', proof.length ? primeProofList(proof) : relaySummary('proof packet unavailable'), true),
-      relaySection('Visible-to-Scott declaration', visibleFields.length ? relayList(visibleFields) : relaySummary('visible field declaration unavailable'), true),
+      relaySection('Visible-to-user declaration', visibleFields.length ? relayList(visibleFields) : relaySummary('visible field declaration unavailable'), true),
       relaySection('Execution blockers', blockers.length ? relayList(blockers) : relaySummary('none'), false),
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');

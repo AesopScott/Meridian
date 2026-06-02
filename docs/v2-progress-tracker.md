@@ -29,7 +29,7 @@
 
 - [x] **Prime + Autonomy Contract:** `PrimeNextAction` domain object with action type, confidence, blockers, human-gate requirements, immutable evidence, and deterministic executability semantics - built in `40def3d`, repaired in `39c9ac8`; review cleared by Reviews C on 2026-05-31.
 - [x] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - built in `57aad9a`, queue provenance in `a2b8cd0`; review cleared by Reviews A on 2026-05-31 with 55 `tests/test_prime_autonomy.py` tests passing.
-- [x] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-Scott declarations, execution blockers, and backend capability sections. Review cleared on 2026-06-02 with Prime runtime, Bifrost cockpit, FileMap, Prime JSON, and bridge self-tests passing. Operations remain not-live.
+- [x] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime Directives, Prime Directive Proofs, Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-user declarations, execution blockers, and backend capability sections. Review cleared on 2026-06-02 with Prime runtime, Bifrost cockpit, FileMap, Prime JSON, and bridge self-tests passing. Operations remain not-live.
 
 ### Aegis Harness
 

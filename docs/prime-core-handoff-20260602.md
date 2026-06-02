@@ -139,6 +139,8 @@ Prime runtime currently assembles backend state from:
 
 Prime runtime emits:
 
+- Prime Directives
+- Prime Directive Proofs
 - typed request
 - runtime decision
 - owner harness
@@ -151,7 +153,7 @@ Prime runtime emits:
 - no-drift audit
 - proof packet
 - blockers
-- visible-to-Scott declarations
+- visible-to-user declarations
 
 Prime runtime does not yet execute live actions.
 
@@ -239,6 +241,8 @@ Current status:
 
 Visible sections currently include:
 
+- Prime Directives
+- Prime Directive Proofs
 - Prime backend source
 - Runtime truth map
 - Typed interaction request
@@ -248,7 +252,7 @@ Visible sections currently include:
 - Aegis risk logic
 - Backend source refs
 - Proof and invalidation logic
-- Visible-to-Scott declaration
+- Visible-to-user declaration
 - Execution blockers
 - Backend capability sections
 

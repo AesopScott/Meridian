@@ -68,7 +68,7 @@ def test_prime_decision_shape_is_visible_and_executable():
         "Relay",
         "Prime",
     }
-    assert "visibleToScott" in payload
+    assert "visibleToUser" in payload
     assert payload["driftAudit"]["status"] == "clean"
     assert payload["driftAudit"]["clean"] is True
 
@@ -361,6 +361,16 @@ def test_prime_runtime_snapshot_is_backend_visible_contract():
     assert snapshot["decision"]["driftAudit"]["status"] == "clean"
     assert snapshot["decision"]["context"]["sourceRefs"][0]["harness"] == "Compass"
     assert snapshot["decision"]["context"]["aegisRisk"]["aggregateAction"] == "route_allowed"
+    assert [item["name"] for item in snapshot["primeDirectives"]] == [
+        "Logic, not rules",
+        "Context precedes meaningful action",
+        "Intention must be visible before execution",
+    ]
+    assert [item["question"] for item in snapshot["primeDirectiveProofs"]] == [
+        "What reasoning connects the current context, evidence, constraints, and desired outcome to this action?",
+        "What mission/context/source state was read or verified before deciding this action was appropriate?",
+        "Was the intended action, reason, scope, and expected effect made visible to the user before execution?",
+    ]
     assert "Interaction Request" in titles
     assert "Prime Job" in titles
     assert "Logic Hierarchy" in titles
