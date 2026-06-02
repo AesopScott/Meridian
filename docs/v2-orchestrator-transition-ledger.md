@@ -411,6 +411,12 @@ Coordinator Build 1/3/4 movement - 2026-06-02:
 - Approved and completed path-limited movement of Build 4 Aegis PromptPacket proof policy evaluator commits `ff862efa` and `271134e5` onto shared main as `62473606` and `7993022d`, limited to `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
 - Proof rerun on shared main after movement: `python -m pytest tests/test_relay_executor.py -q` passed 172/172; `python -m pytest tests/test_filemap.py -q` passed 46/46; `python -m pytest tests/test_aegis.py -q` passed 215/215; `git diff --check 3cffeaa2^..HEAD` passed.
 
+Coordinator Build 5 Aegis rendering movement - 2026-06-02:
+
+- Movement gate: fetched `origin/main`; verified shared main clean/aligned on `main`; verified Build 5 worktree clean before movement.
+- Approved and completed path-limited movement of Build 5 Bifrost Aegis policy rendering commits `3e29b75b` and `a92b4159` onto shared main as `8d56cef5` and `9d8aa279`, limited to `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, and `docs/live-build-5.md`.
+- Proof rerun on shared main after movement: `python -m pytest tests/test_bifrost_cockpit.py -q` passed 217/217; `git diff --check 8d56cef5^..HEAD` passed.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
