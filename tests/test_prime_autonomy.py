@@ -13,9 +13,11 @@ from meridian_core.prime_autonomy import (
     select_prime_next_action,
     make_prime_next_action,
     select_next_action_from_project_state,
+    select_next_action_from_command_plan_audit,
     select_next_action_from_session_lifecycle_advisory,
 )
 from meridian_core.session_lifecycle import (
+    CommandIntent,
     HealthState,
     HarnessRole,
     OperationScope,
@@ -23,6 +25,7 @@ from meridian_core.session_lifecycle import (
     PermissionState,
     ProofState,
     ReviewCadenceState,
+    SessionCommandPlan,
     SessionLifecycleState,
     SessionStatus,
     gather_prime_autonomy_input,
@@ -690,3 +693,109 @@ class TestSessionLifecycleAdvisorySelection:
         assert action.action_type == PrimeActionType.POLL_SESSION
         assert action.risk_tier == PrimeActionRiskTier.SAFE
         assert action.is_executable() is True
+
+
+class TestCommandPlanAuditAdvisorySelection:
+    """Test Prime consumption of SessionCommandPlan audit evidence."""
+
+    @pytest.fixture
+    def poll_plan(self):
+        """Create an executable command plan with audit evidence."""
+        return SessionCommandPlan(
+            session_id="session-audit",
+            session_name="Build 2 Audit",
+            command_intent=CommandIntent.POLL_QUEUE,
+            reason="Poll queue after review clearance",
+            expected_state_transition=(SessionStatus.POLLING, SessionStatus.POLLING),
+            current_state_evidence="typed state snapshot",
+            queue_file_evidence="docs/live-build-2.md",
+            worktree_evidence="/worktree/build-2",
+            review_gate_evidence=None,
+            proof_requirement=ProofState.QUEUE_READ,
+            queue_file_affected="docs/live-build-2.md",
+            worktree_path_affected="/worktree/build-2",
+            branch_affected="codex/aligned-build-2-prime-audit",
+            aegis_gate_result=None,
+            cadence_gate_required=False,
+            cadence_gate_status=ReviewCadenceState.NONE,
+            is_executable_now=True,
+            human_approval_required=False,
+            approval_context=None,
+            rollback_or_recovery_note="No recovery needed.",
+        )
+
+    def test_none_command_audit_pauses_safely(self):
+        """Missing audit evidence falls back to safe pause."""
+        action = select_next_action_from_command_plan_audit()
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.FALLBACK
+        assert action.target_harness == "Session Lifecycle"
+
+    def test_executable_poll_audit_becomes_poll_session(self, poll_plan):
+        """Executable poll_queue audit evidence maps to Prime POLL_SESSION."""
+        action = select_next_action_from_command_plan_audit(command_plan=poll_plan)
+
+        assert action.action_type == PrimeActionType.POLL_SESSION
+        assert action.risk_tier == PrimeActionRiskTier.SAFE
+        assert action.target_lane == poll_plan.session_id
+        assert action.is_executable() is True
+        assert "plan.action=poll_queue" in action.evidence
+        assert "permission.proof=queue_read" in action.evidence
+
+    def test_serialized_audit_evidence_becomes_prime_evidence(self, poll_plan):
+        """Serialized audit_evidence is enough for Prime-facing advisory data."""
+        action = select_next_action_from_command_plan_audit(
+            audit_evidence=poll_plan.to_dict()["audit_evidence"]
+        )
+
+        assert action.action_type == PrimeActionType.POLL_SESSION
+        assert action.target_lane is None
+        assert "plan.reason=Poll queue after review clearance" in action.evidence
+        assert "recovery.note=No recovery needed." in action.evidence
+
+    def test_human_gated_audit_blocks_prime_execution(self, poll_plan):
+        """Human-gated command audits become blocked Prime pause actions."""
+        gated_plan = SessionCommandPlan(
+            **{
+                **poll_plan.__dict__,
+                "command_intent": CommandIntent.REQUEST_HUMAN_GATE,
+                "reason": "review_gate",
+                "review_gate_evidence": "review gate pending",
+                "cadence_gate_required": True,
+                "cadence_gate_status": ReviewCadenceState.REVIEW_GATED,
+                "is_executable_now": False,
+                "human_approval_required": True,
+                "approval_context": "human review approval required",
+            }
+        )
+        action = select_next_action_from_command_plan_audit(command_plan=gated_plan)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is True
+        assert action.is_executable() is False
+        assert "blocker=human_approval_required" in action.evidence
+        assert "human review approval required" in action.blockers
+
+    def test_permission_boundary_audit_stays_display_safe(self, poll_plan):
+        """Permission-boundary audit metadata becomes evidence, not execution."""
+        blocked_plan = SessionCommandPlan(
+            **{
+                **poll_plan.__dict__,
+                "command_intent": CommandIntent.REQUEST_HUMAN_GATE,
+                "reason": "permission_boundary",
+                "proof_requirement": ProofState.PERMISSION_VALIDATED,
+                "is_executable_now": False,
+                "human_approval_required": True,
+                "approval_context": "permission boundary blocks restart",
+            }
+        )
+        action = select_next_action_from_command_plan_audit(
+            audit_evidence=blocked_plan.audit_evidence()
+        )
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.risk_tier == PrimeActionRiskTier.HIGH
+        assert "permission.proof=permission_validated" in action.evidence
+        assert "blocker=permission boundary blocks restart" in action.evidence
+        assert action.target_harness == "Session Lifecycle"

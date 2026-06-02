@@ -7,13 +7,14 @@ and deterministic fallback action selection.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, List, FrozenSet
+from typing import Any, Optional, List, FrozenSet
 
 from meridian_core.session_lifecycle import (
     FindingType,
     OperationScope,
     PrimeAutonomyInput as SessionPrimeAutonomyInput,
     ReviewCadenceState,
+    SessionCommandPlan,
     SessionStatus,
 )
 
@@ -403,4 +404,103 @@ def select_next_action_from_session_lifecycle_advisory(
         target_harness="Session Lifecycle",
         rationale="No restart/resteer findings; continue watching session state.",
         evidence=session_ids,
+    )
+
+
+def _audit_section(audit_evidence: dict[str, Any], section: str) -> dict[str, Any]:
+    value = audit_evidence.get(section, {})
+    return value if isinstance(value, dict) else {}
+
+
+def _audit_list(audit_evidence: dict[str, Any], section: str) -> list[str]:
+    value = audit_evidence.get(section, [])
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value]
+    return []
+
+
+def _prime_evidence_from_command_audit(audit_evidence: dict[str, Any]) -> list[str]:
+    plan = _audit_section(audit_evidence, "plan")
+    permission = _audit_section(audit_evidence, "permission")
+    review_gate = _audit_section(audit_evidence, "review_gate")
+    recovery = _audit_section(audit_evidence, "recovery")
+    blockers = _audit_list(audit_evidence, "blockers")
+
+    evidence = [
+        f"plan.action={plan.get('action')}",
+        f"plan.reason={plan.get('reason')}",
+        f"plan.executable={plan.get('is_executable')}",
+        f"permission.proof={permission.get('proof_requirement')}",
+        f"permission.branch={permission.get('branch_affected')}",
+        f"review.required={review_gate.get('cadence_gate_required')}",
+        f"review.status={review_gate.get('cadence_gate_status')}",
+        f"recovery.note={recovery.get('rollback_or_recovery_note')}",
+    ]
+    evidence.extend(f"blocker={blocker}" for blocker in blockers)
+    return evidence
+
+
+def select_next_action_from_command_plan_audit(
+    command_plan: Optional[SessionCommandPlan] = None,
+    audit_evidence: Optional[dict[str, Any]] = None,
+) -> PrimeNextAction:
+    """Convert SessionCommandPlan audit evidence into a Prime advisory action.
+
+    Accepts either the command plan object or its serialized audit_evidence dict.
+    The result is advisory-only and does not execute session control.
+    """
+    if command_plan is not None:
+        audit = command_plan.audit_evidence()
+        target_lane = command_plan.session_id
+    else:
+        audit = audit_evidence
+        target_lane = None
+
+    if audit is None:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.FALLBACK,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.ERROR_RECOVERY,
+            target_harness="Session Lifecycle",
+            rationale="No SessionCommandPlan audit evidence available.",
+        )
+
+    plan = _audit_section(audit, "plan")
+    review_gate = _audit_section(audit, "review_gate")
+    blockers = _audit_list(audit, "blockers")
+    evidence = _prime_evidence_from_command_audit(audit)
+    action_name = str(plan.get("action") or "unknown")
+    reason = str(plan.get("reason") or "no reason supplied")
+    executable = bool(plan.get("is_executable"))
+    human_gate_required = bool(review_gate.get("human_approval_required"))
+    is_blocked = bool(blockers) or human_gate_required or not executable
+
+    if action_name == "poll_queue" and executable:
+        return make_prime_next_action(
+            action_type=PrimeActionType.POLL_SESSION,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.SESSION_STATE,
+            target_harness="Session Lifecycle",
+            target_lane=target_lane,
+            rationale=f"Command audit permits safe poll: {reason}",
+            evidence=evidence,
+        )
+
+    return make_prime_next_action(
+        action_type=(
+            PrimeActionType.PAUSE_AND_WAIT
+            if is_blocked
+            else PrimeActionType.ADVISE_SESSION_RECOVERY
+        ),
+        confidence=PrimeActionConfidence.HIGH,
+        risk_tier=PrimeActionRiskTier.HIGH if is_blocked else PrimeActionRiskTier.MEDIUM,
+        source=PrimeActionSource.SESSION_STATE,
+        target_harness="Session Lifecycle",
+        target_lane=target_lane,
+        rationale=f"Command audit advisory for {action_name}: {reason}",
+        evidence=evidence,
+        human_gate_required=human_gate_required,
+        blockers=blockers,
     )
