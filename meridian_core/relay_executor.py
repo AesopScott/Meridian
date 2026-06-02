@@ -1408,7 +1408,7 @@ def relay_execution_summary_to_proof_trail(
                 status=EvidenceStatus.OPEN,
                 source="relay_executor",
                 target=f"{role}:{error.preferred_model}",
-                summary=f"{role} lane failed: {error.error}",
+                summary=f"{role} lane failed; error length {len(error.error)} characters",
             )
         )
     return trail

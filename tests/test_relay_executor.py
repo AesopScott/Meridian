@@ -445,6 +445,94 @@ class TestRelayExecutionSummaryToProofTrail:
         assert _PROMPT not in evidence_text
         assert _PACKET_ID not in evidence_text
 
+    def test_error_proof_evidence_does_not_leak_free_text_failure(self):
+        danger = (
+            "RAW_PROMPT_SENTINEL worker_chat=private "
+            "credential=sk-test-secret BRANCH_MOVE_REQUEST "
+            "free-text blocker summary: move main"
+        )
+
+        def raising_call(payload: str) -> str:
+            raise RuntimeError(danger)
+
+        plan = _make_plan(1)
+        summary = execute_relay_dispatch_plan(plan, raising_call)
+        trail = relay_execution_summary_to_proof_trail(summary)
+        evidence_text = " ".join(
+            f"{ev.id} {ev.source} {ev.target} {ev.summary}" for ev in trail.evidence
+        )
+
+        assert len(summary.errors) == 1
+        assert danger in summary.errors[0].error
+        assert "error length" in evidence_text
+        for sentinel in (
+            "RAW_PROMPT_SENTINEL",
+            "worker_chat=private",
+            "credential=sk-test-secret",
+            "BRANCH_MOVE_REQUEST",
+            "free-text blocker summary",
+            "move main",
+        ):
+            assert sentinel not in evidence_text
+
+    def test_relay_evidence_views_do_not_leak_prompt_output_or_branch_requests(self):
+        dangerous_payload = (
+            "RAW_PROMPT_SENTINEL worker_chat=private "
+            "credential=sk-test-secret BRANCH_MOVE_REQUEST "
+            "free-text blocker summary: move main"
+        )
+        route = route_from_tier(1)
+        packet = assemble_relay_packet(
+            packet_id="NEGATIVE-PAYLOAD-PKT",
+            serialized_prompt=dangerous_payload,
+            route=route,
+        )
+        from meridian_core.relay_dispatch import build_relay_dispatch_plan
+
+        plan = build_relay_dispatch_plan(route, packet)
+        snapshot = PromptPayloadSnapshot(
+            raw_prompt_chars=len(dangerous_payload),
+            estimated_tokens=256,
+            budget_tokens=2048,
+        )
+
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call(dangerous_payload),
+            payload_snapshots=(snapshot,),
+            include_decision_record=True,
+        )
+        proof_trail = relay_execution_summary_to_proof_trail(summary)
+        rendered = " ".join(
+            str(value)
+            for value in (
+                [evidence.summary for evidence in proof_trail.evidence],
+                summary.results[0].payload_evidence.to_dict(),
+                summary.results[0].payload_meter_evidence.to_dict(),
+                summary.results[0].dispatch_envelope.to_dict(),
+                summary.results[0].dispatch_metadata_envelope.to_dict(),
+                summary.results[0].provider_result_validation_evidence.to_dict(),
+                summary.prompt_payload_meter_consumer_view(),
+                summary.dispatch_metadata_consumer_view(),
+                summary.provider_result_validation_consumer_view(),
+                summary.decision_record.packet_hash,
+                summary.decision_record.prompt_budget_ref,
+                summary.decision_record.packet_proof_metadata_ref,
+                summary.decision_record.fallback_blockers,
+            )
+        )
+
+        for sentinel in (
+            "RAW_PROMPT_SENTINEL",
+            "worker_chat=private",
+            "credential=sk-test-secret",
+            "BRANCH_MOVE_REQUEST",
+            "free-text blocker summary",
+            "move main",
+        ):
+            assert sentinel not in rendered
+        assert summary.results[0].output == dangerous_payload
+
     def test_empty_execution_summary_produces_clean_empty_proof_trail(self):
         summary = RelayExecutionSummary(results=(), errors=())
         trail = relay_execution_summary_to_proof_trail(summary)
