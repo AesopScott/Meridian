@@ -20,6 +20,36 @@ Completion: commit only review provenance/finding/pass updates locally in `docs/
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review current-main Build 2 permission summary expiry repair.
+
+Status: passed by Codex Reviews A on 2026-06-01 23:26 -06:00. Current `HEAD` and `origin/main` are `d7d5f930`, and Build 2 commits `65e2a97f` and `d9dd6354` are ancestors of current main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
+
+Review scope: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, and `docs/live-codex-reviews.md` for provenance only.
+
+Proof commands:
+
+- `python -m pytest tests/test_session_lifecycle.py -q`
+- `git diff --check 65e2a97f^..d9dd6354`
+
+Review result:
+
+- Containment checks for `65e2a97f` and `d9dd6354` passed.
+- Scope check shows implementation/test changes limited to `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, with queue provenance in `docs/live-build-2.md`.
+- `python -m pytest tests/test_session_lifecycle.py -q` passed with 92 tests.
+- `git diff --check 65e2a97f^..d9dd6354` passed.
+- Verified `_permission_unlock_expired_at()` now normalizes aware datetimes through `_as_utc(...).astimezone(timezone.utc)` before expiry comparison and preserves naive-as-UTC handling.
+- Re-ran the Reviews A repro: `observed_at=2026-06-02T02:00:00-06:00` normalizes to `2026-06-02T08:00:00+00:00`; with `unlock_expiry=2026-06-02T07:00:00+00:00`, helper and expected comparison both return expired.
+- Verified the added regression covers non-UTC aware timestamp expiry and `permission.unlock_expired` evidence in `summarize_session_permission_state()`.
+- Scoped side-effect scan found no session spawning, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, main writes, Polaris dependency, or autonomous movement introduced by the repair.
+
+Finding: none.
+
+Completion: Build 2 permission summary expiry repair is review-cleared. No repair routed.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review current-main Build 1 Relay/Aegis PromptPacket policy runtime repair.
 
 Status: passed by Codex Reviews A on 2026-06-01 23:23 -06:00. Current `HEAD` and `origin/main` are `193ba4b2`, and Build 1 commits `3a27163b` and `193ba4b2` are ancestors of current main.
