@@ -154,6 +154,13 @@ Replacement coordinator sync follow-up - 2026-06-02:
 - Fast-forwarded clean behind-only worktrees Build 3, Build 4, Build 5, Reviews A, and Reviews B to `7b086b7f` using `git pull --ff-only origin main`. Build 1 and Build 2 were not synced because they remain clean but divergent with local ahead history.
 - Purpose: ensure Build 3 and Reviews B can see the supervised escalation queue updates in their assigned worktrees, and keep Build 4/5/Reviews A current with the corrected handoff/ledger without touching worker implementation files.
 
+Current orchestrator review of supervised routing trial - 2026-06-02:
+
+- Review thread accepted the Open Checkpoint 3 supervised routing trial with no corrections.
+- Accepted: Build 3 and Reviews B queue updates are coordinator-scoped, specific, actionable, and reject read-check-only progress; Build 4 was correctly held unchanged.
+- Approved next step: Build 3 and Reviews B should execute the queued tasks in their assigned unique worktrees and record pass/finding/blocker evidence.
+- Takeover remains incomplete: full takeover still waits on Build 3 and Reviews B evidence plus explicit takeover approval in this ledger.
+
 ## Full Takeover Criteria
 
 The replacement coordinator may take full ownership only when all are true:
