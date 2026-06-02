@@ -10,6 +10,33 @@ Only the first `Active Task` block in this file is executable. Lower archived/st
 
 ## Completed / Ready For Codex Review
 
+Goal: keep FileMap current after Build 2 command-staging review packet and Reviews A provenance landing on main.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/live-build-3.md`.
+
+Task: concrete FileMap audit after command-staging review packet movement, current live queue/review provenance, and current `origin/main`.
+
+Completion:
+
+- Build 3 audited current `origin/main` at `70ab73e8` after movement from the prompt-meter FileMap landing `5ba404ef..HEAD`.
+- Inspected changed/referenced paths from `5ba404ef..HEAD` (9 changed paths), all five live-build queue files, both live review provenance files, runtime FileMap entries, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- Inspected called-out command-staging paths: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`, `docs/live-codex-reviews.md`, plus existing Prime/Beacon/session docs referenced by those queue changes.
+- Also inspected the current Relay prompt-meter edge consumer paths from the same movement: `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`.
+- No missing existing artifacts were found. No runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS` registration changes were needed.
+- Out-of-scope evidence: `.mcp.json` remains excluded as Polaris MCP connector config per no-touch-Polaris instructions.
+- Audit evidence: focused coverage check across 43 inspected FileMap-relevant changed/referenced existing paths found zero gaps.
+- Files changed: `docs/live-build-3.md`.
+- Tests: `python -m pytest tests/test_filemap.py -q` - 47 passed.
+- Diff proof: `git diff --check` - passed.
+- Commit: this queue-marker commit.
+- Next Candidate: bind runtime validation or review findings before unrelated FileMap cleanup.
+
+Ready for Codex Review.
+
+## Completed / Ready For Codex Review
+
 Goal: keep FileMap current after latest visible prompt payload meter and review/provenance movement on main.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
