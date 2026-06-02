@@ -1503,6 +1503,126 @@ summary {
   border: 1px solid rgba(255, 203, 107, 0.28);
 }
 
+.aegis-packet-policy {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.aegis-policy-header-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.aegis-policy-header-main h3 {
+  margin: 0;
+  color: var(--cyan);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.aegis-policy-id,
+.aegis-policy-decision {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.aegis-policy-id {
+  color: var(--muted);
+  border: 1px solid rgba(93, 157, 255, 0.2);
+}
+
+.aegis-policy-decision-allow {
+  color: var(--green);
+  background: rgba(101, 240, 170, 0.12);
+  border: 1px solid rgba(101, 240, 170, 0.32);
+}
+
+.aegis-policy-decision-warn,
+.aegis-policy-decision-demote {
+  color: var(--amber);
+  background: rgba(255, 203, 107, 0.12);
+  border: 1px solid rgba(255, 203, 107, 0.32);
+}
+
+.aegis-policy-decision-block {
+  color: var(--red);
+  background: rgba(255, 111, 123, 0.12);
+  border: 1px solid rgba(255, 111, 123, 0.32);
+}
+
+.aegis-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 6px;
+}
+
+.aegis-policy-field {
+  color: var(--text);
+  font-size: 10px;
+  padding: 6px 7px;
+  background: rgba(4, 12, 22, 0.58);
+  border: 1px solid rgba(93, 157, 255, 0.18);
+  border-radius: 4px;
+}
+
+.aegis-policy-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.aegis-policy-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-content: flex-start;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(4, 12, 22, 0.55);
+  border: 1px solid rgba(93, 157, 255, 0.16);
+}
+
+.aegis-policy-list-title {
+  width: 100%;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.aegis-policy-chip {
+  font-size: 9px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.aegis-policy-evidence {
+  color: var(--green);
+  background: rgba(101, 240, 170, 0.12);
+  border: 1px solid rgba(101, 240, 170, 0.28);
+}
+
+.aegis-policy-reason {
+  color: var(--blue);
+  background: rgba(93, 157, 255, 0.12);
+  border: 1px solid rgba(93, 157, 255, 0.28);
+}
+
+.aegis-policy-missing-field {
+  color: var(--amber);
+  background: rgba(255, 203, 107, 0.12);
+  border: 1px solid rgba(255, 203, 107, 0.28);
+}
+
 @keyframes hud-pulse {
   0%, 100% {
     transform: scale(0.96);

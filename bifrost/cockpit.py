@@ -163,6 +163,18 @@ class PromptPacketProofView:
 
 
 @dataclass
+class AegisPromptPacketPolicyView:
+    packet_id: str = ""
+    policy_id: str = ""
+    decision: str = "warn"
+    human_gate_state: str = "not_required"
+    proof_requirement: str = "unknown"
+    aegis_evidence_ids: list[str] = field(default_factory=list)
+    missing_fields: list[str] = field(default_factory=list)
+    reason_tags: list[str] = field(default_factory=list)
+
+
+@dataclass
 class ProofGateStatus:
     gate_id: str
     gate_name: str
@@ -281,6 +293,7 @@ class CockpitViewModel:
     prompt_payload: PromptPayloadView = field(default_factory=PromptPayloadView)
     dispatch_hardening: DispatchHardeningView = field(default_factory=DispatchHardeningView)
     prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
+    aegis_prompt_packet_policy: AegisPromptPacketPolicyView = field(default_factory=AegisPromptPacketPolicyView)
     session_lifecycle: SessionLifecycleView = field(default_factory=SessionLifecycleView)
     proof_state: ProofStateView = field(default_factory=ProofStateView)
     user_session_mode: UserSessionModeView = field(default_factory=UserSessionModeView)
@@ -423,6 +436,25 @@ def sample_cockpit_view_model() -> CockpitViewModel:
             missing_metadata_warnings=[
                 "completion_tokens_missing",
                 "latency_ms_missing",
+            ],
+        ),
+        aegis_prompt_packet_policy=AegisPromptPacketPolicyView(
+            packet_id="prompt-packet-001",
+            policy_id="aegis-policy-packet-001",
+            decision="warn",
+            human_gate_state="not_required",
+            proof_requirement="tier2_payload_snapshot",
+            aegis_evidence_ids=[
+                "aegis:route-tier",
+                "aegis:payload-proof",
+            ],
+            missing_fields=[
+                "completion_tokens",
+                "latency_ms",
+            ],
+            reason_tags=[
+                "payload_snapshot_present",
+                "response_hash_pending",
             ],
         ),
         lanes=[
@@ -1222,6 +1254,53 @@ def _render_prompt_packet_proof(packet: PromptPacketProofView) -> str:
     )
 
 
+def _render_aegis_prompt_packet_policy(policy: AegisPromptPacketPolicyView) -> str:
+    if not policy.packet_id:
+        return ""
+
+    evidence_items = "".join(
+        f'<span class="aegis-policy-chip aegis-policy-evidence">{_e(evidence_id)}</span>'
+        for evidence_id in policy.aegis_evidence_ids
+    )
+    missing_items = "".join(
+        f'<span class="aegis-policy-chip aegis-policy-missing-field">{_e(field_name)}</span>'
+        for field_name in policy.missing_fields
+    )
+    reason_items = "".join(
+        f'<span class="aegis-policy-chip aegis-policy-reason">{_e(reason_tag)}</span>'
+        for reason_tag in policy.reason_tags
+    )
+
+    return (
+        '<section class="aegis-packet-policy" aria-label="Aegis PromptPacket Policy Decision">'
+        '<div class="aegis-policy-header-main">'
+        '<h3>Aegis PromptPacket Policy</h3>'
+        f'<span class="aegis-policy-id">{_e(policy.policy_id)}</span>'
+        f'<span class="aegis-policy-decision aegis-policy-decision-{_e(policy.decision)}">{_e(policy.decision)}</span>'
+        "</div>"
+        '<div class="aegis-policy-grid">'
+        f'<span class="aegis-policy-field aegis-policy-packet-id">Packet id: {_e(policy.packet_id)}</span>'
+        f'<span class="aegis-policy-field aegis-policy-human-gate">Human gate: {_e(policy.human_gate_state)}</span>'
+        f'<span class="aegis-policy-field aegis-policy-requirement">Proof requirement: {_e(policy.proof_requirement)}</span>'
+        "</div>"
+        '<div class="aegis-policy-lists">'
+        '<div class="aegis-policy-list aegis-policy-evidence-ids" aria-label="Aegis Policy Evidence IDs">'
+        '<span class="aegis-policy-list-title">Evidence IDs</span>'
+        + evidence_items
+        + "</div>"
+        '<div class="aegis-policy-list aegis-policy-missing-fields" aria-label="Aegis Policy Missing Fields">'
+        '<span class="aegis-policy-list-title">Missing fields</span>'
+        + missing_items
+        + "</div>"
+        '<div class="aegis-policy-list aegis-policy-reason-tags" aria-label="Aegis Policy Reason Tags">'
+        '<span class="aegis-policy-list-title">Reason tags</span>'
+        + reason_items
+        + "</div>"
+        + "</div>"
+        + "</section>"
+    )
+
+
 def _render_instrument_band(inst: InstrumentBand) -> str:
     def chip(label: str, status: str) -> str:
         return (
@@ -1549,6 +1628,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     prompt_payload = _render_prompt_payload(vm.prompt_payload)
     dispatch_hardening = _render_dispatch_hardening(vm.dispatch_hardening)
     prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
+    aegis_packet_policy = _render_aegis_prompt_packet_policy(vm.aegis_prompt_packet_policy)
     projects = _render_project_strip(vm.projects, vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
@@ -1581,6 +1661,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{proof_state}\n"
         f"{dispatch_hardening}\n"
         f"{prompt_packet_proof}\n"
+        f"{aegis_packet_policy}\n"
         f"{provider_balance}\n"
         f"{prompt_payload}\n"
         "</main>\n"

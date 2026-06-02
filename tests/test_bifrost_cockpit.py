@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from bifrost.cockpit import (
+    AegisPromptPacketPolicyView,
     CockpitViewModel,
     DispatchHardeningView,
     HarnessCard,
@@ -629,6 +630,99 @@ def test_prompt_packet_proof_preserves_prior_bifrost_surfaces():
 
 
 # ── Harness dashboard ────────────────────────────────────────────────────────
+
+
+def test_aegis_prompt_packet_policy_sample_renders_required_fields():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'aria-label="Aegis PromptPacket Policy Decision"' in doc
+    assert "Aegis PromptPacket Policy" in doc
+    assert "aegis-policy-packet-001" in doc
+    assert "Packet id: prompt-packet-001" in doc
+    assert "Human gate: not_required" in doc
+    assert "Proof requirement: tier2_payload_snapshot" in doc
+    assert 'aegis-policy-decision-warn' in doc
+
+
+def test_aegis_prompt_packet_policy_sample_renders_evidence_missing_fields_and_reasons():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    assert 'class="aegis-policy-list aegis-policy-evidence-ids"' in doc
+    assert "aegis:route-tier" in doc
+    assert "aegis:payload-proof" in doc
+    assert "completion_tokens" in doc
+    assert "latency_ms" in doc
+    assert "payload_snapshot_present" in doc
+    assert "response_hash_pending" in doc
+
+
+def test_aegis_prompt_packet_policy_supports_allow_warn_demote_block_and_human_gate():
+    for decision in ("allow", "warn", "demote", "block"):
+        vm = sample_cockpit_view_model()
+        vm.aegis_prompt_packet_policy = AegisPromptPacketPolicyView(
+            packet_id=f"packet-{decision}",
+            policy_id=f"policy-{decision}",
+            decision=decision,
+            human_gate_state="required" if decision == "block" else "not_required",
+            proof_requirement="tier3_dual_lane",
+            aegis_evidence_ids=["aegis:test-policy"],
+            missing_fields=["response_payload_hash"],
+            reason_tags=[f"{decision}_policy_decision"],
+        )
+        doc = render_cockpit_html(vm)
+        assert f"policy-{decision}" in doc
+        assert f"Packet id: packet-{decision}" in doc
+        assert f"aegis-policy-decision-{decision}" in doc
+        assert f"{decision}_policy_decision" in doc
+        if decision == "block":
+            assert "Human gate: required" in doc
+
+
+def test_aegis_prompt_packet_policy_escapes_structured_fields():
+    vm = sample_cockpit_view_model()
+    vm.aegis_prompt_packet_policy = AegisPromptPacketPolicyView(
+        packet_id="<script>packet</script>",
+        policy_id="policy:<bad>",
+        decision="block",
+        human_gate_state="<img src=x>",
+        proof_requirement="<script>requirement</script>",
+        aegis_evidence_ids=["<script>evidence</script>"],
+        missing_fields=["field:<bad>"],
+        reason_tags=["<script>reason</script>"],
+    )
+    doc = render_cockpit_html(vm)
+    assert "<script>" not in doc
+    assert "<img" not in doc
+    assert "&lt;script&gt;packet&lt;/script&gt;" in doc
+    assert "policy:&lt;bad&gt;" in doc
+    assert "field:&lt;bad&gt;" in doc
+    assert "&lt;script&gt;reason&lt;/script&gt;" in doc
+
+
+def test_aegis_prompt_packet_policy_in_cockpit_main_not_hud_core():
+    doc = render_cockpit_html(sample_cockpit_view_model())
+    main_section = doc[doc.find('<main class="cockpit-main">'):doc.find('</main>')]
+    core_start = doc.find('class="hud-command-core"')
+    core_end = doc.find("</div>", core_start)
+    core_section = doc[core_start:core_end]
+    assert 'class="aegis-packet-policy"' in main_section
+    assert "Aegis PromptPacket Policy" not in core_section
+
+
+def test_aegis_prompt_packet_policy_preserves_prior_bifrost_surfaces():
+    vm = sample_cockpit_view_model()
+    vm.right_panel_active_mode = "user_session"
+    vm.user_session_mode.sessions.append(
+        SessionItem("closed-aegis-policy-session", "Closed Aegis Session", "Meridian", "done")
+    )
+    vm.user_session_mode.selected_session_id = "closed-aegis-policy-session"
+    doc = render_cockpit_html(vm)
+    assert 'aria-label="Aegis PromptPacket Policy Decision"' in doc
+    assert 'aria-label="PromptPacket Proof Metadata"' in doc
+    assert 'aria-label="Dispatch Hardening State"' in doc
+    assert 'aria-label="Prompt Payload Visibility"' in doc
+    assert 'class="proof-preview-list"' in doc
+    assert 'class="stale-target-guard"' in doc
+    assert 'data-recovery-action="ask-prime-recover"' in doc
+    assert "Next prompt target: Closed Aegis Session" not in doc
 
 
 def test_render_harness_dashboard_present():
