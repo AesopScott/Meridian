@@ -8,9 +8,11 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Repair-Routed
 
 Goal: review current-main Build 1 DeepSeek candidate metadata presets, then Build 2 runtime-state export.
+
+Status: repair routed by Codex Reviews A on 2026-06-02 22:47 -06:00. Current review target was `origin/main` at `b8cd9b4a`; assigned commits `bfada8b1`, `1fcad364`, `93bf40dd`, and `d0179bb0` are ancestors of `origin/main`.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-a`.
 
@@ -18,7 +20,14 @@ Task: review current-main Ready markers in order: Build 1 DeepSeek candidate met
 
 Proof: for Build 1, `python -m pytest tests/test_model_adapter.py -q` plus `git diff --check bfada8b1^..1fcad364`. For Build 2, `python -m pytest tests/test_session_lifecycle.py -q` plus `git diff --check 93bf40dd^..d0179bb0`.
 
-Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews.md`. If a finding exists, record the smallest focused repair route and stop. Next Candidate: return to Build 1/2 polling after these current-main reviews.
+Review result:
+
+- Build 1 DeepSeek candidate metadata passed: metadata-only scope was limited to `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, and Build 1 queue provenance; `deepseek-chat` remains the exact dispatch id; `deepseek-v4-pro` and `deepseek-v4-flash` remain variant labels only; direct trust, pending external review, weak proof strength, endpoint/evidence refs, prompt-drag defaults, blocked authority tags, and no review-clearance/branch-movement/Relay-bypass/autonomous-coding authority are covered by tests.
+- Build 2 runtime-state export targeted review passed: the assigned diff adds a pure serializable `SessionRuntimeStateExport` and advisory `export_session_runtime_state_for_workflow_recovery()` surface; targeted runtime-state tests pass; the slice records permission, workflow, command, review-gate, human-gate, and evidence fields without recovery execution, process/model/UI/Bifrost/FileMap/branch/main/Polaris behavior.
+- Finding: HIGH - the required full Build 2 proof command `python -m pytest tests/test_session_lifecycle.py -q` fails on current-main with two close/archive write-through proof regressions. `test_close_proof_is_non_executable_and_requires_stop_before_close` expects `permission_gate_state == "approved"` but receives `"blocked"`, and `test_archive_proof_serializes_write_through_and_visibility` expects only `proof.is_executable_now_false` but receives an extra `permission.archive_required` blocker.
+- Repair route: Build 2 should make close/archive write-through proof permission evaluation deterministic against the proof timestamp. `build_close_archive_write_through_proof()` computes `observed_at`, but `session.can_execute_operation(required_operation)` uses wall-clock time; after the fixture's temporary archive permission expires, the proof turns blocked even when the supplied proof timestamp is within the approved window. Evaluate the archive permission against `observed_at` or otherwise pass a deterministic permission timestamp, then rerun `python -m pytest tests/test_session_lifecycle.py -q`.
+
+Completion: review provenance/finding update only in `docs/live-codex-reviews.md`. Next Candidate: return to Build 1/2 polling after Build 2 repairs the deterministic close/archive permission proof blocker.
 
 ## Coordinator Override - Completed / Passed
 
@@ -2685,6 +2694,7 @@ YYYY-MM-DD HH:MM TZ - Codex Reviews checked queue; status: idle/running/blocked;
 2026-06-01 16:32 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after pull; top review item remains completed/repair-routed and no executable Active Task / Coordinator Override - Active Now block is present; Build 3 FileMap item remains Next Candidate only.
 2026-06-01 16:36 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after pull check; reread queue top is completed/repair-routed with no executable Active Task / Coordinator Override - Active Now block present; transient local promotion for Build 2 repair was not present after reread; Build 3 FileMap remains Next Candidate only.
 2026-06-01 16:42 -06:00 - Codex Reviews A checked queue; status: idle; notes: origin/main current after pull; top review item remains completed/passed and no executable Active Task / Coordinator Override - Active Now block is present; Build 3 FileMap item remains Next Candidate only.
+2026-06-02 22:47 -06:00 - Codex Reviews A checked queue; status: repair routed; notes: origin/main fetched at `b8cd9b4a`; Active Task found for Build 1 DeepSeek metadata and Build 2 runtime-state export; Build 2 required full proof failed on current-main close/archive permission timestamp regression.
 ```
 
 ## Review Log
@@ -3173,6 +3183,7 @@ Round 6 write log:
 - 2026-06-01 16:36 -06:00 - Codex Reviews A completed idle queue read after origin/main pull check. Files changed: `docs/live-codex-reviews.md`. Tests run: not run for final idle state; transient Build 2 repair proof was run before reread (`python -m pytest tests/test_session_lifecycle.py -q`, 24 passed) but no executable Active Task remained in the queue after reread. Proof command: `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings in the assigned review queue; no executable Active Task present. Commit: this commit. Push status: pushed to `origin/main`; unrelated dirty Reviews B/Build 4 files left unstaged/out of scope. Obsidian update status: not updated; no active review task or new durable review finding.
 - 2026-06-01 16:39 -06:00 - Codex Reviews A completed Build 2 Session Lifecycle routing-action repair review for commit `558af555`. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_session_lifecycle.py -q` (24 passed); proof commands: `git merge-base --is-ancestor 558af555 HEAD`, scoped inspection of `meridian_core/session_lifecycle.py` and `tests/test_session_lifecycle.py`, side-effect scan with `rg`, and `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings; prior Build 2 Session Lifecycle action/reason coverage findings closed. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; review queue records pass only.
 - 2026-06-01 16:42 -06:00 - Codex Reviews A completed idle queue read after origin/main pull. Files changed: `docs/live-codex-reviews.md`. Tests run: not run (read-check-only queue update); proof command: `git diff --check -- docs/live-codex-reviews.md`. Findings/fixes: no actionable findings; no executable Active Task present. Commit: this commit. Push status: pushed to `origin/main`. Obsidian update status: not updated; no active review task or new durable review finding.
+- 2026-06-02 22:47 -06:00 - Codex Reviews A completed current-main Build 1 DeepSeek metadata and Build 2 runtime-state export review. Files changed: `docs/live-codex-reviews.md`. Tests run: `python -m pytest tests/test_model_adapter.py -q` (43 passed); `python -m pytest tests/test_session_lifecycle.py::TestSessionRuntimeStateExport -q` (3 passed); `python -m pytest tests/test_session_lifecycle.py -q` (120 passed, 2 failed). Proof commands: `git diff --check bfada8b1^..1fcad364` (passed), `git diff --check 93bf40dd^..d0179bb0` (passed), and ancestry checks for `bfada8b1`, `1fcad364`, `93bf40dd`, and `d0179bb0` against `origin/main`. Findings/fixes: Build 1 passed; Build 2 runtime-state export targeted checks passed, but required full Session Lifecycle proof failed because close/archive write-through proof evaluates temporary archive permission with wall-clock time instead of the proof timestamp, causing `permission_gate_state` to become `blocked` and adding `permission.archive_required` after fixture expiry; repair routed to Build 2 to evaluate close/archive permission against `observed_at` or otherwise make proof permission checks timestamp-deterministic. Commit: this commit. Push status: pending local commit. Obsidian update status: not updated; repair route recorded in review queue.
 
 When idle, continue polling `docs/live-codex-reviews.md` and `docs/live-build-1.md`/`docs/live-build-2.md` every 30 seconds for new Ready-for-Codex-Review markers, cadence triggers, or repair-verification needs.
 
