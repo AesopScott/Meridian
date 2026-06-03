@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -3625,7 +3625,7 @@ body {
           if (Number(entry.sessionContextEntries) > 0) {
             metaParts.push(`visible context ${entry.sessionContextEntries} entries`);
           }
-          meta.textContent = metaParts.join(' · ');
+          meta.textContent = metaParts.join(' Â· ');
           row.append(meta);
         }
       }
@@ -3678,7 +3678,7 @@ body {
       bridgeOnline = true;
       modelReadiness = Array.isArray(result.models) ? result.models : [];
       bridgeCapabilities = result.capabilities || {};
-      const bridgeLabel = result.version ? ` · bridge ${result.version}` : '';
+      const bridgeLabel = result.version ? ` Â· bridge ${result.version}` : '';
       if (modelSelect.value === 'auto') {
         document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, 'Prime / Relay auto'));
         return;
@@ -4312,7 +4312,7 @@ body {
     const logicNode = rightWorkspace?.querySelector('[data-relay-logic]');
     if (!logicNode) return;
     try {
-      const relayLogicUrl = `${localBridgeBase}/relay-logic`;
+      const relayLogicUrl = 'http://127.0.0.1:8767/bridge/relay-logic';
       const response = await fetch(relayLogicUrl, { cache: 'no-store' });
       const snapshot = await response.json();
       logicNode.innerHTML = renderRelayLogicSnapshot(snapshot);

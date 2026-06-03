@@ -1,4 +1,4 @@
-"""Tests for the Bifrost cockpit static HTML renderer."""
+﻿"""Tests for the Bifrost cockpit static HTML renderer."""
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ from meridian_core.cockpit_state import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-# ── sample_cockpit_view_model ───────────────────────────────────────────────
+# â”€â”€ sample_cockpit_view_model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_sample_view_model_has_project_and_bearing():
@@ -269,7 +269,7 @@ def test_index_relay_harness_renders_backend_logic_snapshot_contract():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
 
     assert "data-relay-logic" in doc
-    assert "const relayLogicUrl = `${localBridgeBase}/relay-logic`;" in doc
+    assert "const relayLogicUrl = 'http://127.0.0.1:8767/bridge/relay-logic';" in doc
     assert "fetch(relayLogicUrl, { cache: 'no-store' })" in doc
     assert "renderRelayLogicSnapshot(snapshot)" in doc
     assert "renderRelayPrimeDirectives(snapshot)" in doc
@@ -342,7 +342,7 @@ def test_sample_view_model_instrument_version():
     assert vm.instrument.version.startswith("v")
 
 
-# ── render_cockpit_html — document structure ────────────────────────────────
+# â”€â”€ render_cockpit_html â€” document structure â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_render_returns_complete_html_document():
@@ -368,7 +368,7 @@ def test_render_includes_title_with_project():
     assert "<title>" in doc
 
 
-# ── Top navigation removal ───────────────────────────────────────────────────
+# â”€â”€ Top navigation removal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_render_has_no_permanent_top_navigation():
@@ -379,7 +379,7 @@ def test_render_has_no_permanent_top_navigation():
 
 
 
-# ── Prime panel ─────────────────────────────────────────────────────────────
+# â”€â”€ Prime panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_render_prime_panel_class_present():
@@ -1276,7 +1276,7 @@ def test_prompt_packet_proof_preserves_prior_bifrost_surfaces():
 
 
 
-# ── Harness dashboard ────────────────────────────────────────────────────────
+# â”€â”€ Harness dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_aegis_prompt_packet_policy_sample_renders_required_fields():
@@ -1813,7 +1813,7 @@ def test_render_harness_dashboard_attention_hook():
     assert 'data-attention="true"' in doc
 
 
-# ── Project strip ────────────────────────────────────────────────────────────
+# â”€â”€ Project strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_render_project_strip_class_present():
@@ -1852,7 +1852,7 @@ def test_render_project_drilldown_sessions():
     assert "Prime command bay" in doc
 
 
-# ── Progress surface ─────────────────────────────────────────────────────────
+# â”€â”€ Progress surface â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_render_progress_surface_class_present():
@@ -1913,7 +1913,7 @@ def test_render_progress_surface_is_mission_feed():
     assert "Review Console" not in doc
 
 
-# ── Instrument band ──────────────────────────────────────────────────────────
+# â”€â”€ Instrument band â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_render_instrument_band_class_present():
@@ -1959,7 +1959,7 @@ def test_render_instrument_clock():
     assert vm.instrument.clock in doc
 
 
-# ── XSS escaping ─────────────────────────────────────────────────────────────
+# â”€â”€ XSS escaping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_escapes_xss_in_project():
@@ -2074,7 +2074,7 @@ def test_escapes_xss_in_queue_state():
     assert "&lt;b&gt;" in doc
 
 
-# ── Custom view model ─────────────────────────────────────────────────────────
+# â”€â”€ Custom view model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_custom_view_model_rendered():
@@ -2110,7 +2110,7 @@ def test_custom_view_model_rendered():
     assert "09:01" in doc
 
 
-# ── view_model_from_snapshot ──────────────────────────────────────────────────
+# â”€â”€ view_model_from_snapshot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _make_snapshot(
@@ -2272,7 +2272,7 @@ def test_snapshot_result_is_renderable():
     assert "all good" in doc
 
 
-# ── Voice I/O state ───────────────────────────────────────────────────────────
+# â”€â”€ Voice I/O state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_sample_view_model_has_voice_state():
@@ -2451,7 +2451,7 @@ def test_voice_no_provider_labels_in_voice_states():
         assert label not in doc.split("voice-strip")[1].split("</div>")[0] if "voice-strip" in doc else True
 
 
-# ── Session Lifecycle ───────────────────────────────────────────────────────
+# â”€â”€ Session Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_sample_view_model_has_session_lifecycle():
@@ -3081,7 +3081,7 @@ def test_proof_state_in_cockpit_main_not_core():
     assert 'class="proof-state"' in main_section
 
 
-# ── Right-Panel Mode Tests ──────────────────────────────────────────────────
+# â”€â”€ Right-Panel Mode Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def test_user_session_mode_renders_with_data():
@@ -3120,7 +3120,7 @@ def test_user_session_mode_shows_selected_session():
         assert f'value="{selected_id}"' in doc and 'selected' in doc
 
 
-# ── Sessions dropdown grouping and sorting ──────────────────────────────────
+# â”€â”€ Sessions dropdown grouping and sorting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def test_sessions_dropdown_groups_by_project():
     """Sessions dropdown uses optgroups for each project."""
@@ -3407,7 +3407,7 @@ def test_right_panel_renders_in_aside_element():
     assert '</aside>' in doc
 
 
-# ── interactive-state mode switching ────────────────────────────────────────
+# â”€â”€ interactive-state mode switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def test_mode_switch_user_to_settings_preserves_prompt_state():
     """Switching from User Session mode to Settings preserves unsent prompt text."""
@@ -3600,7 +3600,7 @@ def test_prompt_window_only_renders_in_user_session_mode():
     assert "harness" in harness_doc.lower() or "gate-" in harness_doc
 
 
-# ── Sessions dropdown filtering (Reviews B repairs) ──────────────────────────
+# â”€â”€ Sessions dropdown filtering (Reviews B repairs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def test_sessions_dropdown_excludes_blocked_sessions():
     """Non-open sessions (blocked, done) are excluded from the dropdown."""
@@ -3732,7 +3732,7 @@ def test_sessions_dropdown_with_mixed_statuses_filters_correctly():
     assert "Done E" not in html
 
 
-# ── Stale-target guard (post-Sessions dropdown repair) ──────────────────────
+# â”€â”€ Stale-target guard (post-Sessions dropdown repair) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def test_stale_target_guard_shows_when_selected_session_closed():
     """Stale-target guard shows when selected session is no longer available."""
