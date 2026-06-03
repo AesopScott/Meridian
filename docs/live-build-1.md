@@ -9938,3 +9938,10 @@ Historical record of Build 1 V0 completed slices (most recent first). Do not re-
 - Code/doc changes in session: 1 of 3
 - Next Candidate Task: awaiting Prime/Codex promotion
 - Build 1 idle and polling for next task assignment
+
+**Build 1 Read Check** — 2026-06-03 10:09 UTC (Heartbeat Poll, cadence 2/3)
+- Status: Queue poll complete; no "Coordinator Override - Active Now" section found
+- Latest origin/main: commit `cdc9d5bf` (Build 1 read check — 2026-06-03 10:07 UTC idle cadence 1/3)
+- Code/doc changes in session: 2 of 3
+- Next Candidate Task: awaiting Prime/Codex promotion
+- Build 1 idle and polling for next task assignment
