@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: repair close/archive write-through proof permission timing so Session Lifecycle proof stays deterministic.
 
@@ -37,6 +37,16 @@ Completion:
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Next Candidate: bind reviewed close/archive proof into Prime/Beacon advisory serialization after this deterministic proof repair clears review.
+
+Completion:
+
+- Build 2 completed the close/archive write-through proof permission timing repair in local worktree commit `d1bd643d`.
+- Files changed: `tests/test_session_lifecycle.py`.
+- Evidence: `build_close_archive_write_through_proof()` already calls `_permission_context_can_execute_operation_at` with `observed_at` — wall-clock bypassed. Added two determinism regression tests.
+- Required tests passing: `test_close_proof_is_non_executable_and_requires_stop_before_close` (`permission_gate_state=="approved"` ✓), `test_archive_proof_serializes_write_through_and_visibility` (no `permission.archive_required` blocker ✓).
+- Regression tests added: `test_close_proof_permission_gate_uses_observed_at_not_wallclock`, `test_archive_proof_no_permission_blocker_when_observed_at_inside_window`.
+- Proof: 127 tests passed; `git diff --check` clean. Worktree branch: `codex/build-2-v3-goal-checkpoint-proof-20260602-1327`.
+- 2026-06-04 12:58 UTC — Ready for Codex Review. Coordinator movement required after Reviews A clearance.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
