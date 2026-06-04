@@ -10,6 +10,32 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 ## Coordinator Override - Completed / Passed
 
+Goal: review Build 1 Relay Source/Git main-write coordination handoff display-safety audit.
+
+Status: passed by coordinator-side Reviews A intake on 2026-06-04. Candidate commit was `8320b768d` (`test: Harden Relay source git handoff tags`) from Build 1.
+
+Proof: Reviews A worktree was clean before review; exact detached checkout of `8320b768d` ran `python -m pytest tests/test_relay_executor.py -q` and passed 222 tests; `git diff --check 8320b768^..8320b768` passed; scope was limited to `meridian_core/relay_executor.py` and `tests/test_relay_executor.py`.
+
+Review result: Relay Source/Git handoff tags now reject command/source-control terms inside structured `packet-proof-*` and `aegis-proof-*` evidence ids. Tests prove raw Git/main-write coordination text and command-shaped evidence ids such as `git reset --hard origin/main`, `merge origin/main`, `rebase current branch`, `cherry-pick review commit`, `stash-pop across worktrees`, `unapproved_main_write_request`, `packet-proof-git-reset-hard`, and `aegis-proof-main-write-request` are redacted across blockers, warnings, reasons, and evidence-id handoff surfaces while safe packet/aegis proof tags and fixed human approval phrases survive.
+
+Finding: none. No live vendor calls, network/filesystem access, UI/Bifrost/FileMap/session/process behavior, branch/worktree movement, shared-main write, or Polaris dependency was introduced.
+
+Completion: Build 1 Relay Source/Git handoff display-safety audit is review-cleared. Coordinator movement requires shared-main gate and frontend ACK, path-limited to `meridian_core/relay_executor.py`, `tests/test_relay_executor.py`, and Reviews A provenance.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Aegis V3 Goal Runtime checkpoint discipline advisory gate.
+
+Status: passed by coordinator-side Reviews A intake on 2026-06-04. Candidate branch was `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis` with source commits `dfc01107` and `04bdcbb32`.
+
+Proof: Build 4 worktree was clean before review; `git diff --check dfc01107^..04bdcbb32` passed; `python -m pytest tests/test_aegis.py -q` passed with 298 tests. Scope check was limited to `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+
+Review result: the Aegis advisory is deterministic, display-safe, and non-executable. It records V3 Goal Runtime checkpoint discipline state, Git/Obsidian checkpoint refs, cadence, budget, review/lease/proof refs, blocker policy, and fail-closed warnings without granting execution authority or self-approval. No Git/Obsidian operation, automation creation, filesystem movement, UI/Bifrost/Relay/Session/FileMap edit, model/provider call, worker main write, or Polaris dependency was introduced.
+
+Completion: Build 4 V3 Goal Runtime checkpoint discipline advisory is review-cleared and pending coordinator main-write coordination if it is not already present on current main.
+
+## Coordinator Override - Completed / Passed
+
 Goal: review Build 2 Session Lifecycle close/archive observed_at permission repair and V3 goal checkpoint proof packet.
 
 Status: passed by coordinator-side Reviews A intake on 2026-06-04. Candidate branch was `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-lifecycle` with source commits `a0d4db8e9`, `69541f488`, and `d1bd643d4`.

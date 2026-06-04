@@ -96,6 +96,20 @@ No active write lease.
 Start new entries below this line.
 
 ```text
+Time: 2026-06-04 08:41 -06:00
+Writer: Meridian coordinator
+Intent: path-limited backend/review provenance movement for Build 1 Relay Source/Git handoff hardening and Build 4 Aegis V3 Goal checkpoint discipline advisory under frontend ACK.
+Action completed: confirmed approved Build 1 and Build 4 code/test content was already present on current main by content; added missing Reviews A provenance for Build 1 and Build 4 and cleared the lease record.
+Commit(s): this commit.
+Pushed to origin/main: pending at commit time.
+Files changed: docs/live-codex-reviews.md; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_relay_executor.py tests/test_aegis.py -q passed 523 tests; git diff --check passed with line-ending notices only before commit.
+Final shared main status: pending final fetch/status after push.
+Notes/blockers: no frontend branch/UI Build 2 files, index.html, tests/test_bifrost_cockpit.py, Bifrost/preview/CSS, Build 2/3/5, FileMap, FTP/deploy, worker main write, or Polaris included. Build 1 Relay sanitizer/tests and Build 4 Aegis implementation/tests were already present on current main by content, so this landing is provenance/ledger only.
+Status: Complete pending push/final status
+```
+
+```text
 Time: 2026-06-04 08:29 -06:00
 Writer: Meridian coordinator
 Intent: narrow cleanup after Model Harness detail surface landing under frontend ACK.
