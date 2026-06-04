@@ -6,17 +6,42 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Passed
 
-Goal: review Build 3/4/5 V3 goal checkpoint support slices and current FileMap/render/advisory refreshes.
+Goal: review Relay Runtime Logic restore branch after the user reported the Relay runtime interface lost detailed Relay information.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
-Task: review Build 3 FileMap audit commit `ddf3c29bd`, Build 4 Aegis V3 goal checkpoint discipline commits `dfc01107b`/`04bdcbb32`, and Build 5 V3 goal runtime render audit commits `a15c8ff16`/`390e6d768` if they remain pending and path-limited. Prefer oldest ready/least stale slice first. If a branch is too stale to review cleanly, record exact ahead/behind/path evidence and route refresh to the owning build lane. Verify no live model/provider calls, session/process control, implementation leakage outside allowed scope, branch/worktree/main movement, or Polaris dependency.
+Source branch: `origin/codex/restore-relay-runtime-logic-20260602`.
 
-Proof: Build 3 uses `python -m pytest tests/test_filemap.py -q`; Build 4 uses `python -m pytest tests/test_aegis.py -q`; Build 5 uses `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; each review also runs diff-check over the ready commit/range.
+Source tip reviewed: `37677c6f` (`Restore Relay runtime logic refresh`).
 
-Completion: commit only review provenance/finding/pass updates in `docs/live-codex-reviews-2.md` and any focused repair route appended to the owning build queue; update Obsidian; leave a concrete Next Candidate.
+Task: verify the two-file restore reloads the backend Relay logic snapshot from the visible Relay panel refresh path and adds tests that guard the Relay renderer contract.
+
+Proof requested: explicit refspec fetch of `origin/main` and `origin/codex/restore-relay-runtime-logic-20260602`; Reviews B clean check; exact two-file path scope; `python -m pytest tests/test_bifrost_cockpit.py tests/test_relay_logic_snapshot.py -q`; `node scripts/meridian-model-bridge.js --self-test`; `git diff --check origin/main..origin/codex/restore-relay-runtime-logic-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`.
+
+Review result - 2026-06-02 14:10 -06:00:
+
+- PASS. The restored branch touched only `index.html` and `tests/test_bifrost_cockpit.py`.
+- Verified `refreshRelayPanel()` reloads `loadRelayLogic()` whenever `[data-relay-logic]` is visible, so a Relay panel that initially saw a stale/offline bridge can recover the full backend Relay snapshot on focus or visibility refresh.
+- Verified the added cockpit tests guard the Relay renderer contract for Prime directives/proofs, capability sections, route precedence, dispatch lane/payload policy, audit rows, fallback blockers, and proof/telemetry logic.
+- Verified the backend Relay snapshot still contains the detailed interface material: three Prime directives, `Relay Job`, `Dispatch Logic`, and tier 3 `model_payload_only` dispatch policy.
+- Verified no live model calls, execution controls, branch/worktree movement, main writes, queue changes, coordination-doc changes, or Polaris work were introduced.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/restore-relay-runtime-logic-20260602:refs/remotes/origin/codex/restore-relay-runtime-logic-20260602` completed from Reviews B.
+- Reviews B worktree was clean before pass provenance recording.
+- Remote restore tip resolved to `37677c6f`.
+- `git diff --name-only origin/main..origin/codex/restore-relay-runtime-logic-20260602` returned exactly `index.html` and `tests/test_bifrost_cockpit.py`.
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_relay_logic_snapshot.py -q` passed: 295 tests.
+- `node scripts/meridian-model-bridge.js --self-test` returned `ok: true`.
+- `git diff --check origin/main..origin/codex/restore-relay-runtime-logic-20260602` passed with normal line-ending notices only.
+- `python -m meridian_core.relay_logic_snapshot` smoke confirmed `ok=True`, three Prime directives, `Relay Job`, `Dispatch Logic`, and `model_payload_only`.
+
+Next Candidate: coordinator main-write lease for the two-file Relay restore after shared main is clean/aligned.
 
 ## Coordinator Override - Completed / Passed
 
@@ -64,6 +89,10 @@ Source branch: `codex/build-3-filemap-repaired-frontend-audit-20260602-1152`.
 
 Task: review commit `ddf3c29b` (`chore: audit repaired frontend FileMap coverage`) for current-main FileMap gap registration only. Verify coverage for `meridian_core/compass.py`, `tests/test_compass.py`, `docs/main-write-coordination-ledger.md`, docs mirror repairs for `docs/agentic-ai-framework-checklist.md` and `docs/federation-harness-horizon.md`, plus recorded branch-only exclusions without pre-registering frontend snapshot/test files.
 
+Proof requested: `git fetch origin +refs/heads/main:refs/remotes/origin/main`; Reviews B clean check; Build 3 source worktree clean check; `python -m pytest tests/test_filemap.py -q`; `git diff --check ddf3c29b^..ddf3c29b`; scoped path review limited to `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, `tests/test_filemap.py`, plus Reviews B provenance only.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`.
+
 Review result - 2026-06-02 12:34 -06:00:
 
 - PASS. Build 3 source worktree was clean and the reviewed commit touched only `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
@@ -86,23 +115,708 @@ Next Candidate: coordinator-routed frontend/runtime repair or FileMap audit afte
 
 ## Coordinator Override - Completed / Passed
 
-Goal: review Build 3 post-voice FileMap audit / registration.
+Goal: re-review freshly repaired frontend Source/Git Runtime Logic UI branch after prior Reviews B scope findings `c3a88782` and `81a54b13`, using mandatory corrected explicit remote-tracking fetch.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
 
-Task: review Build 3 commit `90e6d739` (`chore: register Bifrost voice preview FileMap coverage`). Verify Bifrost voice preview/runtime paths are registered in runtime FileMap and `docs/FileMap.md`, no mojibake/BOM/personal-name regressions in touched FileMap docs/code, and no unrelated scope leakage.
+Source branch: `origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`.
 
-Proof: `python -m pytest tests/test_filemap.py -q`; `git diff --check 90e6d739^..90e6d739`.
+Task: review repaired tip `0cbe08fe7b1e759ad219721779e406e7dfe24266` for path-scope repair and, if scope-clean, backend-sourced display-only Source/Git Runtime Logic UI: main-write coordination, ACK/lease gates, clean-state checks, path-limited movement, completion proof, cross-harness relationships, runtime boundary, `/bridge/source-git-logic`, Source/Git dock panel routing, FileMap/test alignment, no commit/push/merge/rebase/reset/stash-pop/cherry-pick/worktree movement controls, no personal-name or encoding issues, and no Polaris.
 
-Review result - 2026-06-02 10:55 -06:00:
+Proof requested: mandatory corrected fetch `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-source-git-runtime-logic-scopefix-20260602:refs/remotes/origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`; Reviews B clean check; remote branch/tip verification; exact eight-file `origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`.
 
-- Build 3 post-voice FileMap coverage passed. Commit `90e6d739` changed only allowed files: `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
-- `python -m pytest tests/test_filemap.py -q` passed with 47 tests.
-- `git diff --check 90e6d739^..90e6d739` passed.
-- `git diff --name-only 90e6d739^..90e6d739` showed only the four allowed Build 3/FileMap files.
-- No mojibake, BOM, personal-name wording, runtime/UI/session/process, branch/worktree/main movement, or Polaris leakage was found in the reviewed scope.
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
 
-Completion: Build 3 post-voice FileMap coverage is review-cleared. Reviews B returns to current-main Ready-marker polling.
+Review result - 2026-06-02 12:30 -06:00:
+
+- Finding routed. The mandatory corrected fetch succeeded, and the remote branch tip exists and matches the reported repaired commit `0cbe08fe7b1e759ad219721779e406e7dfe24266`.
+- `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` passed, but the required corrected current-main path-scope check still failed.
+- The required `origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` diff includes live-build queue files outside the reported eight-file Source/Git Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, and `docs/live-build-4.md`.
+- Because the branch is not scope-clean against current `origin/main` after the mandatory corrected refspec fetch, Reviews B stopped before running the Source/Git runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-source-git-runtime-logic-scopefix-20260602:refs/remotes/origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` returned `0cbe08fe7b1e759ad219721779e406e7dfe24266`.
+- `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` showed 12 changed paths, including the four out-of-scope live-build paths listed above.
+
+Smallest repair request: repair the Source/Git Runtime Logic UI branch so the corrected current-main review diff is limited to the reported eight files, or route an explicit expanded-scope review if live-build queue rewrites are intentional.
+
+Completion: Source/Git Runtime Logic UI review remains blocked on corrected current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: re-review repaired frontend Federation Runtime Logic UI branch after prior Reviews B scope findings `46b25c12` and `85ddf19d`, using mandatory corrected explicit remote-tracking fetch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Task: review repaired tip `5a23f95dd454b6153c91c41b522488e39a72df1c` for path-scope repair and, if scope-clean, backend-sourced display-only Federation Runtime Logic UI: consent-first discovery, permission boundaries, typed handoff packets, cross-harness relationships, runtime boundary, `/bridge/federation-logic`, Federation harness panel routing, FileMap/test alignment, no networking/authentication/runtime remote execution/shared mutable state controls, no personal-name or encoding issues, and no Polaris.
+
+Proof requested: mandatory corrected fetch `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-federation-runtime-logic-20260602:refs/remotes/origin/codex/frontend-federation-runtime-logic-20260602`; Reviews B clean check; remote branch/tip verification; exact eight-file `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:28 -06:00:
+
+- Finding routed. The mandatory corrected fetch succeeded, and the remote branch tip exists and matches the reported repaired commit `5a23f95dd454b6153c91c41b522488e39a72df1c`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed, but the required corrected current-main path-scope check still failed.
+- The required `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` diff includes live-build queue files outside the reported eight-file Federation Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, and `docs/live-build-4.md`.
+- Because the branch is not scope-clean against current `origin/main` after the mandatory corrected refspec fetch, Reviews B stopped before running the Federation runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-federation-runtime-logic-20260602:refs/remotes/origin/codex/frontend-federation-runtime-logic-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-federation-runtime-logic-20260602` returned `5a23f95dd454b6153c91c41b522488e39a72df1c`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-federation-runtime-logic-20260602` showed 12 changed paths, including the four out-of-scope live-build paths listed above.
+
+Smallest repair request: repair the Federation Runtime Logic UI branch so the corrected current-main review diff is limited to the reported eight files, or route an explicit expanded-scope review if live-build queue rewrites are intentional.
+
+Completion: Federation Runtime Logic UI review remains blocked on corrected current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: re-review repaired frontend Source/Git Runtime Logic UI branch after prior Reviews B scope finding `c3a88782`, using corrected explicit remote-tracking fetch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`.
+
+Task: review repaired tip `a6e474caf113c348a9289f3320d1282f56d1e80a` for path-scope repair and, if scope-clean, backend-sourced display-only Source/Git Runtime Logic UI: main-write coordination, ACK/lease gates, clean-state checks, path-limited movement, completion proof, cross-harness relationships, runtime boundary, `/bridge/source-git-logic`, Source/Git dock panel routing, FileMap/test alignment, no commit/push/merge/rebase/reset/stash-pop/cherry-pick/worktree movement controls, no personal-name or encoding issues, and no Polaris.
+
+Proof requested: corrected fetch `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-source-git-runtime-logic-scopefix-20260602:refs/remotes/origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`; Reviews B clean check; remote branch/tip verification; exact eight-file `origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:25 -06:00:
+
+- Finding routed. The remote branch tip exists and matches the reported repaired commit `a6e474caf113c348a9289f3320d1282f56d1e80a`.
+- `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` passed, but the required corrected current-main path-scope check still failed.
+- The required `origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` diff includes files outside the reported eight-file Source/Git Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `meridian_core/relay_executor.py`, and `tests/test_relay_executor.py`.
+- Because the branch is not scope-clean against current `origin/main` after the corrected refspec fetch, Reviews B stopped before running the Source/Git runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-source-git-runtime-logic-scopefix-20260602:refs/remotes/origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` returned `a6e474caf113c348a9289f3320d1282f56d1e80a`.
+- `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` showed 14 changed paths, including the six out-of-scope live-build and Relay executor paths listed above.
+
+Smallest repair request: repair the Source/Git Runtime Logic UI branch so the corrected current-main review diff is limited to the reported eight files, or route an explicit expanded-scope review if live-build queue rewrites and Relay executor changes are intentional.
+
+Completion: Source/Git Runtime Logic UI review remains blocked on corrected current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Aegis V3 goal checkpoint discipline advisory.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Source branch: `codex/build-4-v3-goal-checkpoint-discipline-20260602-1454`.
+
+Task: review exact commits `dfc01107b` (`Add Aegis V3 goal checkpoint discipline advisory`) and `04bdcbb32` (`Mark Build 4 V3 checkpoint advisory ready`) for a pure Aegis-side V3 Goal Runtime checkpoint discipline advisory. Verify objective presence, active owner lane, Git/Obsidian checkpoint refs, checkpoint cadence state, token/time budget status, review/lease gate refs, blocker policy state, proof refs, deterministic fail-closed blockers, bounded display-safe serialization, `self_approval_granted=False`, `execution_authorized=False`, and no Git/Obsidian writes, automation creation, branch/worktree movement, session/process control, provider/model calls, UI/Bifrost/Relay/Session/FileMap implementation edits, shared-main write, or Polaris.
+
+Review result - 2026-06-04 07:27 -06:00:
+
+- PASS. Build 4 source worktree was clean and the reviewed exact range touched only `docs/live-build-4.md`, `meridian_core/aegis.py`, and `tests/test_aegis.py`.
+- Verified the new `V3GoalCheckpointDisciplineInput`, `V3GoalCheckpointDisciplinePolicyResult`, `evaluate_v3_goal_checkpoint_discipline_advisory()`, and serialization helpers are pure Aegis/domain code over summarized metadata.
+- Verified policy coverage for missing objective, unassigned owner lane, missing Git/Obsidian checkpoint refs, stale/unknown checkpoint cadence, exceeded token/time budgets, missing review/lease gates, ambiguous blocker policy, missing proof refs, unsafe refs, stable advisory keys, deterministic results, and display-safe redaction.
+- Verified serialization sets `self_approval_granted` to `False` and `execution_authorized` to `False`.
+- No UI/Bifrost/Relay/Session/FileMap implementation edits, live provider/model calls, session/process control, branch/worktree/main movement, Git/Obsidian writes, automation creation, or Polaris dependency was found in the reviewed scope.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main` completed from shared main before review evidence capture.
+- Build 4 source worktree status was clean on `codex/build-4-v3-goal-checkpoint-discipline-20260602-1454`.
+- `git diff --name-status dfc01107b^..04bdcbb32` showed only `docs/live-build-4.md`, `meridian_core/aegis.py`, and `tests/test_aegis.py`.
+- `git diff --check dfc01107b^..04bdcbb32` passed.
+- `python -m pytest tests/test_aegis.py -q` passed: 298 tests.
+
+Next Candidate: coordinator may request exact path-limited movement of Build 4 commits `dfc01107b`/`04bdcbb32` plus this Reviews B provenance after the shared-main gate and frontend ACK.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Aegis/Compass V3 Goal Runtime advisory gate.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Source branch: `codex/build-4-v3-goal-runtime-advisory-20260602-1436`.
+
+Task: review commits `05393ab6` (`Add Aegis V3 goal runtime advisory`) and `bc8aba19` (`Mark Build 4 V3 goal advisory ready`) for a display/review-metadata-only Aegis V3 Goal Runtime readiness advisory: objective present, lane ownership, continuation/blocker policy, regular Git checkpoint expectation, regular Obsidian checkpoint expectation, review/lease gates, proof refs, bounded redaction, `execution_authorized=False`, no self-approval, no Git/Obsidian writes, no automation creation, no branch/worktree movement, no session touching, no provider/model calls, no UI/Bifrost/Relay/Session/FileMap edits, no shared-main write, and no Polaris.
+
+Proof requested: `git fetch origin +refs/heads/main:refs/remotes/origin/main`; Reviews B clean check; Build 4 source worktree clean check; `python -m pytest tests/test_aegis.py -q`; `git diff --check 05393ab6^..bc8aba19`; scoped path review limited to `meridian_core/aegis.py`, `tests/test_aegis.py`, `docs/live-build-4.md`, plus Reviews B provenance only.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`.
+
+Review result - 2026-06-02 12:24 -06:00:
+
+- PASS. Build 4 source worktree was clean and the reviewed range touched only `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`.
+- Verified the new `V3GoalRuntimeReadinessInput`, `V3GoalRuntimeReadinessPolicyResult`, `evaluate_v3_goal_runtime_readiness_advisory()`, and serialization are pure Aegis/domain helpers over primitive metadata, with no UI/Bifrost/Relay/Session/FileMap implementation edits and no provider/model/session/process/Git/Obsidian execution.
+- Verified readiness gates cover objective presence, lane owner, continuation/blocker policies, Git and Obsidian checkpoint expectations, review/lease gates, proof refs, deterministic fail-closed blockers, stable advisory keys, and bounded display-safe redaction.
+- Verified advisory serialization sets `self_approval_granted` to `False` and `execution_authorized` to `False`, and tests assert unsafe personal/path/provider/account/prompt/Git strings are redacted and not rendered raw.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main` completed from Reviews B.
+- Reviews B worktree was clean before pass provenance recording.
+- Build 4 source worktree status was clean on `codex/build-4-v3-goal-runtime-advisory-20260602-1436`.
+- `python -m pytest tests/test_aegis.py -q` passed: 296 tests.
+- `git diff --check 05393ab6^..bc8aba19` passed.
+- `git diff --name-status 05393ab6^..bc8aba19` showed only the expected Build 4 files: `docs/live-build-4.md`, `meridian_core/aegis.py`, `tests/test_aegis.py`.
+
+Next Candidate: repaired frontend Source/Git Runtime Logic UI branch, per coordinator follow-on route.
+
+## Coordinator Override - Completed / Passed
+
+Goal: re-review repaired frontend Federation Runtime Logic UI branch after prior Reviews B scope findings `46b25c12` and `85ddf19d`, using corrected explicit remote-tracking fetch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Task: review repaired tip `52f70214caf37ce9ac03c06b9a79a4b0d0aabf76` for path-scope repair and, if scope-clean, backend-sourced display-only Federation Runtime Logic UI: consent-first discovery, permission boundaries, typed handoff packets, cross-harness relationships, runtime boundary, `/bridge/federation-logic`, Federation harness panel routing, FileMap/test alignment, no networking/authentication/runtime remote execution/shared mutable state controls, no personal-name or encoding issues, and no Polaris.
+
+Proof requested: corrected fetch `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-federation-runtime-logic-20260602:refs/remotes/origin/codex/frontend-federation-runtime-logic-20260602`; Reviews B clean check; remote branch/tip verification; exact eight-file `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:21 -06:00:
+
+- Finding routed. The remote branch tip exists and matches the reported repaired commit `52f70214caf37ce9ac03c06b9a79a4b0d0aabf76`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed, but the required corrected current-main path-scope check still failed.
+- The required `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` diff includes live-build queue files outside the reported eight-file Federation Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, and `docs/live-build-4.md`.
+- Because the branch is not scope-clean against current `origin/main` after the corrected refspec fetch, Reviews B stopped before running the Federation runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin +refs/heads/main:refs/remotes/origin/main +refs/heads/codex/frontend-federation-runtime-logic-20260602:refs/remotes/origin/codex/frontend-federation-runtime-logic-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-federation-runtime-logic-20260602` returned `52f70214caf37ce9ac03c06b9a79a4b0d0aabf76`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-federation-runtime-logic-20260602` showed 12 changed paths, including the four out-of-scope live-build paths listed above.
+
+Smallest repair request: repair the Federation Runtime Logic UI branch so the corrected current-main review diff is limited to the reported eight files, or route an explicit expanded-scope review if live-build queue rewrites are intentional.
+
+Completion: Federation Runtime Logic UI review remains blocked on corrected current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review repaired frontend Source/Git Runtime Logic UI branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`.
+
+Task: review reported repaired tip `dd2045c668427aeddeed0a13ec6a59b06a42ba25` for path-scope repair and, if scope-clean, backend-sourced display-only Source/Git Runtime Logic UI: main-write coordination, ACK/lease gates, clean-state checks, path-limited movement, completion proof, cross-harness relationships, runtime boundary, `/bridge/source-git-logic`, Source/Git dock panel routing, FileMap/test alignment, no commit/push/merge/rebase/reset/stash-pop/cherry-pick/worktree movement controls, no personal-name or encoding issues, and no Polaris.
+
+Proof requested: `git fetch origin main codex/frontend-source-git-runtime-logic-scopefix-20260602`; Reviews B clean check; remote branch/tip verification; exact eight-file `origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:18 -06:00:
+
+- Finding routed. The remote branch tip exists and matches the reported repaired commit `dd2045c668427aeddeed0a13ec6a59b06a42ba25`.
+- `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` passed, but the required current-main path-scope check failed.
+- The required `origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` diff includes files outside the reported eight-file Source/Git Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `meridian_core/relay_executor.py`, and `tests/test_relay_executor.py`.
+- Because the branch is not scope-clean against current `origin/main`, Reviews B stopped before running the Source/Git runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin main codex/frontend-source-git-runtime-logic-scopefix-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` returned `dd2045c668427aeddeed0a13ec6a59b06a42ba25`.
+- `git diff --check origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-source-git-runtime-logic-scopefix-20260602` showed 14 changed paths, including the six out-of-scope live-build and Relay executor paths listed above.
+
+Smallest repair request: repair the Source/Git Runtime Logic UI branch so the current-main review diff is limited to the reported eight files, or route an explicit expanded-scope review if live-build queue rewrites and Relay executor changes are intentional.
+
+Completion: Source/Git Runtime Logic UI review is blocked on current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: re-review repaired frontend Federation Runtime Logic UI branch after prior Reviews B scope finding `46b25c12`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Task: review reported repaired tip `d0edfb66369a99292c504dec8ec02b506672c557` for path-scope repair and, if scope-clean, backend-sourced display-only Federation Runtime Logic UI: consent-first discovery, permission boundaries, typed handoff packets, cross-harness relationships, runtime boundary, `/bridge/federation-logic`, Federation harness panel routing, FileMap/test alignment, no networking/authentication/runtime remote execution/shared mutable state controls, no personal-name or encoding issues, and no Polaris.
+
+Proof requested: `git fetch origin main codex/frontend-federation-runtime-logic-20260602`; Reviews B clean check; remote branch/tip verification; exact eight-file `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:16 -06:00:
+
+- Finding routed. The remote branch tip exists and matches the reported repaired commit `d0edfb66369a99292c504dec8ec02b506672c557`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed, but the required current-main path-scope check still failed.
+- The required `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` diff includes live-build queue files outside the reported eight-file Federation Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, and `docs/live-build-4.md`.
+- Because the branch is still not scope-clean against current `origin/main`, Reviews B stopped before running the Federation runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin main codex/frontend-federation-runtime-logic-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-federation-runtime-logic-20260602` returned `d0edfb66369a99292c504dec8ec02b506672c557`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-federation-runtime-logic-20260602` showed 12 changed paths, including the four out-of-scope live-build queue files listed above.
+
+Smallest repair request: repair the Federation Runtime Logic UI branch so the current-main review diff is limited to the reported eight files, or route an explicit expanded-scope review if live-build queue rewrites are intentional.
+
+Completion: repaired Federation Runtime Logic UI review remains blocked on current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Aegis main-write coordination advisory model, then Build 5 Bifrost Federation Runtime Logic render-contract audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktrees: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`; `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Task 1: review Build 4 commits `3bb3c096` (`Add Aegis main-write coordination advisory`) and `78cde8e0` (`Mark Build 4 main-write advisory ready`). Verify the advisory evaluator is pure display/review metadata only: summarized clean-gate inputs, ledger checked, frontend ACK/lease, explicit path scope, clean/aligned shared main, clean affected worktrees, exclusions, proof plan, `execution_authorized=False`, no Git execution, no self-approval, no branch/worktree/main movement, no UI/Bifrost/Relay/Session/FileMap edits, no provider/model calls, and no Polaris. Verify unsafe paths/branch movement/free text are bounded/redacted.
+
+Task 2: review Build 5 commits `097e8bdf` (`Add Federation render audit tests`) and `ebdde541` (`Mark Federation render audit ready`). Verify tests/provenance-only Bifrost render/preview audit proving current surfaces do not expose Federation Runtime Logic, cross-project handoff, remote discovery, authentication, networking, or shared-state controls as executable UI before a reviewed frontend Federation display-only surface lands. Placeholder/planned Federation text is allowed only as display-only context.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 4 and Build 5 source worktree clean checks; `python -m pytest tests/test_aegis.py -q`; `git diff --check 3bb3c096^..78cde8e0`; `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; `git diff --check 097e8bdf^..ebdde541`; scoped path review.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:14 -06:00:
+
+- Task 1 passed. Build 4 range `3bb3c096^..78cde8e0` changed only `docs/live-build-4.md`, `meridian_core/aegis.py`, and `tests/test_aegis.py`.
+- The new `MainWriteCoordinationInput`, `MainWriteCoordinationPolicyResult`, and `evaluate_main_write_coordination_advisory()` are pure Aegis-side primitives. The evaluator accepts summarized clean-gate inputs only and does not run Git, access the filesystem, move branches/worktrees, write main, grant self-approval, call providers/models, or import UI/Bifrost/Relay/Session/FileMap behavior.
+- The advisory enforces ledger checked, frontend ACK granted, active lease, explicit path scope, clean/aligned shared main, clean affected worktrees, required exclusions, and proof-plan refs. It fails closed for missing/unknown/unsafe inputs and serializes `self_approval_granted=False` plus `execution_authorized=False`.
+- Display serialization redacts unsafe Windows paths, Git commands, branch/worktree movement text, shared-main/free-text strings, raw prompt/provider/account patterns, overlong values, and newline-bearing values. Tests cover clean allow, blockers for every required gate, required exclusion enforcement, stable advisory keys, unsafe redaction, no raw exposure, and determinism.
+- Task 2 passed. Build 5 range `097e8bdf^..ebdde541` changed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+- The Federation render audit is tests/provenance-only. It adds no Bifrost runtime implementation, `bifrost/cockpit.py`, CSS, `bifrost/preview.html`, `index.html`, bridge, FileMap, session/runtime code, main movement, branch/worktree movement, networking/authentication, shared-state control, or Polaris dependency.
+- The no-op audit is concrete: cockpit and preview tests render current static output, allow the existing Federation planned placeholder and `federation panel reserved` text, and reject Federation Runtime Logic, Remote Discovery, Federation Authentication, Shared State Controls labels, federation/remote/auth/network/shared-state `data-action` hooks, control attributes, and execute/connect/sync fragments.
+
+Proof:
+
+- `git fetch origin main` completed.
+- Reviews B worktree was clean before provenance recording.
+- Build 4 source worktree was clean before review at `78cde8e0`, ahead by the two reviewed commits.
+- `python -m pytest tests/test_aegis.py -q` passed: 297 tests.
+- `git diff --check 3bb3c096^..78cde8e0` passed.
+- `git diff --name-status 3bb3c096^..78cde8e0` showed only `docs/live-build-4.md`, `meridian_core/aegis.py`, and `tests/test_aegis.py`.
+- Build 5 source worktree was clean before review at `ebdde541`, ahead by the two reviewed commits.
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed: 312 tests.
+- `git diff --check 097e8bdf^..ebdde541` passed.
+- `git diff --name-status 097e8bdf^..ebdde541` showed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+
+Next Candidate: implement reviewed Source/Git or Prime display consumers for main-write readiness without execution authority; when a reviewed Federation Bifrost display-only surface lands, add sample rendering and escaping tests for federation mode, remote discovery state, auth gate, networking boundary, shared-state exclusions, evidence refs, blockers, human gate, and non-executable status.
+
+Completion: Build 4 Aegis main-write coordination advisory model and Build 5 Federation render audit are review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 3 Source/Git and Federation FileMap audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Task: review Build 3 commit `fd0b7984` (`chore: audit source git federation FileMap coverage`) on branch `codex/build-3-filemap-source-git-federation-audit-20260602-1141`. Verify Build 3 registered only existing current-main artifacts, repaired mirror coverage for existing current-main Federation horizon docs, inspected Federation branch `eb3f52e7` and Source/Git branch `7cdb278d` by path list only, and did not pre-register branch-only frontend runtime-logic snapshot files.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 3 source worktree clean check; `python -m pytest tests/test_filemap.py -q`; `git diff --check fd0b7984^..fd0b7984`; scoped path review of `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md`; targeted absence check for branch-only runtime snapshot paths.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:04 -06:00:
+
+- Build 3 Source/Git and Federation FileMap audit passed. The reviewed range changed only `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
+- The audit registered current-main gaps `meridian_core/compass.py` and `tests/test_compass.py` in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- The audit repaired `docs/FileMap.md` mirror coverage for existing current-main artifact `docs/federation-harness-horizon.md`, which was already present in runtime FileMap and `_REQUIRED_PATHS`.
+- Build 3 inspected Federation branch `eb3f52e7` and Source/Git branch `7cdb278d` by path list only, separating current-main paths from branch-only runtime snapshot files.
+- Branch-only runtime snapshot files were not pre-registered. Targeted scan found no FileMap surface matches for `federation_logic_snapshot`, `test_federation_logic_snapshot`, `source_git_logic_snapshot`, or `test_source_git_logic_snapshot` in `docs/FileMap.md`, `meridian_core/filemap.py`, or `tests/test_filemap.py`.
+- No unrelated FileMap churn, runtime/UI edits, branch/worktree movement, shared-main write, push, or Polaris dependency was introduced.
+
+Proof:
+
+- `git fetch origin main` completed.
+- Reviews B worktree was clean before provenance recording.
+- Build 3 source worktree was clean before review at `fd0b7984`, ahead by the single reviewed commit.
+- `python -m pytest tests/test_filemap.py -q` passed: 47 tests.
+- `git diff --check fd0b7984^..fd0b7984` passed.
+- `git diff --name-status fd0b7984^..fd0b7984` showed only `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
+- Targeted branch-only absence scan for `federation_logic_snapshot|test_federation_logic_snapshot|source_git_logic_snapshot|test_source_git_logic_snapshot` across FileMap surfaces returned no matches.
+
+Next Candidate: register landed Source/Git or Federation runtime-logic snapshot modules/tests only after those files reach main and the relevant frontend/runtime branches clear review.
+
+Completion: Build 3 Source/Git and Federation FileMap audit is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Compass handoff consumer advisory repair, then Build 5 Bifrost Source/Git main-write coordination render-contract audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktrees: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`; `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Task 1: review Build 4 commits `76be89da` (`Sanitize Compass handoff consumer questions`) and `51ed18aa` (ready marker). Verify prior Reviews B finding `0030b9ac` is repaired: `ProjectHandoffConsumerAdvisory.to_dict()["compass_question"]` uses existing display-safe/bounded behavior, newline/raw prompt/free-text no longer serializes raw, advisory fields and `execution_authorized=False` remain intact, and scope stays pure Compass display/advisory only.
+
+Task 2: review Build 5 commits `81bed789` (`Add Source Git render audit tests`) and `ed0e0363` (`Mark Source Git render audit ready`). Verify tests/provenance-only Bifrost render/preview audit proving current surfaces do not expose Source/Git main-write, branch movement, merge/rebase/reset/cherry-pick, or worktree movement as executable UI before a reviewed frontend Source/Git display-only surface lands. Confirm existing `branch_movement` blocker context remains display-only.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 4 and Build 5 source worktree clean checks; `python -m pytest tests/test_compass.py -q`; `git diff --check 76be89da^..51ed18aa`; `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; `git diff --check 81bed789^..ed0e0363`; scoped path review.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:01 -06:00:
+
+- Task 1 passed. Build 4 range `76be89da^..51ed18aa` changed only `docs/live-build-4.md`, `meridian_core/compass.py`, and `tests/test_compass.py`.
+- The prior `0030b9ac` finding is repaired: `ProjectHandoffConsumerAdvisory.to_dict()` now serializes `compass_question` through `_advisory_safe_value()`.
+- Regression coverage constructs `compass_question="question\nraw prompt text"` and proves serialized output is `unsafe_display_value`, raw prompt text is absent from JSON output, and `execution_authorized` remains false.
+- A direct constructor probe confirmed `RAW_COMPASS_QUESTION_LEAK=False` and `COMPASS_QUESTION_VALUE=unsafe_display_value`.
+- Existing advisory fields, stable serialization, deterministic behavior, and pure display/advisory scope remain intact. No UI, Bifrost, Relay, Session, FileMap, main, Polaris, IO, provider/model call, branch/worktree movement, or execution authority was introduced.
+- Task 2 passed. Build 5 range `81bed789^..ed0e0363` changed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+- The Source/Git audit is tests/provenance-only. It adds no Bifrost runtime implementation, `bifrost/cockpit.py`, CSS, `bifrost/preview.html`, `index.html`, bridge, FileMap, session/runtime code, main, branch/worktree movement, or Polaris dependency.
+- The no-op render audit is concrete: cockpit and preview tests render current static output, allow existing `branch_movement` as blocked-authority context, and reject Source/Git/Main Write labels, Git/main-write/merge/rebase/reset/cherry-pick/worktree movement `data-action` hooks, Git/main/branch/worktree control attributes, and execute/write/move Git fragments.
+
+Proof:
+
+- `git fetch origin main` completed.
+- Reviews B worktree was clean before provenance recording.
+- Build 4 source worktree was clean before review at `51ed18aa`, ahead by the four branch commits.
+- `python -m pytest tests/test_compass.py -q` passed: 108 tests.
+- `git diff --check 76be89da^..51ed18aa` passed.
+- `git diff --name-status 76be89da^..51ed18aa` showed only `docs/live-build-4.md`, `meridian_core/compass.py`, and `tests/test_compass.py`.
+- Build 5 source worktree was clean before review at `ed0e0363`, ahead by the two reviewed commits.
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed: 312 tests.
+- `git diff --check 81bed789^..ed0e0363` passed.
+- `git diff --name-status 81bed789^..ed0e0363` showed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+
+Next Candidate: implement reviewed Compass handoff consumer integrations without execution authority; when a reviewed Source/Git Bifrost display-only surface lands, add sample rendering and escaping tests for branch/worktree identity, main-write policy, blocked operation list, human gate, evidence refs, and non-executable status.
+
+Completion: Build 4 Compass handoff consumer advisory repair and Build 5 Source/Git render audit are review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review frontend Federation Runtime Logic UI branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Task: review reported tip `eb3f52e792020359e7cb15d41c65c76f0aeb837a` for backend-sourced, display-only Federation Runtime Logic UI: consent-first discovery, permission boundaries, typed handoff packets, cross-harness relationships, runtime boundary, `/bridge/federation-logic`, Federation harness panel routing, FileMap/test alignment, no networking/authentication/runtime remote execution/shared mutable state, no personal-name or encoding issues, and no Polaris.
+
+Proof requested: `git fetch origin main codex/frontend-federation-runtime-logic-20260602`; Reviews B clean check; remote branch/tip verification; `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:58 -06:00:
+
+- Finding routed. The remote branch tip exists and matches the reported commit `eb3f52e792020359e7cb15d41c65c76f0aeb837a`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed, but the required current-main path-scope check failed.
+- The required `origin/main..origin/codex/frontend-federation-runtime-logic-20260602` diff includes live-build queue files outside the reported Federation Runtime Logic scope: `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, and `docs/live-build-4.md`.
+- Because the branch is not scope-clean against current `origin/main`, Reviews B stopped before running the Federation runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin main codex/frontend-federation-runtime-logic-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-federation-runtime-logic-20260602` returned `eb3f52e792020359e7cb15d41c65c76f0aeb837a`.
+- `git diff --check origin/main..origin/codex/frontend-federation-runtime-logic-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-federation-runtime-logic-20260602` showed 12 changed paths, including the out-of-scope live-build queue files listed above.
+
+Smallest repair request: rebase/repair the Federation Runtime Logic UI branch so the current-main review diff is limited to the reported Federation scope, or route an explicit expanded-scope review if live-build queue rewrites are intentional.
+
+Completion: Federation Runtime Logic UI review is blocked on current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 3 V3 Goal Runtime FileMap audit, then Build 4 Compass handoff consumer advisory model.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktrees: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`; `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Task 1: review Build 3 commit `4a04802a` (`chore: audit V3 goal runtime FileMap coverage`). Verify it registers only existing current-main artifacts: `docs/main-write-coordination-ledger.md`, `docs/main-write-coordination-handoff.md`, `meridian_core/compass.py`, `tests/test_compass.py`, and mirror rows for existing V3/Echo/V2/Compass/coordination artifacts. Verify it does not pre-register queued frontend branch-only runtime-logic files.
+
+Task 2: review Build 4 commits `5c683f1f` (`Add Compass handoff consumer advisory model`) and `f207990d` (ready marker). Verify pure display-safe Compass consumer/advisory metadata for downstream Relay/Bifrost/Prime, with reviewed handoff decisions, approval/evidence refs, unsafe context blockers, and boundary proof status, while keeping `execution_authorized=False` and no IO/provider/model/UI/Bifrost/Relay/Session/FileMap/main/Polaris movement.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 3 and Build 4 source worktree clean checks; `python -m pytest tests/test_filemap.py -q`; `git diff --check 4a04802a^..4a04802a`; `python -m pytest tests/test_compass.py -q`; `git diff --check 5c683f1f^..f207990d`; scoped path review.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:55 -06:00:
+
+- Task 1 passed. Build 3 range `4a04802a^..4a04802a` changed only `docs/FileMap.md`, `meridian_core/filemap.py`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
+- The FileMap audit registers existing current-main artifacts `docs/main-write-coordination-ledger.md`, `docs/main-write-coordination-handoff.md`, `meridian_core/compass.py`, and `tests/test_compass.py` in runtime FileMap, `docs/FileMap.md`, and `_REQUIRED_PATHS`.
+- The audit repairs mirror rows for existing mainline V3/Echo/V2/Compass/coordination artifacts including `docs/agentic-ai-framework-checklist.md`, `docs/echo-memory-contract.md`, `meridian_core/echo.py`, `tests/test_echo.py`, and `docs/v2-package-api-surface-note.md`.
+- Branch-only runtime-logic files were not pre-registered. Targeted scan found no FileMap entries for `filemap_logic_snapshot`, `echo_logic_snapshot`, `atlas_logic_snapshot`, or their tests in `docs/FileMap.md`, `meridian_core/filemap.py`, or `tests/test_filemap.py`.
+- Task 2 finding routed. Build 4 range `5c683f1f^..f207990d` changed only `meridian_core/compass.py`, `tests/test_compass.py`, and `docs/live-build-4.md`, and test/diff proof passed, but the new `ProjectHandoffConsumerAdvisory.to_dict()` does not display-sanitize `compass_question`.
+- Evidence: `meridian_core/compass.py` serializes most advisory display fields through `_advisory_safe_value()` / `_advisory_safe_tuple()`, but returns `"compass_question": self.compass_question` directly. A constructor probe with `compass_question="question\nraw prompt text"` serialized that raw text unchanged, so downstream Relay/Bifrost/Prime display consumers can receive unsafe/free-text advisory content despite the display-safe serialization requirement.
+- No IO/provider/model/UI/Bifrost/Relay/Session/FileMap/main/Polaris movement was otherwise observed in the Build 4 diff.
+
+Proof:
+
+- `git fetch origin main` completed.
+- Reviews B worktree was clean before provenance recording.
+- Build 3 source worktree was clean before review at `4a04802a`, ahead by the single reviewed commit.
+- `python -m pytest tests/test_filemap.py -q` passed: 47 tests.
+- `git diff --check 4a04802a^..4a04802a` passed.
+- `git diff --name-status 4a04802a^..4a04802a` showed only `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
+- Build 4 source worktree was clean before review at `f207990d`, ahead by the two reviewed commits.
+- `python -m pytest tests/test_compass.py -q` passed: 107 tests.
+- `git diff --check 5c683f1f^..f207990d` passed.
+- `git diff --name-status 5c683f1f^..f207990d` showed only `docs/live-build-4.md`, `meridian_core/compass.py`, and `tests/test_compass.py`.
+
+Smallest repair request: route Build 4 to sanitize `ProjectHandoffConsumerAdvisory.to_dict()["compass_question"]` with the same display-safe helper used for other advisory string fields, and add a focused regression test proving raw/free-text compass questions are bounded or replaced.
+
+Completion: Build 3 V3 Goal Runtime FileMap audit is review-cleared. Build 4 Compass handoff consumer advisory model is blocked on display-safe serialization of `compass_question`; Reviews B stops for coordinator repair routing.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review frontend Beacon Runtime Logic UI branch.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source branch: `origin/codex/frontend-beacon-runtime-logic-repair-20260602`.
+
+Task: review reported tip `bae5b4d51308225bc8d81db1df1a191fc353ae37` for backend-sourced, display-only Beacon Runtime Logic UI: `/bridge/beacon-logic`, Beacon harness panel routing, liveness target logic, heartbeat status logic, advisory evidence, runtime boundaries, cross-harness relationships, FileMap/test alignment, no recovery execution controls, no personal-name literals, and no Polaris.
+
+Proof requested: `git fetch origin main`; Reviews B clean check; remote branch/tip verification; `origin/main..origin/codex/frontend-beacon-runtime-logic-repair-20260602` path-scope inspection; scoped frontend proof if the branch passed scope; `git diff --check origin/main..origin/codex/frontend-beacon-runtime-logic-repair-20260602`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:51 -06:00:
+
+- Finding routed. The remote branch tip exists and matches the reported commit `bae5b4d51308225bc8d81db1df1a191fc353ae37`.
+- `git diff --check origin/main..origin/codex/frontend-beacon-runtime-logic-repair-20260602` passed, but the required current-main path-scope check failed.
+- The required `origin/main..origin/codex/frontend-beacon-runtime-logic-repair-20260602` diff includes files outside the frontend-reported Beacon Runtime Logic scope: `docs/agentic-ai-framework-checklist.md`, `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/main-write-coordination-ledger.md`, `docs/v3-parking-lot.md`, `meridian_core/relay_executor.py`, and `tests/test_relay_executor.py`.
+- Because the branch is not scope-clean against current `origin/main`, Reviews B stopped before running the Beacon runtime proof suite. No checkout, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, push, cross-worktree file movement, or Polaris touch was performed.
+
+Proof:
+
+- `git fetch origin main codex/frontend-beacon-runtime-logic-repair-20260602` completed.
+- Reviews B worktree was clean before finding provenance recording.
+- `git rev-parse origin/codex/frontend-beacon-runtime-logic-repair-20260602` returned `bae5b4d51308225bc8d81db1df1a191fc353ae37`.
+- `git diff --check origin/main..origin/codex/frontend-beacon-runtime-logic-repair-20260602` passed.
+- `git diff --name-status origin/main..origin/codex/frontend-beacon-runtime-logic-repair-20260602` showed 17 changed paths, including the out-of-scope Relay executor, Relay executor tests, live-build queues, main-write ledger, framework checklist, and V3 parking lot paths listed above.
+
+Smallest repair request: rebase/repair the Beacon Runtime Logic UI branch so the current-main review diff is limited to the reported Beacon scope, or route an explicit expanded-scope review if those non-Beacon/Relay/live-queue changes are intentional.
+
+Completion: Beacon Runtime Logic UI review is blocked on current-main path-scope leakage and is routed for coordinator repair.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 5 Bifrost close/archive proof render-contract audit.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Task: review Build 5 commits `156a212e` (`Add close archive proof render audit tests`) and `b0452b15` (`Mark close archive proof render audit ready`) on branch `codex/build-5-close-archive-proof-render-audit-20260602`. Verify this is test/provenance-only Bifrost render/preview audit proving current surfaces do not expose Session Lifecycle close/archive/write-through proof metadata as executable UI before a reviewed Bifrost surface exists.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 5 source worktree clean check; `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; `git diff --check 156a212e^..b0452b15`; scoped path review of `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`, and `docs/live-build-5.md`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 12:18 -06:00:
+
+- Build 5 close/archive proof render-contract audit passed. The reviewed range changed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+- The slice is test/provenance-only. It adds no changes to Bifrost runtime implementation, `bifrost/cockpit.py`, CSS, `bifrost/preview.html`, `index.html`, bridge scripts, FileMap, Session Lifecycle runtime, Relay, shared main, branch/worktree movement, or Polaris dependencies.
+- The no-op audit evidence is concrete: new cockpit and preview tests render current static output and reject Close Proof, Archive Proof, close/archive write-through labels, close/archive/write-through `data-action` hooks, close/archive/write-through proof attributes, and execute/submit proof fragments.
+- Existing stale-session archive recovery remains visible only as inert recovery copy. The added cockpit test separately confirms `data-recovery-action="archive-session"` and "Archive stale session" remain present while `data-action="archive"`, `data-action="close"`, Close Proof, and Archive Proof stay absent.
+- No raw prompt/provider text leakage, close/archive/write-through execution affordance, FileMap/index/bridge/session runtime edit, shared-main write, or Polaris dependency was introduced.
+
+Proof:
+
+- `git fetch origin main` completed.
+- Reviews B worktree was clean before provenance recording.
+- Build 5 source worktree was clean before review at `b0452b15`, ahead by the two reviewed commits. No branch movement, merge, rebase, reset, cherry-pick, stash-pop, shared-main write, or cross-worktree file movement was performed.
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed: 313 tests.
+- `git diff --check 156a212e^..b0452b15` passed.
+- `git diff --name-status 156a212e^..b0452b15` showed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+
+Next Candidate: when a reviewed Session Lifecycle close/archive proof Bifrost view-model surface lands, add display-only sample rendering and escaping tests for target session id, proof refs, write-through state, human gate, blockers, rollback/recovery note, and non-executable status.
+
+Completion: Build 5 close/archive proof render-contract audit is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Compass handoff advisory edge coverage, then Build 5 Compass handoff Bifrost render no-op audit/tests.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktrees: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`; `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Task 1: review Build 4 commits `3b4652be` (`Harden Compass handoff advisory edge output`) and `df795b21` (`Mark Compass handoff edge coverage ready`). Verify Compass handoff evaluator/display output remains bounded when project names, boundary reasons, context refs, approval refs, evidence refs, payload summary refs, or handoff blockers contain unsafe/free-text values. Confirm pure advisory/display-safe behavior and no provider/model calls, live IO, execution authority, branch/worktree movement, Bifrost/Relay/Session/FileMap/main/Polaris edits.
+
+Task 2: review Build 5 commits `2a0af274` (`Add Compass handoff render audit tests`) and `187d4fd1` (`Mark Compass handoff render audit ready`). Verify Bifrost render/preview surfaces remain display-only and do not expose Compass handoff or cross-project routing as execution UI. Since no Compass-facing Bifrost surface exists yet, verify the no-op audit evidence is concrete and tests are meaningful.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 4 and Build 5 source worktree clean checks; `python -m pytest tests/test_compass.py -q`; `git diff --check 3b4652be^..df795b21`; `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; `git diff --check 2a0af274^..187d4fd1`; scoped path review.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:34 -06:00:
+
+- Task 1 passed. Build 4 range `3b4652be^..df795b21` changed only `meridian_core/compass.py`, `tests/test_compass.py`, and `docs/live-build-4.md`.
+- Compass handoff edge hardening adds display-safe placeholdering, bounded display helpers, unsafe project/profile id blockers, unsafe evidence/payload-summary/approval ref blockers, overlong ref handling, and bounded handoff blocker serialization. Tests prove unsafe project IDs, unsafe reason categories, newline/free-text refs, overlong refs, and unsafe blocker text are blocked and not echoed through `ProjectHandoffEvaluation.to_dict()`.
+- Build 4 remains pure Compass domain/test/provenance. No provider/model calls, live IO, execution authority, branch/worktree/shared-main movement, Bifrost, Relay, Session Lifecycle, FileMap registration, or Polaris dependency was introduced. `execution_authorized` remains false in serialized advisory output.
+- Task 2 passed. Build 5 range `2a0af274^..187d4fd1` changed only `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`, and `docs/live-build-5.md`.
+- The Build 5 no-op render audit is concrete: tests inspect current static cockpit and preview output, allow Compass only as an instrumentation/harness label, reject Compass handoff/cross-project execution fragments and `data-action` hooks, and pin `render_preview_html()` to match `render_cockpit_html(sample_cockpit_view_model())`.
+- Build 5 adds no Compass-facing UI/runtime surface, no live provider/model/session/process calls, no raw prompt/provider text, no FileMap/index/bridge changes, no main/branch/worktree movement, and no Polaris dependency.
+
+Proof:
+
+- `git fetch origin main` completed.
+- Reviews B, Build 4, and Build 5 worktrees were clean before provenance recording.
+- `python -m pytest tests/test_compass.py -q` passed: 104 tests.
+- `git diff --check 3b4652be^..df795b21` passed.
+- `git diff --name-status 3b4652be^..df795b21` showed only `docs/live-build-4.md`, `meridian_core/compass.py`, and `tests/test_compass.py`.
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed: 313 tests.
+- `git diff --check 2a0af274^..187d4fd1` passed.
+- `git diff --name-status 2a0af274^..187d4fd1` showed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+
+Next Candidate: implement the reviewed Compass handoff consumer checklist/runtime bridge without execution authority; when a reviewed Compass handoff Bifrost view-model surface lands, add display-only sample rendering and escaping tests for handoff metadata, blockers, evidence refs, and non-executable state.
+
+Completion: Build 4 Compass handoff advisory edge coverage and Build 5 Compass handoff render no-op audit are review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 3 fresh FileMap audit after backend/FileMap provenance movement and queued frontend runtime-logic branches.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-filemap`.
+
+Task: review Build 3 commit `adb84b5d` (`chore: audit runtime logic FileMap coverage`) on branch `codex/build-3-filemap-runtime-logic-audit-20260602-1118`. Verify this is current-main FileMap mirror repair/audit only, registers no branch-only frontend/runtime logic files, and correctly adds mirror rows for existing mainline Echo/Atlas/V2 artifacts already covered by runtime FileMap and `_REQUIRED_PATHS`.
+
+Proof: `git fetch origin main`; Reviews B clean check; Build 3 source worktree clean check; `python -m pytest tests/test_filemap.py -q`; `git diff --check adb84b5d^..adb84b5d`; scoped path review of `docs/FileMap.md` and `docs/live-build-3.md`; targeted consistency checks for mirrored current-main paths and branch-only runtime-logic paths.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:23 -06:00:
+
+- Build 3 runtime-logic FileMap audit passed. Commit `adb84b5d` changed only `docs/FileMap.md` and `docs/live-build-3.md`.
+- The source Build 3 worktree was clean before review. It was ahead 1 / behind 42 relative to `origin/main`; no sync, merge, rebase, reset, cherry-pick, stash-pop, branch movement, shared-main write, push, or cross-worktree file movement was performed.
+- The change is a mirror/provenance audit only. It does not edit runtime FileMap, `_REQUIRED_PATHS`, frontend/runtime code, Bifrost, Relay, Aegis, Charon, Echo, Atlas logic snapshots, shared main, branches, or Polaris.
+- `docs/FileMap.md` adds mirror rows for existing mainline Echo/Atlas/V2 artifacts: `docs/agentic-ai-framework-checklist.md`, `docs/atlas-retrieval-contract.md`, `meridian_core/atlas.py`, `tests/test_atlas.py`, `docs/echo-memory-contract.md`, `meridian_core/echo.py`, `tests/test_echo.py`, and `docs/v2-package-api-surface-note.md`.
+- Targeted consistency check confirmed each of those eight paths is present in runtime FileMap and `_REQUIRED_PATHS`, and now has `docs/FileMap.md` mirror coverage.
+- The queued branch-only runtime-logic files were inspected by path list only in `docs/live-build-3.md` and were not pre-registered in `docs/FileMap.md`: `meridian_core/filemap_logic_snapshot.py`, `tests/test_filemap_logic_snapshot.py`, `meridian_core/echo_logic_snapshot.py`, `tests/test_echo_logic_snapshot.py`, `meridian_core/atlas_logic_snapshot.py`, and `tests/test_atlas_logic_snapshot.py` all had zero mirror rows.
+- Build 3 provenance records branch-only planning for Aegis, Charon, Echo, and Atlas, and explicitly says no branch-only runtime-logic files were registered because they are not on current `origin/main`.
+
+Proof:
+
+- `git fetch origin main` completed.
+- `git status --short --branch` in Reviews B showed clean expected branch.
+- `git status --short --branch` / `git status --porcelain` in Build 3 showed clean expected branch.
+- `python -m pytest tests/test_filemap.py -q` passed: 47 tests.
+- `git diff --check adb84b5d^..adb84b5d` passed.
+- `git diff --name-status adb84b5d^..adb84b5d` showed only `docs/FileMap.md` and `docs/live-build-3.md`.
+
+Next Candidate: bind review findings or register landed runtime-logic files after they reach main.
+
+Completion: Build 3 runtime-logic FileMap audit is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 5 parent post-voice Bifrost render coverage and reconcile with runtime-panel contract pass.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost`.
+
+Task: review unreviewed parent Build 5 slice `fe0adb7b` (`Add post-voice Bifrost render coverage`) and `2146fdb3` (`Mark post-voice render coverage ready`) before relying on the later runtime-panel render contract pass `41fd31b9`. Verify display-only Bifrost render/test coverage only, no live voice/action hooks, no provider/model/session/process calls, no raw prompt/provider text, no Relay runtime/FileMap/main/Polaris leakage, and no branch/worktree movement.
+
+Proof: Build 5 stated proof from `docs/live-build-5.md`: `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; `git diff --check fe0adb7b^..2146fdb3`; scoped path and rendered-output review.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:14 -06:00:
+
+- Build 5 parent post-voice render coverage passed. The reviewed parent range changed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+- The parent slice is test/provenance-only. It adds no changes to `bifrost/cockpit.py`, CSS, `bifrost/preview.html`, `index.html`, bridge scripts, FileMap, backend runtime, Relay, Session Lifecycle, shared main, branch/worktree state, or Polaris dependencies.
+- The cockpit tests cover the landed voice sample metadata (`boot: status-ready`, `input: microphone`, `output: speaker`, `permission: available`, `status: command channel ready`, `intent: voice-intent:panel-focus`), idle fallback, blocked/muted/read-aloud display markers, escaped dynamic voice metadata, and status-only controls.
+- The preview tests assert deterministic static preview voice metadata and display-only boundaries, including no `data-action="voice"`, `data-action="read-aloud"`, `data-action="mute"`, or `data-action="unmute"` hooks in the voice strip.
+- Reconciliation with later runtime-panel contract pass `41fd31b9`: the later slice builds on this parent by adding disabled-control count/static-preview parity/personal-name checks. Current stack rendered-output scans passed for no personal-name strings and no forbidden voice hooks, so the previous runtime-panel pass remains valid after parent review.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed on the current Build 5 stack: 320 tests.
+- `git diff --check fe0adb7b^..2146fdb3` passed.
+- `git diff --name-status fe0adb7b^..2146fdb3` showed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+- Touched-test scans found no personal-name strings and no forbidden voice hooks.
+- Rendered cockpit/preview output scans passed: no personal-name strings and no forbidden voice hooks.
+
+Next Candidate: extend render coverage when active frontend Aegis, Prime directive visibility, Beacon, or Charon UI branches land on main.
+
+Completion: Build 5 parent post-voice render coverage is review-cleared and reconciled with the already-cleared runtime-panel render contract slice. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 4 Compass cross-project handoff runtime.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-aegis`.
+
+Task: review Build 4 commits `494db0b3` (`Add Compass cross-project handoff runtime`) and `1e7d7480` (`Mark Compass cross-project handoff ready`) on branch `codex/build-4-compass-cross-project-handoff-20260602-1212`. Verify scope is Compass/Aegis lane only, cross-project handoff is advisory/display-safe and bounded, and the slice does not touch Polaris, frontend runtime UI branches, Bifrost, Relay, Session Lifecycle, FileMap registration, shared main, branch/worktree movement, provider/model calls, or execution controls.
+
+Proof: `git fetch origin main`; `git status --short --branch`; source worktree clean check; Build 4 stated proof from `docs/live-build-4.md`: `python -m pytest tests/test_compass.py -q`; `git diff --check 494db0b3^..1e7d7480`; scoped path review of `meridian_core/compass.py`, `tests/test_compass.py`, and `docs/live-build-4.md`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record the smallest concrete blocker and stop for coordinator repair routing.
+
+Review result - 2026-06-02 11:12 -06:00:
+
+- Build 4 Compass cross-project handoff runtime passed. The reviewed range changed only `meridian_core/compass.py`, `tests/test_compass.py`, and `docs/live-build-4.md`.
+- The source Build 4 worktree was clean before review and remained clean after proof. Reviews B worktree was clean before recording this provenance.
+- The new Compass handoff runtime is pure/domain-only: frozen `ProjectHandoffRequest`, `ProjectHandoffDecision`, `ProjectHandoffEvaluation`, stable serialization key helpers, and deterministic `evaluate_cross_project_handoff()` in `meridian_core/compass.py`.
+- The evaluator is advisory/display-safe: `to_dict()` always emits `execution_authorized=False`, `review_ready=True` only for distinct projects with safe evidence, payload summary refs, and required approval refs, and blockers/questions are returned for unsafe or ambiguous states.
+- Scope stayed within the Compass/Aegis lane. No Bifrost, Relay, Session Lifecycle, FileMap registration, frontend UI/runtime branch, provider/model call, network/filesystem scan, branch/worktree/shared-main movement, execution control, or Polaris dependency was introduced.
+- Tests cover review-ready distinct handoff, same repo/venture distinctness without boundary collapse, same/missing/mismatched project identities, missing evidence and payload summaries, approval-required blockers, approval-not-required path, raw prompt/transcript/free-form/provider-response blockers, unknown category/type blockers, ambiguous project-difference questions, stable serialization, JSON serializability, determinism, evaluation type validation, and no raw-context/session-retargeting result keys.
+
+Proof:
+
+- `git fetch origin main` completed.
+- `git status --short --branch` in Reviews B and Build 4 showed clean expected branches.
+- `python -m pytest tests/test_compass.py -q` passed: 97 tests.
+- `git diff --check 494db0b3^..1e7d7480` passed.
+- `git diff --name-status 494db0b3^..1e7d7480` showed only `docs/live-build-4.md`, `meridian_core/compass.py`, and `tests/test_compass.py`.
+
+Next Candidate: implement the reviewed Compass handoff consumer checklist/runtime bridge without execution authority.
+
+Completion: Build 4 Compass cross-project handoff runtime is review-cleared. Reviews B returns to current-main Ready-marker polling.
+
+## Coordinator Override - Completed / Passed
+
+Goal: review Build 5 Bifrost runtime panel render contract tests.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\codex-reviews-b`.
+
+Task: review Build 5 commits `f1afceb5` (`Add runtime panel render contract tests`) and `4315c87b` (`Mark runtime panel render contracts ready`). Verify this is test/provenance-only Bifrost render/preview contract coverage proving display-only voice/runtime affordances, no forbidden voice-strip `data-action` hooks, visible disabled controls, preview/static parity, and no personal-name strings in rendered sample output.
+
+Proof: `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q`; strict touched-test scans for personal-name strings and forbidden voice hooks; rendered cockpit/preview output scans for personal-name strings and forbidden voice hooks; `git diff --check f1afceb5^..4315c87b`.
+
+Completion: commit only review provenance/finding/pass updates locally in `docs/live-codex-reviews-2.md`. If a finding exists, record it and stop for coordinator repair routing.
+
+Review result - 2026-06-02 10:59 -06:00:
+
+- Build 5 runtime panel render contract tests passed. The reviewed range changed only the allowed files: `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`, and `docs/live-build-5.md`.
+- The slice is test/provenance-only. It does not change `bifrost/cockpit.py`, CSS, `bifrost/preview.html`, `index.html`, bridge scripts, FileMap, backend runtime, coordination docs outside Build 5, branch/worktree/main state, or Polaris dependencies.
+- New cockpit tests assert disabled voice-strip status controls remain visible through `data-voice-control="input-status"`, `read-aloud-status`, and `mute-status`, with exactly matching `aria-disabled="true"` markers and no `data-action` hooks.
+- New preview tests assert `render_preview_html()` voice-strip markup exactly matches `render_cockpit_html(sample_cockpit_view_model())`, preserving static/preview parity and the display-only voice contract.
+- Touched-test scans and rendered cockpit/preview output scans found no personal-name strings. Rendered voice-strip scans found no forbidden `data-action="voice"`, `data-action="read-aloud"`, `data-action="mute"`, or `data-action="unmute"` hooks.
+
+Proof:
+
+- `python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q` passed: 320 tests.
+- `git diff --check f1afceb5^..4315c87b` passed.
+- `git diff --name-status f1afceb5^..4315c87b` showed only `docs/live-build-5.md`, `tests/test_bifrost_cockpit.py`, and `tests/test_bifrost_preview.py`.
+- Rendered-output scans passed: no personal-name strings and no forbidden voice hooks in cockpit or preview output.
+
+Completion: Build 5 runtime panel render contract tests are review-cleared. Reviews B returns to current-main Ready-marker polling.
 
 ## Coordinator Override - Completed / Passed
 
@@ -3937,11 +4651,3 @@ Next Candidate:
 ## Write / Completion Log
 
 - 2026-06-01 17:43 -06:00 — files changed: `docs/live-codex-reviews-2.md` provenance/disposition and `docs/live-build-4.md` repair routing only. Tests run: not run; docs/architecture review only. Commit hash: pending at write time; see final handoff for pushed commit. Push status: pending at write time. Obsidian update status: not updated; queue provenance/routing only.
-
-## Read Checks
-
-- 2026-06-02 22:43 -06:00 - pulled latest `origin/main` (`cf98d0e4..d6c0e54d` fast-forward) and read `docs/live-codex-reviews-2.md`. The Reviews B header task is `Coordinator Override - Completed / Passed`; no newly promoted executable Reviews B Active Task is present. Status: idle pending next Reviews B Active Task promotion.
-
-## Write / Completion Log
-
-- 2026-06-02 22:43 -06:00 - files changed: `docs/live-codex-reviews-2.md` provenance only. Tests run: not run because no newly promoted executable Reviews B Active Task is present. Commit hash: pending at write time; see final handoff. Push status: pending at write time; see final handoff. Obsidian update status: not updated; queue provenance only.
