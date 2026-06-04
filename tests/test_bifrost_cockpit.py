@@ -258,6 +258,19 @@ def test_index_model_harness_detail_surface_shows_trust_route():
     assert "missing blocker proof blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_capability_envelope():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessCapabilityEnvelope = (items) =>" in doc
+    assert 'aria-label="Model harness capability envelope"' in doc
+    assert "const modelHarnessCapabilityEnvelopes = {" in doc
+    assert "relaySection('Capability envelope', modelHarnessCapabilityEnvelope(capabilityEnvelope), true)" in doc
+    assert ".model-harness-capability-envelope" in doc
+    assert ".model-harness-capability-cell" in doc
+    assert "ProviderCapability.model id required" in doc
+    assert "TelemetryCapability required" in doc
+    assert "prompt hash without raw prompt display" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
