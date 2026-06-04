@@ -100,11 +100,11 @@ Time: 2026-06-04 08:22 -06:00
 Writer: Meridian coordinator
 Intent: land Meridian UI Build 2 Model Harness detail surface slice from contained source commit 40fe45b029ff92572e99d26049fc9229b38b6d18 after frontend request/ACK.
 Action completed: exact two-file frontend slice moved to shared main from contained source ref.
-Commit(s): 7483a64c0 (feat: Add model harness detail surface); this ledger completion commit if separate.
-Pushed to origin/main: pending final push in this completion step
+Commit(s): a6d19049d (feat: Add model harness detail surface); 17e1f792b (Record Model Harness detail surface landing completion); final ledger correction commit if separate.
+Pushed to origin/main: yes
 Files changed: index.html; tests/test_bifrost_cockpit.py; docs/main-write-coordination-ledger.md
 Proof run: python -m py_compile tests/test_bifrost_cockpit.py passed; python -m pytest tests/test_bifrost_cockpit.py -q -k "model_harness_icons_open_model_surface or harness_title_toggles_model_icons" passed 2 tests, 285 deselected; python -m pytest tests/test_bifrost_cockpit.py -q passed 287 tests; git diff --check passed for the feature before commit; staged path scope was exactly index.html and tests/test_bifrost_cockpit.py.
-Final shared main status: pending final explicit fetch/status after push.
+Final shared main status: clean/aligned after final explicit fetch/status; rev-list origin/main...HEAD = 0 0.
 Notes/blockers: no backend worker movement, queue docs, FileMap, Review Console branch, other frontend branch, FTP/deploy work, worker main write, or Polaris included.
 Status: Complete
 ```
