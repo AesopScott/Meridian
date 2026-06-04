@@ -284,6 +284,19 @@ def test_index_model_harness_detail_surface_shows_routing_policy():
     assert "missing goal proof stops continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_handoff_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessHandoffPolicy = (items) =>" in doc
+    assert 'aria-label="Model harness handoff policy"' in doc
+    assert "const modelHarnessHandoffPolicies = {" in doc
+    assert "relaySection('Handoff policy', modelHarnessHandoffPolicy(handoffPolicy), true)" in doc
+    assert ".model-harness-handoff-policy" in doc
+    assert ".model-harness-handoff-cell" in doc
+    assert "provider adapter owns endpoint truth" in doc
+    assert "handoff owner required" in doc
+    assert "missing blocker proof escalates before continuation" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc

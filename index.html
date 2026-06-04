@@ -1605,6 +1605,33 @@ body {
   overflow-wrap: anywhere;
 }
 
+.model-harness-handoff-policy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 7px;
+}
+
+.model-harness-handoff-cell {
+  min-width: 0;
+  border: 1px solid rgba(102, 255, 150, 0.25);
+  background: rgba(2, 21, 12, 0.6);
+  padding: 7px;
+  box-shadow: inset 0 0 12px rgba(102, 255, 150, 0.045);
+}
+
+.model-harness-handoff-label {
+  color: rgba(166, 255, 192, 0.64);
+  font-size: 0.76em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.model-harness-handoff-value {
+  margin-top: 4px;
+  color: rgba(226, 255, 234, 0.95);
+  overflow-wrap: anywhere;
+}
+
 .relay-models-header {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -4268,6 +4295,12 @@ body {
       <div class="model-harness-routing-value">${escapeHtml(value)}</div>
     </div>
   `).join('')}</div>`;
+  const modelHarnessHandoffPolicy = (items) => `<div class="model-harness-handoff-policy" aria-label="Model harness handoff policy">${items.map(([label, value]) => `
+    <div class="model-harness-handoff-cell">
+      <div class="model-harness-handoff-label">${escapeHtml(label)}</div>
+      <div class="model-harness-handoff-value">${escapeHtml(value)}</div>
+    </div>
+  `).join('')}</div>`;
   const primeProofList = (proof) => `<div class="prime-logic-proof">${proof.map((item) => `
     <div class="prime-logic-proof-item">
       <div class="prime-logic-proof-question">${escapeHtml(item.question || 'proof question unavailable')}</div>
@@ -5071,6 +5104,104 @@ body {
       ['stop', 'missing goal proof stops continuation'],
     ],
   };
+  const modelHarnessHandoffPolicies = {
+    Provider: [
+      ['owner', 'provider adapter owns endpoint truth'],
+      ['verifier', 'router verifies health before handoff'],
+      ['evidence', 'provider key, health, and credential posture'],
+      ['escalate', 'unknown endpoint escalates before dispatch'],
+    ],
+    Selection: [
+      ['owner', 'selector owns candidate ranking'],
+      ['verifier', 'verifier checks exact model fit'],
+      ['evidence', 'candidate set and exclusion reasons'],
+      ['escalate', 'ambiguous fit escalates to compare'],
+    ],
+    Router: [
+      ['owner', 'router owns dispatch lane'],
+      ['verifier', 'trace verifies route owner and target'],
+      ['evidence', 'route tier, handoff target, and retry posture'],
+      ['escalate', 'unresolved owner escalates to fallback'],
+    ],
+    Fallback: [
+      ['owner', 'fallback controller owns degraded mode'],
+      ['verifier', 'router verifies fallback chain'],
+      ['evidence', 'blocked reason and approved alternate'],
+      ['escalate', 'no alternate escalates to blocker'],
+    ],
+    Verifier: [
+      ['owner', 'verifier owns acceptance proof'],
+      ['verifier', 'compare checks disagreement when needed'],
+      ['evidence', 'acceptance target and proof reference'],
+      ['escalate', 'missing proof escalates to review'],
+    ],
+    Cost: [
+      ['owner', 'cost monitor owns budget posture'],
+      ['verifier', 'selector verifies spend fit'],
+      ['evidence', 'budget tier, stop threshold, and delta'],
+      ['escalate', 'over-budget state escalates before transport'],
+    ],
+    Latency: [
+      ['owner', 'latency monitor owns timeout posture'],
+      ['verifier', 'router verifies stale-response state'],
+      ['evidence', 'timeout, retry budget, and streaming flag'],
+      ['escalate', 'expired retry budget escalates to fallback'],
+    ],
+    Context: [
+      ['owner', 'context manager owns source envelope'],
+      ['verifier', 'prompt checks source visibility'],
+      ['evidence', 'window pressure and source lineage'],
+      ['escalate', 'hidden context escalates before prompt assembly'],
+    ],
+    Prompt: [
+      ['owner', 'prompt assembler owns payload boundary'],
+      ['verifier', 'policy verifies redaction state'],
+      ['evidence', 'prompt packet hash and instruction provenance'],
+      ['escalate', 'leakage escalates to privacy gate'],
+    ],
+    Policy: [
+      ['owner', 'policy gate owns permission state'],
+      ['verifier', 'safety verifies exception posture'],
+      ['evidence', 'policy source, decision, and block tags'],
+      ['escalate', 'policy mismatch escalates before action'],
+    ],
+    Safety: [
+      ['owner', 'safety gate owns risk posture'],
+      ['verifier', 'policy verifies allowed boundary'],
+      ['evidence', 'risk tier and refusal boundary'],
+      ['escalate', 'unsafe output escalates before execution'],
+    ],
+    Privacy: [
+      ['owner', 'privacy gate owns exposure class'],
+      ['verifier', 'prompt verifies redaction proof'],
+      ['evidence', 'data class, retention posture, and redaction tag'],
+      ['escalate', 'secret exposure escalates to blocker'],
+    ],
+    Tools: [
+      ['owner', 'tool gate owns callable boundary'],
+      ['verifier', 'trace verifies tool-result lineage'],
+      ['evidence', 'tool intent, argument preview, and result trust'],
+      ['escalate', 'unapproved call escalates before execution'],
+    ],
+    Compare: [
+      ['owner', 'compare lane owns candidate judgment'],
+      ['verifier', 'verifier checks winner confidence'],
+      ['evidence', 'winner, dissent, and comparison criteria'],
+      ['escalate', 'hidden criteria escalates to review'],
+    ],
+    Trace: [
+      ['owner', 'trace lane owns lineage record'],
+      ['verifier', 'audit verifies replay boundary'],
+      ['evidence', 'trace id, call id, and response hash'],
+      ['escalate', 'missing lineage escalates before acceptance'],
+    ],
+    Goal: [
+      ['owner', 'goal runtime owns objective status'],
+      ['verifier', 'proof lane verifies continuation evidence'],
+      ['evidence', 'objective, budget, proof trail, and blocker state'],
+      ['escalate', 'missing blocker proof escalates before continuation'],
+    ],
+  };
   const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'));
   const modelHarnessButtons = () => Array.from(document.querySelectorAll('.harness-model-dock .harness-dock-button'));
   const selectedModelHarnessName = (button) => button?.dataset.harness || '';
@@ -5146,6 +5277,12 @@ body {
       ['fallback', 'fallback route required before degradation'],
       ['stop', 'unknown route stops dispatch'],
     ];
+    const handoffPolicy = modelHarnessHandoffPolicies[aspect] || [
+      ['owner', 'handoff owner required'],
+      ['verifier', 'handoff verifier required'],
+      ['evidence', 'handoff evidence required'],
+      ['escalate', 'missing handoff proof escalates before dispatch'],
+    ];
     const proofTelemetry = [
       ['context', contextLogic],
       ['intent', intentLogic],
@@ -5168,6 +5305,7 @@ body {
         relaySection('Trust route', modelHarnessTrustRoute(trustRoute), true),
         relaySection('Capability envelope', modelHarnessCapabilityEnvelope(capabilityEnvelope), true),
         relaySection('Routing policy', modelHarnessRoutingPolicy(routingPolicy), true),
+        relaySection('Handoff policy', modelHarnessHandoffPolicy(handoffPolicy), true),
         relaySection('Runtime signals', relayList(runtimeSignals), true),
         relaySection('Runtime contract', relayGrid([
           ['surface mode', 'Model Harness'],
