@@ -3529,6 +3529,7 @@ YYYY-MM-DD HH:MM TZ - Build 2 checked queue; status: idle/running/blocked
 2026-06-04 12:52:42 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 1 of 3; idle polling
 2026-06-04 12:54:41 UTC - Build 2 checked queue; no Active Now section; no conflict markers; cadence 1 of 3; idle polling
 2026-06-04 12:58:37 UTC - Build 2 write/completion: Active Task closed. Files changed: tests/test_session_lifecycle.py. Tests run: python -m pytest tests/test_session_lifecycle.py -q — 127 passed. Commit: d1bd643d on codex/build-2-v3-goal-checkpoint-proof-20260602-1327. Push status: worktree branch only (no main push per task instructions). Obsidian update: pending (see below). Status: Ready for Codex Review.
+2026-06-04 12:59:38 UTC - Build 2 Obsidian updated: '2026-06-04 Build 2 Close Archive Proof Permission Timing Repair.md' written to Meridian_Build. cadence 2 of 3 (1 doc/code change completed this round).
 ```
 
 ## Write/Completion Log
