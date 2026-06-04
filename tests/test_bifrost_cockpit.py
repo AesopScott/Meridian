@@ -310,6 +310,19 @@ def test_index_model_harness_detail_surface_shows_dispatch_guard():
     assert "missing blocker proof blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_recovery_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessRecoveryPolicy = (items) =>" in doc
+    assert 'aria-label="Model harness recovery policy"' in doc
+    assert "const modelHarnessRecoveryPolicies = {" in doc
+    assert "relaySection('Recovery policy', modelHarnessRecoveryPolicy(recoveryPolicy), true)" in doc
+    assert ".model-harness-recovery-policy" in doc
+    assert ".model-harness-recovery-cell" in doc
+    assert "provider health drift invalidates endpoint trust" in doc
+    assert "model drift proof required" in doc
+    assert "restore continuation after goal proof returns" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
