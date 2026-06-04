@@ -336,6 +336,19 @@ def test_index_model_harness_detail_surface_shows_observability_policy():
     assert "missing goal signal blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_governance_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessGovernancePolicy = (items) =>" in doc
+    assert 'aria-label="Model harness governance policy"' in doc
+    assert "const modelHarnessGovernancePolicies = {" in doc
+    assert "relaySection('Governance policy', modelHarnessGovernancePolicy(governancePolicy), true)" in doc
+    assert ".model-harness-governance-policy" in doc
+    assert ".model-harness-governance-cell" in doc
+    assert "registered provider catalog owns endpoint truth" in doc
+    assert "governance authority required" in doc
+    assert "unapproved goal state blocks continuation" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
