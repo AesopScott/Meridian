@@ -96,6 +96,20 @@ No active write lease.
 Start new entries below this line.
 
 ```text
+Time: 2026-06-04 08:29 -06:00
+Writer: Meridian coordinator
+Intent: narrow cleanup after Model Harness detail surface landing under frontend ACK.
+Action completed: replaced two pre-existing mojibake separators in index.html with ASCII separators and pushed the cleanup to origin/main.
+Commit(s): bb6f5b177 (fix: Clean model harness separator encoding); this ledger completion commit if separate.
+Pushed to origin/main: yes
+Files changed: index.html; docs/main-write-coordination-ledger.md
+Proof run: python -m pytest tests/test_bifrost_cockpit.py -q -k "model_harness_icons_open_model_surface or harness_title_toggles_model_icons" passed 2 tests, 285 deselected; targeted origin/main index.html scan found no `Â` marker after push; git diff --check passed before push.
+Final shared main status: clean/aligned after final explicit fetch/status; rev-list origin/main...HEAD = 0 0.
+Notes/blockers: queue automation repeatedly displaced the cleanup before the final cherry-pick/push; final landed commit is path-limited to index.html. No tests file edits, backend worker files, queue docs, FileMap, Review Console branch, other frontend branches, Build 1/2/3/4/5 movement, FTP/deploy, worker main write, or Polaris included.
+Status: Complete
+```
+
+```text
 Time: 2026-06-04 08:22 -06:00
 Writer: Meridian coordinator
 Intent: land Meridian UI Build 2 Model Harness detail surface slice from contained source commit 40fe45b029ff92572e99d26049fc9229b38b6d18 after frontend request/ACK.
