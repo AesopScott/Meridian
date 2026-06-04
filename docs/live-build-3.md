@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Completed / Ready For Codex Review
 
 Goal: refresh FileMap audit for current V3 goal/checkpoint runtime work and pending review branches.
 
@@ -20,7 +20,18 @@ Task: fetch current `origin/main`; inspect pending V3 goal/checkpoint work from 
 
 Proof: `python -m pytest tests/test_filemap.py -q`; `git diff --check`; concrete inspected commit/path list.
 
-Completion: commit only this FileMap audit/registration slice, request coordinator movement after Reviews B clearance, update Obsidian, and mark Ready for Codex Review.
+Completion:
+
+- Status: Ready for Codex Review.
+- Completed: 2026-06-04.
+- Branch: `codex/build-3-v3-goal-filemap-audit-20260604-1348`.
+- Current main audited: `origin/main` at `91b81c3e`.
+- Inspected recent V3 goal/checkpoint runtime paths: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `meridian_core/aegis.py`, `tests/test_aegis.py`, `tests/test_bifrost_cockpit.py`, `tests/test_bifrost_preview.py`, `docs/live-build-1.md`, `docs/live-build-2.md`, `docs/live-build-3.md`, `docs/live-build-4.md`, `docs/live-build-5.md`, `docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`, and `docs/main-write-coordination-ledger.md`.
+- Inspected symbols/evidence: `GoalRuntimeCheckpointSurface`, `V3GoalRuntimeCheckpointProofPacket`, `build_v3_goal_runtime_checkpoint_proof_packet()`, `_permission_context_can_execute_operation_at()`, `test_close_proof_permission_gate_uses_observed_at_not_wallclock`, and `test_archive_proof_no_permission_blocker_when_observed_at_inside_window`.
+- Coverage result: no FileMap registration changes required. All inspected paths have runtime FileMap entries and `_REQUIRED_PATHS` coverage; `docs/FileMap.md` already mirrors the relevant queue/review/coordination files.
+- Files changed: `docs/live-build-3.md` only.
+- Proof: `python -m pytest tests/test_filemap.py -q` passed with 47 tests; `git diff --check` passed.
+- Coordinator movement required after Reviews B clearance.
 
 Next Candidate: keep FileMap current after Build 1/2/4/5 V3 goal slices land or are repaired.
 
