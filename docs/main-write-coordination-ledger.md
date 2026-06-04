@@ -100,13 +100,13 @@ Time: 2026-06-04 11:38 -06:00
 Writer: Meridian coordinator
 Intent: land frontend UI Build 2 Model Harness compliance-policy detail surface from contained clone under frontend request/ACK.
 Action completed: path-limited patch from clean contained frontend clone applied and committed on shared main.
-Commit(s): `adcbe6bad` (`feat: Add model harness compliance policy`).
-Pushed to origin/main: pending at ledger close.
+Commit(s): `adcbe6bad` (`feat: Add model harness compliance policy`); `45b357a1d` (`chore: Close compliance policy landing lease`).
+Pushed to origin/main: yes.
 Files changed: index.html; tests/test_bifrost_cockpit.py; docs/main-write-coordination-ledger.md.
 Proof run: python -m py_compile tests/test_bifrost_cockpit.py passed; python -m pytest tests/test_bifrost_cockpit.py -q -k "compliance_policy or model_harness_detail_surface" passed 13 tests; python -m pytest tests/test_bifrost_cockpit.py -q passed 302 tests; git diff --check passed with line-ending notice for ledger only; targeted personal-name/encoding scan over index.html and tests/test_bifrost_cockpit.py returned no matches; compliance-policy markers verified in index.html and tests/test_bifrost_cockpit.py.
-Final shared main status: pending push/final fetch.
+Final shared main status: clean/aligned with origin/main after explicit fetch/status; rev-list origin/main...HEAD = 0 0 at `45b357a1d`.
 Notes/blockers: source frontend commit was `3a03c808e`; source clone was clean and exact diff scope was index.html plus tests/test_bifrost_cockpit.py. No backend worker files, queue docs, FileMap, Review Console branch, other frontend branches, FTP/deploy, worker main write, or Polaris included.
-Status: Complete pending push/final status
+Status: Complete
 ```
 
 ```text
