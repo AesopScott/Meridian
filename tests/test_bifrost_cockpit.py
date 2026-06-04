@@ -388,6 +388,19 @@ def test_index_model_harness_detail_surface_shows_evaluation_policy():
     assert "failed goal evaluation blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_lifecycle_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessLifecyclePolicy = (items) =>" in doc
+    assert 'aria-label="Model harness lifecycle policy"' in doc
+    assert "const modelHarnessLifecyclePolicies = {" in doc
+    assert "relaySection('Lifecycle policy', modelHarnessLifecyclePolicy(lifecyclePolicy), true)" in doc
+    assert ".model-harness-lifecycle-policy" in doc
+    assert ".model-harness-lifecycle-cell" in doc
+    assert "register provider endpoint and credential posture" in doc
+    assert "lifecycle initialization required" in doc
+    assert "stale goal lifecycle blocks continuation" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc

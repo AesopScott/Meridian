@@ -1821,6 +1821,33 @@ body {
   overflow-wrap: anywhere;
 }
 
+.model-harness-lifecycle-policy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 7px;
+}
+
+.model-harness-lifecycle-cell {
+  min-width: 0;
+  border: 1px solid rgba(102, 255, 150, 0.25);
+  background: rgba(2, 22, 13, 0.58);
+  padding: 7px;
+  box-shadow: inset 0 0 12px rgba(102, 255, 150, 0.045);
+}
+
+.model-harness-lifecycle-label {
+  color: rgba(166, 255, 192, 0.64);
+  font-size: 0.76em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.model-harness-lifecycle-value {
+  margin-top: 4px;
+  color: rgba(226, 255, 234, 0.95);
+  overflow-wrap: anywhere;
+}
+
 .relay-models-header {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -4532,6 +4559,12 @@ body {
       <div class="model-harness-evaluation-value">${escapeHtml(value)}</div>
     </div>
   `).join('')}</div>`;
+  const modelHarnessLifecyclePolicy = (items) => `<div class="model-harness-lifecycle-policy" aria-label="Model harness lifecycle policy">${items.map(([label, value]) => `
+    <div class="model-harness-lifecycle-cell">
+      <div class="model-harness-lifecycle-label">${escapeHtml(label)}</div>
+      <div class="model-harness-lifecycle-value">${escapeHtml(value)}</div>
+    </div>
+  `).join('')}</div>`;
   const primeProofList = (proof) => `<div class="prime-logic-proof">${proof.map((item) => `
     <div class="prime-logic-proof-item">
       <div class="prime-logic-proof-question">${escapeHtml(item.question || 'proof question unavailable')}</div>
@@ -6119,6 +6152,104 @@ body {
       ['verdict', 'failed goal evaluation blocks continuation'],
     ],
   };
+  const modelHarnessLifecyclePolicies = {
+    Provider: [
+      ['initialize', 'register provider endpoint and credential posture'],
+      ['active', 'provider health and region proof refresh before dispatch'],
+      ['retire', 'disable provider when endpoint or license proof expires'],
+      ['blocker', 'stale provider lifecycle blocks model call'],
+    ],
+    Selection: [
+      ['initialize', 'load candidate set and exact model catalog'],
+      ['active', 'selection lifecycle refreshes ranking before dispatch'],
+      ['retire', 'remove model when fit or availability proof expires'],
+      ['blocker', 'stale selection lifecycle blocks dispatch'],
+    ],
+    Router: [
+      ['initialize', 'register route owner, target, and retry budget'],
+      ['active', 'route lifecycle confirms target health before handoff'],
+      ['retire', 'close route when owner, target, or retry policy expires'],
+      ['blocker', 'stale route lifecycle blocks dispatch'],
+    ],
+    Fallback: [
+      ['initialize', 'register fallback chain and degraded-mode entry condition'],
+      ['active', 'fallback lifecycle confirms alternate readiness before recovery'],
+      ['retire', 'remove fallback when alternate or blocker proof expires'],
+      ['blocker', 'stale fallback lifecycle blocks recovery'],
+    ],
+    Verifier: [
+      ['initialize', 'register verifier target and proof requirement'],
+      ['active', 'verifier lifecycle refreshes proof before completion'],
+      ['retire', 'close verifier when acceptance target changes'],
+      ['blocker', 'stale verifier lifecycle blocks completion'],
+    ],
+    Cost: [
+      ['initialize', 'register budget class and spend threshold'],
+      ['active', 'cost lifecycle refreshes token and spend telemetry'],
+      ['retire', 'close budget when threshold or contract changes'],
+      ['blocker', 'stale cost lifecycle blocks transport'],
+    ],
+    Latency: [
+      ['initialize', 'register timeout, retry, and freshness window'],
+      ['active', 'latency lifecycle refreshes stale state before acceptance'],
+      ['retire', 'close latency route when timeout posture changes'],
+      ['blocker', 'stale latency lifecycle blocks acceptance'],
+    ],
+    Context: [
+      ['initialize', 'register source envelope and lineage boundary'],
+      ['active', 'context lifecycle refreshes refs before prompt assembly'],
+      ['retire', 'close context when source lineage or retention expires'],
+      ['blocker', 'stale context lifecycle blocks assembly'],
+    ],
+    Prompt: [
+      ['initialize', 'register prompt packet boundary and hash policy'],
+      ['active', 'prompt lifecycle refreshes redaction before model call'],
+      ['retire', 'close prompt packet when intent or source changes'],
+      ['blocker', 'stale prompt lifecycle blocks dispatch'],
+    ],
+    Policy: [
+      ['initialize', 'register permission source and decision scope'],
+      ['active', 'policy lifecycle refreshes decision before execution'],
+      ['retire', 'close policy state when permission source changes'],
+      ['blocker', 'stale policy lifecycle blocks action'],
+    ],
+    Safety: [
+      ['initialize', 'register risk posture and escalation boundary'],
+      ['active', 'safety lifecycle refreshes mitigation before execution'],
+      ['retire', 'close safety state when risk tier changes'],
+      ['blocker', 'stale safety lifecycle blocks action'],
+    ],
+    Privacy: [
+      ['initialize', 'register exposure class and retention window'],
+      ['active', 'privacy lifecycle refreshes redaction before handoff'],
+      ['retire', 'close privacy state when exposure class changes'],
+      ['blocker', 'stale privacy lifecycle blocks handoff'],
+    ],
+    Tools: [
+      ['initialize', 'register callable boundary and argument scope'],
+      ['active', 'tool lifecycle refreshes permission before execution'],
+      ['retire', 'close tool route when callable contract changes'],
+      ['blocker', 'stale tool lifecycle blocks tool call'],
+    ],
+    Compare: [
+      ['initialize', 'register candidate set and winner criteria'],
+      ['active', 'comparison lifecycle refreshes candidates before scoring'],
+      ['retire', 'close comparison when criteria or candidate set changes'],
+      ['blocker', 'stale comparison lifecycle blocks selection'],
+    ],
+    Trace: [
+      ['initialize', 'register trace id, call id, and retention class'],
+      ['active', 'trace lifecycle refreshes lineage before acceptance'],
+      ['retire', 'close trace when replay boundary or hash changes'],
+      ['blocker', 'stale trace lifecycle blocks acceptance'],
+    ],
+    Goal: [
+      ['initialize', 'register objective, status, budget, and proof trail'],
+      ['active', 'goal lifecycle refreshes continuation proof before action'],
+      ['retire', 'close goal when complete, blocked, or usage-limited'],
+      ['blocker', 'stale goal lifecycle blocks continuation'],
+    ],
+  };
   const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'));
   const modelHarnessButtons = () => Array.from(document.querySelectorAll('.harness-model-dock .harness-dock-button'));
   const selectedModelHarnessName = (button) => button?.dataset.harness || '';
@@ -6242,6 +6373,12 @@ body {
       ['threshold', 'evaluation threshold required'],
       ['verdict', 'missing evaluation proof blocks use'],
     ];
+    const lifecyclePolicy = modelHarnessLifecyclePolicies[aspect] || [
+      ['initialize', 'lifecycle initialization required'],
+      ['active', 'active lifecycle proof required'],
+      ['retire', 'retirement lifecycle proof required'],
+      ['blocker', 'missing lifecycle proof blocks use'],
+    ];
     const proofTelemetry = [
       ['context', contextLogic],
       ['intent', intentLogic],
@@ -6272,6 +6409,7 @@ body {
         relaySection('Acceptance policy', modelHarnessAcceptancePolicy(acceptancePolicy), true),
         relaySection('Compliance policy', modelHarnessCompliancePolicy(compliancePolicy), true),
         relaySection('Evaluation policy', modelHarnessEvaluationPolicy(evaluationPolicy), true),
+        relaySection('Lifecycle policy', modelHarnessLifecyclePolicy(lifecyclePolicy), true),
         relaySection('Runtime signals', relayList(runtimeSignals), true),
         relaySection('Runtime contract', relayGrid([
           ['surface mode', 'Model Harness'],
