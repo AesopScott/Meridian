@@ -349,6 +349,19 @@ def test_index_model_harness_detail_surface_shows_governance_policy():
     assert "unapproved goal state blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_acceptance_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessAcceptancePolicy = (items) =>" in doc
+    assert 'aria-label="Model harness acceptance policy"' in doc
+    assert "const modelHarnessAcceptancePolicies = {" in doc
+    assert "relaySection('Acceptance policy', modelHarnessAcceptancePolicy(acceptancePolicy), true)" in doc
+    assert ".model-harness-acceptance-policy" in doc
+    assert ".model-harness-acceptance-cell" in doc
+    assert "provider endpoint and health proof visible" in doc
+    assert "acceptance criterion required" in doc
+    assert "missing goal proof blocks acceptance" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
