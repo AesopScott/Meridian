@@ -84,18 +84,7 @@ Status: Complete | Aborted | Blocked
 
 ## Active Coordination
 
-```text
-Time: 2026-06-04 09:45 -06:00
-Writer: Meridian coordinator
-Requested action: retry path-limited frontend Model Harness trust-route landing and push to origin/main.
-Target base: origin/main after explicit fetch; shared main clean/aligned.
-Path-limited scope: index.html; tests/test_bifrost_cockpit.py; docs/main-write-coordination-ledger.md for active/completion lease bookkeeping only.
-Reason: frontend UI Build 2 requested coordinator landing of contained branch commit `60b442cf1`; prior attempt was displaced by queue churn.
-Proof to run: python -m py_compile tests/test_bifrost_cockpit.py; python -m pytest tests/test_bifrost_cockpit.py -q; git diff --check; targeted personal-name/encoding scan; final fetch/status.
-Expected duration: under 10 minutes from frontend request/ACK.
-Requires other party ACK: yes, frontend request/ACK received in thread `019e86dc-1cdf-7781-9872-800b4764c87f`.
-Status: Active
-```
+No active write lease.
 
 ## Standing Acknowledgements
 
@@ -105,6 +94,20 @@ Status: Active
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-04 09:48 -06:00
+Writer: Meridian coordinator
+Intent: land frontend UI Build 2 Model Harness trust route from contained clone under frontend request/ACK.
+Action completed: path-limited patch from clean contained frontend clone applied and pushed to origin/main after queue-churn retry.
+Commit(s): `ff9500d42` (`feat: Add model harness trust route surface`).
+Pushed to origin/main: yes.
+Files changed: index.html; tests/test_bifrost_cockpit.py; docs/main-write-coordination-ledger.md.
+Proof run: python -m py_compile tests/test_bifrost_cockpit.py passed; python -m pytest tests/test_bifrost_cockpit.py -q passed 293 tests; git diff --check passed with line-ending notice for ledger only; targeted personal-name/encoding scan over index.html and tests/test_bifrost_cockpit.py returned no matches; trust-route markers verified in index.html and tests/test_bifrost_cockpit.py.
+Final shared main status: clean/aligned with origin/main after explicit fetch/status; rev-list origin/main...HEAD = 0 0.
+Notes/blockers: source frontend commit was `60b442cf1`; source clone was clean and exact diff scope was index.html plus tests/test_bifrost_cockpit.py. Earlier queue churn produced a mislabeled queue-only commit `e31487f9c`; final trust-route feature content is in `ff9500d42`. No backend worker files, queue docs, FileMap, Review Console branch, other frontend branches, FTP/deploy, worker main write, or Polaris included.
+Status: Complete
+```
 
 ```text
 Time: 2026-06-04 09:28 -06:00
