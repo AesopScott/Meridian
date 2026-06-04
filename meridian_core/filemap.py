@@ -306,11 +306,25 @@ def make_default_map() -> FileMap:
             notes="Functional seed for Prime's work intention.",
         ),
         FileMapEntry(
+            path="meridian_core/compass.py",
+            area=FileArea.COMPASS,
+            purpose="Compass project runtime: project definition, scope evaluation, project-difference evidence, and cross-project handoff review objects.",
+            related_tests=["tests/test_compass.py"],
+            notes="Pure domain runtime; no repo mutation, session control, or model/provider calls.",
+        ),
+        FileMapEntry(
             path="meridian_core/compass_logic_snapshot.py",
             area=FileArea.COMPASS,
             purpose="Backend snapshot for Compass project-context logic shown in the visible harness panel.",
             related_tests=["tests/test_bifrost_cockpit.py"],
             notes="Bifrost consumes this through /bridge/compass-logic; keeps Compass UI documentation backend-sourced.",
+        ),
+        FileMapEntry(
+            path="tests/test_compass.py",
+            area=FileArea.COMPASS,
+            purpose="Regression tests for meridian_core/compass.py project runtime definitions, scope checks, project-difference evaluation, and handoff review serialization.",
+            related_tests=[],
+            notes="Run before changing meridian_core/compass.py or Compass project-boundary behavior.",
         ),
         FileMapEntry(
             path="meridian_core/objectives.py",
@@ -799,6 +813,13 @@ def make_default_map() -> FileMap:
             purpose="V2 orchestrator transition ledger: shared coordination surface for replacement coordinator intake checks, routing recommendations, and takeover status.",
             related_tests=[],
             notes="Coordinator ledger. Read before declaring takeover complete or approving branch/worktree movement during transition.",
+        ),
+        FileMapEntry(
+            path="docs/main-write-coordination-ledger.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Main-write coordination ledger: tracks reviewed branch landings, main advancement, worktree syncs, and provenance for coordinator-approved writes.",
+            related_tests=[],
+            notes="Read before reasoning about mainline movement, reviewed landings, or coordinator write provenance.",
         ),
 
         # -- V2 Contract Docs (Echo, Atlas, Workflow subagent) ---------
