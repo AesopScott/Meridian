@@ -94,6 +94,21 @@ No active write lease.
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-04 13:58 UTC
+Writer: Meridian coordinator
+Intent: land reviewed Build 3 V3 goal/checkpoint FileMap no-op audit after frontend ACK.
+Action completed: Build 3 audit provenance and Reviews B clearance moved to shared main.
+Commit(s): 7031b9d37 (Record V3 goal FileMap audit completion); 54a4d5c6a (Clear Build 3 V3 goal FileMap audit review); this ledger completion commit if separate.
+Pushed to origin/main: pending final push in this completion step
+Files changed: docs/live-build-3.md; docs/live-codex-reviews-2.md; docs/main-write-coordination-ledger.md
+Proof run: python -m pytest tests\test_filemap.py -q passed 47 tests; git diff --check HEAD~2..HEAD passed.
+Final shared main status: pending final explicit fetch/status after push.
+Notes/blockers: docs-only movement; no implementation files, frontend branches, Relay restore movement, Build 1/2/4/5 movement, worker main write, or Polaris included.
+Status: Complete
+```
+
 ```text
 Time: 2026-06-04 13:45 UTC
 Writer: Meridian coordinator
