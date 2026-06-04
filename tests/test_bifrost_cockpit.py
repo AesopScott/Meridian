@@ -216,6 +216,22 @@ def test_index_model_harness_detail_surface_names_runtime_signals():
         assert expected in doc
 
 
+def test_index_model_harness_detail_surface_shows_proof_telemetry_strip():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessProofStrip = (items) =>" in doc
+    assert 'aria-label="Model harness proof telemetry"' in doc
+    assert 'class="model-harness-proof-strip"' in doc
+    assert "const proofTelemetry = [" in doc
+    assert "['context', contextLogic]" in doc
+    assert "['intent', intentLogic]" in doc
+    assert "['gate', visibleGate]" in doc
+    assert "['proof', proofLogic]" in doc
+    assert "relaySection('Proof telemetry', modelHarnessProofStrip(proofTelemetry), true)" in doc
+    assert ".model-harness-proof-strip" in doc
+    assert ".model-harness-proof-cell" in doc
+    assert "rgba(102, 255, 150, 0.28)" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
