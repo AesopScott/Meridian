@@ -1,4 +1,4 @@
-﻿"""Tests for the Bifrost cockpit static HTML renderer."""
+"""Tests for the Bifrost cockpit static HTML renderer."""
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ from meridian_core.cockpit_state import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-# â”€â”€ sample_cockpit_view_model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# sample_cockpit_view_model
 
 
 def test_sample_view_model_has_project_and_bearing():
@@ -156,9 +156,28 @@ def test_index_harness_title_toggles_model_icons():
     assert "Switch to model harness icons" in doc
     assert "harness-model-mode" in doc
     assert ".harness-dock-wrap.harness-model-mode .harness-dock-top" in doc
+    assert "grid-template-columns: repeat(8, minmax(44px, 1fr))" in doc
+    assert "grid-template-columns: repeat(16, minmax(0, 1fr))" in doc
     assert 'class="harness-dock harness-dock-bottom harness-model-dock"' in doc
     assert 'aria-label="Model harness"' in doc
-    for label in ("Claude", "GPT", "Gemini", "DeepSeek", "Local", "Router", "Verifier", "Cost", "Fallback"):
+    for label in (
+        "Provider",
+        "Select",
+        "Router",
+        "Fallback",
+        "Verifier",
+        "Cost",
+        "Latency",
+        "Context",
+        "Prompt",
+        "Policy",
+        "Safety",
+        "Privacy",
+        "Tools",
+        "Compare",
+        "Trace",
+        "Goal",
+    ):
         assert f'<span class="harness-label">{label}</span>' in doc
 
 
@@ -342,7 +361,7 @@ def test_sample_view_model_instrument_version():
     assert vm.instrument.version.startswith("v")
 
 
-# â”€â”€ render_cockpit_html â€” document structure â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# render_cockpit_html document structure
 
 
 def test_render_returns_complete_html_document():
@@ -368,7 +387,7 @@ def test_render_includes_title_with_project():
     assert "<title>" in doc
 
 
-# â”€â”€ Top navigation removal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Top navigation removal
 
 
 def test_render_has_no_permanent_top_navigation():
@@ -379,7 +398,7 @@ def test_render_has_no_permanent_top_navigation():
 
 
 
-# â”€â”€ Prime panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Prime panel
 
 
 def test_render_prime_panel_class_present():
@@ -1276,7 +1295,7 @@ def test_prompt_packet_proof_preserves_prior_bifrost_surfaces():
 
 
 
-# â”€â”€ Harness dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Harness dashboard
 
 
 def test_aegis_prompt_packet_policy_sample_renders_required_fields():
@@ -1813,7 +1832,7 @@ def test_render_harness_dashboard_attention_hook():
     assert 'data-attention="true"' in doc
 
 
-# â”€â”€ Project strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Project strip
 
 
 def test_render_project_strip_class_present():
@@ -1852,7 +1871,7 @@ def test_render_project_drilldown_sessions():
     assert "Prime command bay" in doc
 
 
-# â”€â”€ Progress surface â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Progress surface
 
 
 def test_render_progress_surface_class_present():
@@ -1913,7 +1932,7 @@ def test_render_progress_surface_is_mission_feed():
     assert "Review Console" not in doc
 
 
-# â”€â”€ Instrument band â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Instrument band
 
 
 def test_render_instrument_band_class_present():
@@ -1959,7 +1978,7 @@ def test_render_instrument_clock():
     assert vm.instrument.clock in doc
 
 
-# â”€â”€ XSS escaping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# XSS escaping
 
 
 def test_escapes_xss_in_project():
@@ -2074,7 +2093,7 @@ def test_escapes_xss_in_queue_state():
     assert "&lt;b&gt;" in doc
 
 
-# â”€â”€ Custom view model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Custom view model
 
 
 def test_custom_view_model_rendered():
@@ -2110,7 +2129,7 @@ def test_custom_view_model_rendered():
     assert "09:01" in doc
 
 
-# â”€â”€ view_model_from_snapshot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# view_model_from_snapshot
 
 
 def _make_snapshot(
@@ -2272,7 +2291,7 @@ def test_snapshot_result_is_renderable():
     assert "all good" in doc
 
 
-# â”€â”€ Voice I/O state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Voice I/O state
 
 
 def test_sample_view_model_has_voice_state():
@@ -2451,7 +2470,7 @@ def test_voice_no_provider_labels_in_voice_states():
         assert label not in doc.split("voice-strip")[1].split("</div>")[0] if "voice-strip" in doc else True
 
 
-# â”€â”€ Session Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Session Lifecycle
 
 
 def test_sample_view_model_has_session_lifecycle():
@@ -3130,7 +3149,7 @@ def test_proof_state_in_cockpit_main_not_core():
     assert 'class="proof-state"' in main_section
 
 
-# â”€â”€ Right-Panel Mode Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Right-Panel Mode Tests
 
 
 def test_user_session_mode_renders_with_data():
@@ -3169,7 +3188,7 @@ def test_user_session_mode_shows_selected_session():
         assert f'value="{selected_id}"' in doc and 'selected' in doc
 
 
-# â”€â”€ Sessions dropdown grouping and sorting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Sessions dropdown grouping and sorting
 
 def test_sessions_dropdown_groups_by_project():
     """Sessions dropdown uses optgroups for each project."""
@@ -3456,7 +3475,7 @@ def test_right_panel_renders_in_aside_element():
     assert '</aside>' in doc
 
 
-# â”€â”€ interactive-state mode switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# interactive-state mode switching
 
 def test_mode_switch_user_to_settings_preserves_prompt_state():
     """Switching from User Session mode to Settings preserves unsent prompt text."""
@@ -3649,7 +3668,7 @@ def test_prompt_window_only_renders_in_user_session_mode():
     assert "harness" in harness_doc.lower() or "gate-" in harness_doc
 
 
-# â”€â”€ Sessions dropdown filtering (Reviews B repairs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Sessions dropdown filtering (Reviews B repairs)
 
 def test_sessions_dropdown_excludes_blocked_sessions():
     """Non-open sessions (blocked, done) are excluded from the dropdown."""
@@ -3781,7 +3800,7 @@ def test_sessions_dropdown_with_mixed_statuses_filters_correctly():
     assert "Done E" not in html
 
 
-# â”€â”€ Stale-target guard (post-Sessions dropdown repair) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Stale-target guard (post-Sessions dropdown repair)
 
 def test_stale_target_guard_shows_when_selected_session_closed():
     """Stale-target guard shows when selected session is no longer available."""
