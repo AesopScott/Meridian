@@ -245,6 +245,19 @@ def test_index_model_harness_detail_surface_shows_evidence_route():
     assert "goal proof trail before continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_trust_route():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessTrustRoute = (items) =>" in doc
+    assert 'aria-label="Model harness trust route"' in doc
+    assert "const modelHarnessTrustRoutes = {" in doc
+    assert "relaySection('Trust route', modelHarnessTrustRoute(trustRoute), true)" in doc
+    assert ".model-harness-trust-route" in doc
+    assert ".model-harness-trust-cell" in doc
+    assert "direct-provider declaration required" in doc
+    assert "unknown trust route blocks dispatch" in doc
+    assert "missing blocker proof blocks continuation" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
