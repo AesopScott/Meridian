@@ -375,6 +375,19 @@ def test_index_model_harness_detail_surface_shows_compliance_policy():
     assert "missing goal compliance proof blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_evaluation_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessEvaluationPolicy = (items) =>" in doc
+    assert 'aria-label="Model harness evaluation policy"' in doc
+    assert "const modelHarnessEvaluationPolicies = {" in doc
+    assert "relaySection('Evaluation policy', modelHarnessEvaluationPolicy(evaluationPolicy), true)" in doc
+    assert ".model-harness-evaluation-policy" in doc
+    assert ".model-harness-evaluation-cell" in doc
+    assert "provider health, credential posture, and region fit scored" in doc
+    assert "evaluation score required" in doc
+    assert "failed goal evaluation blocks continuation" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc

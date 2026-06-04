@@ -1794,6 +1794,33 @@ body {
   overflow-wrap: anywhere;
 }
 
+.model-harness-evaluation-policy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 7px;
+}
+
+.model-harness-evaluation-cell {
+  min-width: 0;
+  border: 1px solid rgba(102, 255, 150, 0.25);
+  background: rgba(2, 22, 13, 0.58);
+  padding: 7px;
+  box-shadow: inset 0 0 12px rgba(102, 255, 150, 0.045);
+}
+
+.model-harness-evaluation-label {
+  color: rgba(166, 255, 192, 0.64);
+  font-size: 0.76em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.model-harness-evaluation-value {
+  margin-top: 4px;
+  color: rgba(226, 255, 234, 0.95);
+  overflow-wrap: anywhere;
+}
+
 .relay-models-header {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -4499,6 +4526,12 @@ body {
       <div class="model-harness-compliance-value">${escapeHtml(value)}</div>
     </div>
   `).join('')}</div>`;
+  const modelHarnessEvaluationPolicy = (items) => `<div class="model-harness-evaluation-policy" aria-label="Model harness evaluation policy">${items.map(([label, value]) => `
+    <div class="model-harness-evaluation-cell">
+      <div class="model-harness-evaluation-label">${escapeHtml(label)}</div>
+      <div class="model-harness-evaluation-value">${escapeHtml(value)}</div>
+    </div>
+  `).join('')}</div>`;
   const primeProofList = (proof) => `<div class="prime-logic-proof">${proof.map((item) => `
     <div class="prime-logic-proof-item">
       <div class="prime-logic-proof-question">${escapeHtml(item.question || 'proof question unavailable')}</div>
@@ -5988,6 +6021,104 @@ body {
       ['block', 'missing goal compliance proof blocks continuation'],
     ],
   };
+  const modelHarnessEvaluationPolicies = {
+    Provider: [
+      ['score', 'provider health, credential posture, and region fit scored'],
+      ['evidence', 'adapter proof and endpoint response recorded'],
+      ['threshold', 'provider score must pass before dispatch'],
+      ['verdict', 'failed provider evaluation blocks model call'],
+    ],
+    Selection: [
+      ['score', 'model fit, exclusion quality, and exact-id confidence scored'],
+      ['evidence', 'candidate comparison and selected-model rationale recorded'],
+      ['threshold', 'selection score must pass before route assignment'],
+      ['verdict', 'failed selection evaluation blocks dispatch'],
+    ],
+    Router: [
+      ['score', 'route confidence, retry fitness, and target health scored'],
+      ['evidence', 'route id, target state, and retry budget recorded'],
+      ['threshold', 'route score must pass before handoff'],
+      ['verdict', 'failed route evaluation blocks dispatch'],
+    ],
+    Fallback: [
+      ['score', 'fallback fitness, degraded-mode safety, and alternate trust scored'],
+      ['evidence', 'fallback chain and blocked-primary reason recorded'],
+      ['threshold', 'fallback score must pass before recovery'],
+      ['verdict', 'failed fallback evaluation blocks recovery'],
+    ],
+    Verifier: [
+      ['score', 'proof quality, acceptance fit, and verifier confidence scored'],
+      ['evidence', 'verifier result and evidence refs recorded'],
+      ['threshold', 'verification score must pass before completion'],
+      ['verdict', 'failed verifier evaluation blocks completion'],
+    ],
+    Cost: [
+      ['score', 'budget fit, spend pressure, and token efficiency scored'],
+      ['evidence', 'token delta, spend class, and budget threshold recorded'],
+      ['threshold', 'cost score must pass before transport'],
+      ['verdict', 'failed cost evaluation blocks model call'],
+    ],
+    Latency: [
+      ['score', 'freshness, timeout fit, and retry pressure scored'],
+      ['evidence', 'latency ms, stale tag, and retry result recorded'],
+      ['threshold', 'latency score must pass before acceptance'],
+      ['verdict', 'failed latency evaluation blocks acceptance'],
+    ],
+    Context: [
+      ['score', 'source quality, lineage fit, and context pressure scored'],
+      ['evidence', 'source refs, window pressure, and lineage proof recorded'],
+      ['threshold', 'context score must pass before prompt assembly'],
+      ['verdict', 'failed context evaluation blocks assembly'],
+    ],
+    Prompt: [
+      ['score', 'prompt boundary, redaction quality, and intent fit scored'],
+      ['evidence', 'prompt hash, packet refs, and redaction result recorded'],
+      ['threshold', 'prompt score must pass before model call'],
+      ['verdict', 'failed prompt evaluation blocks dispatch'],
+    ],
+    Policy: [
+      ['score', 'permission fit, decision clarity, and denial coverage scored'],
+      ['evidence', 'policy decision source and block tags recorded'],
+      ['threshold', 'policy score must pass before execution'],
+      ['verdict', 'failed policy evaluation blocks action'],
+    ],
+    Safety: [
+      ['score', 'risk posture, mitigation quality, and escalation fit scored'],
+      ['evidence', 'risk tier, refusal boundary, and mitigation record stored'],
+      ['threshold', 'safety score must pass before execution'],
+      ['verdict', 'failed safety evaluation blocks action'],
+    ],
+    Privacy: [
+      ['score', 'exposure class, redaction quality, and retention fit scored'],
+      ['evidence', 'redaction proof, exposure class, and retention window recorded'],
+      ['threshold', 'privacy score must pass before provider handoff'],
+      ['verdict', 'failed privacy evaluation blocks handoff'],
+    ],
+    Tools: [
+      ['score', 'tool intent, argument quality, and result boundary scored'],
+      ['evidence', 'tool preview, permission proof, and result boundary recorded'],
+      ['threshold', 'tool score must pass before execution'],
+      ['verdict', 'failed tool evaluation blocks tool call'],
+    ],
+    Compare: [
+      ['score', 'candidate coverage, dissent quality, and winner confidence scored'],
+      ['evidence', 'winner record, dissent refs, and confidence proof recorded'],
+      ['threshold', 'comparison score must pass before winner selection'],
+      ['verdict', 'failed comparison evaluation blocks selection'],
+    ],
+    Trace: [
+      ['score', 'lineage completeness, replay fit, and response hash quality scored'],
+      ['evidence', 'trace id, call id, lineage refs, and response hash recorded'],
+      ['threshold', 'trace score must pass before acceptance'],
+      ['verdict', 'failed trace evaluation blocks acceptance'],
+    ],
+    Goal: [
+      ['score', 'objective clarity, budget fit, and proof continuity scored'],
+      ['evidence', 'status, budget telemetry, and proof trail recorded'],
+      ['threshold', 'goal score must pass before continuation'],
+      ['verdict', 'failed goal evaluation blocks continuation'],
+    ],
+  };
   const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'));
   const modelHarnessButtons = () => Array.from(document.querySelectorAll('.harness-model-dock .harness-dock-button'));
   const selectedModelHarnessName = (button) => button?.dataset.harness || '';
@@ -6105,6 +6236,12 @@ body {
       ['constraint', 'compliance constraint required'],
       ['block', 'missing compliance proof blocks use'],
     ];
+    const evaluationPolicy = modelHarnessEvaluationPolicies[aspect] || [
+      ['score', 'evaluation score required'],
+      ['evidence', 'evaluation evidence required'],
+      ['threshold', 'evaluation threshold required'],
+      ['verdict', 'missing evaluation proof blocks use'],
+    ];
     const proofTelemetry = [
       ['context', contextLogic],
       ['intent', intentLogic],
@@ -6134,6 +6271,7 @@ body {
         relaySection('Governance policy', modelHarnessGovernancePolicy(governancePolicy), true),
         relaySection('Acceptance policy', modelHarnessAcceptancePolicy(acceptancePolicy), true),
         relaySection('Compliance policy', modelHarnessCompliancePolicy(compliancePolicy), true),
+        relaySection('Evaluation policy', modelHarnessEvaluationPolicy(evaluationPolicy), true),
         relaySection('Runtime signals', relayList(runtimeSignals), true),
         relaySection('Runtime contract', relayGrid([
           ['surface mode', 'Model Harness'],
