@@ -181,6 +181,22 @@ def test_index_harness_title_toggles_model_icons():
         assert f'<span class="harness-label">{label}</span>' in doc
 
 
+def test_index_model_harness_icons_open_model_surface():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessAspects = {" in doc
+    assert "const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'))" in doc
+    assert "const renderModelHarnessSurface = (button) =>" in doc
+    assert "Model ${label} Harness" in doc
+    assert "surfaceClass: 'is-model-harness-surface'" in doc
+    assert "setHarnessDockMode('model')" in doc
+    assert "screen.classList.add('session-theme-green')" in doc
+    assert "isModelHarnessButton(button) ? renderModelHarnessSurface(button) : renderHarnessSurface(button)" in doc
+    assert "display-only until model harness backend is registered" in doc
+    assert "What context was visible before this model action?" in doc
+    assert "What intention was visible before execution?" in doc
+    assert "What proof shows the model action followed that logic?" in doc
+
+
 def test_index_user_session_mode_names_target_and_preserves_storage():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "User Session:" in doc

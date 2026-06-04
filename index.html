@@ -1453,6 +1453,11 @@ body {
   line-height: 1.35;
 }
 
+.right-panel-surface.is-model-harness-surface .relay-models-status {
+  border-color: rgba(102, 255, 150, 0.58);
+  color: #66ff96;
+}
+
 .relay-models-header {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -4395,14 +4400,15 @@ body {
     rightWindow.classList.remove('is-relay-models');
     rightWorkspace.querySelectorAll('.relay-models-surface, .right-panel-surface').forEach((node) => node.remove());
   };
-  const renderRightPanelSurface = ({ title, status, sections }) => {
+  const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) => {
     if (!rightWindow || !rightWorkspace) return false;
     try {
       clearRightPanelSurface();
       rightWindow.classList.add('is-panel-surface');
       rightWorkspace.removeAttribute('aria-hidden');
+      const safeSurfaceClass = surfaceClass ? ` ${surfaceClass}` : '';
       rightWorkspace.insertAdjacentHTML('beforeend', `
-        <div class="right-panel-surface" role="region" aria-label="${escapeHtml(title)}">
+        <div class="right-panel-surface${safeSurfaceClass}" role="region" aria-label="${escapeHtml(title)}">
           <div class="relay-models-header">
             <div class="relay-models-title">${escapeHtml(title)}</div>
             <div class="relay-models-status">${escapeHtml(status)}</div>
@@ -4422,6 +4428,53 @@ body {
       restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
       return false;
     }
+  };
+  const modelHarnessAspects = {
+    Provider: ['Adapter', 'provider endpoint and credential posture', 'provider readiness and account state', 'adapter contract is visible before a request is routed'],
+    Selection: ['Match', 'model choice and selection reason', 'capability fit and project context', 'selection intent is visible before execution'],
+    Router: ['Route', 'primary route and handoff target', 'route health and retry posture', 'route decision is visible before dispatch'],
+    Fallback: ['Recover', 'fallback chain and blocked fallbacks', 'degraded-state recovery path', 'fallback cannot be silent'],
+    Verifier: ['Proof', 'verification model and evidence target', 'required proof before acceptance', 'proof obligation is visible before completion'],
+    Cost: ['Budget', 'token, time, and spend envelope', 'budget pressure and stop threshold', 'budget posture is visible before dispatch'],
+    Latency: ['Speed', 'latency target and timeout posture', 'streaming and retry budget', 'time cost is visible before routing'],
+    Context: ['Window', 'context window and source envelope', 'visible context carried into the prompt', 'context precedes meaningful action'],
+    Prompt: ['Payload', 'prompt packet and instruction boundary', 'payload provenance and redaction posture', 'prompt intent is visible before execution'],
+    Policy: ['Policy', 'model policy and tool permission posture', 'policy source and exception handling', 'policy logic is visible before action'],
+    Safety: ['Guard', 'risk posture and refusal boundary', 'safety evidence and escalation posture', 'unsafe execution is blocked visibly'],
+    Privacy: ['Data', 'data exposure and retention posture', 'private context and redaction proof', 'privacy logic is visible before dispatch'],
+    Tools: ['Calls', 'tool permissions and callable surface', 'tool argument preview and result handling', 'tool intent is visible before execution'],
+    Compare: ['Council', 'comparison candidates and voting posture', 'cross-model disagreement handling', 'comparison logic is visible before selection'],
+    Trace: ['Audit', 'request trace and evidence trail', 'route, model, and response audit path', 'trace proof follows every execution'],
+    Goal: ['Intent', 'goal objective and continuation posture', 'completion, blocker, and budget state', 'goal intent is visible before execution'],
+  };
+  const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'));
+  const renderModelHarnessSurface = (button) => {
+    const aspect = button?.dataset.harness || 'Model';
+    const label = button?.querySelector?.('.harness-label')?.textContent?.trim() || aspect;
+    const [status, contextLogic, intentLogic, proofLogic] = modelHarnessAspects[aspect] || ['planned', 'model runtime context', 'model runtime intent', 'model runtime proof'];
+    return renderRightPanelSurface({
+      title: `Model ${label} Harness`,
+      status,
+      surfaceClass: 'is-model-harness-surface',
+      sections: [
+        relaySection('Aspect logic', relayGrid([
+          ['aspect', label],
+          ['context logic', contextLogic],
+          ['intent logic', intentLogic],
+          ['proof logic', proofLogic],
+        ]), true),
+        relaySection('Runtime contract', relayGrid([
+          ['surface mode', 'Model Harness'],
+          ['mutation policy', 'display-only until model harness backend is registered'],
+          ['drift guard', 'visible model state must match backend proof before writes are enabled'],
+        ]), true),
+        relaySection('Proof questions', relayList([
+          'What context was visible before this model action?',
+          'What intention was visible before execution?',
+          'What proof shows the model action followed that logic?',
+        ])),
+      ],
+    });
   };
   const renderSparkSurface = (label) => {
     return renderRightPanelSurface({
@@ -4813,8 +4866,14 @@ body {
       ? renderRelayModels()
       : (button.dataset.harness === 'Compass'
         ? renderCompassProjectLogic()
-        : (button.dataset.harness === 'Session Lifecycle' ? renderVulcanSessionLogic() : renderHarnessSurface(button)));
+        : (button.dataset.harness === 'Session Lifecycle'
+          ? renderVulcanSessionLogic()
+          : (isModelHarnessButton(button) ? renderModelHarnessSurface(button) : renderHarnessSurface(button))));
     if (!rendered) return;
+    if (isModelHarnessButton(button)) {
+      setHarnessDockMode('model');
+      screen.classList.add('session-theme-green');
+    }
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });
     harnessDisabledUntil = Date.now() + 2000;
