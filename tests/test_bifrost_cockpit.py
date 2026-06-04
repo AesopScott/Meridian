@@ -184,17 +184,74 @@ def test_index_harness_title_toggles_model_icons():
 def test_index_model_harness_icons_open_model_surface():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessAspects = {" in doc
+    assert "const modelHarnessRuntimeSignals = {" in doc
+    assert "const modelHarnessVisibleGates = {" in doc
     assert "const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'))" in doc
     assert "const renderModelHarnessSurface = (button) =>" in doc
     assert "Model ${label} Harness" in doc
     assert "surfaceClass: 'is-model-harness-surface'" in doc
     assert "setHarnessDockMode('model')" in doc
     assert "screen.classList.add('session-theme-green')" in doc
-    assert "isModelHarnessButton(button) ? renderModelHarnessSurface(button) : renderHarnessSurface(button)" in doc
+    assert "modelButton ? renderModelHarnessSurface(button) : renderHarnessSurface(button)" in doc
     assert "display-only until model harness backend is registered" in doc
     assert "What context was visible before this model action?" in doc
     assert "What intention was visible before execution?" in doc
     assert "What proof shows the model action followed that logic?" in doc
+
+
+def test_index_model_harness_detail_surface_names_runtime_signals():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "relaySection('Runtime signals', relayList(runtimeSignals), true)" in doc
+    assert "['visible gate', visibleGate]" in doc
+    for expected in (
+        "credential availability without secret display",
+        "candidate model set",
+        "prompt packet boundary",
+        "tool-result trust boundary",
+        "objective id and status",
+        "adapter health must be visible before provider use",
+        "prompt boundary must be visible before model call",
+        "goal status must be visible before continuation",
+    ):
+        assert expected in doc
+
+
+def test_index_model_harness_selection_is_visible_and_persistent():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc
+    assert "const storedModelHarnessName = () =>" in doc
+    assert "const modelHarnessButtonByName = (name) =>" in doc
+    assert "const setSelectedModelHarnessButton = (button, { persist = true } = {}) =>" in doc
+    assert "const activateStoredModelHarnessAspect = ({ persist = false } = {}) =>" in doc
+    assert "item.classList.toggle('is-selected', selected)" in doc
+    assert "item.setAttribute('aria-current', 'true')" in doc
+    assert "item.removeAttribute('aria-current')" in doc
+    assert "localStorage.setItem(modelHarnessSelectionKey, selectedModelHarnessName(button))" in doc
+    assert "setSelectedModelHarnessButton(button, { persist })" in doc
+    assert "if (nextMode === 'model') activateStoredModelHarnessAspect({ persist: false })" in doc
+    assert "modelHarnessButtonByName(storedModelHarnessName()) || modelHarnessButtons()[0]" in doc
+    assert '.harness-dock-button[aria-current="true"] .harness-icon' in doc
+    assert '.harness-dock-button[aria-current="true"] .harness-label' in doc
+
+
+def test_index_model_harness_icons_support_keyboard_navigation():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const navigateModelHarnessAspect = (button, delta) =>" in doc
+    assert "const activateModelHarnessAspectAt = (index) =>" in doc
+    assert "const next = models[(current + delta + models.length) % models.length]" in doc
+    assert "activateHarnessButton(next)" in doc
+    assert "next.focus({ preventScroll: true })" in doc
+    assert "button.focus({ preventScroll: true })" in doc
+    assert "button.addEventListener('keydown', (event) =>" in doc
+    assert "if (!isModelHarnessButton(button)) return" in doc
+    assert "event.key === 'ArrowRight' || event.key === 'ArrowDown'" in doc
+    assert "navigateModelHarnessAspect(button, 1)" in doc
+    assert "event.key === 'ArrowLeft' || event.key === 'ArrowUp'" in doc
+    assert "navigateModelHarnessAspect(button, -1)" in doc
+    assert "event.key === 'Home'" in doc
+    assert "activateModelHarnessAspectAt(0)" in doc
+    assert "event.key === 'End'" in doc
+    assert "activateModelHarnessAspectAt(modelHarnessButtons().length - 1)" in doc
 
 
 def test_index_user_session_mode_names_target_and_preserves_storage():

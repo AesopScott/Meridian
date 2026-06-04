@@ -2845,6 +2845,13 @@ body {
   filter: drop-shadow(0 0 16px rgba(72, 255, 145, 0.9));
 }
 
+.harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button.is-selected .harness-icon,
+.harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button[aria-current="true"] .harness-icon {
+  stroke: #f2fff5;
+  transform: translate(-50%, calc(-50% - 3px)) scale(1.08);
+  filter: drop-shadow(0 0 18px rgba(72, 255, 145, 0.98));
+}
+
 .harness-label,
 .harness-sub-label {
   position: absolute;
@@ -2903,6 +2910,14 @@ body {
 
 .harness-dock-wrap.harness-dock-open .harness-label,
 .harness-dock-wrap.harness-dock-open .harness-sub-label {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button.is-selected .harness-label,
+.harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button.is-selected .harness-sub-label,
+.harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button[aria-current="true"] .harness-label,
+.harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button[aria-current="true"] .harness-sub-label {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
@@ -3991,11 +4006,14 @@ body {
     if (label) label.textContent = isModelMode ? 'Model Harness' : 'Orchestrator Harness';
   };
   harnessLine.addEventListener('click', () => {
-    setHarnessDockMode(harnessDock.classList.contains('harness-model-mode') ? 'orchestrator' : 'model');
+    const nextMode = harnessDock.classList.contains('harness-model-mode') ? 'orchestrator' : 'model';
+    setHarnessDockMode(nextMode);
+    if (nextMode === 'model') activateStoredModelHarnessAspect({ persist: false });
     openHarness();
   });
   const rightPanelModeKey = 'meridian.right-panel.mode.v1';
   const rightPanelSelectionKey = 'meridian.right-panel.selection.v1';
+  const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1';
   const validRightPanelModes = new Set(['user', 'spark', 'harness']);
   let rightPanelRecoveryWarning = '';
   const readStoredRightPanel = () => {
@@ -4447,11 +4465,93 @@ body {
     Trace: ['Audit', 'request trace and evidence trail', 'route, model, and response audit path', 'trace proof follows every execution'],
     Goal: ['Intent', 'goal objective and continuation posture', 'completion, blocker, and budget state', 'goal intent is visible before execution'],
   };
+  const modelHarnessRuntimeSignals = {
+    Provider: ['provider id and endpoint family', 'credential availability without secret display', 'adapter health and supported modalities'],
+    Selection: ['candidate model set', 'capability match reason', 'selection confidence and exclusion reason'],
+    Router: ['primary route target', 'handoff owner and route tier', 'retry and escalation posture'],
+    Fallback: ['fallback order', 'blocked fallback reason', 'degraded-mode recovery target'],
+    Verifier: ['verification model or rule', 'acceptance evidence target', 'unverified response handling'],
+    Cost: ['token budget remaining', 'projected spend band', 'stop threshold and overage state'],
+    Latency: ['timeout window', 'streaming posture', 'retry budget and stale-response guard'],
+    Context: ['source envelope', 'context-window pressure', 'visible transcript and retrieval refs'],
+    Prompt: ['prompt packet boundary', 'instruction provenance', 'redaction and payload hash state'],
+    Policy: ['policy source', 'permission exception state', 'route-specific constraint'],
+    Safety: ['risk tier', 'refusal or escalation boundary', 'unsafe-output handling'],
+    Privacy: ['private data class', 'retention and redaction state', 'external-provider exposure flag'],
+    Tools: ['callable tool set', 'argument preview state', 'tool-result trust boundary'],
+    Compare: ['candidate comparison set', 'disagreement threshold', 'winner and dissent evidence'],
+    Trace: ['request trace id', 'model/provider response lineage', 'proof refs and replay boundary'],
+    Goal: ['objective id and status', 'continuation budget state', 'completion or blocker proof'],
+  };
+  const modelHarnessVisibleGates = {
+    Provider: 'adapter health must be visible before provider use',
+    Selection: 'model choice must name capability fit before execution',
+    Router: 'route owner and tier must be visible before dispatch',
+    Fallback: 'fallback path must be visible before degraded execution',
+    Verifier: 'acceptance proof must be visible before completion',
+    Cost: 'budget pressure must be visible before dispatch',
+    Latency: 'timeout posture must be visible before routing',
+    Context: 'context envelope must be visible before prompt assembly',
+    Prompt: 'prompt boundary must be visible before model call',
+    Policy: 'policy source must be visible before action',
+    Safety: 'risk posture must be visible before execution',
+    Privacy: 'data exposure must be visible before provider handoff',
+    Tools: 'tool permission must be visible before any call',
+    Compare: 'comparison criteria must be visible before selection',
+    Trace: 'trace refs must be visible before response acceptance',
+    Goal: 'goal status must be visible before continuation',
+  };
   const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'));
+  const modelHarnessButtons = () => Array.from(document.querySelectorAll('.harness-model-dock .harness-dock-button'));
+  const selectedModelHarnessName = (button) => button?.dataset.harness || '';
+  const storedModelHarnessName = () => {
+    try {
+      return localStorage.getItem(modelHarnessSelectionKey) || '';
+    } catch {
+      return '';
+    }
+  };
+  const modelHarnessButtonByName = (name) => modelHarnessButtons().find((item) => item.dataset.harness === name) || null;
+  const setSelectedModelHarnessButton = (button, { persist = true } = {}) => {
+    modelHarnessButtons().forEach((item) => {
+      const selected = item === button;
+      item.classList.toggle('is-selected', selected);
+      if (selected) item.setAttribute('aria-current', 'true');
+      else item.removeAttribute('aria-current');
+    });
+    if (!button || !persist) return;
+    try {
+      localStorage.setItem(modelHarnessSelectionKey, selectedModelHarnessName(button));
+    } catch {
+      // Selection still renders even if storage is unavailable.
+    }
+  };
+  const activateStoredModelHarnessAspect = ({ persist = false } = {}) => {
+    const button = modelHarnessButtonByName(storedModelHarnessName()) || modelHarnessButtons()[0] || null;
+    if (button) activateHarnessButton(button, { persist });
+  };
+  const navigateModelHarnessAspect = (button, delta) => {
+    const models = modelHarnessButtons();
+    if (!button || !models.length) return;
+    const current = models.indexOf(button);
+    if (current < 0) return;
+    const next = models[(current + delta + models.length) % models.length];
+    activateHarnessButton(next);
+    next.focus({ preventScroll: true });
+  };
+  const activateModelHarnessAspectAt = (index) => {
+    const models = modelHarnessButtons();
+    const button = models[index] || null;
+    if (!button) return;
+    activateHarnessButton(button);
+    button.focus({ preventScroll: true });
+  };
   const renderModelHarnessSurface = (button) => {
     const aspect = button?.dataset.harness || 'Model';
     const label = button?.querySelector?.('.harness-label')?.textContent?.trim() || aspect;
     const [status, contextLogic, intentLogic, proofLogic] = modelHarnessAspects[aspect] || ['planned', 'model runtime context', 'model runtime intent', 'model runtime proof'];
+    const runtimeSignals = modelHarnessRuntimeSignals[aspect] || ['model state', 'route state', 'proof state'];
+    const visibleGate = modelHarnessVisibleGates[aspect] || 'model action gate must be visible before execution';
     return renderRightPanelSurface({
       title: `Model ${label} Harness`,
       status,
@@ -4463,9 +4563,11 @@ body {
           ['intent logic', intentLogic],
           ['proof logic', proofLogic],
         ]), true),
+        relaySection('Runtime signals', relayList(runtimeSignals), true),
         relaySection('Runtime contract', relayGrid([
           ['surface mode', 'Model Harness'],
           ['mutation policy', 'display-only until model harness backend is registered'],
+          ['visible gate', visibleGate],
           ['drift guard', 'visible model state must match backend proof before writes are enabled'],
         ]), true),
         relaySection('Proof questions', relayList([
@@ -4856,6 +4958,7 @@ body {
   };
   const activateHarnessButton = (button, { persist = true } = {}) => {
     if (!button) return;
+    const modelButton = isModelHarnessButton(button);
     screen.classList.remove('session-theme-aqua');
     screen.classList.remove('session-theme-green');
     if (userTitle) userTitle.textContent = button.dataset.sessionTitle || button.dataset.harness || 'User';
@@ -4868,10 +4971,11 @@ body {
         ? renderCompassProjectLogic()
         : (button.dataset.harness === 'Session Lifecycle'
           ? renderVulcanSessionLogic()
-          : (isModelHarnessButton(button) ? renderModelHarnessSurface(button) : renderHarnessSurface(button))));
+          : (modelButton ? renderModelHarnessSurface(button) : renderHarnessSurface(button))));
     if (!rendered) return;
-    if (isModelHarnessButton(button)) {
+    if (modelButton) {
       setHarnessDockMode('model');
+      setSelectedModelHarnessButton(button, { persist });
       screen.classList.add('session-theme-green');
     }
     screen.classList.add('sessions-visible');
@@ -4953,6 +5057,22 @@ body {
   });
   harnessButtons.forEach((button) => {
     button.addEventListener('click', () => activateHarnessButton(button));
+    button.addEventListener('keydown', (event) => {
+      if (!isModelHarnessButton(button)) return;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        navigateModelHarnessAspect(button, 1);
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        navigateModelHarnessAspect(button, -1);
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        activateModelHarnessAspectAt(0);
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        activateModelHarnessAspectAt(modelHarnessButtons().length - 1);
+      }
+    });
   });
   const restoreStoredRightPanel = () => {
     const stored = readStoredRightPanel();
