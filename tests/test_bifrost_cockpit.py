@@ -401,6 +401,19 @@ def test_index_model_harness_detail_surface_shows_lifecycle_policy():
     assert "stale goal lifecycle blocks continuation" in doc
 
 
+def test_index_model_harness_detail_surface_shows_version_policy():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const modelHarnessVersionPolicy = (items) =>" in doc
+    assert 'aria-label="Model harness version policy"' in doc
+    assert "const modelHarnessVersionPolicies = {" in doc
+    assert "relaySection('Version policy', modelHarnessVersionPolicy(versionPolicy), true)" in doc
+    assert ".model-harness-version-policy" in doc
+    assert ".model-harness-version-cell" in doc
+    assert "provider adapter version and endpoint contract pinned" in doc
+    assert "version pin required" in doc
+    assert "unpinned goal version blocks continuation" in doc
+
+
 def test_index_model_harness_selection_is_visible_and_persistent():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const modelHarnessSelectionKey = 'meridian.model-harness.selection.v1'" in doc

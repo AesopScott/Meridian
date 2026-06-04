@@ -1848,6 +1848,33 @@ body {
   overflow-wrap: anywhere;
 }
 
+.model-harness-version-policy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 7px;
+}
+
+.model-harness-version-cell {
+  min-width: 0;
+  border: 1px solid rgba(102, 255, 150, 0.25);
+  background: rgba(2, 22, 13, 0.58);
+  padding: 7px;
+  box-shadow: inset 0 0 12px rgba(102, 255, 150, 0.045);
+}
+
+.model-harness-version-label {
+  color: rgba(166, 255, 192, 0.64);
+  font-size: 0.76em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.model-harness-version-value {
+  margin-top: 4px;
+  color: rgba(226, 255, 234, 0.95);
+  overflow-wrap: anywhere;
+}
+
 .relay-models-header {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -4565,6 +4592,12 @@ body {
       <div class="model-harness-lifecycle-value">${escapeHtml(value)}</div>
     </div>
   `).join('')}</div>`;
+  const modelHarnessVersionPolicy = (items) => `<div class="model-harness-version-policy" aria-label="Model harness version policy">${items.map(([label, value]) => `
+    <div class="model-harness-version-cell">
+      <div class="model-harness-version-label">${escapeHtml(label)}</div>
+      <div class="model-harness-version-value">${escapeHtml(value)}</div>
+    </div>
+  `).join('')}</div>`;
   const primeProofList = (proof) => `<div class="prime-logic-proof">${proof.map((item) => `
     <div class="prime-logic-proof-item">
       <div class="prime-logic-proof-question">${escapeHtml(item.question || 'proof question unavailable')}</div>
@@ -6250,6 +6283,104 @@ body {
       ['blocker', 'stale goal lifecycle blocks continuation'],
     ],
   };
+  const modelHarnessVersionPolicies = {
+    Provider: [
+      ['pin', 'provider adapter version and endpoint contract pinned'],
+      ['compatible', 'provider version must match credential and region proof'],
+      ['migrate', 'adapter migration requires provider health proof refresh'],
+      ['block', 'unpinned provider version blocks model call'],
+    ],
+    Selection: [
+      ['pin', 'selection policy version and model catalog revision pinned'],
+      ['compatible', 'selected model version must match task capability'],
+      ['migrate', 'selection migration requires candidate comparison refresh'],
+      ['block', 'unpinned selection version blocks dispatch'],
+    ],
+    Router: [
+      ['pin', 'router policy version and lane contract pinned'],
+      ['compatible', 'route version must match target and retry contract'],
+      ['migrate', 'route migration requires handoff proof refresh'],
+      ['block', 'unpinned route version blocks dispatch'],
+    ],
+    Fallback: [
+      ['pin', 'fallback chain version and degraded-mode contract pinned'],
+      ['compatible', 'fallback version must preserve original compliance tier'],
+      ['migrate', 'fallback migration requires alternate readiness proof'],
+      ['block', 'unpinned fallback version blocks recovery'],
+    ],
+    Verifier: [
+      ['pin', 'verifier version and acceptance rubric pinned'],
+      ['compatible', 'verifier version must match evidence schema'],
+      ['migrate', 'verifier migration requires proof schema refresh'],
+      ['block', 'unpinned verifier version blocks completion'],
+    ],
+    Cost: [
+      ['pin', 'budget policy version and rate table pinned'],
+      ['compatible', 'cost version must match contract and spend threshold'],
+      ['migrate', 'cost migration requires budget proof refresh'],
+      ['block', 'unpinned cost version blocks transport'],
+    ],
+    Latency: [
+      ['pin', 'latency policy version and timeout contract pinned'],
+      ['compatible', 'latency version must match retry and freshness window'],
+      ['migrate', 'latency migration requires stale-state proof refresh'],
+      ['block', 'unpinned latency version blocks acceptance'],
+    ],
+    Context: [
+      ['pin', 'context policy version and source envelope pinned'],
+      ['compatible', 'context version must match source and retention class'],
+      ['migrate', 'context migration requires lineage proof refresh'],
+      ['block', 'unpinned context version blocks assembly'],
+    ],
+    Prompt: [
+      ['pin', 'prompt policy version and packet schema pinned'],
+      ['compatible', 'prompt version must match redaction and intent schema'],
+      ['migrate', 'prompt migration requires packet hash refresh'],
+      ['block', 'unpinned prompt version blocks model call'],
+    ],
+    Policy: [
+      ['pin', 'policy decision version and permission schema pinned'],
+      ['compatible', 'policy version must match execution permission scope'],
+      ['migrate', 'policy migration requires decision proof refresh'],
+      ['block', 'unpinned policy version blocks action'],
+    ],
+    Safety: [
+      ['pin', 'safety rubric version and risk taxonomy pinned'],
+      ['compatible', 'safety version must match mitigation schema'],
+      ['migrate', 'safety migration requires escalation proof refresh'],
+      ['block', 'unpinned safety version blocks action'],
+    ],
+    Privacy: [
+      ['pin', 'privacy policy version and exposure taxonomy pinned'],
+      ['compatible', 'privacy version must match retention and redaction class'],
+      ['migrate', 'privacy migration requires redaction proof refresh'],
+      ['block', 'unpinned privacy version blocks handoff'],
+    ],
+    Tools: [
+      ['pin', 'tool contract version and callable schema pinned'],
+      ['compatible', 'tool version must match permission and argument scope'],
+      ['migrate', 'tool migration requires preview and result-boundary proof'],
+      ['block', 'unpinned tool version blocks tool call'],
+    ],
+    Compare: [
+      ['pin', 'comparison rubric version and candidate schema pinned'],
+      ['compatible', 'comparison version must match winner criteria'],
+      ['migrate', 'comparison migration requires candidate proof refresh'],
+      ['block', 'unpinned comparison version blocks selection'],
+    ],
+    Trace: [
+      ['pin', 'trace schema version and replay boundary pinned'],
+      ['compatible', 'trace version must match call id and hash schema'],
+      ['migrate', 'trace migration requires lineage proof refresh'],
+      ['block', 'unpinned trace version blocks acceptance'],
+    ],
+    Goal: [
+      ['pin', 'goal runtime version and lifecycle schema pinned'],
+      ['compatible', 'goal version must match objective status and budget schema'],
+      ['migrate', 'goal migration requires proof trail refresh'],
+      ['block', 'unpinned goal version blocks continuation'],
+    ],
+  };
   const isModelHarnessButton = (button) => Boolean(button?.closest?.('.harness-model-dock'));
   const modelHarnessButtons = () => Array.from(document.querySelectorAll('.harness-model-dock .harness-dock-button'));
   const selectedModelHarnessName = (button) => button?.dataset.harness || '';
@@ -6379,6 +6510,12 @@ body {
       ['retire', 'retirement lifecycle proof required'],
       ['blocker', 'missing lifecycle proof blocks use'],
     ];
+    const versionPolicy = modelHarnessVersionPolicies[aspect] || [
+      ['pin', 'version pin required'],
+      ['compatible', 'version compatibility proof required'],
+      ['migrate', 'version migration proof required'],
+      ['block', 'missing version proof blocks use'],
+    ];
     const proofTelemetry = [
       ['context', contextLogic],
       ['intent', intentLogic],
@@ -6410,6 +6547,7 @@ body {
         relaySection('Compliance policy', modelHarnessCompliancePolicy(compliancePolicy), true),
         relaySection('Evaluation policy', modelHarnessEvaluationPolicy(evaluationPolicy), true),
         relaySection('Lifecycle policy', modelHarnessLifecyclePolicy(lifecyclePolicy), true),
+        relaySection('Version policy', modelHarnessVersionPolicy(versionPolicy), true),
         relaySection('Runtime signals', relayList(runtimeSignals), true),
         relaySection('Runtime contract', relayGrid([
           ['surface mode', 'Model Harness'],
