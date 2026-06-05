@@ -3200,7 +3200,7 @@ body {
 
 .harness-model-dock {
   display: none;
-  grid-template-columns: repeat(8, minmax(44px, 1fr));
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
 }
 
 .harness-dock-wrap.harness-model-mode .harness-dock-top {
@@ -3213,16 +3213,18 @@ body {
 
 .harness-dock-wrap.harness-model-mode .harness-model-dock {
   display: grid;
-  grid-template-columns: repeat(8, minmax(44px, 1fr));
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
   align-items: center;
-  top: calc(var(--harness-line-y) - 27px);
+  top: 0;
+  height: 244px;
   margin: 0;
 }
 
 @media (min-width: 960px) {
   .harness-model-dock,
   .harness-dock-wrap.harness-model-mode .harness-model-dock {
-    grid-template-columns: repeat(21, minmax(0, 1fr));
+    grid-template-columns: repeat(22, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -3232,8 +3234,29 @@ body {
 }
 
 .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button {
-  --harness-icon-size: 30%;
-  --harness-icon-half: 15%;
+  --harness-icon-size: 34.65%;
+  --harness-icon-half: 17.325%;
+}
+
+@media (min-width: 960px) {
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button {
+    grid-column: span 2;
+  }
+
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(n + 12) {
+    grid-row: 2;
+  }
+
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(12) { grid-column: 2 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(13) { grid-column: 4 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(14) { grid-column: 6 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(15) { grid-column: 8 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(16) { grid-column: 10 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(17) { grid-column: 12 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(18) { grid-column: 14 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(19) { grid-column: 16 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(20) { grid-column: 18 / span 2; }
+  .harness-dock-wrap.harness-model-mode .harness-model-dock .harness-dock-button:nth-child(21) { grid-column: 20 / span 2; }
 }
 
 .harness-dock-button {
