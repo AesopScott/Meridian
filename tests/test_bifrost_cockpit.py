@@ -157,15 +157,16 @@ def test_index_harness_title_toggles_model_icons():
     assert "harness-model-mode" in doc
     assert ".harness-dock-wrap.harness-model-mode .harness-dock-top" in doc
     assert "grid-template-columns: repeat(8, minmax(44px, 1fr))" in doc
-    assert "grid-template-columns: repeat(16, minmax(0, 1fr))" in doc
+    assert "grid-template-columns: repeat(21, minmax(0, 1fr))" in doc
     assert 'class="harness-dock harness-dock-bottom harness-model-dock"' in doc
     assert 'aria-label="Model harness"' in doc
     for label in (
         "Provider",
+        "Identity",
         "Select",
-        "Router",
+        "Route",
         "Fallback",
-        "Verifier",
+        "Verify",
         "Cost",
         "Latency",
         "Context",
@@ -177,6 +178,10 @@ def test_index_harness_title_toggles_model_icons():
         "Compare",
         "Trace",
         "Goal",
+        "Payload",
+        "Response",
+        "Evidence",
+        "Trust",
     ):
         assert f'<span class="harness-label">{label}</span>' in doc
 
@@ -205,13 +210,17 @@ def test_index_model_harness_detail_surface_names_runtime_signals():
     assert "['visible gate', visibleGate]" in doc
     for expected in (
         "credential availability without secret display",
+        "exact model id",
         "candidate model set",
         "prompt packet boundary",
         "tool-result trust boundary",
         "objective id and status",
+        "trust mode",
         "adapter health must be visible before provider use",
+        "exact model id must be visible before route selection",
         "prompt boundary must be visible before model call",
         "goal status must be visible before continuation",
+        "trust state must be visible before dispatch",
     ):
         assert expected in doc
 
@@ -240,9 +249,9 @@ def test_index_model_harness_detail_surface_shows_evidence_route():
     assert "relaySection('Evidence route', modelHarnessEvidenceRoute(evidenceRoute), true)" in doc
     assert ".model-harness-evidence-route" in doc
     assert ".model-harness-evidence-step" in doc
-    assert "provider registry and adapter health snapshot" in doc
-    assert "cost posture record before dispatch" in doc
-    assert "goal proof trail before continuation" in doc
+    assert "Connects to a model/vendor through a controlled boundary." in doc
+    assert "Tracks spend posture and token/call economics." in doc
+    assert "Binds model work to the orchestrator objective." in doc
 
 
 def test_index_model_harness_detail_surface_shows_trust_route():

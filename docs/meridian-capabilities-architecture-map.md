@@ -37,6 +37,10 @@ Most AI tools today are either:
 
 Meridian is a fourth shape: a **Prime-centered command system** where a persistent local brain reasons over a portfolio, dispatches worker sessions through a harness mesh, gates completion claims with proof, and treats every meaningful decision as a risk-tier choice rather than a model choice. The vendor model is a cognitive resource. The harness is the hands, senses, and memory. The user is the bottleneck for judgment, not coordination.
 
+Meridian's working memory is not a larger prompt. It is the coordinated state carried by Prime, harness heartbeats, queues, session records, Echo, Atlas, Aegis, Relay, Bifrost, and the Model Harness. Context is only the admitted subset of that state that a model receives for a specific inference. This makes **context admission** a load-bearing capability: selected state must pass relevance, freshness, proof, policy, privacy, trust, and prompt-budget gates before it becomes model-visible context.
+
+The build may still move through familiar phases such as plan, build, verify, review, and release. The runtime does not. The runtime circulates through harness interfaces on heartbeat, updates working memory, admits context, dispatches bounded cognition or workflow work, receives typed summaries, proves or blocks state transitions, and repeats.
+
 The capabilities below are the load-bearing pieces of that shape.
 
 ---

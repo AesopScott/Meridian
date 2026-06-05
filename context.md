@@ -307,6 +307,44 @@ It includes:
 
 The local brain maintains continuity. Remote models help with bounded reasoning, generation, review, and synthesis.
 
+## Working Memory
+
+Working memory is the coordinated set of systems that hold and manage currently relevant agent state beyond any single model context window.
+
+It is not one file, one prompt, or one neural model state. It is the live state carried across Prime, the harness mesh, session records, event logs, current objectives, selected Echo records, Atlas hits, proof state, queue state, model telemetry, and Bifrost-visible status.
+
+Working memory may contain pointers to long-term knowledge, summaries of retrieved material, current task state, open gates, active blockers, and the latest admitted context. It decides what should be preserved, refreshed, retrieved, summarized, injected, or withheld next.
+
+In Meridian:
+
+- Echo and Atlas provide recall and retrieval candidates.
+- Beacon, Vulcan, Source, and Workflow report live state.
+- Aegis evaluates proof, risk, policy, and admission.
+- Relay and the Model Harness convert admitted context into bounded model calls.
+- Bifrost renders the state without becoming the owner of decisions.
+- Prime coordinates the whole without absorbing raw working noise into its own context.
+
+The model sees only admitted context. Working memory is the broader coordinated state that decides what may become context.
+
+## Context Admission
+
+Context admission is the gate that turns selected working memory into model-visible context.
+
+No important model call should receive raw state just because the state exists. Before information enters a prompt, Meridian should know:
+
+- where it came from
+- why it is relevant
+- how fresh it is
+- what risk tier it affects
+- what proof or policy gate applies
+- whether it is safe to expose to the chosen provider
+- whether the payload fits the prompt budget
+- what hash, trace, or evidence will prove what was sent
+
+Default injection is zero. Echo records, Atlas excerpts, workflow summaries, proof logs, tool outputs, and worker-session state become context only when the owning harness, Relay, and Aegis allow them under the current route.
+
+This is the core difference between Meridian and a prompt chain: Meridian does not ask a model to govern its own inputs. The harness runtime admits context first; the model reasons second.
+
 ## Remote Brain
 
 A remote brain is a model or agent session used for cognitive work.
