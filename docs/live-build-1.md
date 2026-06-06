@@ -8,6 +8,32 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: implement the next Relay/Model backend slice for DeepSeek live validation and transport authority without granting live autonomous authority.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-validation`.
+
+Branch: `codex/build-1-deepseek-validation-transport-20260606`.
+
+Allowed files only: `meridian_core/model_adapter.py`, `tests/test_model_adapter.py`, `docs/deepseek-provider-validation-gate.md`, `docs/live-build-1.md`.
+
+Task:
+- Add a deterministic backend validation-state object or helper for DeepSeek direct-provider authority. It must distinguish metadata-only candidate state from validation-cleared transport state.
+- Preserve the existing exact dispatch identity rule: `deepseek-chat` is the only direct dispatch id; `deepseek-v4-pro` and `deepseek-v4-flash` remain variant/capability labels only.
+- Represent the validation gate levels needed before DeepSeek can receive autonomous implementation, review-clearing, branch/worktree movement, or live coding authority.
+- Keep the slice pure/local: no network calls, no credentials, no account probing, no live provider execution, no UI/Bifrost/FileMap edits, no shared-main write, no branch/worktree movement outside the assigned worktree, and no Polaris dependency.
+
+Proof:
+- `python -m pytest tests/test_model_adapter.py -q`
+- `git diff --check`
+- Path-scope check limited to the allowed files.
+
+Completion:
+- Commit only this slice on the assigned branch.
+- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete evidence.
+- Next Candidate: after Reviews A clearance, bind validation-cleared DeepSeek transport authority into Relay metadata/disposition without enabling unsafe bypass.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: Relay V3 Goal Runtime handoff/checkpoint display-safety audit.

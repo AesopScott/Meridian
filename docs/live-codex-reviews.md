@@ -529,7 +529,7 @@ Build 2 finding: none.
 
 Completion: Build 1 DeepSeek candidate metadata presets and Build 2 runtime-state export are review-cleared. No repair routed.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Superseded / Historical
 
 Goal: review current-main Build 1 Model Harness metadata binding, then Build 2 workflow advisory binding.
 
@@ -589,7 +589,7 @@ Build 2 finding: none.
 
 Completion: Build 1 Model Harness metadata binding and Build 2 workflow advisory binding are review-cleared. No repair routed.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Superseded / Historical
 
 Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
 
@@ -648,7 +648,7 @@ Build 2 finding: none.
 
 Completion: Build 1 Relay policy disposition runtime and Build 2 workflow work-order recovery summary are review-cleared. No repair routed.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Superseded / Historical
 
 Goal: keep Build 1/2 review hot under the rolling two-stage pipeline.
 
@@ -1078,7 +1078,7 @@ Build 3 finding: none.
 
 Completion: Build 2 command-plan audit evidence, Build 1 Relay dispatch envelope helpers, and Build 3 FileMap dispatch audit are review-cleared. No repair routed.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Superseded / Historical
 
 Goal: poll and review the next current-main Ready marker from Build 1, Build 2, or Build 3 after fresh lane reactivation.
 

@@ -8,6 +8,31 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: bind reviewed backend prompt-payload and model metadata surfaces into a deterministic Bifrost backend view-model sample.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost-backend-binding`.
+
+Branch: `codex/build-5-bifrost-backend-binding-20260606`.
+
+Allowed files only: `bifrost/cockpit.py`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
+
+Task:
+- Add a narrow deterministic view-model/sample binding that consumes already reviewed backend structures for Relay prompt payload evidence and Model Harness capability metadata.
+- Keep this as backend/view-model binding only: no live provider calls, no browser automation, no Electron changes, no raw prompt/provider response text, no FileMap edits, no branch/worktree movement, no shared-main write, and no Polaris dependency.
+- Render or expose enough structured fields for future UI to show provider/model identity, route kind, trust state, prompt payload label, budget percent, growth state, external-review status, and evidence refs from backend data.
+
+Proof:
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+- `git diff --check`
+- Path-scope check limited to the allowed files.
+
+Completion:
+- Commit only this slice on the assigned branch.
+- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete evidence.
+- Next Candidate: live cockpit wiring after Reviews B clears the backend/view-model binding.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: audit current-main Bifrost render/preview surfaces for V3 Goal Runtime checkpoint/update execution exposure.

@@ -8,6 +8,32 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task
+
+Goal: keep FileMap current for the backend restart wave and V2 tracker correction.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-backend-restart-filemap`.
+
+Branch: `codex/build-3-backend-restart-filemap-20260606`.
+
+Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/v2-progress-tracker.md`, `docs/live-build-3.md`.
+
+Task:
+- Pull current `origin/main` and inspect the backend restart wave queue changes in `docs/live-build-1.md` through `docs/live-build-5.md`, plus the corrected `docs/v2-progress-tracker.md`.
+- Register only existing files that are missing from runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS`.
+- If no FileMap changes are required, record a no-op audit with concrete inspected paths and proof.
+- Do not edit backend implementation files beyond FileMap surfaces, do not move branches/worktrees, do not write shared main, do not touch UI/Bifrost runtime code, and do not touch Polaris.
+
+Proof:
+- `python -m pytest tests/test_filemap.py -q`
+- `git diff --check`
+- Concrete inspected path list.
+
+Completion:
+- Commit only this slice on the assigned branch.
+- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete evidence.
+- Next Candidate: repeat FileMap audit after Build 1/2/4 backend branches land or are repaired.
+
 ## Completed / Ready For Codex Review
 
 Goal: refresh FileMap audit for current V3 goal/checkpoint runtime work and pending review branches.

@@ -15,13 +15,13 @@
 | Prime Autonomy | 3 | 0 | 0 | 0 | 3 | 100% |
 | Echo Harness | 2 | 0 | 2 | 0 | 4 | 100% |
 | Atlas Harness | 2 | 0 | 1 | 0 | 3 | 100% |
-| Relay/Model Harness | 2 | 0 | 2 | 6 | 10 | 20% clear + 20% baseline |
+| Relay/Model Harness | 7 | 0 | 2 | 1 | 10 | 70% clear + 20% baseline |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Compass Harness | 0 | 0 | 1 | 4 | 5 | 20% baseline |
 | Session Lifecycle Harness | 1 | 0 | 1 | 5 | 7 | 29% |
 | Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **14** | **0** | **9** | **21** | **44** | **32% Clear + 20% Baseline** |
+| **Total V2** | **19** | **0** | **9** | **16** | **44** | **43% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -40,6 +40,11 @@
 
 - [x] **Relay + CognitionPolicy Integration:** dispatching with proof gate enforcement - see Aegis entry above, commit `b99ce1d`; review cleared.
 - [x] **Relay + Prompt Payload Meter Helper:** `PromptPayloadSnapshot` / `PayloadStatus` domain helper - built in `638117f`, repaired in `8e8c87b`; review cleared by Reviews A on 2026-05-31. This is the runtime helper only; Bifrost visibility remains a separate item below.
+- [x] **Model Harness + Metadata Binding:** provider-neutral `ModelHarnessMetadata`, DeepSeek candidate metadata presets, route metadata binding, prompt-drag defaults, external-review evidence refs, and Relay model capability summaries - reviewed in `docs/live-codex-reviews.md` with `tests/test_model_adapter.py tests/test_relay_executor.py` passing.
+- [x] **Relay + Prompt Payload Evidence Binding:** Relay dispatch records structured prompt payload evidence, budget status, growth state, tokenizer family, and missing-telemetry tags without storing raw prompt text - review-cleared by Reviews A.
+- [x] **Relay + Dispatch Metadata Envelope:** provider-neutral dispatch metadata envelope and validation/fail-closed advisory fields for future HTTP/provider transports - review-cleared by Reviews A.
+- [x] **Relay + PromptPacket Proof Metadata Binding:** PromptPacket proof metadata is carried into Relay dispatch envelopes and decision records without changing the model payload boundary - review-cleared by Reviews A.
+- [x] **Relay + Aegis PromptPacket Policy Runtime:** Relay evaluates Aegis PromptPacket proof policy before provider transport and records display-safe policy evidence/disposition for allow, warn, demote, human-gate, block, and missing-metadata outcomes - review-cleared by Reviews A.
 
 ### Echo Harness
 
@@ -112,12 +117,7 @@
 
 ### Relay / Model Harness
 
-- [ ] **Model Harness + Metadata:** capability metadata and prompt-drag telemetry fields - module: `meridian_core/model_adapter.py`; contract: `docs/model-harness-v2-contract.md`.
-- [ ] **Model Harness + DeepSeek Primary Provider:** DeepSeek direct-API adapter metadata and routing preset - default `deepseek-v4-pro`, fast lane `deepseek-v4-flash`; must route through Relay/Aegis like Claude and OpenAI, not as a bypass; starts in candidate trust state until the validation gate proves coding reliability.
-- [ ] **Relay/Bifrost + Visible Prompt Payload Meter:** wire the reviewed `PromptPayloadSnapshot` helper into dispatch and cockpit visibility - show `(under 1k)` / `(12.4k)` style label, budget percent, and growth delta for every model dispatch; queue/Q-mode growth across polls is a DEGRADED prompt-drag finding.
-- [ ] **Relay + Model Adapter:** route capability/tier/budget metadata binding - no vendor-specific presets in first slice.
-- [ ] **Relay + Dispatch Hardening:** provider-neutral HTTP transport envelope updates for metadata pass-through.
-- [ ] **Relay + PromptPacket:** proof metadata integration into dispatch (prompt_packet.py already v1 complete; v2 adds budget/proof bindings).
+- [ ] **Model Harness + DeepSeek Live Validation/Transport:** DeepSeek remains candidate-trust metadata only. Complete the validation-gate proof and live transport authority before Prime can route autonomous implementation, review-clearing, branch/worktree movement, or live coding lanes through DeepSeek.
 
 ### Session Lifecycle Harness
 

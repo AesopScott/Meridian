@@ -8,6 +8,32 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Goal: implement Compass project definition runtime as the next backend boundary slice.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606`.
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Task:
+- Add or complete deterministic Compass domain objects/helpers for project identity as a bounded body of work with outcome, context, artifacts, objectives, tasks, proof trail, and relationship to repo/venture/session.
+- Prove project identity does not collapse merely because two projects share a repo path, venture, or session label.
+- Surface ambiguous or incomplete project identity as a Compass question/blocker rather than silently selecting hidden context.
+- Preserve pure backend behavior: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main write, no raw cross-project transcript injection, and no Polaris dependency.
+
+Proof:
+- `python -m pytest tests/test_compass.py -q`
+- `git diff --check`
+- Path-scope check limited to the allowed files.
+
+Completion:
+- Commit only this slice on the assigned branch.
+- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete evidence.
+- Next Candidate: Compass bounds/scope runtime after project definition review clears.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: add Aegis V3 Goal Runtime checkpoint discipline advisory gate.
