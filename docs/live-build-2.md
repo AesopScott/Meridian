@@ -22,6 +22,9 @@ Finding:
 - Codex Reviews A found that Build 2 commit `9ac84c59c` adds `SessionLiveStateEvidence`, but `to_dict()` serializes raw `project_path`, raw `worktree_path`, and raw `blocker_summary` directly into the exported payload at `meridian_core/session_lifecycle.py:438-475`.
 - Evidence refs are redacted, but the primary serialized object can still leak exact filesystem paths and free-text blocker content to Beacon/Prime/recovery consumers.
 
+Resume status:
+- 2026-06-06 14:34 -06:00: Coordinator resumed existing Polaris Claude Haiku card `chat_1780776511631` with this repair prompt. The lane accepted the prompt but immediately returned `You've hit your monthly spend limit · raise it at claude.ai/settings/usage`. Keep the repair active for Claude Max Haiku/Opus once the account limit is raised; do not substitute Codex as implementer.
+
 Task:
 - Repair `SessionLiveStateEvidence.to_dict()` so serialized output uses bounded display-safe forms for project path, worktree path, and blocker summary. Raw filesystem paths and raw blocker text must not appear in the exported dictionary.
 - Add regression tests proving `to_dict()` does not contain raw `project_path`, raw `worktree_path`, or raw blocker text while still preserving useful bounded labels/refs for downstream advisory consumers.

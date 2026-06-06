@@ -29,6 +29,7 @@ Repair required:
 - The 2026-06-06 Build 4H marker was not review-ready. Branch `codex/build-4-compass-project-definition-20260606` only contains a queue marker commit (`5b2166278`) on top of `3b7bae9f2`; it does not contain the required `meridian_core/compass.py` or `tests/test_compass.py` implementation diff.
 - Do not review or land this Build 4 slice until a Claude Max build lane completes the actual allowed-file implementation or the coordinator explicitly promotes a verified existing Compass implementation branch for review.
 - Current blocker: Claude Max Haiku resumes returned `You've hit your monthly spend limit`; keep this task parked rather than substituting Codex as the implementer.
+- 2026-06-06 14:34 -06:00: Coordinator resumed existing Polaris Claude Haiku card `chat_1780776552390` with the implementation prompt. The lane accepted the prompt and immediately returned the same spend-limit error. Resume on Haiku/Opus after the account limit is raised.
 - Next Candidate: Compass bounds/scope runtime after project definition review clears.
 
 ## Coordinator Override - Completed / Ready For Codex Review

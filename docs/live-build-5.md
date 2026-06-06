@@ -27,6 +27,9 @@ Review note:
 - Codex Reviews B found the 2026-06-06 Build 5 branch `codex/build-5-bifrost-backend-binding-20260606` / commit `ac60db5bd` only edits `docs/live-build-5.md` and does not modify `bifrost/cockpit.py` or `tests/test_bifrost_cockpit.py`.
 - Do not treat that marker as review-cleared. Complete the actual backend/view-model binding in the allowed runtime/test files, or provide a verified no-op proof showing the requested binding already exists in current main with focused tests.
 
+Resume status:
+- 2026-06-06 14:34 -06:00: Coordinator resumed existing Polaris Claude Haiku card `chat_1780776554658` with this repair prompt. The lane accepted the prompt but immediately returned `You've hit your monthly spend limit · raise it at claude.ai/settings/usage`. Keep the repair active for Claude Max Haiku/Opus once the account limit is raised; do not substitute Codex as implementer.
+
 Proof:
 - `python -m pytest tests/test_bifrost_cockpit.py -q`
 - `git diff --check`

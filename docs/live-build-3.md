@@ -22,6 +22,9 @@ Finding:
 - Codex Reviews B verified Build 3 commits `ee9ef8a76` and `b6a8d6971` are scope-clean and tests pass, but the branch updates only `meridian_core/filemap.py`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
 - The active task allowed and required `docs/FileMap.md` coverage, and the completion text claimed both runtime FileMap and docs mirror alignment. The reviewed branch did not update `docs/FileMap.md`, so the human FileMap mirror remains stale for the newly registered backend paths.
 
+Resume status:
+- 2026-06-06 14:34 -06:00: Coordinator resumed existing Polaris Claude Haiku card `chat_1780776514088` with this repair prompt. The lane accepted the prompt but immediately returned `You've hit your monthly spend limit · raise it at claude.ai/settings/usage`. Keep the repair active for Claude Max Haiku/Opus once the account limit is raised; do not substitute Codex as implementer.
+
 Task:
 - Update `docs/FileMap.md` to mirror the backend restart wave registrations added in `meridian_core/filemap.py` / `_REQUIRED_PATHS`, or record a concrete no-op proof if each new runtime path already has accurate docs mirror coverage.
 - Refresh the Build 3 completion marker so it accurately states which FileMap surfaces were updated and inspected.
