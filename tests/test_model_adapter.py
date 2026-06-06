@@ -10,6 +10,8 @@ from meridian_core.model_adapter import (
     AdapterRegistry,
     DEEPSEEK_DIRECT_ENDPOINT,
     DEEPSEEK_DIRECT_MODEL,
+    DeepSeekValidationLevel,
+    DeepSeekValidationState,
     EnvConfiguredModelAdapter,
     FakeModelAdapter,
     HttpJsonModelAdapter,
@@ -23,6 +25,7 @@ from meridian_core.model_adapter import (
     bind_model_route_metadata,
     deepseek_candidate_metadata_preset,
     deepseek_candidate_route_presets,
+    deepseek_validation_state_from_preset,
 )
 from meridian_core.prompt_payload_meter import PromptPayloadSnapshot
 from meridian_core.relay import CostPosture, LatencyPosture
@@ -666,3 +669,234 @@ class TestHttpJsonModelAdapter:
             http_post=fake_post,
         )
         assert adapter("approved prompt") == "model response text"
+
+
+class TestDeepSeekValidationState:
+    def test_validation_level_enum_defines_all_gates(self) -> None:
+        assert DeepSeekValidationLevel.METADATA_ONLY.value == "level-0:metadata-only"
+        assert DeepSeekValidationLevel.VALIDATION_CLEARED.value == "level-1:validation-cleared"
+        assert DeepSeekValidationLevel.REVIEW_CLEARANCE.value == "level-2:review-clearance"
+        assert DeepSeekValidationLevel.BRANCH_MOVEMENT.value == "level-3:branch-movement"
+        assert DeepSeekValidationLevel.AUTONOMOUS_CODING.value == "level-4:autonomous-coding"
+
+    def test_metadata_only_state_blocks_all_operations(self) -> None:
+        state = DeepSeekValidationState(
+            current_level=DeepSeekValidationLevel.METADATA_ONLY,
+            can_receive_prompt_payloads=False,
+            can_clear_reviews=False,
+            can_move_branches=False,
+            can_enable_autonomous_coding=False,
+            blocked_operations=(
+                "prompt_payload_dispatch",
+                "review_clearance",
+                "branch_movement",
+                "autonomous_coding",
+            ),
+            validation_ref="deepseek-validation:level-0:metadata-only",
+        )
+        assert state.current_level == DeepSeekValidationLevel.METADATA_ONLY
+        assert not state.can_receive_prompt_payloads
+        assert not state.can_clear_reviews
+        assert not state.can_move_branches
+        assert not state.can_enable_autonomous_coding
+        assert len(state.blocked_operations) == 4
+
+    def test_validation_cleared_state_allows_payload_dispatch(self) -> None:
+        state = DeepSeekValidationState(
+            current_level=DeepSeekValidationLevel.VALIDATION_CLEARED,
+            can_receive_prompt_payloads=True,
+            can_clear_reviews=False,
+            can_move_branches=False,
+            can_enable_autonomous_coding=False,
+            blocked_operations=(
+                "review_clearance",
+                "branch_movement",
+                "autonomous_coding",
+            ),
+            validation_ref="deepseek-validation:level-1:validation-cleared",
+        )
+        assert state.current_level == DeepSeekValidationLevel.VALIDATION_CLEARED
+        assert state.can_receive_prompt_payloads
+        assert not state.can_clear_reviews
+        assert not state.can_move_branches
+        assert not state.can_enable_autonomous_coding
+
+    def test_metadata_only_rejects_any_operational_authority(self) -> None:
+        with pytest.raises(
+            ModelAdapterConfigError, match="metadata-only validation level"
+        ):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.METADATA_ONLY,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=False,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-0:metadata-only",
+            )
+
+    def test_validation_cleared_requires_prompt_payload_authority(self) -> None:
+        with pytest.raises(
+            ModelAdapterConfigError, match="validation-cleared level must grant"
+        ):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.VALIDATION_CLEARED,
+                can_receive_prompt_payloads=False,
+                can_clear_reviews=False,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-1:validation-cleared",
+            )
+
+    def test_validation_cleared_blocks_review_branch_autonomous(self) -> None:
+        with pytest.raises(
+            ModelAdapterConfigError, match="validation-cleared level cannot grant"
+        ):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.VALIDATION_CLEARED,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=True,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-1:validation-cleared",
+            )
+
+    def test_state_is_frozen(self) -> None:
+        state = DeepSeekValidationState(
+            current_level=DeepSeekValidationLevel.METADATA_ONLY,
+            can_receive_prompt_payloads=False,
+            can_clear_reviews=False,
+            can_move_branches=False,
+            can_enable_autonomous_coding=False,
+            blocked_operations=(),
+            validation_ref="deepseek-validation:level-0:metadata-only",
+        )
+        with pytest.raises(FrozenInstanceError):
+            state.can_receive_prompt_payloads = True  # type: ignore[misc]
+
+    def test_derive_state_from_metadata_only_preset(self) -> None:
+        preset = deepseek_candidate_route_presets()[0]
+        state = deepseek_validation_state_from_preset(preset)
+        assert state.current_level == DeepSeekValidationLevel.METADATA_ONLY
+        assert not state.can_receive_prompt_payloads
+        assert not state.can_clear_reviews
+        assert not state.can_move_branches
+        assert not state.can_enable_autonomous_coding
+        assert state.validation_ref == "deepseek-validation:level-0:metadata-only"
+
+    def test_derive_state_preserves_dispatch_identity_rule(self) -> None:
+        preset = deepseek_candidate_route_presets()[0]
+        state = deepseek_validation_state_from_preset(preset)
+        assert state.current_level == DeepSeekValidationLevel.METADATA_ONLY
+        assert preset.dispatch_model == DEEPSEEK_DIRECT_MODEL
+        assert preset.dispatch_model == "deepseek-chat"
+
+    def test_rejects_non_deepseek_presets(self) -> None:
+        non_deepseek = ModelCandidateRoutePreset(
+            provider_name="anthropic",
+            dispatch_model="claude-opus",
+            variant_label="claude-opus-4",
+            lane="default_quality",
+            api_mode="direct",
+            trust_state="trusted",
+            requires_external_review=False,
+            external_review_status="not_required",
+            direct_api_endpoint="https://api.anthropic.com/v1",
+            capability_tier="primary",
+            context_budget=200000,
+            prompt_payload_budget=150000,
+            allowed_task_types=("all",),
+            blocked_task_types=(),
+            max_risk_tier=10,
+            q_mode_flat=False,
+            can_clear_reviews=True,
+            can_move_branches=True,
+            bypasses_relay_aegis=False,
+            autonomous_coding_allowed=True,
+            known_authorities=("anthropic",),
+        )
+        with pytest.raises(
+            ModelAdapterConfigError, match="only for direct DeepSeek"
+        ):
+            deepseek_validation_state_from_preset(non_deepseek)
+
+    def test_rejects_indirect_deepseek_dispatch_at_preset_construction(self) -> None:
+        direct_preset = deepseek_candidate_route_presets()[0]
+        with pytest.raises(ModelAdapterConfigError, match="deepseek-chat"):
+            ModelCandidateRoutePreset(
+                provider_name="deepseek",
+                dispatch_model="openrouter-deepseek",
+                variant_label=direct_preset.variant_label,
+                lane=direct_preset.lane,
+                api_mode=direct_preset.api_mode,
+                trust_state=direct_preset.trust_state,
+                requires_external_review=direct_preset.requires_external_review,
+                external_review_status=direct_preset.external_review_status,
+                direct_api_endpoint=direct_preset.direct_api_endpoint,
+                capability_tier=direct_preset.capability_tier,
+                context_budget=direct_preset.context_budget,
+                prompt_payload_budget=direct_preset.prompt_payload_budget,
+                allowed_task_types=direct_preset.allowed_task_types,
+                blocked_task_types=direct_preset.blocked_task_types,
+                max_risk_tier=direct_preset.max_risk_tier,
+                q_mode_flat=direct_preset.q_mode_flat,
+                can_clear_reviews=direct_preset.can_clear_reviews,
+                can_move_branches=direct_preset.can_move_branches,
+                bypasses_relay_aegis=direct_preset.bypasses_relay_aegis,
+                autonomous_coding_allowed=direct_preset.autonomous_coding_allowed,
+                known_authorities=direct_preset.known_authorities,
+            )
+
+    def test_rejects_unknown_validation_reference(self) -> None:
+        direct_preset = deepseek_candidate_route_presets()[0]
+        with pytest.raises(ModelAdapterConfigError, match="Unknown DeepSeek"):
+            deepseek_validation_state_from_preset(
+                ModelCandidateRoutePreset(
+                    provider_name="deepseek",
+                    dispatch_model=direct_preset.dispatch_model,
+                    variant_label=direct_preset.variant_label,
+                    lane=direct_preset.lane,
+                    api_mode=direct_preset.api_mode,
+                    trust_state=direct_preset.trust_state,
+                    requires_external_review=direct_preset.requires_external_review,
+                    external_review_status=direct_preset.external_review_status,
+                    direct_api_endpoint=direct_preset.direct_api_endpoint,
+                    capability_tier=direct_preset.capability_tier,
+                    context_budget=direct_preset.context_budget,
+                    prompt_payload_budget=direct_preset.prompt_payload_budget,
+                    allowed_task_types=direct_preset.allowed_task_types,
+                    blocked_task_types=direct_preset.blocked_task_types,
+                    max_risk_tier=direct_preset.max_risk_tier,
+                    q_mode_flat=direct_preset.q_mode_flat,
+                    can_clear_reviews=direct_preset.can_clear_reviews,
+                    can_move_branches=direct_preset.can_move_branches,
+                    bypasses_relay_aegis=direct_preset.bypasses_relay_aegis,
+                    autonomous_coding_allowed=direct_preset.autonomous_coding_allowed,
+                    known_authorities=direct_preset.known_authorities,
+                    validation_evidence_ref="unknown-validation:xyz",
+                )
+            )
+
+    def test_validation_state_blocks_dangerous_operations_at_metadata_level(self) -> None:
+        state = deepseek_validation_state_from_preset(
+            deepseek_candidate_route_presets()[0]
+        )
+        assert "prompt_payload_dispatch" in state.blocked_operations
+        assert "review_clearance" in state.blocked_operations
+        assert "branch_movement" in state.blocked_operations
+        assert "autonomous_coding" in state.blocked_operations
+
+    def test_fast_lane_preset_derives_same_validation_level_as_default(self) -> None:
+        default_state = deepseek_validation_state_from_preset(
+            deepseek_candidate_route_presets()[0]
+        )
+        fast_state = deepseek_validation_state_from_preset(
+            deepseek_candidate_route_presets()[1]
+        )
+        assert default_state.current_level == fast_state.current_level
+        assert (
+            default_state.can_receive_prompt_payloads
+            == fast_state.can_receive_prompt_payloads
+        )

@@ -11,6 +11,7 @@ import json
 import os
 import urllib.request
 from dataclasses import dataclass
+from enum import Enum
 from types import MappingProxyType
 from typing import Any, Callable, Mapping, Protocol
 
@@ -19,6 +20,100 @@ from .relay import ModelRole
 
 class ModelAdapterConfigError(RuntimeError):
     """Raised when a live model adapter is missing required configuration."""
+
+
+class DeepSeekValidationLevel(Enum):
+    """Validation gate levels for DeepSeek direct-provider authority.
+
+    Each level gates progressively more dangerous operations.
+    Levels are ordered: only clear when prior level is satisfied.
+    """
+
+    METADATA_ONLY = "level-0:metadata-only"
+    VALIDATION_CLEARED = "level-1:validation-cleared"
+    REVIEW_CLEARANCE = "level-2:review-clearance"
+    BRANCH_MOVEMENT = "level-3:branch-movement"
+    AUTONOMOUS_CODING = "level-4:autonomous-coding"
+
+
+@dataclass(frozen=True)
+class DeepSeekValidationState:
+    """Deterministic validation-state object for DeepSeek direct-provider authority.
+
+    Distinguishes metadata-only candidate state from validation-cleared transport state.
+    Records which operations are gated by validation levels.
+    """
+
+    current_level: DeepSeekValidationLevel
+    can_receive_prompt_payloads: bool
+    can_clear_reviews: bool
+    can_move_branches: bool
+    can_enable_autonomous_coding: bool
+    blocked_operations: tuple[str, ...]
+    validation_ref: str
+
+    def __post_init__(self) -> None:
+        if self.current_level == DeepSeekValidationLevel.METADATA_ONLY:
+            if self.can_receive_prompt_payloads or self.can_clear_reviews or self.can_move_branches or self.can_enable_autonomous_coding:
+                raise ModelAdapterConfigError(
+                    "metadata-only validation level cannot grant any operational authority"
+                )
+        elif self.current_level == DeepSeekValidationLevel.VALIDATION_CLEARED:
+            if not self.can_receive_prompt_payloads:
+                raise ModelAdapterConfigError(
+                    "validation-cleared level must grant prompt payload authority"
+                )
+            if self.can_clear_reviews or self.can_move_branches or self.can_enable_autonomous_coding:
+                raise ModelAdapterConfigError(
+                    "validation-cleared level cannot grant review/branch/autonomous authority"
+                )
+
+
+def deepseek_validation_state_from_preset(preset: ModelCandidateRoutePreset) -> DeepSeekValidationState:
+    """Derive the validation state from a DeepSeek candidate preset.
+
+    Ensures consistency between preset authority bits and validation levels.
+    """
+    if preset.provider_name != "deepseek" or preset.dispatch_model != DEEPSEEK_DIRECT_MODEL:
+        raise ModelAdapterConfigError(
+            "validation state is only for direct DeepSeek dispatch (deepseek-chat)"
+        )
+
+    validation_ref = preset.validation_evidence_ref or "deepseek-validation:level-0:metadata-only"
+
+    if validation_ref.startswith("deepseek-validation:level-0"):
+        return DeepSeekValidationState(
+            current_level=DeepSeekValidationLevel.METADATA_ONLY,
+            can_receive_prompt_payloads=False,
+            can_clear_reviews=False,
+            can_move_branches=False,
+            can_enable_autonomous_coding=False,
+            blocked_operations=(
+                "prompt_payload_dispatch",
+                "review_clearance",
+                "branch_movement",
+                "autonomous_coding",
+            ),
+            validation_ref=validation_ref,
+        )
+    elif validation_ref.startswith("deepseek-validation:level-1"):
+        return DeepSeekValidationState(
+            current_level=DeepSeekValidationLevel.VALIDATION_CLEARED,
+            can_receive_prompt_payloads=True,
+            can_clear_reviews=False,
+            can_move_branches=False,
+            can_enable_autonomous_coding=False,
+            blocked_operations=(
+                "review_clearance",
+                "branch_movement",
+                "autonomous_coding",
+            ),
+            validation_ref=validation_ref,
+        )
+    else:
+        raise ModelAdapterConfigError(
+            f"Unknown DeepSeek validation reference: {validation_ref}"
+        )
 
 
 @dataclass(frozen=True)
