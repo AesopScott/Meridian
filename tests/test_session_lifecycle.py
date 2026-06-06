@@ -27,6 +27,7 @@ from meridian_core.session_lifecycle import (
     SessionPermissionSummary,
     WorkflowWorkOrderRecoverySummary,
     SessionRuntimeStateExport,
+    SessionLiveStateEvidence,
     SessionLiveControlPermissionGate,
     SessionRecoveryReadinessSummary,
     SessionLiveControlCommandPlanStagingRecord,
@@ -36,6 +37,7 @@ from meridian_core.session_lifecycle import (
     V3GoalRuntimeCheckpointProofPacket,
     SessionLifecycleState,
     SessionCommandPlan,
+    build_session_live_state_evidence,
     build_command_staging_review_packet,
     build_command_preview_proof,
     build_close_archive_write_through_proof,
@@ -1932,6 +1934,161 @@ class TestSessionRuntimeStateExport:
         assert "command.target_session_mismatch" in export.human_gate_blockers
         assert "workflow.target_session_mismatch" in export.human_gate_blockers
         assert "workflow.target_session_mismatch=True" in export.evidence_refs
+
+
+class TestSessionLiveStateEvidence:
+    """Tests for session live state evidence export."""
+
+    @pytest.fixture
+    def session_state(self):
+        """Create a session with comprehensive lifecycle state."""
+        now = datetime(2026, 6, 2, 10, 30, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE, OperationScope.WORKTREE_CREATE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=2),
+            task_scope="live-state-evidence",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-evidence",
+            session_name="Build 2 Evidence",
+            project_name="Meridian",
+            project_path="/home/scott/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-haiku-4-5",
+            status=SessionStatus.RUNNING,
+            worktree_path="/worktree/build-2-session-state-evidence",
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="live-state-evidence",
+            last_queue_read_at=now - timedelta(minutes=5),
+            last_queue_write_at=now - timedelta(minutes=3),
+            last_prompt_sent_at=now - timedelta(minutes=1),
+            last_prompt_payload_size=8500,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=ProofState.COMMAND_STAGED,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def test_live_state_evidence_captures_all_session_fields(self, session_state):
+        """Live state evidence includes queue id/path, worktree, branch, model/provider, timestamps, proof, blocker, project, and evidence refs."""
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(session_state, timestamp=timestamp)
+        serialized = evidence.to_dict()
+
+        assert isinstance(evidence, SessionLiveStateEvidence)
+        assert evidence.session_id == session_state.session_id
+        assert evidence.session_name == session_state.session_name
+        assert evidence.project_name == session_state.project_name
+        assert evidence.project_path == session_state.project_path
+        assert evidence.assigned_queue_file == session_state.assigned_queue_file
+        assert evidence.worktree_path == session_state.worktree_path
+        assert evidence.branch_name == session_state.branch_name
+        assert evidence.model_provider == session_state.model_provider
+        assert evidence.model_name == session_state.model_name
+        assert evidence.status == session_state.status
+        assert evidence.health_state == session_state.health_state
+        assert evidence.current_task_id == session_state.current_task_id
+        assert evidence.last_queue_read_at == session_state.last_queue_read_at
+        assert evidence.last_queue_write_at == session_state.last_queue_write_at
+        assert evidence.last_prompt_sent_at == session_state.last_prompt_sent_at
+        assert evidence.proof_state == session_state.proof_state
+        assert evidence.blocker_summary == session_state.blocker_summary
+        assert evidence.timestamp == timestamp
+
+    def test_live_state_evidence_includes_display_safe_evidence_refs(self, session_state):
+        """Live state evidence refs are display-safe without raw paths or credentials."""
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(session_state, timestamp=timestamp)
+
+        # Should include safe references
+        assert any("session.id=" in ref for ref in evidence.evidence_refs)
+        assert any("project.name=" in ref for ref in evidence.evidence_refs)
+        assert any("model.provider=" in ref for ref in evidence.evidence_refs)
+        assert any("model.name=" in ref for ref in evidence.evidence_refs)
+        assert any("branch.name=" in ref for ref in evidence.evidence_refs)
+        assert any("proof.state=" in ref for ref in evidence.evidence_refs)
+        assert any("queue.file=" in ref for ref in evidence.evidence_refs)
+
+        # Should NOT expose raw filesystem paths
+        assert not any(session_state.project_path in ref for ref in evidence.evidence_refs)
+        assert not any(session_state.worktree_path in ref for ref in evidence.evidence_refs)
+
+        # Paths should be redacted to safe placeholders
+        assert any("worktree.path_safe=" in ref for ref in evidence.evidence_refs)
+        assert any("project.path_safe=" in ref for ref in evidence.evidence_refs)
+
+    def test_live_state_evidence_serializes_to_json_safe_dict(self, session_state):
+        """Serialized evidence is JSON-safe with ISO timestamp strings."""
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(session_state, timestamp=timestamp)
+        serialized = evidence.to_dict()
+
+        # All timestamps should be ISO format strings
+        assert isinstance(serialized["last_queue_read_at"], str)
+        assert isinstance(serialized["last_queue_write_at"], str)
+        assert isinstance(serialized["last_prompt_sent_at"], str)
+        assert isinstance(serialized["timestamp"], str)
+
+        # All enums should be converted to values
+        assert isinstance(serialized["status"], str)
+        assert serialized["status"] == "running"
+        assert isinstance(serialized["health_state"], str)
+        assert serialized["health_state"] == "healthy"
+        assert isinstance(serialized["proof_state"], str)
+        assert serialized["proof_state"] == "command_staged"
+
+        # Evidence refs should be a list
+        assert isinstance(serialized["evidence_refs"], list)
+        assert len(serialized["evidence_refs"]) > 0
+
+    def test_live_state_evidence_with_no_blocker(self, session_state):
+        """Live state evidence handles sessions with no blockers."""
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(session_state, timestamp=timestamp)
+        serialized = evidence.to_dict()
+
+        assert evidence.blocker_summary is None
+        assert serialized["blocker_summary"] is None
+        assert any("blocker_summary=none" in ref for ref in evidence.evidence_refs)
+
+    def test_live_state_evidence_with_blocker(self, session_state):
+        """Live state evidence redacts blocker content."""
+        blocked_state = SessionLifecycleState(
+            **{**session_state.__dict__, "blocker_summary": "Waiting for review gate approval"}
+        )
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(blocked_state, timestamp=timestamp)
+        serialized = evidence.to_dict()
+
+        assert evidence.blocker_summary == blocked_state.blocker_summary
+        # Blocker content should be captured but referenced safely in evidence refs
+        assert any("blocker_summary=" in ref for ref in evidence.evidence_refs)
+
+    def test_live_state_evidence_with_no_project_path(self, session_state):
+        """Live state evidence handles sessions with no project path."""
+        no_path_state = SessionLifecycleState(
+            **{**session_state.__dict__, "project_path": None}
+        )
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(no_path_state, timestamp=timestamp)
+
+        assert evidence.project_path is None
+        assert any("project.path_safe=none" in ref for ref in evidence.evidence_refs)
 
 
 class TestSessionLiveControlPermissionGate:

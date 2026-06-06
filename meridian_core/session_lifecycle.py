@@ -428,6 +428,57 @@ class SessionRuntimeStateExport:
 
 
 @dataclass(frozen=True)
+class SessionLiveStateEvidence:
+    """Display-safe live state evidence for backend recovery/advisory consumers."""
+
+    evidence_id: str
+    session_id: str
+    session_name: str
+    project_name: str
+    project_path: Optional[str]
+    assigned_queue_file: str
+    worktree_path: str
+    branch_name: str
+    model_provider: str
+    model_name: str
+    status: SessionStatus
+    health_state: HealthState
+    current_task_id: Optional[str]
+    last_queue_read_at: datetime
+    last_queue_write_at: datetime
+    last_prompt_sent_at: datetime
+    proof_state: ProofState
+    blocker_summary: Optional[str]
+    evidence_refs: tuple[str, ...]
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize live state evidence to JSON-safe display-safe metadata."""
+        return {
+            "evidence_id": self.evidence_id,
+            "session_id": self.session_id,
+            "session_name": self.session_name,
+            "project_name": self.project_name,
+            "project_path": self.project_path,
+            "assigned_queue_file": self.assigned_queue_file,
+            "worktree_path": self.worktree_path,
+            "branch_name": self.branch_name,
+            "model_provider": self.model_provider,
+            "model_name": self.model_name,
+            "status": self.status.value,
+            "health_state": self.health_state.value,
+            "current_task_id": self.current_task_id,
+            "last_queue_read_at": self.last_queue_read_at.isoformat(),
+            "last_queue_write_at": self.last_queue_write_at.isoformat(),
+            "last_prompt_sent_at": self.last_prompt_sent_at.isoformat(),
+            "proof_state": self.proof_state.value,
+            "blocker_summary": self.blocker_summary,
+            "evidence_refs": list(self.evidence_refs),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
 class SessionLiveControlPermissionGate:
     """Advisory permission gate for future live-control execution readiness."""
 
@@ -1690,6 +1741,70 @@ def export_session_runtime_state_for_workflow_recovery(
         permission_blockers=permission_blockers,
         review_gate_blockers=review_gate_blockers,
         human_gate_blockers=tuple(dict.fromkeys(human_gate_blockers)),
+        evidence_refs=tuple(evidence_refs),
+        timestamp=observed_at,
+    )
+
+
+def build_session_live_state_evidence(
+    session: SessionLifecycleState,
+    timestamp: Optional[datetime] = None,
+) -> SessionLiveStateEvidence:
+    """Build display-safe live state evidence for backend recovery/advisory consumers.
+
+    Captures session queue id/path, worktree, branch, model/provider label,
+    last read/write/prompt timestamps, proof state, blocker summary, project
+    assignment, and display-safe evidence refs.
+
+    This is pure advisory metadata. It does not spawn, inspect, move, restart,
+    or steer sessions. It does not expose raw prompts, credentials, or unbounded
+    filesystem paths.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+
+    evidence_refs = [
+        f"evidence.id={session.session_id}:{observed_at.isoformat()}",
+        f"session.id={session.session_id}",
+        f"session.name={session.session_name}",
+        f"project.name={session.project_name}",
+        f"project.path_safe={'<path>' if session.project_path else 'none'}",
+        f"queue.file={session.assigned_queue_file}",
+        f"worktree.path_safe={'<worktree>' if session.worktree_path else 'none'}",
+        f"branch.name={session.branch_name}",
+        f"model.provider={session.model_provider}",
+        f"model.name={session.model_name}",
+        f"status={session.status.value}",
+        f"health={session.health_state.value}",
+        f"current_task_id={session.current_task_id or 'none'}",
+        f"last_queue_read_at={session.last_queue_read_at.isoformat()}",
+        f"last_queue_write_at={session.last_queue_write_at.isoformat()}",
+        f"last_prompt_sent_at={session.last_prompt_sent_at.isoformat()}",
+        f"proof.state={session.proof_state.value}",
+        f"review.cadence={session.review_cadence_state.value}",
+        f"blocker_summary={'<blocker>' if session.blocker_summary else 'none'}",
+        f"permission.state={session.permission_context.branch_permission_state.value}",
+        f"harness.role={session.harness_role.value}",
+    ]
+
+    return SessionLiveStateEvidence(
+        evidence_id=f"{session.session_id}:{observed_at.isoformat()}",
+        session_id=session.session_id,
+        session_name=session.session_name,
+        project_name=session.project_name,
+        project_path=session.project_path,
+        assigned_queue_file=session.assigned_queue_file,
+        worktree_path=session.worktree_path,
+        branch_name=session.branch_name,
+        model_provider=session.model_provider,
+        model_name=session.model_name,
+        status=session.status,
+        health_state=session.health_state,
+        current_task_id=session.current_task_id,
+        last_queue_read_at=session.last_queue_read_at,
+        last_queue_write_at=session.last_queue_write_at,
+        last_prompt_sent_at=session.last_prompt_sent_at,
+        proof_state=session.proof_state,
+        blocker_summary=session.blocker_summary,
         evidence_refs=tuple(evidence_refs),
         timestamp=observed_at,
     )
