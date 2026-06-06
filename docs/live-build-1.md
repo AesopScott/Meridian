@@ -22,6 +22,9 @@ Context:
 - Codex Reviews A cleared Build 1 commits `88b491898` and `0025b4277`: `DeepSeekValidationState` / `DeepSeekValidationLevel` are local-only, preserve `deepseek-chat` as the only direct dispatch id, and keep `deepseek-v4-pro` / `deepseek-v4-flash` as variant/capability labels only.
 - The next backend slice should consume that reviewed validation-state metadata in Relay-facing disposition/advisory surfaces without granting autonomous implementation, review-clearing, branch/worktree movement, live coding, or bypass authority.
 
+Resume status:
+- 2026-06-06 14:38 -06:00: Coordinator resumed existing Polaris Claude Haiku card `chat_1780776509221` with this promoted task. The lane accepted the prompt but immediately returned `You've hit your monthly spend limit · raise it at claude.ai/settings/usage`. Keep the task active for Claude Max Haiku/Opus once the account limit is raised; do not substitute Codex as implementer.
+
 Task:
 - Add a narrow deterministic Relay/Model binding that exposes DeepSeek validation level, direct dispatch id, variant labels, transport-cleared state, blocked-authority tags, and evidence refs as bounded metadata/disposition only.
 - Ensure metadata-only candidate state remains blocked for autonomous implementation, review-clearing, branch/worktree movement, live coding authority, and unsafe Relay bypass.
