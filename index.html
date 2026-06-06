@@ -4492,7 +4492,7 @@ body {
     const nextMode = harnessDock.classList.contains('harness-model-mode') ? 'orchestrator' : 'model';
     setHarnessDockMode(nextMode);
     if (nextMode === 'model') activateStoredModelHarnessAspect({ persist: false });
-    openHarness();
+    openHarness({ force: true });
   });
   const rightPanelModeKey = 'meridian.right-panel.mode.v1';
   const rightPanelSelectionKey = 'meridian.right-panel.selection.v1';
@@ -6967,8 +6967,9 @@ body {
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refreshRelayPanel();
   });
-  const openHarness = () => {
-    if (Date.now() < harnessDisabledUntil) return;
+  const openHarness = ({ force = false } = {}) => {
+    if (force) harnessDisabledUntil = 0;
+    if (!force && Date.now() < harnessDisabledUntil) return;
     harnessDock.classList.add('harness-dock-open');
     stage.classList.remove('spark-menu-open');
   };

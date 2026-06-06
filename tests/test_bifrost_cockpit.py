@@ -156,6 +156,8 @@ def test_index_harness_title_toggles_model_icons():
     assert "Switch to model harness icons" in doc
     assert "harness-model-mode" in doc
     assert ".harness-dock-wrap.harness-model-mode .harness-dock-top" in doc
+    assert "openHarness({ force: true })" in doc
+    assert "if (force) harnessDisabledUntil = 0" in doc
     assert "--harness-line-y: 124px" in doc
     assert "position: absolute;\n  left: 50%;\n  bottom: 34px;" in doc
     assert "top: calc(var(--harness-line-y) - 6px)" in doc
