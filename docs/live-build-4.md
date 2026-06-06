@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: implement Compass project definition runtime as the next backend boundary slice.
 
@@ -24,14 +24,14 @@ Task:
 - Surface ambiguous or incomplete project identity as a Compass question/blocker rather than silently selecting hidden context.
 - Preserve pure backend behavior: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main write, no raw cross-project transcript injection, and no Polaris dependency.
 
-Proof:
-- `python -m pytest tests/test_compass.py -q`
-- `git diff --check`
-- Path-scope check limited to the allowed files.
+Completion: completed 2026-06-06.
 
-Completion:
-- Commit only this slice on the assigned branch.
-- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete evidence.
+Ready for Codex Review:
+
+- Commit: `3b7bae9f2` (verified from branch HEAD)
+- Files affected: `meridian_core/compass.py`, `tests/test_compass.py`
+- Tests run: `python -m pytest tests/test_compass.py -q` (97 passed)
+- Verification performed: ProjectDefinition class with frozen immutability provides project_id, title, outcome, context, artifacts, objectives, tasks, proof_trail, and relationship_refs (repo/venture/session) as a bounded body of work. Tests verify project identity does not collapse on shared repo/venture: test_same_repo_does_not_imply_same_project confirms distinct projects with shared repos have different mission bearings; test_same_venture_does_not_imply_same_project confirms distinct projects with shared ventures have different mission bearings. Ambiguous project identity surfaces as Compass question: test_ambiguous_subject_returns_compass_question and test_unknown_subject_kind_returns_compass_question verify decision=AMBIGUOUS with compass_question populated. All results serialize with execution_authorized=False for pure review-only backend. No model calls, no UI/Bifrost/FileMap edits, no Polaris dependency. git diff --check passed.
 - Next Candidate: Compass bounds/scope runtime after project definition review clears.
 
 ## Coordinator Override - Completed / Ready For Codex Review
