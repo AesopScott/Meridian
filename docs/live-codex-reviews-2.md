@@ -6,6 +6,59 @@ This file is the standing queue for a second specialized Codex Reviews session.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Completed / Finding Routed
+
+Goal: review Build 3 backend restart FileMap audit completion from the assigned build worktree branch.
+
+Worktree: `C:\Users\scott\Code\Meridian`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-backend-restart-filemap`.
+
+Source branch: `codex/build-3-backend-restart-filemap-20260606`.
+
+Source commits reviewed: `ee9ef8a76` (`audit: Register missing backend files in FileMap and _REQUIRED_PATHS`) and `b6a8d6971` (`docs: Mark FileMap backend restart audit as completed`).
+
+Review result - 2026-06-06 14:28 -06:00:
+
+- Finding routed. The reviewed Build 3 branch is scope-clean and its proof is real, but the FileMap registration is incomplete against the task requirements.
+- Verified the reviewed branch changes only `meridian_core/filemap.py`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
+- Verified `python -m pytest tests/test_filemap.py -q` passed with 47 tests in the Build 3 worktree, and `git diff --check 3b7bae9f2..b6a8d6971` passed.
+- Verified `ee9ef8a76` adds runtime FileMap entries and `_REQUIRED_PATHS` coverage for the claimed backend files, including `meridian_core/cognition_policy.py`, `meridian_core/lane_state.py`, `meridian_core/tokens.py`, and the related test suites.
+- Finding: the task and completion marker both require missing files to be registered across runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS`, and the completion text claims the files were registered in both surfaces. But no `docs/FileMap.md` update exists in the reviewed branch, so the human FileMap mirror remains stale for the newly registered paths.
+- Why it matters: Build 3 owns FileMap consistency across the runtime registry, the human mirror, and required-path coverage. Leaving `docs/FileMap.md` unchanged breaks the mirror guarantee and makes the completion claim inaccurate.
+- Verified no shared-main write, branch/worktree movement, UI/runtime implementation edits outside allowed scope, or Polaris dependency were introduced.
+
+Proof:
+
+- Build 3 worktree status before review: `## codex/build-3-backend-restart-filemap-20260606...origin/main [ahead 2, behind 1]`.
+- `git diff --name-status 3b7bae9f2..b6a8d6971` showed only `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py`.
+- `git diff --check 3b7bae9f2..b6a8d6971` passed.
+- `python -m pytest tests/test_filemap.py -q` passed with 47 tests.
+- Targeted mirror check confirmed new runtime registrations such as `meridian_core/cognition_policy.py`, `meridian_core/lane_state.py`, `tests/test_cli.py`, and `tests/test_package_api.py` are present in `meridian_core/filemap.py` / `_REQUIRED_PATHS` but absent from `docs/FileMap.md`.
+
+Smallest repair request: update `docs/FileMap.md` to mirror the newly added backend restart wave FileMap registrations, then refresh the Build 3 completion marker to accurately state all three FileMap surfaces are aligned.
+
+## Coordinator Override - Completed / Finding Routed
+
+Goal: assess Build 5 Bifrost backend/view-model binding readiness from the assigned build worktree branch.
+
+Worktree: `C:\Users\scott\Code\Meridian`.
+
+Source worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-5-bifrost-backend-binding`.
+
+Source branch: `codex/build-5-bifrost-backend-binding-20260606`.
+
+Source commit reviewed: `ac60db5bd` (`docs(live-build-5): Mark backend/view-model binding task complete`).
+
+Review result - 2026-06-06 14:30 -06:00:
+
+- Finding routed. The reviewed Build 5 branch is not a valid implementation of the assigned backend/view-model binding task.
+- Verified `git diff --name-status 3b7bae9f2..ac60db5bd` shows only `docs/live-build-5.md`.
+- Verified the branch does not modify the allowed runtime/test files required by the task: `bifrost/cockpit.py` and `tests/test_bifrost_cockpit.py`.
+- Finding: the completion marker claims the binding infrastructure is already complete, but the branch does not prove the requested binding exists in current main and does not add/adjust focused tests for the requested provider/model identity, route kind, trust state, prompt payload label, budget percent, growth state, external-review status, and evidence refs.
+
+Smallest repair request: keep Build 5 active. Complete the actual backend/view-model binding in `bifrost/cockpit.py` and `tests/test_bifrost_cockpit.py`, or replace the marker with a concrete no-op proof that the requested fields already exist in current main and are covered by focused tests.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 3 V3 goal/checkpoint FileMap audit completion.

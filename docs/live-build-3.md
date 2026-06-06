@@ -8,9 +8,9 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task
+## Repair Required / Active Task
 
-Goal: keep FileMap current for the backend restart wave and V2 tracker correction.
+Goal: repair backend restart FileMap docs mirror gap found by Codex Reviews B.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-3-backend-restart-filemap`.
 
@@ -18,10 +18,13 @@ Branch: `codex/build-3-backend-restart-filemap-20260606`.
 
 Allowed files only: `meridian_core/filemap.py`, `docs/FileMap.md`, `tests/test_filemap.py`, `docs/v2-progress-tracker.md`, `docs/live-build-3.md`.
 
+Finding:
+- Codex Reviews B verified Build 3 commits `ee9ef8a76` and `b6a8d6971` are scope-clean and tests pass, but the branch updates only `meridian_core/filemap.py`, `tests/test_filemap.py`, and `docs/live-build-3.md`.
+- The active task allowed and required `docs/FileMap.md` coverage, and the completion text claimed both runtime FileMap and docs mirror alignment. The reviewed branch did not update `docs/FileMap.md`, so the human FileMap mirror remains stale for the newly registered backend paths.
+
 Task:
-- Pull current `origin/main` and inspect the backend restart wave queue changes in `docs/live-build-1.md` through `docs/live-build-5.md`, plus the corrected `docs/v2-progress-tracker.md`.
-- Register only existing files that are missing from runtime FileMap, `docs/FileMap.md`, or `_REQUIRED_PATHS`.
-- If no FileMap changes are required, record a no-op audit with concrete inspected paths and proof.
+- Update `docs/FileMap.md` to mirror the backend restart wave registrations added in `meridian_core/filemap.py` / `_REQUIRED_PATHS`, or record a concrete no-op proof if each new runtime path already has accurate docs mirror coverage.
+- Refresh the Build 3 completion marker so it accurately states which FileMap surfaces were updated and inspected.
 - Do not edit backend implementation files beyond FileMap surfaces, do not move branches/worktrees, do not write shared main, do not touch UI/Bifrost runtime code, and do not touch Polaris.
 
 Proof:
