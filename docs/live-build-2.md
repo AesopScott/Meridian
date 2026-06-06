@@ -8,9 +8,9 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Repair Required / Active Now
 
-Goal: implement Session Lifecycle live state evidence completeness for backend recovery/advisory consumers.
+Goal: repair Session Lifecycle live state evidence display-safety leak found by Codex Reviews A.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-state-evidence`.
 
@@ -18,10 +18,14 @@ Branch: `codex/build-2-session-state-evidence-20260606`.
 
 Allowed files only: `meridian_core/session_lifecycle.py`, `tests/test_session_lifecycle.py`, `docs/live-build-2.md`.
 
+Finding:
+- Codex Reviews A found that Build 2 commit `9ac84c59c` adds `SessionLiveStateEvidence`, but `to_dict()` serializes raw `project_path`, raw `worktree_path`, and raw `blocker_summary` directly into the exported payload at `meridian_core/session_lifecycle.py:438-475`.
+- Evidence refs are redacted, but the primary serialized object can still leak exact filesystem paths and free-text blocker content to Beacon/Prime/recovery consumers.
+
 Task:
-- Extend the backend session lifecycle state/export surface so live-state evidence includes queue id/path, worktree, branch, model/provider label, last read/write/prompt timestamps, proof state, blocker summary, project assignment, and display-safe evidence refs.
+- Repair `SessionLiveStateEvidence.to_dict()` so serialized output uses bounded display-safe forms for project path, worktree path, and blocker summary. Raw filesystem paths and raw blocker text must not appear in the exported dictionary.
+- Add regression tests proving `to_dict()` does not contain raw `project_path`, raw `worktree_path`, or raw blocker text while still preserving useful bounded labels/refs for downstream advisory consumers.
 - Preserve advisory-only behavior: no session spawning, stopping, archiving, process inspection, model calls, UI/Bifrost/FileMap edits, branch/worktree movement, shared-main writes, or Polaris dependency.
-- Do not expose raw worker chat, raw prompt text, provider responses, credentials, or unbounded filesystem paths in serialized evidence.
 
 Proof:
 - `python -m pytest tests/test_session_lifecycle.py -q`

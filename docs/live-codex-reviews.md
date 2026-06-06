@@ -8,6 +8,27 @@ The build lanes build. Review lanes review.
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
 
+## Coordinator Override - Completed / Repair-Routed
+
+Goal: review Build 1 DeepSeek validation-state transport authority gating and Build 2 Session Lifecycle live-state evidence completeness.
+
+Status: repair routed by Codex Reviews A on 2026-06-06. Candidate worktrees were `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-validation` at `0025b4277` and `C:\Users\scott\Code\Meridian-Worktrees\build-2-session-state-evidence` at `91115c09f`.
+
+Proof:
+
+- Build 1 scope check: `git diff --name-only 3b7bae9f2..HEAD` returned only `docs/live-build-1.md`, `meridian_core/model_adapter.py`, and `tests/test_model_adapter.py`.
+- Build 1 proof: `python -m pytest tests/test_model_adapter.py -q` passed with 57 tests; `git diff --check 3b7bae9f2..HEAD` passed.
+- Build 2 scope check: `git diff --name-only 3b7bae9f2..HEAD` returned only `docs/live-build-2.md`, `meridian_core/session_lifecycle.py`, and `tests/test_session_lifecycle.py`.
+- Build 2 proof: `python -m pytest tests/test_session_lifecycle.py -q` passed with 131 tests; `git diff --check 3b7bae9f2..HEAD` passed.
+
+Review result:
+
+- Build 1 passed: the new `DeepSeekValidationState` / `DeepSeekValidationLevel` slice remains local-only, preserves `deepseek-chat` as the only direct dispatch id, keeps metadata-only presets from gaining prompt, review, branch-movement, or autonomous-coding authority, and does not introduce live provider transport, credentials, UI/Bifrost/FileMap edits, branch/worktree movement, shared-main writes, or Polaris dependency.
+- Build 2 finding: MEDIUM - `SessionLiveStateEvidence` is documented and named as display-safe evidence, but `to_dict()` serializes raw `project_path`, raw `worktree_path`, and raw `blocker_summary` directly into the exported payload at `meridian_core/session_lifecycle.py:438-475`. The evidence refs are redacted, but the primary serialized object still leaks the exact path/blocker content the helper claims not to expose. Any downstream Beacon/Prime/recovery consumer that renders or logs `to_dict()` will reintroduce filesystem-path and free-text blocker leakage.
+- Build 2 repair route: replace the serialized path/blocker fields with bounded display-safe forms such as placeholders or derived labels, then add regression tests asserting `to_dict()` never contains raw `project_path`, raw `worktree_path`, or raw blocker text.
+
+Completion: Build 1 DeepSeek validation-state transport authority gating is review-cleared. Build 2 Session Lifecycle live-state evidence completeness is not review-cleared; keep it in the Build 2 worktree and route the serializer leak back for repair before coordinator movement.
+
 ## Coordinator Override - Completed / Passed
 
 Goal: review Build 1 Relay Source/Git main-write coordination handoff display-safety audit.

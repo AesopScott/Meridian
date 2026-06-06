@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Repair Required / Invalid Ready Marker
 
 Goal: implement Compass project definition runtime as the next backend boundary slice.
 
@@ -24,14 +24,11 @@ Task:
 - Surface ambiguous or incomplete project identity as a Compass question/blocker rather than silently selecting hidden context.
 - Preserve pure backend behavior: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main write, no raw cross-project transcript injection, and no Polaris dependency.
 
-Proof:
-- `python -m pytest tests/test_compass.py -q`
-- `git diff --check`
-- Path-scope check limited to the allowed files.
+Repair required:
 
-Completion:
-- Commit only this slice on the assigned branch.
-- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete evidence.
+- The 2026-06-06 Build 4H marker was not review-ready. Branch `codex/build-4-compass-project-definition-20260606` only contains a queue marker commit (`5b2166278`) on top of `3b7bae9f2`; it does not contain the required `meridian_core/compass.py` or `tests/test_compass.py` implementation diff.
+- Do not review or land this Build 4 slice until a Claude Max build lane completes the actual allowed-file implementation or the coordinator explicitly promotes a verified existing Compass implementation branch for review.
+- Current blocker: Claude Max Haiku resumes returned `You've hit your monthly spend limit`; keep this task parked rather than substituting Codex as the implementer.
 - Next Candidate: Compass bounds/scope runtime after project definition review clears.
 
 ## Coordinator Override - Completed / Ready For Codex Review
