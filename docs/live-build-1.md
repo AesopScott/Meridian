@@ -8,7 +8,20 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Completed / Ready For Codex Review (Codex Review B follow-up)
+## Coordinator Override - Completed / Review-Cleared / Promoted To Main
+
+Coordinator reconciliation: 2026-06-07T13:07:00-06:00.
+
+Status: no executable backend task is currently assigned to Build 1. The
+previous top candidate below is already contained in `origin/main`; targeted
+containment proof showed `merge-base(56a539cf2, origin/main) == 56a539cf2` and
+`git diff origin/main...56a539cf2` empty. Do not re-review or re-promote this
+historical branch unless a new coordinator task is assigned above this block.
+
+Promoted commit: `56a539cf2` (`fix: Codex Review B follow-up — close DeepSeek
+gate bypass on the direct public dispatch path`).
+
+## Coordinator Override - Historical Promoted Candidate (Codex Review B follow-up)
 
 Goal: address Codex Review B finding on Build 1 Opus repair commit `09767f142`. Codex Review B did NOT clear the prior commit and flagged that the DeepSeek execution gate only protected the registry-backed executor (`execute_relay_plan_with_registry`); the direct public path `execute_relay_dispatch_plan` around line 3178 still called `model_call(lane.payload)` unconditionally, and `execute_relay_dispatch_plan_with_policy` around line 3523 delegated into the same ungated path. Because `_build_dispatch_metadata_envelope()` on the direct path was built without adapter metadata, `deepseek_transport_authority` remained `None`, so blocked DeepSeek candidate metadata was never enforced. Codex reproduced the bypass with `execute_relay_dispatch_plan(plan, FakeModelAdapter(metadata=deepseek_candidate_metadata_preset("fast")))` → `results=1`, `errors=0`, `authority=None`, adapter received the payload.
 
