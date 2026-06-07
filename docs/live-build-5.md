@@ -276,6 +276,20 @@ Prompt payload visibility launch attempt note - 2026-06-07T10:47:46-06:00:
   Opus availability window or promote a narrower coordinator-scoped active
   block before dispatching another worker.
 
+Prompt payload visibility launch attempt note - 2026-06-07T10:50:15-06:00:
+
+- After promoting this task to the first executable Active Now block, coordinator
+  launched Opus worker `chat_1780851013499` through Polaris `launch-chat`, tier
+  `power`, for the same Prompt Payload Visibility backend/view-model binding.
+- Result: no candidate. Diagnostics show the worker reached
+  `claude-opus-4-7` and hit a Claude rate-limit event before any allowed
+  backend/test/doc file changes. The isolated worker worktree contains only
+  Polaris-generated `.mcp.json` dirt.
+- During the inspection, shared main picked up unrelated
+  `docs/v3-parking-lot.md` dirt. Coordinator preserved that change on local
+  branch `codex/quarantine-main-dirty-v3-parking-lot-20260607-105216`, then
+  returned shared `main` to clean/aligned state before continuing.
+
 ## Coordinator Override - Active Now / Repair Required
 
 Goal: bind reviewed backend prompt-payload and model metadata surfaces into a deterministic Bifrost backend view-model sample.
