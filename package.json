@@ -2,12 +2,12 @@
   "name": "meridian-cockpit",
   "version": "0.1.0",
   "private": true,
-  "description": "Electron app shell for the Meridian Bifrost V1 cockpit preview.",
+  "description": "Electron app shell for the Meridian cockpit UI.",
   "main": "electron/main.js",
   "scripts": {
     "preview": "python -m bifrost.preview",
     "model-bridge": "node scripts/meridian-model-bridge.js",
-    "start": "npm run preview && electron .",
+    "start": "electron .",
     "proof:cockpit": "python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py -q && npm audit --audit-level=high"
   },
   "devDependencies": {

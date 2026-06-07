@@ -1,25 +1,24 @@
 'use strict';
 
-// Meridian — V1 Bifrost cockpit Electron app shell.
+// Meridian cockpit Electron app shell.
 //
-// Opens a desktop window that loads the locally generated Bifrost cockpit HTML
-// preview file. The preview HTML is produced by `python bifrost/preview.py`
-// (see the npm `preview` script). This shell does not embed any business
-// logic; it is strictly a viewer for the static Bifrost cockpit document.
+// Opens a desktop window that loads the actual Meridian cockpit UI entrypoint.
+// The Bifrost preview writer remains available for backend snapshot proofs, but
+// app startup must not regenerate or replace the working UI surface.
 //
 // Secure defaults:
 //   - loadFile() of a local path only (no remote URL load).
 //   - contextIsolation: true and nodeIntegration: false in the renderer.
 //   - sandbox: true and webSecurity: true.
-//   - will-navigate is blocked except to the local preview file.
+//   - will-navigate is blocked except to the local UI file.
 //   - window.open / target=_blank is denied (V1 cockpit is observation-only).
 
 const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 
-const PREVIEW_FILE = path.resolve(__dirname, '..', 'bifrost', 'preview.html');
-const PREVIEW_URL = pathToFileURL(PREVIEW_FILE).toString();
+const UI_FILE = path.resolve(__dirname, '..', 'index.html');
+const UI_URL = pathToFileURL(UI_FILE).toString();
 
 function createCockpitWindow() {
   const win = new BrowserWindow({
@@ -40,7 +39,7 @@ function createCockpitWindow() {
   });
 
   win.webContents.on('will-navigate', (event, navUrl) => {
-    if (navUrl !== PREVIEW_URL) {
+    if (navUrl !== UI_URL) {
       event.preventDefault();
     }
   });
@@ -49,7 +48,7 @@ function createCockpitWindow() {
     return { action: 'deny' };
   });
 
-  win.loadFile(PREVIEW_FILE);
+  win.loadFile(UI_FILE);
   return win;
 }
 
@@ -70,6 +69,6 @@ app.on('window-all-closed', () => {
 
 module.exports = {
   createCockpitWindow,
-  PREVIEW_FILE,
-  PREVIEW_URL,
+  UI_FILE,
+  UI_URL,
 };

@@ -1,9 +1,9 @@
-"""Tests for the Bifrost preview-HTML writer and the V1 Electron app shell.
+"""Tests for the Bifrost preview-HTML writer and the Meridian Electron app shell.
 
 The Electron tests are inspection-based: they verify that ``package.json`` and
-``electron/main.js`` are wired to launch a desktop window that loads the locally
-generated Bifrost cockpit preview file with secure defaults. Electron itself is
-not executed in this environment.
+``electron/main.js`` are wired to launch a desktop window that loads the actual
+Meridian UI entrypoint with secure defaults. Electron itself is not executed in
+this environment.
 """
 
 from __future__ import annotations
@@ -177,9 +177,9 @@ def test_package_json_start_invokes_electron(package_json_data):
     assert "electron" in start
 
 
-def test_package_json_start_regenerates_preview_first(package_json_data):
+def test_package_json_start_does_not_regenerate_preview(package_json_data):
     start = package_json_data["scripts"]["start"]
-    assert "preview" in start, "`start` should regenerate preview before launching Electron"
+    assert "preview" not in start, "`start` must open the UI without regenerating preview HTML"
 
 
 def test_package_json_preview_invokes_python_preview(package_json_data):
@@ -206,13 +206,13 @@ def electron_main_source():
     return ELECTRON_MAIN.read_text(encoding="utf-8")
 
 
-def test_electron_main_loads_local_preview_file(electron_main_source):
-    assert "preview.html" in electron_main_source
+def test_electron_main_loads_local_ui_file(electron_main_source):
+    assert "index.html" in electron_main_source
     assert "loadFile" in electron_main_source
 
 
-def test_electron_main_resolves_preview_under_bifrost(electron_main_source):
-    assert "'bifrost'" in electron_main_source or '"bifrost"' in electron_main_source
+def test_electron_main_resolves_ui_at_repo_root(electron_main_source):
+    assert "'..', 'index.html'" in electron_main_source or '"..", "index.html"' in electron_main_source
 
 
 def test_electron_main_does_not_load_remote_urls(electron_main_source):
@@ -251,6 +251,6 @@ def test_electron_main_quits_on_window_all_closed_except_darwin(electron_main_so
     assert "darwin" in electron_main_source
 
 
-def test_electron_main_exports_preview_constants(electron_main_source):
+def test_electron_main_exports_ui_constants(electron_main_source):
     assert "module.exports" in electron_main_source
-    assert "PREVIEW_FILE" in electron_main_source
+    assert "UI_FILE" in electron_main_source
