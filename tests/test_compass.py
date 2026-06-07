@@ -2315,15 +2315,12 @@ class TestProjectScopeSubjectFieldRawContextGuard:
         assert result.decision is ProjectScopeDecision.BLOCKED
         # evidence_refs blocker runs first.
         assert "raw_context_evidence_ref_blocked" in result.blockers
-        # In this precedence path, subject_ref is NOT yet redacted (kept verbatim
-        # via _scope_result default), but the LATER repair path is unreachable
-        # only when evidence is the cause. Either way, raw evidence payload is
-        # redacted in this branch.
         encoded = json.dumps(result.to_dict(), sort_keys=True)
         assert "secret evidence" not in encoded
-        # subject_ref leak is gated by this precedence: callers either fix
-        # evidence_refs and then retry, where the subject_ref guard then fires
-        # and redacts. We assert that by retrying with safe evidence.
+        assert "secret subject" not in encoded
+        assert result.subject_ref == "<redacted_raw_context>"
+        # If callers fix evidence_refs and retry, the subject-field guard still
+        # fires directly and preserves the same no-raw-output invariant.
         retry = evaluate_project_scope(
             _project(),
             ProjectScopeCandidate(
