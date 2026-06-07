@@ -8,6 +8,63 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now / Opus Task Assigned
+
+Timestamp: 2026-06-07T13:13:00-06:00.
+
+Goal: implement the first minimal V3 Goal Runtime backend domain slice from the
+reviewed contract.
+
+Worker requirement: implementation candidate must run in a Polaris Build 2 Opus
+worker (`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may
+review only after a real worker candidate exists.
+
+Source of authority:
+
+- `docs/v3-goal-runtime-contract.md`
+- `docs/v3-intake-resolution.md` row 15
+
+Task: add the smallest pure-Python Goal Runtime domain module and focused tests.
+Implement only deterministic, dependency-free domain objects and validation
+helpers that are directly authorized by the reviewed contract:
+
+- closed `GoalStatus` enum with exactly `ACTIVE`, `BLOCKED`, `USAGE_LIMITED`,
+  `COMPLETE`
+- status transition validator matching the contract's allowed transitions and
+  single-writer authorship rules
+- display-safe `GoalRecord`, `GoalBlockedReason`, `GoalTelemetrySnapshot`, and
+  minimal nested value objects needed by the tests
+- proof-reference requirement helper consistent with the contract:
+  `proof_trail_ref` required when `risk_tier >= 2`, any Session Lifecycle
+  dispatch occurred, any `BLOCKED` or `USAGE_LIMITED` occurrence exists, or
+  status is `COMPLETE`
+- serialization that preserves typed/bounded fields and refuses or omits raw
+  prompt/model/session-private text
+
+Keep this slice pure/local: no database, no persistence, no model calls, no
+process/session automation, no network, no account probing, no branch/worktree
+movement, no UI/Electron/Bifrost behavior, no FileMap changes, no generated
+artifacts, and no live provider calls.
+
+Allowed files only:
+
+- new `meridian_core/goal_runtime.py`
+- new `tests/test_goal_runtime.py`
+- `docs/live-build-2.md` for the worker completion marker
+
+Do not edit `docs/v3-goal-runtime-contract.md`, FileMap surfaces,
+`index.html`, Electron/Bifrost UI, generated artifacts, Relay/Model runtime,
+Compass runtime implementation, Echo runtime implementation, Session Lifecycle
+runtime implementation, Beacon runtime implementation, Aegis runtime
+implementation, Build 1/3/4/5 queues, or review logs.
+
+Required proof before Ready marker:
+
+- `python -m pytest tests/test_goal_runtime.py -q`
+- `git diff --check`
+- path-scope proof limited to allowed files
+- completion marker here with files changed, tests, proof, and remaining risk
+
 ## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Coordinator reconciliation: 2026-06-07T13:10:00-06:00.
