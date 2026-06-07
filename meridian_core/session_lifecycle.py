@@ -458,14 +458,20 @@ class SessionLiveStateEvidence:
         Raw filesystem paths and raw blocker text are redacted to bounded
         display-safe forms. Downstream advisory consumers (Beacon/Prime)
         receive presence indicators and bounded labels only.
+
+        Empty-string and whitespace-only ``project_path`` and
+        ``blocker_summary`` are treated as absent — keeping presence and
+        label values aligned and preventing phantom-present output.
         """
+        project_path_present = _has_meaningful_text(self.project_path)
+        blocker_present = _has_meaningful_text(self.blocker_summary)
         return {
             "evidence_id": self.evidence_id,
             "session_id": self.session_id,
             "session_name": self.session_name,
             "project_name": self.project_name,
-            "project_path_present": self.project_path is not None,
-            "project_path_label": "<project_path>" if self.project_path else "none",
+            "project_path_present": project_path_present,
+            "project_path_label": "<project_path>" if project_path_present else "none",
             "assigned_queue_file": self.assigned_queue_file,
             "worktree_path_present": bool(self.worktree_path),
             "worktree_path_label": "<worktree_path>" if self.worktree_path else "none",
@@ -479,10 +485,12 @@ class SessionLiveStateEvidence:
             "last_queue_write_at": self.last_queue_write_at.isoformat(),
             "last_prompt_sent_at": self.last_prompt_sent_at.isoformat(),
             "proof_state": self.proof_state.value,
-            "blocker_present": self.blocker_summary is not None,
-            "blocker_summary_label": "<blocker_summary>" if self.blocker_summary else "none",
+            "blocker_present": blocker_present,
+            "blocker_summary_label": (
+                "<blocker_summary>" if blocker_present else "none"
+            ),
             "blocker_summary_length": (
-                len(self.blocker_summary) if self.blocker_summary else 0
+                len(self.blocker_summary) if blocker_present else 0
             ),
             "evidence_refs": list(self.evidence_refs),
             "timestamp": self.timestamp.isoformat(),
@@ -1613,6 +1621,18 @@ def _as_utc(value: datetime) -> datetime:
     return value.astimezone(timezone.utc)
 
 
+def _has_meaningful_text(value: Optional[str]) -> bool:
+    """True when ``value`` carries non-whitespace content.
+
+    Used to normalize ``project_path`` and ``blocker_summary`` presence
+    semantics in display-safe serialization and advisory projection so
+    blank ("") and whitespace-only strings are treated as absent. This
+    avoids the phantom-present / phantom-blocker drift Codex Reviews A
+    flagged on the live-state advisory path.
+    """
+    return value is not None and value.strip() != ""
+
+
 def _session_can_accept_work_at(
     session: SessionLifecycleState,
     observed_at: datetime,
@@ -2061,11 +2081,15 @@ def build_session_live_state_advisory_projection(
     """
     observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
 
-    project_path_present = evidence.project_path is not None
+    # Empty-string / whitespace-only project_path and blocker_summary are
+    # treated as absent so present-vs-label semantics stay aligned and the
+    # universal advisory blocker is not augmented with a phantom
+    # session.blocker_present from blank input.
+    project_path_present = _has_meaningful_text(evidence.project_path)
     worktree_path_present = bool(evidence.worktree_path)
-    blocker_present = evidence.blocker_summary is not None
+    blocker_present = _has_meaningful_text(evidence.blocker_summary)
     blocker_summary_length = (
-        len(evidence.blocker_summary) if evidence.blocker_summary else 0
+        len(evidence.blocker_summary) if blocker_present else 0
     )
 
     # Fail-closed advisory boundary: this projection is advisory-only by

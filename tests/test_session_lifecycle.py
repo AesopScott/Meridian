@@ -2097,6 +2097,58 @@ class TestSessionLiveStateEvidence:
         assert evidence.project_path is None
         assert any("project.path_safe=none" in ref for ref in evidence.evidence_refs)
 
+    @pytest.mark.parametrize("blank_path", ["", "   ", "\t", "\n"])
+    def test_to_dict_treats_blank_project_path_as_absent(self, session_state, blank_path):
+        """Regression for Codex Review A: empty/whitespace project_path is absent."""
+        blank_state = SessionLifecycleState(
+            **{**session_state.__dict__, "project_path": blank_path}
+        )
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(blank_state, timestamp=timestamp)
+        serialized = evidence.to_dict()
+
+        # present/label must agree — blank counts as absent
+        assert serialized["project_path_present"] is False
+        assert serialized["project_path_label"] == "none"
+
+    @pytest.mark.parametrize("blank_blocker", ["", "   ", "\t", "\n"])
+    def test_to_dict_treats_blank_blocker_summary_as_absent(
+        self, session_state, blank_blocker
+    ):
+        """Regression for Codex Review A: empty/whitespace blocker_summary is absent."""
+        blank_state = SessionLifecycleState(
+            **{**session_state.__dict__, "blocker_summary": blank_blocker}
+        )
+        timestamp = datetime(2026, 6, 2, 10, 35, tzinfo=timezone.utc)
+
+        evidence = build_session_live_state_evidence(blank_state, timestamp=timestamp)
+        serialized = evidence.to_dict()
+
+        # present/label/length must all agree — blank counts as absent
+        assert serialized["blocker_present"] is False
+        assert serialized["blocker_summary_label"] == "none"
+        assert serialized["blocker_summary_length"] == 0
+
+    def test_to_dict_preserves_non_empty_project_path_and_blocker(self, session_state):
+        """Legitimate non-empty strings still register as present after the repair."""
+        full_state = SessionLifecycleState(
+            **{
+                **session_state.__dict__,
+                "project_path": "/real/project/path",
+                "blocker_summary": "Real blocker text",
+            }
+        )
+
+        evidence = build_session_live_state_evidence(full_state)
+        serialized = evidence.to_dict()
+
+        assert serialized["project_path_present"] is True
+        assert serialized["project_path_label"] == "<project_path>"
+        assert serialized["blocker_present"] is True
+        assert serialized["blocker_summary_label"] == "<blocker_summary>"
+        assert serialized["blocker_summary_length"] == len("Real blocker text")
+
     def test_to_dict_does_not_leak_raw_project_path(self, session_state):
         """Regression: to_dict() must not serialize raw project_path."""
         sensitive_path = "/home/scott/secret-project/internal"
@@ -2470,6 +2522,67 @@ class TestSessionLiveStateAdvisoryProjection:
             assert "advisory_only.requires_human_gate" in projection.advisory_blockers, (
                 f"Universal advisory blocker missing for variant {variant}"
             )
+
+    @pytest.mark.parametrize("blank_blocker", ["", "   ", "\t", "\n"])
+    def test_projection_treats_blank_blocker_summary_as_absent(
+        self, healthy_evidence, blank_blocker
+    ):
+        """Regression for Codex Review A: blank blocker_summary is not present.
+
+        The projection must not emit `session.blocker_present` in
+        advisory_blockers when the underlying blocker_summary is blank.
+        The fail-closed universal blocker still holds — but the phantom
+        condition-specific blocker disappears.
+        """
+        blank_evidence = SessionLiveStateEvidence(
+            **{**healthy_evidence.__dict__, "blocker_summary": blank_blocker}
+        )
+
+        projection = build_session_live_state_advisory_projection(blank_evidence)
+
+        assert projection.blocker_present is False
+        assert projection.blocker_summary_label == "none"
+        assert projection.blocker_summary_length == 0
+        assert "session.blocker_present" not in projection.advisory_blockers
+        # Fail-closed universal blocker still present
+        assert (
+            "advisory_only.requires_human_gate" in projection.advisory_blockers
+        )
+        assert projection.human_gate_required is True
+
+    @pytest.mark.parametrize("blank_path", ["", "   ", "\t", "\n"])
+    def test_projection_treats_blank_project_path_as_absent(
+        self, healthy_evidence, blank_path
+    ):
+        """Regression for Codex Review A: blank project_path is not present."""
+        blank_evidence = SessionLiveStateEvidence(
+            **{**healthy_evidence.__dict__, "project_path": blank_path}
+        )
+
+        projection = build_session_live_state_advisory_projection(blank_evidence)
+
+        assert projection.project_path_present is False
+        assert projection.project_path_label == "none"
+
+    def test_projection_preserves_real_blocker_summary_and_path(self, healthy_evidence):
+        """Legitimate non-empty values still produce present/blocker output."""
+        real_evidence = SessionLiveStateEvidence(
+            **{
+                **healthy_evidence.__dict__,
+                "project_path": "/real/project/path",
+                "blocker_summary": "Real blocker text",
+            }
+        )
+
+        projection = build_session_live_state_advisory_projection(real_evidence)
+
+        assert projection.project_path_present is True
+        assert projection.project_path_label == "<project_path>"
+        assert projection.blocker_present is True
+        assert projection.blocker_summary_label == "<blocker_summary>"
+        assert projection.blocker_summary_length == len("Real blocker text")
+        # Real blocker still surfaces the condition-specific blocker
+        assert "session.blocker_present" in projection.advisory_blockers
 
 
 class TestSessionLiveControlPermissionGate:
