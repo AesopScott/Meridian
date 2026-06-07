@@ -296,6 +296,28 @@ class RelayAegisPolicyHandoffView:
 
 
 @dataclass
+class ReviewedBackendEvidenceItem:
+    source: str
+    label: str
+    state: str
+    count_label: str = ""
+    evidence_ref: str = ""
+    provenance: str = ""
+
+
+@dataclass
+class ReviewedBackendEvidenceView:
+    source: str = ""
+    prime_next_action: str = ""
+    session_lifecycle_preview: str = ""
+    aegis_policy_result: str = ""
+    relay_model_metadata: str = ""
+    items: list[ReviewedBackendEvidenceItem] = field(default_factory=list)
+    evidence_refs: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+
+@dataclass
 class ProofGateStatus:
     gate_id: str
     gate_name: str
@@ -470,6 +492,7 @@ class CockpitViewModel:
     prompt_packet_proof: PromptPacketProofView = field(default_factory=PromptPacketProofView)
     aegis_prompt_packet_policy: AegisPromptPacketPolicyView = field(default_factory=AegisPromptPacketPolicyView)
     relay_aegis_policy_handoff: RelayAegisPolicyHandoffView = field(default_factory=RelayAegisPolicyHandoffView)
+    reviewed_backend_evidence: ReviewedBackendEvidenceView = field(default_factory=ReviewedBackendEvidenceView)
     session_lifecycle: SessionLifecycleView = field(default_factory=SessionLifecycleView)
     proof_state: ProofStateView = field(default_factory=ProofStateView)
     user_session_mode: UserSessionModeView = field(default_factory=UserSessionModeView)
@@ -2324,6 +2347,84 @@ def _backend_tag_list(value: object) -> list[str]:
     return [_safe_handoff_value(value)]
 
 
+def _reviewed_backend_evidence_item_from_mapping(
+    item: Mapping[str, object],
+) -> ReviewedBackendEvidenceItem:
+    return ReviewedBackendEvidenceItem(
+        source=_backend_str(_handoff_summary_value(
+            item, "source", "component", "surface", default="unknown",
+        ), "unknown"),
+        label=_backend_str(_handoff_summary_value(
+            item, "label", "display_label", "name", default="reviewed evidence",
+        ), "reviewed evidence"),
+        state=_backend_str(_handoff_summary_value(
+            item, "state", "status", "result", default="ready",
+        ), "ready"),
+        count_label=_backend_str(_handoff_summary_value(
+            item, "count_label", "hit_count_label", "count", default="",
+        )),
+        evidence_ref=_backend_str(_handoff_summary_value(
+            item, "evidence_ref", "evidence_id", "ref", default="",
+        )),
+        provenance=_backend_str(_handoff_summary_value(
+            item, "provenance", "review_ref", "source_ref", default="",
+        )),
+    )
+
+
+def reviewed_backend_evidence_view_from_summary(
+    summary: Mapping[str, object],
+) -> ReviewedBackendEvidenceView:
+    """Project reviewed backend evidence summaries into display-only cockpit state.
+
+    The summary is already-curated backend state: Prime next-action metadata,
+    Echo/Atlas hit counts, Session Lifecycle preview, Aegis policy result, and
+    Relay/model metadata. It is rendered as inert HTML only; no session controls,
+    live process inspection, account probing, provider calls, or raw prompt text.
+    """
+    items: list[ReviewedBackendEvidenceItem] = []
+    raw_items = _handoff_summary_value(
+        summary, "items", "evidence_items", "hits", default=(),
+    )
+    if isinstance(raw_items, Mapping):
+        iterable_items: Iterable[object] = raw_items.values()
+    elif isinstance(raw_items, (list, tuple)):
+        iterable_items = raw_items
+    elif isinstance(raw_items, set):
+        iterable_items = sorted(raw_items, key=str)
+    else:
+        iterable_items = ()
+
+    for raw_item in iterable_items:
+        if isinstance(raw_item, Mapping):
+            items.append(_reviewed_backend_evidence_item_from_mapping(raw_item))
+
+    return ReviewedBackendEvidenceView(
+        source=_backend_str(_handoff_summary_value(
+            summary, "source", "summary_source", default="reviewed-backend-evidence",
+        ), "reviewed-backend-evidence"),
+        prime_next_action=_backend_str(_handoff_summary_value(
+            summary, "prime_next_action", "next_action", default="",
+        )),
+        session_lifecycle_preview=_backend_str(_handoff_summary_value(
+            summary, "session_lifecycle_preview", "session_preview", default="",
+        )),
+        aegis_policy_result=_backend_str(_handoff_summary_value(
+            summary, "aegis_policy_result", "aegis_result", "policy_result", default="",
+        )),
+        relay_model_metadata=_backend_str(_handoff_summary_value(
+            summary, "relay_model_metadata", "model_metadata", "relay_metadata", default="",
+        )),
+        items=items,
+        evidence_refs=_handoff_summary_list(
+            summary, "evidence_refs", "evidence", "evidence_ids",
+        ),
+        warnings=_handoff_summary_list(
+            summary, "warnings", "warning_tags",
+        ),
+    )
+
+
 def prompt_payload_view_from_evidence(
     evidence: "RelayPromptPayloadEvidence",
 ) -> PromptPayloadView:
@@ -2725,6 +2826,7 @@ def cockpit_view_model_with_backend_bindings(
     model_capability_selected_id: str = "",
     model_capability_metadata_source: str = "model-harness-relay-summary",
     provider_balance_summary: Mapping[str, object] | None = None,
+    reviewed_backend_evidence_summary: Mapping[str, object] | None = None,
 ) -> "CockpitViewModel":
     """Wire reviewed backend evidence/summary records into a CockpitViewModel.
 
@@ -2756,6 +2858,10 @@ def cockpit_view_model_with_backend_bindings(
         # view-level fields override only when the summary explicitly supplies them.
         base.provider_balance = merge_provider_balance_summary_into_view(
             base.provider_balance, provider_balance_summary,
+        )
+    if reviewed_backend_evidence_summary is not None:
+        base.reviewed_backend_evidence = reviewed_backend_evidence_view_from_summary(
+            reviewed_backend_evidence_summary,
         )
     return base
 
@@ -2987,6 +3093,74 @@ def sample_backend_bound_cockpit_view_model() -> "CockpitViewModel":
                 },
             ),
         },
+        reviewed_backend_evidence_summary={
+            "source": "backend-reviewed-evidence-sample",
+            "prime_next_action": "continue_bifrost_browser_first_extension",
+            "session_lifecycle_preview": "display_only_preview_ready",
+            "aegis_policy_result": "warn_human_gate_not_required",
+            "relay_model_metadata": "claude tier2 trusted; deepseek tier3 candidate",
+            "evidence_refs": (
+                "prime:next-action-reviewed",
+                "echo:memory-hit-summary",
+                "atlas:retrieval-hit-summary",
+                "session-lifecycle:preview-reviewed",
+                "aegis:policy-result-reviewed",
+                "relay:model-metadata-reviewed",
+            ),
+            "warnings": (
+                "display_only_no_execution_controls",
+            ),
+            "items": (
+                {
+                    "source": "Prime",
+                    "label": "Next action",
+                    "state": "ready",
+                    "count_label": "action: 1",
+                    "evidence_ref": "prime:next-action-reviewed",
+                    "provenance": "reviewed-backend-state",
+                },
+                {
+                    "source": "Echo",
+                    "label": "Memory hits",
+                    "state": "available",
+                    "count_label": "hits: 3",
+                    "evidence_ref": "echo:memory-hit-summary",
+                    "provenance": "reviewed-backend-state",
+                },
+                {
+                    "source": "Atlas",
+                    "label": "Retrieval hits",
+                    "state": "available",
+                    "count_label": "hits: 2",
+                    "evidence_ref": "atlas:retrieval-hit-summary",
+                    "provenance": "reviewed-backend-state",
+                },
+                {
+                    "source": "Session Lifecycle",
+                    "label": "Preview",
+                    "state": "display_only",
+                    "count_label": "targets: 0 executable",
+                    "evidence_ref": "session-lifecycle:preview-reviewed",
+                    "provenance": "reviewed-backend-state",
+                },
+                {
+                    "source": "Aegis",
+                    "label": "Policy result",
+                    "state": "warn",
+                    "count_label": "blockers: 0",
+                    "evidence_ref": "aegis:policy-result-reviewed",
+                    "provenance": "reviewed-backend-state",
+                },
+                {
+                    "source": "Relay",
+                    "label": "Model metadata",
+                    "state": "bound",
+                    "count_label": "lanes: 2",
+                    "evidence_ref": "relay:model-metadata-reviewed",
+                    "provenance": "reviewed-backend-state",
+                },
+            ),
+        },
     )
 
 
@@ -3134,6 +3308,70 @@ def _render_relay_aegis_policy_handoff(handoff: RelayAegisPolicyHandoffView) -> 
         '<div class="handoff-list handoff-missing-metadata-fields" aria-label="Relay Aegis Missing Metadata Fields">'
         '<span class="handoff-list-title">Missing metadata</span>'
         + missing_metadata_items
+        + "</div>"
+        + "</div>"
+        + "</section>"
+    )
+
+
+def _render_reviewed_backend_evidence(evidence: ReviewedBackendEvidenceView) -> str:
+    if not (
+        evidence.source
+        or evidence.prime_next_action
+        or evidence.session_lifecycle_preview
+        or evidence.aegis_policy_result
+        or evidence.relay_model_metadata
+        or evidence.items
+        or evidence.evidence_refs
+        or evidence.warnings
+    ):
+        return ""
+
+    item_cards = "".join(
+        '<div class="backend-evidence-card">'
+        '<div class="backend-evidence-card-head">'
+        f'<span class="backend-evidence-source">{_e(_safe_handoff_value(item.source))}</span>'
+        f'<span class="backend-evidence-state backend-evidence-state-{_e(_safe_handoff_value(item.state))}">{_e(_safe_handoff_value(item.state))}</span>'
+        "</div>"
+        f'<span class="backend-evidence-label">{_e(_safe_handoff_value(item.label))}</span>'
+        f'<span class="backend-evidence-count">{_e(_safe_handoff_value(item.count_label or "count: n/a"))}</span>'
+        f'<span class="backend-evidence-ref">Evidence: {_e(_safe_handoff_value(item.evidence_ref or "evidence_ref_missing"))}</span>'
+        f'<span class="backend-evidence-provenance">Provenance: {_e(_safe_handoff_value(item.provenance or "reviewed_backend_state"))}</span>'
+        "</div>"
+        for item in evidence.items
+    )
+    evidence_chips = "".join(
+        f'<span class="backend-evidence-chip backend-evidence-ref-chip">{_e(_safe_handoff_value(ref))}</span>'
+        for ref in evidence.evidence_refs
+    ) or '<span class="backend-evidence-chip backend-evidence-empty">no_evidence_refs</span>'
+    warning_chips = "".join(
+        f'<span class="backend-evidence-chip backend-evidence-warning-chip">{_e(_safe_handoff_value(warning))}</span>'
+        for warning in evidence.warnings
+    ) or '<span class="backend-evidence-chip backend-evidence-empty">no_warnings</span>'
+
+    return (
+        '<section class="reviewed-backend-evidence" aria-label="Reviewed Backend Evidence Snapshot">'
+        '<div class="backend-evidence-header-main">'
+        '<h3>Reviewed Backend Evidence</h3>'
+        f'<span class="backend-evidence-summary-source">Source: {_e(_safe_handoff_value(evidence.source or "reviewed-backend-evidence"))}</span>'
+        "</div>"
+        '<div class="backend-evidence-grid">'
+        f'<span class="backend-evidence-field backend-evidence-prime">Prime next action: {_e(_safe_handoff_value(evidence.prime_next_action or "not_available"))}</span>'
+        f'<span class="backend-evidence-field backend-evidence-session">Session preview: {_e(_safe_handoff_value(evidence.session_lifecycle_preview or "not_available"))}</span>'
+        f'<span class="backend-evidence-field backend-evidence-aegis">Aegis policy result: {_e(_safe_handoff_value(evidence.aegis_policy_result or "not_available"))}</span>'
+        f'<span class="backend-evidence-field backend-evidence-relay">Relay/model metadata: {_e(_safe_handoff_value(evidence.relay_model_metadata or "not_available"))}</span>'
+        "</div>"
+        '<div class="backend-evidence-items" aria-label="Reviewed Backend Evidence Items">'
+        + item_cards
+        + "</div>"
+        '<div class="backend-evidence-lists">'
+        '<div class="backend-evidence-list backend-evidence-refs" aria-label="Reviewed Backend Evidence Refs">'
+        '<span class="backend-evidence-list-title">Evidence refs</span>'
+        + evidence_chips
+        + "</div>"
+        '<div class="backend-evidence-list backend-evidence-warnings" aria-label="Reviewed Backend Evidence Warnings">'
+        '<span class="backend-evidence-list-title">Warnings</span>'
+        + warning_chips
         + "</div>"
         + "</div>"
         + "</section>"
@@ -3625,6 +3863,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
     prompt_packet_proof = _render_prompt_packet_proof(vm.prompt_packet_proof)
     aegis_packet_policy = _render_aegis_prompt_packet_policy(vm.aegis_prompt_packet_policy)
     relay_aegis_handoff = _render_relay_aegis_policy_handoff(vm.relay_aegis_policy_handoff)
+    reviewed_backend_evidence = _render_reviewed_backend_evidence(vm.reviewed_backend_evidence)
     projects = _render_project_strip(vm.projects, vm.lanes)
     progress = _render_progress_surface(vm.progress_events)
     instrument = _render_instrument_band(vm.instrument)
@@ -3659,6 +3898,7 @@ def render_cockpit_html(vm: CockpitViewModel) -> str:
         f"{prompt_packet_proof}\n"
         f"{aegis_packet_policy}\n"
         f"{relay_aegis_handoff}\n"
+        f"{reviewed_backend_evidence}\n"
         f"{provider_balance}\n"
         f"{model_capabilities}\n"
         f"{model_validation_envelopes}\n"
