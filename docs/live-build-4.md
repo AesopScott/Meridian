@@ -10,6 +10,42 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair cadence-3/3 self-review finding — `neighbor.project_id` raw context leaked via `collapsing_neighbors` / `distinguishing_neighbors` lists and the AMBIGUOUS `compass_question` interpolation.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (pushed to origin at `54ea2f77d` on 2026-06-06).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Finding (MEDIUM): `evaluate_project_identity` returned the AMBIGUOUS branch with `collapsing_neighbors=collapsing` and `distinguishing_neighbors=distinguishing`, sourced from `neighbor.project_id` values. The collapsing path's `compass_question` interpolated `list(collapsing)` verbatim into its text. `ProjectIdentityNeighbor` did NOT reject raw context in `project_id`, so a caller could pass `neighbor=ProjectIdentityNeighbor(project_id='raw_prompt:secret-neighbor-...', ...)` and the BLOCKED result preserved the raw payload in both serialized tuples and the compass_question. This is the same shortfall pattern as `cd20be9c3` (scope evidence_refs), `df8120b49` (difference shared_relationship_refs), `808297315` (identity evidence_refs), `95dde4d50` (scope subject_ref/ambiguity_reason via compass_question), `c3d9f4a22` (bounds aggregation re-exposure), and `d55b15149` (handoff evidence/summary/approval refs).
+
+Repair:
+- Repair commit `54ea2f77d` (Repair Compass identity-layer neighbor.project_id raw-context leak). `evaluate_project_identity` now computes `redacted_distinguishing = _redact_raw_context_refs(distinguishing)` and `redacted_collapsing = _redact_raw_context_refs(collapsing)` before constructing the AMBIGUOUS or DEFINED `ProjectIdentityEvaluation`. Both `distinguishing_neighbors` and `collapsing_neighbors` carry the redacted tuples; the AMBIGUOUS `compass_question` interpolates `list(redacted_collapsing)` so no raw payload appears in the question text. Defense-in-depth: `candidate.evidence_refs` is also routed through `_redact_raw_context_refs` on these branches (matching the BLOCKED branch from `808297315`).
+
+Completion: 2026-06-06 (Opus build lane, cadence-3/3 self-review repair).
+
+Ready for Codex Review:
+
+- Repair commit: `54ea2f77d`.
+- Branch HEAD pushed: `origin/codex/build-4-compass-project-definition-20260606` at `54ea2f77d` (2026-06-06).
+- Files changed: `meridian_core/compass.py` (+9/-6 lines: AMBIGUOUS + DEFINED branches now redact neighbor lists and evidence_refs), `tests/test_compass.py` (+125 lines: new `TestProjectIdentityNeighborProjectIdRedaction` class with 12 cases), `docs/live-build-4.md` (this main marker).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **297 passed** (12 new neighbor-redaction tests on top of 285 prior).
+- `git diff --check`: clean.
+- Reproducer (before fix): `ProjectIdentityNeighbor(project_id='raw_prompt:secret-neighbor-project-id-payload', mission_bearing=<same bearing as candidate>, ...)` → `evaluate_project_identity` returned AMBIGUOUS with `collapsing_neighbors=('raw_prompt:secret-neighbor-project-id-payload',)`, `compass_question` text contained the raw payload verbatim, and `json.dumps(result.to_dict())` contained `secret-neighbor`.
+- After fix: same call returns `collapsing_neighbors=('<redacted_raw_context>',)`, `compass_question` substitutes `['<redacted_raw_context>']` for the raw list, and `json.dumps` no longer contains `secret-neighbor`.
+- Concrete evidence each required invariant is enforced:
+  - 7 parametrized raw-context prefixes for `neighbor.project_id` confirm `collapsing_neighbors` redacts and `json.dumps` no longer contains the raw payload.
+  - Dedicated `test_raw_context_in_neighbor_project_id_redacted_in_compass_question` confirms the AMBIGUOUS question text contains `<redacted_raw_context>` instead of the raw neighbor id.
+  - DEFINED path also redacts via `test_raw_context_in_neighbor_project_id_redacted_in_distinguishing`.
+  - Regression: safe `meridian-shadow` neighbor still appears unredacted in `collapsing_neighbors` and `compass_question`.
+  - Mixed safe + raw neighbors partially redacted in original order.
+  - Stable `project_identity_result_dict_keys()` shape preserved; `execution_authorized=False`.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes (beyond this queue marker), no Polaris dependency.
+- Next Candidate: pending coordinator promotion after this identity-layer neighbor.project_id redaction repair clears Codex review. Independent Codex review still owed for the full 9-commit Compass repair series now on the branch (`cc584318f` + `cd20be9c3` + `270438271` + `df8120b49` + `808297315` + `95dde4d50` + `c3d9f4a22` + `d55b15149` + `54ea2f77d`) plus cross-lane `43b1dafb8` once Codex CLI spend limit is raised.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair cadence-3/3 self-review finding — handoff BLOCKED result preserved raw `evidence_refs` / `payload_summary_refs` / `approval_refs` verbatim in serialization.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
@@ -6037,3 +6073,7 @@ Completion:
   2. Fix Tier 3+ account missing/expired fallback condition: changed from "? (wait for auth)" with fallback "Try direct API" to "? (start/re-auth session, or direct API if proof/audit explicit)"
   3. Fix DeepSeek route table: established `deepseek-chat` as the exact dispatch ID per Model Harness registry, with `v4-pro` and `v4-flash` as marketing/capability variants described as metadata, not dispatch keys
 - Reviews B follow-up verification complete; consistency fixes applied.
+
+2026-06-06 21:06 -06:00 - Build 4 cross-check: cadence 3/3 Codex review attempt (7th consecutive) on the 8-commit Compass repair series (cc584318f^..d55b15149) PARKED — Codex CLI returned monthly spend limit again; no independent review obtained; per heartbeat directive ran careful self-review as fallback; ONE actionable finding surfaced parallel to the prior five: [MEDIUM] evaluate_project_identity preserved neighbor.project_id raw context in collapsing_neighbors and distinguishing_neighbors tuples and interpolated `list(collapsing)` verbatim into the AMBIGUOUS compass_question; ProjectIdentityNeighbor.__post_init__ did NOT reject raw context in project_id; reproduced (decision=ambiguous, collapsing_neighbors=('raw_prompt:secret-neighbor-project-id-payload',), compass_question contained the raw payload, json.dumps leaked 'secret-neighbor'); other audit checks (compass_question constants in handoff layer, difference_evidence guard ordering, matched_refs trace, frozen-dataclass invariants, style consistency across 9 repairs) all passed.
+
+2026-06-06 21:10 -06:00 - Build 4 completed cadence 3/3 self-review repair; repair commit 54ea2f77d on branch codex/build-4-compass-project-definition-20260606; files changed: meridian_core/compass.py (evaluate_project_identity now computes redacted_distinguishing and redacted_collapsing via _redact_raw_context_refs before constructing both AMBIGUOUS and DEFINED ProjectIdentityEvaluation; routes redacted tuples into distinguishing_neighbors and collapsing_neighbors; AMBIGUOUS compass_question now interpolates list(redacted_collapsing); defense-in-depth also redacts candidate.evidence_refs on these branches to match the BLOCKED branch pattern), tests/test_compass.py (TestProjectIdentityNeighborProjectIdRedaction — 12 new cases: 7 parametrized raw-context prefix tests asserting collapsing redaction and json.dumps absence of raw payload; dedicated compass_question redaction test; DEFINED-path distinguishing_neighbors redaction test; safe-neighbor passthrough regression; mixed safe + raw partial redaction; stable result_dict_keys shape with execution_authorized=False), docs/live-build-4.md (main marker only this turn — branch-side queue marker not touched in this turn); tests run: python -m pytest tests/test_compass.py -q -> 297 passed (12 new tests on top of 285); git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at 54ea2f77d (d55b15149..54ea2f77d); main queue updated with new Completed / Ready For Codex Review block for the neighbor.project_id redaction repair; Obsidian update status: not performed in this lane; cadence reset for next cycle; lane idle pending independent Codex review on the 9-commit Compass repair series or coordinator promotion of next backend candidate.
