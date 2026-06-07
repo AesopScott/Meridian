@@ -1007,6 +1007,20 @@ def make_default_map() -> FileMap:
             notes="Parking lot, not a roadmap. Owner: Build 4. Ideas only until V2 closes.",
         ),
         FileMapEntry(
+            path="docs/v3-intake-resolution.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="V3 intake resolution: deterministic gate that resolves every agentic-ai-framework-checklist [~]/[ ] item into Promote to V3, Move earlier, Park for later, or Reject with a named owner.",
+            related_tests=[],
+            notes="V3 entry-point. Read before promoting any agentic-ai-framework-checklist item to a V3 spec or runtime build.",
+        ),
+        FileMapEntry(
+            path="docs/v3-goal-runtime-contract.md",
+            area=FileArea.ARCHITECTURE,
+            purpose="V3 Goal Runtime / Goal Harness contract: bounded backend decision surface for native goal objects, status lifecycle, telemetry, continuation/resume policy, and proof-trail semantics across Prime, Compass, and Echo.",
+            related_tests=[],
+            notes="V3 first-wave contract. Read before designing any V3 goal runtime, Compass continuation policy, or Echo goal-lineage code.",
+        ),
+        FileMapEntry(
             path="docs/filemap-v2-v3-discoverability-audit.md",
             area=FileArea.FILE_MAP,
             purpose="V2/V3 FileMap discoverability audit: identifies architecture and horizon docs Prime must find at wake, plus follow-up FileMap registration gaps.",

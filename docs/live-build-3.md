@@ -59,6 +59,43 @@ Required proof before Ready marker:
   registered
 - path-scope proof limited to allowed files
 
+### Build 3 Opus Audit Marker (2026-06-07T12:58:00-06:00)
+
+Worktree: `C:/Users/scott/AppData/Local/Temp/polaris-wt/build3-v3-filemap-audit-20260607-1258`.
+
+Inspected sources: runtime FileMap (`meridian_core/filemap.py`), human mirror
+(`docs/FileMap.md`), `_REQUIRED_PATHS` (`tests/test_filemap.py`), and the top
+Active Task block of `docs/live-build-3.md`. Targeted V3 docs paths were
+inspected against all three FileMap surfaces.
+
+Coverage table (path : runtime FileMap : docs/FileMap.md : `_REQUIRED_PATHS`):
+
+- `docs/v3-intake-resolution.md` : missing : missing : missing → newly registered (this audit).
+- `docs/v3-goal-runtime-contract.md` : missing : missing : missing → newly registered (this audit).
+- `docs/v3-parking-lot.md` : already covered (`meridian_core/filemap.py:1003`) : already covered (`docs/FileMap.md:218`) : already covered (`tests/test_filemap.py:114`).
+- `docs/agentic-ai-framework-checklist.md` : already covered (`meridian_core/filemap.py:827`) : already covered (`docs/FileMap.md:205`) : already covered (`tests/test_filemap.py:18`).
+- `docs/live-build-3.md` (live queue doc): already covered across runtime FileMap, docs mirror, and `_REQUIRED_PATHS`; no stale-mirror gap found.
+
+Registrations applied in this audit (allowed files only):
+
+- `meridian_core/filemap.py`: added two `FileMapEntry` blocks for `docs/v3-intake-resolution.md` and `docs/v3-goal-runtime-contract.md` immediately after the existing `docs/v3-parking-lot.md` entry, in the V2/V3 architecture-doc cluster.
+- `docs/FileMap.md`: added two table rows for the same two paths immediately after the existing `docs/v3-parking-lot.md` row.
+- `tests/test_filemap.py`: added two paths to `_REQUIRED_PATHS` immediately after `docs/v3-parking-lot.md`.
+
+Path-scope: edits limited to `meridian_core/filemap.py`, `docs/FileMap.md`,
+`tests/test_filemap.py`, and `docs/live-build-3.md` (this marker). No edits to
+runtime implementation outside FileMap surfaces, V3 intake/contract docs,
+Build 1/2/4/5 queues, review logs, `index.html`, Electron/Bifrost UI,
+generated artifacts, branches, or Polaris.
+
+Proof:
+
+- `python -m pytest tests/test_filemap.py -q` → 47 passed.
+- `git diff --check` → clean.
+- `git status --short` → only `docs/FileMap.md`, `docs/live-build-3.md`, `meridian_core/filemap.py`, and `tests/test_filemap.py` modified; no other paths touched.
+
+Ready for Codex Review A/B.
+
 ## Completed / Promoted To Main
 
 Goal: repair backend restart FileMap docs mirror gap found by Codex Reviews B.
