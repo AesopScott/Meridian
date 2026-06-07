@@ -59,6 +59,21 @@ Launch attempt note - 2026-06-07T09:01:20-06:00:
 - This task remains active for the next Opus availability window. Do not route
   Codex review until a real worker candidate exists.
 
+Codex Review A/B evidence note - 2026-06-07T09:06:30-06:00:
+
+- Review A found no issues, but independent Review B found one blocking gap:
+  OpenAI is only preserved from the base `sample_cockpit_view_model()` provider
+  balance, not proven through the backend-bound
+  `sample_backend_bound_cockpit_view_model().provider_balance_summary` path.
+- Smallest required Opus repair: add an `openai` provider row to
+  `sample_backend_bound_cockpit_view_model().provider_balance_summary`, then
+  tighten backend-bound tests to prove OpenAI health, route kind, current prompt
+  tokens, remaining credit label, estimated spend label, and cost pressure come
+  from the backend-bound summary rather than from base-sample preservation.
+- Keep this as the active Build 5 task. Do not mark `Bifrost + Balance Button`
+  built/review-cleared until the repair is implemented by an Opus worker,
+  proof passes, and Codex Review A/B clears it.
+
 ## Coordinator Update - Opus Worker Relaunch Attempt / No Candidate
 
 Timestamp: 2026-06-07T08:49:01-06:00.

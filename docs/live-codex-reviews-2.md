@@ -34,6 +34,37 @@ Review result - 2026-06-07 08:58 -06:00:
   edits, no provider/model calls, no session/process control, no branch
   movement, and no worker push.
 
+## Coordinator Override - Completed / Finding Routed
+
+Goal: review whether current `origin/main` satisfies the V2 tracker item
+`Bifrost + Balance Button` without requiring another Opus implementation slice.
+
+Review result - 2026-06-07 09:06 -06:00:
+
+- Finding routed. Review A found no issues, but independent Review B found a
+  blocking backend-bound proof gap for OpenAI.
+- Cleared evidence: current main already renders provider balance fields and
+  tests Claude, DeepSeek, OpenRouter/aggregator, and local provider families
+  across sample render, backend summary mapping, redaction/escaping,
+  provenance, determinism, partial-merge preservation, and static render proof.
+- Blocking gap: OpenAI is rendered from the base sample, but
+  `sample_backend_bound_cockpit_view_model().provider_balance_summary` contains
+  `claude`, `deepseek`, `openrouter`, and `local` only. Therefore current main
+  does not prove OpenAI health/route/token/credit/spend/cost-pressure fields
+  through the backend-bound provider-balance summary path.
+- Smallest Opus repair: add an OpenAI row to
+  `sample_backend_bound_cockpit_view_model().provider_balance_summary`, then
+  tighten backend-bound tests to verify OpenAI `health`, `route_kind`,
+  `current_prompt_tokens`, `remaining_credit_label`, `estimated_spend_label`,
+  and `cost_pressure` from that summary instead of accepting base-sample
+  preservation.
+- Proof run during review: focused provider-balance selection passed with
+  `51 passed, 332 deselected`; earlier full cockpit proof passed with
+  `python -m pytest tests/test_bifrost_cockpit.py -q` -> `383 passed`.
+- Scope check: no implementation files were edited by review, no `index.html`
+  edits, no provider/model calls, no session/process control, no branch
+  movement, and no worker push.
+
 ## Required First Command For Every New Task
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
