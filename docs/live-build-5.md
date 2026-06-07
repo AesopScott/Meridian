@@ -288,7 +288,7 @@ Completion marker - 2026-06-07T11:08:39-06:00:
   text, process/session controls, Electron behavior, or `index.html` edits were
   introduced by the promoted backend proof.
 
-## Coordinator Override - Active Now / Opus Task Assigned
+## Coordinator Override - Completed / Review-Cleared / Do Not Execute
 
 Timestamp: 2026-06-07T11:36:00-06:00.
 
