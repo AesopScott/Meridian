@@ -5181,6 +5181,64 @@ body {
       )),
     ].join('');
   };
+  const renderAegisLogicSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Aegis logic source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Aegis logic snapshot unavailable'],
+      ]), true);
+    }
+    const trail = snapshot.proof_trail || {};
+    const policy = snapshot.cognition_policy || {};
+    const route = policy.relay_route || {};
+    const evidence = Array.isArray(trail.evidence) ? trail.evidence : [];
+    return [
+      relaySection('Aegis logic source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['harness', snapshot.harness || 'Aegis'],
+        ['display only', snapshot.display_only ? 'yes' : 'no'],
+        ['raw evidence body visible', snapshot.raw_evidence_body_visible ? 'yes' : 'no'],
+      ]), true),
+      relaySection('Proof trail summary', relayGrid([
+        ['clean', trail.is_clean ? 'yes' : 'no'],
+        ['evidence count', trail.evidence_count ?? 0],
+        ['blocking count', trail.blocking_count ?? 0],
+        ['open findings', trail.open_count ?? 0],
+      ]), true),
+      relaySection('Cognition policy gate', relayGrid([
+        ['action', relayText(policy.action_type)],
+        ['risk tier', policy.risk_tier ?? 'unknown'],
+        ['lanes', relayJoin(policy.lanes)],
+        ['requires proof', policy.requires_proof ? 'yes' : 'no'],
+        ['requires review', policy.requires_review ? 'yes' : 'no'],
+        ['requires human gate', policy.requires_human_gate ? 'yes' : 'no'],
+        ['decision', relayText(policy.decision)],
+        ['can dispatch', policy.can_dispatch ? 'yes' : 'no'],
+        ['blocking reasons', relayJoin(policy.blocking_reasons)],
+      ]), true),
+      relaySection('Relay route gate', relayGrid([
+        ['risk tier', route.risk_tier ?? 'unknown'],
+        ['mode', relayText(route.mode)],
+        ['reason', route.reason || 'unknown'],
+        ['requires independence', route.requires_independence ? 'yes' : 'no'],
+        ['route requires human gate', route.requires_human_gate ? 'yes' : 'no'],
+      ]), false),
+      ...evidence.map((item, index) => relaySection(
+        `Evidence ${index + 1}: ${item.id || 'unknown'}`,
+        relayGrid([
+          ['type', relayText(item.type)],
+          ['severity', relayText(item.severity)],
+          ['status', relayText(item.status)],
+          ['source', item.source || 'unknown'],
+          ['target', item.target || 'unknown'],
+          ['summary', item.summary || 'unknown'],
+          ['proof blocking', item.proof_blocking ? 'yes' : 'no'],
+        ]),
+        index === 0,
+      )),
+    ].join('');
+  };
   const loadRelayLogic = async () => {
     const logicNode = rightWorkspace?.querySelector('[data-relay-logic]');
     if (!logicNode) return;
@@ -5290,6 +5348,17 @@ body {
       logicNode.innerHTML = renderFileMapSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderFileMapSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadAegisLogic = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-aegis-logic]');
+    if (!logicNode) return;
+    try {
+      const response = await fetch(bridgeUrl('aegis-logic'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderAegisLogicSnapshot(snapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderAegisLogicSnapshot({ ok: false, error: error.message });
     }
   };
   const relayBridgeRows = (status, detail) => [
@@ -7453,6 +7522,37 @@ body {
       return false;
     }
   };
+  const renderAegisLogic = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Aegis logic">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Aegis Runtime Logic</div>
+            <div class="relay-models-status">Proof gate</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-aegis-logic>${relaySection('Aegis logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadAegisLogic();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const openSpark = () => {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
@@ -7476,6 +7576,7 @@ body {
     if (rightWorkspace?.querySelector('[data-echo-memory]')) loadEchoMemory();
     if (rightWorkspace?.querySelector('[data-atlas-retrieval]')) loadAtlasRetrieval();
     if (rightWorkspace?.querySelector('[data-filemap]')) loadFileMap();
+    if (rightWorkspace?.querySelector('[data-aegis-logic]')) loadAegisLogic();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
@@ -7697,6 +7798,8 @@ body {
       rendered = renderAtlasRetrieval();
     } else if (button.dataset.harness === 'FileMap') {
       rendered = renderFileMap();
+    } else if (button.dataset.harness === 'Aegis') {
+      rendered = renderAegisLogic();
     } else {
       rendered = modelButton ? renderModelHarnessSurface(button) : renderHarnessSurface(button);
     }

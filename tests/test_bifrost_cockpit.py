@@ -635,6 +635,22 @@ def test_index_memory_retrieval_and_filemap_surfaces_use_bridge_snapshots():
     assert "mutation_authorized ? 'yes'" not in doc
 
 
+def test_index_aegis_surface_uses_bridge_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Aegis Runtime Logic" in doc
+    assert "data-aegis-logic" in doc
+    assert "const renderAegisLogicSnapshot = (snapshot) =>" in doc
+    assert "const loadAegisLogic = async () =>" in doc
+    assert "bridgeUrl('aegis-logic')" in doc
+    assert "renderAegisLogic()" in doc
+    assert "if (rightWorkspace?.querySelector('[data-aegis-logic]')) loadAegisLogic();" in doc
+    assert "button.dataset.harness === 'Aegis'" in doc
+    assert "raw evidence body visible" in doc
+    assert "display only" in doc
+    assert "apply_console_response" not in doc
+    assert "enqueue_to_review_console" not in doc
+
+
 def test_index_wired_harness_titles_use_runtime_logic_naming():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Prime Runtime Logic" in doc
@@ -744,6 +760,25 @@ def test_bridge_exposes_memory_retrieval_and_filemap_routes():
     assert '"mutation_authorized": False' in doc
     assert "hit.record.body" not in doc
     assert '"body":' not in doc
+
+
+def test_bridge_exposes_aegis_logic_route():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "aegisLogicSnapshot: true" in doc
+    assert "aegisLogic: '/bridge/aegis-logic'" in doc
+    assert "function aegisLogicSnapshot()" in doc
+    assert "req.method === 'GET' && req.url === BRIDGE_ROUTES.aegisLogic" in doc
+    assert "meridian_core.aegis" in doc
+    assert "meridian_core.cognition_policy" in doc
+    assert "result.relay_route.risk_tier" in doc
+    assert "result.relay_route.tier" not in doc
+    assert '"display_only": True' in doc
+    assert '"mutation_authorized": False' in doc
+    assert '"raw_evidence_body_visible": False' in doc
+    assert '"mutation_authorized": True' not in doc
+    assert '"body":' not in doc
+    assert "apply_console_response" not in doc
+    assert "enqueue_to_review_console" not in doc
 
 
 def test_ui_checklist_defers_deep_compass_and_vulcan_items_to_backend_tracker():

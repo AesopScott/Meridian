@@ -28,6 +28,7 @@ const BRIDGE_CAPABILITIES = {
   echoMemorySnapshot: true,
   atlasRetrievalSnapshot: true,
   fileMapSnapshot: true,
+  aegisLogicSnapshot: true,
   userSessionTargets: true,
 };
 const BRIDGE_ROUTES = Object.freeze({
@@ -43,6 +44,7 @@ const BRIDGE_ROUTES = Object.freeze({
   echoMemory: '/bridge/echo-memory',
   atlasRetrieval: '/bridge/atlas-retrieval',
   fileMap: '/bridge/filemap',
+  aegisLogic: '/bridge/aegis-logic',
   userSessions: '/bridge/user-sessions',
   recentCalls: '/bridge/recent-calls',
   callResult: '/bridge/call-result',
@@ -91,7 +93,7 @@ if (process.argv.includes('--self-test')) {
   rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
   const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
   const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
-  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot && BRIDGE_CAPABILITIES.primeRuntimeSnapshot && BRIDGE_CAPABILITIES.compassLogicSnapshot && BRIDGE_CAPABILITIES.vulcanLogicSnapshot && BRIDGE_CAPABILITIES.providerBalanceSnapshot && BRIDGE_CAPABILITIES.goalRuntimeSnapshot && BRIDGE_CAPABILITIES.workflowDispatchStatusSnapshot && BRIDGE_CAPABILITIES.echoMemorySnapshot && BRIDGE_CAPABILITIES.atlasRetrievalSnapshot && BRIDGE_CAPABILITIES.fileMapSnapshot;
+  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot && BRIDGE_CAPABILITIES.primeRuntimeSnapshot && BRIDGE_CAPABILITIES.compassLogicSnapshot && BRIDGE_CAPABILITIES.vulcanLogicSnapshot && BRIDGE_CAPABILITIES.providerBalanceSnapshot && BRIDGE_CAPABILITIES.goalRuntimeSnapshot && BRIDGE_CAPABILITIES.workflowDispatchStatusSnapshot && BRIDGE_CAPABILITIES.echoMemorySnapshot && BRIDGE_CAPABILITIES.atlasRetrievalSnapshot && BRIDGE_CAPABILITIES.fileMapSnapshot && BRIDGE_CAPABILITIES.aegisLogicSnapshot;
   const sampleSession = sessionTargetFromWorktree({
     path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-bifrost',
     branch: 'refs/heads/worktree-build-5-bifrost',
@@ -930,6 +932,92 @@ print(json.dumps({
 `);
 }
 
+function aegisLogicSnapshot() {
+  return pythonJsonSnapshot('Aegis logic', String.raw`
+import json
+from meridian_core.aegis import (
+    EvidenceSeverity,
+    ProofTrail,
+    evidence_from_cross_check,
+)
+from meridian_core.cognition_policy import (
+    CognitionActionType,
+    evaluate_cognition_policy,
+)
+
+trail = ProofTrail()
+trail.add(evidence_from_cross_check(
+    "aegis-ui-001",
+    "relay_dispatch",
+    "prompt_packet",
+    "PromptPacket proof metadata present",
+    EvidenceSeverity.INFO,
+))
+trail.add(evidence_from_cross_check(
+    "aegis-ui-002",
+    "review_console",
+    "human_gate",
+    "Tier-three review gate requires explicit approval",
+    EvidenceSeverity.ERROR,
+))
+result = evaluate_cognition_policy(
+    3,
+    CognitionActionType.BUILD,
+    proof_trail=trail,
+    human_gate_approved=False,
+)
+policy = result.policy
+print(json.dumps({
+    "ok": True,
+    "source": "meridian_core.aegis / meridian_core.cognition_policy",
+    "version": "v2-aegis-runtime-2026-06-07",
+    "harness": "Aegis",
+    "summary": "Display-safe Aegis proof and cognition-policy gate sample.",
+    "display_only": True,
+    "mutation_authorized": False,
+    "raw_evidence_body_visible": False,
+    "proof_trail": {
+        "is_clean": trail.is_clean(),
+        "evidence_count": len(trail.evidence),
+        "blocking_count": len(trail.blocking()),
+        "open_count": len(trail.open_findings()),
+        "evidence": [
+            {
+                "id": evidence.id,
+                "type": evidence.evidence_type.value,
+                "severity": evidence.severity.value,
+                "status": evidence.status.value,
+                "source": evidence.source,
+                "target": evidence.target,
+                "summary": evidence.summary,
+                "proof_blocking": evidence.is_proof_blocking(),
+            }
+            for evidence in trail.evidence
+        ],
+    },
+    "cognition_policy": {
+        "action_type": policy.action_type.value,
+        "risk_tier": policy.risk_tier,
+        "lanes": [lane.value for lane in policy.lanes],
+        "requires_proof": policy.requires_proof,
+        "requires_review": policy.requires_review,
+        "requires_human_gate": policy.requires_human_gate,
+        "reason": policy.reason,
+        "decision": result.decision.value,
+        "can_dispatch": result.can_dispatch,
+        "blocking_reasons": list(result.blocking_reasons),
+        "relay_route": {
+            "risk_tier": result.relay_route.risk_tier,
+            "mode": result.relay_route.mode.value,
+            "reason": result.relay_route.reason,
+            "requires_independence": result.relay_route.requires_independence,
+            "requires_human_gate": result.relay_route.requires_human_gate,
+        },
+    },
+}))
+`);
+}
+
 function parseGitWorktrees(stdout) {
   const records = [];
   let current = null;
@@ -1204,6 +1292,17 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET' && req.url === BRIDGE_ROUTES.fileMap) {
     const snapshot = await fileMapSnapshot();
+    sendJson(res, snapshot.ok ? 200 : 500, {
+      service: 'meridian-model-bridge',
+      version: BRIDGE_VERSION,
+      capabilities: BRIDGE_CAPABILITIES,
+      ...snapshot,
+    }, req);
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === BRIDGE_ROUTES.aegisLogic) {
+    const snapshot = await aegisLogicSnapshot();
     sendJson(res, snapshot.ok ? 200 : 500, {
       service: 'meridian-model-bridge',
       version: BRIDGE_VERSION,
