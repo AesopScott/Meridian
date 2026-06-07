@@ -72,6 +72,131 @@ Required proof before Ready marker:
 Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
+### Build 3 Opus Workflow Dispatch FileMap Registration Ready For Codex Review (2026-06-07T17:15:00-06:00)
+
+Status: ready for Codex Review A/B. Not promoted; not pushed. Stopped on
+detached worktree HEAD per task scope.
+
+Worktree:
+`C:/Users/scott/AppData/Local/Temp/polaris-wt/build3-workflow-dispatch-filemap-20260607-1715`.
+
+Base HEAD on this worktree has the promoted Workflow Sub-Agent Harness
+dispatch backend slice from `28002a9b7` (`workflow: add dispatch domain
+slice`) already merged into the main lineage that this detached worktree was
+cut from.
+
+Coverage table before this slice
+(path : runtime FileMap : `docs/FileMap.md` : `_REQUIRED_PATHS`):
+
+- `meridian_core/workflow_dispatch.py` : missing : missing : missing → newly
+  registered in this slice.
+- `tests/test_workflow_dispatch.py` : missing : missing : missing → newly
+  registered in this slice.
+
+Registrations applied (allowed files only):
+
+- `meridian_core/filemap.py`:
+  - added new `FileArea.WORKFLOW_DISPATCH = "Workflow Sub-Agent Harness /
+    Dispatch"` constant immediately after `PROVIDER_BALANCE` in the
+    area-label block;
+  - added two `FileMapEntry` blocks for `meridian_core/workflow_dispatch.py`
+    and `tests/test_workflow_dispatch.py` immediately after the existing
+    `tests/test_provider_balance.py` entry, following the Provider Balance
+    / Goal Runtime registration style. Entries identify Workflow Sub-Agent
+    Harness / Prime coordination ownership (Workflow Sub-Agent Harness owns
+    the dispatch domain; Prime coordination issues work orders and consumes
+    `WorkflowResultSummary` / `WorkflowErrorSummary` /
+    `WorkflowResteerRequest`; Aegis, Beacon, Session Lifecycle, Echo, Atlas,
+    Relay, and Bifrost are downstream or adjacent consumers only and are not
+    imported by this slice), the frozen work-order / input / packet / prompt
+    budget / gate context / heartbeat / result / error / resteer /
+    resteer-changes / promotion-decision dataclasses, the closed
+    `WorkflowHarness` / `WorkflowPhase` / `WorkflowFailureKind` enums, the
+    pure `dispatch_work_order` fake/stub handler dispatch and
+    exception-to-typed-`WorkflowErrorSummary` conversion, tier proof and
+    gate enforcement (tier-3+ `gate_context` requirement; tier-2+
+    `proof_trail` requirement at dispatch; tier-4 `requires_human_gate`
+    requirement at `promote_workflow_result`), segment-aware allowed /
+    forbidden path scoping for `WorkflowInputPacket` inputs, UTC-only
+    ISO-8601 timestamp validation with bounded year range, tri-state
+    `WorkflowResteerChanges` override semantics, prompt-drag /
+    display-safety guards over free-text fields and handler return
+    payloads, `WORKFLOW_NESTING_CAP` enforcement, the no-heartbeat-history
+    rule on Prime-visible return payloads, and the no-live-workflow /
+    no-process-or-session-control / no-model / no-network /
+    no-UI-Electron-Bifrost / no-Echo-or-FileMap-durable-writes /
+    no-provider-or-account / no-FileMap-self-registration / no-branch-or-
+    worktree-movement exclusion scope.
+- `docs/FileMap.md`: added two table rows for the same two paths
+  immediately after the existing `tests/test_provider_balance.py` row,
+  mirroring the runtime FileMap entries with the same Workflow Sub-Agent
+  Harness / Dispatch area label, ownership split, frozen-shape language,
+  tier proof / gate enforcement language, segment-aware path scope, UTC
+  timestamp validation, tri-state resteer overrides,
+  prompt-drag/display-safety policy, nesting cap, no-heartbeat-history
+  rule, and the same exclusion scope (no live workflow execution,
+  process/session control, model calls, network, UI/Electron/Bifrost
+  behavior, Echo/FileMap durable writes, provider/account calls, or
+  FileMap self-registration).
+- `tests/test_filemap.py`: appended the two paths
+  `meridian_core/workflow_dispatch.py` and
+  `tests/test_workflow_dispatch.py` to `_REQUIRED_PATHS` immediately
+  after `tests/test_provider_balance.py` so the existing default-map
+  coverage and injection-summary tests enforce the registration.
+- `docs/live-build-3.md`: this Ready marker.
+
+Files changed:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md` (this marker)
+
+Path-scope: edits limited to the four allowed files above. No edits to
+`meridian_core/workflow_dispatch.py`, `tests/test_workflow_dispatch.py`,
+`docs/workflow-subagent-harness-contract.md`,
+`docs/workflow-subagent-usage-checklist.md`,
+`docs/workflows-subagent-harness-architecture.md`, Bifrost / Electron / UI
+files, generated artifacts, package files, other Build 1 / 2 / 4 / 5
+queues, review logs, or runtime code outside FileMap registration.
+`git status --short --branch` confirms only the four allowed files are
+modified on this detached worktree HEAD.
+
+Proof:
+
+- `python -m pytest tests/test_filemap.py tests/test_workflow_dispatch.py
+  -q` → `208 passed in 0.34s` (47 FileMap tests + 161 Workflow Dispatch
+  tests).
+- `git diff --check -- meridian_core/filemap.py docs/FileMap.md
+  tests/test_filemap.py docs/live-build-3.md` → clean (no whitespace
+  errors and no conflict markers).
+- `git status --short --branch` → only `meridian_core/filemap.py`,
+  `docs/FileMap.md`, `tests/test_filemap.py`, and `docs/live-build-3.md`
+  appear as modified on detached `HEAD`.
+
+Remaining risk:
+
+- Registration-only slice; runtime behavior of
+  `meridian_core/workflow_dispatch.py` and
+  `tests/test_workflow_dispatch.py` is unchanged. The 161-test workflow
+  dispatch suite still asserts the contract (tier proof and gate
+  enforcement, segment-aware path scope, UTC timestamp validation,
+  tri-state resteer overrides, prompt-drag / display-safety guards,
+  nesting cap, and no-heartbeat-history rule) and remains the source of
+  truth for workflow dispatch policy.
+- New `FileArea.WORKFLOW_DISPATCH` label adds a new area string but does
+  not change existing area-filter behavior; `tests/test_filemap.py` is
+  the registration-coverage proof and now requires both new paths.
+- No live workflow execution, process/session control, model calls,
+  network, UI/Electron/Bifrost behavior, Echo/FileMap durable writes,
+  provider/account calls, FileMap self-registration inside
+  `meridian_core/workflow_dispatch.py`, or branch/worktree movement was
+  authorized or attempted by this slice.
+- Worktree stopped on detached `HEAD`; no commit, push, branch creation,
+  merge, rebase, reset, cherry-pick, worktree move, or cross-worktree
+  copy was performed. Promotion to `main` requires coordinator approval
+  per Build 3 rules.
+
 ## Completed / Review-Cleared / Promoted To Main - Provider Balance FileMap Registration
 
 Timestamp: 2026-06-07T15:55:00-06:00.

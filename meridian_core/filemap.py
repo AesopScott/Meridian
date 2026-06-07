@@ -51,6 +51,7 @@ class FileArea:
     BIFROST          = "Bifrost / session harness"
     GOAL_RUNTIME     = "Goal Runtime / Goal Harness"
     PROVIDER_BALANCE = "Provider Balance / Usage"
+    WORKFLOW_DISPATCH = "Workflow Sub-Agent Harness / Dispatch"
 
 
 @dataclass
@@ -1049,6 +1050,20 @@ def make_default_map() -> FileMap:
             purpose="Test suite for meridian_core/provider_balance.py: frozen-dataclass invariants for ProviderBalanceSnapshot and ProviderBalanceSummary, fail-safe unknown / unavailable defaults, deterministic ordering and selected-provider handling, cost-pressure fallback to UNKNOWN, display-safety redaction of raw prompt/response text, credentials, filesystem paths, and branch/worktree text, evidence-ref normalization and caps, and structural compatibility of the to_mapping() summary shape with the Bifrost cockpit consumer contract.",
             related_tests=[],
             notes="Run before changing meridian_core/provider_balance.py or any Provider Balance / Usage ownership, snapshot/summary shape, display-safety policy, fail-safe defaults, cost-pressure fallback, or selected-provider policy behavior. Bifrost is not imported here; the module is the source of truth for provider-balance policy.",
+        ),
+        FileMapEntry(
+            path="meridian_core/workflow_dispatch.py",
+            area=FileArea.WORKFLOW_DISPATCH,
+            purpose="Workflow Sub-Agent Harness dispatch domain slice: frozen WorkflowWorkOrder / WorkflowInputRecord / WorkflowInputPacket / WorkflowPromptBudget / WorkflowGateContext / WorkflowHeartbeat / WorkflowResultSummary / WorkflowErrorSummary / WorkflowResteerRequest / WorkflowResteerChanges / WorkflowPromotionDecision dataclasses, closed WorkflowHarness / WorkflowPhase / WorkflowFailureKind enums, pure dispatch_work_order helper that invokes a registered fake/stub handler and converts handler exceptions to a typed WorkflowErrorSummary, tier proof and gate enforcement (tier-3+ requires gate_context; tier-2+ result requires non-empty proof_trail; tier-4 result requires requires_human_gate=True at promote_workflow_result), segment-aware allowed/forbidden path scoping for WorkflowInputPacket inputs, UTC-only ISO-8601 timestamp validation with bounded year range, tri-state resteer overrides via WorkflowResteerChanges, prompt-drag / display-safety guards over free-text fields and handler return payloads, nested workflow depth capped at WORKFLOW_NESTING_CAP, and no heartbeat-history exposure in any Prime-visible return value.",
+            related_tests=["tests/test_workflow_dispatch.py"],
+            notes="Pure deterministic backend domain only: no live workflow execution, no process/session control, no model calls, no network, no UI/Electron/Bifrost behavior, no Echo/FileMap durable writes, no provider/account calls, no FileMap self-registration inside the workflow module, and no branch/worktree movement. Ownership: Workflow Sub-Agent Harness owns the dispatch domain; Prime coordination issues work orders and consumes WorkflowResultSummary / WorkflowErrorSummary / WorkflowResteerRequest. Aegis, Beacon, Session Lifecycle, Echo, Atlas, Relay, and Bifrost are downstream or adjacent consumers only and are not imported by this slice. Implements docs/workflow-subagent-harness-contract.md, docs/workflow-subagent-usage-checklist.md, and docs/workflows-subagent-harness-architecture.md. Handler returns that expose transcripts, raw logs, raw file/search bodies, free-text plans, heartbeat history, credentials, or filesystem/branch/worktree text become typed dispatch failures rather than successful results.",
+        ),
+        FileMapEntry(
+            path="tests/test_workflow_dispatch.py",
+            area=FileArea.WORKFLOW_DISPATCH,
+            purpose="161-test proof suite for meridian_core/workflow_dispatch.py: frozen-dataclass invariants and field caps for every Workflow* shape, closed WorkflowHarness / WorkflowPhase / WorkflowFailureKind enums, fake/stub handler dispatch including exception-to-WorkflowErrorSummary conversion and unsafe-return rejection, tier proof and gate enforcement (tier-3+ gate_context requirement and tier-2+ proof_trail requirement at dispatch; tier-4 requires_human_gate enforcement at promote_workflow_result), segment-aware allowed/forbidden path scoping for WorkflowInputPacket inputs, UTC-only ISO-8601 timestamp validation, tri-state WorkflowResteerChanges override semantics, prompt-drag / display-safety guards across free-text fields and handler return payloads, WORKFLOW_NESTING_CAP enforcement, and the no-heartbeat-history exposure rule on Prime-visible return payloads.",
+            related_tests=[],
+            notes="Run before changing meridian_core/workflow_dispatch.py or any Workflow Sub-Agent Harness dispatch ownership, work-order/input/heartbeat/result/error/resteer/promotion shape, closed enums, tier proof or gate enforcement, segment-aware path scope, UTC timestamp validation, tri-state resteer override, prompt-drag/display-safety policy, nesting cap, or no-heartbeat-history rule. No live workflow execution, process/session control, model calls, network, UI/Electron/Bifrost behavior, Echo/FileMap durable writes, provider/account calls, or FileMap self-registration are exercised here; this slice is the source of truth for workflow dispatch policy.",
         ),
         FileMapEntry(
             path="docs/filemap-v2-v3-discoverability-audit.md",
