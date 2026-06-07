@@ -10,6 +10,45 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement Compass Project Difference Runtime (coordinator-promoted after Codex Review B passed identity + bounds/scope runtimes).
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (branch-local commit only this turn; no push per directive).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Task:
+- Distinguish projects by mission/bearing, objectives, artifacts, memory pins, blockers, proof expectations, and relationship refs; same repo or venture must NOT imply same project.
+- Surface uncertain or insufficient evidence as Compass questions/blockers rather than silently merging.
+- Always serialize `execution_authorized=False`.
+- Block/redact raw prompt/transcript/free-form context/provider-response evidence refs.
+- Pure backend: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no Polaris dependency.
+
+Completion: 2026-06-06 (Opus build lane).
+
+Ready for Codex Review:
+
+- Implementation commit: `270438271` (Add Compass Project Difference Runtime raw-context guard + execution_authorized).
+- Files changed: `meridian_core/compass.py` (+73 lines), `tests/test_compass.py` (+241 lines), `docs/live-build-4.md` (this branch marker).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **246 passed** (37 new TestProjectDifferenceRawContextGuard cases + 1 updated existing test on top of 208 prior).
+- `git diff --check`: clean.
+- Path-scope check: implementation diff limited to `meridian_core/compass.py` and `tests/test_compass.py`; this queue marker is the only `docs/live-build-4.md` change for this slice.
+- Concrete evidence each required invariant is enforced:
+  - Distinct projects on bounded bearing fields, not on shared envelope: existing `test_same_repo_does_not_imply_same_project` and `test_same_venture_does_not_imply_same_project` continue to pass; new regression guards `test_shared_repo_does_not_imply_same_project_under_raw_guard` and `test_shared_venture_does_not_imply_same_project_under_raw_guard` confirm the new raw-context guard did not change that behavior. `test_visible_difference_evidence_covers_all_requested_fields` still proves all six required difference fields (mission_bearing, objectives, artifacts, memory_pins, blockers, proof_expectations) are surfaced.
+  - Uncertain/insufficient evidence surfaces as Compass questions/blockers: `test_missing_left_project_id_blocks`, `test_missing_right_project_id_blocks`, `test_missing_difference_evidence_refs_blocks`, `test_missing_left_required_fields_block`, `test_missing_right_required_fields_block`, `test_same_project_id_without_evidence_returns_same_project`, and `test_no_difference_evidence_but_distinct_project_ids_returns_ambiguous` all continue to pass.
+  - `execution_authorized=False` now serialized on every decision branch: `_PROJECT_DIFFERENCE_RESULT_DICT_KEYS` extended with `execution_authorized`; `test_execution_never_authorized_across_difference_branches` parametrizes over DISTINCT / SAME_PROJECT / raw-blocked / missing-blocked confirming `payload["execution_authorized"] is False` and `payload["merge_authorized"] is False` on each. `test_difference_runtime_does_not_emit_cross_project_handoff_fields` updated from its prior (now-inverted) assertion to require `execution_authorized=False`.
+  - Block/redact raw context evidence refs: new `_project_difference_raw_context_blockers` helper + raw-context branch in `evaluate_project_difference` returns BLOCKED with `_redact_raw_context_refs` swap; 8 parametrized raw-context prefix tests (`raw_prompt`, `raw_transcript`, `free_form_context`, `transcript`, `conversation`, `provider_response`, `raw_context`, embedded-newline) confirm the BLOCK + redaction marker `<redacted_raw_context>` + `merge_authorized=False` + `execution_authorized=False`; 6 parametrized JSON-encoded serialization tests assert raw payload absent from `json.dumps` output.
+  - Defense-in-depth: raw-context payload smuggled through profile fields is also caught. Left- and right-side `mission_bearing` each blocks via dedicated tests. Both sides parametrized over `objectives`, `artifacts`, `memory_pins`, `blockers`, `proof_expectations`, `repo_refs`, `venture_refs` (14 tests total) each block with side+field-specific blocker name and no raw payload in JSON.
+  - Ordering invariant: `test_raw_context_guard_runs_before_required_field_blockers` confirms the raw-context guard short-circuits BEFORE missing-field blockers so an incomplete profile cannot leak raw payload through the missing-field branch.
+  - Multi-site aggregation: `test_multiple_raw_context_sites_aggregate_into_blockers` confirms all raw-context sites surface in the blockers tuple in one pass.
+  - Stable serialization preserved: `test_raw_context_blocked_result_serializes_stably` asserts `tuple(result.to_dict().keys()) == project_difference_result_dict_keys()` for the BLOCKED branch under the extended dict_keys shape.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no raw cross-project transcript injection, no Polaris dependency.
+- Push status: branch-local commit only this turn per coordinator directive ("do not push"). No `docs/live-build-4.md` update on shared main this turn; the slice can be promoted to main on a subsequent coordinator-authorized heartbeat.
+- Next Candidate: pending coordinator promotion after Compass Project Difference Runtime review clears.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement Compass project bounds/scope runtime as the next backend boundary slice (Next Candidate after project definition review).
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
