@@ -1483,7 +1483,24 @@ def evaluate_project_scope(
     project: ProjectDefinition,
     candidate: ProjectScopeCandidate,
 ) -> ProjectScopeEvaluation:
-    """Evaluate whether a summarized subject is inside a project boundary."""
+    """Evaluate whether a summarized subject is inside a project boundary.
+
+    Raw-context evidence refs (``raw_prompt:``, ``raw_transcript:``,
+    ``free_form_context:``, ``transcript:``, ``conversation:``,
+    ``provider_response:``, anything containing a newline, etc.) fail closed
+    as ``BLOCKED`` before any boundary match, and the serialized evidence is
+    redacted so the raw payload never appears in ``to_dict()`` output. This
+    keeps the no-raw-cross-project-transcript-injection invariant intact for
+    direct callers of ``evaluate_project_scope``, not only for callers that
+    reach scope through ``evaluate_project_bounds``.
+    """
+    if _has_raw_context_ref(candidate.evidence_refs):
+        return _scope_result(
+            ProjectScopeDecision.BLOCKED,
+            candidate,
+            blockers=("raw_context_evidence_ref_blocked",),
+            evidence_refs_override=_redact_raw_context_refs(candidate.evidence_refs),
+        )
     if candidate.project_id is None:
         return _scope_result(
             ProjectScopeDecision.BLOCKED,
@@ -1946,13 +1963,18 @@ def _scope_result(
     matched_refs: tuple[str, ...] = (),
     blockers: tuple[str, ...] = (),
     compass_question: str | None = None,
+    evidence_refs_override: tuple[str, ...] | None = None,
 ) -> ProjectScopeEvaluation:
     return ProjectScopeEvaluation(
         decision=decision,
         project_id=candidate.project_id,
         subject_kind=candidate.subject_kind,
         subject_ref=candidate.subject_ref,
-        evidence_refs=candidate.evidence_refs,
+        evidence_refs=(
+            evidence_refs_override
+            if evidence_refs_override is not None
+            else candidate.evidence_refs
+        ),
         matched_refs=matched_refs,
         blockers=blockers,
         compass_question=compass_question,
@@ -2323,6 +2345,20 @@ def _is_raw_context_ref(ref: str) -> bool:
     normalized = ref.strip().lower()
     return "\n" in ref or any(
         normalized.startswith(prefix) for prefix in _RAW_CONTEXT_REF_PREFIXES
+    )
+
+
+def _redact_raw_context_refs(refs: Iterable[str]) -> tuple[str, ...]:
+    """Replace each raw-context ref with a redaction marker.
+
+    Safe (non-raw) refs pass through unchanged so a serialized scope/bounds
+    result still carries the legitimate evidence trail while never preserving
+    the raw prompt/transcript/free-form-context payload that triggered the
+    block.
+    """
+    return tuple(
+        "<redacted_raw_context>" if _is_raw_context_ref(ref) else ref
+        for ref in refs
     )
 
 
