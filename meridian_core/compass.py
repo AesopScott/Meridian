@@ -1620,7 +1620,9 @@ def evaluate_project_difference(
             left_project_id=left.project_id,
             right_project_id=right.project_id,
             evidence_refs=_redact_raw_context_refs(normalized_evidence_refs),
-            shared_relationship_refs=shared_relationship_refs,
+            shared_relationship_refs=_redact_raw_context_refs(
+                shared_relationship_refs
+            ),
             blockers=raw_context_blockers,
             compass_question=(
                 "Compass cannot compare project bearings while raw prompt, "

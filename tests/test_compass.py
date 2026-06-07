@@ -2366,6 +2366,42 @@ class TestProjectDifferenceRawContextGuard:
         )
         assert tuple(result.to_dict().keys()) == project_difference_result_dict_keys()
 
+    def test_shared_relationship_refs_redacted_when_raw_context_shared(self):
+        """Self-review repair: when both sides smuggle the same raw-context ref
+        through repo_refs/venture_refs, the BLOCKED result must NOT leak the
+        raw payload through shared_relationship_refs in the serialized output.
+        """
+        smuggled = "raw_prompt:smuggled-via-shared-repo"
+        result = evaluate_project_difference(
+            _difference_profile(repo_refs=(smuggled,)),
+            _other_difference_profile(repo_refs=(smuggled,)),
+            evidence_refs=("proof:cmp",),
+        )
+        assert result.decision is ProjectDifferenceDecision.BLOCKED
+        assert "raw_context_in_left_repo_refs_blocked" in result.blockers
+        assert "raw_context_in_right_repo_refs_blocked" in result.blockers
+        # Redacted in dataclass field.
+        assert smuggled not in result.shared_relationship_refs
+        assert "<redacted_raw_context>" in result.shared_relationship_refs
+        # Redacted in serialization (no raw payload anywhere).
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "smuggled-via-shared-repo" not in encoded
+        assert "<redacted_raw_context>" in encoded
+
+    def test_shared_relationship_refs_redacted_when_raw_context_shared_via_venture(self):
+        smuggled = "transcript:smuggled-via-shared-venture"
+        result = evaluate_project_difference(
+            _difference_profile(venture_refs=(smuggled,)),
+            _other_difference_profile(venture_refs=(smuggled,)),
+            evidence_refs=("proof:cmp",),
+        )
+        assert result.decision is ProjectDifferenceDecision.BLOCKED
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "smuggled-via-shared-venture" not in encoded
+        # Safe shared refs (e.g. the venture:Meridian intersection) must still
+        # appear non-redacted.
+        assert "<redacted_raw_context>" in result.shared_relationship_refs
+
     def test_execution_never_authorized_across_difference_branches(self):
         distinct = evaluate_project_difference(
             _difference_profile(),
