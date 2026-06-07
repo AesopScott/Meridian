@@ -8,6 +8,62 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task - Provider Balance FileMap Registration
+
+Timestamp: 2026-06-07T15:55:00-06:00.
+
+Goal: register the newly promoted V3 Provider Balance / Usage backend domain
+slice in all FileMap surfaces.
+
+Worker requirement: implementation must run in a Polaris Build 3 Opus worker
+(`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may review only
+after a real worker candidate exists.
+
+Source of authority:
+
+- Promoted main commit `7e0e79331` (`provider-balance: add v3 backend slice`).
+- `docs/live-build-1.md` completion and coordinator promotion marker for the
+  Provider Balance / Usage slice.
+- `docs/v3-intake-resolution.md` row 14 (`Cost and resource management`).
+- Existing FileMap registration pattern for the V3 Goal Runtime slice.
+
+Task: register `meridian_core/provider_balance.py` and
+`tests/test_provider_balance.py` in all three FileMap surfaces. Keep this as a
+registration-only slice; do not change provider-balance implementation,
+provider-balance tests, Bifrost/Electron/UI files, generated artifacts, package
+files, worker queues outside this file, or runtime behavior.
+
+Allowed files only:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Expected registration content:
+
+- Place the new entries near the existing V3 domain registrations, following
+  the Goal Runtime registration style.
+- Identify ownership as Relay Harness (primary) / Model Harness / Bifrost.
+- Describe the module as a pure deterministic Provider Balance / Usage domain
+  slice: frozen snapshots/summaries, provider health, route kind, quota/credit
+  labels, token usage, estimated spend labels, cost-pressure state,
+  selected-provider policy state, provider-neutral families, display-safe
+  evidence refs, no live provider calls, no credentials/account probing, no
+  network, no UI/Electron behavior, and no Bifrost import.
+- Register the focused test file as the contract/proof suite for the module.
+
+Required proof before Ready marker:
+
+- `python -m pytest tests/test_filemap.py tests/test_provider_balance.py -q`
+- `git diff --check`
+- path-scope proof limited to the four allowed files
+- completion marker in this section with files changed, proof, and remaining
+  risk
+
+Stop after implementation and marker. Do not promote to main, do not push to
+main, do not move branches/worktrees, and do not touch shared main.
+
 ## Completed / Review-Cleared / Promoted To Main
 
 Coordinator reconciliation: 2026-06-07T13:10:00-06:00.
