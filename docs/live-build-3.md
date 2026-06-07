@@ -18,6 +18,99 @@ promoted to `origin/main` in `75edb31c5` (`filemap: register v3 intake and goal
 docs`). Do not re-run this historical task unless a new coordinator task is
 assigned above this block.
 
+### Build 3 Opus Goal Runtime FileMap Registration Marker (2026-06-07T13:25:00-06:00, refreshed 2026-06-07T13:55:00-06:00)
+
+Status: review-ready, not yet committed or pushed. Refreshed after a Main
+intervention asked the worker to revert an out-of-scope `.mcp.json`
+modification (Polaris-injected worktree-local URL change, not a worker edit)
+so the worker diff carries only the four allowed files.
+
+Worktree: `C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780865139021`.
+
+Base HEAD on this worktree: `96c0b195648d0f2f1a9ace0ffd340bcdbfc4e01b`
+(`goal-runtime: add v3 domain slice`).
+
+Goal: register the new V3 Goal Runtime / Goal Harness domain slice
+(`meridian_core/goal_runtime.py` and `tests/test_goal_runtime.py`) introduced by
+the promoted Build 2 commit `96c0b1956` in all three FileMap surfaces.
+
+Coverage table before this slice
+(path : runtime FileMap : `docs/FileMap.md` : `_REQUIRED_PATHS`):
+
+- `meridian_core/goal_runtime.py` : missing : missing : missing → newly
+  registered in this slice.
+- `tests/test_goal_runtime.py` : missing : missing : missing → newly
+  registered in this slice.
+- `docs/v3-goal-runtime-contract.md` : already covered
+  (`meridian_core/filemap.py` v3-contract block) : already covered
+  (`docs/FileMap.md` v3 architecture row) : already covered
+  (`tests/test_filemap.py` `_REQUIRED_PATHS`).
+- `docs/live-build-2.md` (live queue doc): already covered in all three
+  FileMap surfaces; queue registration is adequate and was not re-touched
+  by this slice.
+
+Registrations applied (allowed files only):
+
+- `meridian_core/filemap.py`:
+  - added new `FileArea.GOAL_RUNTIME = "Goal Runtime / Goal Harness"` constant
+    next to `BIFROST` in the area-label block;
+  - added two `FileMapEntry` blocks for `meridian_core/goal_runtime.py` and
+    `tests/test_goal_runtime.py` immediately after the existing
+    `docs/v3-goal-runtime-contract.md` block. Entries identify Goal Runtime /
+    Goal Harness ownership (Prime creation and ACTIVE → COMPLETE, Compass for
+    other non-terminal transitions and `continuation_policy` edits, Echo for
+    lineage, Beacon for telemetry, Aegis for `proof_trail_ref`), closed
+    `GoalStatus` lifecycle, `proof_trail_ref` / `final_proof_ref` semantics,
+    Compass / Prime / Echo / Beacon / Aegis boundaries, display-safe
+    `to_safe_dict` serialization, and the pure-deterministic no-model /
+    no-network / no-persistence / no-UI scope.
+- `docs/FileMap.md`: added two table rows for the same two paths immediately
+  after the existing `docs/v3-goal-runtime-contract.md` row, mirroring the
+  runtime FileMap entries with the same ownership, lifecycle, proof-ref, and
+  display-safe scope language.
+- `tests/test_filemap.py`: added the two paths `meridian_core/goal_runtime.py`
+  and `tests/test_goal_runtime.py` to `_REQUIRED_PATHS` immediately after
+  `docs/v3-goal-runtime-contract.md` so the existing default-map coverage and
+  injection-summary tests enforce the registration.
+- `docs/live-build-3.md`: this completion marker.
+
+Path-scope: edits limited to `meridian_core/filemap.py`, `docs/FileMap.md`,
+`tests/test_filemap.py`, and `docs/live-build-3.md` (this marker). No edits to
+Goal Runtime implementation, V2 / V3 contract docs, Build 1 / 2 / 4 / 5 queues,
+review logs, runtime code outside FileMap surfaces, `index.html`, Electron /
+Bifrost UI, generated artifacts, package files, branches, or Polaris.
+
+Worktree-scope clean: per Main intervention 2026-06-07T13:55:00-06:00, the
+Polaris-injected `.mcp.json` URL rewrite was reverted in this worker worktree
+only (`git checkout -- .mcp.json`). The worker did not modify `.mcp.json` and
+it is no longer in `git status`. Revert is local to this worktree; shared main
+and other worktrees were not touched.
+
+Proof (run in this worktree, against the cleaned tree at refresh time):
+
+- `python -m pytest tests/test_filemap.py -q` → 47 passed in 0.10s.
+- `python -m pytest tests/test_goal_runtime.py -q` → 110 passed in 0.12s.
+- `git diff --check` → no whitespace errors (one benign LF/CRLF normalization
+  warning emitted against this marker file itself when Git inspects the
+  working copy on Windows).
+- `git status --short --branch` →
+  ```
+  ## HEAD (no branch)
+   M docs/FileMap.md
+   M docs/live-build-3.md
+   M meridian_core/filemap.py
+   M tests/test_filemap.py
+  ```
+  Status now contains only the four allowed files; `.mcp.json` is no longer
+  present.
+
+Residual risk: low. The new `FileArea.GOAL_RUNTIME` constant is additive and
+does not collide with existing area labels. The runtime FileMap test
+`test_multiple_areas_present` and the area-filter tests pass unchanged.
+`docs/FileMap.md` placement keeps the V3 cluster contiguous so future Build 3
+audits can reuse the same anchor. No commit or push performed; no branch
+operations; worker did not leave this worktree.
+
 ## Historical Promoted Task / Opus Task Assigned
 
 Timestamp: 2026-06-07T12:58:00-06:00.

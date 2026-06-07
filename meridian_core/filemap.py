@@ -49,6 +49,7 @@ class FileArea:
     BUILD_PROCESS    = "Build process"
     PACKAGE_POLICY   = "Package API policy"
     BIFROST          = "Bifrost / session harness"
+    GOAL_RUNTIME     = "Goal Runtime / Goal Harness"
 
 
 @dataclass
@@ -1019,6 +1020,20 @@ def make_default_map() -> FileMap:
             purpose="V3 Goal Runtime / Goal Harness contract: bounded backend decision surface for native goal objects, status lifecycle, telemetry, continuation/resume policy, and proof-trail semantics across Prime, Compass, and Echo.",
             related_tests=[],
             notes="V3 first-wave contract. Read before designing any V3 goal runtime, Compass continuation policy, or Echo goal-lineage code.",
+        ),
+        FileMapEntry(
+            path="meridian_core/goal_runtime.py",
+            area=FileArea.GOAL_RUNTIME,
+            purpose="V3 Goal Runtime / Goal Harness domain slice: closed GoalStatus lifecycle (ACTIVE/BLOCKED/USAGE_LIMITED/COMPLETE) with HarnessWriter-gated single-writer transition matrix, GoalRecord with GoalContinuationPolicy, Beacon-authored GoalTelemetrySnapshot, Echo-authored GoalLineageEntry, Aegis proof_trail_ref and final_proof_ref, and a display-safe to_safe_dict serializer.",
+            related_tests=["tests/test_goal_runtime.py"],
+            notes="Pure deterministic domain only: no model calls, no network, no persistence, no UI. Ownership: Prime creates and writes ACTIVE -> COMPLETE; Compass writes every transition among ACTIVE/BLOCKED/USAGE_LIMITED and edits continuation_policy; Echo appends lineage; Beacon appends telemetry; Aegis writes proof_trail_ref and never writes status. Implements docs/v3-goal-runtime-contract.md. Field caps and regex-based display-safety rejection enforced at construction.",
+        ),
+        FileMapEntry(
+            path="tests/test_goal_runtime.py",
+            area=FileArea.GOAL_RUNTIME,
+            purpose="Test suite for meridian_core/goal_runtime.py: closed GoalStatus lifecycle, single-writer transition matrix (Prime creation and ACTIVE -> COMPLETE; Compass for non-terminal transitions; Echo lineage; Beacon telemetry; Aegis proof refs), proof-trail-ref requirements (risk_tier >= 2, dispatched, blocked, usage-limited, or COMPLETE), display-safe to_safe_dict serialization, and field-cap enforcement.",
+            related_tests=[],
+            notes="Run before changing meridian_core/goal_runtime.py or any Goal Runtime ownership, lifecycle, transition matrix, proof requirement, or display-safety behavior.",
         ),
         FileMapEntry(
             path="docs/filemap-v2-v3-discoverability-audit.md",

@@ -114,6 +114,8 @@ _REQUIRED_PATHS = [
     "docs/v3-parking-lot.md",
     "docs/v3-intake-resolution.md",
     "docs/v3-goal-runtime-contract.md",
+    "meridian_core/goal_runtime.py",
+    "tests/test_goal_runtime.py",
     "docs/filemap-v2-v3-discoverability-audit.md",
     "docs/prime-status-console-cli-brief.md",
     "docs/non-orchestrator-surface-naming.md",
