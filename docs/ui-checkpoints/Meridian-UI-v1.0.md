@@ -1,12 +1,21 @@
 # Meridian UI v1.0
 
-Permanent checkpoint for the Meridian UI version 1.0 state.
+Historical checkpoint for the Meridian UI version 1.0 state.
 
-## Live preview
+Current UI authority: `index.html` at the repository root is the actual
+Meridian UI. This checkpoint records an earlier named UI state and should not
+be treated as the current app entrypoint unless intentionally restoring that
+old visual state.
+
+## Historical Preview
 
 `http://127.0.0.1:8766/bifrost/preview.html?v=meridian-ui-v1.0`
 
-## Restore
+## Historical Restore Only
+
+Do not run this as part of normal Meridian UI work. It overwrites the generated
+Bifrost preview artifact with the older v1.0 checkpoint. Current app launch
+uses `index.html`.
 
 ```powershell
 Copy-Item -LiteralPath "C:\Users\scott\Code\Meridian\bifrost\versions\Meridian-UI-v1.0\preview.html" -Destination "C:\Users\scott\Code\Meridian\bifrost\preview.html" -Force

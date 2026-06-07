@@ -1,5 +1,11 @@
 # Live Codex Reviews B Queue
 
+Current UI authority note: root `index.html` is the actual Meridian UI and the
+Electron app target. `bifrost/preview.html` is generated backend/view-model
+proof output only. Any older review text saying `npm start` regenerates preview
+HTML describes the original V1 shell behavior before commit `05a108f1`
+corrected startup to open `index.html`.
+
 This file is the standing queue for a second specialized Codex Reviews session.
 
 ## Required First Command For Every New Task
@@ -3413,7 +3419,7 @@ Required proof:
 - Inspect target diffs with `git show`.
 - Run `python -m pytest tests/test_bifrost_preview.py tests/test_bifrost_cockpit.py -q`.
 - Run `python -m pytest tests/test_filemap.py -q`.
-- Confirm `npm start` exists and is wired as `npm run preview && electron .`.
+- Confirm `npm start` exists and is wired as `electron .`, with Electron loading root `index.html`.
 - Confirm Electron shell uses secure local-preview behavior and blocks remote navigation.
 - Confirm V1 tracker says 13/13 with Electron shell built.
 - Confirm Echo/Atlas docs are V2-scoped and avoid vector DB, prompt dumping, broad crawling, or live account scraping in first slices.
@@ -3851,7 +3857,7 @@ Reason: Monitor detected new Ready marker for V1 Electron cockpit app shell
 
 **package.json Setup**
 - "main": "electron/main.js" ✓
-- "start": "npm run preview && electron ." (regenerate then launch) ✓
+- "start": "electron ." (launch the actual root `index.html` UI) ✓
 - "preview": "python -m bifrost.preview" (Python preview writer) ✓
 - Electron as devDependency only (no node_modules committed) ✓
 - "private": true (no accidental npm publish) ✓
@@ -3864,7 +3870,7 @@ Reason: Monitor detected new Ready marker for V1 Electron cockpit app shell
 
 **V1 Progress Tracker Updated**
 - V1 cockpit items: 13/13 (was 12/12)
-- Final item: openable Electron app shell, npm start regenerates preview + launches Electron
+- Final item: openable Electron app shell, later corrected so npm start launches the actual root `index.html` UI
 - V0/V1 progress complete and locked
 
 **Findings**
@@ -3875,7 +3881,7 @@ Reason: Monitor detected new Ready marker for V1 Electron cockpit app shell
 - `git show 6b3e652 --stat` confirms 5 files (preview.py, main.js, package.json, test file, docs)
 - Test results: 107 passed, full suite 1095 passed
 - Manual inspection: Electron security defaults all present and correct
-- package.json correctly wires npm start → preview regeneration → Electron launch
+- package.json now wires npm start → Electron launch of root `index.html`; preview generation is separate proof tooling
 - V0/V1 progress tracker correctly shows 13/13 items complete
 
 **Next Action**

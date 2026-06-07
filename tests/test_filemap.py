@@ -147,6 +147,7 @@ _REQUIRED_PATHS = [
     "bifrost/static/media/spark-hud-reference.jpg",
     "tests/test_bifrost_cockpit.py",
     "tests/test_cockpit_state.py",
+    "docs/meridian-ui-authority.md",
     "index.html",
     "scripts/meridian-model-bridge.js",
     "package.json",

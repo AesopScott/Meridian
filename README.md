@@ -4,6 +4,14 @@ Meridian is a local orchestrator for agentic software work.
 
 You talk to the orchestrator. The orchestrator drives worker sessions, harnesses, proof, and project motion.
 
+## Actual UI
+
+The actual Meridian user interface is `index.html` at the repository root.
+
+This is the working cockpit UI: harness dock, Prime panel, user/session panel, Spark center, right-panel modes, model harness views, and local bridge wiring. Electron wraps this same file through `electron/main.js`. `npm start` opens `index.html`; it must not regenerate or substitute `bifrost/preview.html`.
+
+`bifrost/preview.html` is a generated backend/render proof artifact created by `bifrost/preview.py`. It is not the product UI entrypoint.
+
 ## What It Is
 
 Meridian is a proactive portfolio orchestrator and builder. It advances projects, businesses, websites, tools, and experiments until Scott's judgment is the bottleneck — not execution.
@@ -18,9 +26,9 @@ Harnesses → Heartbeat / Events
 Orchestrator → Scott only for judgment bottlenecks
 ```
 
-## Current State: V0 Local Brain Skeleton
+## Current State
 
-This first slice makes the core concepts real in code. It does not yet include real model integrations, UI, persistence, or agent harness wiring.
+Meridian now has a working local cockpit UI in `index.html`, an Electron wrapper, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
 
 ### Package: `meridian_core`
 
@@ -59,7 +67,6 @@ pytest tests/ -v
 - Public model setup flow: Scott's local Max/Claude and Codex CLI logins are already configured for this development machine, but a public Meridian build must not assume that. If a selected model CLI is missing or not authenticated, Meridian should tell the user to install the relevant CLI and log in to their account instead of showing raw process errors.
 - Model routing intent: each project's Prime/orchestrator should normally choose the model automatically through Relay harness logic. Manual model selection may be exposed for direct use and testing, but the expected operating mode is automated Prime/Relay decision-making.
 - Real session injection (modeled only)
-- UI or Electron shell
 - SQLite or other persistence
 - Git / worktree harness
 - Browser automation

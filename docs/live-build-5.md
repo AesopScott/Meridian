@@ -1,5 +1,11 @@
 # Live Build 5 Queue
 
+Current UI authority note: root `index.html` is the actual Meridian UI and the
+Electron app target. `bifrost/preview.html` is generated backend/view-model
+proof output only. Any older Build 5 log text saying `npm start` regenerates
+preview HTML describes the original V1 shell behavior before commit `05a108f1`
+corrected startup to open `index.html`.
+
 ## Completion Marker - Completed / Promoted To Main
 
 Timestamp: 2026-06-07T07:12:48-06:00.

@@ -4,6 +4,12 @@
 **Status:** Active checklist
 **Date:** 2026-06-01
 
+## UI Authority
+
+`index.html` is the actual Meridian UI. It is the product cockpit surface Scott has been building and using. Electron opens this same file via `electron/main.js`; `npm start` must not regenerate or replace it with `bifrost/preview.html`.
+
+`bifrost/preview.html` is a generated Bifrost rendering proof artifact. Use it only for deterministic backend/view-model preview proof tasks, not as the operational Meridian UI.
+
 ## Purpose
 
 This checklist is the gate for plugging live behavior into the Meridian UI. Use it whenever a button, panel, prompt surface, harness control, model bridge, or session behavior is added or changed.
