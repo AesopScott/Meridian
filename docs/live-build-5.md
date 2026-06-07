@@ -74,6 +74,17 @@ Codex Review A/B evidence note - 2026-06-07T09:06:30-06:00:
   built/review-cleared until the repair is implemented by an Opus worker,
   proof passes, and Codex Review A/B clears it.
 
+Repair launch attempt note - 2026-06-07T09:07:54-06:00:
+
+- Worker `chat_1780844872270` launched through Polaris `launch-chat`, tier
+  `power`, for the exact OpenAI backend-bound provider-balance proof repair.
+- Result: no candidate. Diagnostics show the worker reached `claude-opus-4-7`
+  and then hit a Claude rate-limit event before any backend/test file changes.
+  The isolated worker worktree contains only Polaris-generated `.mcp.json`
+  dirt.
+- The OpenAI backend-bound proof repair remains the active Build 5 task for the
+  next Opus availability window.
+
 ## Coordinator Update - Opus Worker Relaunch Attempt / No Candidate
 
 Timestamp: 2026-06-07T08:49:01-06:00.
