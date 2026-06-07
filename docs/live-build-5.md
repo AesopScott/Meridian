@@ -219,7 +219,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now / Opus Task Assigned
+## Coordinator Override - Completed / Review-Cleared / Promoted
 
 Timestamp: 2026-06-07T10:52:00-06:00.
 
@@ -262,6 +262,42 @@ Required proof before Ready marker:
 - concise completion marker here with files changed, proof, and any remaining
   risk.
 
+Completion marker - 2026-06-07T11:08:39-06:00:
+
+- Opus worker `chat_1780851013499` produced a reviewed no-op completion proof
+  for `Bifrost + Prompt Payload Visibility`. Promotion scope is
+  `tests/test_bifrost_cockpit.py` only; worker `.mcp.json` dirt and worker-local
+  `docs/live-build-5.md` marker were not promoted.
+- Repair loop: initial Codex Review B found weak dispatch-continuity and
+  leakage/control assertions. The same Opus worker repaired the test by slicing
+  dispatch, visible-prompt-payload-meter, and prompt-payload-visibility sections,
+  comparing provider/model/route fields by equality, and checking real
+  sentinel/control tokens inside those scoped sections.
+- Proof on worker and promoted main: `python -m pytest
+  tests/test_bifrost_cockpit.py -q` passed at 384 tests; `git diff --check`
+  passed.
+- Codex Review A rerun `codex_1780851814897`: PASS.
+- Codex Review B rerun `codex_1780851815171`: PASS; explicitly confirmed the
+  prior two findings were closed.
+- During promotion, unrelated `index.html` renderer-internals dirt appeared on
+  shared main twice. Coordinator preserved it on local branch
+  `codex/quarantine-main-dirty-index-features-20260607-110549` and patch
+  `C:\Users\scott\Code\Meridian-Worktrees\quarantine-index-features-20260607-110839.patch`,
+  then restored shared main clean before backend promotion.
+- No live provider calls, account probing, secrets, raw prompt/provider-response
+  text, process/session controls, Electron behavior, or `index.html` edits were
+  introduced by the promoted backend proof.
+
+## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
+
+Goal: hold Build 5 after Main promotion of `Bifrost + Prompt Payload
+Visibility`.
+
+Status: no executable backend task is currently assigned to Build 5. The next
+remaining Bifrost tracker items are `Bifrost + Electron Cockpit` and
+`Bifrost + Voice I/O Surface`; promote one of those as a fresh top Active Now
+block before dispatching an Opus worker.
+
 Prompt payload visibility launch attempt note - 2026-06-07T10:47:46-06:00:
 
 - After Balance Button promotion, coordinator launched Opus worker
@@ -290,7 +326,7 @@ Prompt payload visibility launch attempt note - 2026-06-07T10:50:15-06:00:
   branch `codex/quarantine-main-dirty-v3-parking-lot-20260607-105216`, then
   returned shared `main` to clean/aligned state before continuing.
 
-## Coordinator Override - Active Now / Repair Required
+## Coordinator Override - Archived Stale / Repair Required / Do Not Execute
 
 Goal: bind reviewed backend prompt-payload and model metadata surfaces into a deterministic Bifrost backend view-model sample.
 

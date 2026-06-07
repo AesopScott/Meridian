@@ -6267,3 +6267,177 @@ def test_merge_provider_balance_summary_is_deterministic():
     b = merge_provider_balance_summary_into_view(base, summary)
     assert a == b
     assert [p.provider_id for p in a.providers] == [p.provider_id for p in b.providers]
+
+
+# Bifrost + Prompt Payload Visibility: backend-bound surface adjacency proof.
+#
+# Proves the visible prompt payload surface produced by the backend-binding
+# pipeline renders required prompt-payload fields inside the same cockpit
+# document as dispatch hardening and the instrument-band queue-poll chip.
+
+
+_PROMPT_PAYLOAD_VISIBILITY_PROVIDER = "claude"
+_PROMPT_PAYLOAD_VISIBILITY_MODEL = "claude-sonnet-4-20250514"
+_PROMPT_PAYLOAD_VISIBILITY_ROUTE_CLASS = "direct"
+_PROMPT_PAYLOAD_VISIBILITY_ROUTE_KIND = "direct"
+
+_PROMPT_PAYLOAD_VISIBILITY_FORBIDDEN_LEAKAGE = (
+    "RAW_PROMPT_SENTINEL",
+    "SECRET_VALUE",
+    "raw_prompt",
+    "raw_provider_response",
+    "provider_response",
+)
+_PROMPT_PAYLOAD_VISIBILITY_FORBIDDEN_CONTROLS = (
+    "<button",
+    "<form",
+    "data-recovery-action",
+    "restart-session",
+    "archive-session",
+    "resteer-session",
+    "spawn-session",
+    "merge",
+    "rebase",
+    "cherry-pick",
+    "stash-pop",
+)
+
+
+def _slice_aria_section(doc: str, aria_label: str) -> str:
+    needle = f'aria-label="{aria_label}"'
+    assert needle in doc, f"missing section aria-label={aria_label!r}"
+    after = doc.split(needle, 1)[1]
+    assert "</section>" in after, f"unclosed section for aria-label={aria_label!r}"
+    return after.split("</section>", 1)[0]
+
+
+def test_backend_bound_prompt_payload_visibility_renders_adjacent_to_dispatch_and_queue_poll():
+    vm = sample_backend_bound_cockpit_view_model()
+    vm.dispatch_hardening = DispatchHardeningView(
+        dispatch_id="dispatch-prompt-payload-visibility",
+        provider_id=_PROMPT_PAYLOAD_VISIBILITY_PROVIDER,
+        exact_model_id=_PROMPT_PAYLOAD_VISIBILITY_MODEL,
+        route_class=_PROMPT_PAYLOAD_VISIBILITY_ROUTE_CLASS,
+        route_kind=_PROMPT_PAYLOAD_VISIBILITY_ROUTE_KIND,
+        trust_state="trusted",
+        proof_strength="strong",
+        external_review_status="not_required",
+        payload_evidence_state="snapshot_present",
+    )
+    doc = render_cockpit_html(vm)
+
+    dispatch_section = _slice_aria_section(doc, "Dispatch Hardening State")
+    meter_section = _slice_aria_section(doc, "Visible Prompt Payload Meter")
+    payload_section = _slice_aria_section(doc, "Prompt Payload Visibility")
+
+    # Prompt payload size.
+    assert 'class="payload-size">(3.7k)</span>' in payload_section
+    assert "920 tokens" in payload_section
+    assert "under 1k" in meter_section
+    assert "12.4k" in meter_section
+
+    # Budget pressure.
+    assert "23% budget" in payload_section
+    assert "Prompt budget: 4000 tokens" in payload_section
+    assert "Context budget: 200000 tokens" in payload_section
+    assert "Budget: 22.5%" in meter_section
+    assert "Budget: 62.0%" in meter_section
+
+    # Growth/flat status.
+    assert 'data-growth-state="flat"' in payload_section
+    assert 'data-watch-state="ok"' in payload_section
+    assert "Delta: 0 tokens / 0.0%" in payload_section
+    assert "Growth delta: 0 tokens / 0.0%" in meter_section
+    assert "Growth delta: +240 tokens / 6.0%" in meter_section
+
+    # Q-mode prompt-drag state.
+    assert "Q-mode prompt drag: ok" in meter_section
+    assert "Q-mode prompt drag: degraded" in meter_section
+    assert "Payload status: ok" in meter_section
+    assert "Payload status: degraded" in meter_section
+
+    # Evidence refs.
+    assert "Evidence: payload-snapshot:claude-dispatch" in payload_section
+    assert "Telemetry: adapter:claude" in payload_section
+    assert "Adapter: review:claude-cleared" in payload_section
+    assert "Payload evidence: payload-snapshot:claude-dispatch" in meter_section
+    assert "Payload evidence: payload-snapshot:deepseek-qmode" in meter_section
+    assert "Provider balance: provider-balance:claude" in meter_section
+    assert "Provider balance: provider-balance:deepseek" in meter_section
+
+    # Dispatch section identity, scoped to the dispatch section.
+    assert f"Provider: {_PROMPT_PAYLOAD_VISIBILITY_PROVIDER}" in dispatch_section
+    assert f"Exact model: {_PROMPT_PAYLOAD_VISIBILITY_MODEL}" in dispatch_section
+    assert f"Route class: {_PROMPT_PAYLOAD_VISIBILITY_ROUTE_CLASS}" in dispatch_section
+    assert f"Route kind: {_PROMPT_PAYLOAD_VISIBILITY_ROUTE_KIND}" in dispatch_section
+
+    # Payload section identity, scoped to prompt payload visibility.
+    assert f"Provider: {_PROMPT_PAYLOAD_VISIBILITY_PROVIDER}" in payload_section
+    assert f"Model: {_PROMPT_PAYLOAD_VISIBILITY_MODEL}" in payload_section
+    assert f"Route class: {_PROMPT_PAYLOAD_VISIBILITY_ROUTE_CLASS}" in payload_section
+    assert f"Route kind: {_PROMPT_PAYLOAD_VISIBILITY_ROUTE_KIND}" in payload_section
+
+    # Meter section identity, scoped to the Claude meter row.
+    claude_meter_marker = 'data-meter-id="payload-meter:claude-under-1k"'
+    assert claude_meter_marker in meter_section
+    claude_row = meter_section.split(claude_meter_marker, 1)[1]
+    claude_row = claude_row.split('<div class="payload-meter-item ', 1)[0]
+    assert f"Provider: {_PROMPT_PAYLOAD_VISIBILITY_PROVIDER}" in claude_row
+    assert f"Model: {_PROMPT_PAYLOAD_VISIBILITY_MODEL}" in claude_row
+    assert f"Route: {_PROMPT_PAYLOAD_VISIBILITY_ROUTE_KIND}" in claude_row
+
+    def _capture(section: str, field: str) -> str:
+        match = re.search(re.escape(field) + r":\s*([A-Za-z0-9_.\-]+)", section)
+        assert match, f"missing field {field!r} in section"
+        return match.group(1)
+
+    dispatch_provider = _capture(dispatch_section, "Provider")
+    dispatch_model = _capture(dispatch_section, "Exact model")
+    dispatch_route_class = _capture(dispatch_section, "Route class")
+    dispatch_route_kind = _capture(dispatch_section, "Route kind")
+    payload_provider = _capture(payload_section, "Provider")
+    payload_model = _capture(payload_section, "Model")
+    payload_route_class = _capture(payload_section, "Route class")
+    payload_route_kind = _capture(payload_section, "Route kind")
+    meter_claude_provider = _capture(claude_row, "Provider")
+    meter_claude_model = _capture(claude_row, "Model")
+    meter_claude_route_kind = _capture(claude_row, "Route")
+
+    assert dispatch_provider == payload_provider == meter_claude_provider == (
+        _PROMPT_PAYLOAD_VISIBILITY_PROVIDER
+    )
+    assert dispatch_model == payload_model == meter_claude_model == (
+        _PROMPT_PAYLOAD_VISIBILITY_MODEL
+    )
+    assert dispatch_route_class == payload_route_class == (
+        _PROMPT_PAYLOAD_VISIBILITY_ROUTE_CLASS
+    )
+    assert dispatch_route_kind == payload_route_kind == meter_claude_route_kind == (
+        _PROMPT_PAYLOAD_VISIBILITY_ROUTE_KIND
+    )
+
+    # Adjacency to queue-poll state in the rendered cockpit document.
+    dispatch_marker = 'aria-label="Dispatch Hardening State"'
+    meter_marker = 'aria-label="Visible Prompt Payload Meter"'
+    payload_marker = 'aria-label="Prompt Payload Visibility"'
+    queue_marker = '<span class="instr-queue">Queue '
+    assert queue_marker in doc
+    assert doc.index(dispatch_marker) < doc.index(meter_marker)
+    assert doc.index(meter_marker) < doc.index(payload_marker)
+    assert doc.index(payload_marker) < doc.index(queue_marker)
+    assert "Queue ON" in doc
+
+    scoped_sections = {
+        "dispatch_hardening": dispatch_section,
+        "visible_prompt_payload_meter": meter_section,
+        "prompt_payload_visibility": payload_section,
+    }
+    for section_name, section in scoped_sections.items():
+        for unsafe in _PROMPT_PAYLOAD_VISIBILITY_FORBIDDEN_LEAKAGE:
+            assert unsafe not in section, (
+                f"leakage token {unsafe!r} appeared in {section_name} section"
+            )
+        for control in _PROMPT_PAYLOAD_VISIBILITY_FORBIDDEN_CONTROLS:
+            assert control not in section, (
+                f"control token {control!r} appeared in {section_name} section"
+            )
