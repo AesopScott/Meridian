@@ -10,6 +10,41 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair cadence-3/3 self-review finding — handoff BLOCKED result preserved raw `evidence_refs` / `payload_summary_refs` / `approval_refs` verbatim in serialization.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (pushed to origin at `d55b15149` on 2026-06-06).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Finding (MEDIUM): `_handoff_request_blockers` detected raw context in `request.evidence_refs`, `request.payload_summary_refs`, and `request.approval_refs` and added the matching blocker codes (`raw_context_evidence_ref_blocked`, `raw_context_payload_summary_ref_blocked`, `raw_context_approval_ref_blocked`), but `_handoff_result` constructed `ProjectHandoffEvaluation` passing those refs through unchanged. The existing `test_raw_context_bleed_is_blocked` only checked blocker presence (same shortfall that hid the scope-layer bypass `cd20be9c3` and identity-layer bypass `808297315`), so it passed under the leaky implementation.
+
+Repair:
+- Repair commit `d55b15149` (`fix: redact handoff raw refs in results`) routes `request.payload_summary_refs`, `request.evidence_refs`, and `request.approval_refs` through `_redact_raw_context_refs` when constructing the `ProjectHandoffEvaluation`. Safe refs pass through unchanged; raw-context entries collapse to `<redacted_raw_context>`.
+
+Completion: 2026-06-06 (parallel-lane Opus build session, cadence-3/3 self-review repair).
+
+Ready for Codex Review:
+
+- Repair commit: `d55b15149` (Repair handoff raw refs redaction in `_handoff_result`).
+- Branch HEAD pushed: `origin/codex/build-4-compass-project-definition-20260606` at `d55b15149` (2026-06-06).
+- Files changed: `meridian_core/compass.py` (+3/-3 lines: route the three handoff request ref tuples through `_redact_raw_context_refs` in `_handoff_result`), `tests/test_compass.py` (+36 lines new handoff redaction tests).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **285 passed** (1 new handoff redaction test on top of 284 prior).
+- `git diff --check`: clean.
+- Reproducer (before fix): `evaluate_cross_project_handoff` with `request.evidence_refs=("raw_prompt:secret evidence body",)`, `request.payload_summary_refs=("raw_prompt:secret summary payload",)`, `request.approval_refs=("transcript:secret approval",)` returned `BLOCKED` with the three blockers, but `to_dict()` carried all three raw strings verbatim and `json.dumps` contained `secret evidence body`, `secret summary payload`, `secret approval`.
+- After fix: same call returns `BLOCKED` with `evidence_refs=("<redacted_raw_context>", ...)`, `payload_summary_refs=("<redacted_raw_context>", ...)`, `approval_refs=("<redacted_raw_context>", ...)`. `json.dumps` no longer contains any of the raw payloads.
+- Concrete evidence the invariants hold:
+  - Raw payload redacted in dataclass fields AND `to_dict()` output across all three handoff request ref tuples.
+  - Safe refs preserved unredacted (regression).
+  - `REVIEW_READY` path with legitimate inputs still serializes safe refs verbatim (no over-trigger).
+  - `execution_authorized=False` and `review_ready=False` preserved on the redacted BLOCKED path.
+  - Stable `project_handoff_result_dict_keys()` shape preserved.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes (beyond this queue marker), no Polaris dependency.
+- Next Candidate: pending coordinator promotion after this handoff redaction repair clears Codex review. Independent Codex review still owed for the 8-commit Compass repair series (`cc584318f` + `cd20be9c3` + `270438271` + `df8120b49` + `808297315` + `95dde4d50` + `c3d9f4a22` + `d55b15149`) plus cross-lane `43b1dafb8` once Codex CLI spend limit is raised.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair Codex Review B finding on bounds aggregation re-exposing raw scope `subject_ref` (parallel-lane HIGH-severity fix).
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
@@ -3544,6 +3579,10 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-06-06 20:20 -06:00 - Build 4 cross-check: parallel-lane HIGH-severity bounds-aggregation re-exposure leak found and repaired in worktree by another session. Finding: scope-layer subject-field repair (95dde4d50) redacted ProjectScopeEvaluation.subject_ref, but evaluate_project_bounds() rebuilt blocked_refs/ambiguous_refs/candidate_decisions/compass_question from the ORIGINAL ProjectScopeCandidate.subject_ref rather than the redacted scope-evaluation field — re-exposing raw payload in the normal bounds caller path. Repair commit c3d9f4a22 (fix: preserve scope redaction through bounds aggregation) makes bounds aggregation consume the redacted ProjectScopeEvaluation.subject_ref/subject_kind instead. Branch markers 30b9b1a31 (scope subject-field repair marker) and 7058477e0 (bounds-aggregation repair marker) landed on branch. test_bounds_aggregation_uses_redacted_scope_subject_refs added. 284 passing.
 
 2026-06-06 20:24 -06:00 - Build 4 completed bounds-aggregation redaction repair promotion; implementation commit c3d9f4a22, branch markers 30b9b1a31 and 7058477e0 on branch codex/build-4-compass-project-definition-20260606; files changed on branch: meridian_core/compass.py (bounds aggregation now consumes redacted ProjectScopeEvaluation.subject_ref/subject_kind instead of ProjectScopeCandidate.subject_ref/subject_kind, so any redaction the scope layer applied flows through into blocked_refs, ambiguous_refs, candidate_decisions, and compass_question on the bounds caller path), tests/test_compass.py (test_bounds_aggregation_uses_redacted_scope_subject_refs — confirms raw subject_ref and ambiguity_reason do NOT leak through blocked_refs, candidate_decisions, compass_question, or JSON serialization), docs/live-build-4.md (branch-side markers); tests run: python -m pytest tests/test_compass.py -q -> 284 passed; git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at 7058477e0 (db5b423e3..7058477e0); main queue updated with new Completed / Ready For Codex Review block for the bounds-aggregation redaction repair; Obsidian update status: not performed in this lane (build branch only; coordinator/Obsidian-lane handles vault sync after Codex review); Ready for Codex Review; cadence 2/3 of new cycle
+
+2026-06-06 20:32 -06:00 - Build 4 cross-check: cadence 3/3 Codex review attempt on the 7-commit Compass repair series (cc584318f^..7058477e0) PARKED — Codex CLI returned monthly spend limit AGAIN (6th consecutive cycle parked); no independent review obtained; per heartbeat directive ran careful self-review as fallback; ONE actionable finding surfaced parallel to the prior four: [MEDIUM] _handoff_request_blockers detected raw context in request.evidence_refs/payload_summary_refs/approval_refs and added matching blocker codes, but _handoff_result constructed ProjectHandoffEvaluation passing those tuples through unchanged, so the BLOCKED result preserved the raw payload verbatim in to_dict() output; existing test_raw_context_bleed_is_blocked only checked blocker presence (same shortfall that hid the scope-layer cd20be9c3 and identity-layer 808297315 leaks); reproduced (BLOCKED + json.dumps contained `secret evidence body`, `secret summary payload`, `secret approval` verbatim); other audit checks (matched_refs trace, identity-neighbor overlap, bounds-runtime BLOCKED shared_relationship_refs reuse of difference redaction, subject_kind validity, c3d9f4a22 regression on safe paths, frozen-dataclass invariants, style consistency) all passed.
+
+2026-06-06 20:37 -06:00 - Build 4 completed cadence 3/3 handoff-redaction repair; repair commit d55b15149 (`fix: redact handoff raw refs in results`) landed on branch by parallel-lane Opus session; files changed: meridian_core/compass.py (_handoff_result now routes request.payload_summary_refs, request.evidence_refs, and request.approval_refs through _redact_raw_context_refs when constructing ProjectHandoffEvaluation; safe refs unchanged, raw-context entries collapse to "<redacted_raw_context>"), tests/test_compass.py (new handoff redaction test confirming raw payload absent from to_dict() output across the three handoff request ref tuples while safe REVIEW_READY path is unchanged); tests run: python -m pytest tests/test_compass.py -q -> 285 passed (1 new test on top of 284); git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at d55b15149 (7058477e0..d55b15149); main queue updated with new Completed / Ready For Codex Review block for the handoff redaction repair; Obsidian update status: not performed in this lane; cadence reset for next cycle; lane idle pending independent Codex review on the 8-commit Compass repair series or coordinator promotion of next backend candidate.
 
 2026-06-06 19:52 -06:00 - Build 4 cross-check: cadence 3/3 Codex review on Difference Runtime slice (270438271~1..3ba2d976c) PARKED — Codex CLI returned monthly spend limit error again (same block as prior cadence-3/3 attempt on cd20be9c3); no independent review obtained; per heartbeat directive ran careful self-review as fallback against 10 review questions (ordering, redaction scope, _difference_field_tuple safety, downstream shape compatibility, distinctness regression, None safety, test coverage gaps, blocker name generation, scope-field audit, scope/bounds pattern consistency); ALL self-review checks PASSED with one LOW observation logged (project_id not in _PROJECT_DIFFERENCE_RAW_CONTEXT_SCAN_FIELDS — consistent with identity/scope/bounds layers across the codebase, treated as trusted slug; candidate for a future follow-up audit slice not this one); no actionable repairs needed; coordinator note: independent Codex review still owed for cc584318f + cd20be9c3 + 270438271 once spend limit is raised; no other lanes blocked by this; cadence reset for next cycle; lane idle pending coordinator promotion of next backend candidate or Codex spend-limit relief.
 
