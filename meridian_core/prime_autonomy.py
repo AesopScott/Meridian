@@ -1288,6 +1288,19 @@ class DeepSeekValidationRuntimeStateExport:
         }
 
 
+def _as_utc(value: datetime) -> datetime:
+    """Normalize a datetime to canonical UTC.
+
+    Mirrors meridian_core/beacon.py and meridian_core/session_lifecycle.py:
+    naive datetimes are treated as UTC; offset-aware datetimes are converted
+    to UTC. Keeps generated_at and export_id consistent with the project's
+    existing runtime/advisory timestamp surface.
+    """
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
 def build_deepseek_validation_runtime_state_export(
     disposition: DeepSeekValidationDisposition,
     *,
@@ -1301,8 +1314,15 @@ def build_deepseek_validation_runtime_state_export(
     every autonomous-authority bit is False. Beacon and Prime advisory shapes
     are mirrored into the export so a single polled record carries the full
     advisory picture.
+
+    The caller-supplied ``now`` is normalized to canonical UTC before being
+    stored, serialized, passed into Beacon advisory construction, and used in
+    ``export_id``. Naive datetimes are treated as UTC; offset-aware datetimes
+    are converted to UTC. Matches the existing ``_as_utc()`` pattern in
+    ``beacon.py`` and ``session_lifecycle.py``.
     """
-    generated_at = now if now is not None else datetime.now(timezone.utc)
+    raw_now = now if now is not None else datetime.now(timezone.utc)
+    generated_at = _as_utc(raw_now)
     beacon_advisory = deepseek_validation_disposition_advisory_evidence(
         disposition, now=generated_at
     )

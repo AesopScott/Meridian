@@ -2269,3 +2269,106 @@ class TestDeepSeekValidationRuntimeStateExport:
                 beacon_evidence=(),
                 beacon_blockers=(),
             )
+
+
+class TestDeepSeekValidationRuntimeStateExportTimestampNormalization:
+    """generated_at and export_id must always be canonical UTC.
+
+    Codex Review A flagged that the builder used the caller-supplied ``now``
+    as-is, so an offset-aware non-UTC datetime or a naive datetime could leak
+    into ``generated_at`` and ``export_id`` and diverge from the existing
+    UTC-only timestamp surface in beacon.py / session_lifecycle.py.
+    """
+
+    def _disposition(self) -> DeepSeekValidationDisposition:
+        disposition = bind_deepseek_validation_disposition(
+            deepseek_candidate_metadata_preset("fast")
+        )
+        assert disposition is not None
+        return disposition
+
+    def test_offset_aware_non_utc_now_normalizes_to_utc(self) -> None:
+        offset = datetime(
+            2026, 6, 7, 9, 30, tzinfo=timezone(timedelta(hours=-5))
+        )
+        export = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=offset
+        )
+        expected_utc = datetime(2026, 6, 7, 14, 30, tzinfo=timezone.utc)
+        assert export.generated_at == expected_utc
+        assert export.generated_at.utcoffset() == timedelta(0)
+        assert export.generated_at.tzinfo == timezone.utc
+        assert export.export_id.endswith("2026-06-07T14:30:00+00:00")
+
+    def test_naive_now_is_treated_as_utc(self) -> None:
+        naive = datetime(2026, 6, 7, 14, 30)
+        export = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=naive
+        )
+        expected_utc = datetime(2026, 6, 7, 14, 30, tzinfo=timezone.utc)
+        assert export.generated_at == expected_utc
+        assert export.generated_at.tzinfo == timezone.utc
+        assert export.export_id.endswith("2026-06-07T14:30:00+00:00")
+
+    def test_already_utc_now_remains_utc(self) -> None:
+        utc = datetime(2026, 6, 7, 14, 30, tzinfo=timezone.utc)
+        export = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=utc
+        )
+        assert export.generated_at == utc
+        assert export.generated_at.tzinfo == timezone.utc
+        assert export.export_id.endswith("2026-06-07T14:30:00+00:00")
+
+    def test_three_now_forms_produce_identical_utc_export_id_and_generated_at(
+        self,
+    ) -> None:
+        naive = datetime(2026, 6, 7, 14, 30)
+        offset = datetime(
+            2026, 6, 7, 9, 30, tzinfo=timezone(timedelta(hours=-5))
+        )
+        utc = datetime(2026, 6, 7, 14, 30, tzinfo=timezone.utc)
+        e_naive = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=naive
+        )
+        e_offset = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=offset
+        )
+        e_utc = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=utc
+        )
+        assert e_naive.generated_at == e_offset.generated_at == e_utc.generated_at
+        assert e_naive.export_id == e_offset.export_id == e_utc.export_id
+
+    def test_offset_aware_to_dict_carries_utc_iso(self) -> None:
+        offset = datetime(
+            2026, 6, 7, 9, 30, tzinfo=timezone(timedelta(hours=-5))
+        )
+        export = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=offset
+        )
+        rendered = export.to_dict()
+        expected_iso = datetime(
+            2026, 6, 7, 14, 30, tzinfo=timezone.utc
+        ).isoformat()
+        assert rendered["generated_at"] == expected_iso
+        assert rendered["export_id"].endswith(expected_iso)
+
+    def test_offset_aware_non_utc_still_preserves_advisory_only_invariants(
+        self,
+    ) -> None:
+        offset = datetime(
+            2026, 6, 7, 9, 30, tzinfo=timezone(timedelta(hours=-5))
+        )
+        export = build_deepseek_validation_runtime_state_export(
+            self._disposition(), now=offset
+        )
+        assert export.ready_for_execution is False
+        assert export.human_gate_required is True
+        assert export.serialization_only is True
+        assert export.autonomous_implementation_authorized is False
+        assert export.review_clearing_authorized is False
+        assert export.branch_movement_authorized is False
+        assert export.live_coding_authority_authorized is False
+        assert export.relay_bypass_authorized is False
+        for marker in _DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS:
+            assert marker in export.no_authority_blockers
