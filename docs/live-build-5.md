@@ -219,17 +219,48 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
+## Coordinator Override - Active Now / Opus Task Assigned
 
-Goal: hold Build 5 after Main promotion of the Bifrost backend/view-model binding stack.
+Timestamp: 2026-06-07T10:52:00-06:00.
 
-Status: no executable backend task is currently assigned to Build 5.
+Goal: implement or verify the next Bifrost V2 backend/view-model slice:
+`Bifrost + Prompt Payload Visibility`.
 
-Main promotion:
-- `origin/main` includes reviewed backend prompt-payload/model metadata binding, trust-state repair, cockpit evidence wiring, provider balance/cost-pressure binding, and Codex Review B partial-provider snapshot/view-level provenance repair through integration commit `626797140`.
-- Proof in the clean integration worktree: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 375 passed; `python -m pytest tests/test_bifrost_preview.py -q` -> 29 passed.
+Worker requirement: implementation must run in a Polaris Build 5 Opus worker
+(`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may review only
+after a real worker candidate exists.
 
-Instruction: do not execute lower stale Active Now / Repair Required blocks. Wait for a new coordinator-promoted backend task.
+Task: inspect current main and either prove the visible prompt payload surface is
+already fully backend-bound or implement the smallest deterministic
+backend/view-model/test slice that binds reviewed Relay prompt-payload evidence
+into the Bifrost visible prompt payload meter. The surface must show prompt
+payload size, budget pressure, growth/flat status, Q-mode prompt-drag state,
+evidence refs, and provider/model/route continuity next to model dispatch and
+queue-poll state where applicable.
+
+Allowed likely files:
+
+- `bifrost/cockpit.py`
+- `bifrost/static/cockpit.css` only if render classes are needed
+- `tests/test_bifrost_cockpit.py`
+- this file only for the worker completion marker
+- `docs/v2-progress-tracker.md` only if the worker proves a no-op completion or
+  the slice is review-cleared after Codex Review A/B
+
+Do not edit `index.html`. Do not make live provider calls, probe accounts, read
+secrets, inspect live processes, spawn sessions, or add Electron-only behavior.
+Do not read all of this large queue file; use targeted `rg` and small line
+slices. Start from:
+
+- `rg -n "VisiblePrompt|PromptPayload|prompt_payload|payload meter|PromptPayloadSnapshot" bifrost/cockpit.py tests/test_bifrost_cockpit.py meridian_core`
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+
+Required proof before Ready marker:
+
+- `python -m pytest tests/test_bifrost_cockpit.py -q`
+- `git diff --check`
+- concise completion marker here with files changed, proof, and any remaining
+  risk.
 
 Prompt payload visibility launch attempt note - 2026-06-07T10:47:46-06:00:
 
