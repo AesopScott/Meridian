@@ -10,6 +10,57 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: implement Compass project bounds/scope runtime as the next backend boundary slice (Next Candidate after project definition review).
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606`.
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Task:
+- Extend the deterministic Compass backend with a project bounds/scope runtime that builds on the reviewed project identity runtime.
+- Model bounded project scope using outcome, context, artifacts, objectives, tasks, proof trail, and repo/venture/session relationships.
+- Distinguish in-scope vs out-of-scope requests; surface ambiguous or incomplete scope as Compass questions/blockers.
+- Preserve shared repo/venture/session boundaries (do not collapse them silently).
+- Always serialize `execution_authorized=False`.
+- Pure backend: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no raw cross-project transcript injection, no Polaris dependency.
+
+Completion: completed 2026-06-06 (Opus build lane).
+
+Ready for Codex Review:
+
+- Implementation commit: `3a7f3af2` (Add Compass project bounds runtime).
+- Files changed: `meridian_core/compass.py` (+492 lines), `tests/test_compass.py` (+400 lines).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **181 passed** (29 new bounds runtime tests on top of 152 prior).
+- `git diff --check`: clean.
+- Path-scope check: implementation diff limited to `meridian_core/compass.py` and `tests/test_compass.py`; this queue marker is the only `docs/live-build-4.md` change for this slice.
+- Concrete evidence the bounds runtime proves the required invariants:
+  - New `ProjectBoundsDecision` enum (`IN_SCOPE`, `OUT_OF_SCOPE`, `PARTIAL_SCOPE`, `AMBIGUOUS`, `BLOCKED`).
+  - New frozen `ProjectBoundsRequest` bundles a tuple of `ProjectScopeCandidate` subjects with the relationship envelope (`repo_refs`, `venture_refs`, `session_refs`), evidence refs, request kind, request ref, and optional `ambiguity_reason`.
+  - New frozen `ProjectBoundsEvaluation` always serializes `execution_authorized=False`. Stable key order via `project_bounds_result_dict_keys()`.
+  - `evaluate_project_bounds(project, request)` builds on the reviewed identity runtime by requiring the request's `project_id` to match the reviewed `ProjectDefinition`, then runs each candidate through `evaluate_project_scope` and aggregates per-subject decisions deterministically.
+  - In-scope vs out-of-scope vs mixed:
+    - `test_all_in_scope_subjects_return_in_scope` -> `IN_SCOPE` with surfaced shared refs.
+    - `test_all_out_of_scope_subjects_return_out_of_scope` -> `OUT_OF_SCOPE` with a Compass question asking whether to redirect.
+    - `test_mixed_subjects_return_partial_scope` -> `PARTIAL_SCOPE` with a Compass question asking whether to split the out-of-scope subjects off.
+  - Ambiguous/incomplete scope surfaces as Compass question/blocker (no silent context selection):
+    - `test_unknown_request_kind_returns_compass_question` -> `AMBIGUOUS` + `unknown_bounds_request_kind`.
+    - `test_explicit_ambiguous_request_kind_returns_compass_question` -> `AMBIGUOUS` + `ambiguous_bounds_request` with the caller's stated reason.
+    - `test_ambiguous_subject_returns_compass_question` -> `AMBIGUOUS` + `candidate_ambiguous` naming the ambiguous subjects.
+  - Hidden context is blocked:
+    - `test_missing_request_project_id_blocks`, `test_project_identity_mismatch_blocks`, `test_empty_candidates_blocks`, `test_missing_evidence_refs_blocks`, `test_raw_context_evidence_ref_blocks`, `test_blocked_subject_blocks_bounds`.
+  - Shared repo/venture/session boundaries preserved, not collapsed:
+    - `test_shared_repo_venture_session_surfaced_not_collapsed` confirms shared refs appear under `shared_relationship_refs` while the bounds decision still depends on per-subject scope.
+    - `test_non_shared_envelope_does_not_surface_shared_refs` confirms unrelated envelope refs are not surfaced.
+  - Per-candidate decisions recorded for auditability: `test_candidate_decisions_record_per_subject_outcomes`.
+  - Stable serialization and review-only: `test_bounds_result_serializes_stably`, `test_bounds_result_is_json_serializable`, `test_bounds_result_is_deterministic`, `test_bounds_evaluation_decision_type_required`, `test_bounds_runtime_does_not_emit_identity_or_handoff_fields`, `test_bounds_runtime_does_not_emit_raw_context_keys`, `test_execution_is_never_authorized_across_branches`.
+  - Public surface exposed via `evaluate_project_bounds`, `project_bounds_request_dict_keys`, `project_bounds_result_dict_keys`, and `project_bounds_request_kinds` (frozen set of known request kinds).
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no raw cross-project transcript injection, no Polaris dependency.
+- Next Candidate: pending coordinator promotion after Compass project bounds review clears.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement Compass project definition runtime as the next backend boundary slice.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
