@@ -1920,31 +1920,31 @@ def evaluate_project_bounds(
     )
     candidate_decisions = tuple(
         {
-            "subject_kind": candidate.subject_kind,
-            "subject_ref": candidate.subject_ref,
+            "subject_kind": result.subject_kind,
+            "subject_ref": result.subject_ref,
             "decision": result.decision.value,
         }
-        for candidate, result in zip(request.candidates, candidate_results)
+        for result in candidate_results
     )
 
     in_scope_refs = tuple(
-        candidate.subject_ref
-        for candidate, result in zip(request.candidates, candidate_results)
+        result.subject_ref
+        for result in candidate_results
         if result.decision is ProjectScopeDecision.IN_SCOPE
     )
     out_of_scope_refs = tuple(
-        candidate.subject_ref
-        for candidate, result in zip(request.candidates, candidate_results)
+        result.subject_ref
+        for result in candidate_results
         if result.decision is ProjectScopeDecision.OUT_OF_SCOPE
     )
     ambiguous_refs = tuple(
-        candidate.subject_ref
-        for candidate, result in zip(request.candidates, candidate_results)
+        result.subject_ref
+        for result in candidate_results
         if result.decision is ProjectScopeDecision.AMBIGUOUS
     )
     blocked_refs = tuple(
-        candidate.subject_ref
-        for candidate, result in zip(request.candidates, candidate_results)
+        result.subject_ref
+        for result in candidate_results
         if result.decision is ProjectScopeDecision.BLOCKED
     )
 
