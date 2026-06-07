@@ -18,10 +18,10 @@
 | Relay/Model Harness | 7 | 0 | 2 | 1 | 10 | 70% clear + 20% baseline |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Compass Harness | 4 | 0 | 1 | 0 | 5 | 80% clear + 20% baseline |
-| Session Lifecycle Harness | 1 | 0 | 1 | 5 | 7 | 29% |
+| Session Lifecycle Harness | 6 | 0 | 1 | 0 | 7 | 86% clear + 14% baseline |
 | Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **23** | **0** | **9** | **12** | **44** | **52% Clear + 20% Baseline** |
+| **Total V2** | **28** | **0** | **9** | **7** | **44** | **64% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -66,6 +66,11 @@
 ### Session Lifecycle Harness
 
 - [x] **Prime + Session Lifecycle:** `restart_resteer.py` domain objects and deterministic evaluator for empty build queues, wrong queue routing, shared/main worktree violations, quota blocks, proof blocks, launch failures, and review cadence gates - built in `8b4c8ac`, repaired in `40def3d`; contract baseline in `27e1b1f`; review cleared by Reviews A on 2026-05-31.
+- [x] **Session Lifecycle + Implementation:** `SessionLifecycleState` and `SessionCommandPlan` domain objects model session status, command intent, routing reason, proof state, queue/worktree/branch identity, review state, Aegis gate data, blockers, recovery notes, and deterministic audit evidence. Built and repaired across `558af5554`, `17d70c9d`, `7e96994a`, `e486de2d`, and `e41851ae`; review-promoted on main with `tests/test_session_lifecycle.py` passing.
+- [x] **Session Lifecycle + Permissions:** `PermissionContext`, `SessionPermissionSummary`, operation scopes, permission states, restart/resteer findings, Prime/Beacon advisory binding, expiry/task-scope checks, and fail-closed permission boundaries are implemented without live control. Built through `7e96994a`, repaired through `e486de2d`, `e41851ae`, `1b56a098`, `65e2a97f`, `c57306f0`, and `225a5108`; review-promoted on main.
+- [x] **Session Lifecycle + State Evidence Completeness:** `SessionLiveStateEvidence` and `SessionLiveStateAdvisoryProjection` expose display-safe queue, worktree, branch, model, timestamp, proof, blocker, and project assignment evidence without raw worker chat or raw filesystem/blocker leakage. Built in `8a769e90`, repaired through `e6e8e1c9`, `dd6a0d1a`, `0ae0027a`, `c7e08b0f`, and `6701c11d`; review-promoted on main.
+- [x] **Session Lifecycle + Command Plan Proof:** command preview and V2 proof packets include target, reason, expected transition, evidence refs, queue, worktree/branch, Aegis gate result, executability, permission state, rollback/recovery notes, and affected fields while remaining non-executable. Built through `85037c12`, `763bee58`, `fac1643d`, `db6f2ea0`, and `8ce4a96e`; review-promoted on main.
+- [x] **Session Lifecycle + Close/Archive Write-Through:** `SessionCloseArchiveWriteThroughProof`, close/archive/stop-before-close/write-through action family, and V3 checkpoint proof packet provide explicit proof metadata and failure visibility for close/archive workflows without one-click UI execution bypass. Built through the close/archive proof wave and V3 packet commit `488359bb`; review-promoted on main with `tests/test_session_lifecycle.py` passing.
 
 ### Federation Harness
 
@@ -92,7 +97,7 @@
 
 ### Session Lifecycle Harness
 
-- [x] **Session Lifecycle + Workflow Contract:** `docs/workflow-subagent-harness-contract.md` - workflow/sub-agent dispatch contract for bounded harness work defined; Prime work order and heartbeat interface specified; runtime implementation awaiting.
+- [x] **Session Lifecycle + Workflow Contract:** `docs/workflow-subagent-harness-contract.md` - workflow/sub-agent dispatch contract for bounded harness work defined; Prime work order and heartbeat interface specified. Runtime implementation is now represented above under Built and Review-Cleared V2 Capabilities.
 
 ### Compass Harness
 
@@ -128,11 +133,7 @@
 
 ### Session Lifecycle Harness
 
-- [ ] **Session Lifecycle + Implementation:** `SessionLifecycleState` and `SessionCommandPlan` domain objects - module: `meridian_core/session_lifecycle.py`; tests: `tests/test_session_lifecycle.py`; models spawn/watch/steer/stop/transfer/archive/stale/recover actions; builds on contract baseline `docs/session-lifecycle-v2-contract.md`.
-- [ ] **Session Lifecycle + Permissions:** wire the restart/resteer evaluator into Prime/Beacon runtime state; branch/worktree movement still requires Scott or Prime permission object before live execution.
-- [ ] **Session Lifecycle + State Evidence Completeness:** live state payload must expose queue, worktree, branch, model, read/write/prompt timestamps, proof state, blocker summary, and project assignment without raw worker chat.
-- [ ] **Session Lifecycle + Command Plan Proof:** every command preview must include target, reason, expected transition, evidence refs, queue, worktree/branch, Aegis gate result, executability, and rollback/recovery note before execution.
-- [ ] **Session Lifecycle + Close/Archive Write-Through:** close, archive, stop-before-close, and write-through are explicit Vulcan actions with failure visibility; no UI one-click close may bypass this backend proof.
+- None currently. Session Lifecycle runtime items are review-promoted on main; future work should be Prime/live orchestration integration, Runtime Logic UI completeness, or operations gating rather than V2 backend runtime build.
 
 ### Compass Harness
 
