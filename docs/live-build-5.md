@@ -1,12 +1,13 @@
 # Live Build 5 Queue
 
 Current UI authority note: the Electron app is the Meridian UI. It is the app to
-run, demo, test as the product surface, and build against. Root `index.html` is
-part of that app implementation: it is the renderer source loaded by Electron,
-not a separate UI target. `bifrost/preview.html` is generated backend/view-model
-proof output only. Any older Build 5 log text saying `npm start` regenerates
-preview HTML describes the original V1 shell behavior before commit `05a108f1`
-corrected startup to open the Electron app with the Meridian renderer.
+run, demo, test as the product surface, document, and build against. Root
+`index.html` is renderer internals loaded by that Electron app; it is not the UI
+identity and not a separate UI target. `bifrost/preview.html` is generated
+backend/view-model proof output only. Any older Build 5 log text saying
+`npm start` regenerates preview HTML describes the original V1 shell behavior
+before commit `05a108f1` corrected startup to open the Electron app with the
+Meridian renderer.
 
 ## Coordinator Override - Active Now / Opus Task Assigned
 

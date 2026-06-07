@@ -144,7 +144,7 @@
 
 ### Bifrost Harness
 
-- [ ] **Bifrost + Electron Cockpit:** keep the primary cockpit as the Meridian Electron app. Root `index.html` is the app renderer source, not a separate UI target. Generated preview HTML remains deterministic backend/view-model proof output only.
+- [ ] **Bifrost + Electron Cockpit:** keep the primary cockpit as the Meridian Electron app. Root `index.html` is renderer internals loaded by the Electron app, not the UI identity and not a separate UI target. Generated preview HTML remains deterministic backend/view-model proof output only.
 - [ ] **Bifrost + Balance Button:** Polaris-style provider balance and usage surface for Claude, OpenAI, DeepSeek, and aggregator/local adapters; must show provider health, remaining credit where available, token usage, estimated spend, and cost pressure warnings for Prime routing.
 - [ ] **Bifrost + Prompt Payload Visibility:** surface Relay prompt payload size, budget pressure, and growth/flat status next to model dispatch and queue-poll events so Scott and Prime can see prompt drag in real time.
 - [ ] **Bifrost + Voice I/O Surface:** visible microphone input, spoken Prime output, NASA-style boot/status audio state, mute controls, and listening/thinking/speaking indicators; runtime speech plumbing may follow the initial surface.
