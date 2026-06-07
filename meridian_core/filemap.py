@@ -212,6 +212,13 @@ def make_default_map() -> FileMap:
             notes="Read first when continuing this thread in a new session.",
         ),
         FileMapEntry(
+            path="docs/v2-continuation-handoff-20260607.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="V2 continuation handoff for the June 7 coordinator pass: Main authority rules, Opus/Codex worker-review requirements, promoted backend commits, workflow dispatch proof, Electron UI authority, and next backend direction.",
+            related_tests=["tests/test_filemap.py"],
+            notes="Read when resuming the June 7 continuation thread or verifying current backend build provenance.",
+        ),
+        FileMapEntry(
             path="docs/prime-planning-harness-answers.md",
             area=FileArea.PLANNING,
             purpose="First Council-run planning answer brief: answers all Planning Harness questions for V0 Relay model/API dispatch and records the recommended adapter-first path.",

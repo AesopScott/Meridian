@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task - Workflow Dispatch FileMap Registration
+## Completed / Review-Cleared / Promoted To Main - Workflow Dispatch FileMap Registration
 
 Timestamp: 2026-06-07T17:15:00-06:00.
 
@@ -72,10 +72,12 @@ Required proof before Ready marker:
 Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
-### Build 3 Opus Workflow Dispatch FileMap Registration Ready For Codex Review (2026-06-07T17:15:00-06:00)
+### Build 3 Opus Workflow Dispatch FileMap Registration Completed (2026-06-07T17:15:00-06:00)
 
-Status: ready for Codex Review A/B. Not promoted; not pushed. Stopped on
-detached worktree HEAD per task scope.
+Status: completed, Codex Review A/B passed, promoted to `main`, and pushed to
+`origin/main` in `c1c803fba` (`filemap: register workflow dispatch slice`).
+The worker stopped on detached worktree HEAD per task scope; Main performed
+the reviewed promotion after both Codex review lanes passed.
 
 Worktree:
 `C:/Users/scott/AppData/Local/Temp/polaris-wt/build3-workflow-dispatch-filemap-20260607-1715`.
@@ -192,10 +194,13 @@ Remaining risk:
   provider/account calls, FileMap self-registration inside
   `meridian_core/workflow_dispatch.py`, or branch/worktree movement was
   authorized or attempted by this slice.
-- Worktree stopped on detached `HEAD`; no commit, push, branch creation,
-  merge, rebase, reset, cherry-pick, worktree move, or cross-worktree
-  copy was performed. Promotion to `main` requires coordinator approval
-  per Build 3 rules.
+- Worker worktree stopped on detached `HEAD`; no worker commit, push, branch
+  creation, merge, rebase, reset, cherry-pick, worktree move, or cross-worktree
+  copy was performed. Coordinator promotion to `main` occurred only after
+  Codex Review A PASS, Codex Review B PASS, and Main proof:
+  `python -m pytest tests/test_filemap.py tests/test_workflow_dispatch.py -q`
+  -> 208 passed; `git diff --check -- meridian_core/filemap.py docs/FileMap.md
+  tests/test_filemap.py docs/live-build-3.md` -> clean.
 
 ## Completed / Review-Cleared / Promoted To Main - Provider Balance FileMap Registration
 

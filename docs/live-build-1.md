@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Timestamp: 2026-06-07T16:20:00-06:00.
 
@@ -74,9 +74,21 @@ Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
 Completion:
-- Status: Ready for Codex Review (Codex Review A/B follow-up). Repairs
-  the four findings from the prior review pass on top of the same three
-  allowed files in this worktree.
+- Status: completed, Codex Review A/B passed, promoted to `main`, pushed to
+  `origin/main`, and registered in FileMap.
+- Promoted implementation commit: `28002a9b7` (`workflow: add dispatch domain
+  slice`).
+- Promoted FileMap registration commit: `c1c803fba` (`filemap: register
+  workflow dispatch slice`).
+- Codex Review A and Codex Review B both passed the repaired implementation
+  candidate before promotion, then both passed the Build 3 FileMap
+  registration candidate before `c1c803fba`.
+- Main proof after implementation promotion:
+  `python -m pytest tests/test_workflow_dispatch.py -q` -> 161 passed; then
+  `python -m pytest tests/test_workflow_dispatch.py tests/test_filemap.py -q`
+  -> 208 passed; `git diff --check` clean.
+- This task repairs the four findings from the prior review pass on top of the
+  same three allowed files in the worker worktree.
 - Completed: 2026-06-07 (Polaris Build 1 Opus worker, `claude-opus-4-7`,
   detached worktree
   `C:\Users\scott\AppData\Local\Temp\polaris-wt\build1-workflow-dispatch-20260607-1620`;
@@ -282,9 +294,10 @@ Completion:
   module would no longer be import-free of stdlib date handling
   beyond `dataclasses`/`enum`/`typing`) or a hand-rolled calendar
   table; future hardening can add this if needed.
-- Next Candidate: fresh Codex Review of the three allowed files in
-  this worktree against Review A/B's prior findings before any
-  coordinator promotion to `main`.
+- Next Candidate: per-harness workflow handlers and typed output records
+  (Echo, Atlas, Aegis, Relay, Bifrost, Beacon, Session Lifecycle) remain out
+  of scope for this first dispatch-domain slice and require their own
+  coordinator-promoted tasks.
 
 ## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
