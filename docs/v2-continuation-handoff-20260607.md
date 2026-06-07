@@ -15,9 +15,14 @@ conflict-free backend build state after the June 7 continuation pass.
   copy files across worktrees.
 - Main may promote reviewed worker output only after `main` is clean, Codex
   review passes, and Main proof passes.
-- The Electron app is the Meridian UI. Root `index.html` is the current
-  renderer source loaded by Electron; it is not a separate UI product target.
-  `bifrost/preview.html` is generated backend/view-model proof output only.
+- The Electron app is the Meridian UI. When people say "the Meridian UI,"
+  they mean the Electron desktop app. Root `index.html` is the current
+  renderer source that app loads into the desktop window; it is an
+  implementation file inside the Electron app, not a separate product surface,
+  browser demo, historical artifact, or replacement for the app. Edits to
+  `index.html` are edits to the Electron app's visible UI until the renderer is
+  split into different source files. `bifrost/preview.html` is generated
+  backend/view-model proof output only.
 
 ## Current Promoted Backend State
 
@@ -50,6 +55,20 @@ After promoting the Workflow Dispatch FileMap registration to Main:
 - `git diff --check -- meridian_core/filemap.py docs/FileMap.md
   tests/test_filemap.py docs/live-build-3.md` -> clean.
 - `git status --short --branch` -> `## main...origin/main` after push.
+
+## End-Of-Day Wrap - 2026-06-07
+
+Main wrapped backend work for the day after pushing reviewed production work.
+The promoted backend state remains the Workflow Dispatch slice plus FileMap
+registration listed above. The later Atlas Workflow Adapter task did not reach
+promotion: Build 1 Opus worker `chat_1780871924205` produced uncommitted local
+candidate files in
+`C:/Users/scott/AppData/Local/Temp/polaris-wt/build1-atlas-workflow-adapter-20260607-1755`,
+and coordinator proof passed with `python -m pytest
+tests/test_workflow_atlas.py tests/test_workflow_dispatch.py tests/test_atlas.py
+-q` -> 275 passed, but no worker committed a Ready marker and no Codex Review
+A/B clearance was obtained. Main left the Atlas candidate unpromoted, paused
+the Build 1 queue, and closed the active worker/review sessions for the night.
 
 ## Next Backend Direction
 
