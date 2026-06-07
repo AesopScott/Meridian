@@ -8,12 +8,37 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now / Opus Task Assigned
+## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Timestamp: 2026-06-07T13:13:00-06:00.
 
 Goal: implement the first minimal V3 Goal Runtime backend domain slice from the
 reviewed contract.
+
+Coordinator status: completed, Codex Review A/B passed, promoted to `main`, and
+registered in FileMap.
+
+Promoted commits:
+
+- `96c0b1956` (`goal-runtime: add v3 domain slice`) promoted the reviewed
+  Build 2 implementation slice.
+- `1b2847baa` (`filemap: register goal runtime slice`) promoted the Build 3
+  FileMap registration for `meridian_core/goal_runtime.py` and
+  `tests/test_goal_runtime.py`.
+
+Review proof:
+
+- Codex Review A PASS and Codex Review B PASS for the repaired Build 2
+  candidate from Opus workers `chat_1780863382774` and `chat_1780864543482`
+  in worktree `build2-goal-runtime-domain-20260607-1313`.
+- Main proof after promotion: `python -m pytest tests/test_goal_runtime.py -q`
+  passed with 110 tests; `git diff --check` clean.
+- FileMap proof after Build 3 registration: `python -m pytest
+  tests/test_filemap.py -q` passed with 47 tests and
+  `python -m pytest tests/test_goal_runtime.py -q` passed with 110 tests.
+
+Do not re-run this historical task unless a new coordinator task is assigned
+above this block.
 
 Worker requirement: implementation candidate must run in a Polaris Build 2 Opus
 worker (`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may
