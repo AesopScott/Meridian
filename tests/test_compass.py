@@ -2462,3 +2462,137 @@ class TestProjectDifferenceRawContextGuard:
         for payload in (distinct, same, raw_blocked, missing_blocked):
             assert payload["execution_authorized"] is False
             assert payload["merge_authorized"] is False
+
+
+class TestProjectIdentityRawContextRedaction:
+    """Codex Review B repair: raw-context evidence_refs on the identity BLOCKED
+    path must be redacted in ProjectIdentityEvaluation.to_dict().
+
+    Prior to the repair, evaluate_project_identity() detected raw-context refs
+    via _project_identity_blockers and returned BLOCKED with
+    ``raw_context_evidence_ref_blocked`` in blockers — but the result preserved
+    ``candidate.evidence_refs`` verbatim, so to_dict()["evidence_refs"] still
+    leaked the raw prompt/transcript/free-form-context payload. This mirrored
+    the scope-layer bypass Codex Review B caught in cd20be9c3 and the
+    difference-layer bypass repaired in df8120b49.
+    """
+
+    @pytest.mark.parametrize(
+        "raw_ref",
+        (
+            "raw_prompt:secret prompt body",
+            "raw_transcript:session log",
+            "free_form_context:scratch notes",
+            "transcript:full conversation",
+            "conversation:approval said in chat",
+            "provider_response:streamed body",
+            "raw_context:everything",
+            "prompt:user asked X",
+            "line1\nline2 — embedded newline",
+        ),
+    )
+    def test_raw_context_evidence_ref_redacted_in_blocked_serialization(self, raw_ref):
+        result = evaluate_project_identity(
+            _identity_candidate(evidence_refs=(raw_ref,)),
+        )
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "raw_context_evidence_ref_blocked" in result.blockers
+        # Dataclass field redacted.
+        assert raw_ref not in result.evidence_refs
+        assert "<redacted_raw_context>" in result.evidence_refs
+        # Serialized output redacted (no raw payload anywhere in JSON).
+        payload = result.to_dict()
+        assert raw_ref not in payload["evidence_refs"]
+        assert "<redacted_raw_context>" in payload["evidence_refs"]
+        encoded = json.dumps(payload, sort_keys=True)
+        assert raw_ref not in encoded
+        assert "<redacted_raw_context>" in encoded
+        assert payload["execution_authorized"] is False
+
+    def test_mixed_safe_and_raw_evidence_refs_partially_redacted(self):
+        result = evaluate_project_identity(
+            _identity_candidate(
+                evidence_refs=(
+                    "proof:safe-evidence-one",
+                    "raw_prompt:secret prompt body",
+                    "proof:safe-evidence-two",
+                    "transcript:meeting notes",
+                ),
+            ),
+        )
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "raw_context_evidence_ref_blocked" in result.blockers
+        # Safe refs preserved in order; raw refs redacted in-place.
+        assert result.evidence_refs == (
+            "proof:safe-evidence-one",
+            "<redacted_raw_context>",
+            "proof:safe-evidence-two",
+            "<redacted_raw_context>",
+        )
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "secret prompt body" not in encoded
+        assert "meeting notes" not in encoded
+        assert "proof:safe-evidence-one" in encoded
+        assert "proof:safe-evidence-two" in encoded
+
+    def test_safe_evidence_refs_pass_through_unchanged_on_other_blocker_paths(self):
+        """Regression: the redaction call must not over-trigger on BLOCKED paths
+        that fire for other reasons (e.g. missing project_id). Safe evidence
+        refs should still appear in the serialized BLOCKED result so reviewers
+        see the supplied proof trail.
+        """
+        result = evaluate_project_identity(
+            _identity_candidate(
+                project_id=None,  # forces BLOCKED via missing_project_id
+                evidence_refs=("proof:safe-evidence", "tests/test_compass.py"),
+            ),
+        )
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_project_id" in result.blockers
+        assert "raw_context_evidence_ref_blocked" not in result.blockers
+        assert result.evidence_refs == (
+            "proof:safe-evidence",
+            "tests/test_compass.py",
+        )
+
+    def test_safe_evidence_refs_still_define_project_identity(self):
+        """Regression: legitimate evidence still reaches DEFINED, not BLOCKED."""
+        result = evaluate_project_identity(
+            _identity_candidate(
+                evidence_refs=("proof:legit", "tests/test_compass.py"),
+            ),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert result.evidence_refs == (
+            "proof:legit",
+            "tests/test_compass.py",
+        )
+
+    def test_existing_identity_blockers_preserved_alongside_redaction(self):
+        """Multiple blocker conditions: required-field blockers + raw-context
+        guard fire together; raw payload is still redacted in serialization.
+        """
+        result = evaluate_project_identity(
+            _identity_candidate(
+                title=None,  # missing_title
+                evidence_refs=("raw_prompt:secret prompt body",),
+            ),
+        )
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_title" in result.blockers
+        assert "raw_context_evidence_ref_blocked" in result.blockers
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "secret prompt body" not in encoded
+        assert "<redacted_raw_context>" in encoded
+
+    def test_blocked_redacted_result_serializes_stably(self):
+        result = evaluate_project_identity(
+            _identity_candidate(evidence_refs=("raw_prompt:secret",)),
+        )
+        assert tuple(result.to_dict().keys()) == project_identity_result_dict_keys()
+
+    def test_execution_never_authorized_on_redacted_blocked_path(self):
+        result = evaluate_project_identity(
+            _identity_candidate(evidence_refs=("raw_prompt:secret",)),
+        )
+        assert result.to_dict()["execution_authorized"] is False

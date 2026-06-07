@@ -1789,7 +1789,7 @@ def evaluate_project_identity(
             title=candidate.title,
             outcome=candidate.outcome,
             mission_bearing=candidate.mission_bearing,
-            evidence_refs=candidate.evidence_refs,
+            evidence_refs=_redact_raw_context_refs(candidate.evidence_refs),
             blockers=blockers,
             compass_question=(
                 "Compass needs complete project identity inputs before defining "
