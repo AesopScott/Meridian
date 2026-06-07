@@ -1255,3 +1255,297 @@ class TestProjectIdentityRuntime:
         assert defined["execution_authorized"] is False
         assert blocked["execution_authorized"] is False
         assert ambiguous["execution_authorized"] is False
+
+
+class TestProjectIdentityBearingNormalization:
+    """Codex Review B repair: bearing comparison must catch case/punctuation/whitespace collisions."""
+
+    @pytest.mark.parametrize(
+        "neighbor_bearing",
+        (
+            "ship meridian v2 project-boundary runtime.",
+            "Ship Meridian V2 Project-Boundary Runtime",
+            "  Ship Meridian V2 project-boundary runtime!",
+            "Ship  Meridian   V2 project-boundary runtime.",
+            "Ship Meridian V2 project-boundary runtime...",
+            "SHIP MERIDIAN V2 PROJECT-BOUNDARY RUNTIME",
+        ),
+    )
+    def test_normalized_bearing_collisions_return_ambiguous(self, neighbor_bearing):
+        neighbor = _identity_neighbor(
+            project_id="meridian-shadow",
+            mission_bearing=neighbor_bearing,
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-shadow" in result.collapsing_neighbors
+        assert "project_identity_collapse_risk" in result.blockers
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_distinct_bearing_after_normalization_stays_defined(self):
+        neighbor = _identity_neighbor(
+            project_id="meridian-ui-review",
+            mission_bearing="Ship Meridian V3 project-boundary runtime.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-ui-review" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+
+
+class TestProjectIdentityBoundedDistinction:
+    """Codex Review B repair: richer bounded identity evidence must keep distinct projects distinct."""
+
+    @staticmethod
+    def _shared_bearing_neighbor(**overrides) -> ProjectIdentityNeighbor:
+        base = {
+            "project_id": "meridian-shadow",
+            "mission_bearing": "ship meridian v2 project-boundary runtime",
+            "repo_refs": (
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            "venture_refs": ("venture:Meridian",),
+        }
+        base.update(overrides)
+        return ProjectIdentityNeighbor(**base)
+
+    def test_bearing_collision_with_distinct_title_stays_defined(self):
+        neighbor = self._shared_bearing_neighbor(
+            title="Meridian V2 Shadow Project",
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_bearing_collision_with_distinct_outcome_stays_defined(self):
+        neighbor = self._shared_bearing_neighbor(
+            outcome="Shadow project explores parallel boundary runtime experiments.",
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+
+    def test_bearing_collision_with_distinct_context_stays_defined(self):
+        candidate = _identity_candidate(
+            context=("Compass owns project identity and bearing.",),
+            neighbors=(
+                self._shared_bearing_neighbor(
+                    context=("Shadow runtime explores parallel boundary checks.",),
+                ),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+
+    def test_bearing_collision_with_distinct_artifacts_stays_defined(self):
+        candidate = _identity_candidate(
+            artifacts=("meridian_core/compass.py",),
+            neighbors=(
+                self._shared_bearing_neighbor(
+                    artifacts=("meridian_core/shadow_runtime.py",),
+                ),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+
+    def test_bearing_collision_with_distinct_objectives_stays_defined(self):
+        candidate = _identity_candidate(
+            objectives=("Define project runtime identity.",),
+            neighbors=(
+                self._shared_bearing_neighbor(
+                    objectives=("Explore shadow boundary identity hypothesis.",),
+                ),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+
+    def test_bearing_collision_with_distinct_tasks_stays_defined(self):
+        candidate = _identity_candidate(
+            tasks=("Create pure domain object.",),
+            neighbors=(
+                self._shared_bearing_neighbor(
+                    tasks=("Prototype shadow comparison harness.",),
+                ),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+
+    def test_bearing_collision_with_distinct_proof_trail_stays_defined(self):
+        candidate = _identity_candidate(
+            proof_trail=("tests/test_compass.py",),
+            neighbors=(
+                self._shared_bearing_neighbor(
+                    proof_trail=("tests/test_shadow_runtime.py",),
+                ),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+
+    def test_all_bounded_fields_matching_truly_collapses(self):
+        bounded = {
+            "title": "Meridian V2",
+            "outcome": "Prime can coordinate V2 harness runtime without project drift.",
+            "context": (
+                "Compass owns project identity and bearing.",
+                "V2 runtime stays pure until reviewed.",
+            ),
+            "artifacts": (
+                "docs/v2-progress-tracker.md",
+                "meridian_core/compass.py",
+            ),
+            "objectives": (
+                "Define project runtime identity.",
+                "Keep repo, venture, and session relationships explicit.",
+            ),
+            "tasks": (
+                "Create pure domain object.",
+                "Add deterministic serialization tests.",
+            ),
+            "proof_trail": (
+                "docs/harness-stage-checklist.md#Compass",
+                "tests/test_compass.py",
+            ),
+        }
+        candidate = _identity_candidate(
+            **{
+                key: value
+                for key, value in bounded.items()
+                if key not in ("title", "outcome")
+            },
+            neighbors=(
+                self._shared_bearing_neighbor(**bounded),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-shadow" in result.collapsing_neighbors
+        assert result.distinguishing_neighbors == ()
+        assert "project_identity_collapse_risk" in result.blockers
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_bounded_tuple_comparison_is_order_insensitive(self):
+        neighbor = self._shared_bearing_neighbor(
+            artifacts=("meridian_core/compass.py", "docs/v2-progress-tracker.md"),
+        )
+        candidate = _identity_candidate(
+            artifacts=("docs/v2-progress-tracker.md", "meridian_core/compass.py"),
+            neighbors=(neighbor,),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-shadow" in result.collapsing_neighbors
+
+    def test_neighbor_without_bounded_fields_falls_back_to_bearing_only(self):
+        neighbor = self._shared_bearing_neighbor()
+        candidate = _identity_candidate(
+            title="Meridian V2",
+            outcome="Distinct outcome but neighbor carries no bounded evidence.",
+            neighbors=(neighbor,),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-shadow" in result.collapsing_neighbors
+
+    def test_one_sided_bounded_fields_do_not_distinguish(self):
+        """One-sided bounded evidence cannot prove distinction.
+
+        Candidate populates ``objectives`` while neighbor populates ``artifacts``;
+        neither field is set on both sides, so neither can serve as evidence of
+        distinct identity. With matching bearings and no two-sided distinguishing
+        field, the result must collapse rather than silently distinguish.
+        """
+        neighbor = self._shared_bearing_neighbor(
+            artifacts=("meridian_core/shadow_runtime.py",),
+        )
+        candidate = _identity_candidate(
+            objectives=("Define project runtime identity.",),
+            neighbors=(neighbor,),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-shadow" in result.collapsing_neighbors
+
+    def test_two_sided_distinguishing_field_overrides_one_sided_fields(self):
+        """A both-sided distinguishing field keeps neighbor distinct even when other fields are one-sided."""
+        neighbor = self._shared_bearing_neighbor(
+            artifacts=("meridian_core/shadow_runtime.py",),
+            objectives=("Explore shadow boundary identity hypothesis.",),
+        )
+        candidate = _identity_candidate(
+            artifacts=("meridian_core/compass.py",),
+            objectives=("Define project runtime identity.",),
+            tasks=("Create pure domain object.",),
+            neighbors=(neighbor,),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "meridian-shadow" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+
+    def test_neighbor_richer_fields_serialize_stably(self):
+        neighbor = ProjectIdentityNeighbor(
+            project_id="meridian-shadow",
+            mission_bearing="ship meridian v2 project-boundary runtime",
+            title="Meridian Shadow",
+            outcome="Shadow outcome.",
+            context=("ctx",),
+            artifacts=("artifact",),
+            objectives=("objective",),
+            tasks=("task",),
+            proof_trail=("proof",),
+            repo_refs=("repo:meridian",),
+            venture_refs=("venture:Meridian",),
+        )
+        assert tuple(neighbor.to_dict().keys()) == project_identity_neighbor_dict_keys()
+
+    def test_candidate_richer_fields_serialize_stably(self):
+        candidate = _identity_candidate(
+            context=("ctx",),
+            artifacts=("artifact",),
+            objectives=("objective",),
+            tasks=("task",),
+            proof_trail=("proof",),
+        )
+        assert tuple(candidate.to_dict().keys()) == project_identity_candidate_dict_keys()
+
+    def test_candidate_from_definition_passes_bounded_fields(self):
+        project = _project()
+        candidate = project_identity_candidate_from_definition(
+            project,
+            mission_bearing="Ship Meridian V2 project-boundary runtime.",
+            evidence_refs=("proof:from-definition-bounded",),
+        )
+        assert candidate.context == project.context
+        assert candidate.artifacts == project.artifacts
+        assert candidate.objectives == project.objectives
+        assert candidate.tasks == project.tasks
+        assert candidate.proof_trail == project.proof_trail

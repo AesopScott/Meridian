@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable, Mapping
@@ -104,6 +105,13 @@ _PROJECT_HANDOFF_RESULT_DICT_KEYS = (
 _PROJECT_IDENTITY_NEIGHBOR_KEYS = (
     "project_id",
     "mission_bearing",
+    "title",
+    "outcome",
+    "context",
+    "artifacts",
+    "objectives",
+    "tasks",
+    "proof_trail",
     "repo_refs",
     "venture_refs",
     "session_refs",
@@ -113,12 +121,30 @@ _PROJECT_IDENTITY_CANDIDATE_KEYS = (
     "title",
     "outcome",
     "mission_bearing",
+    "context",
+    "artifacts",
+    "objectives",
+    "tasks",
+    "proof_trail",
     "repo_refs",
     "venture_refs",
     "session_refs",
     "evidence_refs",
     "neighbors",
 )
+_PROJECT_IDENTITY_BOUNDED_TUPLE_FIELDS = (
+    "context",
+    "artifacts",
+    "objectives",
+    "tasks",
+    "proof_trail",
+)
+_PROJECT_IDENTITY_BOUNDED_TEXT_FIELDS = (
+    "title",
+    "outcome",
+)
+_BEARING_PUNCTUATION_STRIP = ".,;:!?-—–_'\"—–"
+_BEARING_WHITESPACE_RE = re.compile(r"\s+")
 _PROJECT_IDENTITY_RESULT_DICT_KEYS = (
     "decision",
     "project_id",
@@ -841,10 +867,23 @@ class ProjectHandoffEvaluation:
 
 @dataclass(frozen=True)
 class ProjectIdentityNeighbor:
-    """Already-defined neighbor project that may share relationship refs."""
+    """Already-defined neighbor project that may share relationship refs.
+
+    Optional bounded identity evidence (``title``, ``outcome``, ``context``,
+    ``artifacts``, ``objectives``, ``tasks``, ``proof_trail``) is used during
+    overlap evaluation to keep genuinely distinct projects distinct even when
+    their mission bearings collide after normalization.
+    """
 
     project_id: str
     mission_bearing: str
+    title: str | None = None
+    outcome: str | None = None
+    context: tuple[str, ...] = ()
+    artifacts: tuple[str, ...] = ()
+    objectives: tuple[str, ...] = ()
+    tasks: tuple[str, ...] = ()
+    proof_trail: tuple[str, ...] = ()
     repo_refs: tuple[str, ...] = ()
     venture_refs: tuple[str, ...] = ()
     session_refs: tuple[str, ...] = ()
@@ -859,6 +898,43 @@ class ProjectIdentityNeighbor:
             self,
             "mission_bearing",
             _normalize_required_text("mission_bearing", self.mission_bearing),
+        )
+        if self.title is not None:
+            object.__setattr__(
+                self,
+                "title",
+                _normalize_required_text("title", self.title),
+            )
+        if self.outcome is not None:
+            object.__setattr__(
+                self,
+                "outcome",
+                _normalize_required_text("outcome", self.outcome),
+            )
+        object.__setattr__(
+            self,
+            "context",
+            _normalize_optional_tuple("context", self.context),
+        )
+        object.__setattr__(
+            self,
+            "artifacts",
+            _normalize_optional_tuple("artifacts", self.artifacts),
+        )
+        object.__setattr__(
+            self,
+            "objectives",
+            _normalize_optional_tuple("objectives", self.objectives),
+        )
+        object.__setattr__(
+            self,
+            "tasks",
+            _normalize_optional_tuple("tasks", self.tasks),
+        )
+        object.__setattr__(
+            self,
+            "proof_trail",
+            _normalize_optional_tuple("proof_trail", self.proof_trail),
         )
         object.__setattr__(
             self,
@@ -880,6 +956,13 @@ class ProjectIdentityNeighbor:
         return {
             "project_id": self.project_id,
             "mission_bearing": self.mission_bearing,
+            "title": self.title,
+            "outcome": self.outcome,
+            "context": self.context,
+            "artifacts": self.artifacts,
+            "objectives": self.objectives,
+            "tasks": self.tasks,
+            "proof_trail": self.proof_trail,
             "repo_refs": self.repo_refs,
             "venture_refs": self.venture_refs,
             "session_refs": self.session_refs,
@@ -888,7 +971,13 @@ class ProjectIdentityNeighbor:
 
 @dataclass(frozen=True)
 class ProjectIdentityCandidate:
-    """Primitive identity inputs being considered as a Meridian project definition."""
+    """Primitive identity inputs being considered as a Meridian project definition.
+
+    Bounded identity evidence tuples (``context``, ``artifacts``, ``objectives``,
+    ``tasks``, ``proof_trail``) are optional but, when populated, participate in
+    neighbor comparison so a candidate whose mission bearing collides with a
+    neighbor can still stay distinct if any of its bounded body of work differs.
+    """
 
     project_id: str | None
     title: str | None
@@ -898,6 +987,11 @@ class ProjectIdentityCandidate:
     venture_refs: tuple[str, ...]
     session_refs: tuple[str, ...] = ()
     evidence_refs: tuple[str, ...] = ()
+    context: tuple[str, ...] = ()
+    artifacts: tuple[str, ...] = ()
+    objectives: tuple[str, ...] = ()
+    tasks: tuple[str, ...] = ()
+    proof_trail: tuple[str, ...] = ()
     neighbors: tuple[ProjectIdentityNeighbor, ...] = ()
 
     def __post_init__(self) -> None:
@@ -945,6 +1039,31 @@ class ProjectIdentityCandidate:
             "evidence_refs",
             _normalize_optional_tuple("evidence_refs", self.evidence_refs),
         )
+        object.__setattr__(
+            self,
+            "context",
+            _normalize_optional_tuple("context", self.context),
+        )
+        object.__setattr__(
+            self,
+            "artifacts",
+            _normalize_optional_tuple("artifacts", self.artifacts),
+        )
+        object.__setattr__(
+            self,
+            "objectives",
+            _normalize_optional_tuple("objectives", self.objectives),
+        )
+        object.__setattr__(
+            self,
+            "tasks",
+            _normalize_optional_tuple("tasks", self.tasks),
+        )
+        object.__setattr__(
+            self,
+            "proof_trail",
+            _normalize_optional_tuple("proof_trail", self.proof_trail),
+        )
         if any(
             not isinstance(neighbor, ProjectIdentityNeighbor)
             for neighbor in self.neighbors
@@ -958,6 +1077,11 @@ class ProjectIdentityCandidate:
             "title": self.title,
             "outcome": self.outcome,
             "mission_bearing": self.mission_bearing,
+            "context": self.context,
+            "artifacts": self.artifacts,
+            "objectives": self.objectives,
+            "tasks": self.tasks,
+            "proof_trail": self.proof_trail,
             "repo_refs": self.repo_refs,
             "venture_refs": self.venture_refs,
             "session_refs": self.session_refs,
@@ -1312,7 +1436,12 @@ def project_identity_candidate_from_definition(
     evidence_refs: Iterable[str],
     neighbors: Iterable[ProjectIdentityNeighbor] = (),
 ) -> ProjectIdentityCandidate:
-    """Build a ProjectIdentityCandidate from an already-validated ProjectDefinition."""
+    """Build a ProjectIdentityCandidate from an already-validated ProjectDefinition.
+
+    The bounded body of work (context, artifacts, objectives, tasks, proof_trail)
+    is forwarded so neighbor comparison can use richer identity evidence when a
+    mission bearing collides with another project.
+    """
     return ProjectIdentityCandidate(
         project_id=project.project_id,
         title=project.title,
@@ -1322,6 +1451,11 @@ def project_identity_candidate_from_definition(
         venture_refs=project.relationship_refs.venture_refs,
         session_refs=project.relationship_refs.session_refs,
         evidence_refs=tuple(evidence_refs),
+        context=project.context,
+        artifacts=project.artifacts,
+        objectives=project.objectives,
+        tasks=project.tasks,
+        proof_trail=project.proof_trail,
         neighbors=tuple(neighbors),
     )
 
@@ -1537,6 +1671,51 @@ def _project_identity_blockers(
     return tuple(blockers)
 
 
+def _normalize_bearing_text(value: str | None) -> str:
+    """Normalize bearing-like text so trivial variants do not slip past comparison.
+
+    Lowercases, strips leading/trailing whitespace, collapses internal whitespace
+    runs to single spaces, and trims surrounding punctuation. Used to detect
+    case/formatting/punctuation collisions between candidate and neighbor
+    mission bearings (and analogous bounded text fields).
+    """
+    if value is None:
+        return ""
+    normalized = _BEARING_WHITESPACE_RE.sub(" ", value.strip().lower())
+    return normalized.strip(_BEARING_PUNCTUATION_STRIP).strip()
+
+
+def _bounded_identity_distinguishes(
+    candidate: ProjectIdentityCandidate,
+    neighbor: ProjectIdentityNeighbor,
+) -> bool:
+    """Return True if candidate vs neighbor bounded identity evidence differs.
+
+    Only fields populated on both sides participate. Text fields are compared
+    after the same normalization used for mission bearings; tuple fields are
+    compared as order-insensitive sets so storage order does not cause spurious
+    distinction.
+    """
+    for field_name in _PROJECT_IDENTITY_BOUNDED_TEXT_FIELDS:
+        candidate_value = getattr(candidate, field_name, None)
+        neighbor_value = getattr(neighbor, field_name, None)
+        if candidate_value is None or neighbor_value is None:
+            continue
+        if _normalize_bearing_text(candidate_value) != _normalize_bearing_text(
+            neighbor_value
+        ):
+            return True
+
+    for field_name in _PROJECT_IDENTITY_BOUNDED_TUPLE_FIELDS:
+        candidate_value = getattr(candidate, field_name, ())
+        neighbor_value = getattr(neighbor, field_name, ())
+        if not candidate_value or not neighbor_value:
+            continue
+        if set(candidate_value) != set(neighbor_value):
+            return True
+    return False
+
+
 def _project_identity_neighbor_overlap(
     candidate: ProjectIdentityCandidate,
 ) -> tuple[
@@ -1549,11 +1728,7 @@ def _project_identity_neighbor_overlap(
     candidate_repo = set(candidate.repo_refs)
     candidate_venture = set(candidate.venture_refs)
     candidate_session = set(candidate.session_refs)
-    candidate_bearing = (
-        candidate.mission_bearing.strip()
-        if candidate.mission_bearing is not None
-        else ""
-    )
+    candidate_bearing = _normalize_bearing_text(candidate.mission_bearing)
 
     shared_repo: set[str] = set()
     shared_venture: set[str] = set()
@@ -1576,17 +1751,22 @@ def _project_identity_neighbor_overlap(
         shared_venture |= n_venture
         shared_session |= n_session
 
-        neighbor_bearing = neighbor.mission_bearing.strip()
+        neighbor_bearing = _normalize_bearing_text(neighbor.mission_bearing)
         same_project_id = (
             candidate.project_id is not None
             and neighbor.project_id == candidate.project_id
         )
         same_bearing = neighbor_bearing == candidate_bearing
+        bounded_distinguishes = _bounded_identity_distinguishes(candidate, neighbor)
 
-        if same_project_id or same_bearing:
+        if same_project_id:
             collapsing.append(neighbor.project_id)
-        else:
+        elif not same_bearing:
             distinguishing.append(neighbor.project_id)
+        elif bounded_distinguishes:
+            distinguishing.append(neighbor.project_id)
+        else:
+            collapsing.append(neighbor.project_id)
 
     return (
         tuple(sorted(shared_repo)),
