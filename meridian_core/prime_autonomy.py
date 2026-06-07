@@ -6,9 +6,14 @@ and deterministic fallback action selection.
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional, List, FrozenSet
 
+from meridian_core.beacon import (
+    BeaconAdvisoryEvidence,
+    deepseek_validation_disposition_advisory_evidence,
+)
 from meridian_core.model_adapter import DeepSeekValidationDisposition
 from meridian_core.session_lifecycle import (
     CommandIntent,
@@ -1154,4 +1159,189 @@ def select_next_action_from_deepseek_validation_disposition(
         evidence=evidence,
         human_gate_required=True,
         blockers=blockers,
+    )
+
+
+@dataclass(frozen=True)
+class DeepSeekValidationRuntimeStateExport:
+    """Display/advisory polling surface bundling DeepSeek validation disposition
+    with the Prime next-action and Beacon advisory evidence projections.
+
+    Mirrors the existing runtime-state export pattern: frozen, serializable via
+    to_dict(), display-safe. Carries no execution authority. __post_init__
+    guards reject any construction that would carry autonomy bits, mark itself
+    ready-for-execution, drop the human gate, lose the five non-authority
+    blockers, masquerade variant labels as the dispatch model, or use a
+    dispatch id other than deepseek-chat.
+    """
+
+    export_id: str
+    generated_at: datetime
+    validation_level: str
+    direct_dispatch_id: str
+    variant_labels: tuple[str, ...]
+    transport_cleared: bool
+    blocked_authority_tags: tuple[str, ...]
+    validation_evidence_ref: str
+    direct_endpoint_evidence_ref: Optional[str]
+    external_review_evidence_ref: Optional[str]
+    autonomous_implementation_authorized: bool
+    review_clearing_authorized: bool
+    branch_movement_authorized: bool
+    live_coding_authority_authorized: bool
+    relay_bypass_authorized: bool
+    ready_for_execution: bool
+    human_gate_required: bool
+    no_authority_blockers: tuple[str, ...]
+    prime_action_type: str
+    prime_confidence: str
+    prime_risk_tier: str
+    prime_target_harness: str
+    prime_target_lane: str
+    prime_target_project: str
+    prime_rationale: str
+    prime_evidence: tuple[str, ...]
+    prime_blockers: tuple[str, ...]
+    beacon_harness_id: str
+    beacon_advisory_type: str
+    beacon_evidence: tuple[str, ...]
+    beacon_blockers: tuple[str, ...]
+    serialization_only: bool = True
+
+    def __post_init__(self) -> None:
+        if self.direct_dispatch_id != "deepseek-chat":
+            raise ValueError(
+                "DeepSeekValidationRuntimeStateExport direct_dispatch_id must be "
+                "deepseek-chat (no autonomy by accident)"
+            )
+        for label in self.variant_labels:
+            if label == self.direct_dispatch_id:
+                raise ValueError(
+                    "DeepSeekValidationRuntimeStateExport variant labels must not "
+                    "masquerade as the dispatch model"
+                )
+        if (
+            self.autonomous_implementation_authorized
+            or self.review_clearing_authorized
+            or self.branch_movement_authorized
+            or self.live_coding_authority_authorized
+            or self.relay_bypass_authorized
+        ):
+            raise ValueError(
+                "DeepSeekValidationRuntimeStateExport must not carry any "
+                "autonomous-authority bit set (no autonomy by accident)"
+            )
+        if self.ready_for_execution:
+            raise ValueError(
+                "DeepSeekValidationRuntimeStateExport must remain non-executable"
+            )
+        if not self.human_gate_required:
+            raise ValueError(
+                "DeepSeekValidationRuntimeStateExport must require a human gate"
+            )
+        if not self.serialization_only:
+            raise ValueError(
+                "DeepSeekValidationRuntimeStateExport is serialization-only"
+            )
+        for marker in _DEEPSEEK_PRIME_NON_AUTHORITY_BLOCKERS:
+            if marker not in self.no_authority_blockers:
+                raise ValueError(
+                    f"DeepSeekValidationRuntimeStateExport must preserve "
+                    f"non-authority blocker: {marker}"
+                )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize export to JSON-safe polling metadata."""
+        return {
+            "export_id": self.export_id,
+            "generated_at": self.generated_at.isoformat(),
+            "validation_level": self.validation_level,
+            "direct_dispatch_id": self.direct_dispatch_id,
+            "variant_labels": list(self.variant_labels),
+            "transport_cleared": self.transport_cleared,
+            "blocked_authority_tags": list(self.blocked_authority_tags),
+            "validation_evidence_ref": self.validation_evidence_ref,
+            "direct_endpoint_evidence_ref": self.direct_endpoint_evidence_ref,
+            "external_review_evidence_ref": self.external_review_evidence_ref,
+            "autonomous_implementation_authorized": self.autonomous_implementation_authorized,
+            "review_clearing_authorized": self.review_clearing_authorized,
+            "branch_movement_authorized": self.branch_movement_authorized,
+            "live_coding_authority_authorized": self.live_coding_authority_authorized,
+            "relay_bypass_authorized": self.relay_bypass_authorized,
+            "ready_for_execution": self.ready_for_execution,
+            "human_gate_required": self.human_gate_required,
+            "no_authority_blockers": list(self.no_authority_blockers),
+            "prime_action_type": self.prime_action_type,
+            "prime_confidence": self.prime_confidence,
+            "prime_risk_tier": self.prime_risk_tier,
+            "prime_target_harness": self.prime_target_harness,
+            "prime_target_lane": self.prime_target_lane,
+            "prime_target_project": self.prime_target_project,
+            "prime_rationale": self.prime_rationale,
+            "prime_evidence": list(self.prime_evidence),
+            "prime_blockers": list(self.prime_blockers),
+            "beacon_harness_id": self.beacon_harness_id,
+            "beacon_advisory_type": self.beacon_advisory_type,
+            "beacon_evidence": list(self.beacon_evidence),
+            "beacon_blockers": list(self.beacon_blockers),
+            "serialization_only": self.serialization_only,
+        }
+
+
+def build_deepseek_validation_runtime_state_export(
+    disposition: DeepSeekValidationDisposition,
+    *,
+    now: Optional[datetime] = None,
+) -> DeepSeekValidationRuntimeStateExport:
+    """Bundle disposition + Prime advisory action + Beacon advisory evidence
+    into a single display-safe runtime-state export for downstream polling.
+
+    The export carries no execution authority — Prime action is always
+    PAUSE_AND_WAIT, human_gate_required=True, ready_for_execution=False, and
+    every autonomous-authority bit is False. Beacon and Prime advisory shapes
+    are mirrored into the export so a single polled record carries the full
+    advisory picture.
+    """
+    generated_at = now if now is not None else datetime.now(timezone.utc)
+    beacon_advisory = deepseek_validation_disposition_advisory_evidence(
+        disposition, now=generated_at
+    )
+    prime_action = select_next_action_from_deepseek_validation_disposition(disposition)
+    export_id = (
+        f"deepseek-validation-export:{disposition.validation_level}:"
+        f"{generated_at.isoformat()}"
+    )
+    return DeepSeekValidationRuntimeStateExport(
+        export_id=export_id,
+        generated_at=generated_at,
+        validation_level=disposition.validation_level,
+        direct_dispatch_id=disposition.direct_dispatch_id,
+        variant_labels=tuple(disposition.variant_labels),
+        transport_cleared=disposition.transport_cleared,
+        blocked_authority_tags=tuple(disposition.blocked_authority_tags),
+        validation_evidence_ref=disposition.validation_evidence_ref,
+        direct_endpoint_evidence_ref=disposition.direct_endpoint_evidence_ref,
+        external_review_evidence_ref=disposition.external_review_evidence_ref,
+        autonomous_implementation_authorized=disposition.autonomous_implementation_authorized,
+        review_clearing_authorized=disposition.review_clearing_authorized,
+        branch_movement_authorized=disposition.branch_movement_authorized,
+        live_coding_authority_authorized=disposition.live_coding_authority_authorized,
+        relay_bypass_authorized=disposition.relay_bypass_authorized,
+        ready_for_execution=False,
+        human_gate_required=True,
+        no_authority_blockers=_DEEPSEEK_PRIME_NON_AUTHORITY_BLOCKERS,
+        prime_action_type=prime_action.action_type.value,
+        prime_confidence=prime_action.confidence.value,
+        prime_risk_tier=prime_action.risk_tier.value,
+        prime_target_harness=prime_action.target_harness or "",
+        prime_target_lane=prime_action.target_lane or "",
+        prime_target_project=prime_action.target_project or "",
+        prime_rationale=prime_action.rationale,
+        prime_evidence=tuple(sorted(prime_action.evidence)),
+        prime_blockers=tuple(sorted(prime_action.blockers)),
+        beacon_harness_id=beacon_advisory.harness_id,
+        beacon_advisory_type=beacon_advisory.advisory_type,
+        beacon_evidence=beacon_advisory.evidence,
+        beacon_blockers=beacon_advisory.blockers,
+        serialization_only=disposition.serialization_only,
     )

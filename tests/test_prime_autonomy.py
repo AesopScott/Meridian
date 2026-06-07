@@ -9,12 +9,14 @@ from meridian_core.model_adapter import (
     deepseek_candidate_metadata_preset,
 )
 from meridian_core.prime_autonomy import (
+    DeepSeekValidationRuntimeStateExport,
     PrimeActionType,
     PrimeActionConfidence,
     PrimeActionRiskTier,
     PrimeActionSource,
     PrimeNextAction,
     ProjectStateSignal,
+    build_deepseek_validation_runtime_state_export,
     select_prime_next_action,
     make_prime_next_action,
     select_next_action_from_command_plan_staging_record,
@@ -1884,3 +1886,386 @@ class TestSelectNextActionFromDeepSeekValidationDisposition:
             ev.startswith("deepseek.external_review_evidence_ref=")
             for ev in action.evidence
         )
+
+
+_DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS = (
+    "deepseek_advisory_only_no_autonomous_implementation",
+    "deepseek_advisory_only_no_review_clearing",
+    "deepseek_advisory_only_no_branch_movement",
+    "deepseek_advisory_only_no_live_coding",
+    "deepseek_advisory_only_no_relay_bypass",
+)
+
+
+def _fixed_export_now() -> datetime:
+    return datetime(2026, 6, 7, 4, 0, tzinfo=timezone.utc)
+
+
+def _metadata_only_export() -> DeepSeekValidationRuntimeStateExport:
+    disposition = bind_deepseek_validation_disposition(
+        deepseek_candidate_metadata_preset("fast")
+    )
+    assert disposition is not None
+    return build_deepseek_validation_runtime_state_export(
+        disposition, now=_fixed_export_now()
+    )
+
+
+class TestDeepSeekValidationRuntimeStateExport:
+    """Polling-surface bundle of DeepSeek validation disposition + advisory."""
+
+    def test_export_id_is_deterministic_for_fixed_now(self) -> None:
+        export = _metadata_only_export()
+        assert export.export_id == (
+            "deepseek-validation-export:level-0:metadata-only:"
+            "2026-06-07T04:00:00+00:00"
+        )
+        assert export.generated_at == _fixed_export_now()
+
+    def test_export_carries_disposition_identity_and_evidence(self) -> None:
+        export = _metadata_only_export()
+        assert export.validation_level == "level-0:metadata-only"
+        assert export.direct_dispatch_id == "deepseek-chat"
+        assert export.variant_labels == ("deepseek-v4-flash",)
+        assert export.transport_cleared is False
+        assert export.validation_evidence_ref == (
+            "deepseek-validation:level-0:metadata-only"
+        )
+        assert export.direct_endpoint_evidence_ref == (
+            "deepseek-direct-endpoint:"
+            "https://api.deepseek.com/v1/chat/completions"
+        )
+        assert export.external_review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
+
+    def test_export_blocks_execution_and_requires_human_gate(self) -> None:
+        export = _metadata_only_export()
+        assert export.ready_for_execution is False
+        assert export.human_gate_required is True
+        assert export.serialization_only is True
+        assert export.autonomous_implementation_authorized is False
+        assert export.review_clearing_authorized is False
+        assert export.branch_movement_authorized is False
+        assert export.live_coding_authority_authorized is False
+        assert export.relay_bypass_authorized is False
+
+    def test_export_preserves_all_five_non_authority_blockers(self) -> None:
+        export = _metadata_only_export()
+        for marker in _DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS:
+            assert marker in export.no_authority_blockers
+
+    def test_export_preserves_blocked_authority_tags(self) -> None:
+        export = _metadata_only_export()
+        assert "review_clearance" in export.blocked_authority_tags
+        assert "branch_movement" in export.blocked_authority_tags
+        assert "relay_aegis_bypass" in export.blocked_authority_tags
+        assert "autonomous_coding" in export.blocked_authority_tags
+        assert "aggregator_authority" in export.blocked_authority_tags
+
+    def test_export_mirrors_prime_action_pause_and_wait(self) -> None:
+        export = _metadata_only_export()
+        assert export.prime_action_type == "pause_and_wait"
+        assert export.prime_confidence == "high"
+        assert export.prime_risk_tier == "safe"
+        assert export.prime_target_harness == "Relay"
+        assert export.prime_target_lane == "model_harness"
+        assert export.prime_target_project == "Meridian"
+        assert "No autonomous authority granted" in export.prime_rationale
+        assert "level-0:metadata-only" in export.prime_rationale
+
+    def test_export_mirrors_prime_blockers_and_evidence(self) -> None:
+        export = _metadata_only_export()
+        for marker in _DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS:
+            assert marker in export.prime_blockers
+        assert any(
+            ev == "deepseek.validation_level=level-0:metadata-only"
+            for ev in export.prime_evidence
+        )
+
+    def test_export_mirrors_beacon_advisory_shape(self) -> None:
+        export = _metadata_only_export()
+        assert export.beacon_harness_id == "relay-model-deepseek"
+        assert export.beacon_advisory_type == (
+            "deepseek_validation_level-0:metadata-only"
+        )
+        for marker in _DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS:
+            assert marker in export.beacon_blockers
+        assert "deepseek_transport_not_cleared" in export.beacon_blockers
+        assert any(
+            ev.startswith("deepseek.validation_level=")
+            for ev in export.beacon_evidence
+        )
+
+    def test_export_to_dict_is_json_safe_and_stable(self) -> None:
+        export = _metadata_only_export()
+        rendered = export.to_dict()
+        assert rendered == export.to_dict()
+        assert rendered["export_id"] == export.export_id
+        assert rendered["generated_at"] == _fixed_export_now().isoformat()
+        assert rendered["ready_for_execution"] is False
+        assert rendered["human_gate_required"] is True
+        assert isinstance(rendered["variant_labels"], list)
+        assert isinstance(rendered["beacon_evidence"], list)
+        assert isinstance(rendered["prime_blockers"], list)
+        flat = (
+            " ".join(rendered["beacon_evidence"])
+            + " "
+            + " ".join(rendered["prime_evidence"])
+            + " "
+            + rendered["prime_rationale"]
+        )
+        assert "credential" not in flat.lower()
+        assert "api_key" not in flat.lower()
+        assert "/Users/" not in flat
+        assert "C:\\Users" not in flat
+
+    def test_export_validation_cleared_marks_transport_cleared(self) -> None:
+        from meridian_core.model_adapter import DeepSeekValidationDisposition
+
+        cleared = DeepSeekValidationDisposition(
+            validation_level="level-1:validation-cleared",
+            direct_dispatch_id="deepseek-chat",
+            variant_labels=("deepseek-v4-pro",),
+            transport_cleared=True,
+            blocked_authority_tags=(
+                "review_clearance",
+                "branch_movement",
+                "autonomous_coding",
+            ),
+            validation_evidence_ref="deepseek-validation:level-1:validation-cleared",
+            direct_endpoint_evidence_ref=(
+                "deepseek-direct-endpoint:"
+                "https://api.deepseek.com/v1/chat/completions"
+            ),
+            external_review_evidence_ref=(
+                "external-review:deepseek:deepseek-chat:passed"
+            ),
+        )
+        export = build_deepseek_validation_runtime_state_export(
+            cleared, now=_fixed_export_now()
+        )
+        assert export.transport_cleared is True
+        assert "deepseek_transport_not_cleared" not in export.beacon_blockers
+        assert export.ready_for_execution is False
+        assert export.human_gate_required is True
+        for marker in _DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS:
+            assert marker in export.no_authority_blockers
+            assert marker in export.prime_blockers
+            assert marker in export.beacon_blockers
+
+    def test_export_rejects_construction_with_autonomous_authority(self) -> None:
+        with pytest.raises(ValueError, match="autonomous-authority"):
+            DeepSeekValidationRuntimeStateExport(
+                export_id="x",
+                generated_at=_fixed_export_now(),
+                validation_level="level-0:metadata-only",
+                direct_dispatch_id="deepseek-chat",
+                variant_labels=("deepseek-v4-pro",),
+                transport_cleared=False,
+                blocked_authority_tags=(),
+                validation_evidence_ref="deepseek-validation:level-0:metadata-only",
+                direct_endpoint_evidence_ref=None,
+                external_review_evidence_ref=None,
+                autonomous_implementation_authorized=True,
+                review_clearing_authorized=False,
+                branch_movement_authorized=False,
+                live_coding_authority_authorized=False,
+                relay_bypass_authorized=False,
+                ready_for_execution=False,
+                human_gate_required=True,
+                no_authority_blockers=_DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS,
+                prime_action_type="pause_and_wait",
+                prime_confidence="high",
+                prime_risk_tier="safe",
+                prime_target_harness="Relay",
+                prime_target_lane="model_harness",
+                prime_target_project="Meridian",
+                prime_rationale="r",
+                prime_evidence=(),
+                prime_blockers=(),
+                beacon_harness_id="relay-model-deepseek",
+                beacon_advisory_type="x",
+                beacon_evidence=(),
+                beacon_blockers=(),
+            )
+
+    def test_export_rejects_construction_with_ready_for_execution(self) -> None:
+        with pytest.raises(ValueError, match="non-executable"):
+            DeepSeekValidationRuntimeStateExport(
+                export_id="x",
+                generated_at=_fixed_export_now(),
+                validation_level="level-0:metadata-only",
+                direct_dispatch_id="deepseek-chat",
+                variant_labels=("deepseek-v4-pro",),
+                transport_cleared=False,
+                blocked_authority_tags=(),
+                validation_evidence_ref="deepseek-validation:level-0:metadata-only",
+                direct_endpoint_evidence_ref=None,
+                external_review_evidence_ref=None,
+                autonomous_implementation_authorized=False,
+                review_clearing_authorized=False,
+                branch_movement_authorized=False,
+                live_coding_authority_authorized=False,
+                relay_bypass_authorized=False,
+                ready_for_execution=True,
+                human_gate_required=True,
+                no_authority_blockers=_DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS,
+                prime_action_type="pause_and_wait",
+                prime_confidence="high",
+                prime_risk_tier="safe",
+                prime_target_harness="Relay",
+                prime_target_lane="model_harness",
+                prime_target_project="Meridian",
+                prime_rationale="r",
+                prime_evidence=(),
+                prime_blockers=(),
+                beacon_harness_id="relay-model-deepseek",
+                beacon_advisory_type="x",
+                beacon_evidence=(),
+                beacon_blockers=(),
+            )
+
+    def test_export_rejects_construction_without_human_gate(self) -> None:
+        with pytest.raises(ValueError, match="human gate"):
+            DeepSeekValidationRuntimeStateExport(
+                export_id="x",
+                generated_at=_fixed_export_now(),
+                validation_level="level-0:metadata-only",
+                direct_dispatch_id="deepseek-chat",
+                variant_labels=("deepseek-v4-pro",),
+                transport_cleared=False,
+                blocked_authority_tags=(),
+                validation_evidence_ref="deepseek-validation:level-0:metadata-only",
+                direct_endpoint_evidence_ref=None,
+                external_review_evidence_ref=None,
+                autonomous_implementation_authorized=False,
+                review_clearing_authorized=False,
+                branch_movement_authorized=False,
+                live_coding_authority_authorized=False,
+                relay_bypass_authorized=False,
+                ready_for_execution=False,
+                human_gate_required=False,
+                no_authority_blockers=_DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS,
+                prime_action_type="pause_and_wait",
+                prime_confidence="high",
+                prime_risk_tier="safe",
+                prime_target_harness="Relay",
+                prime_target_lane="model_harness",
+                prime_target_project="Meridian",
+                prime_rationale="r",
+                prime_evidence=(),
+                prime_blockers=(),
+                beacon_harness_id="relay-model-deepseek",
+                beacon_advisory_type="x",
+                beacon_evidence=(),
+                beacon_blockers=(),
+            )
+
+    def test_export_rejects_non_deepseek_chat_dispatch_id(self) -> None:
+        with pytest.raises(ValueError, match="deepseek-chat"):
+            DeepSeekValidationRuntimeStateExport(
+                export_id="x",
+                generated_at=_fixed_export_now(),
+                validation_level="level-0:metadata-only",
+                direct_dispatch_id="claude-opus",
+                variant_labels=("claude-opus-4",),
+                transport_cleared=False,
+                blocked_authority_tags=(),
+                validation_evidence_ref="deepseek-validation:level-0:metadata-only",
+                direct_endpoint_evidence_ref=None,
+                external_review_evidence_ref=None,
+                autonomous_implementation_authorized=False,
+                review_clearing_authorized=False,
+                branch_movement_authorized=False,
+                live_coding_authority_authorized=False,
+                relay_bypass_authorized=False,
+                ready_for_execution=False,
+                human_gate_required=True,
+                no_authority_blockers=_DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS,
+                prime_action_type="pause_and_wait",
+                prime_confidence="high",
+                prime_risk_tier="safe",
+                prime_target_harness="Relay",
+                prime_target_lane="model_harness",
+                prime_target_project="Meridian",
+                prime_rationale="r",
+                prime_evidence=(),
+                prime_blockers=(),
+                beacon_harness_id="relay-model-deepseek",
+                beacon_advisory_type="x",
+                beacon_evidence=(),
+                beacon_blockers=(),
+            )
+
+    def test_export_rejects_variant_masquerading_as_dispatch_model(self) -> None:
+        with pytest.raises(ValueError, match="masquerade"):
+            DeepSeekValidationRuntimeStateExport(
+                export_id="x",
+                generated_at=_fixed_export_now(),
+                validation_level="level-0:metadata-only",
+                direct_dispatch_id="deepseek-chat",
+                variant_labels=("deepseek-chat",),
+                transport_cleared=False,
+                blocked_authority_tags=(),
+                validation_evidence_ref="deepseek-validation:level-0:metadata-only",
+                direct_endpoint_evidence_ref=None,
+                external_review_evidence_ref=None,
+                autonomous_implementation_authorized=False,
+                review_clearing_authorized=False,
+                branch_movement_authorized=False,
+                live_coding_authority_authorized=False,
+                relay_bypass_authorized=False,
+                ready_for_execution=False,
+                human_gate_required=True,
+                no_authority_blockers=_DEEPSEEK_EXPORT_NON_AUTHORITY_BLOCKERS,
+                prime_action_type="pause_and_wait",
+                prime_confidence="high",
+                prime_risk_tier="safe",
+                prime_target_harness="Relay",
+                prime_target_lane="model_harness",
+                prime_target_project="Meridian",
+                prime_rationale="r",
+                prime_evidence=(),
+                prime_blockers=(),
+                beacon_harness_id="relay-model-deepseek",
+                beacon_advisory_type="x",
+                beacon_evidence=(),
+                beacon_blockers=(),
+            )
+
+    def test_export_rejects_missing_non_authority_blocker(self) -> None:
+        with pytest.raises(ValueError, match="non-authority blocker"):
+            DeepSeekValidationRuntimeStateExport(
+                export_id="x",
+                generated_at=_fixed_export_now(),
+                validation_level="level-0:metadata-only",
+                direct_dispatch_id="deepseek-chat",
+                variant_labels=("deepseek-v4-pro",),
+                transport_cleared=False,
+                blocked_authority_tags=(),
+                validation_evidence_ref="deepseek-validation:level-0:metadata-only",
+                direct_endpoint_evidence_ref=None,
+                external_review_evidence_ref=None,
+                autonomous_implementation_authorized=False,
+                review_clearing_authorized=False,
+                branch_movement_authorized=False,
+                live_coding_authority_authorized=False,
+                relay_bypass_authorized=False,
+                ready_for_execution=False,
+                human_gate_required=True,
+                no_authority_blockers=("deepseek_advisory_only_no_autonomous_implementation",),
+                prime_action_type="pause_and_wait",
+                prime_confidence="high",
+                prime_risk_tier="safe",
+                prime_target_harness="Relay",
+                prime_target_lane="model_harness",
+                prime_target_project="Meridian",
+                prime_rationale="r",
+                prime_evidence=(),
+                prime_blockers=(),
+                beacon_harness_id="relay-model-deepseek",
+                beacon_advisory_type="x",
+                beacon_evidence=(),
+                beacon_blockers=(),
+            )
