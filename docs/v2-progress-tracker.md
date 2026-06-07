@@ -19,9 +19,9 @@
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Compass Harness | 4 | 0 | 1 | 0 | 5 | 80% clear + 20% baseline |
 | Session Lifecycle Harness | 6 | 0 | 1 | 0 | 7 | 86% clear + 14% baseline |
-| Bifrost Harness | 6 | 0 | 2 | 1 | 9 | 67% clear + 22% baseline |
+| Bifrost Harness | 7 | 0 | 2 | 0 | 9 | 78% clear + 22% baseline |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **34** | **0** | **9** | **1** | **44** | **77% Clear + 20% Baseline** |
+| **Total V2** | **35** | **0** | **9** | **0** | **44** | **80% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -85,6 +85,7 @@
 - [x] **Bifrost + Balance Button:** backend-bound provider balance proof covers Claude, OpenAI, DeepSeek, aggregator, and local adapters with provider health, route kind, remaining credit labels, token usage, estimated spend, and cost-pressure state. OpenAI is supplied through `sample_backend_bound_cockpit_view_model().provider_balance_summary`, repaired by Opus worker `chat_1780849813091`, review-cleared by Codex Review A `codex_1780850388656` and Review B `codex_1780850388968`, with `tests/test_bifrost_cockpit.py` passing at 383 tests.
 - [x] **Bifrost + Prompt Payload Visibility:** reviewed no-op backend/view-model proof shows existing `sample_backend_bound_cockpit_view_model()` rendering already carries Relay prompt payload size, budget pressure, growth/flat state, Q-mode prompt-drag, evidence refs, provider/model/route continuity, dispatch adjacency, and queue-poll adjacency without raw prompt/provider leakage or execution controls. Verified by Opus worker `chat_1780851013499`, repaired after Codex findings, review-cleared by Codex Review A `codex_1780851814897` and Review B `codex_1780851815171`, with `tests/test_bifrost_cockpit.py` passing at 384 tests.
 - [x] **Bifrost + Voice I/O Surface:** reviewed no-op backend/view-model proof shows existing `VoiceIOState` and `render_cockpit_html()` already render microphone input, spoken Prime output, wake/boot audio status, mute/listening/thinking/speaking states, display-safe status/intent refs, and non-executable voice controls through the static cockpit path. Verified by Opus worker `chat_1780852385348`, repaired after Codex Review B required per-control disabled-state assertions, review-cleared by Codex Review A `019ea31a-5a0b-7c13-9301-fd9bada9ce0d` and Review B `019ea31a-75f7-76b2-8d0a-eed4f8791a63`, with `tests/test_bifrost_cockpit.py` passing at 385 tests.
+- [x] **Bifrost + Electron Cockpit:** reviewed authority proof locks the Electron app as the Meridian UI, root `index.html` as renderer internals loaded by Electron rather than a separate UI target, `bifrost/preview.html` as generated backend/view-model proof output only, and `npm start` / Electron startup as non-substituting/non-regenerating preview output. Verified by Opus worker `chat_1780853361884`, repaired after Codex Review A required tighter doc-content guards, review-cleared by Codex Review A `019ea326-9d07-7cd2-94d2-c153edde8906` and Review B `019ea326-b7ab-7851-a5c3-b6cdeda703c7`, with `tests/test_bifrost_preview.py tests/test_filemap.py tests/test_bifrost_cockpit.py` passing at 465 tests.
 
 ## Built But Awaiting Review
 
@@ -147,7 +148,7 @@
 
 ### Bifrost Harness
 
-- [ ] **Bifrost + Electron Cockpit:** keep the primary cockpit as the Meridian Electron app. Root `index.html` is renderer internals loaded by the Electron app, not the UI identity and not a separate UI target. Generated preview HTML remains deterministic backend/view-model proof output only.
+- None currently. All V2 Bifrost Needs Build items are review-promoted on main; future Bifrost work should be V3 horizon, runtime wiring, or operations-gated UI integration rather than V2 backend/build closure.
 
 ## Review Gates for V2
 
