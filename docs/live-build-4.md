@@ -8,6 +8,55 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now / Opus Task Assigned
+
+Timestamp: 2026-06-07T12:42:00-06:00.
+
+Goal: start the V3 intake gate now that V2 Needs Build is closed by resolving
+the partial/gap items in `docs/agentic-ai-framework-checklist.md` into owned
+roadmap outcomes.
+
+Worker requirement: implementation/planning candidate must run in a Polaris
+Build 4 Opus worker (`launch-chat`, tier `power`, `claude-opus-4-7`). Codex
+sessions may review only after a real worker candidate exists.
+
+Task: inspect `docs/v3-parking-lot.md` and
+`docs/agentic-ai-framework-checklist.md`, then produce the smallest useful V3
+intake artifact that resolves every `[~]` and `[ ]` checklist item into one of
+the four required outcomes:
+
+- Promote to V3 as a Prime-owned or harness-owned roadmap item.
+- Move earlier if the item is actually required for V2 autonomy.
+- Park for later as V4+ or public/product horizon.
+- Reject as intentionally out of scope for Meridian.
+
+Every resolved item must name an owner: Prime or a named harness. Do not write
+V3 implementation specs yet. Do not change runtime code. Do not edit
+`index.html`, Electron/Bifrost UI, FileMap, Relay/Model runtime, Session
+Lifecycle runtime, Compass runtime, or generated artifacts. If a new docs file
+is useful, keep it narrow and deterministic.
+
+Allowed likely files:
+
+- `docs/agentic-ai-framework-checklist.md`
+- `docs/v3-parking-lot.md`
+- a new `docs/v3-intake-resolution.md` if that is cleaner than expanding the
+  checklist inline
+- this file for the worker completion marker
+
+Do not edit `docs/v2-progress-tracker.md` unless the worker finds a concrete
+contradiction in the V2 closure state. Start from:
+
+- `rg -n "\[~\]|\[ \]|V3 Intake Rule|V3 starts|Promote to V3|Move earlier|Park for later|Reject" docs/agentic-ai-framework-checklist.md docs/v3-parking-lot.md`
+- `git status --short --branch`
+
+Required proof before Ready marker:
+
+- deterministic item count showing every `[~]` and `[ ]` item was resolved
+- `git diff --check`
+- concise completion marker here with files changed, proof, and any remaining
+  risk.
+
 ## Coordinator Override - Completed / Ready For Codex Review
 
 Goal: close three Codex review raw-context follow-up gaps on the Compass project-identity, project-difference, and cross-project handoff runtime — every gap reachable on `origin/main` before the repair.
