@@ -5,8 +5,8 @@
 **Objective:** Redesign the Meridian Electron app toward the last approved HUD
 interface direction: the dark multi-panel Meridian command grid Scott provided
 in chat. This is not a spaceship cockpit build. The Electron app is the Meridian
-UI; root `index.html` is its renderer source, and generated Bifrost preview HTML
-is proof output only.
+UI; root `index.html` is still part of that app today as its renderer source,
+and generated Bifrost preview HTML is proof output only.
 
 ## Hard Correction
 

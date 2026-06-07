@@ -280,11 +280,12 @@ def test_ui_authority_doc_calls_index_html_renderer_internals(ui_authority_sourc
     assert "`index.html`" in ui_authority_source
     assert "not the product identity" in ui_authority_source
     # Tightened anchors: Electron must load root index.html, and index.html
-    # must be locked as not a separate UI target.
+    # must be locked as current renderer source rather than a separate UI target.
     assert "Electron loads" in ui_authority_source
-    assert "Root `index.html` is not the Meridian UI" in ui_authority_source
-    assert "Do not write that\n`index.html` is the Meridian UI" in ui_authority_source
-    assert "loads root `index.html` as renderer internals" in ui_authority_source
+    assert "Root `index.html` is still part of that app today" in ui_authority_source
+    assert "`index.html` is one internal file the app\ncurrently uses to render it" in ui_authority_source
+    assert "do not imply that `index.html` is unrelated\nto the Electron app" in ui_authority_source
+    assert "loads root `index.html` as its renderer source" in ui_authority_source
 
 
 def test_ui_authority_doc_describes_bifrost_preview_as_generated_proof(ui_authority_source):
