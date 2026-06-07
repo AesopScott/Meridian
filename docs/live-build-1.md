@@ -73,6 +73,219 @@ Required proof before Ready marker:
 Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
+Completion:
+- Status: Ready for Codex Review (Codex Review A/B follow-up). Repairs
+  the four findings from the prior review pass on top of the same three
+  allowed files in this worktree.
+- Completed: 2026-06-07 (Polaris Build 1 Opus worker, `claude-opus-4-7`,
+  detached worktree
+  `C:\Users\scott\AppData\Local\Temp\polaris-wt\build1-workflow-dispatch-20260607-1620`;
+  no commits, no push, no branch/worktree movement, no write to shared main).
+- Files changed: `meridian_core/workflow_dispatch.py`,
+  `tests/test_workflow_dispatch.py`, `docs/live-build-1.md` (this
+  Completion block in the active section only).
+- Tests run after the four repairs: `python -m pytest
+  tests/test_workflow_dispatch.py -q` -> 161 passed in 0.20s (105
+  baseline + 56 new repair / regression tests across the four findings);
+  `git diff --check -- meridian_core/workflow_dispatch.py
+  tests/test_workflow_dispatch.py docs/live-build-1.md` -> clean (no
+  whitespace errors; LF/CRLF notices are platform line-ending warnings,
+  not failures); `git status --short --branch` -> `## HEAD (no branch)`
+  with exactly the three allowed files (` M docs/live-build-1.md`,
+  ` A meridian_core/workflow_dispatch.py`,
+  ` A tests/test_workflow_dispatch.py`). Path-scope confined to the
+  three allowed files; no edits to Workflow contract docs, FileMap
+  surfaces, Provider Balance files, Goal Runtime files,
+  Bifrost/Electron/UI files, generated artifacts, package files, other
+  live-build queues, review logs, or runtime code outside this module.
+- HIGH/P1 promotion policy gate gap — concrete before/after:
+  - Before: `promote_workflow_result` returned `accepted=True` for any
+    tier-2+ result with a non-empty `proof_trail`, ignoring
+    `gate_context.policy_decision`. Tier-3/tier-4 returned
+    `accepted=True` without any explicit caller-supplied review /
+    human-approval signal — the `requires_review_console` /
+    `requires_human_gate` fields were advisory only and could not block
+    durable promotion.
+  - After: `promote_workflow_result(work_order, result, *,
+    review_console_pass=False, human_approval=False)` enforces a
+    layered gate ladder: tier-2+ requires non-empty `proof_trail` AND
+    `work_order.input.gate_context` present AND
+    `gate_context.policy_decision == "ALLOW"` (`"WARN"` / `"DENY"` /
+    missing gate all block); tier-3+ additionally requires the
+    caller-supplied `review_console_pass=True`; tier-4 additionally
+    requires both the caller-supplied `human_approval=True` AND
+    `result.requires_human_gate=True` on the result itself. Defaulting
+    `review_console_pass` and `human_approval` to `False` blocks
+    tier-3/tier-4 durable promotion by construction — callers that have
+    actually gathered those signals must pass them in explicitly.
+    `WorkflowPromotionDecision` now exposes `policy_decision_required`
+    alongside `requires_review_console` / `requires_human_gate` so the
+    caller can see what preconditions the slice expected. Errors still
+    never promote. Non-bool caller signals raise
+    `WorkflowValidationError`.
+  - Tests proving the gate: `test_tier2_without_gate_context_rejected`,
+    `test_tier2_with_allow_policy_accepted`,
+    `test_tier2_with_warn_policy_rejected`,
+    `test_tier2_with_deny_policy_rejected`,
+    `test_tier3_default_signals_rejected`,
+    `test_tier3_with_review_console_pass_accepted`,
+    `test_tier4_default_signals_rejected`,
+    `test_tier4_without_result_human_gate_rejected`,
+    `test_tier4_without_caller_human_approval_rejected`,
+    `test_tier4_with_all_signals_accepted`,
+    `test_non_bool_signal_rejected`.
+  - Test rename mapping (the three baseline tests below were
+    REMOVED in this repair because their pre-repair expectations were
+    structurally incompatible with the new gate ladder; do not look
+    for them in the current file):
+    - old `test_tier3_requires_review_console` (expected
+      `accepted=True` for tier-3 without any caller signal) →
+      replaced by `test_tier3_default_signals_rejected` (asserts
+      `accepted=False` when `review_console_pass` defaults to
+      `False`) + `test_tier3_with_review_console_pass_accepted`
+      (positive case with `review_console_pass=True`).
+    - old `test_tier4_without_human_gate_rejected` (saw the new
+      review-console failure first under the new ladder) →
+      replaced by `test_tier4_default_signals_rejected` (both
+      signals default-False) +
+      `test_tier4_without_result_human_gate_rejected` (passes
+      `review_console_pass=True` and `human_approval=True` so the
+      *result*-flag check is what surfaces) +
+      `test_tier4_without_caller_human_approval_rejected`
+      (passes `review_console_pass=True` only so the
+      `human_approval` check is what surfaces).
+    - old `test_tier4_with_human_gate_accepted` (expected
+      `accepted=True` for tier-4 without explicit caller
+      approvals) → replaced by `test_tier4_with_all_signals_accepted`
+      (positive case with both `review_console_pass=True` and
+      `human_approval=True` AND `result.requires_human_gate=True`).
+- MEDIUM/P2 path-scope prefix-boundary bug — concrete before/after:
+  - Before: `is_path_in_scope` used raw `path == prefix or
+    path.startswith(prefix)`, so `allowed_paths=("src/atlas",)` would
+    accept `src/atlas2/file.py` and `src/atlas-secret/file.py` —
+    silently widening scope into sibling directories with a shared name
+    stem. The same bug affected `forbidden_paths`.
+  - After: a new `_path_matches_prefix(path, prefix)` helper enforces
+    segment-aware matching — exact match is allowed, child paths
+    require a slash boundary, and prefixes that already end with `"/"`
+    keep their slash boundary built in. Both `allowed_paths` and
+    `forbidden_paths` use the same helper, so the forbidden-wins rule
+    is preserved with the new semantics. `WorkflowInputPacket`'s
+    `file_path` input validation inherits the fix.
+  - Tests proving the fix: `test_sibling_numeric_prefix_escape_rejected`,
+    `test_sibling_dash_prefix_escape_rejected`,
+    `test_exact_match_allowed`,
+    `test_child_under_unterminated_prefix_allowed`,
+    `test_forbidden_segment_aware_blocks_real_child`,
+    `test_forbidden_segment_aware_does_not_block_sibling`,
+    plus packet-level
+    `test_file_path_input_sibling_prefix_escape_rejected`,
+    `test_file_path_input_dash_sibling_escape_rejected`,
+    `test_file_path_input_exact_match_allowed`,
+    `test_file_path_input_child_under_unterminated_prefix_allowed`.
+    The existing `test_file_path_input_inside_forbidden_rejected` was
+    updated to use a directory-level forbidden prefix
+    (`forbidden_paths=("src/secrets",)`,
+    `ref="src/secrets/key.pem"`) so it exercises segment-aware
+    semantics rather than the old `startswith` substring behavior.
+- P2 UTC timestamp validation gap — concrete before/after:
+  - Before: `WorkflowWorkOrder.created_at` and
+    `WorkflowHeartbeat.emitted_at` accepted any "safe" string,
+    including placeholder values like `"t"`, `"now"`, or unbounded free
+    text. Naive local-time strings and `+00:00` offsets passed too.
+  - After: a new `_is_valid_utc_timestamp(value)` helper enforces a
+    deterministic ISO UTC shape — `YYYY-MM-DDTHH:MM:SSZ` (length 20)
+    or `YYYY-MM-DDTHH:MM:SS.fffZ`...`YYYY-MM-DDTHH:MM:SS.ffffffZ`
+    (1–6 fractional digits, length 22–27). Strict validation of year
+    (2000–2199), month (1–12), day (1–31), hour (0–23), minute (0–59),
+    second (0–60). Missing `Z`, lowercase `z`, `+00:00` offset, naive
+    local-time strings, and free text are all rejected. Pure-Python,
+    dependency-free (no `datetime.fromisoformat` reliance).
+  - Tests proving the fix: parametrized
+    `test_invalid_created_at_rejected` (10 negatives: `"t"`, `"now"`,
+    `"2026-06-07 16:20:00"`, missing `Z`, lowercase `z`, `+00:00`
+    offset, 2-digit year, bad month, day 0, hour 24), parametrized
+    `test_valid_created_at_accepted` (3 positives including fractional
+    seconds), and the mirror parametrized
+    `test_invalid_emitted_at_rejected` / `test_valid_emitted_at_accepted`
+    suite for `WorkflowHeartbeat`. All existing placeholder timestamps
+    (`emitted_at="t"`) in heartbeat tests were upgraded to valid ISO Z
+    timestamps so they exercise what the test name claims rather than
+    failing on the timestamp itself.
+- MEDIUM empty-tuple resteer override gap (Review A) — concrete
+  before/after:
+  - Before: `apply_resteer` used truthiness for tuple-override fields
+    (`changes.allowed_tools if changes.allowed_tools else
+    base_packet.allowed_tools`). Because the empty tuple `()` is
+    falsy, callers could not intentionally apply `allowed_tools=()`,
+    `allowed_paths=()`, or `forbidden_paths=()` — those overrides
+    silently fell through to the original packet's values.
+  - After: `WorkflowResteerChanges.allowed_paths` /
+    `forbidden_paths` / `allowed_tools` are typed as
+    `Optional[tuple[str, ...]]` with default `None`. Tri-state
+    semantics: `None` means "no change" (pass through the original
+    packet's value); a tuple (including the empty tuple) means
+    "explicit override" (replace the original value). `__post_init__`
+    skips validation when the field is `None` and validates the tuple
+    normally when set. `apply_resteer` uses `is None` checks to drive
+    the override decision. Frozen-dataclass immutability and existing
+    validation are preserved.
+  - Tests proving the fix:
+    `test_resteer_empty_allowed_tools_forces_summarize_only`,
+    `test_resteer_empty_forbidden_paths_clears_blocklist`,
+    `test_resteer_empty_allowed_paths_clears_scope`,
+    `test_resteer_none_tuple_fields_passthrough`,
+    `test_resteer_narrow_allowed_paths_to_subdir`,
+    `test_resteer_changes_none_default_for_tuple_fields`.
+- Slice shape (unchanged from prior submission except where called
+  out above): 11 frozen dataclasses, 3 closed enums with the contract's
+  exact vocabulary, `dispatch_work_order` (catches handler exceptions
+  -> `INTERNAL_ERROR`, catches `WorkflowValidationError` ->
+  `INPUT_INVALID`, rejects tier-3+ orders missing `gate_context` ->
+  `GATE_REQUIRED` *before* handler invocation, rejects tier-2+ results
+  with empty `proof_trail` -> `PROOF_UNAVAILABLE`, validates
+  `work_order_id` / `harness` / `result_shape` matches, wraps a
+  returned `WorkflowResteerRequest` as
+  `WorkflowErrorSummary(RESTEER_REQUESTED, resteer_request=...)`,
+  return type is exactly `WorkflowResultSummary` or
+  `WorkflowErrorSummary` — heartbeat history is never a field on
+  either, asserted structurally), input/path/tool validation helpers
+  (now segment-aware), `promote_workflow_result` (now policy-gated as
+  above), `apply_resteer` (now tri-state-aware as above), prompt-drag
+  guards (unchanged).
+- Pure/local (unchanged): no live workflow execution, no process /
+  session control, no model calls, no network, no filesystem mutation
+  beyond the three allowed files, no branch / worktree movement, no
+  Echo / FileMap durable writes, no UI / Electron / Bifrost behavior,
+  no generated artifacts, no provider / account calls, no FileMap
+  registration. `meridian_core/workflow_dispatch.py` still imports only
+  `dataclasses`, `enum`, and `typing`.
+- Remaining risk: (a) per-harness workflow handlers (Echo, Atlas,
+  Aegis, Relay, Bifrost, Beacon, Session Lifecycle) and their typed
+  output records remain out of scope here and belong to their own
+  lanes, per contract §"First Runtime Tests"; (b) `WorkflowPromptBudget`
+  and `WorkflowGateContext` are still local value carriers — real
+  `PromptBudgetPlan` / `CognitionPolicy` integration is out of scope
+  for the V2 first wave (the new policy gate enforces the string
+  vocabulary `"ALLOW"` / `"WARN"` / `"DENY"` defined in this slice);
+  (c) hard-timeout / live-process control remains Session Lifecycle's
+  responsibility — this slice represents `TIMEOUT` as a
+  handler-returned error summary and verifies the typed pass-through
+  but does not start any timer; (d) the dispatch helper does not
+  enforce heartbeat-sequence monotonicity on the handler itself;
+  tests verify monotonicity via the sink and structural absence of
+  any heartbeat field on the return; (e) the prompt-drag forbidden-
+  field list is conservative for v1 and may widen as new harness
+  output shapes appear; (f) the UTC timestamp validator does not
+  reject e.g. 31 February — month/day combinations are bounded but not
+  calendar-checked, because that would either require `datetime` (the
+  module would no longer be import-free of stdlib date handling
+  beyond `dataclasses`/`enum`/`typing`) or a hand-rolled calendar
+  table; future hardening can add this if needed.
+- Next Candidate: fresh Codex Review of the three allowed files in
+  this worktree against Review A/B's prior findings before any
+  coordinator promotion to `main`.
+
 ## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Timestamp: 2026-06-07T14:52:00-06:00.
