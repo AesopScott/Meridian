@@ -1,12 +1,12 @@
 # Live Build 5 Queue
 
-## Completion Marker - Ready For Main Routing / Codex Review
+## Completion Marker - Completed / Promoted To Main
 
 Timestamp: 2026-06-07T07:12:48-06:00.
 
 Goal: implemented the next Bifrost V2 cockpit extension as a deterministic browser-first backend/view-model rendering slice for already-reviewed backend state.
 
-Implementation commit on clean promotion branch: `9a14e73eb` (`feat(bifrost): add reviewed backend evidence cockpit slice`). Original Build 5 worker commit before clean cherry-pick: `65ff7445a`.
+Implementation commit on clean promotion branch: `9a14e73eb` (`feat(bifrost): add reviewed backend evidence cockpit slice`). Repair commit: `6400e80bd` (`fix(bifrost): redact reviewed backend raw-context prefixes`). Main promotion merge: `151de3b40`. Original Build 5 worker commit before clean cherry-pick: `65ff7445a`.
 
 Files changed:
 - `bifrost/cockpit.py`
@@ -21,6 +21,7 @@ Concrete evidence:
 - `git diff --check`: clean; Git emitted only normal CRLF working-copy warnings.
 - Path scope before documentation marker: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
 - Guardrails covered by tests: unsafe marker redaction, non-Mapping item skips, deterministic summary projection, sample rendering, backend binding preservation, and no execution controls in the new section (`<button`, `<form`, recovery/session action hooks, merge/rebase/cherry-pick/stash-pop labels).
+- Codex Review A initially found raw-context prefix leakage for `raw_transcript`, `transcript:`, `conversation:`, `provider_response`, `free_form_context`, and `raw_context`; repair `6400e80bd` expanded the redactor and regression coverage. Codex Review A and B cleared the repaired clean promotion candidate.
 
 Constraints honored: no live provider calls, no account probing, no raw prompt/transcript/provider-response text, no credentials/secrets, no FileMap edits, no Electron/index.html changes, no session execution controls, no process inspection, no data movement across worktrees, no shared-main writes, no main push.
 

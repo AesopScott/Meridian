@@ -19,9 +19,9 @@
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Compass Harness | 4 | 0 | 1 | 0 | 5 | 80% clear + 20% baseline |
 | Session Lifecycle Harness | 6 | 0 | 1 | 0 | 7 | 86% clear + 14% baseline |
-| Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
+| Bifrost Harness | 2 | 0 | 2 | 5 | 9 | 22% clear + 22% baseline |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **29** | **0** | **9** | **6** | **44** | **66% Clear + 20% Baseline** |
+| **Total V2** | **30** | **0** | **9** | **5** | **44** | **68% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -80,6 +80,7 @@
 ### Bifrost Harness
 
 - [x] **Bifrost + FileMap Integration:** active Bifrost V2 cockpit direction docs (`docs/bifrost-v2-cockpit-extensions.md`, `docs/jarvis-ui-source-assessment.md`) registered in runtime FileMap, `docs/FileMap.md`, and required-path coverage - built in `d496472`; review cleared by Reviews B on 2026-05-31.
+- [x] **Bifrost + Reviewed Backend Evidence / JARVIS-Source V2 Extension Slice:** `ReviewedBackendEvidenceView`, `reviewed_backend_evidence_view_from_summary()`, backend-bound sample wiring, and inert cockpit HTML/CSS rendering display Prime next action, Echo memory-hit summary, Atlas retrieval-hit summary, Session Lifecycle preview, Aegis policy result, Relay/model metadata, evidence refs, and warnings as escaped static markup only. Built in `9a14e73eb`, repaired in `6400e80bd`, review-cleared by Codex Review A/B, and promoted on main in `151de3b40` with `tests/test_bifrost_cockpit.py` passing at 383 tests.
 
 ## Built But Awaiting Review
 
@@ -142,7 +143,6 @@
 
 ### Bifrost Harness
 
-- [ ] **Bifrost + JARVIS-Source V2 Extensions:** source-first cockpit adaptation using existing JARVIS/HUD repo patterns, then view-model placeholders for Prime next action, Echo memory hits, Atlas retrieval hits, session lifecycle preview, Aegis policy result - module: `bifrost/cockpit.py` (extends v1 snapshot); tests: `tests/test_bifrost_cockpit.py`; source note: `docs/jarvis-ui-source-assessment.md`; contract: `docs/bifrost-v2-cockpit-extensions.md`.
 - [ ] **Bifrost + Browser-First Cockpit:** keep the primary cockpit as deterministic HTML/CSS preview; Electron remains optional packaging unless desktop-only capability is needed.
 - [ ] **Bifrost + Balance Button:** Polaris-style provider balance and usage surface for Claude, OpenAI, DeepSeek, and aggregator/local adapters; must show provider health, remaining credit where available, token usage, estimated spend, and cost pressure warnings for Prime routing.
 - [ ] **Bifrost + Prompt Payload Visibility:** surface Relay prompt payload size, budget pressure, and growth/flat status next to model dispatch and queue-poll events so Scott and Prime can see prompt drag in real time.
