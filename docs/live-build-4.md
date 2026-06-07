@@ -24,23 +24,27 @@ Task:
 - Surface ambiguous or incomplete project identity as a Compass question/blocker rather than silently selecting hidden context.
 - Preserve pure backend behavior: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main write, no raw cross-project transcript injection, and no Polaris dependency.
 
-Completion: completed 2026-06-06 (Opus repair after invalid Haiku marker).
+Completion: completed 2026-06-06; Codex Review B repair applied 2026-06-06.
 
 Ready for Codex Review:
 
 - Implementation commit: `a5e2bd048` (Add Compass project identity runtime).
-- Files changed in implementation commit: `meridian_core/compass.py`, `tests/test_compass.py`.
-- Tests run: `python -m pytest tests/test_compass.py -q` -> 130 passed (33 new identity tests on top of 97 prior).
+- Codex Review B repair commit: `0a92221a` (Repair Compass project identity bearing normalization + bounded evidence).
+- Files changed across both commits: `meridian_core/compass.py`, `tests/test_compass.py`.
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **152 passed** (97 prior + 33 from implementation commit + 22 from repair commit).
 - `git diff --check`: clean.
-- Path-scope check: implementation diff limited to `meridian_core/compass.py` and `tests/test_compass.py`; this queue update is the only `docs/live-build-4.md` change.
-- Concrete evidence the identity runtime proves the required invariants:
+- Path-scope check: implementation + repair diffs limited to `meridian_core/compass.py` and `tests/test_compass.py`; the only `docs/live-build-4.md` changes are this queue marker.
+- Codex Review B findings addressed:
+  - Finding 1 (bearing normalization): `_normalize_bearing_text()` lowercases, collapses internal whitespace, and trims leading/trailing punctuation before comparison. `TestProjectIdentityBearingNormalization.test_normalized_bearing_collisions_return_ambiguous` covers 6 parametrized variants of the same bearing (lowercase, title-case, leading-whitespace + exclamation, doubled internal whitespace, trailing ellipsis, full caps) all returning `AMBIGUOUS` with `project_identity_collapse_risk`. `test_distinct_bearing_after_normalization_stays_defined` proves genuinely different bearings still distinguish.
+  - Finding 2 (richer bounded identity evidence): `ProjectIdentityNeighbor` and `ProjectIdentityCandidate` now carry `title`, `outcome`, `context`, `artifacts`, `objectives`, `tasks`, and `proof_trail`. `_bounded_identity_distinguishes()` compares only fields populated on both sides; text fields use the same normalization, tuples compare as order-insensitive sets. `project_identity_candidate_from_definition()` forwards the bounded body of work from `ProjectDefinition`. `TestProjectIdentityBoundedDistinction` covers: bearing collisions with distinct `title`/`outcome`/`context`/`artifacts`/`objectives`/`tasks`/`proof_trail` each stay `DEFINED`; all-bounded-fields-matching truly collapses; bounded tuple comparison is order-insensitive; neighbor without bounded fields falls back to bearing-only collapse; one-sided bounded fields cannot distinguish; two-sided distinguishing field overrides one-sided fields; richer-field `to_dict()` matches the updated `*_dict_keys` shape; `candidate_from_definition` forwards bounded fields.
+- Concrete evidence the identity runtime continues to prove the required invariants:
   - `ProjectDefinition`, `ProjectRelationshipRefs`, and `define_project()` continue to bound a project by `outcome`, `context`, `artifacts`, `objectives`, `tasks`, `proof_trail`, and `relationship_refs` (repo/venture/session).
-  - New `evaluate_project_identity()` accepts a `ProjectIdentityCandidate` plus `ProjectIdentityNeighbor` profiles and returns a `ProjectIdentityEvaluation` whose decision is `DEFINED`, `AMBIGUOUS`, or `BLOCKED`. Result `to_dict()` always carries `execution_authorized=False`.
-  - Identity does NOT collapse on shared refs: `test_shared_repo_with_distinct_bearing_stays_defined`, `test_shared_venture_with_distinct_bearing_stays_defined`, and `test_shared_session_with_distinct_bearing_stays_defined` each return `DEFINED` with the shared ref surfaced under `shared_repo_refs` / `shared_venture_refs` / `shared_session_refs` and the neighbor recorded in `distinguishing_neighbors`.
-  - Identity collapse risk is surfaced as a Compass question rather than silently merging: `test_shared_refs_with_same_bearing_collapse_returns_compass_question` and `test_same_project_id_neighbor_collapses` return `AMBIGUOUS` with `collapsing_neighbors` populated, blocker `project_identity_collapse_risk`, and a Compass question naming the collapsing neighbors.
-  - Incomplete identity is blocked rather than silently selecting hidden context: `test_missing_project_id_is_blocked`, `test_missing_title_is_blocked`, `test_missing_outcome_is_blocked`, `test_missing_mission_bearing_is_blocked`, `test_missing_repo_refs_is_blocked`, `test_missing_venture_refs_is_blocked`, `test_missing_evidence_refs_is_blocked`, and `test_raw_context_evidence_ref_is_blocked` each return `BLOCKED` with a Compass question.
-  - Serialization is stable and review-only: `test_identity_result_serializes_stably`, `test_identity_result_is_json_serializable`, `test_identity_result_is_deterministic`, `test_identity_runtime_does_not_emit_handoff_or_scope_fields`, `test_identity_runtime_does_not_emit_raw_context_keys`, and `test_execution_is_never_authorized`.
-- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no raw cross-project transcript injection, no Polaris dependency.
+  - `evaluate_project_identity()` accepts a `ProjectIdentityCandidate` plus `ProjectIdentityNeighbor` profiles and returns a `ProjectIdentityEvaluation` whose decision is `DEFINED`, `AMBIGUOUS`, or `BLOCKED`. `to_dict()` always carries `execution_authorized=False` across every decision branch.
+  - Identity does NOT collapse on shared refs: `test_shared_repo_with_distinct_bearing_stays_defined`, `test_shared_venture_with_distinct_bearing_stays_defined`, and `test_shared_session_with_distinct_bearing_stays_defined`.
+  - Identity collapse risk is surfaced as a Compass question rather than silently merging: `test_shared_refs_with_same_bearing_collapse_returns_compass_question`, `test_same_project_id_neighbor_collapses`, and the repair `test_all_bounded_fields_matching_truly_collapses`.
+  - Incomplete identity is blocked rather than silently selecting hidden context: `test_missing_{project_id,title,outcome,mission_bearing,repo_refs,venture_refs,evidence_refs}_is_blocked` and `test_raw_context_evidence_ref_is_blocked`.
+  - Serialization remains stable and review-only: `test_identity_result_serializes_stably`, `test_identity_result_is_json_serializable`, `test_identity_result_is_deterministic`, `test_identity_runtime_does_not_emit_handoff_or_scope_fields`, `test_identity_runtime_does_not_emit_raw_context_keys`, and `test_execution_is_never_authorized`.
+- Pure backend behavior preserved across the repair: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no raw cross-project transcript injection, no Polaris dependency.
 - Next Candidate: Compass bounds/scope runtime after project definition review clears.
 
 ## Coordinator Override - Completed / Ready For Codex Review
