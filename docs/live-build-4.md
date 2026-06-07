@@ -10,6 +10,44 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair Codex Review B finding on Compass project-identity blocked path — raw-context evidence_refs were detected and blocked but not redacted in serialization.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (pushed to origin at `5aa4e4b30` on 2026-06-06).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Task:
+- Repair `evaluate_project_identity()` raw-context BLOCKED path so `evidence_refs` are redacted with the same `_redact_raw_context_refs` pattern used by scope (cd20be9c3) and difference (df8120b49) layers before serialization.
+- Preserve safe evidence refs, existing blockers, status, and `execution_authorized=False` behavior.
+- Add regression tests proving raw evidence refs are blocked AND redacted in `ProjectIdentityEvaluation.to_dict()`, while safe refs pass.
+
+Completion: 2026-06-06 (Opus build lane).
+
+Ready for Codex Review:
+
+- Repair commit: `808297315` (Repair Compass identity-layer raw-context evidence_refs leak (Codex Review B)).
+- Branch marker commit: `5aa4e4b30` (Mark Compass identity-layer raw-context redaction repair ready for Codex review).
+- Branch HEAD pushed: `origin/codex/build-4-compass-project-definition-20260606` at `5aa4e4b30` (2026-06-06).
+- Files changed: `meridian_core/compass.py` (1 line: route `candidate.evidence_refs` through `_redact_raw_context_refs` when constructing the BLOCKED `ProjectIdentityEvaluation`), `tests/test_compass.py` (+134 lines: new `TestProjectIdentityRawContextRedaction` class with 15 cases), `docs/live-build-4.md` (branch marker).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **263 passed** (15 new identity-redaction tests on top of 248 prior).
+- `git diff --check`: clean.
+- Reproducer (before fix): `evaluate_project_identity(_identity_candidate(evidence_refs=("raw_prompt:secret prompt body",))).to_dict()["evidence_refs"]` returned `("raw_prompt:secret prompt body",)` — the raw payload appeared verbatim in JSON output. The existing `test_raw_context_evidence_ref_is_blocked` only checked blocker presence, not redaction, so it passed under the leaky implementation.
+- After fix: same call returns `("<redacted_raw_context>",)` and `json.dumps` no longer contains `secret prompt body`.
+- Concrete evidence each required invariant is enforced:
+  - Raw payload absent from serialization: 9 parametrized prefixes (`raw_prompt`, `raw_transcript`, `free_form_context`, `transcript`, `conversation`, `provider_response`, `raw_context`, `prompt`, embedded-newline) in `test_raw_context_evidence_ref_redacted_in_blocked_serialization` all assert raw text absent from both `result.evidence_refs` and `json.dumps(result.to_dict())` while `<redacted_raw_context>` appears in both.
+  - Mixed safe/raw evidence preserves safe refs in original order and redacts raw refs in place: `test_mixed_safe_and_raw_evidence_refs_partially_redacted`.
+  - Redaction does NOT over-trigger on other BLOCKED paths: `test_safe_evidence_refs_pass_through_unchanged_on_other_blocker_paths` (missing_project_id path with safe evidence refs preserves the original tuple).
+  - Safe evidence still reaches DEFINED: `test_safe_evidence_refs_still_define_project_identity`.
+  - Multi-blocker path: `test_existing_identity_blockers_preserved_alongside_redaction` confirms `missing_title` + `raw_context_evidence_ref_blocked` coexist with redaction still applied.
+  - Stable serialization: `test_blocked_redacted_result_serializes_stably` asserts `tuple(result.to_dict().keys()) == project_identity_result_dict_keys()`.
+  - `execution_authorized=False` preserved: `test_execution_never_authorized_on_redacted_blocked_path`.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes (beyond this queue marker), no Polaris dependency.
+- Next Candidate: pending coordinator promotion after this identity-layer redaction repair clears Codex review.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement Compass Project Difference Runtime (coordinator-promoted after Codex Review B passed identity + bounds/scope runtimes).
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
@@ -3424,6 +3462,10 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-06-06 19:52 -06:00 - Build 4 cross-check: Codex review check on Difference Runtime slice (270438271~1..3ba2d976c) PARKED — Codex CLI returned monthly spend limit again (same condition as prior cadence-3/3 attempts on cc584318f and cd20be9c3); no independent review obtained; per heartbeat directive ran careful self-review across 10 focus areas as fallback; ONE actionable finding surfaced: [MEDIUM] shared_relationship_refs computed via _shared_relationship_refs() BEFORE the raw-context guard runs, then passed through verbatim on the raw-context BLOCKED branch — when both sides smuggle the SAME raw-context ref through repo_refs or venture_refs (e.g. repo_refs=("raw_prompt:smuggled-via-shared-repo",) on both sides), the BLOCKED result preserved the raw payload through shared_relationship_refs and leaked it into to_dict()/json.dumps output; reproduced before fix and confirmed after fix; remaining 9 self-review checks (ordering, redaction scope, _difference_field_tuple safety, no downstream consumer breakage from new execution_authorized key, same-repo/same-venture distinctness regression, None profile field defensiveness, test coverage solid, blocker name generation correct, style consistency with scope/bounds patterns) all passed; coordinator note: independent Codex review still owed for cc584318f + cd20be9c3 + 270438271 + df8120b49 once spend limit is raised.
 
 2026-06-06 19:55 -06:00 - Build 4 completed cadence 3/3 self-review repair; repair commit df8120b49 (branch) + marker repair 2201b6d4c (branch); files changed: meridian_core/compass.py (raw-context BLOCKED branch in evaluate_project_difference now also routes shared_relationship_refs through _redact_raw_context_refs so raw payload shared on both sides via repo_refs/venture_refs cannot leak into BLOCKED serialization), tests/test_compass.py (test_shared_relationship_refs_redacted_when_raw_context_shared and test_shared_relationship_refs_redacted_when_raw_context_shared_via_venture confirm repo_refs and venture_refs leak paths now redacted; safe shared refs like venture:Meridian still appear unredacted), docs/live-build-4.md (branch marker update citing repair); tests run: python -m pytest tests/test_compass.py -q -> 248 passed (2 new tests on top of 246); git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at 2201b6d4c (3ba2d976c..2201b6d4c); main queue updated with cadence-3/3 outcome + repair details; Obsidian update status: not performed in this lane; cadence reset for next cycle; lane idle pending independent Codex review on df8120b49 + earlier repaired commits or coordinator promotion of next backend candidate.
+
+2026-06-06 19:57 -06:00 - Build 4 checked queue; status: running; origin/main pulled (7e43cba) — already up to date; queue file shows no Active Now block but prior coordinator turn delivered a Codex Review B finding on the project-identity BLOCKED path: evaluate_project_identity correctly detected raw_context_evidence_ref_blocked but constructed the ProjectIdentityEvaluation with evidence_refs=candidate.evidence_refs passed through verbatim, so to_dict()["evidence_refs"] preserved the raw payload; existing test_raw_context_evidence_ref_is_blocked only checked blocker presence; reproduced the finding (decision='blocked', evidence_refs unchanged, secret prompt body in json.dumps); off-heartbeat slice repair complete in worktree (808297315 repair + 5aa4e4b30 branch marker on top of 2201b6d4c); 263 tests passing locally; promoting identity-redaction repair to Completed / Ready For Codex Review in main queue and pushing feature branch to origin; cadence 1/3 of new cycle
+
+2026-06-06 20:00 -06:00 - Build 4 completed Codex Review B identity-layer raw-context redaction repair promotion; repair commit 808297315, branch marker 5aa4e4b30 on branch codex/build-4-compass-project-definition-20260606; files changed on branch: meridian_core/compass.py (1 line: route candidate.evidence_refs through _redact_raw_context_refs when constructing the BLOCKED ProjectIdentityEvaluation, mirroring the scope-layer cd20be9c3 and difference-layer df8120b49 patterns), tests/test_compass.py (+134 lines: TestProjectIdentityRawContextRedaction with 15 new cases — 9 parametrized raw-context prefixes asserting redaction in dataclass field + to_dict + json.dumps + execution_authorized=False; mixed safe/raw evidence partial redaction with original order preserved; safe evidence pass-through on other BLOCKED paths regression guard; DEFINED still reachable with safe evidence; multi-blocker missing_title + raw_context coexistence with redaction; stable result_dict_keys shape; execution never authorized on redacted BLOCKED), docs/live-build-4.md (branch marker); tests run: python -m pytest tests/test_compass.py -q -> 263 passed (15 new tests on top of 248); git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at 5aa4e4b30 (2201b6d4c..5aa4e4b30); main queue updated with new Completed / Ready For Codex Review block for the identity-redaction repair; Obsidian update status: not performed in this lane; Ready for Codex Review; cadence 1/3 of new cycle
 
 2026-06-06 19:52 -06:00 - Build 4 cross-check: cadence 3/3 Codex review on Difference Runtime slice (270438271~1..3ba2d976c) PARKED — Codex CLI returned monthly spend limit error again (same block as prior cadence-3/3 attempt on cd20be9c3); no independent review obtained; per heartbeat directive ran careful self-review as fallback against 10 review questions (ordering, redaction scope, _difference_field_tuple safety, downstream shape compatibility, distinctness regression, None safety, test coverage gaps, blocker name generation, scope-field audit, scope/bounds pattern consistency); ALL self-review checks PASSED with one LOW observation logged (project_id not in _PROJECT_DIFFERENCE_RAW_CONTEXT_SCAN_FIELDS — consistent with identity/scope/bounds layers across the codebase, treated as trusted slug; candidate for a future follow-up audit slice not this one); no actionable repairs needed; coordinator note: independent Codex review still owed for cc584318f + cd20be9c3 + 270438271 once spend limit is raised; no other lanes blocked by this; cadence reset for next cycle; lane idle pending coordinator promotion of next backend candidate or Codex spend-limit relief.
 
