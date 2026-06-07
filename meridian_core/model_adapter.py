@@ -512,11 +512,21 @@ def bind_deepseek_transport_authority(
 ) -> DeepSeekTransportAuthority | None:
     """Bind adapter metadata to a fail-closed DeepSeek transport-authority record.
 
-    Returns None when metadata is missing, not DeepSeek direct dispatch, or
-    carries no candidate validation state. Candidate-only metadata (the
-    current state on main) maps to CANDIDATE_METADATA_ONLY proof state, which
-    blocks transport. Only a proof source that explicitly provides verified
-    proof refs plus both authority-gate flags can yield transport authority.
+    Returns None only when metadata is missing or not DeepSeek direct dispatch.
+    Direct DeepSeek (``deepseek-chat``) metadata with no candidate state emits
+    a fail-closed ``blocked:no-proof`` authority rather than a silent None, so
+    consumers can distinguish "no DeepSeek record" from "DeepSeek record with
+    no proof".
+
+    A ``deepseek-validation:level-1:`` validation evidence reference combined
+    with ``human_gate_satisfied`` and ``prime_authority_satisfied`` candidate
+    state flags both explicitly set to ``"true"`` is the only path to
+    AUTHORIZED_TRANSPORT_ONLY. Missing either gate keeps the proof PROOF_VERIFIED
+    but lets ``evaluate_deepseek_transport_authority`` emit the matching
+    blocker (``blocked:human-gate-required`` or
+    ``blocked:prime-authority-required``). Any non-level-1 validation ref —
+    including level-0 metadata-only, blank refs, and unknown levels — stays
+    fail-closed as ``CANDIDATE_METADATA_ONLY`` regardless of gate flags.
     """
     if adapter_metadata is None:
         return None
@@ -526,19 +536,37 @@ def bind_deepseek_transport_authority(
         return None
     candidate_state = adapter_metadata.deepseek_candidate_state
     if candidate_state is None:
-        return None
+        proof = DeepSeekValidationGateProof(
+            proof_state=DeepSeekValidationProofState.NONE,
+        )
+        return evaluate_deepseek_transport_authority(proof)
 
     validation_ref = (candidate_state.get("validation_evidence_ref") or "").strip()
     review_ref = (candidate_state.get("external_review_evidence_ref") or "").strip() or None
     proof_refs: tuple[str, ...] = (validation_ref,) if validation_ref else ()
-
-    proof = DeepSeekValidationGateProof(
-        proof_state=DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY,
-        proof_evidence_refs=proof_refs,
-        review_evidence_ref=review_ref,
-        human_gate_satisfied=False,
-        prime_authority_satisfied=False,
+    human_gate_satisfied = (
+        (candidate_state.get("human_gate_satisfied") or "").strip().lower() == "true"
     )
+    prime_authority_satisfied = (
+        (candidate_state.get("prime_authority_satisfied") or "").strip().lower() == "true"
+    )
+
+    if validation_ref.startswith("deepseek-validation:level-1:"):
+        proof = DeepSeekValidationGateProof(
+            proof_state=DeepSeekValidationProofState.PROOF_VERIFIED,
+            proof_evidence_refs=proof_refs,
+            review_evidence_ref=review_ref,
+            human_gate_satisfied=human_gate_satisfied,
+            prime_authority_satisfied=prime_authority_satisfied,
+        )
+    else:
+        proof = DeepSeekValidationGateProof(
+            proof_state=DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY,
+            proof_evidence_refs=proof_refs,
+            review_evidence_ref=review_ref,
+            human_gate_satisfied=False,
+            prime_authority_satisfied=False,
+        )
     return evaluate_deepseek_transport_authority(proof)
 
 

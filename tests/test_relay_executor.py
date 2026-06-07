@@ -17,6 +17,7 @@ from meridian_core.model_adapter import (
     FakeModelAdapter,
     MissingAdapterError,
     ModelHarnessMetadata,
+    ModelRouteMetadataBinding,
     deepseek_candidate_metadata_preset,
 )
 from meridian_core.prompt_payload_meter import PayloadStatus, PromptPayloadSnapshot
@@ -4572,3 +4573,163 @@ class TestRelayDispatchMetadataEnvelopeDeepSeekTransportAuthority:
         envelope = summary.results[0].dispatch_metadata_envelope
         assert envelope is not None
         assert envelope.to_dict()["deepseek_transport_authority"] is None
+
+    def _clean_payload_evidence(self, plan: RelayDispatchPlan) -> RelayPromptPayloadEvidence:
+        """Payload evidence with all gate-passing fields so fail_closed_advisory
+        does NOT trip — isolates the DeepSeek transport-authority contribution
+        to metadata_transport_allowed."""
+        lane = plan.lanes[0]
+        return RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            heartbeat_id=plan.packet.packet_id,
+            lane_id=f"{lane.role.value}:{lane.preferred_model}",
+            selected_provider="deepseek",
+            selected_model="deepseek-chat",
+            capability_tier="standard",
+            provider_route_kind="direct",
+            trust_state="trusted",
+            requires_external_review=False,
+            external_review_status="not_required",
+            model_metadata_ref="model-harness-metadata:deepseek:deepseek-chat",
+            model_context_window_tokens=65536,
+            prompt_budget_tokens=57344,
+            budget_status="healthy",
+        )
+
+    def _clean_route_metadata(self) -> ModelRouteMetadataBinding:
+        """Route metadata binding with all gate-passing fields so the metadata
+        envelope's validation_tags stay empty for non-DeepSeek-authority gates."""
+        return ModelRouteMetadataBinding(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            route_risk_tier=1,
+            route_cost_posture="minimal",
+            route_latency_posture="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="trusted",
+            requires_external_review=False,
+            provider_route_kind="direct",
+            external_review_status="not_required",
+            model_metadata_ref="model-harness-metadata:deepseek:deepseek-chat",
+            prompt_payload_status="healthy",
+        )
+
+    def _clean_deepseek_candidate_state(self) -> dict[str, str]:
+        """Candidate-state fields that satisfy every non-DeepSeek-authority
+        validation tag in _build_dispatch_metadata_envelope."""
+        return {
+            "trust_mode": "direct",
+            "proof_strength": "weak",
+            "direct_endpoint_evidence_ref": (
+                "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions"
+            ),
+        }
+
+    def test_envelope_metadata_transport_blocked_by_deepseek_authority_only(self) -> None:
+        """Repair contract: metadata_transport_allowed must be False when the
+        DeepSeek transport-authority is the only blocker — even if no other
+        fail-closed advisory tag fires."""
+        plan = _make_plan(1)
+        payload_evidence = self._clean_payload_evidence(plan)
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=payload_evidence,
+        )
+        candidate_state = self._clean_deepseek_candidate_state()
+        candidate_state.update(
+            {
+                "validation_evidence_ref": "deepseek-validation:level-0:metadata-only",
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "human_gate_satisfied": "false",
+                "prime_authority_satisfied": "false",
+            }
+        )
+        adapter_metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state=candidate_state,
+        )
+
+        envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            adapter_metadata=adapter_metadata,
+            route_metadata=self._clean_route_metadata(),
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+
+        assert envelope.fail_closed_advisory is False
+        assert envelope.fail_closed_tags == ()
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is False
+        assert envelope.metadata_transport_allowed is False
+
+    def test_envelope_metadata_transport_allowed_when_deepseek_authorized_and_gates_clean(
+        self,
+    ) -> None:
+        """Repair contract: metadata_transport_allowed is True only when the
+        DeepSeek authority is AUTHORIZED_TRANSPORT_ONLY *and* no other
+        fail-closed gate trips. Level-1 validation ref plus both gate flags
+        explicitly ``"true"`` is the sole path that lifts both conditions."""
+        plan = _make_plan(1)
+        payload_evidence = self._clean_payload_evidence(plan)
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=payload_evidence,
+        )
+        candidate_state = self._clean_deepseek_candidate_state()
+        candidate_state.update(
+            {
+                "validation_evidence_ref": (
+                    "deepseek-validation:level-1:validation-cleared"
+                ),
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "human_gate_satisfied": "true",
+                "prime_authority_satisfied": "true",
+            }
+        )
+        adapter_metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state=candidate_state,
+        )
+
+        envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            adapter_metadata=adapter_metadata,
+            route_metadata=self._clean_route_metadata(),
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+
+        assert envelope.fail_closed_advisory is False
+        assert envelope.fail_closed_tags == ()
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is True
+        assert envelope.metadata_transport_allowed is True

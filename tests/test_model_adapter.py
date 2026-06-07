@@ -1656,7 +1656,12 @@ class TestBindDeepSeekTransportAuthority:
         )
         assert bind_deepseek_transport_authority(meta) is None
 
-    def test_bind_returns_none_for_deepseek_chat_without_candidate_state(self) -> None:
+    def test_bind_emits_blocked_no_proof_for_deepseek_chat_without_candidate_state(
+        self,
+    ) -> None:
+        """Direct DeepSeek metadata with no candidate_state must fail-closed,
+        not silently return None — consumers need to distinguish "no DeepSeek
+        record" from "DeepSeek record with no proof"."""
         meta = ModelHarnessMetadata(
             provider_name="deepseek",
             model_name="deepseek-chat",
@@ -1666,7 +1671,18 @@ class TestBindDeepSeekTransportAuthority:
             trust_state="candidate",
             requires_external_review=True,
         )
-        assert bind_deepseek_transport_authority(meta) is None
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_NO_PROOF
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_missing" in auth.blocker_tags
+        assert auth.proof.proof_state is DeepSeekValidationProofState.NONE
+        assert auth.proof.proof_evidence_refs == ()
+        assert auth.proof.review_evidence_ref is None
+        assert auth.proof.human_gate_satisfied is False
+        assert auth.proof.prime_authority_satisfied is False
+        for marker in _DEEPSEEK_AUTHORITY_TAGS:
+            assert marker in auth.blocked_authority_tags
 
     def test_bind_returns_candidate_blocked_authority_for_current_metadata(self) -> None:
         meta = deepseek_candidate_metadata_preset("fast")
@@ -1702,3 +1718,135 @@ class TestBindDeepSeekTransportAuthority:
                 auth.status
                 is DeepSeekTransportAuthorityStatus.BLOCKED_CANDIDATE_ONLY
             )
+
+    def _level_one_metadata(
+        self,
+        *,
+        human_gate: str | None = "true",
+        prime_authority: str | None = "true",
+        validation_ref: str = "deepseek-validation:level-1:validation-cleared",
+        review_ref: str = "external-review:deepseek:deepseek-chat:passed",
+    ) -> ModelHarnessMetadata:
+        candidate_state: dict[str, str] = {
+            "validation_evidence_ref": validation_ref,
+            "external_review_evidence_ref": review_ref,
+        }
+        if human_gate is not None:
+            candidate_state["human_gate_satisfied"] = human_gate
+        if prime_authority is not None:
+            candidate_state["prime_authority_satisfied"] = prime_authority
+        return ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state=candidate_state,
+        )
+
+    def test_bind_level_one_validation_with_both_gates_yields_authorized_transport_only(
+        self,
+    ) -> None:
+        """Repair: level-1 validation ref + both gates explicitly true is the
+        only path that lifts the binder out of fail-closed."""
+        meta = self._level_one_metadata(human_gate="true", prime_authority="true")
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert (
+            auth.status
+            is DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY
+        )
+        assert auth.transport_authorized is True
+        assert auth.proof.proof_state is DeepSeekValidationProofState.PROOF_VERIFIED
+        assert auth.proof.human_gate_satisfied is True
+        assert auth.proof.prime_authority_satisfied is True
+        assert auth.proof.proof_evidence_refs == (
+            "deepseek-validation:level-1:validation-cleared",
+        )
+        assert auth.proof.review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:passed"
+        )
+        assert auth.autonomous_implementation_authorized is False
+        assert auth.review_clearing_authorized is False
+        assert auth.branch_movement_authorized is False
+        assert auth.live_coding_authority_authorized is False
+        assert auth.relay_bypass_authorized is False
+        for marker in _DEEPSEEK_AUTHORITY_TAGS:
+            assert marker in auth.blocked_authority_tags
+
+    def test_bind_level_one_validation_without_human_gate_blocks(self) -> None:
+        meta = self._level_one_metadata(human_gate="false", prime_authority="true")
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert (
+            auth.status
+            is DeepSeekTransportAuthorityStatus.BLOCKED_HUMAN_GATE_REQUIRED
+        )
+        assert auth.transport_authorized is False
+        assert "deepseek_human_gate_required" in auth.blocker_tags
+        assert auth.proof.human_gate_satisfied is False
+        assert auth.proof.prime_authority_satisfied is True
+
+    def test_bind_level_one_validation_without_prime_authority_blocks(self) -> None:
+        meta = self._level_one_metadata(human_gate="true", prime_authority="false")
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert (
+            auth.status
+            is DeepSeekTransportAuthorityStatus.BLOCKED_PRIME_AUTHORITY_REQUIRED
+        )
+        assert auth.transport_authorized is False
+        assert "deepseek_prime_authority_required" in auth.blocker_tags
+        assert auth.proof.human_gate_satisfied is True
+        assert auth.proof.prime_authority_satisfied is False
+
+    def test_bind_level_one_validation_without_either_gate_blocks(self) -> None:
+        meta = self._level_one_metadata(human_gate=None, prime_authority=None)
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        # Human gate is checked first; both gates being absent surfaces the
+        # human-gate blocker so the human-gate requirement is reported first.
+        assert (
+            auth.status
+            is DeepSeekTransportAuthorityStatus.BLOCKED_HUMAN_GATE_REQUIRED
+        )
+        assert auth.transport_authorized is False
+        assert auth.proof.human_gate_satisfied is False
+        assert auth.proof.prime_authority_satisfied is False
+
+    def test_bind_level_one_validation_with_non_true_gate_strings_blocks(self) -> None:
+        """Only an explicit lowercase ``"true"`` string opens the gate —
+        empty, ``"True"`` casing variants must still fail closed if the
+        downstream toggle is the bare boolean ``"true"`` contract."""
+        meta = self._level_one_metadata(human_gate="yes", prime_authority="1")
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert auth.transport_authorized is False
+        assert auth.status in {
+            DeepSeekTransportAuthorityStatus.BLOCKED_HUMAN_GATE_REQUIRED,
+            DeepSeekTransportAuthorityStatus.BLOCKED_PRIME_AUTHORITY_REQUIRED,
+        }
+
+    def test_bind_non_level_one_validation_ref_stays_candidate_metadata_only(
+        self,
+    ) -> None:
+        """Even if both gate flags are explicitly true, a non-level-1
+        validation ref must keep the proof state at CANDIDATE_METADATA_ONLY —
+        gate flags alone cannot bypass the validation-level ladder."""
+        meta = self._level_one_metadata(
+            validation_ref="deepseek-validation:level-0:metadata-only",
+            human_gate="true",
+            prime_authority="true",
+        )
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert (
+            auth.status
+            is DeepSeekTransportAuthorityStatus.BLOCKED_CANDIDATE_ONLY
+        )
+        assert auth.transport_authorized is False
+        assert auth.proof.proof_state is DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY
+        assert auth.proof.human_gate_satisfied is False
+        assert auth.proof.prime_authority_satisfied is False

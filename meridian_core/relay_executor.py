@@ -2452,6 +2452,13 @@ def _build_dispatch_metadata_envelope(
         dispatch_envelope is not None and not dispatch_envelope.safe_to_dispatch
     )
 
+    deepseek_transport_authority = bind_deepseek_transport_authority(adapter_metadata)
+    deepseek_transport_blocks = (
+        deepseek_transport_authority is not None
+        and not deepseek_transport_authority.transport_authorized
+    )
+    metadata_transport_allowed = (not fail_closed_advisory) and not deepseek_transport_blocks
+
     lane_label = role or "no-lane"
     model_label = exact_model_id or requested_model_id or "unknown-model"
     return RelayDispatchMetadataEnvelope(
@@ -2544,14 +2551,12 @@ def _build_dispatch_metadata_envelope(
         validation_tags=tuple(dict.fromkeys(validation_tags)),
         fail_closed_advisory=fail_closed_advisory,
         fail_closed_tags=fail_closed_tags,
-        metadata_transport_allowed=not fail_closed_advisory,
+        metadata_transport_allowed=metadata_transport_allowed,
         retry_requires_fresh_metadata=fail_closed_advisory,
         deepseek_validation_disposition=bind_deepseek_validation_disposition(
             adapter_metadata
         ),
-        deepseek_transport_authority=bind_deepseek_transport_authority(
-            adapter_metadata
-        ),
+        deepseek_transport_authority=deepseek_transport_authority,
     )
 
 

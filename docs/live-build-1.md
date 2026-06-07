@@ -10,6 +10,29 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: continue the Build 1 Opus repair lane on top of commit `2bf033f2f` — close two contract gaps in `bind_deepseek_transport_authority`/`_build_dispatch_metadata_envelope` (silent `None` when DeepSeek metadata lacked candidate state; missing relay_executor integration coverage for the new `metadata_transport_allowed` drive) without enabling unsafe live autonomy.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-live-validation-20260606`.
+
+Branch: `codex/build-1-deepseek-live-validation-20260606` (pushed to origin).
+
+Allowed files only: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+
+Completion:
+- Status: Ready for Codex Review.
+- Completed: 2026-06-06 (Opus repair lane continuation after Polaris rebuild).
+- Files changed: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/live-build-1.md`.
+- Tests run: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` -> 365 passed (+8 new: 6 model_adapter, 2 relay_executor); `git diff --check origin/main..HEAD` -> clean; `git diff --check` working tree -> clean; path-scope confined to allowed files; no raw credential/api_key/password/secret/raw-prompt/raw-response strings introduced.
+- Concrete before/after evidence:
+  - Before: `bind_deepseek_transport_authority` returned a silent `None` whenever direct DeepSeek metadata had no `deepseek_candidate_state`, so consumers could not distinguish "no DeepSeek record" from "DeepSeek record with no proof"; a candidate-state path with both authority-gate flags set was hard-coded to `CANDIDATE_METADATA_ONLY`, so a future `PROOF_VERIFIED + dual-gate` shape could never be lifted to `authorized:transport-only`. In `_build_dispatch_metadata_envelope`, `metadata_transport_allowed` was driven only by `fail_closed_advisory`, so a `blocked:*` DeepSeek transport-authority could co-exist with `metadata_transport_allowed=True` if no other fail-closed gate tripped.
+  - After: `bind_deepseek_transport_authority` emits a fail-closed `BLOCKED_NO_PROOF` authority (`proof_state=NONE`, empty refs, both gate flags False, every `_DEEPSEEK_AUTHORITY_TAGS` marker in `blocked_authority_tags`) for direct DeepSeek metadata without candidate state; a `validation_evidence_ref` starting with `deepseek-validation:level-1:` combined with both `human_gate_satisfied` and `prime_authority_satisfied` candidate-state values explicitly equal to lowercase `"true"` is the only path that constructs `PROOF_VERIFIED` and lets `evaluate_deepseek_transport_authority` emit `AUTHORIZED_TRANSPORT_ONLY` (missing or non-`"true"` gate strings still surface the matching `BLOCKED_HUMAN_GATE_REQUIRED` / `BLOCKED_PRIME_AUTHORITY_REQUIRED`); any non-level-1 ref — level-0 metadata-only, blank refs, unknown levels — stays fail-closed as `CANDIDATE_METADATA_ONLY`. `_build_dispatch_metadata_envelope` now computes `deepseek_transport_authority` once, treats it as a blocker when `transport_authorized is False`, and drives `metadata_transport_allowed = (not fail_closed_advisory) and not deepseek_transport_blocks`.
+  - The five autonomous-authority bits (`autonomous_implementation_authorized`, `review_clearing_authorized`, `branch_movement_authorized`, `live_coding_authority_authorized`, `relay_bypass_authorized`) remain hard-coded False even on the new `AUTHORIZED_TRANSPORT_ONLY` path; every `_DEEPSEEK_AUTHORITY_TAGS` marker stays in `blocked_authority_tags`; dispatch identity stays hard-coded to `deepseek-chat`; `serialization_only=True` is enforced; `DeepSeekValidationState.__post_init__` continues to refuse construction of `REVIEW_CLEARANCE` / `BRANCH_MOVEMENT` / `AUTONOMOUS_CODING` validation levels.
+  - Six new bind tests in `tests/test_model_adapter.py` cover: fail-closed `BLOCKED_NO_PROOF` for direct DeepSeek metadata without candidate state; level-1 ref + both gates `"true"` yields `AUTHORIZED_TRANSPORT_ONLY` with autonomy bits still False; level-1 + missing human gate / missing prime authority / both gates absent surface the matching blocked status; level-1 + non-`"true"` gate strings (`"yes"`, `"1"`) still fail closed; level-0 ref + both gates `"true"` keeps `CANDIDATE_METADATA_ONLY` (gate flags alone cannot bypass the validation ladder). Two new envelope tests in `tests/test_relay_executor.py` use `_build_dispatch_metadata_envelope` with a clean `ModelRouteMetadataBinding`, payload evidence, and dispatch envelope to prove that `metadata_transport_allowed` is False when the DeepSeek transport-authority is the sole blocker (`fail_closed_advisory is False`, `fail_closed_tags == ()`) and True only when the authority is `AUTHORIZED_TRANSPORT_ONLY` AND every other fail-closed gate is clean.
+  - Pure/local: no network calls, no credentials, no account probing, no live provider/model execution, no UI/Bifrost/FileMap edits, no shared-main write, no branch/worktree movement outside this assigned branch, no Polaris dependency. Branch will be pushed to `origin/codex/build-1-deepseek-live-validation-20260606`; no push to `main`.
+- Next Candidate: Codex Reviews A review of the bind/envelope repair on top of `2bf033f2f` before any coordinator promotion to `main`.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement the next Model Harness DeepSeek validation-gate proof and transport-authority backend slice without enabling unsafe live autonomy.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-live-validation-20260606`.
