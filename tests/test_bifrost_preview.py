@@ -276,22 +276,24 @@ def test_ui_authority_doc_names_electron_app_as_meridian_ui(ui_authority_source)
 
 
 def test_ui_authority_doc_calls_index_html_renderer_internals(ui_authority_source):
+    normalized_source = " ".join(ui_authority_source.split())
     assert "renderer" in ui_authority_source
     assert "`index.html`" in ui_authority_source
     # Tightened anchors: Electron must load root index.html, and index.html
     # must be locked as current renderer source rather than a separate UI target.
     assert "Electron loads" in ui_authority_source
-    assert "Root `index.html` is the current renderer source file loaded by that Electron\napp" in ui_authority_source
-    assert "It is app internals" in ui_authority_source
-    assert "Edits to `index.html` are edits to the Electron app's UI" in ui_authority_source
-    assert "It is part of the app today" in ui_authority_source
-    assert "file is not obsolete, detached, merely historical, disposable, or independent\nfrom the app" in ui_authority_source
-    assert "not the Meridian UI by itself" in ui_authority_source
-    assert "not a separate product target" in ui_authority_source
-    assert "Do not write\nthat `index.html` is the Meridian UI without the Electron-app qualifier" in ui_authority_source
-    assert "Do not imply that `index.html` is\nunrelated to the Electron app" in ui_authority_source
-    assert "edits to it are outside app UI work" in ui_authority_source
-    assert "loads root `index.html` as its renderer source file" in ui_authority_source
+    assert "Implementation detail: the Electron app currently loads root `index.html` as its renderer source file" in normalized_source
+    assert "That file is app internals" in ui_authority_source
+    assert "Edits to `index.html` are edits to the Electron app's UI" in normalized_source
+    assert "It is part of the app today" in normalized_source
+    assert "file is not obsolete, detached, merely historical, disposable, or independent from the app" in normalized_source
+    assert "not the Meridian UI by itself" in normalized_source
+    assert "not a separate product target" in normalized_source
+    assert "Do not write that `index.html` is the Meridian UI without the Electron-app qualifier" in normalized_source
+    assert "Do not imply that `index.html` is unrelated to the Electron app" in normalized_source
+    assert "Do not lead documentation, handoffs, or status notes by naming `index.html` as the UI" in normalized_source
+    assert "edits to it are outside app UI work" in normalized_source
+    assert "loads root `index.html` as its renderer source file" in normalized_source
 
 
 def test_ui_authority_doc_describes_bifrost_preview_as_generated_proof(ui_authority_source):

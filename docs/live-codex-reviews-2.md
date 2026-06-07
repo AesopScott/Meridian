@@ -1,9 +1,10 @@
 # Live Codex Reviews B Queue
 
 Current UI authority note: the Electron app is the Meridian UI. Root
-`index.html` is the active renderer source inside that Electron app, so edits to
-it are edits to the app's visible UI. It is part of the app today, not obsolete,
-detached, historical-only, independent, or a separate UI target.
+`index.html` is only the active renderer source inside that Electron app, so
+edits to it are edits to the app's visible UI. It is part of the app today, not
+obsolete, detached, historical-only, independent, or a separate UI target. Docs
+and reviews must lead with the Electron app, not with the renderer file.
 `bifrost/preview.html` is generated backend/view-model proof output only. Any
 older review text saying `npm start` regenerates preview HTML describes the
 original V1 shell behavior before commit `05a108f1` corrected startup to load

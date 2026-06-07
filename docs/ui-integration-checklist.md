@@ -7,14 +7,16 @@
 ## UI Authority
 
 The Meridian UI is the Electron app. That desktop app is the product surface
-Scott has been building and using. Root `index.html` is the current renderer
-source file loaded by that app: Electron loads it into the desktop window, so
-edits to that file are edits to the Electron app's visible UI. It is part of
-the app today, not obsolete, detached, historical-only, or independent from the
-app. It also is not the Meridian UI by itself, not a standalone browser demo
-target, and not a separate Meridian UI target. `npm start` must launch
-`electron/main.js`, which opens the Meridian Electron app; startup must not
-regenerate or replace the app with `bifrost/preview.html`.
+Scott has been building and using. Root `index.html` is an implementation
+detail of that app: it is the current renderer source file Electron loads into
+the desktop window, so edits to that file are edits to the Electron app's
+visible UI. It is part of the app today, not obsolete, detached,
+historical-only, or independent from the app. It also is not the Meridian UI by
+itself, not a standalone browser demo target, and not a separate Meridian UI
+target. UI documentation and handoffs must lead with the Electron app, then name
+`index.html` only as the current renderer source when needed. `npm start` must
+launch `electron/main.js`, which opens the Meridian Electron app; startup must
+not regenerate or replace the app with `bifrost/preview.html`.
 
 `bifrost/preview.html` is a generated Bifrost rendering proof artifact. Use it only for deterministic backend/view-model preview proof tasks, not as the operational Meridian UI.
 

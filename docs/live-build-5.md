@@ -2,10 +2,11 @@
 
 Current UI authority note: the Electron app is the Meridian UI. It is the app to
 run, demo, test as the product surface, document, and build against. Root
-`index.html` is the active renderer source inside that Electron app. Edits to
-`index.html` are edits to the app's visible UI because Electron currently loads
-that file into the desktop window. It is part of the app today, not obsolete,
-detached, historical-only, independent, or a separate UI target.
+`index.html` is only the current renderer source inside that Electron app. Edits
+to `index.html` are edits to the app's visible UI because Electron currently
+loads that file into the desktop window. It is part of the app today, not
+obsolete, detached, historical-only, independent, or a separate UI target. Docs
+and handoffs must lead with the Electron app, not with the renderer file.
 `bifrost/preview.html` is generated backend/view-model proof output only. Any
 older Build 5 log text saying `npm start` regenerates preview HTML describes the
 original V1 shell behavior before commit `05a108f1` corrected startup to open

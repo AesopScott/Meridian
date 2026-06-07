@@ -303,7 +303,7 @@ sending only the task packet.
 
 **Voice-first cockpit requirement:** Bifrost must expose Meridian as a fully voice-enabled cockpit, not only a typed prompt UI. V2 should define the visible voice state and control surface for microphone input, spoken Prime output, NASA-style boot/status audio, mute/voice toggles, and listening/thinking/speaking indicators. Runtime speech recognition/TTS can land in a later slice, but the cockpit architecture must reserve the surface and data model now.
 
-**Browser-first cockpit requirement:** Bifrost should remain a fast-iterating HTML/CSS cockpit surface. Electron may wrap it later, but V2 should not depend on Electron unless desktop-only capability is required. The preview HTML is a valid primary surface for design, testing, and early operation.
+**Electron-app cockpit requirement:** The Meridian UI is the Electron app. Root `index.html` is only the current renderer source loaded by that app, so UI implementation may still edit HTML/CSS/JS quickly, but the product surface to run, demo, test, document, and build against is the Electron desktop app. Generated Bifrost preview HTML is proof output only, not a primary surface for design, testing, early operation, or demos.
 
 **First vertical slice:**
 
