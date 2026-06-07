@@ -116,6 +116,7 @@ class ProviderBalanceItem:
     credit_status: str = "unknown"
     estimated_spend_label: str = ""
     notes: str = ""
+    evidence_refs: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -1758,6 +1759,18 @@ def _render_provider_balance(balance: ProviderBalanceView) -> str:
         credit_class = f"provider-credit-{_e(provider.credit_status)}"
         selected_attr = ' data-selected="true"' if provider.provider_id == balance.selected_provider else ""
         trust_label = f"[{_e(provider.trust_state)}]"
+        evidence_block = ""
+        if provider.evidence_refs:
+            evidence_chips = "".join(
+                f'<span class="provider-evidence-chip">{_e(ref)}</span>'
+                for ref in provider.evidence_refs
+            )
+            evidence_block = (
+                '<div class="provider-evidence-refs" aria-label="Provider Balance Evidence Refs">'
+                '<span class="provider-evidence-label">Evidence:</span>'
+                f"{evidence_chips}"
+                "</div>"
+            )
         provider_items.append(
             f'<div class="provider-item {status_class} {pressure_class} {credit_class}" data-provider="{_e(provider.provider_id)}"{selected_attr}>'
             f'<div class="provider-header">'
@@ -1777,6 +1790,7 @@ def _render_provider_balance(balance: ProviderBalanceView) -> str:
             f'<span class="metric provider-spend">Spend: {_e(provider.estimated_spend_label or "unknown")}</span>'
             f"</div>"
             f'<span class="provider-notes">{_e(provider.notes)}</span>'
+            f"{evidence_block}"
             f"</div>"
         )
 
@@ -2509,6 +2523,76 @@ def model_capability_metadata_view_from_summary(
     )
 
 
+def _provider_balance_item_from_mapping(
+    raw: Mapping[str, object],
+) -> ProviderBalanceItem:
+    """Project a single per-provider balance/cost-pressure mapping into a ProviderBalanceItem.
+
+    All string fields are routed through the existing `_safe_handoff_value`
+    redactor so unsafe markers (raw prompts, serialized payloads, secret/api-key
+    fragments, model_payload tokens) cannot bleed into the cockpit surface.
+    Numeric fields are parsed defensively via `_backend_int`/`_backend_float`.
+    """
+    return ProviderBalanceItem(
+        provider_id=_safe_handoff_value(_handoff_summary_value(raw, "provider_id", default="")),
+        display_name=_safe_handoff_value(_handoff_summary_value(raw, "display_name", default="")),
+        model_name=_safe_handoff_value(_handoff_summary_value(raw, "model_name", "exact_model_id", default="")),
+        trust_state=_safe_handoff_value(_handoff_summary_value(raw, "trust_state", default="unknown")),
+        health=_safe_handoff_value(_handoff_summary_value(raw, "health", "provider_health", default="unknown")),
+        route_kind=_safe_handoff_value(_handoff_summary_value(raw, "route_kind", "provider_route_kind", default="")),
+        context_budget_tokens=_backend_int(_handoff_summary_value(raw, "context_budget_tokens", "context_window_tokens", default=0)),
+        prompt_budget_tokens=_backend_int(_handoff_summary_value(raw, "prompt_budget_tokens", default=0)),
+        current_prompt_tokens=_backend_int(_handoff_summary_value(raw, "current_prompt_tokens", "estimated_prompt_tokens", default=0)),
+        prompt_budget_percent=_backend_float(_handoff_summary_value(raw, "prompt_budget_percent", "budget_percent", default=0.0)),
+        prompt_delta_tokens=_backend_int(_handoff_summary_value(raw, "prompt_delta_tokens", "delta_tokens", default=0)),
+        cost_pressure=_safe_handoff_value(_handoff_summary_value(raw, "cost_pressure", default="none")),
+        quota_state=_safe_handoff_value(_handoff_summary_value(raw, "quota_state", default="unknown")),
+        remaining_credit_label=_safe_handoff_value(_handoff_summary_value(raw, "remaining_credit_label", default="")),
+        credit_status=_safe_handoff_value(_handoff_summary_value(raw, "credit_status", default="unknown")),
+        estimated_spend_label=_safe_handoff_value(_handoff_summary_value(raw, "estimated_spend_label", default="")),
+        notes=_safe_handoff_value(_handoff_summary_value(raw, "notes", default="")),
+        evidence_refs=_handoff_summary_list(raw, "evidence_refs", "evidence", "evidence_ids"),
+    )
+
+
+def provider_balance_view_from_summary(
+    summary: Mapping[str, object],
+) -> ProviderBalanceView:
+    """Bind a structured provider balance / cost-pressure summary into a ProviderBalanceView.
+
+    Deterministic, side-effect-free, display-only. Accepts a Mapping with optional
+    keys: `providers` (list/tuple of per-provider mappings — identity, health,
+    route, trust, token usage, cost pressure, remaining credit, evidence_refs,
+    notes), `selected_provider`, `routing_owner`, `policy_state`. Each per-
+    provider mapping is projected via `_provider_balance_item_from_mapping`,
+    which reuses `_safe_handoff_value` for string redaction. No live account
+    calls, no provider probing, no raw transport payloads.
+
+    Non-Mapping entries inside `providers` are skipped silently rather than
+    raising — the surface is display-only and must remain renderable when a
+    backend feed is partially populated.
+    """
+    raw_providers = _handoff_summary_value(summary, "providers", default=())
+    providers: list[ProviderBalanceItem] = []
+    if isinstance(raw_providers, (list, tuple)):
+        for raw in raw_providers:
+            if isinstance(raw, Mapping):
+                providers.append(_provider_balance_item_from_mapping(raw))
+
+    return ProviderBalanceView(
+        providers=providers,
+        selected_provider=_safe_handoff_value(_handoff_summary_value(
+            summary, "selected_provider", default="",
+        )),
+        routing_owner=_safe_handoff_value(_handoff_summary_value(
+            summary, "routing_owner", default="unknown",
+        )),
+        policy_state=_safe_handoff_value(_handoff_summary_value(
+            summary, "policy_state", default="ok",
+        )),
+    )
+
+
 def cockpit_view_model_with_backend_bindings(
     base: "CockpitViewModel",
     *,
@@ -2518,13 +2602,14 @@ def cockpit_view_model_with_backend_bindings(
     model_capability_summary: "RelayModelCapabilityMetadataSummary | None" = None,
     model_capability_selected_id: str = "",
     model_capability_metadata_source: str = "model-harness-relay-summary",
+    provider_balance_summary: Mapping[str, object] | None = None,
 ) -> "CockpitViewModel":
     """Wire reviewed backend evidence/summary records into a CockpitViewModel.
 
-    Applies the three Build 5H binding adapters in place on `base` and returns
-    the same instance for chaining. Only fields whose backend record is supplied
+    Applies the Build 5H binding adapters in place on `base` and returns the
+    same instance for chaining. Only fields whose backend record is supplied
     are replaced; the rest of the view model — projects, voice, instrument,
-    provider balance, etc. — is preserved exactly as the caller built it.
+    session lifecycle, etc. — is preserved exactly as the caller built it.
 
     Deterministic and side-effect-free: no live calls, no transport, no raw
     prompt or provider response text, no FileMap edits, no Electron changes.
@@ -2542,6 +2627,8 @@ def cockpit_view_model_with_backend_bindings(
             selected_model_id=model_capability_selected_id,
             metadata_source=model_capability_metadata_source,
         )
+    if provider_balance_summary is not None:
+        base.provider_balance = provider_balance_view_from_summary(provider_balance_summary)
     return base
 
 
@@ -2668,6 +2755,105 @@ def sample_backend_bound_cockpit_view_model() -> "CockpitViewModel":
         ),
         model_capability_selected_id="claude-sonnet-4-20250514",
         model_capability_metadata_source="model-harness-relay-summary-sample",
+        provider_balance_summary={
+            "selected_provider": "claude",
+            "routing_owner": "Relay",
+            "policy_state": "warning",
+            "providers": (
+                {
+                    "provider_id": "claude",
+                    "display_name": "Claude",
+                    "model_name": "claude-sonnet-4-20250514",
+                    "trust_state": "trusted",
+                    "health": "ok",
+                    "route_kind": "direct",
+                    "context_budget_tokens": 200000,
+                    "prompt_budget_tokens": 4000,
+                    "current_prompt_tokens": 920,
+                    "prompt_budget_percent": 23.0,
+                    "prompt_delta_tokens": 0,
+                    "cost_pressure": "low",
+                    "quota_state": "available",
+                    "remaining_credit_label": "credit: available",
+                    "credit_status": "available",
+                    "estimated_spend_label": "$0.18 estimated",
+                    "notes": "Primary provider ready",
+                    "evidence_refs": (
+                        "adapter:claude",
+                        "payload-snapshot:claude-dispatch",
+                    ),
+                },
+                {
+                    "provider_id": "deepseek",
+                    "display_name": "DeepSeek",
+                    "model_name": "deepseek-chat",
+                    "trust_state": "candidate",
+                    "health": "degraded",
+                    "route_kind": "direct",
+                    "context_budget_tokens": 256000,
+                    "prompt_budget_tokens": 5000,
+                    "current_prompt_tokens": 3100,
+                    "prompt_budget_percent": 62.0,
+                    "prompt_delta_tokens": 240,
+                    "cost_pressure": "high",
+                    "quota_state": "limited",
+                    "remaining_credit_label": "credit: limited",
+                    "credit_status": "limited",
+                    "estimated_spend_label": "$0.03 estimated",
+                    "notes": "Q-mode prompt drag detected; awaiting external review",
+                    "evidence_refs": (
+                        "adapter:deepseek",
+                        "payload-snapshot:deepseek-qmode",
+                        "review:deepseek-pending",
+                    ),
+                },
+                {
+                    "provider_id": "openrouter",
+                    "display_name": "OpenRouter",
+                    "model_name": "deepseek-chat",
+                    "trust_state": "aggregator",
+                    "health": "degraded",
+                    "route_kind": "aggregator",
+                    "context_budget_tokens": 64000,
+                    "prompt_budget_tokens": 1800,
+                    "current_prompt_tokens": 1600,
+                    "prompt_budget_percent": 88.9,
+                    "prompt_delta_tokens": 360,
+                    "cost_pressure": "degraded",
+                    "quota_state": "metered",
+                    "remaining_credit_label": "credit: provider-hidden",
+                    "credit_status": "unknown",
+                    "estimated_spend_label": "$0.02 estimated",
+                    "notes": "Aggregator route lacks payload snapshot proof",
+                    "evidence_refs": (
+                        "adapter:openrouter",
+                        "snapshot:unavailable",
+                    ),
+                },
+                {
+                    "provider_id": "local",
+                    "display_name": "Local",
+                    "model_name": "local-deterministic",
+                    "trust_state": "local",
+                    "health": "offline",
+                    "route_kind": "local",
+                    "context_budget_tokens": 32000,
+                    "prompt_budget_tokens": 1200,
+                    "current_prompt_tokens": 0,
+                    "prompt_budget_percent": 0.0,
+                    "prompt_delta_tokens": 0,
+                    "cost_pressure": "blocked",
+                    "quota_state": "unavailable",
+                    "remaining_credit_label": "credit: n/a",
+                    "credit_status": "unavailable",
+                    "estimated_spend_label": "$0.00 estimated",
+                    "notes": "Local deterministic route unavailable",
+                    "evidence_refs": (
+                        "adapter:local",
+                    ),
+                },
+            ),
+        },
     )
 
 

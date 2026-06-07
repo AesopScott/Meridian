@@ -48,6 +48,7 @@ from bifrost.cockpit import (
     cockpit_view_model_with_backend_bindings,
     model_capability_metadata_view_from_summary,
     prompt_payload_view_from_evidence,
+    provider_balance_view_from_summary,
     render_cockpit_html,
     relay_aegis_policy_handoff_from_summary,
     sample_backend_bound_cockpit_view_model,
@@ -5199,13 +5200,16 @@ def test_sample_backend_bound_cockpit_renders_evidence_refs():
 def test_sample_backend_bound_cockpit_preserves_existing_surfaces_from_base_view_model():
     bound_doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
 
-    # The base sample_cockpit_view_model contributes provider balance, voice,
-    # session lifecycle, etc. The wiring slice must not erase those.
-    assert "OpenAI" in bound_doc  # provider balance row from base sample
+    # Surfaces NOT bound by the wiring slice (voice, prime messages, projects,
+    # session lifecycle, proof state, instrument) must still come from the
+    # base sample_cockpit_view_model.
     assert "mic armed" in bound_doc  # voice listening state from base sample
+    assert "Command channel open." in bound_doc  # prime message from base sample
+    # Bound surfaces still render correctly after wiring.
     assert "Visible Prompt Payload Meter" in bound_doc
     assert "Model Harness Capability Metadata" in bound_doc
     assert "Prompt Payload Visibility" in bound_doc
+    assert "Provider Balance" in bound_doc
 
 
 def test_cockpit_wiring_slice_has_no_filesystem_or_network_side_effects():
@@ -5213,11 +5217,404 @@ def test_cockpit_wiring_slice_has_no_filesystem_or_network_side_effects():
     a = sample_backend_bound_cockpit_view_model()
     b = sample_backend_bound_cockpit_view_model()
 
-    # The three reviewed surfaces are projected from sample backend records
+    # The reviewed surfaces are projected from sample backend records
     # via the adapters; equality across separate calls proves determinism.
     assert a.prompt_payload == b.prompt_payload
     assert a.visible_prompt_payload_meter == b.visible_prompt_payload_meter
     assert a.model_capabilities == b.model_capabilities
+    assert a.provider_balance == b.provider_balance
 
     # Render is deterministic on identical view models
     assert render_cockpit_html(a) == render_cockpit_html(b)
+
+
+# V2 Provider Balance / Cost-Pressure backend/view-model binding slice
+# (provider_balance_view_from_summary + cockpit wiring + evidence_refs).
+
+
+def test_provider_balance_view_from_summary_maps_identity_health_and_route():
+    view = provider_balance_view_from_summary({
+        "selected_provider": "claude",
+        "routing_owner": "Relay",
+        "policy_state": "ok",
+        "providers": (
+            {
+                "provider_id": "claude",
+                "display_name": "Claude",
+                "model_name": "claude-sonnet-4-20250514",
+                "trust_state": "trusted",
+                "health": "ok",
+                "route_kind": "direct",
+                "context_budget_tokens": 200000,
+                "prompt_budget_tokens": 4000,
+                "current_prompt_tokens": 920,
+                "prompt_budget_percent": 23.0,
+                "prompt_delta_tokens": 0,
+                "cost_pressure": "low",
+                "quota_state": "available",
+                "remaining_credit_label": "credit: available",
+                "credit_status": "available",
+                "estimated_spend_label": "$0.18 estimated",
+                "notes": "Primary provider ready",
+                "evidence_refs": ("adapter:claude", "payload-snapshot:claude-dispatch"),
+            },
+        ),
+    })
+
+    assert view.selected_provider == "claude"
+    assert view.routing_owner == "Relay"
+    assert view.policy_state == "ok"
+    assert len(view.providers) == 1
+    item = view.providers[0]
+    assert item.provider_id == "claude"
+    assert item.display_name == "Claude"
+    assert item.model_name == "claude-sonnet-4-20250514"
+    assert item.trust_state == "trusted"
+    assert item.health == "ok"
+    assert item.route_kind == "direct"
+    assert item.context_budget_tokens == 200000
+    assert item.prompt_budget_tokens == 4000
+    assert item.current_prompt_tokens == 920
+    assert item.prompt_budget_percent == 23.0
+    assert item.prompt_delta_tokens == 0
+    assert item.cost_pressure == "low"
+    assert item.quota_state == "available"
+    assert item.remaining_credit_label == "credit: available"
+    assert item.credit_status == "available"
+    assert item.estimated_spend_label == "$0.18 estimated"
+    assert item.notes == "Primary provider ready"
+    assert item.evidence_refs == ["adapter:claude", "payload-snapshot:claude-dispatch"]
+
+
+def test_provider_balance_view_from_summary_renders_cost_pressure_and_credit_states():
+    view = provider_balance_view_from_summary({
+        "providers": (
+            {
+                "provider_id": "deepseek",
+                "display_name": "DeepSeek",
+                "model_name": "deepseek-chat",
+                "trust_state": "candidate",
+                "health": "degraded",
+                "cost_pressure": "high",
+                "quota_state": "limited",
+                "remaining_credit_label": "credit: limited",
+                "credit_status": "limited",
+                "estimated_spend_label": "$0.03 estimated",
+            },
+            {
+                "provider_id": "openrouter",
+                "display_name": "OpenRouter",
+                "model_name": "deepseek-chat",
+                "trust_state": "aggregator",
+                "health": "degraded",
+                "cost_pressure": "degraded",
+                "quota_state": "metered",
+                "remaining_credit_label": "credit: provider-hidden",
+                "credit_status": "unknown",
+            },
+        ),
+    })
+
+    deepseek, openrouter = view.providers
+    assert deepseek.cost_pressure == "high"
+    assert deepseek.credit_status == "limited"
+    assert deepseek.estimated_spend_label == "$0.03 estimated"
+    assert openrouter.cost_pressure == "degraded"
+    assert openrouter.credit_status == "unknown"
+    assert openrouter.remaining_credit_label == "credit: provider-hidden"
+
+
+def test_provider_balance_view_from_summary_supports_field_aliases():
+    """Adapter accepts common aliases so it can bind backend feeds that name
+    fields differently (e.g. exact_model_id, budget_percent, delta_tokens)."""
+    view = provider_balance_view_from_summary({
+        "providers": (
+            {
+                "provider_id": "claude",
+                "display_name": "Claude",
+                "exact_model_id": "claude-sonnet-4-20250514",
+                "trust_state": "trusted",
+                "provider_health": "ok",
+                "provider_route_kind": "direct",
+                "context_window_tokens": 200000,
+                "estimated_prompt_tokens": 920,
+                "budget_percent": 23.0,
+                "delta_tokens": 0,
+            },
+        ),
+    })
+
+    item = view.providers[0]
+    assert item.model_name == "claude-sonnet-4-20250514"
+    assert item.health == "ok"
+    assert item.route_kind == "direct"
+    assert item.context_budget_tokens == 200000
+    assert item.current_prompt_tokens == 920
+    assert item.prompt_budget_percent == 23.0
+    assert item.prompt_delta_tokens == 0
+
+
+def test_provider_balance_view_from_summary_empty_summary_yields_empty_view():
+    view = provider_balance_view_from_summary({})
+    assert view.providers == []
+    assert view.selected_provider == ""
+    assert view.routing_owner == "unknown"
+    assert view.policy_state == "ok"
+
+
+def test_provider_balance_view_from_summary_skips_non_mapping_provider_entries():
+    """Non-Mapping entries inside providers list must be skipped silently
+    rather than raising; surface stays renderable on partial backend feeds."""
+    view = provider_balance_view_from_summary({
+        "providers": (
+            "not-a-mapping",
+            None,
+            42,
+            {
+                "provider_id": "claude",
+                "display_name": "Claude",
+                "model_name": "claude-sonnet-4-20250514",
+                "trust_state": "trusted",
+                "health": "ok",
+            },
+        ),
+    })
+    assert len(view.providers) == 1
+    assert view.providers[0].provider_id == "claude"
+
+
+def test_provider_balance_view_from_summary_defaults_safe_on_missing_per_provider_fields():
+    view = provider_balance_view_from_summary({
+        "providers": (
+            {"provider_id": "bare", "display_name": "Bare", "model_name": "bare-model"},
+        ),
+    })
+    item = view.providers[0]
+    assert item.trust_state == "unknown"
+    assert item.health == "unknown"
+    assert item.route_kind == ""
+    assert item.context_budget_tokens == 0
+    assert item.prompt_budget_tokens == 0
+    assert item.prompt_budget_percent == 0.0
+    assert item.cost_pressure == "none"
+    assert item.quota_state == "unknown"
+    assert item.credit_status == "unknown"
+    assert item.notes == ""
+    assert item.evidence_refs == []
+
+
+def test_provider_balance_view_from_summary_redacts_unsafe_per_provider_values():
+    """The adapter must reuse _safe_handoff_value so unsafe markers cannot
+    leak through any string field on a per-provider record."""
+    view = provider_balance_view_from_summary({
+        "selected_provider": "claude",
+        "providers": (
+            {
+                "provider_id": "claude",
+                "display_name": "Claude",
+                "model_name": "claude-sonnet-4-20250514",
+                "trust_state": "trusted",
+                "health": "ok",
+                "notes": "raw_prompt RAW_PROMPT_SENTINEL leaked",
+                "estimated_spend_label": "api_key:SECRET",
+                "evidence_refs": ("adapter:claude", "model_payload:SECRET"),
+            },
+        ),
+    })
+    item = view.providers[0]
+    assert item.notes == "unsafe_metadata_redacted"
+    assert item.estimated_spend_label == "unsafe_metadata_redacted"
+    # Evidence refs route through _safe_handoff_value via _handoff_summary_list
+    # — direct-safe entries pass through, unsafe ones redacted.
+    assert "adapter:claude" in item.evidence_refs
+    assert "unsafe_metadata_redacted" in item.evidence_refs
+
+
+def test_provider_balance_view_from_summary_preserves_provider_order():
+    view = provider_balance_view_from_summary({
+        "providers": (
+            {"provider_id": "z-last", "display_name": "Z", "model_name": "z", "trust_state": "t", "health": "ok"},
+            {"provider_id": "a-first", "display_name": "A", "model_name": "a", "trust_state": "t", "health": "ok"},
+            {"provider_id": "m-mid", "display_name": "M", "model_name": "m", "trust_state": "t", "health": "ok"},
+        ),
+    })
+    assert [p.provider_id for p in view.providers] == ["z-last", "a-first", "m-mid"]
+
+
+def test_cockpit_view_model_with_backend_bindings_wires_provider_balance_summary():
+    base = CockpitViewModel(project="Test", bearing="provider-balance-wiring")
+    original_voice = base.voice
+
+    bound = cockpit_view_model_with_backend_bindings(
+        base,
+        provider_balance_summary={
+            "selected_provider": "claude",
+            "routing_owner": "Relay",
+            "policy_state": "ok",
+            "providers": (
+                {
+                    "provider_id": "claude",
+                    "display_name": "Claude",
+                    "model_name": "claude-sonnet-4-20250514",
+                    "trust_state": "trusted",
+                    "health": "ok",
+                    "route_kind": "direct",
+                    "evidence_refs": ("adapter:claude",),
+                },
+            ),
+        },
+    )
+
+    assert bound is base
+    assert bound.provider_balance.selected_provider == "claude"
+    assert bound.provider_balance.routing_owner == "Relay"
+    assert len(bound.provider_balance.providers) == 1
+    assert bound.provider_balance.providers[0].evidence_refs == ["adapter:claude"]
+    # Untouched surfaces preserved
+    assert bound.voice is original_voice
+
+
+def test_cockpit_view_model_with_backend_bindings_provider_balance_optional():
+    """Omitting provider_balance_summary leaves base.provider_balance untouched."""
+    base = sample_cockpit_view_model()
+    snapshot = base.provider_balance
+    bound = cockpit_view_model_with_backend_bindings(base)
+    assert bound.provider_balance is snapshot
+
+
+def test_sample_backend_bound_cockpit_view_model_binds_provider_balance_from_summary():
+    vm = sample_backend_bound_cockpit_view_model()
+    assert vm.provider_balance.selected_provider == "claude"
+    assert vm.provider_balance.routing_owner == "Relay"
+    assert vm.provider_balance.policy_state == "warning"
+    assert len(vm.provider_balance.providers) == 4
+
+    by_id = {p.provider_id: p for p in vm.provider_balance.providers}
+    claude = by_id["claude"]
+    deepseek = by_id["deepseek"]
+    openrouter = by_id["openrouter"]
+    local = by_id["local"]
+
+    # Identity + health + route + trust
+    assert claude.display_name == "Claude"
+    assert claude.health == "ok"
+    assert claude.route_kind == "direct"
+    assert claude.trust_state == "trusted"
+
+    # Token-pressure fields
+    assert claude.current_prompt_tokens == 920
+    assert claude.prompt_budget_tokens == 4000
+    assert claude.prompt_budget_percent == 23.0
+
+    # Cost-pressure warnings + remaining-credit placeholders
+    assert deepseek.cost_pressure == "high"
+    assert deepseek.credit_status == "limited"
+    assert deepseek.remaining_credit_label == "credit: limited"
+    assert deepseek.estimated_spend_label == "$0.03 estimated"
+
+    # Aggregator route with bounded remaining-credit placeholder
+    assert openrouter.route_kind == "aggregator"
+    assert openrouter.credit_status == "unknown"
+    assert openrouter.remaining_credit_label == "credit: provider-hidden"
+
+    # Offline/local route — blocked cost pressure, unavailable credit
+    assert local.health == "offline"
+    assert local.cost_pressure == "blocked"
+    assert local.credit_status == "unavailable"
+
+    # Evidence refs surface for every provider
+    assert "adapter:claude" in claude.evidence_refs
+    assert "payload-snapshot:claude-dispatch" in claude.evidence_refs
+    assert "review:deepseek-pending" in deepseek.evidence_refs
+    assert "snapshot:unavailable" in openrouter.evidence_refs
+
+
+def test_sample_backend_bound_cockpit_renders_provider_health_and_cost_pressure():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    # Provider health classes
+    assert 'class="provider-item provider-ok' in doc
+    assert "provider-degraded" in doc
+    assert "provider-offline" in doc
+    # Cost-pressure classes
+    assert "provider-pressure-low" in doc
+    assert "provider-pressure-high" in doc
+    assert "provider-pressure-degraded" in doc
+    assert "provider-pressure-blocked" in doc
+    # Provider/model identity in headers
+    assert "Claude" in doc
+    assert "DeepSeek" in doc
+    assert "OpenRouter" in doc
+    assert "deepseek-chat" in doc
+
+
+def test_sample_backend_bound_cockpit_renders_token_pressure_and_spend():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    assert "Budget: 23%" in doc
+    assert "Tokens: 920/4000" in doc
+    assert "Tokens: 3100/5000" in doc
+    assert "Pressure: high" in doc
+    assert "Pressure: degraded" in doc
+    assert "Spend: $0.18 estimated" in doc
+    assert "Spend: $0.03 estimated" in doc
+
+
+def test_sample_backend_bound_cockpit_renders_remaining_credit_placeholders():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    assert "Remaining: credit: available" in doc
+    assert "Remaining: credit: limited" in doc
+    assert "Remaining: credit: provider-hidden" in doc
+    assert "Remaining: credit: n/a" in doc
+    assert "provider-credit-unknown" in doc
+    assert "provider-credit-unavailable" in doc
+
+
+def test_sample_backend_bound_cockpit_renders_provider_balance_evidence_refs():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    assert 'aria-label="Provider Balance Evidence Refs"' in doc
+    assert '<span class="provider-evidence-chip">adapter:claude</span>' in doc
+    assert '<span class="provider-evidence-chip">adapter:deepseek</span>' in doc
+    assert '<span class="provider-evidence-chip">review:deepseek-pending</span>' in doc
+    assert '<span class="provider-evidence-chip">adapter:openrouter</span>' in doc
+    assert '<span class="provider-evidence-chip">snapshot:unavailable</span>' in doc
+    assert '<span class="provider-evidence-chip">adapter:local</span>' in doc
+
+
+def test_provider_balance_view_from_summary_is_deterministic():
+    """Adapter is a pure projection of input data — repeated calls equal."""
+    summary = {
+        "selected_provider": "claude",
+        "providers": (
+            {
+                "provider_id": "claude",
+                "display_name": "Claude",
+                "model_name": "claude-sonnet-4-20250514",
+                "trust_state": "trusted",
+                "health": "ok",
+                "evidence_refs": ("adapter:claude",),
+            },
+        ),
+    }
+    assert provider_balance_view_from_summary(summary) == provider_balance_view_from_summary(summary)
+
+
+def test_provider_balance_evidence_refs_absent_when_empty():
+    """When evidence_refs is empty the surface omits the evidence block."""
+    base = CockpitViewModel(project="Test", bearing="test")
+    base.provider_balance = ProviderBalanceView(
+        providers=[ProviderBalanceItem(
+            provider_id="claude",
+            display_name="Claude",
+            model_name="claude-sonnet-4-20250514",
+            trust_state="trusted",
+            health="ok",
+        )],
+        selected_provider="claude",
+    )
+    doc = render_cockpit_html(base)
+    assert "Claude" in doc
+    assert 'aria-label="Provider Balance Evidence Refs"' not in doc
+    assert "provider-evidence-chip" not in doc
