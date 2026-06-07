@@ -1819,6 +1819,9 @@ def evaluate_project_identity(
         collapsing,
     ) = _project_identity_neighbor_overlap(candidate)
 
+    redacted_distinguishing = _redact_raw_context_refs(distinguishing)
+    redacted_collapsing = _redact_raw_context_refs(collapsing)
+
     if collapsing:
         return ProjectIdentityEvaluation(
             decision=ProjectIdentityDecision.AMBIGUOUS,
@@ -1826,17 +1829,17 @@ def evaluate_project_identity(
             title=candidate.title,
             outcome=candidate.outcome,
             mission_bearing=candidate.mission_bearing,
-            evidence_refs=candidate.evidence_refs,
+            evidence_refs=_redact_raw_context_refs(candidate.evidence_refs),
             shared_repo_refs=shared_repo_refs,
             shared_venture_refs=shared_venture_refs,
             shared_session_refs=shared_session_refs,
-            distinguishing_neighbors=distinguishing,
-            collapsing_neighbors=collapsing,
+            distinguishing_neighbors=redacted_distinguishing,
+            collapsing_neighbors=redacted_collapsing,
             blockers=("project_identity_collapse_risk",),
             compass_question=(
                 "Compass needs a distinguishing mission bearing before defining "
                 "a project that shares repo, venture, or session refs with "
-                f"{list(collapsing)}."
+                f"{list(redacted_collapsing)}."
             ),
         )
 
@@ -1846,11 +1849,11 @@ def evaluate_project_identity(
         title=candidate.title,
         outcome=candidate.outcome,
         mission_bearing=candidate.mission_bearing,
-        evidence_refs=candidate.evidence_refs,
+        evidence_refs=_redact_raw_context_refs(candidate.evidence_refs),
         shared_repo_refs=shared_repo_refs,
         shared_venture_refs=shared_venture_refs,
         shared_session_refs=shared_session_refs,
-        distinguishing_neighbors=distinguishing,
+        distinguishing_neighbors=redacted_distinguishing,
     )
 
 
