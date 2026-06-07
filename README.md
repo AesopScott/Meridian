@@ -6,9 +6,16 @@ You talk to the orchestrator. The orchestrator drives worker sessions, harnesses
 
 ## Meridian UI
 
-The Meridian user interface is the Electron app.
+The Meridian user interface is the Electron app. That is the app to run, demo,
+and build against.
 
-Root `index.html` is the renderer source loaded by Electron. It contains the cockpit surface: harness dock, Prime panel, user/session panel, Spark center, right-panel modes, model harness views, and local bridge wiring. `npm start` launches `electron/main.js`, which opens `index.html` in the desktop app. Startup must not regenerate or substitute `bifrost/preview.html`.
+Root `index.html` is part of the Electron app implementation: it is the
+renderer source the desktop app loads into its window. It contains the cockpit
+surface: harness dock, Prime panel, user/session panel, Spark center,
+right-panel modes, model harness views, and local bridge wiring. Do not treat it
+as a separate UI target. `npm start` launches `electron/main.js`, which opens
+the Meridian Electron app with this renderer. Startup must not regenerate or
+substitute `bifrost/preview.html`.
 
 `bifrost/preview.html` is a generated backend/render proof artifact created by `bifrost/preview.py`. It is not the product UI entrypoint.
 

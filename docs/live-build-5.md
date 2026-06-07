@@ -1,10 +1,12 @@
 # Live Build 5 Queue
 
-Current UI authority note: the Electron app is the Meridian UI. Root
-`index.html` is the renderer source loaded by Electron. `bifrost/preview.html`
-is generated backend/view-model proof output only. Any older Build 5 log text
-saying `npm start` regenerates preview HTML describes the original V1 shell
-behavior before commit `05a108f1` corrected startup to load `index.html`.
+Current UI authority note: the Electron app is the Meridian UI. It is the app to
+run, demo, test as the product surface, and build against. Root `index.html` is
+part of that app implementation: it is the renderer source loaded by Electron,
+not a separate UI target. `bifrost/preview.html` is generated backend/view-model
+proof output only. Any older Build 5 log text saying `npm start` regenerates
+preview HTML describes the original V1 shell behavior before commit `05a108f1`
+corrected startup to open the Electron app with the Meridian renderer.
 
 ## Completion Marker - Completed / Promoted To Main
 
@@ -756,7 +758,8 @@ Ready for Codex Review.
 
 ## Completed / Ready For Codex Review
 
-Goal: implement the Bifrost V2 browser-first HUD shell for the latest UI direction.
+Goal: historical task that implemented the Bifrost V2 HUD shell before the
+Electron-app authority correction.
 
 Allowed files only: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`, `docs/live-build-5.md`.
 
@@ -764,7 +767,9 @@ Task: move the current Bifrost preview toward the latest Scott-approved HUD-grid
 
 Requirements:
 
-- Keep the cockpit browser-first HTML/CSS; do not add Electron-only dependencies.
+- Historical wording superseded: the Meridian UI is now explicitly the Electron
+  app. Root `index.html` is its renderer source, and generated Bifrost preview
+  HTML is proof output only.
 - Make the central Prime command bay the dominant surface. The prompt/input area must be large enough for real conversation, not a small widget.
 - Keep the center presence core quiet: only `PRIMED` plus a pulsing orb/state. Do not put provider balance, Claude/OpenAI/DeepSeek, prompt payload, queue, proof, Prime, B1-B5, ABH, tier, version, or numbered HUD labels inside that core.
 - Remove permanent top navigation noise. Panels should be summonable through Prime/voice or scoped controls, not a top row of buttons.

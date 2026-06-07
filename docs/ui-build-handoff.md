@@ -2,7 +2,11 @@
 
 **Owner lane:** UI / Bifrost interface session
 
-**Objective:** Redesign the Bifrost preview toward the last approved Meridian HUD interface direction: the dark multi-panel Meridian command grid Scott provided in chat. This is not a spaceship cockpit build. Keep it browser-first HTML/CSS for now; Electron is optional packaging later.
+**Objective:** Redesign the Meridian Electron app toward the last approved HUD
+interface direction: the dark multi-panel Meridian command grid Scott provided
+in chat. This is not a spaceship cockpit build. The Electron app is the Meridian
+UI; root `index.html` is its renderer source, and generated Bifrost preview HTML
+is proof output only.
 
 ## Hard Correction
 

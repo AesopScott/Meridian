@@ -1109,7 +1109,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/bifrost-v2-cockpit-extensions.md",
             area=FileArea.BIFROST,
-            purpose="Bifrost V2 cockpit extension contract: browser-first HUD direction, central Prime command bay, quiet PRIMED presence core, project rail, harness consoles, and voice-first interaction layer.",
+            purpose="Bifrost V2 cockpit extension contract: Electron-app HUD direction, central Prime command bay, quiet PRIMED presence core, project rail, harness consoles, and voice-first interaction layer.",
             related_tests=["tests/test_bifrost_cockpit.py"],
             notes="Active V2 UI direction. Bifrost displays state; Prime/Relay/Aegis own decisions and routing.",
         ),

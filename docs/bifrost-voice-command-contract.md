@@ -134,4 +134,6 @@ Low-confidence or high-risk commands must be confirmation-gated before execution
 - Voice commands map to typed intents rather than free-form UI automation.
 - Harness panel, project/lane, dictation, read-aloud, and proof command families are defined.
 - Risky or low-confidence intents require confirmation.
-- Bifrost remains browser-first; Electron may package the surface later but is not required for this contract.
+- Voice state belongs in the Meridian Electron app surface. Root `index.html`
+  is the app renderer source, and generated Bifrost preview HTML remains proof
+  output only.
