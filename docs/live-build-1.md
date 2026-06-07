@@ -8,6 +8,71 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Timestamp: 2026-06-07T16:20:00-06:00.
+
+Goal: implement the first pure Workflow Sub-Agent Harness backend domain slice
+from the reviewed workflow contract.
+
+Worker requirement: implementation must run in a Polaris Build 1 Opus worker
+(`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may review only
+after a real worker candidate exists.
+
+Source of authority:
+
+- `docs/workflow-subagent-harness-contract.md`
+- `docs/workflow-subagent-usage-checklist.md`
+- `docs/workflows-subagent-harness-architecture.md`
+
+Task: add the smallest deterministic, dependency-free workflow dispatch domain
+module and focused tests. Implement the contract's first runtime slice only:
+
+- frozen domain dataclasses for `WorkflowWorkOrder`, `WorkflowInputPacket`,
+  `WorkflowHeartbeat`, `WorkflowResultSummary`, `WorkflowErrorSummary`, and
+  `WorkflowResteerRequest`;
+- closed enums for `WorkflowHarness`, `WorkflowPhase`, and
+  `WorkflowFailureKind` with the values listed in the contract;
+- a pure dispatch helper that invokes registered fake/stub handlers, converts
+  handler exceptions to `WorkflowErrorSummary`, validates result shape, enforces
+  tier proof requirements, rejects tier-3+ orders without gate context before
+  handler invocation, handles `WorkflowResteerRequest`, and does not expose
+  heartbeat history in final Prime-visible return payloads;
+- input/path/tool validation helpers for allowed paths, forbidden paths,
+  summarize-only mode, timeout values, nesting cap, and bounded text fields;
+- a promotion/acceptance helper that rejects tier-4 results without
+  `requires_human_gate=True`;
+- display-safety / prompt-drag guards that reject raw transcript/log/file/search
+  return fields or unsafe free text before it can enter a result summary.
+
+Keep this slice pure/local. No live workflow execution, no process/session
+control, no model calls, no network, no filesystem mutation beyond this worker's
+allowed files, no branch/worktree movement, no Echo/FileMap durable writes, no
+UI/Electron/Bifrost behavior, no generated artifacts, no provider/account calls,
+and no FileMap registration in this slice.
+
+Allowed files only:
+
+- `meridian_core/workflow_dispatch.py`
+- `tests/test_workflow_dispatch.py`
+- `docs/live-build-1.md`
+
+Do not edit Workflow contract docs, FileMap surfaces, Provider Balance files,
+Goal Runtime files, Bifrost/Electron/UI files, generated artifacts, package
+files, other live-build queues, review logs, or runtime code outside this new
+module.
+
+Required proof before Ready marker:
+
+- `python -m pytest tests/test_workflow_dispatch.py -q`
+- `git diff --check`
+- path-scope proof limited to the three allowed files
+- completion marker in this section with files changed, tests, proof, and
+  remaining risk
+
+Stop after implementation and marker. Do not promote to main, do not push to
+main, do not move branches/worktrees, and do not touch shared main.
+
 ## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Timestamp: 2026-06-07T14:52:00-06:00.
