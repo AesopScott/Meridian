@@ -12,7 +12,7 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 Goal: implement the next Model Harness DeepSeek validation-gate proof and transport-authority backend slice without enabling unsafe live autonomy.
 
-Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-validation`.
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-live-validation-20260606`.
 
 Branch: start from current `origin/main` on `codex/build-1-deepseek-live-validation-20260606`.
 
