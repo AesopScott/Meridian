@@ -5716,15 +5716,14 @@ def test_sample_backend_bound_cockpit_view_model_binds_provider_balance_from_sum
     assert vm.provider_balance.selected_provider == "claude"
     assert vm.provider_balance.routing_owner == "Relay"
     assert vm.provider_balance.policy_state == "warning"
-    # Codex Review B repair: partial backend snapshot merges into the existing
-    # base sample (which has 5 providers), preserving providers not mentioned
-    # in the summary. The summary supplies 4 lanes (claude/deepseek/openrouter/
-    # local), so the base's OpenAI provider is preserved alongside the 4
-    # backend-updated lanes — total 5.
+    # The backend summary now supplies all 5 lanes (claude/openai/deepseek/
+    # openrouter/local), each projected from backend evidence rather than
+    # preserved from the base sample.
     assert len(vm.provider_balance.providers) == 5
     by_id = {p.provider_id: p for p in vm.provider_balance.providers}
-    assert "openai" in by_id  # preserved from base sample, not in backend summary
+    assert "openai" in by_id
     claude = by_id["claude"]
+    openai = by_id["openai"]
     deepseek = by_id["deepseek"]
     openrouter = by_id["openrouter"]
     local = by_id["local"]
@@ -5739,6 +5738,24 @@ def test_sample_backend_bound_cockpit_view_model_binds_provider_balance_from_sum
     assert claude.current_prompt_tokens == 920
     assert claude.prompt_budget_tokens == 4000
     assert claude.prompt_budget_percent == 23.0
+
+    # OpenAI lane is backend-bound: health, route_kind, current_prompt_tokens,
+    # remaining_credit_label, estimated_spend_label, and cost_pressure all
+    # come from the backend summary (not the base sample preservation path).
+    assert openai.display_name == "OpenAI"
+    assert openai.model_name == "gpt-4o"
+    assert openai.health == "ok"
+    assert openai.route_kind == "direct"
+    assert openai.trust_state == "trusted"
+    assert openai.current_prompt_tokens == 890
+    assert openai.prompt_budget_tokens == 3000
+    assert openai.prompt_budget_percent == 29.7
+    assert openai.cost_pressure == "medium"
+    assert openai.credit_status == "available"
+    assert openai.remaining_credit_label == "quota: normal"
+    assert openai.estimated_spend_label == "$0.12 estimated"
+    assert "adapter:openai" in openai.evidence_refs
+    assert "telemetry:openai-payload" in openai.evidence_refs
 
     # Cost-pressure warnings + remaining-credit placeholders
     assert deepseek.cost_pressure == "high"

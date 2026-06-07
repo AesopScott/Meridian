@@ -9,7 +9,7 @@ backend/view-model proof output only. Any older Build 5 log text saying
 before commit `05a108f1` corrected startup to open the Electron app with the
 Meridian renderer.
 
-## Coordinator Override - Active Now / Opus Task Assigned
+## Coordinator Override - Completed / Review-Cleared / Promoted
 
 Timestamp: 2026-06-07T09:00:00-06:00.
 
@@ -49,6 +49,26 @@ Required proof before Ready marker:
 - `git diff --check`
 - concise completion marker here with files changed, proof, and any remaining
   risk.
+
+Completion marker - 2026-06-07T10:44:11-06:00:
+
+- Opus worker `chat_1780849813091` produced the repair in an isolated Polaris
+  worktree. Promoted files only: `bifrost/cockpit.py` and
+  `tests/test_bifrost_cockpit.py`; Polaris-generated `.mcp.json` dirt was not
+  promoted.
+- Repair: `sample_backend_bound_cockpit_view_model().provider_balance_summary`
+  now supplies an explicit OpenAI provider row. Backend-bound tests assert
+  OpenAI `health`, `route_kind`, `current_prompt_tokens`,
+  `remaining_credit_label`, `estimated_spend_label`, `cost_pressure`, and
+  backend evidence refs from `sample_backend_bound_cockpit_view_model()`.
+- Proof on worker and promoted main: `python -m pytest
+  tests/test_bifrost_cockpit.py -q` passed at 383 tests; `git diff --check`
+  passed.
+- Codex Review A `codex_1780850388656`: PASS.
+- Codex Review B `codex_1780850388968`: PASS; explicitly verified the prior
+  OpenAI base-sample preservation gap is closed by backend-only evidence refs.
+- No live provider calls, account probing, secrets, process/session controls,
+  Electron behavior, or `index.html` edits were introduced.
 
 Launch attempt note - 2026-06-07T09:01:20-06:00:
 
