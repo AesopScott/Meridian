@@ -8,6 +8,85 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now
+
+Timestamp: 2026-06-07T14:52:00-06:00.
+
+Goal: implement the first minimal V3 Provider Balance / Usage backend domain
+slice for Relay / Model Harness, authorized by `docs/v3-intake-resolution.md`
+row 14 (`Cost and resource management`) and the existing Bifrost Balance proof.
+
+Worker requirement: implementation must run in a Polaris Build 1 Opus worker
+(`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may review only
+after a real worker candidate exists.
+
+Source of authority:
+
+- `docs/v3-intake-resolution.md` row 14.
+- `docs/bifrost-balance-payload-surface-contract.md`.
+- `docs/relay-prompt-payload-visibility-implementation-checklist.md` BAL/Bifrost
+  visibility constraints.
+- Existing Bifrost adapter shape in `bifrost/cockpit.py`
+  (`provider_balance_view_from_summary`) and tests in
+  `tests/test_bifrost_cockpit.py`.
+
+Task: add the smallest pure-Python provider balance / usage domain module that
+can feed Bifrost and Relay without making live provider calls. The slice should
+own structured provider health, route kind, quota/credit label, token usage,
+estimated spend label, cost-pressure state, selected-provider policy state, and
+display-safe evidence refs. It must be deterministic, dependency-free, and
+provider-neutral across Claude, OpenAI, DeepSeek, aggregator/OpenRouter, and
+local adapter families.
+
+Expected implementation shape:
+
+- New `meridian_core/provider_balance.py`.
+- New `tests/test_provider_balance.py`.
+- Update this file only for the worker completion marker.
+- Define frozen dataclasses/enums/helpers as needed for:
+  - per-provider usage/health snapshots;
+  - a combined provider balance summary;
+  - deterministic ordering and selected-provider handling;
+  - conversion to the mapping shape Bifrost already accepts through
+    `provider_balance_view_from_summary`;
+  - fail-safe defaults for unavailable balance/quota/spend data;
+  - display-safety validation/redaction for labels, notes, evidence refs, and
+    provider ids.
+
+Required behavior:
+
+- No network, no credentials, no account probing, no provider SDKs, no live
+  model calls, no process/session control, no UI/Electron behavior, no
+  `index.html`, no generated artifacts, no FileMap edits in this slice.
+- Unknown provider balances must serialize as unknown/unavailable, never as
+  zero or healthy by default.
+- Cost pressure must be bounded and deterministic; missing or invalid pressure
+  must fail safe.
+- Raw prompt text, raw provider response text, credentials, filesystem paths,
+  branch/worktree movement text, and arbitrary free-form blocker prose must not
+  appear in serialized summaries.
+- Evidence refs must be structured short refs; unsafe refs must be redacted or
+  rejected by tests.
+- The module must not import Bifrost; Bifrost remains a consumer of the summary
+  mapping, not the owner of provider-balance policy.
+
+Allowed files only:
+
+- `meridian_core/provider_balance.py`
+- `tests/test_provider_balance.py`
+- `docs/live-build-1.md`
+
+Required proof before Ready marker:
+
+- `python -m pytest tests/test_provider_balance.py -q`
+- `git diff --check`
+- path-scope proof limited to allowed files
+- concise completion marker in this section with files changed, proof, and
+  remaining risk
+
+Stop after implementation and marker. Do not promote to main, do not push to
+main, do not move branches/worktrees, and do not touch shared main.
+
 ## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Coordinator reconciliation: 2026-06-07T13:07:00-06:00.
