@@ -10,6 +10,35 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair Codex Review B finding on bounds aggregation re-exposing raw scope `subject_ref` (parallel-lane HIGH-severity fix).
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (pushed to origin at `7058477e0` on 2026-06-06).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Finding (HIGH): the scope-layer subject-field repair (`95dde4d50`) redacted `ProjectScopeEvaluation.subject_ref`, but `evaluate_project_bounds()` rebuilt `candidate_decisions`, `blocked_refs`, `ambiguous_refs`, and the related compass questions from the ORIGINAL `ProjectScopeCandidate.subject_ref` rather than from the redacted `ProjectScopeEvaluation.subject_ref`. That re-exposed the raw payload in the normal bounds caller path even after the scope layer had successfully redacted it.
+
+Repair:
+- Implementation commit `c3d9f4a22` (`fix: preserve scope redaction through bounds aggregation`) — bounds aggregation now consumes `ProjectScopeEvaluation.subject_ref` / `subject_kind` instead of the original candidate fields, so any redaction the scope layer applied flows through into `blocked_refs`, `ambiguous_refs`, `candidate_decisions`, and `compass_question`.
+- Branch marker commits `30b9b1a31` (scope subject-field repair marker) and `7058477e0` (bounds-aggregation repair marker).
+- Branch HEAD pushed: `origin/codex/build-4-compass-project-definition-20260606` at `7058477e0` (2026-06-06).
+- Regression test `test_bounds_aggregation_uses_redacted_scope_subject_refs` confirms raw `subject_ref` and `ambiguity_reason` do NOT leak through `blocked_refs`, `candidate_decisions`, `compass_question`, or JSON serialization on the normal bounds caller path.
+
+Completion: 2026-06-06 (parallel-lane Opus build session).
+
+Ready for Codex Review:
+
+- Repair commit: `c3d9f4a22`.
+- Files changed: `meridian_core/compass.py` (bounds aggregation now consumes redacted scope evaluation fields), `tests/test_compass.py` (new `test_bounds_aggregation_uses_redacted_scope_subject_refs`), `docs/live-build-4.md` (branch + main markers).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **284 passed**.
+- `git diff --check`: clean.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes (beyond this queue marker), no Polaris dependency.
+- Next Candidate: pending coordinator promotion after this bounds-aggregation redaction repair clears Codex review. Independent Codex review still owed for the 7-commit Compass repair series (`cc584318f` + `cd20be9c3` + `270438271` + `df8120b49` + `808297315` + `95dde4d50` + `c3d9f4a22`) plus cross-lane `43b1dafb8` once Codex CLI spend limit is raised.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair cadence-3/3 self-review finding — raw-context payload in `subject_ref` or `ambiguity_reason` was being interpolated into `compass_question` on the scope-layer AMBIGUOUS branch.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
@@ -3511,6 +3540,10 @@ YYYY-MM-DD HH:MM TZ - Build 4 cross-check: none/finding/fix; details: <short not
 2026-06-06 20:12 -06:00 - Build 4 completed cadence 3/3 self-review repair; repair commit 95dde4d50 (branch) + branch marker db5b423e3 (branch); files changed: meridian_core/compass.py (second raw-context guard added at the top of evaluate_project_scope that scans candidate.subject_ref AND candidate.ambiguity_reason; on hit constructs ProjectScopeEvaluation directly with subject_ref redacted via _redact_raw_context_refs((subject_ref,))[0], evidence_refs redacted via _redact_raw_context_refs, blockers=("raw_context_subject_field_blocked",), redirecting every previously-reachable AMBIGUOUS interpolation path away from compass_question construction), tests/test_compass.py (TestProjectScopeSubjectFieldRawContextGuard — 20 new cases: 9 parametrized subject_ref raw prefixes asserting BLOCKED + redacted subject_ref in dataclass and to_dict and json.dumps; 6 parametrized ambiguity_reason raw prefixes asserting BLOCKED + compass_question=None + raw text absent from json.dumps; guard runs regardless of subject_kind including known artifact; precedence test showing evidence_refs guard fires first with retry confirming subject_ref guard then fires; safe AMBIGUOUS regression preserves interpolated compass_question; safe IN_SCOPE regression preserved; stable result_dict_keys shape under BLOCKED), docs/live-build-4.md (branch marker update); tests run: python -m pytest tests/test_compass.py -q -> 283 passed (20 new tests on top of 263); git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at db5b423e3 (5aa4e4b30..db5b423e3); main queue updated with cadence-3/3 outcome + repair details; Obsidian update status: not performed in this lane; cadence reset for next cycle; lane idle pending independent Codex review on the 6-commit Compass repair series or coordinator promotion of next backend candidate.
 
 2026-06-06 20:19 -06:00 - Build 4 checked queue; status: idle; origin/main pulled (44f76af3e) — already up to date; no executable Coordinator Override - Active Now block (top section is the scope-layer subject-field redaction repair Ready For Codex Review); origin/codex/build-4-compass-project-definition-20260606 in sync with local at db5b423e3 (with cross-lane test commit 43b1dafb8 covering scope raw-subject precedence redaction also landed); local test suite now 284 passed (1 additional test from 43b1dafb8 on top of 283); Codex CLI spend limit still parked; cadence 1/3 of new cycle
+
+2026-06-06 20:20 -06:00 - Build 4 cross-check: parallel-lane HIGH-severity bounds-aggregation re-exposure leak found and repaired in worktree by another session. Finding: scope-layer subject-field repair (95dde4d50) redacted ProjectScopeEvaluation.subject_ref, but evaluate_project_bounds() rebuilt blocked_refs/ambiguous_refs/candidate_decisions/compass_question from the ORIGINAL ProjectScopeCandidate.subject_ref rather than the redacted scope-evaluation field — re-exposing raw payload in the normal bounds caller path. Repair commit c3d9f4a22 (fix: preserve scope redaction through bounds aggregation) makes bounds aggregation consume the redacted ProjectScopeEvaluation.subject_ref/subject_kind instead. Branch markers 30b9b1a31 (scope subject-field repair marker) and 7058477e0 (bounds-aggregation repair marker) landed on branch. test_bounds_aggregation_uses_redacted_scope_subject_refs added. 284 passing.
+
+2026-06-06 20:24 -06:00 - Build 4 completed bounds-aggregation redaction repair promotion; implementation commit c3d9f4a22, branch markers 30b9b1a31 and 7058477e0 on branch codex/build-4-compass-project-definition-20260606; files changed on branch: meridian_core/compass.py (bounds aggregation now consumes redacted ProjectScopeEvaluation.subject_ref/subject_kind instead of ProjectScopeCandidate.subject_ref/subject_kind, so any redaction the scope layer applied flows through into blocked_refs, ambiguous_refs, candidate_decisions, and compass_question on the bounds caller path), tests/test_compass.py (test_bounds_aggregation_uses_redacted_scope_subject_refs — confirms raw subject_ref and ambiguity_reason do NOT leak through blocked_refs, candidate_decisions, compass_question, or JSON serialization), docs/live-build-4.md (branch-side markers); tests run: python -m pytest tests/test_compass.py -q -> 284 passed; git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at 7058477e0 (db5b423e3..7058477e0); main queue updated with new Completed / Ready For Codex Review block for the bounds-aggregation redaction repair; Obsidian update status: not performed in this lane (build branch only; coordinator/Obsidian-lane handles vault sync after Codex review); Ready for Codex Review; cadence 2/3 of new cycle
 
 2026-06-06 19:52 -06:00 - Build 4 cross-check: cadence 3/3 Codex review on Difference Runtime slice (270438271~1..3ba2d976c) PARKED — Codex CLI returned monthly spend limit error again (same block as prior cadence-3/3 attempt on cd20be9c3); no independent review obtained; per heartbeat directive ran careful self-review as fallback against 10 review questions (ordering, redaction scope, _difference_field_tuple safety, downstream shape compatibility, distinctness regression, None safety, test coverage gaps, blocker name generation, scope-field audit, scope/bounds pattern consistency); ALL self-review checks PASSED with one LOW observation logged (project_id not in _PROJECT_DIFFERENCE_RAW_CONTEXT_SCAN_FIELDS — consistent with identity/scope/bounds layers across the codebase, treated as trusted slug; candidate for a future follow-up audit slice not this one); no actionable repairs needed; coordinator note: independent Codex review still owed for cc584318f + cd20be9c3 + 270438271 once spend limit is raised; no other lanes blocked by this; cadence reset for next cycle; lane idle pending coordinator promotion of next backend candidate or Codex spend-limit relief.
 
