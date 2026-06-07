@@ -85,6 +85,19 @@ Repair launch attempt note - 2026-06-07T09:07:54-06:00:
 - The OpenAI backend-bound proof repair remains the active Build 5 task for the
   next Opus availability window.
 
+Repair launch attempt note - 2026-06-07T09:11:08-06:00:
+
+- Worker `chat_1780845066241` launched through Polaris `launch-chat`, tier
+  `power`, for the same OpenAI backend-bound provider-balance proof repair with
+  a minimized prompt and no queue-doc read requirement.
+- Result: no candidate. Diagnostics show the worker reached `claude-opus-4-7`
+  and then hit a Claude rate-limit event before any backend/test file changes.
+  The isolated worker worktree contains only Polaris-generated `.mcp.json`
+  dirt.
+- The task remains blocked on Opus availability. Do not route Codex review until
+  an Opus worker produces actual `bifrost/cockpit.py` and
+  `tests/test_bifrost_cockpit.py` repair evidence.
+
 ## Coordinator Update - Opus Worker Relaunch Attempt / No Candidate
 
 Timestamp: 2026-06-07T08:49:01-06:00.
