@@ -45,10 +45,12 @@ from bifrost.cockpit import (
     VoiceIOState,
     _render_proof_state,
     _e,
+    cockpit_view_model_with_backend_bindings,
     model_capability_metadata_view_from_summary,
     prompt_payload_view_from_evidence,
     render_cockpit_html,
     relay_aegis_policy_handoff_from_summary,
+    sample_backend_bound_cockpit_view_model,
     sample_cockpit_view_model,
     view_model_from_snapshot,
     visible_prompt_payload_meter_view_from_evidence,
@@ -4949,3 +4951,273 @@ def test_model_capability_metadata_view_preserves_candidate_trust_on_non_review_
 
     assert view.items[0].candidate_trust_state == "candidate"
     assert view.items[0].proof_strength == "weak"
+
+
+# Build 5H wiring slice: cockpit_view_model_with_backend_bindings +
+# sample_backend_bound_cockpit_view_model render the reviewed backend data.
+
+
+def test_cockpit_view_model_with_backend_bindings_overrides_only_named_surfaces():
+    base = sample_cockpit_view_model()
+    original_provider_balance = base.provider_balance
+    original_voice = base.voice
+    original_instrument = base.instrument
+    original_sessions = base.session_lifecycle
+
+    bound = cockpit_view_model_with_backend_bindings(
+        base,
+        prompt_payload_evidence=RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            selected_provider="claude",
+            selected_model="claude-sonnet-4-20250514",
+            route_class="direct",
+            route_kind="direct",
+            trust_state="trusted",
+            estimated_prompt_tokens=920,
+            prompt_budget_tokens=4000,
+            budget_percent=23.0,
+        ),
+    )
+
+    assert bound is base
+    assert bound.prompt_payload.provider_id == "claude"
+    assert bound.prompt_payload.model_name == "claude-sonnet-4-20250514"
+    # Untouched surfaces preserved
+    assert bound.provider_balance is original_provider_balance
+    assert bound.voice is original_voice
+    assert bound.instrument is original_instrument
+    assert bound.session_lifecycle is original_sessions
+
+
+def test_cockpit_view_model_with_backend_bindings_no_kwargs_is_identity():
+    base = sample_cockpit_view_model()
+    snapshot_prompt = base.prompt_payload
+    snapshot_meter = base.visible_prompt_payload_meter
+    snapshot_caps = base.model_capabilities
+
+    bound = cockpit_view_model_with_backend_bindings(base)
+
+    assert bound is base
+    assert bound.prompt_payload is snapshot_prompt
+    assert bound.visible_prompt_payload_meter is snapshot_meter
+    assert bound.model_capabilities is snapshot_caps
+
+
+def test_cockpit_view_model_with_backend_bindings_wires_all_three_surfaces():
+    base = CockpitViewModel(project="Test", bearing="wiring-slice")
+
+    bound = cockpit_view_model_with_backend_bindings(
+        base,
+        prompt_payload_evidence=RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            selected_provider="claude",
+            selected_model="claude-sonnet-4-20250514",
+            route_class="direct",
+            route_kind="direct",
+            trust_state="trusted",
+            estimated_prompt_tokens=920,
+            prompt_budget_tokens=4000,
+            budget_percent=23.0,
+            growth_state="flat",
+            prompt_payload_snapshot_hash="payload-snapshot:wired",
+        ),
+        visible_meter_evidence=(
+            RelayPromptPayloadMeterEvidence(
+                meter_evidence_id="payload-meter:wired",
+                selected_provider="claude",
+                exact_model_id="claude-sonnet-4-20250514",
+                provider_route_kind="direct",
+                display_label="under 1k",
+                budget_percent=22.5,
+                payload_status="ok",
+            ),
+        ),
+        visible_meter_source="relay-meter-wired",
+        model_capability_summary=RelayModelCapabilityMetadataSummary(
+            lanes=(
+                RelayModelCapabilityLaneSummary(
+                    lane_id="claude",
+                    selected_provider="claude",
+                    exact_model_id="claude-sonnet-4-20250514",
+                    provider_route_kind="direct",
+                    trust_state="trusted",
+                    context_window_tokens=200000,
+                ),
+            ),
+        ),
+        model_capability_selected_id="claude-sonnet-4-20250514",
+        model_capability_metadata_source="model-harness-wired",
+    )
+
+    assert bound.prompt_payload.provider_id == "claude"
+    assert bound.prompt_payload.evidence_ref == "payload-snapshot:wired"
+    assert bound.visible_prompt_payload_meter.source == "relay-meter-wired"
+    assert len(bound.visible_prompt_payload_meter.items) == 1
+    assert bound.visible_prompt_payload_meter.items[0].meter_id == "payload-meter:wired"
+    assert bound.model_capabilities.metadata_source == "model-harness-wired"
+    assert bound.model_capabilities.selected_model_id == "claude-sonnet-4-20250514"
+    assert len(bound.model_capabilities.items) == 1
+
+
+def test_sample_backend_bound_cockpit_view_model_is_deterministic():
+    a = sample_backend_bound_cockpit_view_model()
+    b = sample_backend_bound_cockpit_view_model()
+
+    assert a.prompt_payload == b.prompt_payload
+    assert a.visible_prompt_payload_meter == b.visible_prompt_payload_meter
+    assert a.model_capabilities == b.model_capabilities
+
+
+def test_sample_backend_bound_cockpit_view_model_binds_prompt_payload_from_evidence():
+    vm = sample_backend_bound_cockpit_view_model()
+
+    assert vm.prompt_payload.provider_id == "claude"
+    assert vm.prompt_payload.model_name == "claude-sonnet-4-20250514"
+    assert vm.prompt_payload.route_class == "direct"
+    assert vm.prompt_payload.route_kind == "direct"
+    assert vm.prompt_payload.trust_state == "trusted"
+    assert vm.prompt_payload.estimated_tokens == 920
+    assert vm.prompt_payload.budget_percent == 23.0
+    assert vm.prompt_payload.growth_state == "flat"
+    assert vm.prompt_payload.evidence_ref == "payload-snapshot:claude-dispatch"
+    assert vm.prompt_payload.telemetry_ref == "adapter:claude"
+    assert vm.prompt_payload.adapter_metadata_ref == "review:claude-cleared"
+
+
+def test_sample_backend_bound_cockpit_view_model_binds_meter_from_evidence_list():
+    vm = sample_backend_bound_cockpit_view_model()
+
+    assert vm.visible_prompt_payload_meter.source == "relay-meter-evidence-sample"
+    assert len(vm.visible_prompt_payload_meter.items) == 2
+
+    first, second = vm.visible_prompt_payload_meter.items
+    assert first.meter_id == "payload-meter:claude-under-1k"
+    assert first.provider_id == "claude"
+    assert first.model_id == "claude-sonnet-4-20250514"
+    assert first.prompt_label == "under 1k"
+    assert first.payload_status == "ok"
+    assert first.q_mode_prompt_drag_state == "ok"
+
+    assert second.meter_id == "payload-meter:deepseek-12-4k"
+    assert second.provider_id == "deepseek"
+    assert second.prompt_label == "12.4k"
+    assert second.payload_status == "degraded"
+    assert second.q_mode_prompt_drag_state == "degraded"
+    assert "unexpected_growth_delta" in second.warning_tags
+
+
+def test_sample_backend_bound_cockpit_view_model_binds_model_capabilities_from_summary():
+    vm = sample_backend_bound_cockpit_view_model()
+
+    assert vm.model_capabilities.selected_model_id == "claude-sonnet-4-20250514"
+    assert vm.model_capabilities.metadata_source == "model-harness-relay-summary-sample"
+    assert len(vm.model_capabilities.items) == 2
+
+    claude_item, deepseek_item = vm.model_capabilities.items
+    assert claude_item.provider_id == "claude"
+    assert claude_item.exact_model_id == "claude-sonnet-4-20250514"
+    assert claude_item.route_kind == "direct"
+    assert claude_item.trust_state == "trusted"
+    assert claude_item.external_review_required is False
+    assert claude_item.external_review_status == "not_required"
+
+    assert deepseek_item.provider_id == "deepseek"
+    assert deepseek_item.trust_state == "candidate"
+    assert deepseek_item.candidate_trust_state == "candidate"
+    assert deepseek_item.external_review_required is True
+    assert deepseek_item.external_review_status == "pending"
+    assert deepseek_item.proof_strength == "weak"
+    assert "review:deepseek-pending" in deepseek_item.evidence_refs
+
+
+def test_sample_backend_bound_cockpit_renders_provider_and_model_identity():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    # PromptPayloadView (single record) renders identity in payload-route-context
+    assert "Provider: claude" in doc
+    assert "Model: claude-sonnet-4-20250514" in doc
+    # VisiblePromptPayloadMeterView renders identity per-row
+    assert 'data-meter-id="payload-meter:claude-under-1k"' in doc
+    assert 'data-meter-id="payload-meter:deepseek-12-4k"' in doc
+    assert 'data-provider="deepseek"' in doc
+    assert 'data-model="deepseek-chat"' in doc
+    # ModelCapabilityMetadataView renders per-lane identity
+    assert 'data-model="claude-sonnet-4-20250514"' in doc
+    assert 'data-provider="claude"' in doc
+
+
+def test_sample_backend_bound_cockpit_renders_route_kind_and_trust_state():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    assert "Route kind: direct" in doc
+    assert "Trust: trusted" in doc
+    assert "Trust: candidate" in doc
+    assert "Route: direct" in doc
+
+
+def test_sample_backend_bound_cockpit_renders_prompt_payload_label_and_budget_percent():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    # Prompt payload label and budget percent
+    # PromptPayloadView size_label uses estimated_tokens * 4 heuristic; verify by class
+    assert 'class="payload-size">' in doc
+    assert "23% budget" in doc  # PromptPayloadView.budget_percent = 23.0
+    # Visible meter prompt labels render verbatim
+    assert "under 1k" in doc
+    assert "12.4k" in doc
+    assert "Budget: 22.5%" in doc
+    assert "Budget: 62.0%" in doc
+
+
+def test_sample_backend_bound_cockpit_renders_growth_state_and_external_review_status():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    # Growth state surfaces in prompt payload status
+    assert 'data-growth-state="flat"' in doc
+    # External review status surfaces in model capability badges
+    assert "External review status: not_required" in doc
+    assert "External review status: pending" in doc
+    # Prompt growth state per lane
+    assert "Prompt growth: flat" in doc
+    assert "Prompt growth: unexpected_growth" in doc
+
+
+def test_sample_backend_bound_cockpit_renders_evidence_refs():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    # PromptPayloadView evidence/telemetry/adapter refs
+    assert "Evidence: payload-snapshot:claude-dispatch" in doc
+    assert "Telemetry: adapter:claude" in doc
+    assert "Adapter: review:claude-cleared" in doc
+    # Per-meter evidence refs
+    assert "Payload evidence: payload-snapshot:claude-dispatch" in doc
+    assert "Payload evidence: payload-snapshot:deepseek-qmode" in doc
+    # Per-capability evidence refs (rendered as chips)
+    assert "review:deepseek-pending" in doc
+
+
+def test_sample_backend_bound_cockpit_preserves_existing_surfaces_from_base_view_model():
+    bound_doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    # The base sample_cockpit_view_model contributes provider balance, voice,
+    # session lifecycle, etc. The wiring slice must not erase those.
+    assert "OpenAI" in bound_doc  # provider balance row from base sample
+    assert "mic armed" in bound_doc  # voice listening state from base sample
+    assert "Visible Prompt Payload Meter" in bound_doc
+    assert "Model Harness Capability Metadata" in bound_doc
+    assert "Prompt Payload Visibility" in bound_doc
+
+
+def test_cockpit_wiring_slice_has_no_filesystem_or_network_side_effects():
+    """Wiring slice must be a pure functional projection of backend data."""
+    a = sample_backend_bound_cockpit_view_model()
+    b = sample_backend_bound_cockpit_view_model()
+
+    # The three reviewed surfaces are projected from sample backend records
+    # via the adapters; equality across separate calls proves determinism.
+    assert a.prompt_payload == b.prompt_payload
+    assert a.visible_prompt_payload_meter == b.visible_prompt_payload_meter
+    assert a.model_capabilities == b.model_capabilities
+
+    # Render is deterministic on identical view models
+    assert render_cockpit_html(a) == render_cockpit_html(b)

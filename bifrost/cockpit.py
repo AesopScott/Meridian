@@ -2509,6 +2509,168 @@ def model_capability_metadata_view_from_summary(
     )
 
 
+def cockpit_view_model_with_backend_bindings(
+    base: "CockpitViewModel",
+    *,
+    prompt_payload_evidence: "RelayPromptPayloadEvidence | None" = None,
+    visible_meter_evidence: "Iterable[RelayPromptPayloadMeterEvidence] | None" = None,
+    visible_meter_source: str = "relay-visible-prompt-payload-meter",
+    model_capability_summary: "RelayModelCapabilityMetadataSummary | None" = None,
+    model_capability_selected_id: str = "",
+    model_capability_metadata_source: str = "model-harness-relay-summary",
+) -> "CockpitViewModel":
+    """Wire reviewed backend evidence/summary records into a CockpitViewModel.
+
+    Applies the three Build 5H binding adapters in place on `base` and returns
+    the same instance for chaining. Only fields whose backend record is supplied
+    are replaced; the rest of the view model — projects, voice, instrument,
+    provider balance, etc. — is preserved exactly as the caller built it.
+
+    Deterministic and side-effect-free: no live calls, no transport, no raw
+    prompt or provider response text, no FileMap edits, no Electron changes.
+    """
+    if prompt_payload_evidence is not None:
+        base.prompt_payload = prompt_payload_view_from_evidence(prompt_payload_evidence)
+    if visible_meter_evidence is not None:
+        base.visible_prompt_payload_meter = visible_prompt_payload_meter_view_from_evidence(
+            visible_meter_evidence,
+            source=visible_meter_source,
+        )
+    if model_capability_summary is not None:
+        base.model_capabilities = model_capability_metadata_view_from_summary(
+            model_capability_summary,
+            selected_model_id=model_capability_selected_id,
+            metadata_source=model_capability_metadata_source,
+        )
+    return base
+
+
+def sample_backend_bound_cockpit_view_model() -> "CockpitViewModel":
+    """Return a deterministic CockpitViewModel whose three reviewed surfaces are
+    sourced from sample backend evidence/summary records via the binding adapters.
+
+    Demonstrates the full Build 5H wiring pipeline:
+    RelayPromptPayloadEvidence / list[RelayPromptPayloadMeterEvidence] /
+    RelayModelCapabilityMetadataSummary -> adapters -> CockpitViewModel ->
+    render_cockpit_html. No live provider calls, no Electron, no Polaris.
+    """
+    from meridian_core.relay_executor import (
+        RelayModelCapabilityLaneSummary as _RelayModelCapabilityLaneSummary,
+        RelayModelCapabilityMetadataSummary as _RelayModelCapabilityMetadataSummary,
+        RelayPromptPayloadEvidence as _RelayPromptPayloadEvidence,
+        RelayPromptPayloadMeterEvidence as _RelayPromptPayloadMeterEvidence,
+    )
+
+    return cockpit_view_model_with_backend_bindings(
+        sample_cockpit_view_model(),
+        prompt_payload_evidence=_RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            selected_provider="claude",
+            selected_model="claude-sonnet-4-20250514",
+            capability_tier="tier2",
+            route_class="direct",
+            route_kind="direct",
+            trust_state="trusted",
+            requires_external_review=False,
+            external_review_status="not_required",
+            model_metadata_ref="adapter:claude",
+            external_review_evidence_ref="review:claude-cleared",
+            estimated_prompt_tokens=920,
+            prompt_budget_tokens=4000,
+            model_context_window_tokens=200000,
+            budget_percent=23.0,
+            budget_status="ok",
+            delta_tokens=0,
+            delta_percent=0.0,
+            growth_state="flat",
+            prompt_payload_snapshot_hash="payload-snapshot:claude-dispatch",
+        ),
+        visible_meter_evidence=(
+            _RelayPromptPayloadMeterEvidence(
+                meter_evidence_id="payload-meter:claude-under-1k",
+                selected_provider="claude",
+                exact_model_id="claude-sonnet-4-20250514",
+                provider_route_kind="direct",
+                trust_state="trusted",
+                capability_tier="tier2",
+                display_label="under 1k",
+                estimated_prompt_tokens=900,
+                prompt_budget_tokens=4000,
+                budget_percent=22.5,
+                payload_status="ok",
+                growth_delta_tokens=0,
+                growth_delta_percent=0.0,
+                q_mode=False,
+                growth_state="flat",
+                payload_evidence_ref="payload-snapshot:claude-dispatch",
+                model_metadata_ref="adapter:claude",
+            ),
+            _RelayPromptPayloadMeterEvidence(
+                meter_evidence_id="payload-meter:deepseek-12-4k",
+                selected_provider="deepseek",
+                exact_model_id="deepseek-chat",
+                provider_route_kind="direct",
+                trust_state="candidate",
+                capability_tier="tier3",
+                display_label="12.4k",
+                estimated_prompt_tokens=3100,
+                prompt_budget_tokens=5000,
+                budget_percent=62.0,
+                payload_status="degraded",
+                growth_delta_tokens=240,
+                growth_delta_percent=6.0,
+                q_mode=True,
+                growth_state="unexpected_growth",
+                prompt_drag_tags=("q_mode_prompt_drag_degraded",),
+                warning_tags=("unexpected_growth_delta",),
+                payload_evidence_ref="payload-snapshot:deepseek-qmode",
+                model_metadata_ref="adapter:deepseek",
+                external_review_evidence_ref="review:deepseek-pending",
+            ),
+        ),
+        visible_meter_source="relay-meter-evidence-sample",
+        model_capability_summary=_RelayModelCapabilityMetadataSummary(
+            lanes=(
+                _RelayModelCapabilityLaneSummary(
+                    lane_id="claude",
+                    selected_provider="claude",
+                    exact_model_id="claude-sonnet-4-20250514",
+                    capability_tier="tier2",
+                    provider_route_kind="direct",
+                    trust_state="trusted",
+                    context_window_tokens=200000,
+                    prompt_payload_budget_tokens=4000,
+                    prompt_payload_status="within_budget",
+                    growth_state="flat",
+                    requires_external_review=False,
+                    external_review_status="not_required",
+                    model_metadata_ref="adapter:claude",
+                    payload_evidence_ref="payload-snapshot:claude-dispatch",
+                ),
+                _RelayModelCapabilityLaneSummary(
+                    lane_id="deepseek",
+                    selected_provider="deepseek",
+                    exact_model_id="deepseek-chat",
+                    capability_tier="tier3",
+                    provider_route_kind="direct",
+                    trust_state="candidate",
+                    context_window_tokens=256000,
+                    prompt_payload_budget_tokens=5000,
+                    prompt_payload_status="watch",
+                    growth_state="unexpected_growth",
+                    requires_external_review=True,
+                    external_review_status="pending",
+                    model_metadata_ref="adapter:deepseek",
+                    external_review_evidence_ref="review:deepseek-pending",
+                    payload_evidence_ref="payload-snapshot:deepseek-qmode",
+                ),
+            ),
+        ),
+        model_capability_selected_id="claude-sonnet-4-20250514",
+        model_capability_metadata_source="model-harness-relay-summary-sample",
+    )
+
+
 def relay_aegis_policy_handoff_from_summary(
     summary: Mapping[str, object],
 ) -> RelayAegisPolicyHandoffView:
