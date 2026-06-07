@@ -1,5 +1,29 @@
 # Live Build 5 Queue
 
+## Completion Marker - Ready For Main Routing / Codex Review
+
+Timestamp: 2026-06-07T07:12:48-06:00.
+
+Goal: implemented the next Bifrost V2 cockpit extension as a deterministic browser-first backend/view-model rendering slice for already-reviewed backend state.
+
+Implementation commit on clean promotion branch: `9a14e73eb` (`feat(bifrost): add reviewed backend evidence cockpit slice`). Original Build 5 worker commit before clean cherry-pick: `65ff7445a`.
+
+Files changed:
+- `bifrost/cockpit.py`
+- `bifrost/static/cockpit.css`
+- `tests/test_bifrost_cockpit.py`
+- `docs/live-build-5.md`
+
+Surface delivered: `ReviewedBackendEvidenceView` plus `reviewed_backend_evidence_view_from_summary(...)`, backend-bound sample wiring, and inert cockpit HTML/CSS rendering for a reviewed backend evidence snapshot. The slice displays Prime next action, Echo memory-hit summary, Atlas retrieval-hit summary, Session Lifecycle preview, Aegis policy result, Relay/model metadata, evidence refs, and warnings as escaped static markup only.
+
+Concrete evidence:
+- `python -m pytest tests/test_bifrost_cockpit.py -q`: `383 passed in 1.07s`.
+- `git diff --check`: clean; Git emitted only normal CRLF working-copy warnings.
+- Path scope before documentation marker: `bifrost/cockpit.py`, `bifrost/static/cockpit.css`, `tests/test_bifrost_cockpit.py`.
+- Guardrails covered by tests: unsafe marker redaction, non-Mapping item skips, deterministic summary projection, sample rendering, backend binding preservation, and no execution controls in the new section (`<button`, `<form`, recovery/session action hooks, merge/rebase/cherry-pick/stash-pop labels).
+
+Constraints honored: no live provider calls, no account probing, no raw prompt/transcript/provider-response text, no credentials/secrets, no FileMap edits, no Electron/index.html changes, no session execution controls, no process inspection, no data movement across worktrees, no shared-main writes, no main push.
+
 ## Required First Command For Every New Task
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.

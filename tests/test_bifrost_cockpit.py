@@ -52,6 +52,7 @@ from bifrost.cockpit import (
     provider_balance_view_from_summary,
     render_cockpit_html,
     relay_aegis_policy_handoff_from_summary,
+    reviewed_backend_evidence_view_from_summary,
     sample_backend_bound_cockpit_view_model,
     sample_cockpit_view_model,
     view_model_from_snapshot,
@@ -4996,6 +4997,7 @@ def test_cockpit_view_model_with_backend_bindings_no_kwargs_is_identity():
     snapshot_prompt = base.prompt_payload
     snapshot_meter = base.visible_prompt_payload_meter
     snapshot_caps = base.model_capabilities
+    snapshot_backend_evidence = base.reviewed_backend_evidence
 
     bound = cockpit_view_model_with_backend_bindings(base)
 
@@ -5003,6 +5005,228 @@ def test_cockpit_view_model_with_backend_bindings_no_kwargs_is_identity():
     assert bound.prompt_payload is snapshot_prompt
     assert bound.visible_prompt_payload_meter is snapshot_meter
     assert bound.model_capabilities is snapshot_caps
+    assert bound.reviewed_backend_evidence is snapshot_backend_evidence
+
+
+def test_reviewed_backend_evidence_view_from_summary_maps_static_backend_state():
+    view = reviewed_backend_evidence_view_from_summary({
+        "source": "reviewed-summary",
+        "prime_next_action": "continue_bifrost_browser_first_extension",
+        "session_lifecycle_preview": "display_only_preview_ready",
+        "aegis_policy_result": "warn_human_gate_not_required",
+        "relay_model_metadata": "claude tier2 trusted",
+        "evidence_refs": ("prime:next-action", "relay:model-metadata"),
+        "warnings": ("display_only_no_execution_controls",),
+        "items": (
+            {
+                "source": "Echo",
+                "label": "Memory hits",
+                "state": "available",
+                "count_label": "hits: 3",
+                "evidence_ref": "echo:memory-hit-summary",
+                "provenance": "reviewed-backend-state",
+            },
+            {
+                "source": "Atlas",
+                "label": "Retrieval hits",
+                "state": "available",
+                "count": "hits: 2",
+                "ref": "atlas:retrieval-hit-summary",
+                "review_ref": "reviewed-backend-state",
+            },
+        ),
+    })
+
+    assert view.source == "reviewed-summary"
+    assert view.prime_next_action == "continue_bifrost_browser_first_extension"
+    assert view.session_lifecycle_preview == "display_only_preview_ready"
+    assert view.aegis_policy_result == "warn_human_gate_not_required"
+    assert view.relay_model_metadata == "claude tier2 trusted"
+    assert view.evidence_refs == ["prime:next-action", "relay:model-metadata"]
+    assert view.warnings == ["display_only_no_execution_controls"]
+    assert [item.source for item in view.items] == ["Echo", "Atlas"]
+    assert view.items[1].count_label == "hits: 2"
+    assert view.items[1].evidence_ref == "atlas:retrieval-hit-summary"
+
+
+def test_reviewed_backend_evidence_view_from_summary_redacts_unsafe_markers():
+    view = reviewed_backend_evidence_view_from_summary({
+        "source": "relay",
+        "prime_next_action": "raw_prompt: do not expose",
+        "session_lifecycle_preview": "raw_transcript:FULL",
+        "aegis_policy_result": "conversation:APPROVAL",
+        "relay_model_metadata": "model_payload SECRET_VALUE",
+        "evidence_refs": (
+            "safe:ref",
+            "api_key:SECRET_VALUE",
+            "provider_response:FULL",
+            "free_form_context:FULL",
+            "raw_context:FULL",
+            "transcript:FULL",
+        ),
+        "items": (
+            {
+                "source": "Echo",
+                "label": "raw_provider_response SECRET_VALUE",
+                "state": "available",
+                "evidence_ref": "bearer token",
+            },
+            {
+                "source": "Atlas",
+                "label": "Retrieval hits",
+                "state": "available",
+                "evidence_ref": "raw_context:atlas-result",
+                "provenance": "provider_response:atlas",
+            },
+        ),
+    })
+
+    doc = render_cockpit_html(CockpitViewModel(
+        project="Test",
+        bearing="reviewed-backend-evidence",
+        reviewed_backend_evidence=view,
+    ))
+
+    assert "safe:ref" in doc
+    assert "unsafe_metadata_redacted" in doc
+    assert "SECRET_VALUE" not in doc
+    assert "raw_prompt" not in doc
+    assert "raw_transcript" not in doc
+    assert "raw_provider_response" not in doc
+    assert "provider_response" not in doc
+    assert "free_form_context" not in doc
+    assert "raw_context" not in doc
+    assert "transcript:FULL" not in doc
+    assert "conversation:APPROVAL" not in doc
+    assert "bearer token" not in doc
+
+
+def test_reviewed_backend_evidence_view_from_summary_skips_non_mapping_items():
+    view = reviewed_backend_evidence_view_from_summary({
+        "items": (
+            "not-a-record",
+            {"source": "Prime", "label": "Next action", "state": "ready"},
+        ),
+    })
+
+    assert len(view.items) == 1
+    assert view.items[0].source == "Prime"
+
+
+def test_reviewed_backend_evidence_renders_browser_first_static_snapshot():
+    vm = CockpitViewModel(
+        project="Test",
+        bearing="reviewed-backend-evidence",
+        reviewed_backend_evidence=reviewed_backend_evidence_view_from_summary({
+            "source": "reviewed-backend-evidence",
+            "prime_next_action": "continue_bifrost_browser_first_extension",
+            "session_lifecycle_preview": "display_only_preview_ready",
+            "aegis_policy_result": "warn_human_gate_not_required",
+            "relay_model_metadata": "claude tier2 trusted",
+            "items": (
+                {
+                    "source": "Echo",
+                    "label": "Memory hits",
+                    "state": "available",
+                    "count_label": "hits: 3",
+                    "evidence_ref": "echo:memory-hit-summary",
+                },
+            ),
+            "evidence_refs": ("prime:next-action",),
+            "warnings": ("display_only_no_execution_controls",),
+        }),
+    )
+
+    doc = render_cockpit_html(vm)
+
+    assert 'aria-label="Reviewed Backend Evidence Snapshot"' in doc
+    assert "Prime next action: continue_bifrost_browser_first_extension" in doc
+    assert "Session preview: display_only_preview_ready" in doc
+    assert "Aegis policy result: warn_human_gate_not_required" in doc
+    assert "Relay/model metadata: claude tier2 trusted" in doc
+    assert "Echo" in doc
+    assert "Memory hits" in doc
+    assert "hits: 3" in doc
+    assert "prime:next-action" in doc
+    assert "display_only_no_execution_controls" in doc
+
+
+def test_reviewed_backend_evidence_render_has_no_execution_controls():
+    vm = sample_backend_bound_cockpit_view_model()
+    doc = render_cockpit_html(vm)
+    section = doc.split('aria-label="Reviewed Backend Evidence Snapshot"', 1)[1]
+    section = section.split("</section>", 1)[0]
+
+    forbidden = (
+        "<button",
+        "<form",
+        "data-recovery-action",
+        "restart-session",
+        "archive-session",
+        "resteer-session",
+        "spawn-session",
+        "merge",
+        "rebase",
+        "cherry-pick",
+        "stash-pop",
+    )
+    for token in forbidden:
+        assert token not in section
+
+
+def test_cockpit_view_model_with_backend_bindings_wires_reviewed_backend_evidence():
+    base = CockpitViewModel(project="Test", bearing="reviewed-backend-evidence")
+
+    bound = cockpit_view_model_with_backend_bindings(
+        base,
+        reviewed_backend_evidence_summary={
+            "source": "summary",
+            "prime_next_action": "continue",
+            "items": (
+                {
+                    "source": "Atlas",
+                    "label": "Retrieval hits",
+                    "state": "available",
+                    "count_label": "hits: 2",
+                },
+            ),
+        },
+    )
+
+    assert bound is base
+    assert bound.reviewed_backend_evidence.source == "summary"
+    assert bound.reviewed_backend_evidence.prime_next_action == "continue"
+    assert bound.reviewed_backend_evidence.items[0].source == "Atlas"
+
+
+def test_sample_backend_bound_cockpit_renders_reviewed_backend_evidence_summary():
+    doc = render_cockpit_html(sample_backend_bound_cockpit_view_model())
+
+    assert "backend-reviewed-evidence-sample" in doc
+    assert "continue_bifrost_browser_first_extension" in doc
+    assert "Echo" in doc
+    assert "Memory hits" in doc
+    assert "Atlas" in doc
+    assert "Retrieval hits" in doc
+    assert "session-lifecycle:preview-reviewed" in doc
+    assert "aegis:policy-result-reviewed" in doc
+    assert "relay:model-metadata-reviewed" in doc
+
+
+def test_reviewed_backend_evidence_view_is_deterministic():
+    summary = {
+        "source": "summary",
+        "evidence_refs": {"zeta:ref", "alpha:ref"},
+        "items": (
+            {"source": "Prime", "label": "Next action", "state": "ready"},
+            {"source": "Relay", "label": "Model metadata", "state": "bound"},
+        ),
+    }
+
+    assert (
+        reviewed_backend_evidence_view_from_summary(summary)
+        == reviewed_backend_evidence_view_from_summary(summary)
+    )
 
 
 def test_cockpit_view_model_with_backend_bindings_wires_all_three_surfaces():
