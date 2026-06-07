@@ -282,9 +282,10 @@ def test_ui_authority_doc_calls_index_html_renderer_internals(ui_authority_sourc
     # Tightened anchors: Electron must load root index.html, and index.html
     # must be locked as current renderer source rather than a separate UI target.
     assert "Electron loads" in ui_authority_source
-    assert "Root `index.html` is still part of that app today" in ui_authority_source
-    assert "`index.html` is one internal file the app\ncurrently uses to render it" in ui_authority_source
-    assert "do not imply that `index.html` is unrelated\nto the Electron app" in ui_authority_source
+    assert "Root `index.html` is the current renderer source inside that Electron app" in ui_authority_source
+    assert "Edits\nto `index.html` are app UI work" in ui_authority_source
+    assert "do not imply that `index.html` is\nunrelated to the Electron app" in ui_authority_source
+    assert "edits to it are outside app UI work" in ui_authority_source
     assert "loads root `index.html` as its renderer source" in ui_authority_source
 
 

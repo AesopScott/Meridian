@@ -1191,8 +1191,9 @@ Task: move the current Bifrost preview toward the latest Scott-approved HUD-grid
 Requirements:
 
 - Historical wording superseded: the Meridian UI is now explicitly the Electron
-  app. Root `index.html` is its renderer source, and generated Bifrost preview
-  HTML is proof output only.
+  app. Root `index.html` is the current renderer source inside that app, so
+  edits to it are app UI work. Generated Bifrost preview HTML is proof output
+  only.
 - Make the central Prime command bay the dominant surface. The prompt/input area must be large enough for real conversation, not a small widget.
 - Keep the center presence core quiet: only `PRIMED` plus a pulsing orb/state. Do not put provider balance, Claude/OpenAI/DeepSeek, prompt payload, queue, proof, Prime, B1-B5, ABH, tier, version, or numbered HUD labels inside that core.
 - Remove permanent top navigation noise. Panels should be summonable through Prime/voice or scoped controls, not a top row of buttons.

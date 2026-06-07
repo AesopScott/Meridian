@@ -135,5 +135,5 @@ Low-confidence or high-risk commands must be confirmation-gated before execution
 - Harness panel, project/lane, dictation, read-aloud, and proof command families are defined.
 - Risky or low-confidence intents require confirmation.
 - Voice state belongs in the Meridian Electron app surface. Root `index.html`
-  is the app renderer source, and generated Bifrost preview HTML remains proof
-  output only.
+  is the current app renderer source, so voice UI edits there are app UI work.
+  Generated Bifrost preview HTML remains proof output only.

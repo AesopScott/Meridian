@@ -7,14 +7,15 @@ You talk to the orchestrator. The orchestrator drives worker sessions, harnesses
 ## Meridian UI
 
 The Meridian user interface is the Electron app. That is the app to run, demo,
-and build against.
+test, document, and build against.
 
-Root `index.html` is not the UI. It is part of the Electron app implementation:
-the renderer source the desktop app loads into its window. It contains the
-cockpit markup, styling, and local bridge wiring that the Electron app uses, but
-it must not be named, run, or reviewed as a separate Meridian UI target. `npm
-start` launches `electron/main.js`, which opens the Meridian Electron app with
-this renderer. Startup must not regenerate or substitute `bifrost/preview.html`.
+Root `index.html` is the current renderer source inside the Electron app. Edits
+to that file are edits to the app's visible UI because Electron loads it into
+the desktop window. It is not obsolete, detached, or merely historical. It also
+must not be treated as a standalone browser demo, a separate product target, or
+a replacement identity for the Electron app. `npm start` launches
+`electron/main.js`, which opens the Meridian Electron app with this renderer.
+Startup must not regenerate or substitute `bifrost/preview.html`.
 
 `bifrost/preview.html` is a generated backend/render proof artifact created by `bifrost/preview.py`. It is not the product UI entrypoint.
 
@@ -34,7 +35,7 @@ Orchestrator → Scott only for judgment bottlenecks
 
 ## Current State
 
-Meridian now has a working Electron cockpit app as its UI, renderer internals in `index.html`, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
+Meridian now has a working Electron cockpit app as its UI, current renderer source in `index.html`, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
 
 ### Package: `meridian_core`
 

@@ -3,9 +3,9 @@
 Historical checkpoint for the Meridian UI version 1.0 state.
 
 Current UI authority: the Electron app is the Meridian UI. Root `index.html`
-is its renderer source. This checkpoint records an earlier named UI state and
-should not be treated as the current app entrypoint unless intentionally
-restoring that old visual state.
+is the current renderer source inside that app. This checkpoint records an
+earlier named UI state and should not be treated as the current app entrypoint
+unless intentionally restoring that old visual state.
 
 ## Historical Preview
 
