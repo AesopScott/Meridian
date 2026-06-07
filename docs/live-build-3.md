@@ -8,6 +8,70 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Active Task - Workflow Dispatch FileMap Registration
+
+Timestamp: 2026-06-07T17:15:00-06:00.
+
+Goal: register the newly promoted Workflow Sub-Agent Harness dispatch backend
+domain slice in all FileMap surfaces.
+
+Worker requirement: implementation must run in a Polaris Build 3 Opus worker
+(`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may review only
+after a real worker candidate exists.
+
+Source of authority:
+
+- Promoted main commit `28002a9b7` (`workflow: add dispatch domain slice`).
+- `docs/live-build-1.md` active completion marker for the Workflow Dispatch
+  slice.
+- `docs/workflow-subagent-harness-contract.md`.
+- Existing FileMap registration pattern for Provider Balance and V3 Goal
+  Runtime domain slices.
+
+Task: register `meridian_core/workflow_dispatch.py` and
+`tests/test_workflow_dispatch.py` in all three FileMap surfaces. Keep this as a
+registration-only slice; do not change workflow dispatch implementation,
+workflow dispatch tests, Workflow contract docs, Bifrost/Electron/UI files,
+generated artifacts, package files, worker queues outside this file, or runtime
+behavior.
+
+Allowed files only:
+
+- `meridian_core/filemap.py`
+- `docs/FileMap.md`
+- `tests/test_filemap.py`
+- `docs/live-build-3.md`
+
+Expected registration content:
+
+- Place the new entries near the existing V3 domain registrations, following
+  the Provider Balance / Goal Runtime registration style.
+- Identify ownership as Workflow Sub-Agent Harness / Prime coordination, with
+  Aegis, Beacon, Session Lifecycle, Echo, Atlas, Relay, and Bifrost as
+  downstream or adjacent consumers only where accurate.
+- Describe the module as a pure deterministic Workflow Dispatch domain slice:
+  frozen work-order/input/heartbeat/result/error/resteer/promotion dataclasses,
+  closed workflow enums, fake/stub handler dispatch, tier proof and gate
+  enforcement, segment-aware path scoping, UTC timestamp validation, tri-state
+  resteer overrides, prompt-drag/display-safety guards, no heartbeat-history
+  exposure, and no live workflow execution.
+- Explicitly state the exclusions: no process/session control, no model calls,
+  no network, no UI/Electron/Bifrost behavior, no Echo/FileMap durable writes,
+  no provider/account calls, and no FileMap self-registration inside the
+  workflow module.
+- Register the focused test file as the 161-test proof suite for the module.
+
+Required proof before Ready marker:
+
+- `python -m pytest tests/test_filemap.py tests/test_workflow_dispatch.py -q`
+- `git diff --check`
+- path-scope proof limited to the four allowed files
+- completion marker in this section with files changed, proof, and remaining
+  risk
+
+Stop after implementation and marker. Do not promote to main, do not push to
+main, do not move branches/worktrees, and do not touch shared main.
+
 ## Completed / Review-Cleared / Promoted To Main - Provider Balance FileMap Registration
 
 Timestamp: 2026-06-07T15:55:00-06:00.
