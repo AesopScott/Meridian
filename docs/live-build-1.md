@@ -8,6 +8,38 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now / Build Required
+
+Goal: implement the next Model Harness DeepSeek validation-gate proof and transport-authority backend slice without enabling unsafe live autonomy.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-1-deepseek-validation`.
+
+Branch: start from current `origin/main` on `codex/build-1-deepseek-live-validation-20260606`.
+
+Allowed files only: `meridian_core/model_adapter.py`, `meridian_core/relay_executor.py`, `tests/test_model_adapter.py`, `tests/test_relay_executor.py`, `docs/deepseek-provider-validation-gate.md`, `docs/model-harness-runtime-validation-checklist.md`, `docs/live-build-1.md`.
+
+Context:
+- `docs/v2-progress-tracker.md` still lists **Model Harness + DeepSeek Live Validation/Transport** as the remaining Relay/Model backend build item.
+- Current main already has DeepSeek candidate metadata, validation-state infrastructure, Relay disposition binding, Prime/Beacon advisory projection, and runtime-state export promoted through `bd1d2d594`.
+- This task must advance from candidate metadata toward validation-gate proof and transport authority while staying fail-closed and local-only.
+
+Task:
+- Add deterministic backend structures/helpers that represent DeepSeek validation-gate proof state for direct-provider transport readiness.
+- Represent transport authority as explicit, bounded metadata only: direct dispatch id, validation proof refs, validation level/result, transport authority status, blocked-authority tags, and review evidence.
+- Preserve the invariant that DeepSeek cannot run autonomous implementation, clear reviews, move branches/worktrees, or run live coding lanes unless validation proof and human/Prime authority gates are explicitly satisfied.
+- Ensure missing, stale, partial, or candidate-only validation proof remains blocked/fail-closed in Relay-facing disposition/decision surfaces.
+- Keep this pure/local: no network calls, no credentials, no account probing, no live provider/model execution, no UI/Bifrost/FileMap edits, no shared-main write, no branch/worktree movement outside the assigned branch, and no Polaris dependency.
+
+Proof:
+- Add focused unit tests covering candidate-only blocked state, validation-proof-present transport-ready state, missing/stale proof fail-closed behavior, and Relay disposition/decision output preserving blocked autonomy tags.
+- `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q`
+- `git diff --check`
+
+Completion:
+- Commit only this focused Build 1 slice on the assigned branch.
+- Mark this block `Completed / Ready For Codex Review` with commit hash, files changed, tests run, and concrete before/after evidence.
+- Next Candidate: Codex Reviews A review of the DeepSeek validation-gate proof/transport-authority slice before any coordinator promotion to `main`.
+
 ## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
 
 Goal: hold Build 1 after Main promotion of the DeepSeek validation/advisory/export backend stack.
