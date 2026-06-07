@@ -9,13 +9,12 @@ You talk to the orchestrator. The orchestrator drives worker sessions, harnesses
 The Meridian user interface is the Electron app. That is the app to run, demo,
 and build against.
 
-Root `index.html` is part of the Electron app implementation: it is the
-renderer source the desktop app loads into its window. It contains the cockpit
-surface: harness dock, Prime panel, user/session panel, Spark center,
-right-panel modes, model harness views, and local bridge wiring. Do not treat it
-as a separate UI target. `npm start` launches `electron/main.js`, which opens
-the Meridian Electron app with this renderer. Startup must not regenerate or
-substitute `bifrost/preview.html`.
+Root `index.html` is not the UI. It is part of the Electron app implementation:
+the renderer source the desktop app loads into its window. It contains the
+cockpit markup, styling, and local bridge wiring that the Electron app uses, but
+it must not be named, run, or reviewed as a separate Meridian UI target. `npm
+start` launches `electron/main.js`, which opens the Meridian Electron app with
+this renderer. Startup must not regenerate or substitute `bifrost/preview.html`.
 
 `bifrost/preview.html` is a generated backend/render proof artifact created by `bifrost/preview.py`. It is not the product UI entrypoint.
 
@@ -35,7 +34,7 @@ Orchestrator → Scott only for judgment bottlenecks
 
 ## Current State
 
-Meridian now has a working Electron cockpit UI, renderer source in `index.html`, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
+Meridian now has a working Electron cockpit app as its UI, renderer internals in `index.html`, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
 
 ### Package: `meridian_core`
 

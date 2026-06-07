@@ -282,7 +282,8 @@ def test_ui_authority_doc_calls_index_html_renderer_internals(ui_authority_sourc
     # Tightened anchors: Electron must load root index.html, and index.html
     # must be locked as not a separate UI target.
     assert "Electron loads" in ui_authority_source
-    assert "not the Meridian UI as a separate thing" in ui_authority_source
+    assert "Root `index.html` is not the Meridian UI" in ui_authority_source
+    assert "Do not write that\n`index.html` is the Meridian UI" in ui_authority_source
     assert "loads root `index.html` as renderer internals" in ui_authority_source
 
 

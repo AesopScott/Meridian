@@ -3,12 +3,16 @@
 The Meridian UI is the Electron app. That desktop app is the product surface:
 the thing to run, demo, test, document, and build against.
 
-Root `index.html` is not the Meridian UI as a separate thing. It is an
-implementation file inside the Meridian Electron app: the renderer source that
-Electron loads into the desktop window. It still matters because the app uses it
-to draw the interface, but it is not the product identity, not a standalone demo
-target, and not the thing someone should name as the UI. When someone says "the
-Meridian UI," they mean the Electron app.
+Root `index.html` is not the Meridian UI. It is an implementation file inside
+the Meridian Electron app: the renderer source that Electron loads into the
+desktop window. It still matters because the app uses it to draw the interface,
+but it is not the product identity, not a standalone demo target, and not the
+thing someone should name as the UI. When someone says "the Meridian UI," they
+mean the Electron app.
+
+Documentation rule: say "the Electron app is the Meridian UI." Say
+"`index.html` is renderer internals for that app." Do not write that
+`index.html` is the Meridian UI.
 
 This Electron app is the UI Scott has been building and using. It owns the visible Meridian cockpit: the harness dock, Prime panel, user/session panel, Spark center, right-panel modes, model harness views, local bridge status, and backend-sourced Prime/Relay/Compass/Vulcan runtime logic surfaces.
 
