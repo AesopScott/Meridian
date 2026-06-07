@@ -101,6 +101,46 @@ _PROJECT_HANDOFF_RESULT_DICT_KEYS = (
     "review_ready",
     "execution_authorized",
 )
+_PROJECT_IDENTITY_NEIGHBOR_KEYS = (
+    "project_id",
+    "mission_bearing",
+    "repo_refs",
+    "venture_refs",
+    "session_refs",
+)
+_PROJECT_IDENTITY_CANDIDATE_KEYS = (
+    "project_id",
+    "title",
+    "outcome",
+    "mission_bearing",
+    "repo_refs",
+    "venture_refs",
+    "session_refs",
+    "evidence_refs",
+    "neighbors",
+)
+_PROJECT_IDENTITY_RESULT_DICT_KEYS = (
+    "decision",
+    "project_id",
+    "title",
+    "outcome",
+    "mission_bearing",
+    "evidence_refs",
+    "shared_repo_refs",
+    "shared_venture_refs",
+    "shared_session_refs",
+    "distinguishing_neighbors",
+    "collapsing_neighbors",
+    "blockers",
+    "compass_question",
+    "execution_authorized",
+)
+_PROJECT_IDENTITY_REQUIRED_TEXT_FIELDS = (
+    "project_id",
+    "title",
+    "outcome",
+    "mission_bearing",
+)
 _SCOPE_SUBJECT_KINDS = {
     "context",
     "artifact",
@@ -166,6 +206,14 @@ class ProjectHandoffDecision(Enum):
     """Deterministic Compass decision for cross-project handoff review."""
 
     REVIEW_READY = "review_ready"
+    AMBIGUOUS = "ambiguous"
+    BLOCKED = "blocked"
+
+
+class ProjectIdentityDecision(Enum):
+    """Deterministic Compass decision for project identity definition."""
+
+    DEFINED = "defined"
     AMBIGUOUS = "ambiguous"
     BLOCKED = "blocked"
 
@@ -791,6 +839,245 @@ class ProjectHandoffEvaluation:
         }
 
 
+@dataclass(frozen=True)
+class ProjectIdentityNeighbor:
+    """Already-defined neighbor project that may share relationship refs."""
+
+    project_id: str
+    mission_bearing: str
+    repo_refs: tuple[str, ...] = ()
+    venture_refs: tuple[str, ...] = ()
+    session_refs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "project_id",
+            _normalize_required_text("project_id", self.project_id),
+        )
+        object.__setattr__(
+            self,
+            "mission_bearing",
+            _normalize_required_text("mission_bearing", self.mission_bearing),
+        )
+        object.__setattr__(
+            self,
+            "repo_refs",
+            _normalize_optional_tuple("repo_refs", self.repo_refs),
+        )
+        object.__setattr__(
+            self,
+            "venture_refs",
+            _normalize_optional_tuple("venture_refs", self.venture_refs),
+        )
+        object.__setattr__(
+            self,
+            "session_refs",
+            _normalize_optional_tuple("session_refs", self.session_refs),
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "project_id": self.project_id,
+            "mission_bearing": self.mission_bearing,
+            "repo_refs": self.repo_refs,
+            "venture_refs": self.venture_refs,
+            "session_refs": self.session_refs,
+        }
+
+
+@dataclass(frozen=True)
+class ProjectIdentityCandidate:
+    """Primitive identity inputs being considered as a Meridian project definition."""
+
+    project_id: str | None
+    title: str | None
+    outcome: str | None
+    mission_bearing: str | None
+    repo_refs: tuple[str, ...]
+    venture_refs: tuple[str, ...]
+    session_refs: tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()
+    neighbors: tuple[ProjectIdentityNeighbor, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.project_id is not None:
+            object.__setattr__(
+                self,
+                "project_id",
+                _normalize_required_text("project_id", self.project_id),
+            )
+        if self.title is not None:
+            object.__setattr__(
+                self,
+                "title",
+                _normalize_required_text("title", self.title),
+            )
+        if self.outcome is not None:
+            object.__setattr__(
+                self,
+                "outcome",
+                _normalize_required_text("outcome", self.outcome),
+            )
+        if self.mission_bearing is not None:
+            object.__setattr__(
+                self,
+                "mission_bearing",
+                _normalize_required_text("mission_bearing", self.mission_bearing),
+            )
+        object.__setattr__(
+            self,
+            "repo_refs",
+            _normalize_optional_tuple("repo_refs", self.repo_refs),
+        )
+        object.__setattr__(
+            self,
+            "venture_refs",
+            _normalize_optional_tuple("venture_refs", self.venture_refs),
+        )
+        object.__setattr__(
+            self,
+            "session_refs",
+            _normalize_optional_tuple("session_refs", self.session_refs),
+        )
+        object.__setattr__(
+            self,
+            "evidence_refs",
+            _normalize_optional_tuple("evidence_refs", self.evidence_refs),
+        )
+        if any(
+            not isinstance(neighbor, ProjectIdentityNeighbor)
+            for neighbor in self.neighbors
+        ):
+            raise ValueError("neighbors must be ProjectIdentityNeighbor")
+        object.__setattr__(self, "neighbors", tuple(self.neighbors))
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "project_id": self.project_id,
+            "title": self.title,
+            "outcome": self.outcome,
+            "mission_bearing": self.mission_bearing,
+            "repo_refs": self.repo_refs,
+            "venture_refs": self.venture_refs,
+            "session_refs": self.session_refs,
+            "evidence_refs": self.evidence_refs,
+            "neighbors": tuple(neighbor.to_dict() for neighbor in self.neighbors),
+        }
+
+
+@dataclass(frozen=True)
+class ProjectIdentityEvaluation:
+    """Serializable Compass result for a project identity definition check."""
+
+    decision: ProjectIdentityDecision
+    project_id: str | None
+    title: str | None
+    outcome: str | None
+    mission_bearing: str | None
+    evidence_refs: tuple[str, ...]
+    shared_repo_refs: tuple[str, ...] = ()
+    shared_venture_refs: tuple[str, ...] = ()
+    shared_session_refs: tuple[str, ...] = ()
+    distinguishing_neighbors: tuple[str, ...] = ()
+    collapsing_neighbors: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    compass_question: str | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.decision, ProjectIdentityDecision):
+            raise ValueError("decision must be ProjectIdentityDecision")
+        if self.project_id is not None:
+            object.__setattr__(
+                self,
+                "project_id",
+                _normalize_required_text("project_id", self.project_id),
+            )
+        if self.title is not None:
+            object.__setattr__(
+                self,
+                "title",
+                _normalize_required_text("title", self.title),
+            )
+        if self.outcome is not None:
+            object.__setattr__(
+                self,
+                "outcome",
+                _normalize_required_text("outcome", self.outcome),
+            )
+        if self.mission_bearing is not None:
+            object.__setattr__(
+                self,
+                "mission_bearing",
+                _normalize_required_text("mission_bearing", self.mission_bearing),
+            )
+        object.__setattr__(
+            self,
+            "evidence_refs",
+            _normalize_optional_tuple("evidence_refs", self.evidence_refs),
+        )
+        object.__setattr__(
+            self,
+            "shared_repo_refs",
+            _normalize_optional_tuple("shared_repo_refs", self.shared_repo_refs),
+        )
+        object.__setattr__(
+            self,
+            "shared_venture_refs",
+            _normalize_optional_tuple("shared_venture_refs", self.shared_venture_refs),
+        )
+        object.__setattr__(
+            self,
+            "shared_session_refs",
+            _normalize_optional_tuple("shared_session_refs", self.shared_session_refs),
+        )
+        object.__setattr__(
+            self,
+            "distinguishing_neighbors",
+            _normalize_optional_tuple(
+                "distinguishing_neighbors",
+                self.distinguishing_neighbors,
+            ),
+        )
+        object.__setattr__(
+            self,
+            "collapsing_neighbors",
+            _normalize_optional_tuple(
+                "collapsing_neighbors",
+                self.collapsing_neighbors,
+            ),
+        )
+        object.__setattr__(
+            self,
+            "blockers",
+            _normalize_optional_tuple("blockers", self.blockers),
+        )
+        if self.compass_question is not None:
+            object.__setattr__(
+                self,
+                "compass_question",
+                _normalize_required_text("compass_question", self.compass_question),
+            )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "decision": self.decision.value,
+            "project_id": self.project_id,
+            "title": self.title,
+            "outcome": self.outcome,
+            "mission_bearing": self.mission_bearing,
+            "evidence_refs": self.evidence_refs,
+            "shared_repo_refs": self.shared_repo_refs,
+            "shared_venture_refs": self.shared_venture_refs,
+            "shared_session_refs": self.shared_session_refs,
+            "distinguishing_neighbors": self.distinguishing_neighbors,
+            "collapsing_neighbors": self.collapsing_neighbors,
+            "blockers": self.blockers,
+            "compass_question": self.compass_question,
+            "execution_authorized": False,
+        }
+
+
 def define_project(
     *,
     project_id: str,
@@ -1018,6 +1305,96 @@ def evaluate_cross_project_handoff(
     )
 
 
+def project_identity_candidate_from_definition(
+    project: ProjectDefinition,
+    *,
+    mission_bearing: str,
+    evidence_refs: Iterable[str],
+    neighbors: Iterable[ProjectIdentityNeighbor] = (),
+) -> ProjectIdentityCandidate:
+    """Build a ProjectIdentityCandidate from an already-validated ProjectDefinition."""
+    return ProjectIdentityCandidate(
+        project_id=project.project_id,
+        title=project.title,
+        outcome=project.outcome,
+        mission_bearing=mission_bearing,
+        repo_refs=project.relationship_refs.repo_refs,
+        venture_refs=project.relationship_refs.venture_refs,
+        session_refs=project.relationship_refs.session_refs,
+        evidence_refs=tuple(evidence_refs),
+        neighbors=tuple(neighbors),
+    )
+
+
+def evaluate_project_identity(
+    candidate: ProjectIdentityCandidate,
+) -> ProjectIdentityEvaluation:
+    """Decide whether a candidate is a complete, distinct project definition.
+
+    Identity does not collapse merely because a candidate shares a repo path,
+    venture, or session label with a neighbor — the candidate must also carry
+    a distinguishing mission bearing. Shared refs without a distinguishing
+    bearing surface as a Compass question rather than silently merging.
+    """
+    blockers = _project_identity_blockers(candidate)
+    if blockers:
+        return ProjectIdentityEvaluation(
+            decision=ProjectIdentityDecision.BLOCKED,
+            project_id=candidate.project_id,
+            title=candidate.title,
+            outcome=candidate.outcome,
+            mission_bearing=candidate.mission_bearing,
+            evidence_refs=candidate.evidence_refs,
+            blockers=blockers,
+            compass_question=(
+                "Compass needs complete project identity inputs before defining "
+                "a project boundary."
+            ),
+        )
+
+    (
+        shared_repo_refs,
+        shared_venture_refs,
+        shared_session_refs,
+        distinguishing,
+        collapsing,
+    ) = _project_identity_neighbor_overlap(candidate)
+
+    if collapsing:
+        return ProjectIdentityEvaluation(
+            decision=ProjectIdentityDecision.AMBIGUOUS,
+            project_id=candidate.project_id,
+            title=candidate.title,
+            outcome=candidate.outcome,
+            mission_bearing=candidate.mission_bearing,
+            evidence_refs=candidate.evidence_refs,
+            shared_repo_refs=shared_repo_refs,
+            shared_venture_refs=shared_venture_refs,
+            shared_session_refs=shared_session_refs,
+            distinguishing_neighbors=distinguishing,
+            collapsing_neighbors=collapsing,
+            blockers=("project_identity_collapse_risk",),
+            compass_question=(
+                "Compass needs a distinguishing mission bearing before defining "
+                "a project that shares repo, venture, or session refs with "
+                f"{list(collapsing)}."
+            ),
+        )
+
+    return ProjectIdentityEvaluation(
+        decision=ProjectIdentityDecision.DEFINED,
+        project_id=candidate.project_id,
+        title=candidate.title,
+        outcome=candidate.outcome,
+        mission_bearing=candidate.mission_bearing,
+        evidence_refs=candidate.evidence_refs,
+        shared_repo_refs=shared_repo_refs,
+        shared_venture_refs=shared_venture_refs,
+        shared_session_refs=shared_session_refs,
+        distinguishing_neighbors=distinguishing,
+    )
+
+
 def _scope_result(
     decision: ProjectScopeDecision,
     candidate: ProjectScopeCandidate,
@@ -1140,6 +1517,84 @@ def _handoff_request_blockers(
     if _has_raw_context_ref(request.approval_refs):
         blockers.append("raw_context_approval_ref_blocked")
     return tuple(blockers)
+
+
+def _project_identity_blockers(
+    candidate: ProjectIdentityCandidate,
+) -> tuple[str, ...]:
+    blockers: list[str] = []
+    for field_name in _PROJECT_IDENTITY_REQUIRED_TEXT_FIELDS:
+        if getattr(candidate, field_name) is None:
+            blockers.append(f"missing_{field_name}")
+    if not candidate.repo_refs:
+        blockers.append("missing_repo_refs")
+    if not candidate.venture_refs:
+        blockers.append("missing_venture_refs")
+    if not candidate.evidence_refs:
+        blockers.append("missing_evidence_refs")
+    if _has_raw_context_ref(candidate.evidence_refs):
+        blockers.append("raw_context_evidence_ref_blocked")
+    return tuple(blockers)
+
+
+def _project_identity_neighbor_overlap(
+    candidate: ProjectIdentityCandidate,
+) -> tuple[
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+]:
+    candidate_repo = set(candidate.repo_refs)
+    candidate_venture = set(candidate.venture_refs)
+    candidate_session = set(candidate.session_refs)
+    candidate_bearing = (
+        candidate.mission_bearing.strip()
+        if candidate.mission_bearing is not None
+        else ""
+    )
+
+    shared_repo: set[str] = set()
+    shared_venture: set[str] = set()
+    shared_session: set[str] = set()
+    distinguishing: list[str] = []
+    collapsing: list[str] = []
+    seen_neighbors: set[str] = set()
+
+    for neighbor in candidate.neighbors:
+        if neighbor.project_id in seen_neighbors:
+            continue
+        n_repo = set(neighbor.repo_refs) & candidate_repo
+        n_venture = set(neighbor.venture_refs) & candidate_venture
+        n_session = set(neighbor.session_refs) & candidate_session
+        if not (n_repo or n_venture or n_session):
+            continue
+
+        seen_neighbors.add(neighbor.project_id)
+        shared_repo |= n_repo
+        shared_venture |= n_venture
+        shared_session |= n_session
+
+        neighbor_bearing = neighbor.mission_bearing.strip()
+        same_project_id = (
+            candidate.project_id is not None
+            and neighbor.project_id == candidate.project_id
+        )
+        same_bearing = neighbor_bearing == candidate_bearing
+
+        if same_project_id or same_bearing:
+            collapsing.append(neighbor.project_id)
+        else:
+            distinguishing.append(neighbor.project_id)
+
+    return (
+        tuple(sorted(shared_repo)),
+        tuple(sorted(shared_venture)),
+        tuple(sorted(shared_session)),
+        tuple(distinguishing),
+        tuple(collapsing),
+    )
 
 
 def _project_difference_blockers(
@@ -1267,3 +1722,18 @@ def project_handoff_request_dict_keys() -> tuple[str, ...]:
 def project_handoff_result_dict_keys() -> tuple[str, ...]:
     """Expose the stable handoff-evaluation serialization shape."""
     return _PROJECT_HANDOFF_RESULT_DICT_KEYS
+
+
+def project_identity_neighbor_dict_keys() -> tuple[str, ...]:
+    """Expose the stable identity-neighbor serialization shape."""
+    return _PROJECT_IDENTITY_NEIGHBOR_KEYS
+
+
+def project_identity_candidate_dict_keys() -> tuple[str, ...]:
+    """Expose the stable identity-candidate serialization shape."""
+    return _PROJECT_IDENTITY_CANDIDATE_KEYS
+
+
+def project_identity_result_dict_keys() -> tuple[str, ...]:
+    """Expose the stable identity-evaluation serialization shape."""
+    return _PROJECT_IDENTITY_RESULT_DICT_KEYS

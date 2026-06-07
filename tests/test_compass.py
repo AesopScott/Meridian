@@ -16,6 +16,10 @@ from meridian_core.compass import (
     ProjectHandoffDecision,
     ProjectHandoffEvaluation,
     ProjectHandoffRequest,
+    ProjectIdentityCandidate,
+    ProjectIdentityDecision,
+    ProjectIdentityEvaluation,
+    ProjectIdentityNeighbor,
     ProjectRelationshipRefs,
     ProjectScopeCandidate,
     ProjectScopeDecision,
@@ -23,6 +27,7 @@ from meridian_core.compass import (
     define_project,
     evaluate_cross_project_handoff,
     evaluate_project_difference,
+    evaluate_project_identity,
     evaluate_project_scope,
     project_difference_evidence_dict_keys,
     project_difference_profile_dict_keys,
@@ -32,6 +37,10 @@ from meridian_core.compass import (
     project_definition_fingerprint,
     project_handoff_request_dict_keys,
     project_handoff_result_dict_keys,
+    project_identity_candidate_dict_keys,
+    project_identity_candidate_from_definition,
+    project_identity_neighbor_dict_keys,
+    project_identity_result_dict_keys,
     project_scope_result_dict_keys,
 )
 
@@ -935,3 +944,350 @@ class TestProjectHandoffRuntime:
         assert "transcript" not in payload
         assert "free_form_context" not in payload
         assert "session_retargeting" not in payload
+
+
+def _identity_candidate(**overrides) -> ProjectIdentityCandidate:
+    base = {
+        "project_id": "meridian-v2",
+        "title": "Meridian V2",
+        "outcome": "Prime can coordinate V2 harness runtime without project drift.",
+        "mission_bearing": "Ship Meridian V2 project-boundary runtime.",
+        "repo_refs": ("repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",),
+        "venture_refs": ("venture:Meridian",),
+        "session_refs": ("session:build-4-aegis",),
+        "evidence_refs": ("proof:project-identity-check",),
+        "neighbors": (),
+    }
+    base.update(overrides)
+    return ProjectIdentityCandidate(**base)
+
+
+def _identity_neighbor(**overrides) -> ProjectIdentityNeighbor:
+    base = {
+        "project_id": "meridian-ui-review",
+        "mission_bearing": "Expose reviewed command staging controls.",
+        "repo_refs": ("repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",),
+        "venture_refs": ("venture:Meridian",),
+        "session_refs": ("session:build-4-aegis",),
+    }
+    base.update(overrides)
+    return ProjectIdentityNeighbor(**base)
+
+
+class TestProjectIdentityNeighbor:
+    def test_neighbor_is_frozen(self):
+        neighbor = _identity_neighbor()
+        with pytest.raises(FrozenInstanceError):
+            neighbor.project_id = "other"  # type: ignore[misc]
+
+    def test_neighbor_serializes_stably(self):
+        assert tuple(_identity_neighbor().to_dict().keys()) == (
+            project_identity_neighbor_dict_keys()
+        )
+
+    def test_neighbor_project_id_is_required(self):
+        with pytest.raises(ValueError, match="project_id"):
+            ProjectIdentityNeighbor(
+                project_id="",
+                mission_bearing="bearing",
+            )
+
+    def test_neighbor_mission_bearing_is_required(self):
+        with pytest.raises(ValueError, match="mission_bearing"):
+            ProjectIdentityNeighbor(
+                project_id="other",
+                mission_bearing="",
+            )
+
+
+class TestProjectIdentityCandidate:
+    def test_candidate_is_frozen(self):
+        candidate = _identity_candidate()
+        with pytest.raises(FrozenInstanceError):
+            candidate.project_id = "other"  # type: ignore[misc]
+
+    def test_candidate_serializes_stably(self):
+        assert tuple(_identity_candidate().to_dict().keys()) == (
+            project_identity_candidate_dict_keys()
+        )
+
+    def test_candidate_is_json_serializable(self):
+        encoded = json.dumps(_identity_candidate().to_dict(), sort_keys=True)
+        assert "mission_bearing" in encoded
+        assert "evidence_refs" in encoded
+
+    def test_neighbors_must_be_project_identity_neighbor(self):
+        with pytest.raises(ValueError, match="neighbors"):
+            ProjectIdentityCandidate(
+                project_id="meridian-v2",
+                title="Meridian V2",
+                outcome="outcome",
+                mission_bearing="bearing",
+                repo_refs=("repo:meridian",),
+                venture_refs=("venture:meridian",),
+                neighbors=("not-a-neighbor",),  # type: ignore[arg-type]
+            )
+
+    def test_candidate_can_be_built_from_project_definition(self):
+        project = _project()
+        candidate = project_identity_candidate_from_definition(
+            project,
+            mission_bearing="Ship Meridian V2 project-boundary runtime.",
+            evidence_refs=("proof:project-identity-from-definition",),
+        )
+        assert candidate.project_id == project.project_id
+        assert candidate.title == project.title
+        assert candidate.outcome == project.outcome
+        assert candidate.repo_refs == project.relationship_refs.repo_refs
+        assert candidate.venture_refs == project.relationship_refs.venture_refs
+        assert candidate.session_refs == project.relationship_refs.session_refs
+
+
+class TestProjectIdentityRuntime:
+    def test_complete_distinct_identity_is_defined(self):
+        result = evaluate_project_identity(_identity_candidate())
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert result.project_id == "meridian-v2"
+        assert result.blockers == ()
+        assert result.compass_question is None
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_missing_project_id_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(project_id=None))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_project_id" in result.blockers
+
+    def test_missing_title_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(title=None))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_title" in result.blockers
+
+    def test_missing_outcome_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(outcome=None))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_outcome" in result.blockers
+
+    def test_missing_mission_bearing_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(mission_bearing=None))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_mission_bearing" in result.blockers
+
+    def test_missing_repo_refs_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(repo_refs=()))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_repo_refs" in result.blockers
+
+    def test_missing_venture_refs_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(venture_refs=()))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_venture_refs" in result.blockers
+
+    def test_missing_evidence_refs_is_blocked(self):
+        result = evaluate_project_identity(_identity_candidate(evidence_refs=()))
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "missing_evidence_refs" in result.blockers
+
+    def test_raw_context_evidence_ref_is_blocked(self):
+        result = evaluate_project_identity(
+            _identity_candidate(evidence_refs=("raw_prompt:full prompt text",)),
+        )
+        assert result.decision is ProjectIdentityDecision.BLOCKED
+        assert "raw_context_evidence_ref_blocked" in result.blockers
+
+    def test_blocked_result_surfaces_compass_question(self):
+        result = evaluate_project_identity(_identity_candidate(project_id=None))
+        assert result.compass_question is not None
+        assert "Compass needs" in result.compass_question
+
+    def test_shared_repo_with_distinct_bearing_stays_defined(self):
+        neighbor = _identity_neighbor(
+            project_id="meridian-ui-review",
+            mission_bearing="Expose reviewed command staging controls.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Other",),
+            session_refs=(),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert result.shared_repo_refs == (
+            "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+        )
+        assert "meridian-ui-review" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+        assert result.blockers == ()
+
+    def test_shared_venture_with_distinct_bearing_stays_defined(self):
+        neighbor = _identity_neighbor(
+            project_id="meridian-ui-review",
+            mission_bearing="Expose reviewed command staging controls.",
+            repo_refs=("repo:other",),
+            venture_refs=("venture:Meridian",),
+            session_refs=(),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert result.shared_venture_refs == ("venture:Meridian",)
+        assert "meridian-ui-review" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+
+    def test_shared_session_with_distinct_bearing_stays_defined(self):
+        neighbor = _identity_neighbor(
+            project_id="meridian-ui-review",
+            mission_bearing="Expose reviewed command staging controls.",
+            repo_refs=("repo:other",),
+            venture_refs=("venture:Other",),
+            session_refs=("session:build-4-aegis",),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert result.shared_session_refs == ("session:build-4-aegis",)
+        assert "meridian-ui-review" in result.distinguishing_neighbors
+        assert result.collapsing_neighbors == ()
+
+    def test_shared_refs_with_same_bearing_collapse_returns_compass_question(self):
+        neighbor = _identity_neighbor(
+            project_id="meridian-shadow",
+            mission_bearing="Ship Meridian V2 project-boundary runtime.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+            session_refs=(),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-shadow" in result.collapsing_neighbors
+        assert "project_identity_collapse_risk" in result.blockers
+        assert result.compass_question is not None
+        assert "distinguishing mission bearing" in result.compass_question
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_same_project_id_neighbor_collapses(self):
+        neighbor = _identity_neighbor(
+            project_id="meridian-v2",
+            mission_bearing="Different bearing but same identity label.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-v2" in result.collapsing_neighbors
+
+    def test_unrelated_neighbor_is_ignored(self):
+        neighbor = _identity_neighbor(
+            project_id="polaris-orchestrator",
+            mission_bearing="Coordinate Polaris sessions.",
+            repo_refs=("repo:C:/Users/scott/Code/Polaris-lab",),
+            venture_refs=("venture:Polaris",),
+            session_refs=("session:polaris-coordinator",),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        )
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert result.shared_repo_refs == ()
+        assert result.shared_venture_refs == ()
+        assert result.shared_session_refs == ()
+        assert result.distinguishing_neighbors == ()
+        assert result.collapsing_neighbors == ()
+
+    def test_multiple_neighbors_can_mix_distinct_and_collapsing(self):
+        distinct_neighbor = _identity_neighbor(
+            project_id="meridian-ui-review",
+            mission_bearing="Expose reviewed command staging controls.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+        collapsing_neighbor = _identity_neighbor(
+            project_id="meridian-shadow",
+            mission_bearing="Ship Meridian V2 project-boundary runtime.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+        result = evaluate_project_identity(
+            _identity_candidate(
+                neighbors=(distinct_neighbor, collapsing_neighbor),
+            ),
+        )
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-ui-review" in result.distinguishing_neighbors
+        assert "meridian-shadow" in result.collapsing_neighbors
+
+    def test_identity_result_serializes_stably(self):
+        result = evaluate_project_identity(_identity_candidate())
+        assert tuple(result.to_dict().keys()) == project_identity_result_dict_keys()
+
+    def test_identity_result_is_json_serializable(self):
+        result = evaluate_project_identity(_identity_candidate())
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "defined" in encoded
+        assert "execution_authorized" in encoded
+
+    def test_identity_result_is_deterministic(self):
+        candidate = _identity_candidate()
+        assert evaluate_project_identity(candidate) == evaluate_project_identity(
+            candidate,
+        )
+
+    def test_identity_evaluation_type_is_required(self):
+        with pytest.raises(ValueError, match="decision"):
+            ProjectIdentityEvaluation(
+                decision="defined",  # type: ignore[arg-type]
+                project_id="meridian-v2",
+                title="Meridian V2",
+                outcome="outcome",
+                mission_bearing="bearing",
+                evidence_refs=("proof",),
+            )
+
+    def test_identity_runtime_does_not_emit_handoff_or_scope_fields(self):
+        payload = evaluate_project_identity(_identity_candidate()).to_dict()
+        assert "source_project_id" not in payload
+        assert "target_project_id" not in payload
+        assert "subject_kind" not in payload
+        assert "subject_ref" not in payload
+        assert "review_ready" not in payload
+        assert "merge_authorized" not in payload
+
+    def test_identity_runtime_does_not_emit_raw_context_keys(self):
+        payload = evaluate_project_identity(_identity_candidate()).to_dict()
+        assert "raw_prompt" not in payload
+        assert "transcript" not in payload
+        assert "free_form_context" not in payload
+
+    def test_execution_is_never_authorized(self):
+        defined = evaluate_project_identity(_identity_candidate()).to_dict()
+        blocked = evaluate_project_identity(
+            _identity_candidate(project_id=None),
+        ).to_dict()
+        neighbor = _identity_neighbor(
+            mission_bearing="Ship Meridian V2 project-boundary runtime.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+        ambiguous = evaluate_project_identity(
+            _identity_candidate(neighbors=(neighbor,)),
+        ).to_dict()
+        assert defined["execution_authorized"] is False
+        assert blocked["execution_authorized"] is False
+        assert ambiguous["execution_authorized"] is False
