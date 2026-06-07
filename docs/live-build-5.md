@@ -98,6 +98,16 @@ Repair launch attempt note - 2026-06-07T09:11:08-06:00:
   an Opus worker produces actual `bifrost/cockpit.py` and
   `tests/test_bifrost_cockpit.py` repair evidence.
 
+Repair launch attempt note - 2026-06-07T10:30:14-06:00:
+
+- Worker `chat_1780849813091` launched through Polaris `launch-chat`, tier
+  `power`, for the same OpenAI backend-bound provider-balance proof repair.
+- Result: no candidate. Diagnostics show the worker reached `claude-opus-4-7`
+  and hit a Claude rate-limit event before any backend/test file changes. The
+  isolated worker worktree contains only Polaris-generated `.mcp.json` dirt.
+- This is the first resumed-run occurrence of the same Opus availability
+  blocker after the prior blocked state was cleared.
+
 ## Coordinator Update - Opus Worker Relaunch Attempt / No Candidate
 
 Timestamp: 2026-06-07T08:49:01-06:00.
