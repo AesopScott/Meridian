@@ -2013,3 +2013,177 @@ class TestProjectBoundsRuntime:
         # frozen set: cannot be mutated by callers
         with pytest.raises(AttributeError):
             kinds.add("rogue_kind")  # type: ignore[attr-defined]
+
+
+class TestProjectScopeRawContextGuard:
+    """Codex Review B repair: raw-context evidence must fail closed at the scope layer.
+
+    Prior to this repair, direct callers of ``evaluate_project_scope`` could
+    pass ``evidence_refs=("raw_prompt:full prompt text",)`` and receive
+    ``IN_SCOPE`` with the raw payload preserved in the serialized result.
+    The outer bounds-runtime guard only protected callers that reached scope
+    through ``evaluate_project_bounds``. This class proves the scope layer now
+    blocks + redacts raw-context evidence for ALL callers and that safe
+    evidence still passes.
+    """
+
+    @pytest.mark.parametrize(
+        "raw_ref",
+        (
+            "raw_prompt:full prompt text",
+            "raw_transcript:session log",
+            "free_form_context:scratch notes",
+            "transcript:full conversation",
+            "conversation:approval said in chat",
+            "provider_response:streamed body",
+            "raw_context:everything",
+            "prompt:user asked X",
+            "line1\nline2 — embedded newline",
+        ),
+    )
+    def test_raw_context_evidence_blocks_in_scope_match(self, raw_ref):
+        """Even a candidate whose subject IS in the project boundary must fail closed."""
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="meridian_core/compass.py",  # IS in project artifacts
+            evidence_refs=(raw_ref,),
+        )
+        result = evaluate_project_scope(_project(), candidate)
+        assert result.decision is ProjectScopeDecision.BLOCKED
+        assert "raw_context_evidence_ref_blocked" in result.blockers
+        assert result.to_dict()["execution_authorized"] is False
+
+    @pytest.mark.parametrize(
+        "raw_ref",
+        (
+            "raw_prompt:full prompt text",
+            "raw_transcript:session log",
+            "free_form_context:scratch notes",
+            "transcript:full conversation",
+            "conversation:approval said in chat",
+            "provider_response:streamed body",
+        ),
+    )
+    def test_raw_context_evidence_does_not_leak_in_serialization(self, raw_ref):
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="meridian_core/compass.py",
+            evidence_refs=(raw_ref, "proof:safe-evidence"),
+        )
+        payload = evaluate_project_scope(_project(), candidate).to_dict()
+        # Raw payload text must not appear anywhere in the serialized result.
+        encoded = json.dumps(payload, sort_keys=True)
+        assert raw_ref not in encoded
+        # Safe evidence still serialized.
+        assert "proof:safe-evidence" in payload["evidence_refs"]
+        # Redaction marker appears in place of the raw ref.
+        assert "<redacted_raw_context>" in payload["evidence_refs"]
+
+    def test_mixed_raw_and_safe_evidence_blocks_and_partially_redacts(self):
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="meridian_core/compass.py",
+            evidence_refs=(
+                "proof:safe-evidence",
+                "raw_prompt:full prompt text",
+                "proof:another-safe",
+                "transcript:meeting notes",
+            ),
+        )
+        result = evaluate_project_scope(_project(), candidate)
+        assert result.decision is ProjectScopeDecision.BLOCKED
+        assert "raw_context_evidence_ref_blocked" in result.blockers
+        # Safe refs preserved in order; raw refs redacted in-place.
+        assert result.evidence_refs == (
+            "proof:safe-evidence",
+            "<redacted_raw_context>",
+            "proof:another-safe",
+            "<redacted_raw_context>",
+        )
+
+    def test_safe_evidence_refs_still_return_in_scope(self):
+        """Repair must not over-trigger: legitimate evidence still passes."""
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="meridian_core/compass.py",
+            evidence_refs=("proof:legit-evidence", "tests/test_compass.py"),
+        )
+        result = evaluate_project_scope(_project(), candidate)
+        assert result.decision is ProjectScopeDecision.IN_SCOPE
+        assert result.evidence_refs == (
+            "proof:legit-evidence",
+            "tests/test_compass.py",
+        )
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_safe_out_of_scope_subject_still_returns_out_of_scope(self):
+        """The new raw-context guard must not change normal out-of-scope behavior."""
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="bifrost/ui/command_staging.py",  # NOT in project artifacts
+            evidence_refs=("proof:legit-evidence",),
+        )
+        result = evaluate_project_scope(_project(), candidate)
+        assert result.decision is ProjectScopeDecision.OUT_OF_SCOPE
+
+    def test_bounds_runtime_still_blocks_raw_candidate_evidence_via_request_layer(self):
+        """The bounds-layer pre-check (cc584318f) still fires before the scope-layer check.
+
+        evaluate_project_bounds rejects raw candidate evidence at the request
+        layer with ``raw_context_candidate_evidence_ref_blocked`` BEFORE
+        iterating into evaluate_project_scope. This test confirms that
+        defense-in-depth: the bounds layer catches it first.
+        """
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="meridian_core/compass.py",
+            evidence_refs=("raw_prompt:full prompt text",),
+        )
+        result = evaluate_project_bounds(
+            _project(),
+            _bounds_request(candidates=(candidate,)),
+        )
+        assert result.decision is ProjectBoundsDecision.BLOCKED
+        # The request-level guard runs first and emits its own blocker name.
+        assert "raw_context_candidate_evidence_ref_blocked" in result.blockers
+        assert result.to_dict()["execution_authorized"] is False
+
+    def test_scope_guard_independent_of_subject_match(self):
+        """Raw-context guard must run BEFORE subject-kind/ref matching.
+
+        Otherwise a caller could craft an unknown subject_kind to short-circuit
+        the AMBIGUOUS path and still leak the raw payload through the result.
+        """
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="not-actually-in-project",
+            evidence_refs=("raw_prompt:full prompt text",),
+        )
+        result = evaluate_project_scope(_project(), candidate)
+        assert result.decision is ProjectScopeDecision.BLOCKED
+        assert result.blockers == ("raw_context_evidence_ref_blocked",)
+        # Raw ref redacted even though it would never have reached IN_SCOPE.
+        assert "<redacted_raw_context>" in result.evidence_refs
+        assert "raw_prompt:full prompt text" not in result.evidence_refs
+
+    def test_scope_blocked_serialization_is_json_safe_with_redaction(self):
+        candidate = ProjectScopeCandidate(
+            project_id="meridian-v2",
+            subject_kind="artifact",
+            subject_ref="meridian_core/compass.py",
+            evidence_refs=("raw_prompt:secret payload",),
+        )
+        encoded = json.dumps(
+            evaluate_project_scope(_project(), candidate).to_dict(),
+            sort_keys=True,
+        )
+        assert "<redacted_raw_context>" in encoded
+        assert "secret payload" not in encoded
+        assert "raw_prompt:secret" not in encoded
