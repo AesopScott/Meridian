@@ -8,6 +8,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
+
+Goal: hold Build 1 after Main promotion of the DeepSeek validation/advisory/export backend stack.
+
+Status: no executable backend task is currently assigned to Build 1.
+
+Main promotion:
+- `origin/main` includes the Build 1 DeepSeek validation-state infrastructure, Relay disposition binding, reserved-level repair, Prime/Beacon advisory projection, runtime-state export, and UTC-normalization repair through integration commit `bd1d2d594`.
+- Proof in the clean integration worktree: `python -m pytest tests/test_model_adapter.py tests/test_relay_executor.py -q` -> 319 passed; `python -m pytest tests/test_beacon.py tests/test_prime_autonomy.py -q` -> 161 passed; `python -m pytest tests/test_session_lifecycle.py -q` -> 171 passed.
+
+Instruction: do not execute lower stale Active Now blocks. Wait for a new coordinator-promoted backend task.
+
 ## Coordinator Override - Active Now
 
 Goal: bind reviewed DeepSeek validation-state metadata into Relay disposition without enabling unsafe live autonomy.

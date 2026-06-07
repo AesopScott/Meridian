@@ -8,6 +8,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
+
+Goal: hold Build 5 after Main promotion of the Bifrost backend/view-model binding stack.
+
+Status: no executable backend task is currently assigned to Build 5.
+
+Main promotion:
+- `origin/main` includes reviewed backend prompt-payload/model metadata binding, trust-state repair, cockpit evidence wiring, provider balance/cost-pressure binding, and Codex Review B partial-provider snapshot/view-level provenance repair through integration commit `626797140`.
+- Proof in the clean integration worktree: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 375 passed; `python -m pytest tests/test_bifrost_preview.py -q` -> 29 passed.
+
+Instruction: do not execute lower stale Active Now / Repair Required blocks. Wait for a new coordinator-promoted backend task.
+
 ## Coordinator Override - Active Now / Repair Required
 
 Goal: bind reviewed backend prompt-payload and model metadata surfaces into a deterministic Bifrost backend view-model sample.

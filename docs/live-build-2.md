@@ -8,6 +8,18 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
+## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
+
+Goal: hold Build 2 after Main promotion of the Session Lifecycle live-state evidence and advisory backend stack.
+
+Status: no executable backend task is currently assigned to Build 2.
+
+Main promotion:
+- `origin/main` includes SessionLiveStateEvidence, display-safety repair, Prime/Beacon advisory projection, fail-closed advisory boundary, V2 command-plan preview proof, plan-binding repair, empty-string presence semantics, and evidence-ref presence repair through integration commit `6701c11d1`.
+- Proof in the clean integration worktree: `python -m pytest tests/test_session_lifecycle.py -q` -> 171 passed; `python -m pytest tests/test_beacon.py tests/test_prime_autonomy.py -q` -> 121 passed.
+
+Instruction: do not execute lower stale Repair Required / Active Now blocks. Wait for a new coordinator-promoted backend task.
+
 ## Coordinator Override - Repair Required / Active Now
 
 Goal: repair Session Lifecycle live state evidence display-safety leak found by Codex Reviews A.
