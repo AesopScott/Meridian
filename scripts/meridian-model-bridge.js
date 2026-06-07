@@ -653,6 +653,11 @@ function goalRuntimeSnapshot() {
   return pythonJsonSnapshot('Goal runtime', String.raw`
 import json
 from datetime import datetime, timezone
+from meridian_core.aegis import (
+    V3GoalCheckpointDisciplineInput,
+    evaluate_v3_goal_checkpoint_discipline_advisory,
+    serialize_v3_goal_checkpoint_discipline_policy_result,
+)
 from meridian_core.goal_runtime import (
     BlockResumeKind,
     GoalContinuationPolicy,
@@ -688,15 +693,37 @@ record = GoalRecord(
         source="backlog",
     ),
 )
+discipline_input = V3GoalCheckpointDisciplineInput(
+    goal_objective_present=True,
+    active_owner_lane="prime_compass",
+    last_git_checkpoint_ref="git-checkpoint:goal-runtime-001",
+    last_obsidian_checkpoint_ref="obsidian-checkpoint:goal-runtime-001",
+    checkpoint_cadence_state="current",
+    token_budget_status="within_budget",
+    time_budget_status="within_budget",
+    review_gate_refs=("review:goal-runtime-ready",),
+    lease_gate_refs=("lease:goal-runtime-active",),
+    blocker_policy_state="defined",
+    proof_refs=(
+        "proof:v3-parking-lot-goal-runtime",
+        "proof:agentic-framework-long-term-goals",
+    ),
+)
+discipline_result = evaluate_v3_goal_checkpoint_discipline_advisory(
+    discipline_input
+)
 print(json.dumps({
     "ok": True,
-    "source": "meridian_core.goal_runtime",
+    "source": "meridian_core.goal_runtime / meridian_core.aegis",
     "version": "v3-goal-runtime-2026-06-07",
     "harness": "Prime / Compass / Beacon / Echo / Aegis",
-    "summary": "Display-safe active goal runtime record.",
+    "summary": "Display-safe active goal runtime record with checkpoint discipline advisory.",
     "display_only": True,
     "mutation_authorized": False,
     "goal": record.to_safe_dict(),
+    "checkpoint_discipline": serialize_v3_goal_checkpoint_discipline_policy_result(
+        discipline_result
+    ),
 }))
 `);
 }

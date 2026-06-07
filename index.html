@@ -4985,6 +4985,7 @@ body {
     const goal = snapshot.goal || {};
     const policy = goal.continuation_policy || {};
     const objective = goal.objective_ref || {};
+    const checkpointDiscipline = snapshot.checkpoint_discipline || {};
     return [
       relaySection('Goal runtime source', relayGrid([
         ['source', snapshot.source || 'unknown'],
@@ -5015,6 +5016,29 @@ body {
         ['usage-limited occurrences', goal.usage_limited_occurrences ?? 0],
         ['telemetry snapshots', Array.isArray(goal.telemetry) ? goal.telemetry.length : 0],
         ['lineage entries', Array.isArray(goal.lineage) ? goal.lineage.length : 0],
+      ]), false),
+      relaySection('Checkpoint discipline advisory', relayGrid([
+        ['decision', relayText(checkpointDiscipline.decision)],
+        ['severity', relayText(checkpointDiscipline.severity)],
+        ['objective present', checkpointDiscipline.goal_objective_present ? 'yes' : 'no'],
+        ['owner lane', relayText(checkpointDiscipline.active_owner_lane)],
+        ['git checkpoint ref', checkpointDiscipline.last_git_checkpoint_ref || 'none'],
+        ['obsidian checkpoint ref', checkpointDiscipline.last_obsidian_checkpoint_ref || 'none'],
+        ['cadence', relayText(checkpointDiscipline.checkpoint_cadence_state)],
+        ['token budget', relayText(checkpointDiscipline.token_budget_status)],
+        ['time budget', relayText(checkpointDiscipline.time_budget_status)],
+        ['blocker policy', relayText(checkpointDiscipline.blocker_policy_state)],
+        ['execution authorized', checkpointDiscipline.execution_authorized ? 'yes' : 'no'],
+        ['self approval granted', checkpointDiscipline.self_approval_granted ? 'yes' : 'no'],
+      ]), true),
+      relaySection('Checkpoint advisory refs', relayGrid([
+        ['review refs', relayJoin(checkpointDiscipline.review_gate_refs)],
+        ['lease refs', relayJoin(checkpointDiscipline.lease_gate_refs)],
+        ['proof refs', relayJoin(checkpointDiscipline.proof_refs)],
+        ['blockers', relayJoin(checkpointDiscipline.blockers)],
+        ['warnings', relayJoin(checkpointDiscipline.warnings)],
+        ['prime advisory', relayText(checkpointDiscipline.prime_advisory)],
+        ['compass advisory', relayText(checkpointDiscipline.compass_advisory)],
       ]), false),
       relaySection('Objective ref', relayGrid([
         ['id', objective.id || 'none'],

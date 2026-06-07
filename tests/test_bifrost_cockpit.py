@@ -602,6 +602,9 @@ def test_index_spark_and_workflow_surfaces_use_bridge_snapshots():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Provider Balance" in doc
     assert "Goal Runtime" in doc
+    assert "Checkpoint discipline advisory" in doc
+    assert "execution authorized" in doc
+    assert "self approval granted" in doc
     assert "Workflow Dispatch Status" in doc
     assert "data-provider-balance" in doc
     assert "data-goal-runtime" in doc
@@ -744,6 +747,11 @@ def test_bridge_exposes_reviewed_display_only_capability_routes():
     assert "pythonJsonSnapshot" in doc
     assert "meridian_core.provider_balance" in doc
     assert "meridian_core.goal_runtime" in doc
+    assert "meridian_core.aegis" in doc
+    assert "V3GoalCheckpointDisciplineInput" in doc
+    assert "evaluate_v3_goal_checkpoint_discipline_advisory" in doc
+    assert "serialize_v3_goal_checkpoint_discipline_policy_result" in doc
+    assert "checkpoint_discipline" in doc
     assert "meridian_core.workflow_dispatch" in doc
     assert '"display_only": True' in doc
     assert '"mutation_authorized": False' in doc
