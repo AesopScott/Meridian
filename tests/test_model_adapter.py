@@ -765,6 +765,149 @@ class TestDeepSeekValidationState:
                 validation_ref="deepseek-validation:level-1:validation-cleared",
             )
 
+    def test_review_clearance_level_is_reserved_and_unconstructible_when_all_false(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="level-2:review-clearance.*reserved"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.REVIEW_CLEARANCE,
+                can_receive_prompt_payloads=False,
+                can_clear_reviews=False,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-2:review-clearance",
+            )
+
+    def test_review_clearance_level_is_reserved_even_with_consistent_authority_bits(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="level-2:review-clearance.*reserved"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.REVIEW_CLEARANCE,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=True,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=("branch_movement", "autonomous_coding"),
+                validation_ref="deepseek-validation:level-2:review-clearance",
+            )
+
+    def test_review_clearance_level_is_reserved_even_with_full_authority_request(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="no autonomy by accident"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.REVIEW_CLEARANCE,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=True,
+                can_move_branches=True,
+                can_enable_autonomous_coding=True,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-2:review-clearance",
+            )
+
+    def test_branch_movement_level_is_reserved_and_unconstructible_when_all_false(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="level-3:branch-movement.*reserved"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.BRANCH_MOVEMENT,
+                can_receive_prompt_payloads=False,
+                can_clear_reviews=False,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-3:branch-movement",
+            )
+
+    def test_branch_movement_level_is_reserved_even_with_consistent_authority_bits(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="level-3:branch-movement.*reserved"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.BRANCH_MOVEMENT,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=True,
+                can_move_branches=True,
+                can_enable_autonomous_coding=False,
+                blocked_operations=("autonomous_coding",),
+                validation_ref="deepseek-validation:level-3:branch-movement",
+            )
+
+    def test_branch_movement_level_is_reserved_even_with_full_authority_request(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="no autonomy by accident"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.BRANCH_MOVEMENT,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=True,
+                can_move_branches=True,
+                can_enable_autonomous_coding=True,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-3:branch-movement",
+            )
+
+    def test_autonomous_coding_level_is_reserved_and_unconstructible_when_all_false(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="level-4:autonomous-coding.*reserved"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.AUTONOMOUS_CODING,
+                can_receive_prompt_payloads=False,
+                can_clear_reviews=False,
+                can_move_branches=False,
+                can_enable_autonomous_coding=False,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-4:autonomous-coding",
+            )
+
+    def test_autonomous_coding_level_is_reserved_even_with_consistent_authority_bits(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="level-4:autonomous-coding.*reserved"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.AUTONOMOUS_CODING,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=True,
+                can_move_branches=True,
+                can_enable_autonomous_coding=True,
+                blocked_operations=(),
+                validation_ref="deepseek-validation:level-4:autonomous-coding",
+            )
+
+    def test_autonomous_coding_level_is_reserved_even_with_mixed_authority_bits(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="no autonomy by accident"):
+            DeepSeekValidationState(
+                current_level=DeepSeekValidationLevel.AUTONOMOUS_CODING,
+                can_receive_prompt_payloads=True,
+                can_clear_reviews=False,
+                can_move_branches=True,
+                can_enable_autonomous_coding=False,
+                blocked_operations=("review_clearance",),
+                validation_ref="deepseek-validation:level-4:autonomous-coding",
+            )
+
+    def test_reserved_levels_cannot_be_reached_via_preset_derivation(self) -> None:
+        for level_value in (
+            "deepseek-validation:level-2:review-clearance",
+            "deepseek-validation:level-3:branch-movement",
+            "deepseek-validation:level-4:autonomous-coding",
+        ):
+            direct_preset = deepseek_candidate_route_presets()[0]
+            with pytest.raises(ModelAdapterConfigError, match="Unknown DeepSeek"):
+                deepseek_validation_state_from_preset(
+                    ModelCandidateRoutePreset(
+                        provider_name="deepseek",
+                        dispatch_model=direct_preset.dispatch_model,
+                        variant_label=direct_preset.variant_label,
+                        lane=direct_preset.lane,
+                        api_mode=direct_preset.api_mode,
+                        trust_state=direct_preset.trust_state,
+                        requires_external_review=direct_preset.requires_external_review,
+                        external_review_status=direct_preset.external_review_status,
+                        direct_api_endpoint=direct_preset.direct_api_endpoint,
+                        capability_tier=direct_preset.capability_tier,
+                        context_budget=direct_preset.context_budget,
+                        prompt_payload_budget=direct_preset.prompt_payload_budget,
+                        allowed_task_types=direct_preset.allowed_task_types,
+                        blocked_task_types=direct_preset.blocked_task_types,
+                        max_risk_tier=direct_preset.max_risk_tier,
+                        q_mode_flat=direct_preset.q_mode_flat,
+                        can_clear_reviews=direct_preset.can_clear_reviews,
+                        can_move_branches=direct_preset.can_move_branches,
+                        bypasses_relay_aegis=direct_preset.bypasses_relay_aegis,
+                        autonomous_coding_allowed=direct_preset.autonomous_coding_allowed,
+                        known_authorities=direct_preset.known_authorities,
+                        validation_evidence_ref=level_value,
+                    )
+                )
+
     def test_state_is_frozen(self) -> None:
         state = DeepSeekValidationState(
             current_level=DeepSeekValidationLevel.METADATA_ONLY,

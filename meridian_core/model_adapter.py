@@ -36,12 +36,25 @@ class DeepSeekValidationLevel(Enum):
     AUTONOMOUS_CODING = "level-4:autonomous-coding"
 
 
+_DEEPSEEK_RESERVED_VALIDATION_LEVELS = frozenset({
+    DeepSeekValidationLevel.REVIEW_CLEARANCE,
+    DeepSeekValidationLevel.BRANCH_MOVEMENT,
+    DeepSeekValidationLevel.AUTONOMOUS_CODING,
+})
+
+
 @dataclass(frozen=True)
 class DeepSeekValidationState:
     """Deterministic validation-state object for DeepSeek direct-provider authority.
 
     Distinguishes metadata-only candidate state from validation-cleared transport state.
     Records which operations are gated by validation levels.
+
+    The `DeepSeekValidationLevel` enum advertises higher gate levels
+    (REVIEW_CLEARANCE, BRANCH_MOVEMENT, AUTONOMOUS_CODING) for documentation of
+    the gate ladder, but at this slice they are reserved and not constructible.
+    Future slices must explicitly extend `__post_init__` to authorize a higher
+    level — accidental construction must never grant elevated authority.
     """
 
     current_level: DeepSeekValidationLevel
@@ -54,7 +67,12 @@ class DeepSeekValidationState:
 
     def __post_init__(self) -> None:
         if self.current_level == DeepSeekValidationLevel.METADATA_ONLY:
-            if self.can_receive_prompt_payloads or self.can_clear_reviews or self.can_move_branches or self.can_enable_autonomous_coding:
+            if (
+                self.can_receive_prompt_payloads
+                or self.can_clear_reviews
+                or self.can_move_branches
+                or self.can_enable_autonomous_coding
+            ):
                 raise ModelAdapterConfigError(
                     "metadata-only validation level cannot grant any operational authority"
                 )
@@ -63,10 +81,23 @@ class DeepSeekValidationState:
                 raise ModelAdapterConfigError(
                     "validation-cleared level must grant prompt payload authority"
                 )
-            if self.can_clear_reviews or self.can_move_branches or self.can_enable_autonomous_coding:
+            if (
+                self.can_clear_reviews
+                or self.can_move_branches
+                or self.can_enable_autonomous_coding
+            ):
                 raise ModelAdapterConfigError(
                     "validation-cleared level cannot grant review/branch/autonomous authority"
                 )
+        elif self.current_level in _DEEPSEEK_RESERVED_VALIDATION_LEVELS:
+            raise ModelAdapterConfigError(
+                f"DeepSeek validation level {self.current_level.value} is reserved "
+                "and not constructible at this slice (no autonomy by accident)"
+            )
+        else:
+            raise ModelAdapterConfigError(
+                f"Unknown DeepSeek validation level: {self.current_level!r}"
+            )
 
 
 def deepseek_validation_state_from_preset(preset: ModelCandidateRoutePreset) -> DeepSeekValidationState:
