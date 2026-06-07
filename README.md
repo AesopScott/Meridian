@@ -9,14 +9,15 @@ You talk to the orchestrator. The orchestrator drives worker sessions, harnesses
 The Meridian user interface is the Electron app. That is the app to run, demo,
 test, document, and build against.
 
-Root `index.html` is the current renderer source inside the Electron app. Edits
-to that file are edits to the Electron app's visible UI because Electron loads
-it into the desktop window. It is part of the app today: not obsolete, detached,
-merely historical, or independent from the app. It also must not be treated as a
-standalone browser demo, a separate product target, or a replacement identity
-for the Electron app. `npm start` launches
-`electron/main.js`, which opens the Meridian Electron app with this renderer.
-Startup must not regenerate or substitute `bifrost/preview.html`.
+Root `index.html` is the current renderer source file loaded by the Electron
+app. It is not a separate Meridian UI and it is not the app identity by itself.
+Edits to that file are edits to the Electron app's visible UI because Electron
+loads it into the desktop window. It is part of the app today: not obsolete,
+detached, merely historical, or independent from the app. It also must not be
+treated as a standalone browser demo, a separate product target, or a
+replacement identity for the Electron app. `npm start` launches
+`electron/main.js`, which opens the Meridian Electron app with this renderer
+source. Startup must not regenerate or substitute `bifrost/preview.html`.
 
 `bifrost/preview.html` is a generated backend/render proof artifact created by `bifrost/preview.py`. It is not the product UI entrypoint.
 
@@ -36,7 +37,7 @@ Orchestrator → Scott only for judgment bottlenecks
 
 ## Current State
 
-Meridian now has a working Electron cockpit app as its UI, current renderer source in `index.html`, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
+Meridian now has a working Electron cockpit app as its UI, root `index.html` as that app's current renderer source file, and a local model bridge in `scripts/meridian-model-bridge.js`. The Python core continues to provide deterministic backend/runtime logic for the visible harness surfaces.
 
 ### Package: `meridian_core`
 

@@ -1273,16 +1273,16 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="docs/meridian-ui-authority.md",
             area=FileArea.BIFROST,
-            purpose="Explicit authority note: the Electron app is the Meridian UI, root index.html is its renderer source, and bifrost/preview.html is only generated proof output.",
+            purpose="Explicit authority note: the Electron app is the Meridian UI, root index.html is only the renderer source file loaded by that app, and bifrost/preview.html is only generated proof output.",
             related_tests=["tests/test_filemap.py"],
             notes="Read before changing UI launch behavior or interpreting preview artifacts.",
         ),
         FileMapEntry(
             path="index.html",
             area=FileArea.BIFROST,
-            purpose="Active renderer source inside the Meridian Electron app: loaded by Electron to draw the harness dock, Prime panel, user/session panel, Spark center, right-panel modes, model bridge status, and backend-sourced Prime/Relay/Compass/Vulcan logic surfaces.",
+            purpose="Active renderer source file loaded by the Meridian Electron app: Electron uses it to draw the harness dock, Prime panel, user/session panel, Spark center, right-panel modes, model bridge status, and backend-sourced Prime/Relay/Compass/Vulcan logic surfaces.",
             related_tests=["tests/test_relay_logic_snapshot.py", "tests/test_bifrost_cockpit.py", "tests/test_bifrost_preview.py"],
-            notes="Edits to this file are edits to the Electron app's visible UI because Electron currently renders it inside the desktop app. It is part of the app today, not obsolete, detached, historical-only, independent, the launch command, or a separate app. Electron loads it via electron/main.js; do not replace the Electron app with bifrost/preview.html for demos/startup.",
+            notes="Edits to this file are edits to the Electron app's visible UI because Electron currently renders it inside the desktop app. It is part of the app today, not obsolete, detached, historical-only, independent, the launch command, the Meridian UI by itself, or a separate app. Electron loads it via electron/main.js; do not replace the Electron app with bifrost/preview.html for demos/startup.",
         ),
         FileMapEntry(
             path="scripts/meridian-model-bridge.js",
