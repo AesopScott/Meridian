@@ -26,8 +26,8 @@ Completion: 2026-06-06 (Opus build lane).
 
 Ready for Codex Review:
 
-- Repair commit: `95dde4d50` (Repair Compass scope-layer subject_ref/ambiguity_reason raw-context leak).
-- Files changed: `meridian_core/compass.py` (+22 lines, second raw-context guard added at the top of `evaluate_project_scope` that builds the BLOCKED `ProjectScopeEvaluation` directly with `subject_ref` and `evidence_refs` redacted), `tests/test_compass.py` (+184 lines: new `TestProjectScopeSubjectFieldRawContextGuard` class with 20 cases), `docs/live-build-4.md` (this branch marker).
+- Repair commits: `95dde4d50` (Repair Compass scope-layer subject_ref/ambiguity_reason raw-context leak) and `43b1dafb` (test: cover scope raw subject precedence redaction).
+- Files changed: `meridian_core/compass.py` (+22 lines, raw-context guard at the top of `evaluate_project_scope` now builds BLOCKED `ProjectScopeEvaluation` directly with `subject_ref` and `evidence_refs` redacted), `tests/test_compass.py` (+184 lines: new `TestProjectScopeSubjectFieldRawContextGuard` class with 20 cases, plus the follow-up combined raw-evidence/raw-subject precedence assertion), `docs/live-build-4.md` (this branch marker).
 - Tests run: `python -m pytest tests/test_compass.py -q` -> **283 passed** (20 new subject-field guard tests on top of 263 prior).
 - `git diff --check`: clean.
 - Reproducer (before fix): `ProjectScopeCandidate(project_id='meridian-v2', subject_kind='ambiguous', subject_ref='raw_prompt:secret subject content', evidence_refs=('proof:safe',), ambiguity_reason='reason text')` → `evaluate_project_scope` returned `AMBIGUOUS` with `compass_question` containing the raw subject_ref verbatim; `json.dumps(result.to_dict())` contained `secret subject content`.
@@ -36,12 +36,12 @@ Ready for Codex Review:
   - Raw payload absent from serialization across 9 parametrized raw-context prefixes on `subject_ref`: `test_raw_context_in_subject_ref_blocks_and_redacts`.
   - Same for 6 parametrized raw-context prefixes on `ambiguity_reason`: `test_raw_context_in_ambiguity_reason_blocks_and_redacts` (ambiguity_reason is not a serialized result field, so the assertion verifies raw text absent from JSON and `compass_question=None` — the AMBIGUOUS branch never ran).
   - Guard runs regardless of subject_kind: `test_raw_context_in_subject_ref_independent_of_subject_kind` (known `artifact` subject_kind also blocks).
-  - Precedence: `test_raw_context_in_both_subject_ref_and_evidence_refs_blocks` documents that evidence_refs guard fires first and the subject_ref guard fires on retry with safe evidence.
+  - Precedence: `test_raw_context_in_both_subject_ref_and_evidence_refs_blocks` documents that evidence_refs guard fires first while still redacting `subject_ref`; the test asserts both raw evidence and raw subject payloads are absent from JSON, then retries with safe evidence to prove the subject-field guard also fires directly.
   - Regression: safe `subject_ref` + safe `ambiguity_reason` still reach AMBIGUOUS with interpolated compass_question.
   - Regression: safe candidate still reaches IN_SCOPE.
   - Stable serialization: `test_scope_blocked_subject_field_serializes_stably` asserts `tuple(result.to_dict().keys()) == project_scope_result_dict_keys()`.
 - Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no Polaris dependency.
-- Next Candidate: pending coordinator promotion after this scope-layer subject-field redaction repair clears Codex review. Independent Codex review still owed for `cc584318f` + `cd20be9c3` + `270438271` + `df8120b49` + `808297315` + `95dde4d50` once Codex CLI spend limit is raised.
+- Next Candidate: pending coordinator promotion after this scope-layer subject-field redaction repair clears Codex review. Independent Codex review still owed for `cc584318f` + `cd20be9c3` + `270438271` + `df8120b49` + `808297315` + `95dde4d50` + `43b1dafb`.
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
