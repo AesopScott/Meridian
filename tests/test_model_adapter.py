@@ -10,8 +10,12 @@ from meridian_core.model_adapter import (
     AdapterRegistry,
     DEEPSEEK_DIRECT_ENDPOINT,
     DEEPSEEK_DIRECT_MODEL,
+    DeepSeekTransportAuthority,
+    DeepSeekTransportAuthorityStatus,
     DeepSeekValidationDisposition,
+    DeepSeekValidationGateProof,
     DeepSeekValidationLevel,
+    DeepSeekValidationProofState,
     DeepSeekValidationState,
     EnvConfiguredModelAdapter,
     FakeModelAdapter,
@@ -23,11 +27,13 @@ from meridian_core.model_adapter import (
     ModelAdapterConfigError,
     ModelHarnessMetadata,
     ModelRouteMetadataBinding,
+    bind_deepseek_transport_authority,
     bind_deepseek_validation_disposition,
     bind_model_route_metadata,
     deepseek_candidate_metadata_preset,
     deepseek_candidate_route_presets,
     deepseek_validation_state_from_preset,
+    evaluate_deepseek_transport_authority,
 )
 from meridian_core.prompt_payload_meter import PromptPayloadSnapshot
 from meridian_core.relay import CostPosture, LatencyPosture
@@ -1315,3 +1321,384 @@ class TestDeepSeekValidationDisposition:
         assert disposition is not None
         assert disposition.validation_level == "level-unknown"
         assert disposition.transport_cleared is False
+
+
+_DEEPSEEK_AUTHORITY_TAGS = (
+    "autonomous_implementation",
+    "review_clearance",
+    "branch_movement",
+    "live_coding",
+    "relay_bypass",
+)
+
+
+def _verified_proof(
+    *, human: bool = True, prime: bool = True
+) -> DeepSeekValidationGateProof:
+    return DeepSeekValidationGateProof(
+        proof_state=DeepSeekValidationProofState.PROOF_VERIFIED,
+        proof_evidence_refs=("deepseek-proof:run-id:abc",),
+        review_evidence_ref="external-review:deepseek:deepseek-chat:passed",
+        proof_observed_at="2026-06-09T10:00:00+00:00",
+        proof_max_age_seconds=86400,
+        human_gate_satisfied=human,
+        prime_authority_satisfied=prime,
+    )
+
+
+class TestDeepSeekValidationProofState:
+    def test_enum_advertises_full_proof_ladder(self) -> None:
+        assert DeepSeekValidationProofState.NONE.value == "none"
+        assert (
+            DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY.value
+            == "candidate-metadata-only"
+        )
+        assert (
+            DeepSeekValidationProofState.PROOF_SUBMITTED_PENDING_REVIEW.value
+            == "proof-submitted-pending-review"
+        )
+        assert DeepSeekValidationProofState.PROOF_STALE.value == "proof-stale"
+        assert DeepSeekValidationProofState.PROOF_PARTIAL.value == "proof-partial"
+        assert DeepSeekValidationProofState.PROOF_REVOKED.value == "proof-revoked"
+        assert DeepSeekValidationProofState.PROOF_VERIFIED.value == "proof-verified"
+
+
+class TestDeepSeekValidationGateProof:
+    def test_default_proof_is_fail_closed(self) -> None:
+        proof = DeepSeekValidationGateProof(
+            proof_state=DeepSeekValidationProofState.NONE,
+        )
+        assert proof.proof_evidence_refs == ()
+        assert proof.review_evidence_ref is None
+        assert proof.proof_observed_at is None
+        assert proof.proof_max_age_seconds is None
+        assert proof.human_gate_satisfied is False
+        assert proof.prime_authority_satisfied is False
+
+    def test_rejects_negative_max_age(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="proof_max_age_seconds"):
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.PROOF_VERIFIED,
+                proof_max_age_seconds=-1,
+            )
+
+    def test_to_dict_is_display_safe(self) -> None:
+        proof = _verified_proof()
+        rendered = proof.to_dict()
+        assert rendered["proof_state"] == "proof-verified"
+        assert rendered["proof_evidence_refs"] == ["deepseek-proof:run-id:abc"]
+        assert rendered["review_evidence_ref"] == (
+            "external-review:deepseek:deepseek-chat:passed"
+        )
+        assert rendered["proof_observed_at"] == "2026-06-09T10:00:00+00:00"
+        assert rendered["proof_max_age_seconds"] == 86400
+        assert rendered["human_gate_satisfied"] is True
+        assert rendered["prime_authority_satisfied"] is True
+        flat = " ".join(str(v) for v in rendered.values()).lower()
+        assert "credential" not in flat
+        assert "api_key" not in flat
+
+    def test_is_frozen(self) -> None:
+        proof = DeepSeekValidationGateProof(
+            proof_state=DeepSeekValidationProofState.NONE,
+        )
+        with pytest.raises(FrozenInstanceError):
+            proof.human_gate_satisfied = True  # type: ignore[misc]
+
+
+class TestDeepSeekTransportAuthorityConstruction:
+    def _verified_authority(self) -> DeepSeekTransportAuthority:
+        return evaluate_deepseek_transport_authority(_verified_proof())
+
+    def test_verified_proof_with_both_gates_authorizes_transport(self) -> None:
+        auth = self._verified_authority()
+        assert auth.status is DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY
+        assert auth.transport_authorized is True
+        assert auth.direct_dispatch_id == "deepseek-chat"
+
+    def test_authorized_transport_never_grants_autonomous_authority(self) -> None:
+        auth = self._verified_authority()
+        assert auth.autonomous_implementation_authorized is False
+        assert auth.review_clearing_authorized is False
+        assert auth.branch_movement_authorized is False
+        assert auth.live_coding_authority_authorized is False
+        assert auth.relay_bypass_authorized is False
+        for marker in _DEEPSEEK_AUTHORITY_TAGS:
+            assert marker in auth.blocked_authority_tags
+
+    def test_construction_rejects_autonomous_authority_bit(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="autonomous authority"):
+            DeepSeekTransportAuthority(
+                direct_dispatch_id="deepseek-chat",
+                proof=_verified_proof(),
+                status=DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY,
+                transport_authorized=True,
+                blocker_tags=(),
+                blocked_authority_tags=_DEEPSEEK_AUTHORITY_TAGS,
+                autonomous_implementation_authorized=True,
+            )
+
+    def test_construction_rejects_non_deepseek_chat_dispatch_id(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="deepseek-chat"):
+            DeepSeekTransportAuthority(
+                direct_dispatch_id="claude-opus",
+                proof=_verified_proof(),
+                status=DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY,
+                transport_authorized=True,
+                blocker_tags=(),
+                blocked_authority_tags=_DEEPSEEK_AUTHORITY_TAGS,
+            )
+
+    def test_construction_rejects_non_serialization_only(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="serialization-only"):
+            DeepSeekTransportAuthority(
+                direct_dispatch_id="deepseek-chat",
+                proof=_verified_proof(),
+                status=DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY,
+                transport_authorized=True,
+                blocker_tags=(),
+                blocked_authority_tags=_DEEPSEEK_AUTHORITY_TAGS,
+                serialization_only=False,
+            )
+
+    def test_construction_rejects_status_authorized_mismatch_true(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="transport_authorized must equal"):
+            DeepSeekTransportAuthority(
+                direct_dispatch_id="deepseek-chat",
+                proof=_verified_proof(),
+                status=DeepSeekTransportAuthorityStatus.BLOCKED_NO_PROOF,
+                transport_authorized=True,
+                blocker_tags=("deepseek_proof_missing",),
+                blocked_authority_tags=_DEEPSEEK_AUTHORITY_TAGS,
+            )
+
+    def test_construction_rejects_status_authorized_mismatch_false(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="transport_authorized must equal"):
+            DeepSeekTransportAuthority(
+                direct_dispatch_id="deepseek-chat",
+                proof=_verified_proof(),
+                status=DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY,
+                transport_authorized=False,
+                blocker_tags=(),
+                blocked_authority_tags=_DEEPSEEK_AUTHORITY_TAGS,
+            )
+
+    def test_construction_rejects_missing_blocked_authority_tag(self) -> None:
+        with pytest.raises(ModelAdapterConfigError, match="blocked-authority tag"):
+            DeepSeekTransportAuthority(
+                direct_dispatch_id="deepseek-chat",
+                proof=_verified_proof(),
+                status=DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY,
+                transport_authorized=True,
+                blocker_tags=(),
+                blocked_authority_tags=("autonomous_implementation",),
+            )
+
+    def test_to_dict_is_display_safe_and_stable(self) -> None:
+        auth = self._verified_authority()
+        rendered = auth.to_dict()
+        assert rendered == auth.to_dict()
+        assert tuple(rendered.keys()) == (
+            "direct_dispatch_id",
+            "proof",
+            "status",
+            "transport_authorized",
+            "blocker_tags",
+            "blocked_authority_tags",
+            "autonomous_implementation_authorized",
+            "review_clearing_authorized",
+            "branch_movement_authorized",
+            "live_coding_authority_authorized",
+            "relay_bypass_authorized",
+            "serialization_only",
+        )
+        assert rendered["direct_dispatch_id"] == "deepseek-chat"
+        assert rendered["transport_authorized"] is True
+        assert rendered["status"] == "authorized:transport-only"
+        flat = " ".join(str(v) for v in rendered.values()).lower()
+        assert "credential" not in flat
+        assert "api_key" not in flat
+
+
+class TestEvaluateDeepSeekTransportAuthority:
+    def test_none_proof_blocks_with_no_proof_marker(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.NONE
+            )
+        )
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_NO_PROOF
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_missing" in auth.blocker_tags
+
+    def test_candidate_only_proof_blocks_with_candidate_marker(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY
+            )
+        )
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_CANDIDATE_ONLY
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_candidate_only" in auth.blocker_tags
+
+    def test_partial_proof_blocks_with_partial_marker(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.PROOF_PARTIAL
+            )
+        )
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_PARTIAL
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_partial" in auth.blocker_tags
+
+    def test_stale_proof_blocks_with_stale_marker(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.PROOF_STALE
+            )
+        )
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_STALE
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_stale" in auth.blocker_tags
+
+    def test_revoked_proof_blocks_with_revoked_marker(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.PROOF_REVOKED
+            )
+        )
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_REVOKED
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_revoked" in auth.blocker_tags
+
+    def test_pending_review_proof_blocks_with_pending_marker(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            DeepSeekValidationGateProof(
+                proof_state=DeepSeekValidationProofState.PROOF_SUBMITTED_PENDING_REVIEW
+            )
+        )
+        assert (
+            auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_PENDING_REVIEW
+        )
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_pending_review" in auth.blocker_tags
+
+    def test_verified_proof_without_human_gate_blocks(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            _verified_proof(human=False, prime=True)
+        )
+        assert (
+            auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_HUMAN_GATE_REQUIRED
+        )
+        assert auth.transport_authorized is False
+        assert "deepseek_human_gate_required" in auth.blocker_tags
+
+    def test_verified_proof_with_human_gate_but_no_prime_blocks(self) -> None:
+        auth = evaluate_deepseek_transport_authority(
+            _verified_proof(human=True, prime=False)
+        )
+        assert (
+            auth.status
+            is DeepSeekTransportAuthorityStatus.BLOCKED_PRIME_AUTHORITY_REQUIRED
+        )
+        assert auth.transport_authorized is False
+        assert "deepseek_prime_authority_required" in auth.blocker_tags
+
+    def test_verified_proof_with_both_gates_authorizes_transport_only(self) -> None:
+        auth = evaluate_deepseek_transport_authority(_verified_proof())
+        assert auth.status is DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY
+        assert auth.transport_authorized is True
+        assert auth.blocker_tags == ()
+        for marker in _DEEPSEEK_AUTHORITY_TAGS:
+            assert marker in auth.blocked_authority_tags
+
+    def test_every_evaluation_preserves_all_five_blocked_authority_tags(self) -> None:
+        for state in DeepSeekValidationProofState:
+            proof = DeepSeekValidationGateProof(proof_state=state)
+            auth = evaluate_deepseek_transport_authority(proof)
+            for marker in _DEEPSEEK_AUTHORITY_TAGS:
+                assert marker in auth.blocked_authority_tags
+            assert auth.autonomous_implementation_authorized is False
+            assert auth.review_clearing_authorized is False
+            assert auth.branch_movement_authorized is False
+            assert auth.live_coding_authority_authorized is False
+            assert auth.relay_bypass_authorized is False
+
+
+class TestBindDeepSeekTransportAuthority:
+    def test_bind_returns_none_when_metadata_missing(self) -> None:
+        assert bind_deepseek_transport_authority(None) is None
+
+    def test_bind_returns_none_for_non_deepseek_provider(self) -> None:
+        meta = ModelHarnessMetadata(
+            provider_name="anthropic",
+            model_name="claude-opus",
+            capability_tier="primary",
+            context_budget=200000,
+            prompt_payload_budget=150000,
+            trust_state="trusted",
+            requires_external_review=False,
+        )
+        assert bind_deepseek_transport_authority(meta) is None
+
+    def test_bind_returns_none_for_non_deepseek_chat_model(self) -> None:
+        meta = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="openrouter-deepseek",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=True,
+            deepseek_candidate_state={
+                "validation_evidence_ref": "deepseek-validation:level-0:metadata-only",
+            },
+        )
+        assert bind_deepseek_transport_authority(meta) is None
+
+    def test_bind_returns_none_for_deepseek_chat_without_candidate_state(self) -> None:
+        meta = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=True,
+        )
+        assert bind_deepseek_transport_authority(meta) is None
+
+    def test_bind_returns_candidate_blocked_authority_for_current_metadata(self) -> None:
+        meta = deepseek_candidate_metadata_preset("fast")
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert auth.status is DeepSeekTransportAuthorityStatus.BLOCKED_CANDIDATE_ONLY
+        assert auth.transport_authorized is False
+        assert "deepseek_proof_candidate_only" in auth.blocker_tags
+        assert auth.proof.proof_state is DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY
+        assert auth.proof.human_gate_satisfied is False
+        assert auth.proof.prime_authority_satisfied is False
+        for marker in _DEEPSEEK_AUTHORITY_TAGS:
+            assert marker in auth.blocked_authority_tags
+
+    def test_bind_carries_validation_and_review_refs_into_proof(self) -> None:
+        meta = deepseek_candidate_metadata_preset("default_quality")
+        auth = bind_deepseek_transport_authority(meta)
+        assert auth is not None
+        assert auth.proof.proof_evidence_refs == (
+            "deepseek-validation:level-0:metadata-only",
+        )
+        assert auth.proof.review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
+
+    def test_bind_never_grants_transport_for_current_candidate_metadata(self) -> None:
+        for lane in ("default_quality", "fast"):
+            meta = deepseek_candidate_metadata_preset(lane)
+            auth = bind_deepseek_transport_authority(meta)
+            assert auth is not None
+            assert auth.transport_authorized is False
+            assert (
+                auth.status
+                is DeepSeekTransportAuthorityStatus.BLOCKED_CANDIDATE_ONLY
+            )

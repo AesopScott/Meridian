@@ -25,11 +25,13 @@ from .aegis import (
 from .cognition_policy import evaluate_cognition_policy
 from .model_adapter import (
     AdapterRegistry,
+    DeepSeekTransportAuthority,
     DeepSeekValidationDisposition,
     MissingAdapterError,
     ModelAdapter,
     ModelHarnessMetadata,
     ModelRouteMetadataBinding,
+    bind_deepseek_transport_authority,
     bind_deepseek_validation_disposition,
     bind_model_route_metadata,
 )
@@ -316,6 +318,7 @@ class RelayDispatchMetadataEnvelope:
     transport_payload_kind: str = "metadata_only"
     serialization_only: bool = True
     deepseek_validation_disposition: DeepSeekValidationDisposition | None = None
+    deepseek_transport_authority: DeepSeekTransportAuthority | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return stable display-safe metadata for future provider transport handoff."""
@@ -370,6 +373,11 @@ class RelayDispatchMetadataEnvelope:
             "deepseek_validation_disposition": (
                 self.deepseek_validation_disposition.to_dict()
                 if self.deepseek_validation_disposition is not None
+                else None
+            ),
+            "deepseek_transport_authority": (
+                self.deepseek_transport_authority.to_dict()
+                if self.deepseek_transport_authority is not None
                 else None
             ),
         }
@@ -2539,6 +2547,9 @@ def _build_dispatch_metadata_envelope(
         metadata_transport_allowed=not fail_closed_advisory,
         retry_requires_fresh_metadata=fail_closed_advisory,
         deepseek_validation_disposition=bind_deepseek_validation_disposition(
+            adapter_metadata
+        ),
+        deepseek_transport_authority=bind_deepseek_transport_authority(
             adapter_metadata
         ),
     )

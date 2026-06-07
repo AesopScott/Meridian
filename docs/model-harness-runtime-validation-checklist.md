@@ -197,3 +197,48 @@ Model Harness runtime metadata validation work is ready only after:
 - Aegis receives validation blockers/warnings as policy inputs.
 - Bifrost receives display-safe validation state only.
 - Reviews A/B clear the runtime implementation before live provider routing depends on it.
+
+---
+
+## DeepSeek Validation-Gate Proof and Transport Authority
+
+The DeepSeek-specific validation-gate proof state and transport-authority
+status live in `meridian_core/model_adapter.py` and are surfaced through
+`RelayDispatchMetadataEnvelope.deepseek_transport_authority`. The full
+state ladder, status mapping, and authority-gate requirements are defined
+in `docs/deepseek-provider-validation-gate.md`.
+
+Backend invariants enforced by `DeepSeekTransportAuthority.__post_init__`
+and `evaluate_deepseek_transport_authority()`:
+
+- [ ] Missing, candidate-only, partial, stale, revoked, and pending-review
+  proof states all map to fail-closed `blocked:*` status with the
+  corresponding `deepseek_proof_*` marker in `blocker_tags`.
+- [ ] Verified proof without `human_gate_satisfied` is blocked with
+  `blocked:human-gate-required` and `deepseek_human_gate_required`.
+- [ ] Verified proof with human gate but without `prime_authority_satisfied`
+  is blocked with `blocked:prime-authority-required` and
+  `deepseek_prime_authority_required`.
+- [ ] Only verified proof with both gates yields
+  `authorized:transport-only`.
+- [ ] `transport_authorized` always equals
+  `(status == AUTHORIZED_TRANSPORT_ONLY)`; mismatch raises at construction.
+- [ ] All five autonomous-authority bits
+  (`autonomous_implementation_authorized`, `review_clearing_authorized`,
+  `branch_movement_authorized`, `live_coding_authority_authorized`,
+  `relay_bypass_authorized`) are hard-coded `False` in every output,
+  including when `transport_authorized=True`.
+- [ ] `blocked_authority_tags` always contains the full set
+  (`autonomous_implementation`, `review_clearance`, `branch_movement`,
+  `live_coding`, `relay_bypass`); missing any tag raises at construction.
+- [ ] `direct_dispatch_id == "deepseek-chat"`; any other dispatch id raises.
+- [ ] `serialization_only=True`; the record is display/advisory only.
+- [ ] `bind_deepseek_transport_authority()` returns `None` for missing,
+  non-DeepSeek, or non-`deepseek-chat` adapter metadata.
+- [ ] `bind_deepseek_transport_authority()` against current candidate
+  metadata always returns `blocked:candidate-only` with both authority
+  gates `False`.
+- [ ] `to_dict()` on both `DeepSeekValidationGateProof` and
+  `DeepSeekTransportAuthority` produces JSON-safe records with stable key
+  order and contains no credential, api_key, raw prompt, raw response,
+  account identifier, or path strings.

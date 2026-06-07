@@ -278,6 +278,270 @@ def bind_deepseek_validation_disposition(
     )
 
 
+class DeepSeekValidationProofState(Enum):
+    """Validation-gate proof state for DeepSeek direct-provider transport.
+
+    Drives fail-closed transport authority. Any state other than
+    PROOF_VERIFIED (with both human and Prime authority gates satisfied)
+    blocks transport. Even PROOF_VERIFIED never extends authority beyond
+    transport: autonomous implementation, review clearing, branch movement,
+    live coding, and Relay bypass remain hard-blocked regardless.
+    """
+
+    NONE = "none"
+    CANDIDATE_METADATA_ONLY = "candidate-metadata-only"
+    PROOF_SUBMITTED_PENDING_REVIEW = "proof-submitted-pending-review"
+    PROOF_STALE = "proof-stale"
+    PROOF_PARTIAL = "proof-partial"
+    PROOF_REVOKED = "proof-revoked"
+    PROOF_VERIFIED = "proof-verified"
+
+
+class DeepSeekTransportAuthorityStatus(Enum):
+    """Transport-authority status for DeepSeek direct-provider dispatch.
+
+    Only AUTHORIZED_TRANSPORT_ONLY permits transport; every other value is a
+    fail-closed blocker. AUTHORIZED_TRANSPORT_ONLY explicitly does NOT grant
+    autonomous implementation, review clearing, branch movement, live coding,
+    or Relay bypass.
+    """
+
+    BLOCKED_NO_PROOF = "blocked:no-proof"
+    BLOCKED_CANDIDATE_ONLY = "blocked:candidate-only"
+    BLOCKED_PROOF_PARTIAL = "blocked:proof-partial"
+    BLOCKED_PROOF_STALE = "blocked:proof-stale"
+    BLOCKED_PROOF_REVOKED = "blocked:proof-revoked"
+    BLOCKED_PROOF_PENDING_REVIEW = "blocked:proof-pending-review"
+    BLOCKED_HUMAN_GATE_REQUIRED = "blocked:human-gate-required"
+    BLOCKED_PRIME_AUTHORITY_REQUIRED = "blocked:prime-authority-required"
+    AUTHORIZED_TRANSPORT_ONLY = "authorized:transport-only"
+
+
+_DEEPSEEK_PROOF_STATE_TO_BLOCKER: Mapping[
+    DeepSeekValidationProofState, tuple[DeepSeekTransportAuthorityStatus, str]
+] = MappingProxyType({
+    DeepSeekValidationProofState.NONE: (
+        DeepSeekTransportAuthorityStatus.BLOCKED_NO_PROOF,
+        "deepseek_proof_missing",
+    ),
+    DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY: (
+        DeepSeekTransportAuthorityStatus.BLOCKED_CANDIDATE_ONLY,
+        "deepseek_proof_candidate_only",
+    ),
+    DeepSeekValidationProofState.PROOF_PARTIAL: (
+        DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_PARTIAL,
+        "deepseek_proof_partial",
+    ),
+    DeepSeekValidationProofState.PROOF_STALE: (
+        DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_STALE,
+        "deepseek_proof_stale",
+    ),
+    DeepSeekValidationProofState.PROOF_REVOKED: (
+        DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_REVOKED,
+        "deepseek_proof_revoked",
+    ),
+    DeepSeekValidationProofState.PROOF_SUBMITTED_PENDING_REVIEW: (
+        DeepSeekTransportAuthorityStatus.BLOCKED_PROOF_PENDING_REVIEW,
+        "deepseek_proof_pending_review",
+    ),
+})
+
+
+_DEEPSEEK_BLOCKED_AUTHORITY_TAGS: tuple[str, ...] = (
+    "autonomous_implementation",
+    "review_clearance",
+    "branch_movement",
+    "live_coding",
+    "relay_bypass",
+)
+
+
+@dataclass(frozen=True)
+class DeepSeekValidationGateProof:
+    """Bounded validation-gate proof record for DeepSeek direct-provider transport.
+
+    Carries only proof state plus display-safe evidence references. Never
+    stores raw credentials, raw provider responses, or transcripts. Staleness
+    and partial-proof are first-class blockers, not optional warnings.
+    """
+
+    proof_state: DeepSeekValidationProofState
+    proof_evidence_refs: tuple[str, ...] = ()
+    review_evidence_ref: str | None = None
+    proof_observed_at: str | None = None
+    proof_max_age_seconds: int | None = None
+    human_gate_satisfied: bool = False
+    prime_authority_satisfied: bool = False
+
+    def __post_init__(self) -> None:
+        if self.proof_max_age_seconds is not None and self.proof_max_age_seconds < 0:
+            raise ModelAdapterConfigError(
+                "proof_max_age_seconds must be non-negative if provided"
+            )
+
+    def to_dict(self) -> dict[str, object]:
+        """Return display-safe proof metadata for Relay/Bifrost handoff."""
+        return {
+            "proof_state": self.proof_state.value,
+            "proof_evidence_refs": list(self.proof_evidence_refs),
+            "review_evidence_ref": self.review_evidence_ref,
+            "proof_observed_at": self.proof_observed_at,
+            "proof_max_age_seconds": self.proof_max_age_seconds,
+            "human_gate_satisfied": self.human_gate_satisfied,
+            "prime_authority_satisfied": self.prime_authority_satisfied,
+        }
+
+
+@dataclass(frozen=True)
+class DeepSeekTransportAuthority:
+    """Bounded transport-authority record for DeepSeek direct-provider dispatch.
+
+    Combines validation-gate proof + authority gates into a single fail-closed
+    transport-authority status. Authority NEVER extends beyond transport: the
+    five autonomous-authority bits are hard-coded False, the dispatch identity
+    is hard-coded to ``deepseek-chat``, and ``transport_authorized`` must
+    match the ``status == AUTHORIZED_TRANSPORT_ONLY`` invariant.
+    """
+
+    direct_dispatch_id: str
+    proof: DeepSeekValidationGateProof
+    status: DeepSeekTransportAuthorityStatus
+    transport_authorized: bool
+    blocker_tags: tuple[str, ...]
+    blocked_authority_tags: tuple[str, ...]
+    autonomous_implementation_authorized: bool = False
+    review_clearing_authorized: bool = False
+    branch_movement_authorized: bool = False
+    live_coding_authority_authorized: bool = False
+    relay_bypass_authorized: bool = False
+    serialization_only: bool = True
+
+    def __post_init__(self) -> None:
+        if self.direct_dispatch_id != DEEPSEEK_DIRECT_MODEL:
+            raise ModelAdapterConfigError(
+                "DeepSeek transport authority direct_dispatch_id must be deepseek-chat"
+            )
+        if (
+            self.autonomous_implementation_authorized
+            or self.review_clearing_authorized
+            or self.branch_movement_authorized
+            or self.live_coding_authority_authorized
+            or self.relay_bypass_authorized
+        ):
+            raise ModelAdapterConfigError(
+                "DeepSeek transport authority must not grant autonomous authority"
+            )
+        if not self.serialization_only:
+            raise ModelAdapterConfigError(
+                "DeepSeek transport authority is serialization-only"
+            )
+        expected_authorized = (
+            self.status == DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY
+        )
+        if self.transport_authorized != expected_authorized:
+            raise ModelAdapterConfigError(
+                "transport_authorized must equal (status == AUTHORIZED_TRANSPORT_ONLY)"
+            )
+        for marker in _DEEPSEEK_BLOCKED_AUTHORITY_TAGS:
+            if marker not in self.blocked_authority_tags:
+                raise ModelAdapterConfigError(
+                    f"DeepSeek transport authority must preserve "
+                    f"blocked-authority tag: {marker}"
+                )
+
+    def to_dict(self) -> dict[str, object]:
+        """Return display-safe transport-authority metadata."""
+        return {
+            "direct_dispatch_id": self.direct_dispatch_id,
+            "proof": self.proof.to_dict(),
+            "status": self.status.value,
+            "transport_authorized": self.transport_authorized,
+            "blocker_tags": list(self.blocker_tags),
+            "blocked_authority_tags": list(self.blocked_authority_tags),
+            "autonomous_implementation_authorized": self.autonomous_implementation_authorized,
+            "review_clearing_authorized": self.review_clearing_authorized,
+            "branch_movement_authorized": self.branch_movement_authorized,
+            "live_coding_authority_authorized": self.live_coding_authority_authorized,
+            "relay_bypass_authorized": self.relay_bypass_authorized,
+            "serialization_only": self.serialization_only,
+        }
+
+
+def evaluate_deepseek_transport_authority(
+    proof: DeepSeekValidationGateProof,
+) -> DeepSeekTransportAuthority:
+    """Evaluate transport authority from a proof record, fail-closed by default.
+
+    Missing, candidate-only, partial, stale, revoked, or pending-review proof
+    always blocks. Only PROOF_VERIFIED with both human and Prime authority
+    gates satisfied yields AUTHORIZED_TRANSPORT_ONLY. The five autonomous-
+    authority bits remain False in every output.
+    """
+    blocker_tags: list[str] = []
+    if proof.proof_state in _DEEPSEEK_PROOF_STATE_TO_BLOCKER:
+        status, marker = _DEEPSEEK_PROOF_STATE_TO_BLOCKER[proof.proof_state]
+        blocker_tags.append(marker)
+    elif proof.proof_state == DeepSeekValidationProofState.PROOF_VERIFIED:
+        if not proof.human_gate_satisfied:
+            status = DeepSeekTransportAuthorityStatus.BLOCKED_HUMAN_GATE_REQUIRED
+            blocker_tags.append("deepseek_human_gate_required")
+        elif not proof.prime_authority_satisfied:
+            status = DeepSeekTransportAuthorityStatus.BLOCKED_PRIME_AUTHORITY_REQUIRED
+            blocker_tags.append("deepseek_prime_authority_required")
+        else:
+            status = DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY
+    else:
+        # Fail-closed default for any unknown proof state.
+        status = DeepSeekTransportAuthorityStatus.BLOCKED_NO_PROOF
+        blocker_tags.append("deepseek_proof_unknown_state")
+
+    return DeepSeekTransportAuthority(
+        direct_dispatch_id=DEEPSEEK_DIRECT_MODEL,
+        proof=proof,
+        status=status,
+        transport_authorized=(
+            status == DeepSeekTransportAuthorityStatus.AUTHORIZED_TRANSPORT_ONLY
+        ),
+        blocker_tags=tuple(blocker_tags),
+        blocked_authority_tags=_DEEPSEEK_BLOCKED_AUTHORITY_TAGS,
+    )
+
+
+def bind_deepseek_transport_authority(
+    adapter_metadata: "ModelHarnessMetadata | None",
+) -> DeepSeekTransportAuthority | None:
+    """Bind adapter metadata to a fail-closed DeepSeek transport-authority record.
+
+    Returns None when metadata is missing, not DeepSeek direct dispatch, or
+    carries no candidate validation state. Candidate-only metadata (the
+    current state on main) maps to CANDIDATE_METADATA_ONLY proof state, which
+    blocks transport. Only a proof source that explicitly provides verified
+    proof refs plus both authority-gate flags can yield transport authority.
+    """
+    if adapter_metadata is None:
+        return None
+    if adapter_metadata.provider_name != "deepseek":
+        return None
+    if adapter_metadata.model_name != DEEPSEEK_DIRECT_MODEL:
+        return None
+    candidate_state = adapter_metadata.deepseek_candidate_state
+    if candidate_state is None:
+        return None
+
+    validation_ref = (candidate_state.get("validation_evidence_ref") or "").strip()
+    review_ref = (candidate_state.get("external_review_evidence_ref") or "").strip() or None
+    proof_refs: tuple[str, ...] = (validation_ref,) if validation_ref else ()
+
+    proof = DeepSeekValidationGateProof(
+        proof_state=DeepSeekValidationProofState.CANDIDATE_METADATA_ONLY,
+        proof_evidence_refs=proof_refs,
+        review_evidence_ref=review_ref,
+        human_gate_satisfied=False,
+        prime_authority_satisfied=False,
+    )
+    return evaluate_deepseek_transport_authority(proof)
+
+
 @dataclass(frozen=True)
 class ModelHarnessMetadata:
     """Provider-neutral Model Harness metadata for capability and budget tracking."""
