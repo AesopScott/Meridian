@@ -10,6 +10,43 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair Codex Review B finding on Compass project-identity blocked path — raw-context evidence_refs were detected and blocked but not redacted in serialization.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (branch-local commit only this turn; no push per directive).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Task:
+- Repair `evaluate_project_identity()` raw-context BLOCKED path so `evidence_refs` are redacted with the same `_redact_raw_context_refs` pattern used by scope (cd20be9c3) and difference (df8120b49) layers before serialization.
+- Preserve safe evidence refs, existing blockers, status, and `execution_authorized=False` behavior.
+- Add regression tests proving raw evidence refs are blocked AND redacted in `ProjectIdentityEvaluation.to_dict()`, while safe refs pass.
+
+Completion: 2026-06-06 (Opus build lane).
+
+Ready for Codex Review:
+
+- Repair commit: `808297315` (Repair Compass identity-layer raw-context evidence_refs leak (Codex Review B)).
+- Files changed: `meridian_core/compass.py` (1 line: route `candidate.evidence_refs` through `_redact_raw_context_refs` when constructing the BLOCKED `ProjectIdentityEvaluation`), `tests/test_compass.py` (+134 lines: new `TestProjectIdentityRawContextRedaction` class).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **263 passed** (15 new identity-redaction tests on top of 248 prior).
+- `git diff --check`: clean.
+- Reproducer (before fix): `evaluate_project_identity(_identity_candidate(evidence_refs=("raw_prompt:secret prompt body",))).to_dict()["evidence_refs"]` returned `("raw_prompt:secret prompt body",)` — the raw payload appeared verbatim in JSON output. The existing `test_raw_context_evidence_ref_is_blocked` only checked blocker presence, not redaction, so it passed under the leaky implementation.
+- After fix: same call returns `("<redacted_raw_context>",)` and `json.dumps` no longer contains `secret prompt body`.
+- Concrete evidence each required invariant is enforced:
+  - Raw payload absent from serialization: 9 parametrized prefixes (`raw_prompt`, `raw_transcript`, `free_form_context`, `transcript`, `conversation`, `provider_response`, `raw_context`, `prompt`, embedded-newline) in `test_raw_context_evidence_ref_redacted_in_blocked_serialization` all assert raw text absent from both `result.evidence_refs` and `json.dumps(result.to_dict())` while `<redacted_raw_context>` appears in both.
+  - Mixed safe/raw evidence preserves safe refs in original order and redacts raw refs in place: `test_mixed_safe_and_raw_evidence_refs_partially_redacted`.
+  - Redaction does NOT over-trigger on other BLOCKED paths: `test_safe_evidence_refs_pass_through_unchanged_on_other_blocker_paths` (missing_project_id path with safe evidence refs preserves the original tuple).
+  - Safe evidence still reaches DEFINED: `test_safe_evidence_refs_still_define_project_identity`.
+  - Multi-blocker path: `test_existing_identity_blockers_preserved_alongside_redaction` confirms `missing_title` + `raw_context_evidence_ref_blocked` coexist with redaction still applied.
+  - Stable serialization: `test_blocked_redacted_result_serializes_stably` asserts `tuple(result.to_dict().keys()) == project_identity_result_dict_keys()`.
+  - `execution_authorized=False` preserved: `test_execution_never_authorized_on_redacted_blocked_path`.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no Polaris dependency.
+- Push status: branch-local commit only this turn per coordinator directive ("do not push"). No `docs/live-build-4.md` update on shared main this turn; the repair can be promoted to main on a subsequent coordinator-authorized heartbeat.
+- Next Candidate: pending coordinator promotion after this identity-layer redaction repair clears Codex review.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: implement Compass Project Difference Runtime (coordinator-promoted after Codex Review B passed identity + bounds/scope runtimes).
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
