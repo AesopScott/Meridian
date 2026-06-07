@@ -2263,6 +2263,12 @@ def _safe_handoff_value(value: object) -> str:
     lowered = text.lower()
     unsafe_markers = (
         "raw_prompt",
+        "raw_transcript",
+        "free_form_context",
+        "transcript:",
+        "conversation:",
+        "provider_response",
+        "raw_context",
         "serialized_prompt",
         "model_payload",
         "secret",

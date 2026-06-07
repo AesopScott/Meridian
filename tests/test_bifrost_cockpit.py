@@ -5053,14 +5053,30 @@ def test_reviewed_backend_evidence_view_from_summary_redacts_unsafe_markers():
     view = reviewed_backend_evidence_view_from_summary({
         "source": "relay",
         "prime_next_action": "raw_prompt: do not expose",
+        "session_lifecycle_preview": "raw_transcript:FULL",
+        "aegis_policy_result": "conversation:APPROVAL",
         "relay_model_metadata": "model_payload SECRET_VALUE",
-        "evidence_refs": ("safe:ref", "api_key:SECRET_VALUE"),
+        "evidence_refs": (
+            "safe:ref",
+            "api_key:SECRET_VALUE",
+            "provider_response:FULL",
+            "free_form_context:FULL",
+            "raw_context:FULL",
+            "transcript:FULL",
+        ),
         "items": (
             {
                 "source": "Echo",
                 "label": "raw_provider_response SECRET_VALUE",
                 "state": "available",
                 "evidence_ref": "bearer token",
+            },
+            {
+                "source": "Atlas",
+                "label": "Retrieval hits",
+                "state": "available",
+                "evidence_ref": "raw_context:atlas-result",
+                "provenance": "provider_response:atlas",
             },
         ),
     })
@@ -5075,7 +5091,13 @@ def test_reviewed_backend_evidence_view_from_summary_redacts_unsafe_markers():
     assert "unsafe_metadata_redacted" in doc
     assert "SECRET_VALUE" not in doc
     assert "raw_prompt" not in doc
+    assert "raw_transcript" not in doc
     assert "raw_provider_response" not in doc
+    assert "provider_response" not in doc
+    assert "free_form_context" not in doc
+    assert "raw_context" not in doc
+    assert "transcript:FULL" not in doc
+    assert "conversation:APPROVAL" not in doc
     assert "bearer token" not in doc
 
 

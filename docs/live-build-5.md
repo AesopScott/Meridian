@@ -6,7 +6,7 @@ Timestamp: 2026-06-07T07:12:48-06:00.
 
 Goal: implemented the next Bifrost V2 cockpit extension as a deterministic browser-first backend/view-model rendering slice for already-reviewed backend state.
 
-Implementation commit: `65ff7445a` (`feat(bifrost): add reviewed backend evidence cockpit slice`).
+Implementation commit on clean promotion branch: `9a14e73eb` (`feat(bifrost): add reviewed backend evidence cockpit slice`). Original Build 5 worker commit before clean cherry-pick: `65ff7445a`.
 
 Files changed:
 - `bifrost/cockpit.py`
