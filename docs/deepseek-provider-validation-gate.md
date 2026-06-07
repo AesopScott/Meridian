@@ -105,3 +105,65 @@ Prime routes from this metadata. Bifrost displays the trust state and prompt pay
 ## V2 Boundary
 
 V2 should build the provider metadata, direct API target, prompt payload visibility, and validation contract. Full trust automation can mature across V2 and V3 as evidence accumulates.
+
+## Validation-Gate Proof and Transport Authority (Backend)
+
+The backend surface that gates DeepSeek transport authority lives in
+`meridian_core/model_adapter.py` and is consumed by
+`meridian_core/relay_executor.py` through `RelayDispatchMetadataEnvelope`.
+
+### Proof States (`DeepSeekValidationProofState`)
+
+| State | Meaning | Transport |
+| --- | --- | --- |
+| `none` | No proof submitted. | Blocked. |
+| `candidate-metadata-only` | Candidate metadata present; no live-validation proof. | Blocked. |
+| `proof-submitted-pending-review` | Proof submitted; review/clearance pending. | Blocked. |
+| `proof-stale` | Proof present but past `proof_max_age_seconds`. | Blocked. |
+| `proof-partial` | Proof missing required evidence components. | Blocked. |
+| `proof-revoked` | Previously verified proof has been revoked. | Blocked. |
+| `proof-verified` | Verified, fresh, complete proof on file. | Transport authority requires both authority gates below. |
+
+### Authority Gates
+
+Even with `proof-verified`, transport remains blocked unless both gates are
+satisfied:
+
+- `human_gate_satisfied`: human approval recorded.
+- `prime_authority_satisfied`: Prime/Beacon authority recorded.
+
+### Transport Authority Status (`DeepSeekTransportAuthorityStatus`)
+
+The evaluation surface returns exactly one of:
+
+- `blocked:no-proof`
+- `blocked:candidate-only`
+- `blocked:proof-partial`
+- `blocked:proof-stale`
+- `blocked:proof-revoked`
+- `blocked:proof-pending-review`
+- `blocked:human-gate-required`
+- `blocked:prime-authority-required`
+- `authorized:transport-only`
+
+`authorized:transport-only` is the only state where `transport_authorized=True`.
+This status authorizes Relay direct-provider transport only. It does **not**
+grant autonomous implementation, review clearing, branch movement, live
+coding, or Relay bypass — those five autonomy bits are hard-coded `False`
+and the `blocked_authority_tags` tuple
+(`autonomous_implementation`, `review_clearance`, `branch_movement`,
+`live_coding`, `relay_bypass`) is enforced by the dataclass guard.
+
+### Defaults and Invariants
+
+- Default `proof_state` when no proof source is wired up: `none`.
+- Default for `bind_deepseek_transport_authority()` against current
+  candidate metadata on main: `blocked:candidate-only`.
+- Dispatch identity rule preserved: `direct_dispatch_id == "deepseek-chat"`.
+- Variant labels (`deepseek-v4-pro`, `deepseek-v4-flash`) remain
+  capability/variant labels and never reach the transport authority's
+  `direct_dispatch_id` field.
+- `serialization_only=True` is enforced — the transport-authority record is
+  display/advisory, not an execution capability.
+- `transport_authorized` must equal `status == AUTHORIZED_TRANSPORT_ONLY`;
+  any mismatch raises at construction.

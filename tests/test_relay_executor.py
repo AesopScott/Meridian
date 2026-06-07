@@ -17,6 +17,7 @@ from meridian_core.model_adapter import (
     FakeModelAdapter,
     MissingAdapterError,
     ModelHarnessMetadata,
+    ModelRouteMetadataBinding,
     deepseek_candidate_metadata_preset,
 )
 from meridian_core.prompt_payload_meter import PayloadStatus, PromptPayloadSnapshot
@@ -43,6 +44,7 @@ from meridian_core.relay_executor import (
     _build_decision_record,
     _build_dispatch_envelope,
     _build_dispatch_metadata_envelope,
+    _build_provider_result_validation_evidence,
     _build_prompt_payload_meter_evidence,
     _evaluate_relay_prompt_packet_policy,
     _relay_prompt_packet_policy_disposition,
@@ -68,6 +70,49 @@ def _make_plan(tier: int) -> RelayDispatchPlan:
     )
     from meridian_core.relay_dispatch import build_relay_dispatch_plan
     return build_relay_dispatch_plan(route, packet)
+
+
+def _deepseek_authorized_metadata(lane: str = "fast") -> ModelHarnessMetadata:
+    """Return DeepSeek metadata equivalent to the candidate preset but with the
+    minimal candidate-state fields needed for AUTHORIZED_TRANSPORT_ONLY (a
+    ``deepseek-validation:level-1:`` ref plus both gate flags exactly ``"true"``),
+    so end-to-end dispatch tests that aren't auditing the transport-authority
+    block can still exercise a full result path after the Codex Review A repair
+    made the DeepSeek transport authority an execution gate."""
+    base = deepseek_candidate_metadata_preset(lane)
+    assert base.deepseek_candidate_state is not None
+    authorized_state = dict(base.deepseek_candidate_state)
+    authorized_state["validation_evidence_ref"] = (
+        "deepseek-validation:level-1:validation-cleared"
+    )
+    authorized_state["external_review_evidence_ref"] = (
+        "external-review:deepseek:deepseek-chat:passed"
+    )
+    authorized_state["external_review_status"] = "passed"
+    authorized_state["human_gate_satisfied"] = "true"
+    authorized_state["prime_authority_satisfied"] = "true"
+    return dataclasses.replace(base, deepseek_candidate_state=authorized_state)
+
+
+def _deepseek_authorized_candidate_state() -> dict[str, str]:
+    """Return the minimal DeepSeek candidate_state mapping that authorizes
+    transport. Use this when a test builds its own ``ModelHarnessMetadata``
+    in-line rather than starting from the candidate preset."""
+    return {
+        "validation_evidence_ref": (
+            "deepseek-validation:level-1:validation-cleared"
+        ),
+        "external_review_evidence_ref": (
+            "external-review:deepseek:deepseek-chat:passed"
+        ),
+        "external_review_status": "passed",
+        "direct_endpoint_evidence_ref": (
+            "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions"
+        ),
+        "trust_mode": "direct",
+        "human_gate_satisfied": "true",
+        "prime_authority_satisfied": "true",
+    }
 
 
 def _constant_model_call(text: str):
@@ -1344,7 +1389,7 @@ class TestRelayPromptPayloadMeterEvidence:
         )
         adapter = FakeModelAdapter(
             "response",
-            metadata=deepseek_candidate_metadata_preset("fast"),
+            metadata=_deepseek_authorized_metadata("fast"),
         )
         registry = AdapterRegistry().register_model(
             plan.lanes[0].preferred_model,
@@ -1690,6 +1735,7 @@ class TestAdapterMetadata:
             supports_latency_ms=True,
             supports_payload_snapshot=True,
             supports_response_hash=True,
+            deepseek_candidate_state=_deepseek_authorized_candidate_state(),
         )
         registry = AdapterRegistry()
         for lane in plan.lanes:
@@ -1784,6 +1830,7 @@ class TestRelayDispatchEnvelope:
             supports_latency_ms=True,
             supports_payload_snapshot=True,
             supports_response_hash=True,
+            deepseek_candidate_state=_deepseek_authorized_candidate_state(),
         )
         registry = AdapterRegistry()
         for lane in plan.lanes:
@@ -2016,7 +2063,9 @@ class TestRelayDispatchMetadataEnvelope:
             payload_snapshots=(snapshot,),
         )
 
-        envelope = summary.results[0].dispatch_metadata_envelope
+        # Candidate-state metadata is now refused at the pre-dispatch gate —
+        # the envelope rides on the error and the adapter is never called.
+        envelope = summary.errors[0].dispatch_metadata_envelope
         assert isinstance(envelope, RelayDispatchMetadataEnvelope)
         assert envelope.exact_model_id == "deepseek-chat"
         assert envelope.selected_provider == "deepseek"
@@ -2053,7 +2102,7 @@ class TestRelayDispatchMetadataEnvelope:
         assert envelope.retry_requires_fresh_metadata is True
         assert envelope.supports_payload_snapshot is True
         assert envelope.supports_response_hash is True
-        assert adapter.received_payloads == [_PROMPT]
+        assert adapter.received_payloads == []
 
     def test_metadata_envelope_without_route_metadata_has_fail_closed_advisories(self) -> None:
         plan = _make_plan(2)
@@ -2156,6 +2205,7 @@ class TestRelayDispatchMetadataEnvelope:
             "transport_payload_kind",
             "serialization_only",
             "deepseek_validation_disposition",
+            "deepseek_transport_authority",
         )
         assert _PROMPT not in rendered
         assert "raw response" not in rendered
@@ -2165,7 +2215,7 @@ class TestRelayDispatchMetadataEnvelope:
         plan = _make_plan(1)
         registry = AdapterRegistry().register_model(
             plan.lanes[0].preferred_model,
-            FakeModelAdapter("response", metadata=deepseek_candidate_metadata_preset("fast")),
+            FakeModelAdapter("response", metadata=_deepseek_authorized_metadata("fast")),
         )
 
         summary = execute_relay_plan_with_registry(plan, registry)
@@ -2182,7 +2232,7 @@ class TestRelayDispatchMetadataEnvelope:
         plan = _make_plan(1)
         adapter = FakeModelAdapter(
             "response",
-            metadata=deepseek_candidate_metadata_preset("default_quality"),
+            metadata=_deepseek_authorized_metadata("default_quality"),
         )
         registry = AdapterRegistry().register_model(plan.lanes[0].preferred_model, adapter)
 
@@ -2203,7 +2253,7 @@ class TestRelayDispatchMetadataEnvelope:
         plan = _make_plan(1)
         adapter = FakeModelAdapter(
             "response",
-            metadata=deepseek_candidate_metadata_preset("fast"),
+            metadata=_deepseek_authorized_metadata("fast"),
         )
         registry = AdapterRegistry().register_model(
             plan.lanes[0].preferred_model,
@@ -2221,7 +2271,7 @@ class TestRelayDispatchMetadataEnvelope:
         assert decision_envelope is result_envelope
         assert decision_envelope.exact_model_id == "deepseek-chat"
         assert decision_envelope.provider_route_kind == "direct"
-        assert decision_envelope.external_review_status == "pending"
+        assert decision_envelope.external_review_status == "passed"
         assert adapter.received_payloads == [_PROMPT]
 
     def test_summary_metadata_consumer_view_is_deterministic_and_display_safe(self) -> None:
@@ -2276,7 +2326,7 @@ class TestRelayProviderResultValidationEvidence:
         plan = _make_plan(1)
         adapter = FakeModelAdapter(
             "raw provider response body secret should not appear",
-            metadata=deepseek_candidate_metadata_preset("fast"),
+            metadata=_deepseek_authorized_metadata("fast"),
         )
         registry = AdapterRegistry().register_model(
             plan.lanes[0].preferred_model,
@@ -2299,14 +2349,12 @@ class TestRelayProviderResultValidationEvidence:
         assert evidence.direct_endpoint_evidence_ref == (
             "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions"
         )
-        assert evidence.external_review_status == "pending"
+        assert evidence.external_review_status == "passed"
         assert evidence.output_length == len(
             "raw provider response body secret should not appear"
         )
         assert evidence.normalized_output_hash is not None
         assert evidence.response_hash_status == "computed"
-        assert evidence.result_validation_status == "blocked"
-        assert "external_review_pending" in evidence.blocker_tags
         assert adapter.received_payloads == [_PROMPT]
 
         rendered = " ".join(str(value) for value in evidence.to_dict().values())
@@ -2319,7 +2367,7 @@ class TestRelayProviderResultValidationEvidence:
         plan = _make_plan(1)
         registry = AdapterRegistry().register_model(
             plan.lanes[0].preferred_model,
-            FakeModelAdapter("", metadata=deepseek_candidate_metadata_preset("fast")),
+            FakeModelAdapter("", metadata=_deepseek_authorized_metadata("fast")),
         )
 
         summary = execute_relay_plan_with_registry(plan, registry)
@@ -2357,7 +2405,7 @@ class TestRelayProviderResultValidationEvidence:
             plan.lanes[0].preferred_model,
             FakeModelAdapter(
                 "provider output text must remain private",
-                metadata=deepseek_candidate_metadata_preset("fast"),
+                metadata=_deepseek_authorized_metadata("fast"),
             ),
         )
 
@@ -2376,8 +2424,6 @@ class TestRelayProviderResultValidationEvidence:
         assert first["serialization_only"] is True
         assert len(first["result_evidence"]) == 1
         assert first["decision_record_result_evidence"] == first["result_evidence"][0]
-        assert first["fail_closed"] is True
-        assert "external_review_pending" in first["blocker_tags"]
         assert _PROMPT not in rendered
         assert "provider output text" not in rendered
         assert "credential" not in rendered.lower()
@@ -2399,7 +2445,7 @@ class TestRelayAegisProviderResultValidationAdvisory:
         plan = _make_plan(1)
         adapter = FakeModelAdapter(
             "private provider output must not appear",
-            metadata=deepseek_candidate_metadata_preset("fast"),
+            metadata=_deepseek_authorized_metadata("fast"),
         )
         registry = AdapterRegistry().register_model(
             plan.lanes[0].preferred_model,
@@ -2419,17 +2465,10 @@ class TestRelayAegisProviderResultValidationAdvisory:
         assert advisory.exact_model_ids == ("deepseek-chat",)
         assert advisory.provider_route_kinds == ("direct",)
         assert advisory.trust_states == ("candidate",)
-        assert advisory.external_review_statuses == ("pending",)
-        assert advisory.result_validation_statuses == ("blocked",)
+        assert advisory.external_review_statuses == ("passed",)
         assert advisory.response_hash_statuses == ("computed",)
-        assert "external_review_pending" in advisory.blocker_tags
         assert result_evidence.model_metadata_ref in advisory.proof_refs
         assert result_evidence.dispatch_metadata_envelope_ref in advisory.proof_refs
-        assert advisory.retry_requires_fresh_validation is True
-        assert advisory.demotion_required is True
-        assert advisory.human_gate_required is True
-        assert advisory.fail_closed_advisory is True
-        assert advisory.usable_for_future_retry is False
         assert advisory.adapter_boundary_unchanged is True
         assert advisory.aegis_execution_timing_unchanged is True
         assert adapter.received_payloads == [_PROMPT]
@@ -4270,7 +4309,9 @@ class TestRelayDispatchMetadataEnvelopeDeepSeekDisposition:
 
         summary = execute_relay_plan_with_registry(plan, registry)
 
-        envelope = summary.results[0].dispatch_metadata_envelope
+        # Candidate DeepSeek metadata is now refused at the pre-dispatch gate;
+        # the envelope (which still carries the disposition) rides on the error.
+        envelope = summary.errors[0].dispatch_metadata_envelope
         assert envelope is not None
         disposition = envelope.deepseek_validation_disposition
         assert disposition is not None
@@ -4302,7 +4343,7 @@ class TestRelayDispatchMetadataEnvelopeDeepSeekDisposition:
 
         summary = execute_relay_plan_with_registry(plan, registry)
 
-        envelope = summary.results[0].dispatch_metadata_envelope
+        envelope = summary.errors[0].dispatch_metadata_envelope
         assert envelope is not None
         disposition = envelope.deepseek_validation_disposition
         assert disposition is not None
@@ -4326,7 +4367,7 @@ class TestRelayDispatchMetadataEnvelopeDeepSeekDisposition:
 
         summary = execute_relay_plan_with_registry(plan, registry)
 
-        envelope = summary.results[0].dispatch_metadata_envelope
+        envelope = summary.errors[0].dispatch_metadata_envelope
         assert envelope is not None
         disposition = envelope.deepseek_validation_disposition
         assert disposition is not None
@@ -4389,7 +4430,7 @@ class TestRelayDispatchMetadataEnvelopeDeepSeekDisposition:
 
         summary = execute_relay_plan_with_registry(plan, registry)
 
-        envelope = summary.results[0].dispatch_metadata_envelope
+        envelope = summary.errors[0].dispatch_metadata_envelope
         assert envelope is not None
         rendered = envelope.to_dict()
         disposition_dict = rendered["deepseek_validation_disposition"]
@@ -4410,3 +4451,698 @@ class TestRelayDispatchMetadataEnvelopeDeepSeekDisposition:
         envelope = summary.results[0].dispatch_metadata_envelope
         assert envelope is not None
         assert envelope.to_dict()["deepseek_validation_disposition"] is None
+
+
+class TestRelayDispatchMetadataEnvelopeDeepSeekTransportAuthority:
+    """Relay dispatch metadata envelope binds fail-closed transport-authority."""
+
+    def test_envelope_binds_transport_authority_for_deepseek_adapter(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        # Blocked DeepSeek transport authority refuses dispatch — the envelope
+        # is carried on the error, not on a result.
+        assert summary.results == ()
+        envelope = summary.errors[0].dispatch_metadata_envelope
+        assert envelope is not None
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.direct_dispatch_id == "deepseek-chat"
+        assert authority.status.value == "blocked:candidate-only"
+        assert authority.transport_authorized is False
+        assert "deepseek_proof_candidate_only" in authority.blocker_tags
+
+    def test_envelope_transport_authority_preserves_blocked_autonomy(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("default_quality"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelope = summary.errors[0].dispatch_metadata_envelope
+        assert envelope is not None
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.autonomous_implementation_authorized is False
+        assert authority.review_clearing_authorized is False
+        assert authority.branch_movement_authorized is False
+        assert authority.live_coding_authority_authorized is False
+        assert authority.relay_bypass_authorized is False
+        for marker in (
+            "autonomous_implementation",
+            "review_clearance",
+            "branch_movement",
+            "live_coding",
+            "relay_bypass",
+        ):
+            assert marker in authority.blocked_authority_tags
+
+    def test_envelope_transport_authority_proof_carries_evidence_refs(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelope = summary.errors[0].dispatch_metadata_envelope
+        assert envelope is not None
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.proof.proof_state.value == "candidate-metadata-only"
+        assert authority.proof.proof_evidence_refs == (
+            "deepseek-validation:level-0:metadata-only",
+        )
+        assert authority.proof.review_evidence_ref == (
+            "external-review:deepseek:deepseek-chat:pending"
+        )
+        assert authority.proof.human_gate_satisfied is False
+        assert authority.proof.prime_authority_satisfied is False
+
+    def test_envelope_transport_authority_absent_when_no_adapter_metadata(self) -> None:
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("response"),
+        )
+
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.deepseek_transport_authority is None
+
+    def test_envelope_transport_authority_absent_for_non_deepseek_adapter(self) -> None:
+        plan = _make_plan(1)
+        non_deepseek_metadata = ModelHarnessMetadata(
+            provider_name="anthropic",
+            model_name="claude-opus",
+            capability_tier="primary",
+            context_budget=200000,
+            prompt_payload_budget=150000,
+            trust_state="trusted",
+            requires_external_review=False,
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
+            tokenizer_family="anthropic",
+            max_output_tokens=8192,
+        )
+        adapter = FakeModelAdapter("response", metadata=non_deepseek_metadata)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.deepseek_transport_authority is None
+
+    def test_envelope_transport_authority_to_dict_is_display_safe(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        envelope = summary.errors[0].dispatch_metadata_envelope
+        assert envelope is not None
+        rendered = envelope.to_dict()["deepseek_transport_authority"]
+        assert isinstance(rendered, dict)
+        assert rendered["direct_dispatch_id"] == "deepseek-chat"
+        assert rendered["status"] == "blocked:candidate-only"
+        assert rendered["transport_authorized"] is False
+        assert rendered["autonomous_implementation_authorized"] is False
+        assert "deepseek_proof_candidate_only" in rendered["blocker_tags"]
+        flat = " ".join(str(v) for v in rendered.values()).lower()
+        assert "credential" not in flat
+        assert "api_key" not in flat
+
+    def test_envelope_transport_authority_dict_is_none_when_absent(self) -> None:
+        plan = _make_plan(2)
+        summary = execute_relay_dispatch_plan(
+            plan,
+            _constant_model_call("response"),
+        )
+
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.to_dict()["deepseek_transport_authority"] is None
+
+    def test_blocked_deepseek_authority_refuses_adapter_dispatch(self) -> None:
+        """Codex Review A HIGH fix: a blocked DeepSeek transport-authority must
+        prevent the adapter from being called at all — proven by checking that
+        the adapter never received the lane payload and that the lane lands in
+        ``summary.errors`` rather than ``summary.results``."""
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        assert adapter.received_payloads == []
+        assert summary.results == ()
+        assert len(summary.errors) == 1
+        error = summary.errors[0]
+        assert error.role is plan.lanes[0].role
+        assert error.preferred_model == plan.lanes[0].preferred_model
+        assert error.error.startswith("deepseek_transport_blocked:")
+        assert "blocked:candidate-only" in error.error
+        assert "deepseek_proof_candidate_only" in error.error
+        envelope = error.dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.metadata_transport_allowed is False
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is False
+        assert error.dispatch_envelope is not None
+
+    def test_blocked_no_proof_deepseek_authority_refuses_adapter_dispatch(self) -> None:
+        """The ``blocked:no-proof`` path (DeepSeek metadata with no candidate
+        state) must also refuse dispatch — covers the new BLOCKED_NO_PROOF
+        emission in the binder."""
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=True,
+        )
+        adapter = FakeModelAdapter("response", metadata=metadata)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        assert adapter.received_payloads == []
+        assert summary.results == ()
+        assert len(summary.errors) == 1
+        error = summary.errors[0]
+        assert "blocked:no-proof" in error.error
+        assert "deepseek_proof_missing" in error.error
+
+    def test_authorized_deepseek_lane_dispatches_and_returns_result(self) -> None:
+        """Authorized DeepSeek transport (level-1 ref + both gates ``"true"``)
+        is the only path that lets the adapter be called and produce a
+        result."""
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state={
+                "validation_evidence_ref": (
+                    "deepseek-validation:level-1:validation-cleared"
+                ),
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "direct_endpoint_evidence_ref": (
+                    "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions"
+                ),
+                "trust_mode": "direct",
+                "human_gate_satisfied": "true",
+                "prime_authority_satisfied": "true",
+            },
+        )
+        adapter = FakeModelAdapter("response", metadata=metadata)
+        registry = AdapterRegistry().register_model(
+            plan.lanes[0].preferred_model,
+            adapter,
+        )
+
+        summary = execute_relay_plan_with_registry(plan, registry)
+
+        assert adapter.received_payloads == [plan.lanes[0].payload]
+        assert summary.errors == ()
+        assert len(summary.results) == 1
+        result = summary.results[0]
+        assert result.output == "response"
+        envelope = result.dispatch_metadata_envelope
+        assert envelope is not None
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is True
+        assert authority.status.value == "authorized:transport-only"
+
+    def test_provider_result_validation_blocks_when_deepseek_authority_blocked(
+        self,
+    ) -> None:
+        """Defence-in-depth: even if a caller bypasses the pre-dispatch gate
+        and feeds an output through ``_build_provider_result_validation_evidence``
+        with a blocked envelope, the result-validation evidence must surface the
+        DeepSeek blocker tags and mark the lane ``blocked``."""
+        plan = _make_plan(1)
+        payload_evidence = self._clean_payload_evidence(plan)
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=payload_evidence,
+        )
+        candidate_state = self._clean_deepseek_candidate_state()
+        candidate_state.update(
+            {
+                "validation_evidence_ref": "deepseek-validation:level-0:metadata-only",
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "human_gate_satisfied": "false",
+                "prime_authority_satisfied": "false",
+            }
+        )
+        adapter_metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state=candidate_state,
+        )
+        dispatch_metadata_envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            adapter_metadata=adapter_metadata,
+            route_metadata=self._clean_route_metadata(),
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+
+        validation_evidence = _build_provider_result_validation_evidence(
+            plan,
+            "would-be response",
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            dispatch_metadata_envelope=dispatch_metadata_envelope,
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+
+        assert validation_evidence.result_validation_status == "blocked"
+        assert "deepseek_proof_candidate_only" in validation_evidence.blocker_tags
+
+    def _clean_payload_evidence(self, plan: RelayDispatchPlan) -> RelayPromptPayloadEvidence:
+        """Payload evidence with all gate-passing fields so fail_closed_advisory
+        does NOT trip — isolates the DeepSeek transport-authority contribution
+        to metadata_transport_allowed."""
+        lane = plan.lanes[0]
+        return RelayPromptPayloadEvidence(
+            prompt_source="relay",
+            heartbeat_id=plan.packet.packet_id,
+            lane_id=f"{lane.role.value}:{lane.preferred_model}",
+            selected_provider="deepseek",
+            selected_model="deepseek-chat",
+            capability_tier="standard",
+            provider_route_kind="direct",
+            trust_state="trusted",
+            requires_external_review=False,
+            external_review_status="not_required",
+            model_metadata_ref="model-harness-metadata:deepseek:deepseek-chat",
+            model_context_window_tokens=65536,
+            prompt_budget_tokens=57344,
+            budget_status="healthy",
+        )
+
+    def _clean_route_metadata(self) -> ModelRouteMetadataBinding:
+        """Route metadata binding with all gate-passing fields so the metadata
+        envelope's validation_tags stay empty for non-DeepSeek-authority gates."""
+        return ModelRouteMetadataBinding(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            route_risk_tier=1,
+            route_cost_posture="minimal",
+            route_latency_posture="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="trusted",
+            requires_external_review=False,
+            provider_route_kind="direct",
+            external_review_status="not_required",
+            model_metadata_ref="model-harness-metadata:deepseek:deepseek-chat",
+            prompt_payload_status="healthy",
+        )
+
+    def _clean_deepseek_candidate_state(self) -> dict[str, str]:
+        """Candidate-state fields that satisfy every non-DeepSeek-authority
+        validation tag in _build_dispatch_metadata_envelope."""
+        return {
+            "trust_mode": "direct",
+            "proof_strength": "weak",
+            "direct_endpoint_evidence_ref": (
+                "deepseek-direct-endpoint:https://api.deepseek.com/v1/chat/completions"
+            ),
+        }
+
+    def test_envelope_metadata_transport_blocked_by_deepseek_authority_only(self) -> None:
+        """Repair contract: metadata_transport_allowed must be False when the
+        DeepSeek transport-authority is the only blocker — even if no other
+        fail-closed advisory tag fires."""
+        plan = _make_plan(1)
+        payload_evidence = self._clean_payload_evidence(plan)
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=payload_evidence,
+        )
+        candidate_state = self._clean_deepseek_candidate_state()
+        candidate_state.update(
+            {
+                "validation_evidence_ref": "deepseek-validation:level-0:metadata-only",
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "human_gate_satisfied": "false",
+                "prime_authority_satisfied": "false",
+            }
+        )
+        adapter_metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state=candidate_state,
+        )
+
+        envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            adapter_metadata=adapter_metadata,
+            route_metadata=self._clean_route_metadata(),
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+
+        assert envelope.fail_closed_advisory is False
+        assert envelope.fail_closed_tags == ()
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is False
+        assert envelope.metadata_transport_allowed is False
+
+    def test_envelope_metadata_transport_allowed_when_deepseek_authorized_and_gates_clean(
+        self,
+    ) -> None:
+        """Repair contract: metadata_transport_allowed is True only when the
+        DeepSeek authority is AUTHORIZED_TRANSPORT_ONLY *and* no other
+        fail-closed gate trips. Level-1 validation ref plus both gate flags
+        explicitly ``"true"`` is the sole path that lifts both conditions."""
+        plan = _make_plan(1)
+        payload_evidence = self._clean_payload_evidence(plan)
+        dispatch_envelope = _build_dispatch_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            payload_evidence=payload_evidence,
+        )
+        candidate_state = self._clean_deepseek_candidate_state()
+        candidate_state.update(
+            {
+                "validation_evidence_ref": (
+                    "deepseek-validation:level-1:validation-cleared"
+                ),
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "human_gate_satisfied": "true",
+                "prime_authority_satisfied": "true",
+            }
+        )
+        adapter_metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=False,
+            deepseek_candidate_state=candidate_state,
+        )
+
+        envelope = _build_dispatch_metadata_envelope(
+            plan,
+            lane_role=plan.lanes[0].role,
+            requested_model_id=plan.lanes[0].preferred_model,
+            adapter_metadata=adapter_metadata,
+            route_metadata=self._clean_route_metadata(),
+            payload_evidence=payload_evidence,
+            dispatch_envelope=dispatch_envelope,
+        )
+
+        assert envelope.fail_closed_advisory is False
+        assert envelope.fail_closed_tags == ()
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is True
+        assert envelope.metadata_transport_allowed is True
+
+
+class TestDirectAndPolicyPathDeepSeekTransportGate:
+    """Codex Review B follow-up: the DeepSeek execution gate must close the
+    direct ``execute_relay_dispatch_plan`` path and its policy wrapper, not
+    just the registry-backed executor. When the ``model_call`` passed in
+    exposes DeepSeek candidate metadata via its ``.metadata`` attribute, the
+    direct path must bind that metadata, evaluate the transport authority,
+    and refuse adapter dispatch on a block — identical to
+    ``execute_relay_plan_with_registry``."""
+
+    def test_direct_dispatch_refuses_blocked_deepseek_candidate_metadata(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+
+        summary = execute_relay_dispatch_plan(plan, adapter)
+
+        assert adapter.received_payloads == []
+        assert summary.results == ()
+        assert len(summary.errors) == 1
+        error = summary.errors[0]
+        assert error.error.startswith("deepseek_transport_blocked:")
+        assert "blocked:candidate-only" in error.error
+        assert "deepseek_proof_candidate_only" in error.error
+        envelope = error.dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.metadata_transport_allowed is False
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is False
+
+    def test_direct_dispatch_refuses_blocked_no_proof_deepseek_metadata(self) -> None:
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="deepseek",
+            model_name="deepseek-chat",
+            capability_tier="standard",
+            context_budget=65536,
+            prompt_payload_budget=57344,
+            trust_state="candidate",
+            requires_external_review=True,
+        )
+        adapter = FakeModelAdapter("response", metadata=metadata)
+
+        summary = execute_relay_dispatch_plan(plan, adapter)
+
+        assert adapter.received_payloads == []
+        assert summary.results == ()
+        assert len(summary.errors) == 1
+        assert "blocked:no-proof" in summary.errors[0].error
+        assert "deepseek_proof_missing" in summary.errors[0].error
+
+    def test_direct_dispatch_allows_authorized_deepseek_metadata(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=_deepseek_authorized_metadata("fast"),
+        )
+
+        summary = execute_relay_dispatch_plan(plan, adapter)
+
+        assert adapter.received_payloads == [plan.lanes[0].payload]
+        assert summary.errors == ()
+        assert len(summary.results) == 1
+        result = summary.results[0]
+        assert result.output == "response"
+        envelope = result.dispatch_metadata_envelope
+        assert envelope is not None
+        authority = envelope.deepseek_transport_authority
+        assert authority is not None
+        assert authority.transport_authorized is True
+        assert authority.status.value == "authorized:transport-only"
+
+    def test_direct_dispatch_with_plain_function_unchanged(self) -> None:
+        """A plain ``Callable[[str], str]`` has no ``.metadata`` and must
+        continue to dispatch as before — the new gate must not regress the
+        legacy direct-call signature."""
+        plan = _make_plan(1)
+
+        summary = execute_relay_dispatch_plan(plan, _constant_model_call("plain"))
+
+        assert summary.errors == ()
+        assert len(summary.results) == 1
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.deepseek_transport_authority is None
+
+    def test_direct_dispatch_with_non_deepseek_adapter_dispatches(self) -> None:
+        """A non-DeepSeek adapter's metadata is bound (so the envelope reflects
+        the real provider), but no DeepSeek transport authority is emitted, so
+        the gate is not engaged and the lane dispatches."""
+        plan = _make_plan(1)
+        metadata = ModelHarnessMetadata(
+            provider_name="anthropic",
+            model_name="claude-opus",
+            capability_tier="primary",
+            context_budget=200000,
+            prompt_payload_budget=150000,
+            trust_state="trusted",
+            requires_external_review=False,
+            supports_completion_tokens=True,
+            supports_latency_ms=True,
+            supports_payload_snapshot=True,
+            supports_response_hash=True,
+            tokenizer_family="anthropic",
+            max_output_tokens=8192,
+        )
+        adapter = FakeModelAdapter("response", metadata=metadata)
+
+        summary = execute_relay_dispatch_plan(plan, adapter)
+
+        assert adapter.received_payloads == [plan.lanes[0].payload]
+        assert summary.errors == ()
+        assert len(summary.results) == 1
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.deepseek_transport_authority is None
+
+    def test_policy_wrapper_refuses_blocked_deepseek_candidate_metadata(self) -> None:
+        """``execute_relay_dispatch_plan_with_policy`` must not remain a
+        bypass: when policy permits dispatch but the DeepSeek transport
+        authority blocks, the lane must still be refused before adapter call."""
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=deepseek_candidate_metadata_preset("fast"),
+        )
+
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            adapter,
+            proof_trail=_clean_proof_trail("packet-proof-policy-block"),
+        )
+
+        assert adapter.received_payloads == []
+        assert summary.results == ()
+        assert len(summary.errors) == 1
+        error = summary.errors[0]
+        assert error.error.startswith("deepseek_transport_blocked:")
+        assert "blocked:candidate-only" in error.error
+        envelope = error.dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.deepseek_transport_authority is not None
+        assert envelope.deepseek_transport_authority.transport_authorized is False
+
+    def test_policy_wrapper_allows_authorized_deepseek_metadata(self) -> None:
+        plan = _make_plan(1)
+        adapter = FakeModelAdapter(
+            "response",
+            metadata=_deepseek_authorized_metadata("fast"),
+        )
+
+        summary = execute_relay_dispatch_plan_with_policy(
+            plan,
+            adapter,
+            proof_trail=_clean_proof_trail("packet-proof-policy-allow"),
+        )
+
+        assert adapter.received_payloads == [plan.lanes[0].payload]
+        assert summary.errors == ()
+        assert len(summary.results) == 1
+        envelope = summary.results[0].dispatch_metadata_envelope
+        assert envelope is not None
+        assert envelope.deepseek_transport_authority is not None
+        assert envelope.deepseek_transport_authority.transport_authorized is True
+
+    def test_direct_dispatch_blocked_by_uppercase_true_gate_strings(self) -> None:
+        """Codex Review A MEDIUM contract preserved on the direct path: case
+        variants like ``"True"`` keep the gate flag False and the lane
+        refused, even though the validation ref is level-1."""
+        plan = _make_plan(1)
+        base = deepseek_candidate_metadata_preset("fast")
+        assert base.deepseek_candidate_state is not None
+        case_variant_state = dict(base.deepseek_candidate_state)
+        case_variant_state.update(
+            {
+                "validation_evidence_ref": (
+                    "deepseek-validation:level-1:validation-cleared"
+                ),
+                "external_review_evidence_ref": (
+                    "external-review:deepseek:deepseek-chat:passed"
+                ),
+                "external_review_status": "passed",
+                "human_gate_satisfied": "True",
+                "prime_authority_satisfied": "true",
+            }
+        )
+        metadata = dataclasses.replace(
+            base, deepseek_candidate_state=case_variant_state
+        )
+        adapter = FakeModelAdapter("response", metadata=metadata)
+
+        summary = execute_relay_dispatch_plan(plan, adapter)
+
+        assert adapter.received_payloads == []
+        assert summary.results == ()
+        assert len(summary.errors) == 1
+        assert "blocked:human-gate-required" in summary.errors[0].error
