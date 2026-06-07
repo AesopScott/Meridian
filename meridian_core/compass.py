@@ -2110,6 +2110,10 @@ def _project_bounds_request_blockers(
         blockers.append("missing_request_evidence_refs")
     if _has_raw_context_ref(request.evidence_refs):
         blockers.append("raw_context_evidence_ref_blocked")
+    for candidate in request.candidates:
+        if _has_raw_context_ref(candidate.evidence_refs):
+            blockers.append("raw_context_candidate_evidence_ref_blocked")
+            break
     return tuple(blockers)
 
 
