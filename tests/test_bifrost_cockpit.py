@@ -4785,3 +4785,167 @@ def test_backend_binding_adapters_have_no_filesystem_or_network_side_effects():
     assert a1 == a2
     assert b1 == b2
     assert c1 == c2
+
+
+# Codex Review A repair: candidate_trust_state must reflect backend lane.trust_state
+# for non-review lanes, not be hard-coded to "trusted".
+
+
+def test_model_capability_metadata_view_preserves_degraded_trust_for_non_review_lane():
+    """A degraded direct lane with requires_external_review=False must not render as trusted."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="local-degraded",
+                selected_provider="local",
+                exact_model_id="local-deterministic",
+                provider_route_kind="direct",
+                trust_state="degraded",
+                requires_external_review=False,
+                external_review_status="not_required",
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    assert len(view.items) == 1
+    item = view.items[0]
+    assert item.trust_state == "degraded"
+    assert item.candidate_trust_state == "degraded"
+    assert item.candidate_trust_state != "trusted"
+    assert item.proof_strength == "weak"
+    assert item.external_review_required is False
+
+
+def test_model_capability_metadata_view_preserves_offline_trust_for_non_review_lane():
+    """Offline non-review lanes must surface offline state, not be re-cast as trusted."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="offline",
+                selected_provider="local",
+                exact_model_id="local-deterministic",
+                provider_route_kind="local",
+                trust_state="offline",
+                requires_external_review=False,
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    assert view.items[0].candidate_trust_state == "offline"
+    assert view.items[0].proof_strength == "weak"
+
+
+def test_model_capability_metadata_view_preserves_blocked_trust_for_non_review_lane():
+    """Blocked non-review lanes must surface blocked state, not be re-cast as trusted."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="blocked",
+                selected_provider="local",
+                exact_model_id="local-deterministic",
+                provider_route_kind="direct",
+                trust_state="blocked",
+                requires_external_review=False,
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    assert view.items[0].candidate_trust_state == "blocked"
+    assert view.items[0].proof_strength == "weak"
+
+
+def test_model_capability_metadata_view_preserves_trusted_non_review_lane_regression():
+    """Regression: trusted non-review lanes must still map to trusted/standard."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="claude",
+                selected_provider="claude",
+                exact_model_id="claude-sonnet-4-20250514",
+                provider_route_kind="direct",
+                trust_state="trusted",
+                requires_external_review=False,
+                external_review_status="not_required",
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    assert view.items[0].candidate_trust_state == "trusted"
+    assert view.items[0].proof_strength == "standard"
+
+
+def test_model_capability_metadata_view_defaults_unknown_for_missing_non_review_trust():
+    """Defensive default: empty/unknown backend trust on a non-review lane stays 'unknown'."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="bare",
+                selected_provider="local",
+                exact_model_id="local-deterministic",
+                provider_route_kind="direct",
+                trust_state="",
+                requires_external_review=False,
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    item = view.items[0]
+    assert item.trust_state == "unknown"
+    assert item.candidate_trust_state == "unknown"
+    assert item.candidate_trust_state != "trusted"
+    assert item.proof_strength == "unknown"
+
+
+def test_model_capability_metadata_view_does_not_overwrite_degraded_with_external_review_flow():
+    """When requires_external_review=True, the review-flow mapping still takes precedence."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="deepseek",
+                selected_provider="deepseek",
+                exact_model_id="deepseek-chat",
+                provider_route_kind="direct",
+                trust_state="degraded",
+                requires_external_review=True,
+                external_review_status="pending",
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    item = view.items[0]
+    assert item.trust_state == "degraded"
+    assert item.candidate_trust_state == "candidate"
+    assert item.proof_strength == "weak"
+
+
+def test_model_capability_metadata_view_preserves_candidate_trust_on_non_review_lane():
+    """A backend lane already marked candidate (not under review) keeps candidate state."""
+    summary = RelayModelCapabilityMetadataSummary(
+        lanes=(
+            RelayModelCapabilityLaneSummary(
+                lane_id="experimental",
+                selected_provider="experimental",
+                exact_model_id="experimental-model",
+                provider_route_kind="direct",
+                trust_state="candidate",
+                requires_external_review=False,
+            ),
+        ),
+    )
+
+    view = model_capability_metadata_view_from_summary(summary)
+
+    assert view.items[0].candidate_trust_state == "candidate"
+    assert view.items[0].proof_strength == "weak"

@@ -2426,6 +2426,7 @@ def model_capability_metadata_view_from_summary(
             getattr(lane, "external_review_status", "not_required"),
             default="not_required",
         )
+        backend_trust = _backend_str(lane.trust_state, default="unknown")
         if external_required and external_status == "passed":
             candidate_trust_state = "external_review_cleared"
             proof_strength = "strong"
@@ -2436,8 +2437,15 @@ def model_capability_metadata_view_from_summary(
             candidate_trust_state = "validation_blocked"
             proof_strength = "weak"
         else:
-            candidate_trust_state = "trusted"
-            proof_strength = "standard"
+            # Non-review lane: preserve backend trust state instead of hard-coding "trusted".
+            # A degraded direct lane must not render as trusted on the cockpit.
+            candidate_trust_state = backend_trust
+            if backend_trust == "trusted":
+                proof_strength = "standard"
+            elif backend_trust in ("degraded", "blocked", "offline", "stale", "candidate"):
+                proof_strength = "weak"
+            else:
+                proof_strength = "unknown"
 
         payload_status = _backend_str(
             getattr(lane, "prompt_payload_status", "unknown"),
@@ -2470,7 +2478,7 @@ def model_capability_metadata_view_from_summary(
                 provider_id=_backend_str(lane.selected_provider),
                 exact_model_id=_backend_str(lane.exact_model_id),
                 route_kind=_backend_str(lane.provider_route_kind, default="unknown"),
-                trust_state=_backend_str(lane.trust_state, default="unknown"),
+                trust_state=backend_trust,
                 candidate_trust_state=candidate_trust_state,
                 context_window_tokens=_backend_int(lane.context_window_tokens),
                 cost_posture="unknown",
