@@ -66,7 +66,7 @@
 - [x] **Bifrost Harness + Prime:** runtime acceptance checklist - built in `ec66081`.
 - [x] **Bifrost Harness + Aegis Harness:** configurable progress/proof surface - built in `e1bf9db`; cleared by Reviews B Round B7.
 - [x] **Bifrost Harness:** harness dashboard implementation - built in `9328272`; cleared by Reviews B Round B8.
-- [x] **Bifrost Harness:** openable Electron cockpit app shell - built in Build 5 and corrected in `05a108f1`; `npm start` launches `electron/main.js`, which loads the actual Meridian UI at root `index.html` with context isolation, sandbox, and remote-navigation blocking. `bifrost/preview.html` remains generated backend/view-model proof output only.
+- [x] **Bifrost Harness:** openable Electron cockpit app shell - built in Build 5 and corrected in `05a108f1`; `npm start` launches the Meridian Electron UI via `electron/main.js`, which loads root `index.html` as the renderer with context isolation, sandbox, and remote-navigation blocking. `bifrost/preview.html` remains generated backend/view-model proof output only.
 
 ### In Progress
 

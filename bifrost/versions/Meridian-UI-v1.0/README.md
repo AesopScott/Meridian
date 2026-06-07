@@ -2,9 +2,9 @@
 
 Historical checkpoint for the Meridian UI version 1.0 state.
 
-Current UI authority: `index.html` at the repository root is the actual
-Meridian UI. This version directory records an earlier named UI state and is
-not the current app entrypoint.
+Current UI authority: the Electron app is the Meridian UI. Root `index.html`
+is its renderer source. This version directory records an earlier named UI
+state and is not the current app entrypoint.
 
 ## Historical Preview
 

@@ -6,7 +6,7 @@
 
 ## UI Authority
 
-`index.html` is the actual Meridian UI. It is the product cockpit surface Scott has been building and using. Electron opens this same file via `electron/main.js`; `npm start` must not regenerate or replace it with `bifrost/preview.html`.
+The Meridian UI is the Electron app. Root `index.html` is the renderer source loaded by Electron, not a separate product surface. It contains the product cockpit surface Scott has been building and using. `npm start` must launch `electron/main.js`, which loads `index.html`; startup must not regenerate or replace it with `bifrost/preview.html`.
 
 `bifrost/preview.html` is a generated Bifrost rendering proof artifact. Use it only for deterministic backend/view-model preview proof tasks, not as the operational Meridian UI.
 
