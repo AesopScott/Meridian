@@ -2808,3 +2808,128 @@ class TestProjectIdentityRawContextRedaction:
             _identity_candidate(evidence_refs=("raw_prompt:secret",)),
         )
         assert result.to_dict()["execution_authorized"] is False
+
+
+class TestProjectIdentityNeighborProjectIdRedaction:
+    """Cadence 3/3 self-review repair: neighbor.project_id raw context leaked
+    via collapsing_neighbors / distinguishing_neighbors lists and via the
+    AMBIGUOUS compass_question's `list(collapsing)` interpolation.
+
+    Reproducer (before fix):
+      neighbor = ProjectIdentityNeighbor(
+          project_id='raw_prompt:secret-neighbor-project-id-payload',
+          mission_bearing='Ship Meridian V2 project-boundary runtime.',  # collides
+          ...,
+      )
+      candidate = ...same bearing...
+      evaluate_project_identity(candidate).collapsing_neighbors
+        -> ('raw_prompt:secret-neighbor-project-id-payload',)
+      compass_question contained 'raw_prompt:secret-neighbor-project-id-payload'
+      json.dumps contained 'secret-neighbor'.
+    """
+
+    @staticmethod
+    def _colliding_neighbor(project_id: str) -> ProjectIdentityNeighbor:
+        return ProjectIdentityNeighbor(
+            project_id=project_id,
+            mission_bearing="Ship Meridian V2 project-boundary runtime.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Meridian",),
+        )
+
+    @pytest.mark.parametrize(
+        "raw_project_id",
+        (
+            "raw_prompt:secret-neighbor-payload",
+            "raw_transcript:secret-neighbor-session-log",
+            "free_form_context:secret-neighbor-notes",
+            "transcript:secret-neighbor-conversation",
+            "conversation:secret-neighbor-chat",
+            "provider_response:secret-neighbor-body",
+            "raw_context:secret-neighbor-everything",
+        ),
+    )
+    def test_raw_context_in_neighbor_project_id_redacted_in_collapsing(
+        self, raw_project_id
+    ):
+        candidate = _identity_candidate(
+            neighbors=(self._colliding_neighbor(raw_project_id),),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert raw_project_id not in result.collapsing_neighbors
+        assert "<redacted_raw_context>" in result.collapsing_neighbors
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert raw_project_id not in encoded
+        assert "<redacted_raw_context>" in encoded
+
+    def test_raw_context_in_neighbor_project_id_redacted_in_compass_question(self):
+        candidate = _identity_candidate(
+            neighbors=(
+                self._colliding_neighbor(
+                    "raw_prompt:secret-neighbor-leak-via-question"
+                ),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.compass_question is not None
+        assert "secret-neighbor-leak-via-question" not in result.compass_question
+        assert "<redacted_raw_context>" in result.compass_question
+
+    def test_raw_context_in_neighbor_project_id_redacted_in_distinguishing(self):
+        """DEFINED path (distinct bearing) also redacts neighbor project_id."""
+        neighbor = ProjectIdentityNeighbor(
+            project_id="raw_prompt:secret-distinguishing-neighbor",
+            mission_bearing="A genuinely different bearing for the neighbor.",
+            repo_refs=(
+                "repo:C:/Users/scott/Code/Meridian-Worktrees/build-4-aegis",
+            ),
+            venture_refs=("venture:Other",),
+        )
+        candidate = _identity_candidate(neighbors=(neighbor,))
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.DEFINED
+        assert "raw_prompt:secret-distinguishing-neighbor" not in (
+            result.distinguishing_neighbors
+        )
+        assert "<redacted_raw_context>" in result.distinguishing_neighbors
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "secret-distinguishing-neighbor" not in encoded
+
+    def test_safe_neighbor_project_ids_pass_through_unchanged(self):
+        """Regression: legitimate neighbors still appear unredacted."""
+        candidate = _identity_candidate(
+            neighbors=(self._colliding_neighbor("meridian-shadow"),),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert result.collapsing_neighbors == ("meridian-shadow",)
+        assert "meridian-shadow" in result.compass_question
+        assert "<redacted_raw_context>" not in result.collapsing_neighbors
+
+    def test_mixed_safe_and_raw_neighbors_partially_redacted(self):
+        candidate = _identity_candidate(
+            neighbors=(
+                self._colliding_neighbor("meridian-safe-shadow"),
+                self._colliding_neighbor("raw_prompt:secret-second-neighbor"),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert result.decision is ProjectIdentityDecision.AMBIGUOUS
+        assert "meridian-safe-shadow" in result.collapsing_neighbors
+        assert "<redacted_raw_context>" in result.collapsing_neighbors
+        encoded = json.dumps(result.to_dict(), sort_keys=True)
+        assert "secret-second-neighbor" not in encoded
+        assert "meridian-safe-shadow" in encoded
+
+    def test_neighbor_redacted_result_serializes_stably(self):
+        candidate = _identity_candidate(
+            neighbors=(
+                self._colliding_neighbor("raw_prompt:secret-stable-shape"),
+            ),
+        )
+        result = evaluate_project_identity(candidate)
+        assert tuple(result.to_dict().keys()) == project_identity_result_dict_keys()
+        assert result.to_dict()["execution_authorized"] is False
