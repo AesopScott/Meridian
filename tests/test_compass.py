@@ -2337,6 +2337,37 @@ class TestProjectScopeSubjectFieldRawContextGuard:
         result = evaluate_project_scope(_project(), candidate)
         assert tuple(result.to_dict().keys()) == project_scope_result_dict_keys()
 
+    def test_bounds_aggregation_uses_redacted_scope_subject_refs(self):
+        """Regression for Codex Review B: bounds must not rebuild refs from raw candidates."""
+        request = _bounds_request(
+            candidates=(
+                ProjectScopeCandidate(
+                    project_id="meridian-v2",
+                    subject_kind="ambiguous",
+                    subject_ref="raw_prompt:secret subject content",
+                    evidence_refs=("proof:safe",),
+                    ambiguity_reason="raw_prompt:secret reason content",
+                ),
+            )
+        )
+
+        result = evaluate_project_bounds(_project(), request)
+        payload = result.to_dict()
+        encoded = json.dumps(payload, sort_keys=True)
+
+        assert result.decision is ProjectBoundsDecision.BLOCKED
+        assert result.blocked_refs == ("<redacted_raw_context>",)
+        assert result.candidate_decisions == (
+            {
+                "subject_kind": "ambiguous",
+                "subject_ref": "<redacted_raw_context>",
+                "decision": "blocked",
+            },
+        )
+        assert "secret subject content" not in encoded
+        assert "secret reason content" not in encoded
+        assert "<redacted_raw_context>" in encoded
+
 
 class TestProjectDifferenceRawContextGuard:
     """Coordinator-promoted: Project Difference Runtime must fail closed on raw context.
