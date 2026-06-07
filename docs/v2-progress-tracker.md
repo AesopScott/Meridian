@@ -17,11 +17,11 @@
 | Atlas Harness | 2 | 0 | 1 | 0 | 3 | 100% |
 | Relay/Model Harness | 7 | 0 | 2 | 1 | 10 | 70% clear + 20% baseline |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
-| Compass Harness | 0 | 0 | 1 | 4 | 5 | 20% baseline |
+| Compass Harness | 4 | 0 | 1 | 0 | 5 | 80% clear + 20% baseline |
 | Session Lifecycle Harness | 1 | 0 | 1 | 5 | 7 | 29% |
 | Bifrost Harness | 1 | 0 | 2 | 6 | 9 | 33% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **19** | **0** | **9** | **16** | **44** | **43% Clear + 20% Baseline** |
+| **Total V2** | **23** | **0** | **9** | **12** | **44** | **52% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -35,6 +35,13 @@
 
 - [x] **Aegis + Prime:** `CognitionPolicy` domain model with action-type/lane/decision enums and policy tier mapping - built in `3cdc74d`; exposes `CognitionPolicy`, `CognitionPolicyResult`, `cognition_policy_for_tier()`, `evaluate_cognition_policy()` through package root for Relay binding; review cleared.
 - [x] **Relay + Aegis:** policy-aware Relay executor wrapper with `execute_relay_dispatch_plan_with_policy` - built in `b99ce1d`; evaluates cognition_policy against route tier before model calls, blocks dispatch with proof gate requirements; 157 tests passing (relay_executor, cognition_policy, aegis); review cleared.
+
+### Compass Harness
+
+- [x] **Compass + Project Definition Runtime:** `ProjectDefinition`, project identity candidates/neighbors/evaluations, and `define_project()` / `evaluate_project_identity()` define bounded project work by outcome, context, artifacts, objectives, tasks, proof trail, and repo/venture/session refs. Built through `d4245add7`, repaired through `562d08290`, `72bd6fcc8`, and `843997c2f`; review-promoted on main with `tests/test_compass.py` passing.
+- [x] **Compass + Bounds And Scope Runtime:** `ProjectScopeCandidate`, `ProjectBoundsRequest`, `ProjectScopeEvaluation`, `ProjectBoundsEvaluation`, `evaluate_project_scope()`, and `evaluate_project_bounds()` decide inside/outside project context, surface Compass questions, require project identity/evidence refs, and redact raw-context leak paths. Built through `2b7c75050`, repaired through `4837c8312`, `9fd9cf25c`, `6f7b50be8`, `01657e53c`, `46176cc29`, and `3cfb2ca4c`; review-promoted on main with 328 Compass tests passing.
+- [x] **Compass + Project Difference Runtime:** `ProjectDifferenceProfile`, `ProjectDifferenceEvidence`, `ProjectDifferenceEvaluation`, and `evaluate_project_difference()` distinguish projects by mission/bearing, objectives, artifacts, memory pins, blockers, proof expectations, and relationship refs; same repo or venture does not imply same project. Built in `b46199ba4`, repaired in `60cc75e17`; review-promoted on main with Compass tests passing.
+- [x] **Compass + Cross-Project Handoff Runtime:** `ProjectHandoffRequest`, `ProjectHandoffEvaluation`, and `evaluate_cross_project_handoff()` model source/target project, reason, payload type, evidence refs, approval need, review readiness, and blocked raw-context bleed. Built before the 2026-06-06 Compass repair wave and repaired on main in `501cd2b50`; review-promoted with Compass tests passing.
 
 ### Relay/Model Harness
 
@@ -89,7 +96,7 @@
 
 ### Compass Harness
 
-- [x] **Compass + Project Boundary Contract:** backend checklist baseline for project definition, bounds, scope, difference, cross-project communication, and Compass/Vulcan ownership split recorded in this tracker. Runtime implementation awaiting.
+- [x] **Compass + Project Boundary Contract:** backend checklist baseline for project definition, bounds, scope, difference, cross-project communication, and Compass/Vulcan ownership split recorded in this tracker. Runtime implementation is now represented above under Built and Review-Cleared V2 Capabilities.
 
 ### Relay/Model Harness
 
@@ -129,10 +136,7 @@
 
 ### Compass Harness
 
-- [ ] **Compass + Project Definition Runtime:** domain object/API must define project as a bounded body of work with outcome, context, artifacts, objectives, tasks, proof trail, and relationship to repo/venture/session.
-- [ ] **Compass + Bounds And Scope Runtime:** backend must decide what is inside/outside project context, surface ambiguous scope as a Compass question, and require project identity/evidence refs before project-scoped actions.
-- [ ] **Compass + Project Difference Runtime:** backend must distinguish projects by mission/bearing, objectives, artifacts, memory pins, blockers, and proof expectations; same repo or venture must not imply same project.
-- [ ] **Compass + Cross-Project Handoff Runtime:** backend must model source project, target project, reason, payload type, evidence refs, approval need, and blocked raw context bleed for cross-project communication.
+- None currently. Compass runtime items are review-promoted on main; future Compass work should be Prime integration, Runtime Logic UI completeness, or operations gating rather than V2 backend runtime build.
 
 ### Bifrost Harness
 
