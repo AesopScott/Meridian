@@ -24,14 +24,23 @@ Task:
 - Surface ambiguous or incomplete project identity as a Compass question/blocker rather than silently selecting hidden context.
 - Preserve pure backend behavior: no model calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main write, no raw cross-project transcript injection, and no Polaris dependency.
 
-Completion: completed 2026-06-06.
+Completion: completed 2026-06-06 (Opus repair after invalid Haiku marker).
 
 Ready for Codex Review:
 
-- Commit: `3b7bae9f2` (verified from branch HEAD)
-- Files affected: `meridian_core/compass.py`, `tests/test_compass.py`
-- Tests run: `python -m pytest tests/test_compass.py -q` (97 passed)
-- Verification performed: ProjectDefinition class with frozen immutability provides project_id, title, outcome, context, artifacts, objectives, tasks, proof_trail, and relationship_refs (repo/venture/session) as a bounded body of work. Tests verify project identity does not collapse on shared repo/venture: test_same_repo_does_not_imply_same_project confirms distinct projects with shared repos have different mission bearings; test_same_venture_does_not_imply_same_project confirms distinct projects with shared ventures have different mission bearings. Ambiguous project identity surfaces as Compass question: test_ambiguous_subject_returns_compass_question and test_unknown_subject_kind_returns_compass_question verify decision=AMBIGUOUS with compass_question populated. All results serialize with execution_authorized=False for pure review-only backend. No model calls, no UI/Bifrost/FileMap edits, no Polaris dependency. git diff --check passed.
+- Implementation commit: `a5e2bd048` (Add Compass project identity runtime).
+- Files changed in implementation commit: `meridian_core/compass.py`, `tests/test_compass.py`.
+- Tests run: `python -m pytest tests/test_compass.py -q` -> 130 passed (33 new identity tests on top of 97 prior).
+- `git diff --check`: clean.
+- Path-scope check: implementation diff limited to `meridian_core/compass.py` and `tests/test_compass.py`; this queue update is the only `docs/live-build-4.md` change.
+- Concrete evidence the identity runtime proves the required invariants:
+  - `ProjectDefinition`, `ProjectRelationshipRefs`, and `define_project()` continue to bound a project by `outcome`, `context`, `artifacts`, `objectives`, `tasks`, `proof_trail`, and `relationship_refs` (repo/venture/session).
+  - New `evaluate_project_identity()` accepts a `ProjectIdentityCandidate` plus `ProjectIdentityNeighbor` profiles and returns a `ProjectIdentityEvaluation` whose decision is `DEFINED`, `AMBIGUOUS`, or `BLOCKED`. Result `to_dict()` always carries `execution_authorized=False`.
+  - Identity does NOT collapse on shared refs: `test_shared_repo_with_distinct_bearing_stays_defined`, `test_shared_venture_with_distinct_bearing_stays_defined`, and `test_shared_session_with_distinct_bearing_stays_defined` each return `DEFINED` with the shared ref surfaced under `shared_repo_refs` / `shared_venture_refs` / `shared_session_refs` and the neighbor recorded in `distinguishing_neighbors`.
+  - Identity collapse risk is surfaced as a Compass question rather than silently merging: `test_shared_refs_with_same_bearing_collapse_returns_compass_question` and `test_same_project_id_neighbor_collapses` return `AMBIGUOUS` with `collapsing_neighbors` populated, blocker `project_identity_collapse_risk`, and a Compass question naming the collapsing neighbors.
+  - Incomplete identity is blocked rather than silently selecting hidden context: `test_missing_project_id_is_blocked`, `test_missing_title_is_blocked`, `test_missing_outcome_is_blocked`, `test_missing_mission_bearing_is_blocked`, `test_missing_repo_refs_is_blocked`, `test_missing_venture_refs_is_blocked`, `test_missing_evidence_refs_is_blocked`, and `test_raw_context_evidence_ref_is_blocked` each return `BLOCKED` with a Compass question.
+  - Serialization is stable and review-only: `test_identity_result_serializes_stably`, `test_identity_result_is_json_serializable`, `test_identity_result_is_deterministic`, `test_identity_runtime_does_not_emit_handoff_or_scope_fields`, `test_identity_runtime_does_not_emit_raw_context_keys`, and `test_execution_is_never_authorized`.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes, no raw cross-project transcript injection, no Polaris dependency.
 - Next Candidate: Compass bounds/scope runtime after project definition review clears.
 
 ## Coordinator Override - Completed / Ready For Codex Review
