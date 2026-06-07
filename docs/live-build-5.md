@@ -8,6 +8,30 @@ proof output only. Any older Build 5 log text saying `npm start` regenerates
 preview HTML describes the original V1 shell behavior before commit `05a108f1`
 corrected startup to open the Electron app with the Meridian renderer.
 
+## Coordinator Update - Opus Worker Relaunch Attempt / No Candidate
+
+Timestamp: 2026-06-07T08:49:01-06:00.
+
+Coordinator launched three Polaris Build 5 implementation workers through the
+Polaris `launch-chat` route with tier `power`, which mapped to
+`claude-opus-4-7` in the Claude CLI Max-plan backend:
+
+- `chat_1780843553145` - Bifrost Electron Cockpit render proof slice.
+- `chat_1780843555038` - Bifrost Balance Button backend surface.
+- `chat_1780843557033` - Bifrost Prompt Payload Visibility backend surface.
+
+Result: no backend candidate is ready for Codex review. Each worker stayed in
+its isolated Polaris worktree under
+`C:\Users\scott\AppData\Local\Temp\polaris-wt\...` and only left
+Polaris-generated `.mcp.json` dirt. Diagnostics show the workers reached
+`claude-opus-4-7`, then hit Claude rate-limit events and/or oversized file-read
+errors before producing implementation changes. Main remained clean and aligned.
+
+Next Opus worker instruction: use one worker at a time, start with targeted
+`rg` searches, do not read all of `docs/live-build-5.md`, and keep the first
+implementation slice small enough to finish before rate limiting. Do not route
+Codex review until a worker has real backend/test changes plus proof output.
+
 ## Completion Marker - Completed / Promoted To Main
 
 Timestamp: 2026-06-07T07:12:48-06:00.
