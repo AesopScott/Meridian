@@ -24,6 +24,13 @@ Every `[~]` and `[ ]` item must be resolved into one of these outcomes before V3
 
 No item leaves this checklist unless it has a named owner: Prime or a harness.
 
+**V3 intake gate status (V2 Needs Build closed):** Every `[~]` and `[ ]` item
+in this checklist is resolved in `docs/v3-intake-resolution.md`. That document
+is the deterministic V3 intake artifact and the authoritative source for the
+Promote-to-V3 / Move-earlier / Park-for-later / Reject decision on each item.
+V3 implementation specs must cite the resolution row, not the raw checklist
+marker.
+
 ## Key Technologies
 
 - [x] **LLMs** — **Model Harness / Relay Harness:** Provider-neutral model adapter contract exists; primary provider set is Claude + OpenAI + DeepSeek, with DeepSeek direct API now a V2 build requirement.

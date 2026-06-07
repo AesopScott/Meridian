@@ -8,7 +8,154 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now / Opus Task Assigned
+## Coordinator Override - Completed / Ready For Codex Review A/B
+
+Worker: Polaris Build 4 Opus worker (`claude-opus-4-7`) in worktree
+`C:\Users\scott\AppData\Local\Temp\polaris-wt\chat_1780854297209`. Worker did
+not touch `C:\Users\scott\Code\Meridian` main; no commit, push, merge, rebase,
+branch movement, or worktree movement was performed (per task constraints).
+
+Files changed by this worker:
+
+- `docs/v3-intake-resolution.md` (new) — deterministic V3 intake artifact.
+- `docs/agentic-ai-framework-checklist.md` — added a V3 intake gate status
+  note under the existing "V3 Intake Rule" section pointing at the resolution
+  doc. No checklist markers were flipped; the resolution doc is the
+  authoritative outcome for each `[~]` / `[ ]` item.
+- `docs/live-build-4.md` — this completion marker only.
+
+Files intentionally NOT touched: runtime code, tests, `FileMap.md`,
+`index.html`, Electron/Bifrost UI, generated artifacts, Relay/Model runtime,
+Session Lifecycle runtime, Compass runtime, `docs/v2-progress-tracker.md`
+(no contradiction found in V2 closure state), `docs/v3-parking-lot.md` (no
+edit required — pre-listed items remain consistent with the resolution).
+
+Item counts (deterministic):
+
+- `[~]` items in `docs/agentic-ai-framework-checklist.md` body: 19.
+- `[ ]` items in `docs/agentic-ai-framework-checklist.md` body: 7.
+- Total `[~]` + `[ ]` items requiring resolution: 26.
+- Resolution rows in `docs/v3-intake-resolution.md`: 26 (one per checklist
+  occurrence; five duplicate checklist lines — Speech/audio, Memory
+  governance, Dynamic tooling, Video generation, Agent marketplaces — are
+  cross-referenced to a single canonical owner-anchored decision).
+- Unique owner-anchored decisions after collapsing the five duplicates: 21.
+
+Outcome roll-up (row-count basis, matches the 26-row checklist total):
+
+- Promote to V3: 10 rows — Multimodal generation, Speech interfaces ×2,
+  Image generation, Self-improvement, Self-improving agents, Cost and
+  resource management, Long-term autonomy / Goal Runtime, Dynamic tooling ×2.
+- Move earlier (into V2 envelope): 9 rows — RAG, Personalization, Code
+  generation, Multi-agent collaboration, Memory systems, Autonomous
+  execution, Memory governance and retention ×2, V2 core build summary.
+- Park for later (V4+ / public horizon): 6 rows — Audio/music generation,
+  Video generation ×2, Agent marketplaces and contracts ×2, Later horizon
+  summary.
+- Reject (out of scope): 1 row — Deep belief networks.
+- Total: 10 + 9 + 6 + 1 = 26 ✓.
+
+Every resolved row names a Prime or named harness owner. Owner roll-up table
+is in `docs/v3-intake-resolution.md`. No row is unowned.
+
+Coordinator pre-review repair (applied before Codex Review A/B): the Owner
+Roll-Up in `docs/v3-intake-resolution.md` was re-audited against all 26
+resolution rows after the coordinator flagged Prime-column mismatches (row 14
+is Relay-primary, not Prime; row 25 is Move-earlier, not Promote-to-V3).
+Every (row, owner) pair was rebuilt from the resolution index, asterisks were
+applied uniformly (no asterisk = primary in that row, asterisk = co-owner in
+that row), and per-owner / per-row totals were added to the resolution doc as
+internal cross-checks (owner-cell sum = 50, equal to the sum of owners across
+all 26 rows: 11×1 + 9×2 + 4×3 + 1×4 + 1×5 = 50). Outcome roll-up counts
+(10 / 9 / 6 / 1) and the 26-row total are unchanged by the repair; only the
+owner-attribution table was rewritten.
+
+Codex Review A repair (applied after Review A; Review B passed otherwise):
+
+1. Medium finding — Checklist line anchors in `docs/v3-intake-resolution.md`
+   were stale after the V3 intake gate status note added to
+   `docs/agentic-ai-framework-checklist.md` shifted the body of the checklist
+   downward. Every section heading and every per-row Checklist line value
+   was re-derived from the current item-prefix grep against
+   `docs/agentic-ai-framework-checklist.md` and rewritten in
+   `docs/v3-intake-resolution.md`. Specifically: Gen AI section
+   `lines 59-66` → `lines 66-73`; Agent Capabilities `lines 74, 82, 84` →
+   `lines 81, 89, 91`; Agent Management `line 90` → `line 97`; Agentic AI
+   Layer `lines 95, 98, 99, 101, 105, 107` →
+   `lines 102, 105, 106, 108, 112, 114`; Outputs And Interfaces
+   `lines 113, 116` → `lines 120, 123`; Governance And Future
+   `lines 121, 125, 127` → `lines 128, 132, 134`; Deep Learning Layer
+   `line 52` → `line 59`; Meridian Coverage Summary `lines 132, 133` →
+   `lines 139, 140`. Every per-row Checklist line value was updated to
+   match. Five duplicate-row cross-references in row descriptions (rows 19,
+   20, 21, 22, 23) were updated from the old line anchors (62, 66, 101, 105,
+   107) to the current line anchors (69, 73, 108, 112, 114). Outcomes,
+   owners, marker types, and roll-up totals are unchanged.
+
+2. Low finding — Two rationales were too implementation-spec-like for a
+   decision-only intake artifact. Row 14 (Cost and resource management)
+   rationale was softened so it promotes a V3 provider-balance/usage
+   decision without prescribing porting of the Polaris Balance button or
+   binding to specific adapters: "Provider balance and usage surfacing is a
+   V3 decision; the specific surface, adapter bindings, and metering shape
+   land in later V3 specs, not in this intake artifact." Row 15 (Long-term
+   autonomy / goal chaining) rationale was softened so it promotes a native
+   Goal Runtime / Goal Harness decision without enumerating goal-object
+   fields or lifecycle semantics: "Native Goal Runtime / Goal Harness is a
+   V3 decision; goal-object shape, status lifecycle, telemetry,
+   continuation/resume policy, and proof-trail semantics land in later V3
+   specs." Outcomes (still Promote to V3), owners, marker types, and
+   roll-up totals are unchanged by the softening.
+
+Stop ready for Codex Review A re-check.
+
+Cross-doc consistency verified:
+
+- `docs/v3-parking-lot.md` already pre-lists the Native Goal Runtime,
+  Provider compliance modes, Model harness metering, Federation /
+  Marketplace items, Dynamic tooling registry surface, and Release horizon.
+  The resolution does not contradict the parking lot; it formalizes which of
+  those items are now V3 scope (Goal Runtime, Cost and resource management,
+  Dynamic tooling) versus still V4+ horizon (Federation, Marketplace, Public
+  packaging).
+- `docs/v2-progress-tracker.md` was reviewed against the Move-earlier set
+  and no contradiction was found; left untouched per assignment scope.
+
+Proof:
+
+- Raw grep: `rg -n "\[~\]|\[ \]" docs/agentic-ai-framework-checklist.md`
+  → 30 matched lines. Of those 30, 4 are non-item references (the legend
+  on lines 11 and 12, and the V3 Intake Rule prose on lines 18 and 27 that
+  cites both `[~]` and `[ ]` by name); the remaining 26 are checklist item
+  lines.
+- Targeted item-prefix grep:
+  `rg -n "^- \[~\] |^- \[ \] " docs/agentic-ai-framework-checklist.md`
+  → 26 item lines exactly (19 `[~]` + 7 `[ ]`). Each of these 26 item
+  lines maps to a resolution row in `docs/v3-intake-resolution.md`.
+- `git diff --check` → clean.
+- `git status --short` → only the three allowed docs paths
+  modified/added; no other paths touched.
+
+Remaining risk:
+
+- The resolution doc is intentionally a decision artifact only. It does not
+  contain implementation specs, schemas, or runtime contracts; the eight
+  unique Promote-to-V3 decisions still need bounded V3 specs in follow-on
+  tasks per owner. Until those land, the Promote-to-V3 set is named-and-owned
+  but not yet sequenced.
+- Duplicate checklist lines (Speech/audio, Memory governance, Dynamic
+  tooling, Video generation, Agent marketplaces) were resolved once and
+  cross-referenced rather than re-decided. If a future review wants distinct
+  outcomes for the Gen AI vs Outputs/Governance occurrences of the same
+  concept, the checklist itself should be de-duplicated in a separate task.
+- The V3 intake gate decisions assume V2 Needs Build closure is still
+  accurate. If V2 closure is reopened later, the Move-earlier rows remain
+  valid (they stay inside V2 scope) but the timing of Promote-to-V3 spec
+  work should be re-checked against the reopened V2 envelope.
+
+Ready for Codex Review A/B.
+
+## Coordinator Override - Original Opus Task Assignment (Historical)
 
 Timestamp: 2026-06-07T12:42:00-06:00.
 
