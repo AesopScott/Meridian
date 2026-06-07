@@ -8,17 +8,64 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower `Archived` or `Stale prior task` sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now / Idle / Awaiting Next Assignment
+## Coordinator Override - Active Now / Opus Task Assigned
 
-Goal: hold Build 2 after Main promotion of the Session Lifecycle live-state evidence and advisory backend stack.
+Timestamp: 2026-06-07T12:23:00-06:00.
 
-Status: no executable backend task is currently assigned to Build 2.
+Goal: start the first V3 backend spec after the reviewed V3 intake gate by
+writing the bounded Native Goal Runtime / Goal Harness contract.
 
-Main promotion:
-- `origin/main` includes SessionLiveStateEvidence, display-safety repair, Prime/Beacon advisory projection, fail-closed advisory boundary, V2 command-plan preview proof, plan-binding repair, empty-string presence semantics, and evidence-ref presence repair through integration commit `6701c11d1`.
-- Proof in the clean integration worktree: `python -m pytest tests/test_session_lifecycle.py -q` -> 171 passed; `python -m pytest tests/test_beacon.py tests/test_prime_autonomy.py -q` -> 121 passed.
+Worker requirement: implementation/spec candidate must run in a Polaris Build 2
+Opus worker (`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions
+may review only after a real worker candidate exists.
 
-Instruction: do not execute lower stale Repair Required / Active Now blocks. Wait for a new coordinator-promoted backend task.
+Source of authority:
+
+- `docs/v3-intake-resolution.md` row 15 promotes Long-term autonomy and goal
+  chaining to V3, owned by Prime (primary) / Compass Harness / Echo Harness.
+- `docs/v3-parking-lot.md` pre-lists the Native Goal Runtime / Goal Harness
+  horizon item.
+
+Task: produce a bounded V3 Goal Runtime contract/spec artifact that defines the
+backend decision surface without implementing runtime code yet. The artifact
+must specify:
+
+- goal object identity and display-safe fields
+- allowed status lifecycle and transition rules
+- token/time/budget telemetry fields and update semantics
+- continuation/resume policy boundaries
+- proof trail requirements
+- completion and blocked semantics
+- ownership boundaries between Prime, Compass, Echo, Session Lifecycle, Beacon,
+  and Aegis
+- explicit non-goals and safety constraints
+
+Keep this as a spec/contract only. Do not implement Python runtime, database,
+process/session automation, UI/Electron/Bifrost behavior, FileMap entries,
+generated artifacts, or tests in this slice unless the worker finds an existing
+spec-test pattern that is necessary for a docs-only contract proof. If tests are
+added, they must be docs/contract guard tests only and must not introduce
+runtime behavior.
+
+Allowed likely files:
+
+- new `docs/v3-goal-runtime-contract.md`
+- `docs/v3-parking-lot.md` only if a short cross-reference is needed
+- `docs/agentic-ai-framework-checklist.md` only if a short cross-reference is
+  needed
+- this file for the worker completion marker
+
+Do not edit `docs/v2-progress-tracker.md`, runtime modules, `index.html`,
+Electron/Bifrost UI, FileMap, generated artifacts, Relay/Model runtime, Compass
+runtime implementation, Echo runtime implementation, Session Lifecycle runtime
+implementation, Beacon runtime implementation, or Aegis runtime implementation.
+
+Required proof before Ready marker:
+
+- cite the exact intake row and parking-lot item that authorize the spec
+- prove no runtime/UI/generated/FileMap paths changed
+- `git diff --check`
+- concise completion marker here with files changed, proof, and remaining risk
 
 ## Coordinator Override - Repair Required / Active Now
 
