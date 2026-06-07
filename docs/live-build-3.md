@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Active Task` block in this file is executable. Lower archived/stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Active Task - Provider Balance FileMap Registration
+## Completed / Review-Cleared / Promoted To Main - Provider Balance FileMap Registration
 
 Timestamp: 2026-06-07T15:55:00-06:00.
 
@@ -64,10 +64,12 @@ Required proof before Ready marker:
 Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
-### Build 3 Opus Provider Balance FileMap Registration Marker (2026-06-07T15:55:00-06:00)
+### Build 3 Opus Provider Balance FileMap Registration Marker (2026-06-07T15:55:00-06:00, reconciled 2026-06-07T16:15:00-06:00)
 
-Status: implementation complete, ready for Codex Review A/B. Not promoted to
-main; no commit, push, branch, or worktree movement performed.
+Status: completed, Codex Review A/B passed, promoted to `main`, and pushed to
+`origin/main` in `eaff1d432` (`filemap: register provider balance slice`).
+This marker is historical proof only; do not re-review or re-promote it unless
+a new coordinator task is assigned above this block.
 
 Worktree: `C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780868743371`.
 

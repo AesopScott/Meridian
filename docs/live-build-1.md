@@ -8,7 +8,7 @@ You must do all work inside your assigned unique worktree. You are not allowed t
 
 Only the first `Coordinator Override - Active Now` block in this file is executable. Lower completed, archived, or stale active-task sections are historical context only and must not be executed unless Prime/Codex promotes them back to the top of the file.
 
-## Coordinator Override - Active Now
+## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
 Timestamp: 2026-06-07T14:52:00-06:00.
 
@@ -88,9 +88,10 @@ Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
 Completion:
-- Status: Ready for Codex Review (Review B P2 path-display-safety repair on
-  top of the prior 2026-06-07 first-V3 candidate; Claude Opus implementation
-  builder, no Sonnet handoff).
+- Status: completed, Codex Review A/B passed, promoted to `main`, and
+  registered in FileMap. Implementation promoted in `7e0e79331`
+  (`provider-balance: add v3 backend slice`); FileMap registration promoted in
+  `eaff1d432` (`filemap: register provider balance slice`).
 - Completed: 2026-06-07 (initial slice) + Review B repair on the same date.
 - Files changed: `meridian_core/provider_balance.py` (initial + repair),
   `tests/test_provider_balance.py` (initial + repair), `docs/live-build-1.md`
