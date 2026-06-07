@@ -10,6 +10,28 @@ Only the first `Coordinator Override - Active Now` block in this file is executa
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair Codex Review B finding on bounds aggregation re-exposing raw scope `subject_ref`.
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606`.
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Finding (High): the scope-layer subject-field repair redacted `ProjectScopeEvaluation.subject_ref`, but `evaluate_project_bounds()` rebuilt `candidate_decisions`, `blocked_refs`, `ambiguous_refs`, and related compass questions from the original `ProjectScopeCandidate.subject_ref`, re-exposing raw context in the normal bounds caller path.
+
+Repair:
+- Commit `c3d9f4a22` (`fix: preserve scope redaction through bounds aggregation`) makes bounds aggregation consume `ProjectScopeEvaluation.subject_ref` / `subject_kind` instead of the original candidate fields.
+- Added `test_bounds_aggregation_uses_redacted_scope_subject_refs`, proving raw `subject_ref` and `ambiguity_reason` do not leak through `blocked_refs`, `candidate_decisions`, `compass_question`, or JSON serialization.
+
+Proof:
+- `python -m pytest tests/test_compass.py -q` -> **284 passed**
+- `git diff --check` -> clean
+
+Ready for Codex Review.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair cadence-3/3 self-review finding — raw-context payload in `subject_ref` or `ambiguity_reason` was being interpolated into `compass_question` on the scope-layer AMBIGUOUS branch.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
