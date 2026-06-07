@@ -2058,10 +2058,10 @@ def _handoff_result(
         target_project_id=request.target_project_id,
         reason_category=request.reason_category,
         payload_type=request.payload_type,
-        payload_summary_refs=request.payload_summary_refs,
-        evidence_refs=request.evidence_refs,
+        payload_summary_refs=_redact_raw_context_refs(request.payload_summary_refs),
+        evidence_refs=_redact_raw_context_refs(request.evidence_refs),
         approval_required=request.approval_required,
-        approval_refs=request.approval_refs,
+        approval_refs=_redact_raw_context_refs(request.approval_refs),
         project_difference_decision=(
             difference_result.decision if difference_result is not None else None
         ),
