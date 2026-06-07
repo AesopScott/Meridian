@@ -31,8 +31,9 @@ Completion: completed 2026-06-06 (Opus build lane).
 Ready for Codex Review:
 
 - Implementation commit: `3a7f3af2` (Add Compass project bounds runtime).
-- Files changed: `meridian_core/compass.py` (+492 lines), `tests/test_compass.py` (+400 lines).
-- Tests run: `python -m pytest tests/test_compass.py -q` -> **181 passed** (29 new bounds runtime tests on top of 152 prior).
+- Cadence 3/3 self-review repair commit: `cc584318` (Repair Compass bounds runtime raw-context candidate evidence gap).
+- Files changed: `meridian_core/compass.py` (+496 lines total), `tests/test_compass.py` (+428 lines total).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **187 passed** (29 bounds runtime tests + 6 parametrized raw-context-candidate tests on top of 152 prior).
 - `git diff --check`: clean.
 - Path-scope check: implementation diff limited to `meridian_core/compass.py` and `tests/test_compass.py`; this queue marker is the only `docs/live-build-4.md` change for this slice.
 - Concrete evidence the bounds runtime proves the required invariants:
@@ -50,6 +51,7 @@ Ready for Codex Review:
     - `test_ambiguous_subject_returns_compass_question` -> `AMBIGUOUS` + `candidate_ambiguous` naming the ambiguous subjects.
   - Hidden context is blocked:
     - `test_missing_request_project_id_blocks`, `test_project_identity_mismatch_blocks`, `test_empty_candidates_blocks`, `test_missing_evidence_refs_blocks`, `test_raw_context_evidence_ref_blocks`, `test_blocked_subject_blocks_bounds`.
+    - Repair: `test_raw_context_in_candidate_evidence_refs_blocks` parametrized over 6 raw-context prefixes (`raw_prompt`, `raw_transcript`, `free_form_context`, `transcript`, `conversation`, `provider_response`) confirms the new `raw_context_candidate_evidence_ref_blocked` guard fires when a subject candidate hides raw context in its `evidence_refs`.
   - Shared repo/venture/session boundaries preserved, not collapsed:
     - `test_shared_repo_venture_session_surfaced_not_collapsed` confirms shared refs appear under `shared_relationship_refs` while the bounds decision still depends on per-subject scope.
     - `test_non_shared_envelope_does_not_surface_shared_refs` confirms unrelated envelope refs are not surfaced.
