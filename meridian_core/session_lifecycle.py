@@ -490,6 +490,88 @@ class SessionLiveStateEvidence:
 
 
 @dataclass(frozen=True)
+class SessionLiveStateAdvisoryProjection:
+    """Bifrost-ready view-model projection of SessionLiveStateEvidence.
+
+    Display-safe by construction: contains only bounded labels, presence
+    indicators, length integers, and enum values. Never carries raw
+    filesystem paths, raw blocker text, raw worker chat, raw prompt text,
+    provider responses, or credentials.
+
+    Consumed by Prime/Beacon/session recovery view models. Advisory-only:
+    no session spawning/stopping/archiving, process inspection, model
+    calls, UI runtime edits, branch movement, or shared-main writes.
+    """
+
+    projection_id: str
+    evidence_id: str
+    session_id: str
+    session_name: str
+    project_name: str
+    project_path_present: bool
+    project_path_label: str
+    assigned_queue_file: str
+    worktree_path_present: bool
+    worktree_path_label: str
+    branch_name: str
+    model_provider: str
+    model_name: str
+    status: SessionStatus
+    health_state: HealthState
+    current_task_id: Optional[str]
+    last_queue_read_at: datetime
+    last_queue_write_at: datetime
+    last_prompt_sent_at: datetime
+    proof_state: ProofState
+    blocker_present: bool
+    blocker_summary_label: str
+    blocker_summary_length: int
+    advisory_blockers: tuple[str, ...]
+    human_gate_required: bool
+    is_executable_now: bool
+    evidence_refs: tuple[str, ...]
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize projection to JSON-safe Bifrost-ready view-model dict.
+
+        Output is display-safe by construction: raw filesystem paths and
+        raw blocker text never appear. Downstream consumers receive
+        bounded presence indicators and labels only.
+        """
+        return {
+            "projection_id": self.projection_id,
+            "evidence_id": self.evidence_id,
+            "session_id": self.session_id,
+            "session_name": self.session_name,
+            "project_name": self.project_name,
+            "project_path_present": self.project_path_present,
+            "project_path_label": self.project_path_label,
+            "assigned_queue_file": self.assigned_queue_file,
+            "worktree_path_present": self.worktree_path_present,
+            "worktree_path_label": self.worktree_path_label,
+            "branch_name": self.branch_name,
+            "model_provider": self.model_provider,
+            "model_name": self.model_name,
+            "status": self.status.value,
+            "health_state": self.health_state.value,
+            "current_task_id": self.current_task_id,
+            "last_queue_read_at": self.last_queue_read_at.isoformat(),
+            "last_queue_write_at": self.last_queue_write_at.isoformat(),
+            "last_prompt_sent_at": self.last_prompt_sent_at.isoformat(),
+            "proof_state": self.proof_state.value,
+            "blocker_present": self.blocker_present,
+            "blocker_summary_label": self.blocker_summary_label,
+            "blocker_summary_length": self.blocker_summary_length,
+            "advisory_blockers": list(self.advisory_blockers),
+            "human_gate_required": self.human_gate_required,
+            "is_executable_now": self.is_executable_now,
+            "evidence_refs": list(self.evidence_refs),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
 class SessionLiveControlPermissionGate:
     """Advisory permission gate for future live-control execution readiness."""
 
@@ -1817,6 +1899,110 @@ def build_session_live_state_evidence(
         proof_state=session.proof_state,
         blocker_summary=session.blocker_summary,
         evidence_refs=tuple(evidence_refs),
+        timestamp=observed_at,
+    )
+
+
+_LIVE_STATE_BLOCKED_STATUSES = frozenset(
+    {
+        SessionStatus.BLOCKED,
+        SessionStatus.REVIEW_GATED,
+        SessionStatus.STALE,
+        SessionStatus.CAPACITY_LIMITED,
+        SessionStatus.ARCHIVED,
+    }
+)
+
+_LIVE_STATE_UNHEALTHY_HEALTH = frozenset(
+    {HealthState.FAILED, HealthState.DEGRADED, HealthState.STALE}
+)
+
+
+def build_session_live_state_advisory_projection(
+    evidence: SessionLiveStateEvidence,
+    *,
+    timestamp: Optional[datetime] = None,
+) -> SessionLiveStateAdvisoryProjection:
+    """Project SessionLiveStateEvidence into Bifrost-ready view-model data.
+
+    Consumes the live-state evidence (or its serialized to_dict() output via
+    the dataclass) and derives bounded, display-safe view-model fields plus
+    deterministic advisory blockers and a human_gate_required flag for
+    Prime/Beacon/session recovery consumers.
+
+    Display-safety is preserved: raw project_path, raw worktree_path, raw
+    blocker_summary, raw worker chat, raw prompt text, provider responses,
+    credentials, and unbounded filesystem paths never appear in the
+    projection's serialized fields.
+
+    Advisory-only: no session spawning/stopping/archiving, process
+    inspection, model calls, UI runtime edits, branch movement, or
+    shared-main writes.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+
+    project_path_present = evidence.project_path is not None
+    worktree_path_present = bool(evidence.worktree_path)
+    blocker_present = evidence.blocker_summary is not None
+    blocker_summary_length = (
+        len(evidence.blocker_summary) if evidence.blocker_summary else 0
+    )
+
+    advisory_blockers: list[str] = []
+    if blocker_present:
+        advisory_blockers.append("session.blocker_present")
+    if evidence.status in _LIVE_STATE_BLOCKED_STATUSES:
+        advisory_blockers.append(f"session.status={evidence.status.value}")
+    if evidence.health_state in _LIVE_STATE_UNHEALTHY_HEALTH:
+        advisory_blockers.append(f"session.health={evidence.health_state.value}")
+    if evidence.proof_state == ProofState.NO_PROOF:
+        advisory_blockers.append("session.proof.missing")
+
+    deduped_blockers = tuple(dict.fromkeys(advisory_blockers))
+    human_gate_required = bool(deduped_blockers)
+    is_executable_now = not human_gate_required
+
+    projection_refs = list(evidence.evidence_refs)
+    projection_refs.extend(
+        [
+            f"projection.id={evidence.session_id}:{observed_at.isoformat()}",
+            f"projection.blocker_present={blocker_present}",
+            f"projection.human_gate_required={human_gate_required}",
+            f"projection.is_executable_now={is_executable_now}",
+        ]
+    )
+    projection_refs.extend(
+        f"projection.blocker={blocker}" for blocker in deduped_blockers
+    )
+
+    return SessionLiveStateAdvisoryProjection(
+        projection_id=f"{evidence.session_id}:{observed_at.isoformat()}",
+        evidence_id=evidence.evidence_id,
+        session_id=evidence.session_id,
+        session_name=evidence.session_name,
+        project_name=evidence.project_name,
+        project_path_present=project_path_present,
+        project_path_label="<project_path>" if project_path_present else "none",
+        assigned_queue_file=evidence.assigned_queue_file,
+        worktree_path_present=worktree_path_present,
+        worktree_path_label="<worktree_path>" if worktree_path_present else "none",
+        branch_name=evidence.branch_name,
+        model_provider=evidence.model_provider,
+        model_name=evidence.model_name,
+        status=evidence.status,
+        health_state=evidence.health_state,
+        current_task_id=evidence.current_task_id,
+        last_queue_read_at=evidence.last_queue_read_at,
+        last_queue_write_at=evidence.last_queue_write_at,
+        last_prompt_sent_at=evidence.last_prompt_sent_at,
+        proof_state=evidence.proof_state,
+        blocker_present=blocker_present,
+        blocker_summary_label="<blocker_summary>" if blocker_present else "none",
+        blocker_summary_length=blocker_summary_length,
+        advisory_blockers=deduped_blockers,
+        human_gate_required=human_gate_required,
+        is_executable_now=is_executable_now,
+        evidence_refs=tuple(projection_refs),
         timestamp=observed_at,
     )
 

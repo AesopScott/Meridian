@@ -28,6 +28,7 @@ from meridian_core.session_lifecycle import (
     WorkflowWorkOrderRecoverySummary,
     SessionRuntimeStateExport,
     SessionLiveStateEvidence,
+    SessionLiveStateAdvisoryProjection,
     SessionLiveControlPermissionGate,
     SessionRecoveryReadinessSummary,
     SessionLiveControlCommandPlanStagingRecord,
@@ -38,6 +39,7 @@ from meridian_core.session_lifecycle import (
     SessionLifecycleState,
     SessionCommandPlan,
     build_session_live_state_evidence,
+    build_session_live_state_advisory_projection,
     build_command_staging_review_packet,
     build_command_preview_proof,
     build_close_archive_write_through_proof,
@@ -2218,6 +2220,189 @@ class TestSessionLiveStateEvidence:
         assert "blocker_present" in serialized
         assert "blocker_summary_label" in serialized
         assert "blocker_summary_length" in serialized
+
+
+class TestSessionLiveStateAdvisoryProjection:
+    """Tests for Bifrost-ready live-state advisory projection."""
+
+    @pytest.fixture
+    def healthy_evidence(self):
+        """Build live-state evidence from a healthy running session."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=2),
+            task_scope="advisory-projection",
+            last_permission_change=now,
+        )
+        session = SessionLifecycleState(
+            session_id="session-projection",
+            session_name="Build 2 Projection",
+            project_name="Meridian",
+            project_path="/home/scott/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.RUNNING,
+            worktree_path="/worktree/build-2-session-state-evidence",
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="advisory-projection",
+            last_queue_read_at=now - timedelta(minutes=5),
+            last_queue_write_at=now - timedelta(minutes=3),
+            last_prompt_sent_at=now - timedelta(minutes=1),
+            last_prompt_payload_size=8500,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=ProofState.COMMAND_STAGED,
+            health_state=HealthState.HEALTHY,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+        return build_session_live_state_evidence(session, timestamp=now)
+
+    def test_projection_from_healthy_evidence_is_executable(self, healthy_evidence):
+        """A healthy live-state evidence projects to an executable advisory."""
+        timestamp = datetime(2026, 6, 7, 12, 5, tzinfo=timezone.utc)
+
+        projection = build_session_live_state_advisory_projection(
+            healthy_evidence, timestamp=timestamp
+        )
+
+        assert isinstance(projection, SessionLiveStateAdvisoryProjection)
+        assert projection.session_id == "session-projection"
+        assert projection.status == SessionStatus.RUNNING
+        assert projection.health_state == HealthState.HEALTHY
+        assert projection.blocker_present is False
+        assert projection.advisory_blockers == ()
+        assert projection.human_gate_required is False
+        assert projection.is_executable_now is True
+        assert projection.timestamp == timestamp
+
+    def test_projection_blocked_session_requires_human_gate(self, healthy_evidence):
+        """A BLOCKED status produces advisory blockers and forces human gate."""
+        blocked_evidence = SessionLiveStateEvidence(
+            **{
+                **healthy_evidence.__dict__,
+                "status": SessionStatus.BLOCKED,
+                "blocker_summary": "Waiting for review approval",
+            }
+        )
+        projection = build_session_live_state_advisory_projection(blocked_evidence)
+
+        assert projection.blocker_present is True
+        assert projection.human_gate_required is True
+        assert projection.is_executable_now is False
+        assert "session.blocker_present" in projection.advisory_blockers
+        assert "session.status=blocked" in projection.advisory_blockers
+
+    def test_projection_stale_health_produces_blocker(self, healthy_evidence):
+        """A STALE health_state surfaces an advisory blocker."""
+        stale_evidence = SessionLiveStateEvidence(
+            **{**healthy_evidence.__dict__, "health_state": HealthState.STALE}
+        )
+        projection = build_session_live_state_advisory_projection(stale_evidence)
+
+        assert "session.health=stale" in projection.advisory_blockers
+        assert projection.human_gate_required is True
+
+    def test_projection_no_proof_produces_blocker(self, healthy_evidence):
+        """ProofState.NO_PROOF surfaces an advisory blocker."""
+        no_proof_evidence = SessionLiveStateEvidence(
+            **{**healthy_evidence.__dict__, "proof_state": ProofState.NO_PROOF}
+        )
+        projection = build_session_live_state_advisory_projection(no_proof_evidence)
+
+        assert "session.proof.missing" in projection.advisory_blockers
+        assert projection.human_gate_required is True
+
+    def test_projection_to_dict_does_not_leak_raw_paths_or_blocker(self, healthy_evidence):
+        """Regression: projection.to_dict() must not leak raw paths or blocker text."""
+        sensitive_evidence = SessionLiveStateEvidence(
+            **{
+                **healthy_evidence.__dict__,
+                "project_path": "/home/scott/secret/project",
+                "worktree_path": "C:\\Users\\scott\\secret-worktree",
+                "blocker_summary": "SECRET_BLOCKER_TEXT credentials in /etc/secrets/key.pem",
+            }
+        )
+
+        projection = build_session_live_state_advisory_projection(sensitive_evidence)
+        serialized = projection.to_dict()
+
+        # Raw keys must not appear
+        assert "project_path" not in serialized
+        assert "worktree_path" not in serialized
+        assert "blocker_summary" not in serialized
+
+        # Raw values must not appear anywhere in serialized output
+        sensitive_values = [
+            "/home/scott/secret/project",
+            "C:\\Users\\scott\\secret-worktree",
+            "SECRET_BLOCKER_TEXT",
+            "/etc/secrets/key.pem",
+        ]
+        for key, value in serialized.items():
+            if isinstance(value, str):
+                for sensitive in sensitive_values:
+                    assert sensitive not in value, (
+                        f"Raw sensitive value '{sensitive}' leaked in serialized['{key}']"
+                    )
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, str):
+                        for sensitive in sensitive_values:
+                            assert sensitive not in item, (
+                                f"Raw sensitive value '{sensitive}' leaked in serialized['{key}'] list"
+                            )
+
+        # Bounded display-safe labels are present
+        assert serialized["project_path_present"] is True
+        assert serialized["project_path_label"] == "<project_path>"
+        assert serialized["worktree_path_present"] is True
+        assert serialized["worktree_path_label"] == "<worktree_path>"
+        assert serialized["blocker_present"] is True
+        assert serialized["blocker_summary_label"] == "<blocker_summary>"
+        assert serialized["blocker_summary_length"] == len(
+            "SECRET_BLOCKER_TEXT credentials in /etc/secrets/key.pem"
+        )
+
+    def test_projection_to_dict_preserves_useful_view_model_fields(self, healthy_evidence):
+        """Projection retains identifiers and bounded labels useful for Bifrost view models."""
+        projection = build_session_live_state_advisory_projection(healthy_evidence)
+        serialized = projection.to_dict()
+
+        assert serialized["projection_id"].startswith("session-projection:")
+        assert serialized["evidence_id"] == healthy_evidence.evidence_id
+        assert serialized["session_id"] == "session-projection"
+        assert serialized["session_name"] == "Build 2 Projection"
+        assert serialized["project_name"] == "Meridian"
+        assert serialized["assigned_queue_file"] == "docs/live-build-2.md"
+        assert serialized["branch_name"] == "codex/build-2-session-state-evidence-20260606"
+        assert serialized["model_provider"] == "anthropic"
+        assert serialized["model_name"] == "claude-opus-4-7"
+        assert serialized["status"] == "running"
+        assert serialized["health_state"] == "healthy"
+        assert serialized["proof_state"] == "command_staged"
+        assert serialized["human_gate_required"] is False
+        assert serialized["is_executable_now"] is True
+        assert isinstance(serialized["evidence_refs"], list)
+
+    def test_projection_evidence_refs_include_projection_metadata(self, healthy_evidence):
+        """Projection refs include both inherited evidence refs and projection-specific refs."""
+        projection = build_session_live_state_advisory_projection(healthy_evidence)
+
+        # Inherited from evidence
+        assert any("session.id=session-projection" in ref for ref in projection.evidence_refs)
+        # New projection refs
+        assert any("projection.id=session-projection:" in ref for ref in projection.evidence_refs)
+        assert any("projection.blocker_present=False" in ref for ref in projection.evidence_refs)
+        assert any("projection.human_gate_required=False" in ref for ref in projection.evidence_refs)
+        assert any("projection.is_executable_now=True" in ref for ref in projection.evidence_refs)
 
 
 class TestSessionLiveControlPermissionGate:

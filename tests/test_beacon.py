@@ -13,6 +13,7 @@ from meridian_core.beacon import (
     check_harness_liveness,
     command_plan_staging_advisory_evidence,
     command_plan_advisory_evidence,
+    live_state_advisory_evidence,
     permission_summary_advisory_evidence,
     recovery_readiness_advisory_evidence,
     runtime_state_advisory_evidence,
@@ -30,7 +31,10 @@ from meridian_core.session_lifecycle import (
     ReviewCadenceState,
     SessionCommandPlan,
     SessionLifecycleState,
+    SessionLiveStateEvidence,
     SessionStatus,
+    build_session_live_state_advisory_projection,
+    build_session_live_state_evidence,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     stage_live_control_command_plan_from_readiness,
@@ -677,3 +681,121 @@ class TestCommandPlanStagingAdvisoryEvidence:
         assert "permission.unlock_expired" in evidence.blockers
         assert "command_plan.command_kind_not_stageable" in evidence.blockers
         assert "staging.blocker=permission.unlock_expired" in evidence.evidence
+
+
+class TestLiveStateAdvisoryEvidence:
+    """Tests for Beacon binding of SessionLiveStateAdvisoryProjection."""
+
+    def _make_session(
+        self,
+        *,
+        now: datetime,
+        status: SessionStatus = SessionStatus.RUNNING,
+        health_state: HealthState = HealthState.HEALTHY,
+        proof_state: ProofState = ProofState.COMMAND_STAGED,
+        blocker_summary: str | None = None,
+    ) -> SessionLifecycleState:
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="advisory-projection",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="build-2-live-state",
+            session_name="Build 2 Live State",
+            project_name="Meridian",
+            project_path="/home/scott/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=status,
+            worktree_path="/worktree/build-2-session-state-evidence",
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="advisory-projection",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=8500,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=proof_state,
+            health_state=health_state,
+            blocker_summary=blocker_summary,
+            permission_context=permission_context,
+        )
+
+    def test_healthy_projection_becomes_alive_beacon_evidence(self) -> None:
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(now=now)
+        evidence = build_session_live_state_evidence(session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        advisory = live_state_advisory_evidence(projection, now=now)
+
+        assert advisory.harness_id == "build-2-live-state"
+        assert advisory.advisory_type == "live_state_running"
+        assert advisory.human_gate_required is False
+        assert advisory.blockers == ()
+        assert any("live_state.session_id=build-2-live-state" in item for item in advisory.evidence)
+        assert any("live_state.status=running" in item for item in advisory.evidence)
+        assert any("live_state.is_executable_now=True" in item for item in advisory.evidence)
+
+    def test_blocked_projection_surfaces_advisory_blockers(self) -> None:
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(
+            now=now,
+            status=SessionStatus.BLOCKED,
+            blocker_summary="Waiting for review approval",
+        )
+        evidence = build_session_live_state_evidence(session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        advisory = live_state_advisory_evidence(projection, now=now)
+
+        assert advisory.advisory_type == "live_state_blocked"
+        assert advisory.human_gate_required is True
+        assert "session.blocker_present" in advisory.blockers
+        assert "session.status=blocked" in advisory.blockers
+        assert advisory.to_dict()["human_gate_required"] is True
+
+    def test_live_state_advisory_preserves_display_safety(self) -> None:
+        """Regression: Beacon advisory must not leak raw paths/blocker text."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(
+            now=now,
+            blocker_summary="SECRET_BLOCKER_TEXT /etc/secrets/key.pem",
+        )
+        sensitive_session = SessionLifecycleState(
+            **{
+                **session.__dict__,
+                "project_path": "/home/scott/secret/project",
+                "worktree_path": "C:\\Users\\scott\\secret-worktree",
+            }
+        )
+        evidence = build_session_live_state_evidence(sensitive_session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        advisory = live_state_advisory_evidence(projection, now=now)
+
+        sensitive_values = [
+            "/home/scott/secret/project",
+            "C:\\Users\\scott\\secret-worktree",
+            "SECRET_BLOCKER_TEXT",
+            "/etc/secrets/key.pem",
+        ]
+        for item in advisory.evidence:
+            for sensitive in sensitive_values:
+                assert sensitive not in item, (
+                    f"Beacon advisory leaked '{sensitive}' in evidence: {item}"
+                )
+        for blocker in advisory.blockers:
+            for sensitive in sensitive_values:
+                assert sensitive not in blocker, (
+                    f"Beacon advisory leaked '{sensitive}' in blockers: {blocker}"
+                )

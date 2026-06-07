@@ -17,6 +17,7 @@ from .session_lifecycle import (
     SessionAction,
     SessionCommandPlan,
     SessionLiveControlCommandPlanStagingRecord,
+    SessionLiveStateAdvisoryProjection,
     SessionPermissionSummary,
     SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
@@ -280,6 +281,43 @@ def command_plan_staging_advisory_evidence(
         evidence=tuple(evidence),
         blockers=staging_record.blockers,
         human_gate_required=True,
+        generated_at=_as_utc(now or datetime.now(timezone.utc)),
+    )
+
+
+def live_state_advisory_evidence(
+    projection: SessionLiveStateAdvisoryProjection,
+    *,
+    now: datetime | None = None,
+) -> BeaconAdvisoryEvidence:
+    """Convert a SessionLiveStateAdvisoryProjection into Beacon advisory evidence.
+
+    Display-safety is preserved end-to-end: the projection already redacts
+    raw paths and raw blocker text, so the Beacon evidence carries only
+    bounded labels and presence indicators. This is advisory-only — no
+    session control, no process inspection, no model calls.
+    """
+    evidence = list(projection.evidence_refs)
+    evidence.extend(
+        [
+            f"live_state.projection_id={projection.projection_id}",
+            f"live_state.session_id={projection.session_id}",
+            f"live_state.status={projection.status.value}",
+            f"live_state.health={projection.health_state.value}",
+            f"live_state.proof_state={projection.proof_state.value}",
+            f"live_state.blocker_present={projection.blocker_present}",
+            f"live_state.project_path_present={projection.project_path_present}",
+            f"live_state.worktree_path_present={projection.worktree_path_present}",
+            f"live_state.is_executable_now={projection.is_executable_now}",
+        ]
+    )
+
+    return BeaconAdvisoryEvidence(
+        harness_id=projection.session_id,
+        advisory_type=f"live_state_{projection.status.value}",
+        evidence=tuple(evidence),
+        blockers=projection.advisory_blockers,
+        human_gate_required=projection.human_gate_required,
         generated_at=_as_utc(now or datetime.now(timezone.utc)),
     )
 

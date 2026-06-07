@@ -13,6 +13,7 @@ from meridian_core.prime_autonomy import (
     select_prime_next_action,
     make_prime_next_action,
     select_next_action_from_command_plan_staging_record,
+    select_next_action_from_live_state_evidence,
     select_next_action_from_project_state,
     select_next_action_from_command_plan_audit,
     select_next_action_from_recovery_readiness_summary,
@@ -32,7 +33,10 @@ from meridian_core.session_lifecycle import (
     SessionAction,
     SessionCommandPlan,
     SessionLifecycleState,
+    SessionLiveStateEvidence,
     SessionStatus,
+    build_session_live_state_advisory_projection,
+    build_session_live_state_evidence,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
@@ -1368,3 +1372,142 @@ class TestCommandPlanAuditAdvisorySelection:
                 "recovery.note=No recovery needed.",
             ]
         )
+
+
+class TestLiveStateEvidenceAdvisorySelection:
+    """Test Prime consumption of Session live-state advisory projection."""
+
+    def _make_session(
+        self,
+        *,
+        now: datetime,
+        status: SessionStatus = SessionStatus.RUNNING,
+        health_state: HealthState = HealthState.HEALTHY,
+        proof_state: ProofState = ProofState.COMMAND_STAGED,
+        blocker_summary: str | None = None,
+    ) -> SessionLifecycleState:
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.BRANCH_MOVE]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="advisory-projection",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="prime-live-state",
+            session_name="Prime Live State",
+            project_name="Meridian",
+            project_path="/home/scott/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=status,
+            worktree_path="/worktree/build-2-session-state-evidence",
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="advisory-projection",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=8500,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=proof_state,
+            health_state=health_state,
+            blocker_summary=blocker_summary,
+            permission_context=permission_context,
+        )
+
+    def test_none_projection_pauses_safely(self):
+        action = select_next_action_from_live_state_evidence(None)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.FALLBACK
+        assert action.target_harness == "Session Lifecycle"
+
+    def test_healthy_projection_becomes_poll_session(self):
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(now=now)
+        evidence = build_session_live_state_evidence(session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        action = select_next_action_from_live_state_evidence(projection)
+
+        assert action.action_type == PrimeActionType.POLL_SESSION
+        assert action.confidence == PrimeActionConfidence.MEDIUM
+        assert action.risk_tier == PrimeActionRiskTier.SAFE
+        assert action.target_lane == "prime-live-state"
+        assert action.human_gate_required is False
+        assert action.is_blocked() is False
+        assert any("live_state.status=running" in item for item in action.evidence)
+
+    def test_blocked_projection_pauses_with_human_gate(self):
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(
+            now=now,
+            status=SessionStatus.BLOCKED,
+            blocker_summary="Waiting for review approval",
+        )
+        evidence = build_session_live_state_evidence(session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        action = select_next_action_from_live_state_evidence(projection)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.HIGH
+        assert action.risk_tier == PrimeActionRiskTier.HIGH
+        assert action.target_lane == "prime-live-state"
+        assert action.human_gate_required is True
+        assert "session.blocker_present" in action.blockers
+        assert "session.status=blocked" in action.blockers
+
+    def test_stale_health_projection_pauses_with_human_gate(self):
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(now=now, health_state=HealthState.STALE)
+        evidence = build_session_live_state_evidence(session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        action = select_next_action_from_live_state_evidence(projection)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.human_gate_required is True
+        assert "session.health=stale" in action.blockers
+
+    def test_prime_advisory_preserves_display_safety(self):
+        """Regression: Prime advisory must not leak raw paths/blocker text."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(
+            now=now,
+            blocker_summary="SECRET_BLOCKER_TEXT /etc/secrets/key.pem",
+        )
+        sensitive_session = SessionLifecycleState(
+            **{
+                **session.__dict__,
+                "project_path": "/home/scott/secret/project",
+                "worktree_path": "C:\\Users\\scott\\secret-worktree",
+            }
+        )
+        evidence = build_session_live_state_evidence(sensitive_session, timestamp=now)
+        projection = build_session_live_state_advisory_projection(evidence, timestamp=now)
+
+        action = select_next_action_from_live_state_evidence(projection)
+
+        sensitive_values = [
+            "/home/scott/secret/project",
+            "C:\\Users\\scott\\secret-worktree",
+            "SECRET_BLOCKER_TEXT",
+            "/etc/secrets/key.pem",
+        ]
+        for item in action.evidence:
+            for sensitive in sensitive_values:
+                assert sensitive not in item, (
+                    f"Prime advisory leaked '{sensitive}' in evidence: {item}"
+                )
+        for blocker in action.blockers:
+            for sensitive in sensitive_values:
+                assert sensitive not in blocker, (
+                    f"Prime advisory leaked '{sensitive}' in blockers: {blocker}"
+                )
