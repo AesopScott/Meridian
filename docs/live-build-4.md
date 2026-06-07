@@ -42,6 +42,41 @@ Completion:
 
 ## Coordinator Override - Completed / Ready For Codex Review
 
+Goal: repair cadence-3/3 self-review finding — bounds `shared_relationship_refs` carried raw payload verbatim when raw context appeared in BOTH project's `relationship_refs` and request envelope (parallel of difference-layer `df8120b49` leak, but on the bounds runtime and reachable on every decision branch).
+
+Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
+
+Branch: `codex/build-4-compass-project-definition-20260606` (pushed to origin at `956adf162` on 2026-06-06).
+
+Allowed files only: `meridian_core/compass.py`, `tests/test_compass.py`, `docs/live-build-4.md`.
+
+Finding (MEDIUM): `_project_bounds_shared_relationship_refs` computed the intersection of `project.relationship_refs` and `request.{repo,venture,session}_refs`. When both carried the same raw-context entry (e.g. `repo_refs=('raw_prompt:secret-shared-repo',)` on both sides), the intersection's raw payload was passed through verbatim into `ProjectBoundsEvaluation.shared_relationship_refs` and serialized into `to_dict()` output. The leak surfaced on the normal IN_SCOPE / OUT_OF_SCOPE / PARTIAL_SCOPE / AMBIGUOUS paths, NOT just BLOCKED, because `shared_relationship_refs` is always computed.
+
+Repair:
+- Repair commit `956adf162` (Repair Compass bounds shared_relationship_refs raw-context leak). `_bounds_result` now routes the `shared_relationship_refs` tuple through `_redact_raw_context_refs` before passing to `ProjectBoundsEvaluation`. Defense-in-depth: `request.evidence_refs` is also routed through `_redact_raw_context_refs` in `_bounds_result` (matches difference + identity patterns).
+
+Completion: 2026-06-06 (Opus build lane, cadence-3/3 self-review repair).
+
+Ready for Codex Review:
+
+- Repair commit: `956adf162`.
+- Branch HEAD pushed: `origin/codex/build-4-compass-project-definition-20260606` at `956adf162` (2026-06-06).
+- Files changed: `meridian_core/compass.py` (+3/-3 lines: `_bounds_result` routes shared_relationship_refs and evidence_refs through `_redact_raw_context_refs`), `tests/test_compass.py` (+185 lines: new `TestProjectBoundsSharedRelationshipRefsRedaction` class with 9 cases), `docs/live-build-4.md` (this main marker).
+- Tests run: `python -m pytest tests/test_compass.py -q` -> **306 passed** (9 new bounds shared-refs tests on top of 297 prior).
+- `git diff --check`: clean.
+- Reproducer (before fix): project + request both with `repo_refs=('raw_prompt:secret-shared-repo',)` → `evaluate_project_bounds` returned IN_SCOPE with `shared_relationship_refs=('raw_prompt:secret-shared-repo', 'venture:y')` and `json.dumps(result.to_dict())` contained `secret-shared-repo`.
+- After fix: same call returns `shared_relationship_refs=('<redacted_raw_context>', 'venture:y')`; raw payload absent from JSON.
+- Concrete evidence each required invariant is enforced:
+  - 6 parametrized raw-context prefixes confirm `shared_relationship_refs` redacts and `json.dumps` no longer contains raw payload across `raw_prompt`, `raw_transcript`, `free_form_context`, `transcript`, `conversation`, `provider_response`.
+  - Dedicated venture-ref leak path test.
+  - Regression: legitimate (non-raw) shared refs still appear unredacted in `shared_relationship_refs`.
+  - Defense-in-depth: bounds-evidence-also-redacted test documents precedence with the request-level guard.
+  - `execution_authorized=False` preserved.
+- Pure backend behavior preserved: no model/provider calls, no UI/Bifrost/FileMap edits, no branch/worktree movement, no shared-main writes (beyond this queue marker), no Polaris dependency.
+- Next Candidate: pending coordinator promotion after this bounds shared-refs redaction repair clears Codex review. Independent Codex review still owed for the 10-commit Compass repair series (`cc584318f` + `cd20be9c3` + `270438271` + `df8120b49` + `808297315` + `95dde4d50` + `c3d9f4a22` + `d55b15149` + `54ea2f77d` + `956adf162`) plus cross-lane `43b1dafb8` once Codex CLI spend limit is raised.
+
+## Coordinator Override - Completed / Ready For Codex Review
+
 Goal: repair cadence-3/3 self-review finding — `neighbor.project_id` raw context leaked via `collapsing_neighbors` / `distinguishing_neighbors` lists and the AMBIGUOUS `compass_question` interpolation.
 
 Worktree: `C:\Users\scott\Code\Meridian-Worktrees\build-4-compass-project-definition`.
@@ -6113,3 +6148,7 @@ Completion:
 2026-06-06 21:11 -06:00 - Build 4 checked queue; status: idle; origin/main pulled (771cd76) — already up to date; no executable Coordinator Override - Active Now block (top section is the identity-layer neighbor.project_id redaction repair Ready For Codex Review); origin/codex/build-4-compass-project-definition-20260606 in sync at 54ea2f77d; local test suite 297 passed; Codex CLI spend limit still parked; cadence 1/3 of new cycle
 
 2026-06-06 21:13 -06:00 - Build 4 checked queue; status: idle; origin/main pulled (5ddc4f7) — already up to date; no executable Coordinator Override - Active Now block; origin/codex/build-4-compass-project-definition-20260606 unchanged at 54ea2f77d; no new coordinator directive; Codex CLI spend limit still parked; cadence 2/3 of new cycle
+
+2026-06-06 21:18 -06:00 - Build 4 cross-check: cadence 3/3 Codex review attempt (8th consecutive) on the 9-commit Compass repair series (cc584318f^..54ea2f77d) PARKED — Codex CLI returned monthly spend limit again; no independent review obtained; per heartbeat directive ran careful self-review as fallback; ONE actionable finding surfaced parallel to the prior six: [MEDIUM] _project_bounds_shared_relationship_refs computed the intersection of project.relationship_refs and request envelope refs, and when both carried the same raw-context entry the intersection's raw payload was passed verbatim into shared_relationship_refs and serialized into to_dict() — leak reached IN_SCOPE/OUT_OF_SCOPE/PARTIAL_SCOPE/AMBIGUOUS paths too, not just BLOCKED; reproduced (decision=in_scope, shared_relationship_refs leaked 'secret-shared-repo'); other audit checks (bounds compass_question interpolation paths after c3d9f4a22, ProjectScopeEvaluation.matched_refs trace, _redact_raw_context_refs consistency across all 6 evaluators, frozen-dataclass invariants, style consistency across 10 repairs) all passed.
+
+2026-06-06 21:22 -06:00 - Build 4 completed cadence 3/3 self-review repair; repair commit 956adf162 on branch codex/build-4-compass-project-definition-20260606; files changed: meridian_core/compass.py (_bounds_result now routes shared_relationship_refs and request.evidence_refs through _redact_raw_context_refs before constructing ProjectBoundsEvaluation; mirrors the difference-layer df8120b49 pattern at the bounds layer), tests/test_compass.py (TestProjectBoundsSharedRelationshipRefsRedaction — 9 new cases: 6 parametrized raw-context prefix tests for project + request shared repo_refs assert IN_SCOPE result still redacts and json.dumps absent raw payload; dedicated venture_refs leak path test; safe-shared-refs passthrough regression; defense-in-depth bounds-evidence-also-redacted test), docs/live-build-4.md (main marker only this turn); tests run: python -m pytest tests/test_compass.py -q -> 306 passed (9 new tests on top of 297); git diff --check clean; push status: branch pushed to origin/codex/build-4-compass-project-definition-20260606 at 956adf162 (54ea2f77d..956adf162); main queue updated with new Completed / Ready For Codex Review block for the bounds shared-refs redaction repair; Obsidian update status: not performed in this lane; cadence reset for next cycle; lane idle pending independent Codex review on the 10-commit Compass repair series or coordinator promotion of next backend candidate.
