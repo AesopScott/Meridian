@@ -23,6 +23,7 @@ from meridian_core.session_lifecycle import (
     SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
     SessionStatus,
+    V2CommandPlanPreviewProof,
     WorkflowWorkOrderRecoverySummary,
 )
 
@@ -844,6 +845,69 @@ def select_next_action_from_live_state_evidence(
         rationale=(
             "Live-state advisory projection is advisory-only; human gate "
             "required before any session recovery is advised."
+        ),
+        evidence=evidence,
+        human_gate_required=True,
+        blockers=blockers,
+    )
+
+
+def select_next_action_from_v2_command_plan_preview(
+    proof: Optional[V2CommandPlanPreviewProof] = None,
+) -> PrimeNextAction:
+    """Convert a V2 command-plan preview proof into a safe Prime action.
+
+    The proof's display-safe fields are mapped to Prime evidence. The
+    proof is non-executable by contract, so Prime always returns a safe
+    PAUSE_AND_WAIT action with ``human_gate_required=True``. Live command
+    execution still requires a separate, reviewed command plan.
+
+    Fail-closed advisory contract: every non-None proof yields a
+    ``PAUSE_AND_WAIT`` action with ``human_gate_required=True`` regardless
+    of advisory_blockers contents. Prime must never receive an executable
+    command-plan preview action from this surface.
+    """
+    if proof is None:
+        return make_prime_next_action(
+            action_type=PrimeActionType.PAUSE_AND_WAIT,
+            confidence=PrimeActionConfidence.FALLBACK,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.ERROR_RECOVERY,
+            target_harness="Session Lifecycle",
+            rationale="No V2 command-plan preview proof available.",
+        )
+
+    evidence = list(proof.evidence_refs)
+    evidence.extend(
+        [
+            f"v2_preview.preview_id={proof.preview_id}",
+            f"v2_preview.target_session_id={proof.target_session_id}",
+            "v2_preview.command_kind="
+            + (proof.command_kind.value if proof.command_kind else "none"),
+            f"v2_preview.aegis_gate_result={proof.aegis_gate_result}",
+            f"v2_preview.aegis_gate_status={proof.aegis_gate_status}",
+            f"v2_preview.is_executable_now={proof.is_executable_now}",
+            f"v2_preview.human_gate_required={proof.human_gate_required}",
+            f"v2_preview.human_gate_state={proof.human_gate_state}",
+            f"v2_preview.review_cadence_state={proof.review_cadence_state.value}",
+            "v2_preview.advisory_only=True",
+        ]
+    )
+
+    blockers = list(proof.advisory_blockers) or [
+        "v2_command_plan_preview.advisory_only.requires_human_gate"
+    ]
+
+    return make_prime_next_action(
+        action_type=PrimeActionType.PAUSE_AND_WAIT,
+        confidence=PrimeActionConfidence.HIGH,
+        risk_tier=PrimeActionRiskTier.HIGH,
+        source=PrimeActionSource.SESSION_STATE,
+        target_harness="Session Lifecycle",
+        target_lane=proof.target_session_id,
+        rationale=(
+            "V2 command-plan preview is non-executable proof-only; human "
+            "gate required before any command-plan execution is advised."
         ),
         evidence=evidence,
         human_gate_required=True,

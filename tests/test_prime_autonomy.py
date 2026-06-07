@@ -19,6 +19,7 @@ from meridian_core.prime_autonomy import (
     select_next_action_from_recovery_readiness_summary,
     select_next_action_from_session_lifecycle_advisory,
     select_next_action_from_runtime_state_export,
+    select_next_action_from_v2_command_plan_preview,
     select_next_action_from_workflow_recovery_summary,
 )
 from meridian_core.session_lifecycle import (
@@ -37,6 +38,7 @@ from meridian_core.session_lifecycle import (
     SessionStatus,
     build_session_live_state_advisory_projection,
     build_session_live_state_evidence,
+    build_v2_command_plan_preview_proof,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     gather_prime_autonomy_input,
@@ -1526,4 +1528,149 @@ class TestLiveStateEvidenceAdvisorySelection:
             for sensitive in sensitive_values:
                 assert sensitive not in blocker, (
                     f"Prime advisory leaked '{sensitive}' in blockers: {blocker}"
+                )
+
+
+class TestV2CommandPlanPreviewSelection:
+    """Test Prime consumption of V2 command-plan preview proof."""
+
+    def _make_session(
+        self,
+        *,
+        now: datetime,
+        worktree_path: str = "/worktree/build-2-session-state-evidence",
+        project_path: str = "/home/scott/meridian",
+    ) -> SessionLifecycleState:
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="v2-preview",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="prime-v2-preview",
+            session_name="Prime V2 Preview",
+            project_name="Meridian",
+            project_path=project_path,
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path=worktree_path,
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="v2-preview",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=8500,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def _make_plan(
+        self,
+        session: SessionLifecycleState,
+        *,
+        reason: str = "Workflow heartbeat stale; advise restart staging",
+        rollback: str = "Advisory restart only",
+    ) -> SessionCommandPlan:
+        return SessionCommandPlan(
+            session_id=session.session_id,
+            session_name=session.session_name,
+            command_intent=CommandIntent.RESTART,
+            reason=reason,
+            expected_state_transition=(SessionStatus.STALE, SessionStatus.RUNNING),
+            current_state_evidence="prime-v2-preview:stale",
+            queue_file_evidence=session.assigned_queue_file,
+            worktree_evidence=session.worktree_path,
+            review_gate_evidence=None,
+            proof_requirement=ProofState.PERMISSION_VALIDATED,
+            queue_file_affected=session.assigned_queue_file,
+            worktree_path_affected=session.worktree_path,
+            branch_affected=session.branch_name,
+            aegis_gate_result="pending",
+            cadence_gate_required=False,
+            cadence_gate_status=ReviewCadenceState.CLEARED,
+            is_executable_now=False,
+            human_approval_required=True,
+            approval_context="restart staging requires review",
+            rollback_or_recovery_note=rollback,
+            permission_state=session.permission_context.branch_permission_state,
+            permission_operation=OperationScope.RESTART,
+            permission_operation_allowed=True,
+        )
+
+    def test_none_proof_pauses_safely(self):
+        action = select_next_action_from_v2_command_plan_preview(None)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.FALLBACK
+        assert action.target_harness == "Session Lifecycle"
+
+    def test_v2_preview_always_pauses_with_human_gate(self):
+        """Fail-closed: a V2 preview proof always yields PAUSE_AND_WAIT in Prime."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(now=now)
+        plan = self._make_plan(session)
+        proof = build_v2_command_plan_preview_proof(session, plan, timestamp=now)
+
+        action = select_next_action_from_v2_command_plan_preview(proof)
+
+        assert action.action_type == PrimeActionType.PAUSE_AND_WAIT
+        assert action.confidence == PrimeActionConfidence.HIGH
+        assert action.risk_tier == PrimeActionRiskTier.HIGH
+        assert action.target_lane == "prime-v2-preview"
+        assert action.human_gate_required is True
+        assert action.is_blocked() is True
+        assert action.is_executable() is False
+        assert (
+            "v2_command_plan_preview.advisory_only.requires_human_gate"
+            in action.blockers
+        )
+        assert any("v2_preview.is_executable_now=False" in item for item in action.evidence)
+        assert "v2_preview.advisory_only=True" in action.evidence
+
+    def test_v2_preview_prime_advisory_preserves_display_safety(self):
+        """Regression: Prime V2 preview advisory must not leak raw paths/reason/rollback."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(
+            now=now,
+            worktree_path="C:\\Users\\scott\\secret-worktree",
+            project_path="/home/scott/secret/project",
+        )
+        plan = self._make_plan(
+            session,
+            reason="SECRET_REASON_TOKEN credentials at /etc/secrets/key.pem",
+            rollback="SECRET_ROLLBACK_TOKEN revert SECRET_CHAT prompt",
+        )
+        proof = build_v2_command_plan_preview_proof(session, plan, timestamp=now)
+
+        action = select_next_action_from_v2_command_plan_preview(proof)
+
+        sensitive_values = [
+            "/home/scott/secret/project",
+            "C:\\Users\\scott\\secret-worktree",
+            "SECRET_REASON_TOKEN",
+            "SECRET_ROLLBACK_TOKEN",
+            "SECRET_CHAT",
+            "/etc/secrets/key.pem",
+        ]
+        for item in action.evidence:
+            for sensitive in sensitive_values:
+                assert sensitive not in item, (
+                    f"V2 preview Prime advisory leaked '{sensitive}' in evidence: {item}"
+                )
+        for blocker in action.blockers:
+            for sensitive in sensitive_values:
+                assert sensitive not in blocker, (
+                    f"V2 preview Prime advisory leaked '{sensitive}' in blockers: {blocker}"
                 )

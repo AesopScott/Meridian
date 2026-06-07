@@ -821,6 +821,119 @@ class SessionCommandPreviewProof:
 
 
 @dataclass(frozen=True)
+class V2CommandPlanPreviewProof:
+    """Display-safe, fail-closed V2 Session Lifecycle command-plan preview proof.
+
+    Captures every required field for command-plan preview review before
+    execution: target, reason (bounded label/length only), expected state
+    transition, evidence refs, queue file, worktree (bounded), branch,
+    Aegis gate result/status, proof requirement, executability,
+    human/review gate state, rollback/recovery note (bounded), permission
+    state, and advisory blockers.
+
+    Display-safety contract:
+    - Raw filesystem paths (worktree_path) never appear; only presence and
+      a bounded label.
+    - Raw reason text never appears; only presence, a bounded label, and
+      length.
+    - Raw rollback_or_recovery_note text never appears; only presence,
+      a bounded label, and length.
+    - Raw worker chat, raw prompt text, provider responses, credentials,
+      and unbounded filesystem paths never appear in serialized output.
+
+    Fail-closed advisory contract: ``is_executable_now`` is False and
+    ``human_gate_required`` is True on every path. ``advisory_blockers``
+    always includes
+    ``v2_command_plan_preview.advisory_only.requires_human_gate`` so Prime
+    and Beacon never receive an executable command-plan preview proof.
+    """
+
+    preview_id: str
+    target_session_id: str
+    session_name: str
+    command_kind: Optional[CommandIntent]
+    required_operation: Optional[OperationScope]
+
+    # Bounded reason
+    reason_present: bool
+    reason_label: str
+    reason_length: int
+
+    # Transition
+    expected_state_transition: tuple[SessionStatus, SessionStatus]
+
+    # Queue / worktree / branch (display-safe)
+    assigned_queue_file: str
+    worktree_path_present: bool
+    worktree_path_label: str
+    branch_name: str
+
+    # Aegis gate
+    aegis_gate_result: str
+    aegis_gate_status: str
+
+    # Proof requirement / executability (fail-closed)
+    proof_requirement: ProofState
+    is_executable_now: bool
+
+    # Human / review gate
+    human_gate_required: bool
+    human_gate_state: str
+    review_cadence_state: ReviewCadenceState
+
+    # Rollback / recovery (bounded)
+    rollback_or_recovery_note_present: bool
+    rollback_or_recovery_note_label: str
+    rollback_or_recovery_note_length: int
+
+    # Permission
+    permission_state: PermissionState
+
+    # Advisory blockers + evidence
+    advisory_blockers: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize V2 command-plan preview proof to JSON-safe display-safe metadata."""
+        return {
+            "preview_id": self.preview_id,
+            "target_session_id": self.target_session_id,
+            "session_name": self.session_name,
+            "command_kind": self.command_kind.value if self.command_kind else None,
+            "required_operation": (
+                self.required_operation.value if self.required_operation else None
+            ),
+            "reason_present": self.reason_present,
+            "reason_label": self.reason_label,
+            "reason_length": self.reason_length,
+            "expected_state_transition": [
+                self.expected_state_transition[0].value,
+                self.expected_state_transition[1].value,
+            ],
+            "assigned_queue_file": self.assigned_queue_file,
+            "worktree_path_present": self.worktree_path_present,
+            "worktree_path_label": self.worktree_path_label,
+            "branch_name": self.branch_name,
+            "aegis_gate_result": self.aegis_gate_result,
+            "aegis_gate_status": self.aegis_gate_status,
+            "proof_requirement": self.proof_requirement.value,
+            "is_executable_now": self.is_executable_now,
+            "human_gate_required": self.human_gate_required,
+            "human_gate_state": self.human_gate_state,
+            "review_cadence_state": self.review_cadence_state.value,
+            "rollback_or_recovery_note_present": self.rollback_or_recovery_note_present,
+            "rollback_or_recovery_note_label": self.rollback_or_recovery_note_label,
+            "rollback_or_recovery_note_length": self.rollback_or_recovery_note_length,
+            "permission_state": self.permission_state.value,
+            "advisory_blockers": list(self.advisory_blockers),
+            "evidence_refs": list(self.evidence_refs),
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
 class SessionCloseArchiveWriteThroughProof:
     """Display-safe proof metadata for close/archive write-through review."""
 
@@ -2444,6 +2557,127 @@ def build_command_preview_proof(
         permission_state=review_packet.permission_state,
         blockers=blockers,
         evidence_refs=tuple(dict.fromkeys(evidence_refs)),
+        timestamp=observed_at,
+    )
+
+
+def build_v2_command_plan_preview_proof(
+    session: SessionLifecycleState,
+    command_plan: SessionCommandPlan,
+    *,
+    aegis_gate_result: Optional[str] = None,
+    aegis_gate_status: str = "pending_ui_review",
+    human_gate_state: str = "pending_ui_review",
+    rollback_or_recovery_note: Optional[str] = None,
+    timestamp: Optional[datetime] = None,
+) -> V2CommandPlanPreviewProof:
+    """Build the V2 Session Lifecycle command-plan preview proof.
+
+    Captures target, reason (bounded), expected transition, evidence refs,
+    queue, worktree (bounded), branch, Aegis gate result/status, proof
+    requirement, executability (False), human/review gate state, and
+    rollback/recovery note (bounded) before any execution.
+
+    Display-safety: raw filesystem paths, raw reason text, raw rollback
+    text, raw worker chat, raw prompt text, provider responses, and
+    credentials never appear in the serialized output.
+
+    Fail-closed: ``is_executable_now`` is False and ``human_gate_required``
+    is True on every path. Advisory blockers always include the universal
+    ``v2_command_plan_preview.advisory_only.requires_human_gate`` sentinel.
+
+    Advisory-only: no session spawning/stopping/archiving, process
+    inspection, model/provider calls, UI runtime edits, branch movement,
+    or shared-main writes.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+
+    reason_text = command_plan.reason or ""
+    reason_present = bool(reason_text)
+
+    rollback_text = (
+        rollback_or_recovery_note
+        if rollback_or_recovery_note is not None
+        else command_plan.rollback_or_recovery_note or ""
+    )
+    rollback_present = bool(rollback_text)
+
+    worktree_present = bool(session.worktree_path)
+    aegis_result = aegis_gate_result or command_plan.aegis_gate_result or "pending"
+
+    advisory_blockers: list[str] = [
+        "v2_command_plan_preview.advisory_only.requires_human_gate"
+    ]
+    if session.review_cadence_state == ReviewCadenceState.REVIEW_GATED:
+        advisory_blockers.append("review.cadence_gated")
+    if command_plan.cadence_gate_required:
+        advisory_blockers.append("review.cadence_gate_required")
+    if not command_plan.is_executable_now:
+        advisory_blockers.append("command_plan.not_executable_now")
+    if command_plan.proof_requirement == ProofState.NO_PROOF:
+        advisory_blockers.append("command_plan.proof.missing")
+
+    deduped_blockers = tuple(dict.fromkeys(advisory_blockers))
+
+    evidence_refs = [
+        f"v2_preview.id={command_plan.session_id}:{observed_at.isoformat()}",
+        f"v2_preview.target_session_id={command_plan.session_id}",
+        f"v2_preview.command_kind={command_plan.command_intent.value}",
+        "v2_preview.expected_transition="
+        f"{command_plan.expected_state_transition[0].value}"
+        f"->{command_plan.expected_state_transition[1].value}",
+        f"v2_preview.reason_present={reason_present}",
+        f"v2_preview.reason_length={len(reason_text)}",
+        f"v2_preview.assigned_queue_file={session.assigned_queue_file}",
+        f"v2_preview.worktree_path_present={worktree_present}",
+        f"v2_preview.branch_name={session.branch_name}",
+        f"v2_preview.aegis_gate_result={aegis_result}",
+        f"v2_preview.aegis_gate_status={aegis_gate_status}",
+        f"v2_preview.proof_requirement={command_plan.proof_requirement.value}",
+        "v2_preview.is_executable_now=False",
+        "v2_preview.human_gate_required=True",
+        f"v2_preview.human_gate_state={human_gate_state}",
+        f"v2_preview.review_cadence_state={session.review_cadence_state.value}",
+        f"v2_preview.rollback_present={rollback_present}",
+        f"v2_preview.rollback_length={len(rollback_text)}",
+        f"v2_preview.permission_state="
+        f"{session.permission_context.branch_permission_state.value}",
+        "v2_preview.advisory_only=True",
+    ]
+    evidence_refs.extend(
+        f"v2_preview.blocker={blocker}" for blocker in deduped_blockers
+    )
+
+    return V2CommandPlanPreviewProof(
+        preview_id=f"{command_plan.session_id}:v2_preview:{observed_at.isoformat()}",
+        target_session_id=command_plan.session_id,
+        session_name=session.session_name,
+        command_kind=command_plan.command_intent,
+        required_operation=command_plan.permission_operation,
+        reason_present=reason_present,
+        reason_label="<reason>" if reason_present else "none",
+        reason_length=len(reason_text),
+        expected_state_transition=command_plan.expected_state_transition,
+        assigned_queue_file=session.assigned_queue_file,
+        worktree_path_present=worktree_present,
+        worktree_path_label="<worktree_path>" if worktree_present else "none",
+        branch_name=session.branch_name,
+        aegis_gate_result=aegis_result,
+        aegis_gate_status=aegis_gate_status,
+        proof_requirement=command_plan.proof_requirement,
+        # Fail-closed invariants
+        is_executable_now=False,
+        human_gate_required=True,
+        human_gate_state=human_gate_state,
+        review_cadence_state=session.review_cadence_state,
+        rollback_or_recovery_note_present=rollback_present,
+        rollback_or_recovery_note_label=(
+            "<rollback_or_recovery_note>" if rollback_present else "none"
+        ),
+        rollback_or_recovery_note_length=len(rollback_text),
+        permission_state=session.permission_context.branch_permission_state,
+        advisory_blockers=deduped_blockers,
+        evidence_refs=tuple(evidence_refs),
         timestamp=observed_at,
     )
 

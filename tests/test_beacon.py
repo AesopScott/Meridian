@@ -17,6 +17,7 @@ from meridian_core.beacon import (
     permission_summary_advisory_evidence,
     recovery_readiness_advisory_evidence,
     runtime_state_advisory_evidence,
+    v2_command_plan_preview_advisory_evidence,
     workflow_recovery_advisory_evidence,
 )
 from meridian_core.models import HeartbeatStatus
@@ -35,6 +36,7 @@ from meridian_core.session_lifecycle import (
     SessionStatus,
     build_session_live_state_advisory_projection,
     build_session_live_state_evidence,
+    build_v2_command_plan_preview_proof,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
     stage_live_control_command_plan_from_readiness,
@@ -809,4 +811,142 @@ class TestLiveStateAdvisoryEvidence:
             for sensitive in sensitive_values:
                 assert sensitive not in blocker, (
                     f"Beacon advisory leaked '{sensitive}' in blockers: {blocker}"
+                )
+
+
+class TestV2CommandPlanPreviewAdvisoryEvidence:
+    """Tests for Beacon binding of V2 command-plan preview proof."""
+
+    def _make_session(
+        self,
+        *,
+        now: datetime,
+        worktree_path: str = "/worktree/build-2-session-state-evidence",
+        project_path: str = "/home/scott/meridian",
+        review_cadence_state: ReviewCadenceState = ReviewCadenceState.CLEARED,
+    ) -> SessionLifecycleState:
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="v2-preview",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="beacon-v2-preview",
+            session_name="Beacon V2 Preview",
+            project_name="Meridian",
+            project_path=project_path,
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path=worktree_path,
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="v2-preview",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=8500,
+            review_cadence_state=review_cadence_state,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    def _make_plan(
+        self,
+        session: SessionLifecycleState,
+        *,
+        reason: str = "Workflow heartbeat stale; advise restart staging",
+        rollback: str = "Advisory restart only; rollback by reverting state",
+    ) -> SessionCommandPlan:
+        return SessionCommandPlan(
+            session_id=session.session_id,
+            session_name=session.session_name,
+            command_intent=CommandIntent.RESTART,
+            reason=reason,
+            expected_state_transition=(SessionStatus.STALE, SessionStatus.RUNNING),
+            current_state_evidence="beacon-v2-preview:stale",
+            queue_file_evidence=session.assigned_queue_file,
+            worktree_evidence=session.worktree_path,
+            review_gate_evidence=None,
+            proof_requirement=ProofState.PERMISSION_VALIDATED,
+            queue_file_affected=session.assigned_queue_file,
+            worktree_path_affected=session.worktree_path,
+            branch_affected=session.branch_name,
+            aegis_gate_result="pending",
+            cadence_gate_required=False,
+            cadence_gate_status=ReviewCadenceState.CLEARED,
+            is_executable_now=False,
+            human_approval_required=True,
+            approval_context="restart staging requires review",
+            rollback_or_recovery_note=rollback,
+            permission_state=session.permission_context.branch_permission_state,
+            permission_operation=OperationScope.RESTART,
+            permission_operation_allowed=True,
+        )
+
+    def test_v2_preview_proof_becomes_advisory_only_beacon_evidence(self) -> None:
+        """Fail-closed: V2 preview always produces non-executable Beacon evidence."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(now=now)
+        plan = self._make_plan(session)
+        proof = build_v2_command_plan_preview_proof(session, plan, timestamp=now)
+
+        advisory = v2_command_plan_preview_advisory_evidence(proof, now=now)
+
+        assert advisory.harness_id == "beacon-v2-preview"
+        assert advisory.advisory_type == "v2_command_plan_preview_restart"
+        assert advisory.human_gate_required is True
+        assert (
+            "v2_command_plan_preview.advisory_only.requires_human_gate"
+            in advisory.blockers
+        )
+        assert any("v2_preview.is_executable_now=False" in item for item in advisory.evidence)
+        assert "v2_preview.advisory_only=True" in advisory.evidence
+        assert any(
+            "v2_preview.aegis_gate_result=pending" in item for item in advisory.evidence
+        )
+
+    def test_v2_preview_advisory_preserves_display_safety(self) -> None:
+        """Regression: Beacon V2 preview advisory must not leak raw paths/reason/rollback."""
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        session = self._make_session(
+            now=now,
+            worktree_path="C:\\Users\\scott\\secret-worktree",
+            project_path="/home/scott/secret/project",
+        )
+        plan = self._make_plan(
+            session,
+            reason="SECRET_REASON_TOKEN credentials at /etc/secrets/key.pem",
+            rollback="SECRET_ROLLBACK_TOKEN revert SECRET_CHAT prompt",
+        )
+        proof = build_v2_command_plan_preview_proof(session, plan, timestamp=now)
+
+        advisory = v2_command_plan_preview_advisory_evidence(proof, now=now)
+
+        sensitive_values = [
+            "/home/scott/secret/project",
+            "C:\\Users\\scott\\secret-worktree",
+            "SECRET_REASON_TOKEN",
+            "SECRET_ROLLBACK_TOKEN",
+            "SECRET_CHAT",
+            "/etc/secrets/key.pem",
+        ]
+        for item in advisory.evidence:
+            for sensitive in sensitive_values:
+                assert sensitive not in item, (
+                    f"V2 preview Beacon advisory leaked '{sensitive}' in evidence: {item}"
+                )
+        for blocker in advisory.blockers:
+            for sensitive in sensitive_values:
+                assert sensitive not in blocker, (
+                    f"V2 preview Beacon advisory leaked '{sensitive}' in blockers: {blocker}"
                 )

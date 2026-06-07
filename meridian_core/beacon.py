@@ -21,6 +21,7 @@ from .session_lifecycle import (
     SessionPermissionSummary,
     SessionRecoveryReadinessSummary,
     SessionRuntimeStateExport,
+    V2CommandPlanPreviewProof,
     WorkflowWorkOrderRecoverySummary,
 )
 
@@ -325,6 +326,56 @@ def live_state_advisory_evidence(
         blockers=projection.advisory_blockers,
         # Fail-closed: never report executable state for a live-state advisory,
         # independent of any future projection-field drift.
+        human_gate_required=True,
+        generated_at=_as_utc(now or datetime.now(timezone.utc)),
+    )
+
+
+def v2_command_plan_preview_advisory_evidence(
+    proof: V2CommandPlanPreviewProof,
+    *,
+    now: datetime | None = None,
+) -> BeaconAdvisoryEvidence:
+    """Convert a V2 command-plan preview proof into Beacon advisory evidence.
+
+    Display-safety is preserved end-to-end: the proof already redacts raw
+    paths, raw reason text, and raw rollback text, so the Beacon evidence
+    carries only bounded labels and presence indicators. This is advisory
+    /proof-only — no command execution, no process inspection, no model
+    calls.
+
+    Fail-closed advisory contract: ``human_gate_required`` is forced True
+    and the Beacon advisory always carries the universal advisory blocker
+    ``v2_command_plan_preview.advisory_only.requires_human_gate`` inherited
+    from the proof, so no downstream consumer can read this evidence as
+    executable.
+    """
+    evidence = list(proof.evidence_refs)
+    evidence.extend(
+        [
+            f"v2_preview.preview_id={proof.preview_id}",
+            f"v2_preview.target_session_id={proof.target_session_id}",
+            "v2_preview.command_kind="
+            + (proof.command_kind.value if proof.command_kind else "none"),
+            f"v2_preview.aegis_gate_result={proof.aegis_gate_result}",
+            f"v2_preview.aegis_gate_status={proof.aegis_gate_status}",
+            f"v2_preview.is_executable_now={proof.is_executable_now}",
+            f"v2_preview.human_gate_state={proof.human_gate_state}",
+            f"v2_preview.review_cadence_state={proof.review_cadence_state.value}",
+            f"v2_preview.permission_state={proof.permission_state.value}",
+            "v2_preview.advisory_only=True",
+        ]
+    )
+
+    return BeaconAdvisoryEvidence(
+        harness_id=proof.target_session_id,
+        advisory_type=(
+            f"v2_command_plan_preview_"
+            f"{proof.command_kind.value if proof.command_kind else 'unknown'}"
+        ),
+        evidence=tuple(evidence),
+        blockers=proof.advisory_blockers,
+        # Fail-closed: never report executable state for a V2 preview proof.
         human_gate_required=True,
         generated_at=_as_utc(now or datetime.now(timezone.utc)),
     )

@@ -35,11 +35,13 @@ from meridian_core.session_lifecycle import (
     SessionCommandStagingReviewPacket,
     SessionCommandPreviewProof,
     SessionCloseArchiveWriteThroughProof,
+    V2CommandPlanPreviewProof,
     V3GoalRuntimeCheckpointProofPacket,
     SessionLifecycleState,
     SessionCommandPlan,
     build_session_live_state_evidence,
     build_session_live_state_advisory_projection,
+    build_v2_command_plan_preview_proof,
     build_command_staging_review_packet,
     build_command_preview_proof,
     build_close_archive_write_through_proof,
@@ -3924,3 +3926,265 @@ class TestSessionLifecycleStatePermissions:
         )
         # should not be able to execute when task_id doesn't match task_scope
         assert not state.can_execute_operation(OperationScope.BRANCH_MOVE)
+
+
+class TestV2CommandPlanPreviewProof:
+    """Tests for V2 Session Lifecycle command-plan preview proof."""
+
+    @pytest.fixture
+    def session(self):
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=timezone.utc)
+        permission_context = PermissionContext(
+            approved_by="coordinator",
+            approval_scope=frozenset([OperationScope.RESTART]),
+            escalation_gate=False,
+            escalation_reason=None,
+            branch_permission_state=PermissionState.UNLOCKED_TEMPORARY,
+            approved_by_secondary=None,
+            unlock_expiry=now + timedelta(hours=1),
+            task_scope="v2-preview",
+            last_permission_change=now,
+        )
+        return SessionLifecycleState(
+            session_id="session-v2-preview",
+            session_name="Build 2 V2 Preview",
+            project_name="Meridian",
+            project_path="/home/scott/meridian",
+            harness_role=HarnessRole.BUILD,
+            assigned_queue_file="docs/live-build-2.md",
+            model_provider="anthropic",
+            model_name="claude-opus-4-7",
+            status=SessionStatus.STALE,
+            worktree_path="/worktree/build-2-session-state-evidence",
+            branch_name="codex/build-2-session-state-evidence-20260606",
+            current_task_id="v2-preview",
+            last_queue_read_at=now,
+            last_queue_write_at=now,
+            last_prompt_sent_at=now,
+            last_prompt_payload_size=8500,
+            review_cadence_state=ReviewCadenceState.CLEARED,
+            proof_state=ProofState.PERMISSION_VALIDATED,
+            health_state=HealthState.STALE,
+            blocker_summary=None,
+            permission_context=permission_context,
+        )
+
+    @pytest.fixture
+    def command_plan(self, session):
+        return SessionCommandPlan(
+            session_id=session.session_id,
+            session_name=session.session_name,
+            command_intent=CommandIntent.RESTART,
+            reason="Workflow heartbeat stale; advise restart staging",
+            expected_state_transition=(SessionStatus.STALE, SessionStatus.RUNNING),
+            current_state_evidence="session-v2-preview:stale",
+            queue_file_evidence=session.assigned_queue_file,
+            worktree_evidence=session.worktree_path,
+            review_gate_evidence=None,
+            proof_requirement=ProofState.PERMISSION_VALIDATED,
+            queue_file_affected=session.assigned_queue_file,
+            worktree_path_affected=session.worktree_path,
+            branch_affected=session.branch_name,
+            aegis_gate_result="pending",
+            cadence_gate_required=False,
+            cadence_gate_status=ReviewCadenceState.CLEARED,
+            is_executable_now=False,
+            human_approval_required=True,
+            approval_context="restart staging requires review",
+            rollback_or_recovery_note="Advisory restart only; rollback by reverting state",
+            permission_state=session.permission_context.branch_permission_state,
+            permission_operation=OperationScope.RESTART,
+            permission_operation_allowed=True,
+        )
+
+    def test_proof_captures_all_required_fields(self, session, command_plan):
+        """V2 preview proof carries target, reason, expected transition, queue, worktree, branch, Aegis, executability, human-gate state, rollback, permission, blockers, refs."""
+        timestamp = datetime(2026, 6, 7, 12, 5, tzinfo=timezone.utc)
+
+        proof = build_v2_command_plan_preview_proof(
+            session, command_plan, timestamp=timestamp
+        )
+
+        assert isinstance(proof, V2CommandPlanPreviewProof)
+        assert proof.target_session_id == "session-v2-preview"
+        assert proof.session_name == "Build 2 V2 Preview"
+        assert proof.command_kind == CommandIntent.RESTART
+        assert proof.required_operation == OperationScope.RESTART
+        assert proof.expected_state_transition == (
+            SessionStatus.STALE,
+            SessionStatus.RUNNING,
+        )
+        assert proof.assigned_queue_file == "docs/live-build-2.md"
+        assert proof.worktree_path_present is True
+        assert proof.worktree_path_label == "<worktree_path>"
+        assert proof.branch_name == "codex/build-2-session-state-evidence-20260606"
+        assert proof.aegis_gate_result == "pending"
+        assert proof.aegis_gate_status == "pending_ui_review"
+        assert proof.proof_requirement == ProofState.PERMISSION_VALIDATED
+        assert proof.review_cadence_state == ReviewCadenceState.CLEARED
+        assert proof.permission_state == PermissionState.UNLOCKED_TEMPORARY
+        # Reason and rollback bounded
+        assert proof.reason_present is True
+        assert proof.reason_label == "<reason>"
+        assert proof.reason_length == len(command_plan.reason)
+        assert proof.rollback_or_recovery_note_present is True
+        assert proof.rollback_or_recovery_note_label == "<rollback_or_recovery_note>"
+        assert proof.rollback_or_recovery_note_length == len(
+            command_plan.rollback_or_recovery_note
+        )
+        assert proof.timestamp == timestamp
+
+    def test_proof_is_fail_closed_on_every_path(self, session, command_plan):
+        """V2 preview proof is non-executable by contract on every input shape."""
+        proof = build_v2_command_plan_preview_proof(session, command_plan)
+
+        assert proof.is_executable_now is False
+        assert proof.human_gate_required is True
+        assert (
+            "v2_command_plan_preview.advisory_only.requires_human_gate"
+            in proof.advisory_blockers
+        )
+        assert "v2_preview.advisory_only=True" in proof.evidence_refs
+
+    def test_proof_universal_blocker_present_even_when_plan_executable(
+        self, session, command_plan
+    ):
+        """Universal advisory blocker still present even if command_plan flagged executable."""
+        executable_plan = SessionCommandPlan(
+            **{
+                **command_plan.__dict__,
+                "is_executable_now": True,
+                "human_approval_required": False,
+            }
+        )
+
+        proof = build_v2_command_plan_preview_proof(session, executable_plan)
+
+        # Fail-closed contract overrides plan-level executability hint
+        assert proof.is_executable_now is False
+        assert proof.human_gate_required is True
+        assert (
+            "v2_command_plan_preview.advisory_only.requires_human_gate"
+            in proof.advisory_blockers
+        )
+
+    def test_proof_review_gated_session_adds_cadence_blocker(self, session, command_plan):
+        gated_session = SessionLifecycleState(
+            **{
+                **session.__dict__,
+                "review_cadence_state": ReviewCadenceState.REVIEW_GATED,
+            }
+        )
+        proof = build_v2_command_plan_preview_proof(gated_session, command_plan)
+
+        assert "review.cadence_gated" in proof.advisory_blockers
+        assert proof.review_cadence_state == ReviewCadenceState.REVIEW_GATED
+
+    def test_proof_no_proof_command_plan_adds_proof_missing_blocker(
+        self, session, command_plan
+    ):
+        no_proof_plan = SessionCommandPlan(
+            **{**command_plan.__dict__, "proof_requirement": ProofState.NO_PROOF}
+        )
+        proof = build_v2_command_plan_preview_proof(session, no_proof_plan)
+
+        assert "command_plan.proof.missing" in proof.advisory_blockers
+
+    def test_proof_to_dict_does_not_leak_raw_paths_reason_or_rollback(
+        self, session, command_plan
+    ):
+        """Regression: proof.to_dict() must not leak raw worktree, reason, or rollback text."""
+        sensitive_session = SessionLifecycleState(
+            **{
+                **session.__dict__,
+                "project_path": "/home/scott/secret/project",
+                "worktree_path": "C:\\Users\\scott\\secret-worktree",
+            }
+        )
+        sensitive_plan = SessionCommandPlan(
+            **{
+                **command_plan.__dict__,
+                "reason": "SECRET_REASON: credentials at /etc/secrets/key.pem",
+                "rollback_or_recovery_note": (
+                    "SECRET_ROLLBACK: revert SECRET_CHAT prompt text"
+                ),
+            }
+        )
+
+        proof = build_v2_command_plan_preview_proof(sensitive_session, sensitive_plan)
+        serialized = proof.to_dict()
+
+        # Raw keys must not appear
+        assert "project_path" not in serialized
+        assert "worktree_path" not in serialized
+        assert "reason" not in serialized
+        assert "rollback_or_recovery_note" not in serialized
+
+        sensitive_values = [
+            "/home/scott/secret/project",
+            "C:\\Users\\scott\\secret-worktree",
+            "SECRET_REASON",
+            "SECRET_ROLLBACK",
+            "SECRET_CHAT",
+            "/etc/secrets/key.pem",
+        ]
+        for key, value in serialized.items():
+            if isinstance(value, str):
+                for sensitive in sensitive_values:
+                    assert sensitive not in value, (
+                        f"V2 preview leaked '{sensitive}' in serialized['{key}']"
+                    )
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, str):
+                        for sensitive in sensitive_values:
+                            assert sensitive not in item, (
+                                f"V2 preview leaked '{sensitive}' in serialized['{key}'] list"
+                            )
+
+        # Bounded labels present
+        assert serialized["worktree_path_present"] is True
+        assert serialized["worktree_path_label"] == "<worktree_path>"
+        assert serialized["reason_present"] is True
+        assert serialized["reason_label"] == "<reason>"
+        assert serialized["reason_length"] == len(sensitive_plan.reason)
+        assert serialized["rollback_or_recovery_note_present"] is True
+        assert serialized["rollback_or_recovery_note_label"] == "<rollback_or_recovery_note>"
+        assert serialized["rollback_or_recovery_note_length"] == len(
+            sensitive_plan.rollback_or_recovery_note
+        )
+
+    def test_proof_serializes_to_json_safe_dict(self, session, command_plan):
+        proof = build_v2_command_plan_preview_proof(session, command_plan)
+        serialized = proof.to_dict()
+
+        assert isinstance(serialized["timestamp"], str)
+        assert isinstance(serialized["command_kind"], str)
+        assert serialized["command_kind"] == "restart"
+        assert isinstance(serialized["expected_state_transition"], list)
+        assert serialized["expected_state_transition"] == ["stale", "running"]
+        assert isinstance(serialized["advisory_blockers"], list)
+        assert isinstance(serialized["evidence_refs"], list)
+        assert serialized["is_executable_now"] is False
+        assert serialized["human_gate_required"] is True
+
+    def test_proof_handles_no_worktree_no_reason_no_rollback(self, session, command_plan):
+        """Bounded fields collapse to 'none' / 0 length when source is empty."""
+        empty_session = SessionLifecycleState(**{**session.__dict__, "worktree_path": ""})
+        empty_plan = SessionCommandPlan(
+            **{**command_plan.__dict__, "reason": "", "rollback_or_recovery_note": None}
+        )
+
+        proof = build_v2_command_plan_preview_proof(empty_session, empty_plan)
+
+        assert proof.worktree_path_present is False
+        assert proof.worktree_path_label == "none"
+        assert proof.reason_present is False
+        assert proof.reason_label == "none"
+        assert proof.reason_length == 0
+        assert proof.rollback_or_recovery_note_present is False
+        assert proof.rollback_or_recovery_note_label == "none"
+        assert proof.rollback_or_recovery_note_length == 0
+        # Fail-closed invariants still hold
+        assert proof.is_executable_now is False
+        assert proof.human_gate_required is True
