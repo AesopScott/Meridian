@@ -1810,6 +1810,34 @@ class TestProjectBoundsRuntime:
         assert result.decision is ProjectBoundsDecision.BLOCKED
         assert "raw_context_evidence_ref_blocked" in result.blockers
 
+    @pytest.mark.parametrize(
+        "raw_ref",
+        (
+            "raw_prompt:full prompt text",
+            "raw_transcript:session log",
+            "free_form_context:scratch notes",
+            "transcript:full conversation",
+            "conversation:approval said in chat",
+            "provider_response:streamed body",
+        ),
+    )
+    def test_raw_context_in_candidate_evidence_refs_blocks(self, raw_ref):
+        """Self-review repair: raw-context refs hidden in subject candidate evidence must also block.
+
+        Without this, the bounds runtime's request-level raw-context guard could
+        be bypassed by stashing the raw payload on a per-subject candidate.
+        """
+        candidate_with_raw = _in_scope_candidate(
+            evidence_refs=("proof:legit-evidence", raw_ref),
+        )
+        result = evaluate_project_bounds(
+            _project(),
+            _bounds_request(candidates=(candidate_with_raw,)),
+        )
+        assert result.decision is ProjectBoundsDecision.BLOCKED
+        assert "raw_context_candidate_evidence_ref_blocked" in result.blockers
+        assert result.to_dict()["execution_authorized"] is False
+
     def test_unknown_request_kind_returns_compass_question(self):
         result = evaluate_project_bounds(
             _project(),
