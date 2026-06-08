@@ -5,6 +5,8 @@
 **Trigger:** V1 cockpit is complete and review-cleared at 12/12.
 **Rule:** Every V2 item is owned by Prime or a harness. No loose feature work.
 
+**Ownership correction:** The Orchestrator/Prime harness owns intent, priority, risk tier, proof/human-gate needs, and final coordination. It does not own provider identity, adapter metadata, prompt payload assembly, context-window fitting, transport gates, provider balance, fallback mechanics, or per-call telemetry. Those belong to Relay + Model Harness, with Aegis/Security providing policy and proof gates and Bifrost rendering backend-owned state.
+
 ## V2 Success Test
 
 V2 succeeds when Prime can use the cockpit to run multiple project threads with less Scott intervention while preserving proof, memory, retrieval, and review discipline.
@@ -13,7 +15,7 @@ In practical terms:
 
 - Prime remembers important project/context decisions beyond any single model context window.
 - Prime retrieves relevant files, notes, plans, and prior decisions through a ranked interface instead of depending on pasted context.
-- Prime selects and routes work by risk tier, using stronger gated cognition only when the action justifies the cost.
+- Prime selects the work intent and risk tier; Relay + Model Harness resolve the governed model route, prompt payload, provider constraints, and dispatch evidence.
 - Prime can spawn, watch, steer, and recover sessions through a session lifecycle harness.
 - Prime can delegate bounded harness work into workflow/sub-agent contexts so the orchestrator context does not fill with harness working memory.
 - Scott sees bottlenecks, review gates, memory/retrieval activity, and harness health in Bifrost without managing worker sessions manually.
@@ -86,6 +88,7 @@ First wave deliverable:
 - Carry a typed `PrimeInteractionRequest` inside every decision packet so intent, action, project, risk, and visible prompt reference stay explicit.
 - Consume Aegis aggregate gate summaries as Prime risk input and preserve approval-needed status when proof/risk blocks execution.
 - Emit a no-drift audit proving request, context, owner, source refs, proof packet, Aegis risk, and visible fields agree.
+- Treat model-call details as referenced state only: Prime may name the requested intent, role, risk tier, and constraints, but Relay + Model Harness own exact provider/model identity, prompt packet construction, fallback, transport authorization, provider balance, and per-call telemetry.
 
 **Likely files/modules/docs:**
 
@@ -108,6 +111,7 @@ First wave deliverable:
 - Do not spawn real sessions yet.
 - Do not mutate backlog state yet.
 - Do not bypass Review Console gates.
+- Do not put provider selection mechanics, prompt payload assembly, transport gates, fallback policy, or model-call telemetry inside Prime runtime objects except as Relay/Model Harness source refs.
 
 ## Track 2: Echo Harness Memory
 
@@ -182,8 +186,8 @@ First wave deliverable:
 - Let Relay know a route's intended risk tier, context budget, and adapter capability needs.
 - Keep provider-neutral HTTP transport as the stable base.
 - Treat **Claude, OpenAI, and DeepSeek** as first-class primary providers in the Model Harness, not optional one-off integrations.
-- Add a DeepSeek direct-API adapter target for V4 models (`deepseek-v4-pro` default, `deepseek-v4-flash` fast lane) so Prime can route high-volume build work away from Claude when capacity or cost requires it.
-- Gate DeepSeek coding authority through `docs/deepseek-provider-validation-gate.md`: DeepSeek starts as a candidate provider, may be used for bounded Q-mode/build planning, and must prove coding reliability before Prime can route autonomous implementation or review-clearing work through it.
+- Add a DeepSeek direct-API adapter target using the existing reviewed backend identity and metadata labels so Relay + Model Harness can route high-volume work away from Claude when capacity or cost requires it.
+- Gate DeepSeek coding authority through `docs/deepseek-provider-validation-gate.md`: DeepSeek starts as a candidate provider, may be used for bounded Q-mode/build planning, and must prove coding reliability before Relay can authorize autonomous implementation or review-clearing dispatch for a Prime request.
 - Bring forward Polaris's **Balance button** pattern: Bifrost exposes provider balances, token/cost telemetry, and model spend visibility for Claude, OpenAI, DeepSeek, and any aggregator routes.
 - Bring forward Polaris's **visible prompt payload meter** pattern: every Relay dispatch must expose the final prompt payload size, budget percentage, and growth delta so Prime/Scott can catch additive prompt replay before it becomes latency, quota, or cost drag.
 
@@ -206,12 +210,14 @@ First wave deliverable:
 - Tests that DeepSeek provider metadata resolves through the same adapter contract as Claude/OpenAI and never bypasses Relay/Aegis policy checks.
 - Tests that DeepSeek starts below autonomous coding trust and cannot receive implementation, review-clearing, or branch/worktree authority until validation metadata records the required proof level.
 - Tests that Balance surface data is derived from structured usage/provider telemetry rather than scraped card text.
+- Tests that Prime consumes Relay/Model Harness source refs for routing, prompt payload, provider balance, and transport-gate state rather than duplicating those fields as orchestrator-owned decisions.
 
 **Out-of-scope guardrails:**
 
 - No vendor-specific presets beyond the explicit primary-provider plan (Claude, OpenAI, DeepSeek) until the metadata contract is stable.
 - No account-based automation public path.
 - No hidden prompt expansion.
+- No Prime-owned provider routing table, prompt assembly path, transport authorization, fallback executor, or provider-balance calculator.
 
 ## Track 5: Aegis Gated Cognition
 
@@ -294,12 +300,16 @@ First wave deliverable:
 
 **Balance button requirement:** Bifrost must expose the Meridian version of Polaris's Balance button. It should show provider/account health, remaining credits where available, token usage by provider/model, estimated spend, and cost pressure warnings that Prime can use when routing work across Claude, OpenAI, DeepSeek, and future adapters.
 
+Balance is display/decision support only. Bifrost renders provider balance from Relay/Model Harness evidence; it must not calculate route authority or mutate provider choice.
+
 **Prompt payload visibility requirement:** Bifrost must expose the Meridian version
 of Polaris's per-prompt payload indicator. Every model dispatch should show the
 payload-size label and budget pressure in the system/progress surface. Queue/Q-mode
 lanes should also show whether the latest prompt was flat or grew against the prior
 dispatch, because unexpected growth means Relay is replaying history instead of
 sending only the task packet.
+
+Prompt payload visibility is Model Harness/Relay-owned evidence. Prime and Bifrost may read it, but neither should construct the model-bound payload or infer prompt budget state from transcripts.
 
 **Voice-first cockpit requirement:** Bifrost must expose Meridian as a fully voice-enabled cockpit, not only a typed prompt UI. V2 should define the visible voice state and control surface for microphone input, spoken Prime output, NASA-style boot/status audio, mute/voice toggles, and listening/thinking/speaking indicators. Runtime speech recognition/TTS can land in a later slice, but the cockpit architecture must reserve the surface and data model now.
 

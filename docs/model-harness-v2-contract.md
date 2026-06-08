@@ -46,6 +46,8 @@ This contract does **not** define:
 
 The Model Harness owns the metadata *declaration*. Relay and Aegis own the metadata *enforcement*. No metadata field may be populated by Relay or Aegis on behalf of an adapter — the adapter must declare its own values.
 
+Prime/Orchestrator may request an intent, role, risk tier, proof posture, or human-gate constraint. It does not own exact provider/model identity, prompt packet construction, payload fitting, fallback behavior, transport authorization, provider balance, or telemetry fields. Those remain Model Harness/Relay-owned and are exposed to Prime as source refs or display-safe evidence.
+
 ---
 
 ## Domain Shape

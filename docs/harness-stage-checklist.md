@@ -4,6 +4,8 @@
 
 **Rule:** A harness is not complete because its button exists. Completion means backend capability, Prime integration, visible Runtime Logic UI, and proof/review are all aligned.
 
+**Ownership correction:** Prime/Orchestrator coordinates intent, priority, risk tier, proof/human-gate needs, and final decisions. Relay + Model Harness own model-call mechanics: provider/model identity, adapter metadata, prompt payload construction, context-window fit, dispatch/fallback behavior, provider balance, transport gates, and telemetry. Bifrost renders backend-owned state and must not convert taxonomy labels into backend authority.
+
 **HTML view:** `docs/harness-stage-checklist.html`
 
 **Update rule:** When this checklist changes, update the HTML view in the same checkpoint.
@@ -24,8 +26,8 @@
 
 | Harness | Contract / Baseline | V2 Backend | Core Implementation | Prime Integration | Runtime Logic UI | Proofs / Review | Operations | Next Build |
 |---|---|---|---|---|---|---|---|---|
-| Prime | built | review-cleared | review-cleared | review-cleared | review-cleared | review-cleared | not live execution | Bind live Compass/Vulcan/Relay inputs only after their backend runtime truth is ready. |
-| Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening. |
+| Prime | built | review-cleared | review-cleared | review-cleared | review-cleared | review-cleared | not live execution | Bind live Compass/Vulcan/Relay inputs as source refs only after their backend runtime truth is ready; do not absorb model-call mechanics. |
+| Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Own provider metadata, route/dispatch evidence, prompt payload visibility, fallback/transport gates, provider balance, and model telemetry. |
 | Compass | baseline | needs build | snapshot only | partial via Prime source refs | wired | not reviewed as runtime | no writes | Project definition, bounds/scope, difference, cross-project handoff runtime. |
 | Vulcan / Session Lifecycle | baseline | needs build | partial | partial via Prime source refs | wired | partial | no live command execution | Live session state evidence, command-plan proof, permissions, close/archive write-through. |
 | Aegis | built | built | built | wired into Prime risk input | partial | review-cleared core; Prime binding awaiting review | proof gates only | Runtime Logic UI for Aegis and live proof packet surfaces. |
@@ -70,5 +72,5 @@ Update the Harness Stage Checklist.
 
 1. Compass backend runtime.
 2. Vulcan live session state and command-plan proof.
-3. Relay model/provider metadata and prompt payload visibility.
+3. Relay / Model Harness ownership correction: keep provider/model identity, prompt payload construction, context fit, fallback, provider balance, transport gates, and telemetry out of Prime-owned runtime.
 4. Echo/Atlas live inputs into Prime runtime.

@@ -181,10 +181,10 @@ selected_model_evidence: {
 ### Not Handled by This Handoff
 
 - **Model selection:** which specific Claude model Relay routes to. (Relay/Model Harness domain.)
-- **Session management:** reuse, reset, or start new. (Relay/Prime Session Lifecycle domain.)
-- **Account/cost routing:** which account to bill. (Prime/Model Harness domain.)
-- **Fallback logic:** what to do if the primary route fails. (Relay/Prime domain.)
-- **Prompt injection:** detecting or sanitizing user input. (Prime/Model Harness domain.)
+- **Session management:** reuse, reset, or start new. (Session Lifecycle/Vulcan domain; Prime coordinates intent and Relay receives only required dispatch context.)
+- **Account/cost routing:** which provider/account posture is available and safe to use. (Relay/Model Harness domain; Prime may consume advisory state.)
+- **Fallback logic:** what to do if the primary route fails. (Relay/Model Harness domain; Prime receives the outcome/escalation.)
+- **Prompt/payload safety:** prompt packet construction, payload fitting, redaction/minimization hooks, and model-bound serialization. (Relay/Model Harness domain, with Aegis/Security policy gates.)
 - **UI rendering:** exact layout, colors, fonts for Bifrost. (Bifrost domain.)
 - **Persistence:** storing route decisions, approval records, or waiver history. (Prime/Durable State domain.)
 - **Async approval workflows:** polling for human approval, retrying after waiver. (Prime domain.)

@@ -32,6 +32,8 @@ Working cadence: respond to the user's latest message, state the next checklist 
 
 Scope rule: every UI/build change must name exactly one owning harness or one Spark setting/control before implementation. Work may touch adjacent bridge or session support only when that support is required to make the named harness/control truthful in the visible interface; the checklist entry and build log must record that scope.
 
+Ownership correction: Prime/Orchestrator owns intent, priority, risk tier, proof/human-gate needs, and final coordination. Relay + Model Harness own model-call mechanics, including provider/model identity, prompt payload construction, context-window fit, dispatch/fallback behavior, provider balance, transport gates, and telemetry. Bifrost and Spark surfaces render or request backend-owned state; they do not create route authority from UI labels.
+
 ## Control Inventory
 
 Use this as the working UI checklist. Every visible icon, selector, session control, and harness button gets its own row. Status values:
@@ -130,7 +132,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | SK7 | Skills | Opens searchable skill/capability registry by model, project, and global scope. | planned | Track `SKL-*` subitems before wiring the surface. |
 | SK8 | Crosscheck | Opens display-only review/proof state from existing backend snapshots. | wired | Spark Crosscheck aggregates `/bridge/review-console` and `/bridge/aegis-logic`; it does not start a review run, apply responses, mutate queues, execute providers, or ingest raw worker session history. |
 | SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | partial | Transient surface close is wired; session close/write-through remains tracked in `CLS-*`. |
-| SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | partial | Spark Archive opens Session Close Archive Proof from `/bridge/session-close-archive-proof`; it is display-only and must not close, delete, replay, or expose raw prompt/worker chat. |
+| SK10 | Archive | Opens close/archive proof posture until reloadable archive controls exist. | wired | Spark Archive opens Session Close Archive Proof from `/bridge/session-close-archive-proof`; it is display-only typed state and must not close, archive, delete, reload, run again, replay, POST, call `/bridge/message`, paste raw prompt/worker chat/session history/log/detail, expose live controls, or feed raw detail into Orchestrator. Orchestrator intake is compact typed session state only; raw detail is fetched on demand only. |
 | SK11 | Reset | Confirms, clears session-window prompts/transcripts, then hard reloads UI. | wired | `RST-*` subitems are wired: reset clears visible local prompt/transcript state, asks `/bridge/restart`, and does not close live sessions or claim memory deletion. |
 | SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | wired | `RLD-*` subitems are wired: reload refreshes the UI/cache while preserving session target and visible prompt/transcript state. |
 | SK13 | Routines | Opens current runtime continuity status until a routine automation backend exists. | wired | Spark Routines opens backend-sourced Goal Runtime plus Workflow Dispatch Status; it is display-only typed state and does not run automation, mutate schedulers, paste raw logs/transcripts/details, or self-approve. |
@@ -269,18 +271,18 @@ Filter is not primarily for finding session cards in this interface. It controls
 
 ### Models Surface Subitems
 
-The Models icon owns model visibility and manual override. It must not silently become Prime/Relay auto-routing before that harness logic exists.
+The Models icon owns model visibility and manual override. It must not silently become Prime/Relay auto-routing before that harness logic exists, and it must not turn UI taxonomy labels into provider/model dispatch keys.
 
 | ID | Models Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | MOD1 | Available backends | Shows detected Codex, Max/Claude, and future model backends. | wired | Spark Models and the manual selector read `/bridge/models` for backend availability without raw CLI errors. |
 | MOD2 | Default backend | Defaults manual prompt sends to Codex until Prime/Relay auto-routing exists. | wired | Fresh page load selects Codex. |
-| MOD3 | Auto routing disabled state | Shows Auto as unavailable until Relay owns the decision logic. | wired | Auto option is disabled or clearly unavailable. |
+| MOD3 | Auto routing disabled state | Shows Auto as unavailable until Relay + Model Harness own the dispatch decision and evidence path. | wired | Auto option is disabled or clearly unavailable. |
 | MOD4 | Per-role mapping | Lists planned roles such as orchestrator, builder, reviewer, verifier, researcher, and release operator. | planned | Roles appear as mappings, not as provider-first choices. |
 | MOD5 | Manual role override | Allows user to pin a model for a role once role routing exists. | planned | Override persists and is visible in routing metadata. |
 | MOD6 | Provider setup status | Shows missing CLI/auth setup guidance for each backend. | wired | Spark Models renders display-safe setup guidance from `/bridge/models`; raw stderr and account probing are not exposed. |
-| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | planned | Metadata comes from Model Harness, not hand-written UI claims. |
-| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | planned | Trust state comes from Aegis/Relay evidence. |
+| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | planned | Metadata comes from Model Harness, not hand-written UI claims or taxonomy labels. |
+| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | planned | Trust state comes from Model Harness metadata plus Aegis/Relay evidence. |
 | MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | planned | Uses Relay prompt payload metrics, not transcript length guesses. |
 | MOD10 | Recent model calls | Shows recent call metadata without prompt text. | wired | Spark Models renders request id, channel, backend/model, result state, duration, project, target presence, and visible-context counts from `/bridge/recent-calls`; it does not call `/bridge/call-result` or render recovered bodies. |
 | MOD11 | Model label display | Response UI shows actual backend/model label when known. | partial | Send prompt; label appears below/near response. |
@@ -288,7 +290,7 @@ The Models icon owns model visibility and manual override. It must not silently 
 
 ### Balance Surface Subitems
 
-The Balance icon owns provider balance, cost pressure, prompt payload, and routing pressure visibility. It observes; it does not secretly reroute work.
+The Balance icon owns provider balance, cost pressure, prompt payload, and routing pressure visibility. It observes Relay/Model Harness evidence; it does not calculate authority, assemble payloads, or secretly reroute work.
 
 | ID | Balance Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
@@ -300,8 +302,8 @@ The Balance icon owns provider balance, cost pressure, prompt payload, and routi
 | BAL6 | Cost pressure warning | Warns when cost, quota, or budget pressure should influence routing. | wired | Spark Balance renders backend cost-pressure state from `/bridge/provider-balance` without changing routing by itself. |
 | BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | planned | Uses `PromptPayloadSnapshot` style metrics. |
 | BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | planned | Growth warning appears from Relay metrics. |
-| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | partial | Spark Balance shows backend-sourced provider posture and evidence refs; route recommendations remain advisory/display-only. |
-| BAL10 | Routing recommendation | Shows Prime/Relay recommendation once routing logic exists. | planned | Recommendation is labeled as recommendation, not automatic action. |
+| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | partial | Spark Balance shows backend-sourced provider posture and evidence refs; route recommendations remain advisory/display-only and remain Relay/Model Harness-owned. |
+| BAL10 | Routing recommendation | Shows Prime intent plus Relay/Model recommendation once routing logic exists. | planned | Recommendation is labeled as recommendation, not automatic action, and does not bypass Relay/Aegis policy. |
 | BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | planned | Override path is visible but does not bypass Relay policy. |
 | BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | partial | Spark Balance keeps account/credential probing unavailable; public setup guidance is shared through Models readiness until fuller onboarding exists. |
 
@@ -389,7 +391,7 @@ Archive preserves reloadable sessions. It differs from long-term knowledge becau
 
 | ID | Archive Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired | Spark Archive opens `/bridge/session-close-archive-proof` as display-only proof; no live control, raw prompt, raw worker chat, replay, reload, run-again, or deletion is authorized. |
+| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired | Spark Archive opens `/bridge/session-close-archive-proof` as display-only typed proof over GET only; no live close/archive/reload/run-again/delete control, POST route, message route, raw prompt, raw worker chat, raw worker session history, pasted transcript/log/detail body, replay, or deletion is authorized. Orchestrator may ingest compact typed session state only; raw detail is fetched on demand only. |
 | ARC1 | Session archive list | Shows archived sessions that can be inspected later. | planned | Archive list is real or empty; no fake sessions. |
 | ARC2 | Reload session | Restores an archived session into an active/reopened state where supported. | planned | Reloaded session preserves identity/source metadata. |
 | ARC3 | Run again | Allows rerun/resume/restart from archived session context where backend supports it. | planned | Action names the actual steering mode used. |
@@ -481,6 +483,7 @@ Compass and Vulcan definitions are backend/V2 build requirements, not UI checkli
 | HBD0 | Prime runtime contract | Prime UI may render backend-sourced orchestration logic, but must not invent owner, proof, blocker, or executability state outside the Prime backend packet. | wired | Prime panel reads `/bridge/prime-logic`; review status lives in `docs/v2-progress-tracker.md`. |
 | HBD1 | Compass backend checklist | Compass UI may render backend-sourced project logic, but must not invent project definitions or cross-project handoff controls before V2 backend rows are built. | wired | Compass panel reads `/bridge/compass-logic`; deeper backend rows live in `docs/v2-progress-tracker.md`. |
 | HBD2 | Vulcan backend checklist | Vulcan UI may render backend-sourced session lifecycle logic, but must not execute session command plans before V2 backend rows are built. | wired | Vulcan panel reads `/bridge/vulcan-logic`; deeper backend rows live in `docs/v2-progress-tracker.md`. |
+| HBD3 | Relay/Model backend ownership | UI may render model-call posture from existing backend snapshots, but must not create provider route tables, prompt payloads, fallback rules, transport gates, or provider-balance calculations in the UI or Prime layer. | wired | Models/Relay/Balance surfaces read `/bridge/models`, `/bridge/relay-logic`, `/bridge/relay-evidence`, and `/bridge/provider-balance` as display-safe backend-owned snapshots. |
 
 ### Harness Mode Subitems
 
@@ -491,8 +494,8 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | wired | Right panel title/target changes to selected harness. |
 | HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | wired | Return to User Session restores the prior `meridian.user-session.target.v1` target or shows the stale-target warning if the session disappeared. |
 | HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | partial | Harness mode opens with logic/backend-link sections, not a prompt window or blank chat. |
-| HMS4 | Prime review path | Prime reviews harness logic items before model interaction. | planned | Logic item has Prime review state before dispatch. |
-| HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay routing. | planned | Dispatch metadata names Relay route/model target. |
+| HMS4 | Prime review path | Prime reviews harness intent, risk, and proof needs before model interaction. | planned | Logic item has Prime review state before dispatch, without Prime-owned provider/payload fields. |
+| HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay + Model Harness routing and payload construction. | planned | Dispatch metadata names Relay route/model target and Model Harness evidence refs. |
 | HMS6 | Harness-specific actions | Right-panel actions target selected harness logic item. | planned | Action metadata names selected harness and logic item. |
 | HMS7 | Unsupported action guard | If harness logic action is not supported yet, action is blocked with readable warning. | planned | Unsupported harness action does not disappear. |
 | HMS8 | Logic update framing | Harness mode language frames work as updating/adding harness logic. | planned | No wording implies arbitrary project session control. |
@@ -514,7 +517,8 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | BR4 | CLI setup detection | Detects missing CLI/auth and gives install/login guidance. | wired | `/bridge/models` and failed calls return setup guidance. |
 | BR5 | Recent call diagnostics | Stores metadata only, never prompt text, and identifies the bridge generation. | wired | `/bridge/recent-calls` returns bridge version/capabilities plus request id/channel/backend/status/context counts. |
 | BR6 | Bridge origin guard | Accepts local Meridian UI and command-line checks; blocks arbitrary web origins from prompt/restart endpoints. | wired | Self-test proves `127.0.0.1:5500` is allowed and `example.com` is blocked. |
-| BR7 | Prime/Relay Auto routing | Future: Prime chooses model through Relay harness logic. | planned | Auto remains disabled until this contract exists. |
+| BR7 | Prime/Relay Auto routing | Future: Prime declares intent/constraints and Relay + Model Harness choose the governed model route. | planned | Auto remains disabled until this contract exists and exposes backend-owned dispatch evidence. |
+| BR8 | Session close/archive proof snapshot | Exposes archive proof posture as a display-only typed snapshot. | wired | `GET /bridge/session-close-archive-proof` returns compact typed session lifecycle proof only; there is no POST route, no message route, no executable command handler, and no raw prompt/chat/session-history/transcript/log/detail body exposure. |
 
 ## Integration Rules
 
@@ -537,7 +541,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | # | Rule | Proof |
 |---|------|-------|
 | MB1 | Model selector defaults to Codex until Prime/Relay auto-routing exists. | Served page contains `value="codex" selected`; saved `auto` falls back to Codex. |
-| MB2 | Auto remains unavailable until Prime/Relay harness logic owns routing. | Served page contains disabled Auto option or equivalent unavailable state. |
+| MB2 | Auto remains unavailable until Relay + Model Harness own routing mechanics and Prime owns only intent/risk/proof inputs. | Served page contains disabled Auto option or equivalent unavailable state. |
 | MB3 | Selecting Codex sends through the Meridian bridge, not Polaris. | Request goes to `http://127.0.0.1:8767/bridge/message`; no Polaris path or process is touched. |
 | MB4 | Selecting Max sends through the Meridian bridge when the Claude CLI is available. | `/bridge/models` reports Max availability; bridge invokes Claude with print/json/no-session-persistence over stdin and parses the JSON result. |
 | MB5 | Public setup errors are readable. | Missing CLI or auth failure returns install/login guidance instead of a silent hang. |
@@ -565,7 +569,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | H1 | Harness buttons do not pretend to be complete before a harness surface exists. | Click behavior is either wired to a real panel or visibly inactive/coming soon by design. |
 | H2 | User/session panels follow rules; orchestrator/Prime panels follow logic. | UI copy and behavior keep Prime logic separate from user/session rules. |
 | H3 | Security is the reserved icon/identity for the TBD security harness. | Harness map lists Security for the TBD slot before wiring actions. |
-| H4 | Prime/Relay model routing remains a future gate until harness logic is defined. | No UI default to Auto and no hidden automatic routing without an explicit Prime/Relay contract. |
+| H4 | Prime/Relay model routing remains a future gate until harness ownership is defined. | No UI default to Auto and no hidden automatic routing without an explicit contract that keeps provider/payload/transport mechanics in Relay + Model Harness. |
 | H5 | Any new harness surface exposes scoped logic-item actions only when that harness can receive them. | Manual/code review: harness/action target is explicit and does not leak into the wrong session channel. |
 
 ## Visual Regression Checks

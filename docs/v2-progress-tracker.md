@@ -4,6 +4,8 @@
 
 **Tracker rule:** Every item is owned by Prime or a harness. No loose feature names without owner assignment.
 
+**Ownership correction:** Prime/Orchestrator owns intent, priority, risk tier, proof/human-gate needs, and final coordination. Relay + Model Harness own provider/model identity, prompt payload construction, context-window fit, dispatch/fallback mechanics, provider balance, transport gates, and per-call telemetry. Bifrost renders those backend-owned concepts; it does not rename or re-own them.
+
 **Source:** `docs/v2-detailed-build-plan.md`
 
 **Harness stage view:** `docs/harness-stage-checklist.md` tracks each harness across Contract/Baseline, V2 Backend, Core Implementation, Prime Integration, Runtime Logic UI, Proofs/Review, and Operations.
@@ -31,6 +33,8 @@
 - [x] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - built in `57aad9a`, queue provenance in `a2b8cd0`; review cleared by Reviews A on 2026-05-31 with 55 `tests/test_prime_autonomy.py` tests passing.
 - [x] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime Directives, Prime Directive Proofs, Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-user declarations, execution blockers, and backend capability sections. Review cleared on 2026-06-02 with Prime runtime, Bifrost cockpit, FileMap, Prime JSON, and bridge self-tests passing. Operations remain not-live.
 
+Prime runtime packets may consume Relay/Model Harness source refs for model-call posture, but provider selection mechanics, prompt payload assembly, fallback execution, transport authorization, provider balance, and model telemetry remain Relay/Model Harness-owned.
+
 ### Aegis Harness
 
 - [x] **Aegis + Prime:** `CognitionPolicy` domain model with action-type/lane/decision enums and policy tier mapping - built in `3cdc74d`; exposes `CognitionPolicy`, `CognitionPolicyResult`, `cognition_policy_for_tier()`, `evaluate_cognition_policy()` through package root for Relay binding; review cleared.
@@ -53,6 +57,8 @@
 - [x] **Relay + PromptPacket Proof Metadata Binding:** PromptPacket proof metadata is carried into Relay dispatch envelopes and decision records without changing the model payload boundary - review-cleared by Reviews A.
 - [x] **Relay + Aegis PromptPacket Policy Runtime:** Relay evaluates Aegis PromptPacket proof policy before provider transport and records display-safe policy evidence/disposition for allow, warn, demote, human-gate, block, and missing-metadata outcomes - review-cleared by Reviews A.
 - [x] **Model Harness + DeepSeek Live Validation/Transport:** DeepSeek validation-gate proof and transport-authority runtime are promoted on main through `2cca03492`, with follow-up gate repairs through `56a539cf2`; direct and registry-backed Relay dispatch both fail closed before adapter invocation unless level-1 proof plus exact lowercase `"true"` human and Prime gate strings authorize transport only. Autonomous implementation, review-clearing, branch/worktree movement, live coding authority, and Relay bypass remain denied.
+
+Ownership correction: future Relay/Model Harness follow-ups should bind existing backend names and evidence surfaces, not create Prime-owned route tables or UI-derived taxonomy fields.
 
 ### Echo Harness
 
@@ -137,6 +143,7 @@
 ### Relay / Model Harness
 
 - None currently. DeepSeek transport authority is review-promoted on main; future Relay/Model work should focus on Bifrost-visible metadata/model-routing follow-ups after tracker and FileMap upkeep.
+- Any future backend promotion must first normalize taxonomy labels to existing backend-owned concepts and keep model-call mechanics out of Prime.
 
 ### Session Lifecycle Harness
 
@@ -156,6 +163,7 @@
 - Every new module/doc must be routed to FileMap by Build 3.
 - Every three task-changing commits per lane must trigger Codex Reviews.
 - Any track introducing model calls must prove Aegis policy tests first.
+- Any track introducing or changing model-call mechanics must be owned by Relay/Model Harness unless it is only a Prime intent/risk/proof reference.
 - Any track introducing DeepSeek coding use must prove the DeepSeek validation gate first; DeepSeek cannot clear reviews, move branches, or run autonomous implementation lanes while still in candidate state.
 - Any track introducing session actions must prove unique worktree and branch-permission rules.
 

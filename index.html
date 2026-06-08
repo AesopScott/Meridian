@@ -5700,6 +5700,10 @@ body {
         ['live control authorized', snapshot.live_control_authorized ? 'yes' : 'no'],
         ['raw prompt visible', snapshot.raw_prompt_visible ? 'yes' : 'no'],
         ['raw worker chat visible', snapshot.raw_worker_chat_visible ? 'yes' : 'no'],
+        ['raw worker session history', snapshot.raw_worker_session_history_visible ? 'yes' : 'no'],
+        ['pasted transcript/log/detail', (snapshot.pasted_transcript_body_visible || snapshot.pasted_log_body_visible || snapshot.raw_detail_body_visible) ? 'yes' : 'no'],
+        ['Orchestrator intake', relayText(snapshot.orchestrator_intake || 'compact typed session state')],
+        ['raw detail is fetched only on demand', snapshot.raw_detail_access === 'fetched_on_demand_only' ? 'yes' : relayText(snapshot.raw_detail_access)],
       ]), true),
       relaySection('Archive write-through proof', relayGrid([
         ['target session', archiveProof.target_session_id || 'unknown'],

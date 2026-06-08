@@ -209,7 +209,7 @@
   <main>
     <header>
       <h1>Harness Stage Checklist</h1>
-      <div class="subhead">Backend-first stage view for every Meridian harness. A harness is not complete because its button exists; completion requires backend capability, Prime integration, Runtime Logic UI, proofs, and safe operations.</div>
+      <div class="subhead">Backend-first stage view for every Meridian harness. A harness is not complete because its button exists; completion requires backend capability, Prime integration, Runtime Logic UI, proofs, and safe operations. Prime coordinates intent and risk; Relay + Model Harness own model-call mechanics.</div>
       <div class="meta">
         <span class="pill">Source pair: docs/harness-stage-checklist.md</span>
         <span class="pill">Update rule: keep Markdown and HTML aligned</span>
@@ -263,8 +263,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>Prime</td><td><span class="status built">built</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status not-live">not live execution</span></td><td>Bind live Compass/Vulcan/Relay inputs only after their backend runtime truth is ready.</td></tr>
-            <tr><td>Relay / Model</td><td><span class="status built">built</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">Auto disabled</span></td><td>Provider metadata, DeepSeek route, prompt payload visibility, dispatch hardening.</td></tr>
+            <tr><td>Prime</td><td><span class="status built">built</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status cleared">review-cleared</span></td><td><span class="status not-live">not live execution</span></td><td>Bind live Compass/Vulcan/Relay inputs as source refs only after their backend runtime truth is ready; do not absorb model-call mechanics.</td></tr>
+            <tr><td>Relay / Model</td><td><span class="status built">built</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">Auto disabled</span></td><td>Own provider metadata, route/dispatch evidence, prompt payload visibility, fallback/transport gates, provider balance, and model telemetry.</td></tr>
             <tr><td>Compass</td><td><span class="status baseline">baseline</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">snapshot only</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status needs">not reviewed as runtime</span></td><td><span class="status not-live">no writes</span></td><td>Project definition, bounds/scope, difference, cross-project handoff runtime.</td></tr>
             <tr><td>Vulcan / Session Lifecycle</td><td><span class="status baseline">baseline</span></td><td><span class="status needs">needs build</span></td><td><span class="status partial">partial</span></td><td><span class="status partial">partial via Prime source refs</span></td><td><span class="status wired">wired</span></td><td><span class="status partial">partial</span></td><td><span class="status not-live">no live command execution</span></td><td>Live session state evidence, command-plan proof, permissions, close/archive write-through.</td></tr>
             <tr><td>Aegis</td><td><span class="status built">built</span></td><td><span class="status built">built</span></td><td><span class="status built">built</span></td><td><span class="status wired">wired into Prime risk input</span></td><td><span class="status partial">partial</span></td><td><span class="status cleared">review-cleared core; Prime binding awaiting review</span></td><td><span class="status partial">proof gates only</span></td><td>Runtime Logic UI for Aegis and live proof packet surfaces.</td></tr>
@@ -291,7 +291,7 @@
       <ol class="priority">
         <li><b>1</b><span>Compass backend runtime.</span></li>
         <li><b>2</b><span>Vulcan live session state and command-plan proof.</span></li>
-        <li><b>3</b><span>Relay model/provider metadata and prompt payload visibility.</span></li>
+        <li><b>3</b><span>Relay / Model Harness ownership correction: keep provider/model identity, prompt payload construction, context fit, fallback, provider balance, transport gates, and telemetry out of Prime-owned runtime.</span></li>
         <li><b>4</b><span>Echo/Atlas live inputs into Prime runtime.</span></li>
       </ol>
       <div class="note">When the Markdown checklist changes, update this HTML page in the same checkpoint.</div>

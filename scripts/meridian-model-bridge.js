@@ -1376,6 +1376,12 @@ print(json.dumps({
     "live_control_authorized": False,
     "raw_prompt_visible": False,
     "raw_worker_chat_visible": False,
+    "raw_worker_session_history_visible": False,
+    "pasted_transcript_body_visible": False,
+    "pasted_log_body_visible": False,
+    "raw_detail_body_visible": False,
+    "orchestrator_intake": "compact_typed_session_state_only",
+    "raw_detail_access": "fetched_on_demand_only",
     "proofs": {
         "archive": archive_proof.to_dict(),
         "close": close_proof.to_dict(),

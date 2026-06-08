@@ -1106,8 +1106,36 @@ def test_index_session_archive_surface_uses_backend_proof_snapshot():
     assert "live control authorized" in doc
     assert "raw prompt visible" in doc
     assert "raw worker chat visible" in doc
+    assert "Command plan preview" in doc
+    assert "aegis gate" in doc
+    assert "human gate required" in doc
+    assert "Orchestrator intake" in doc
+    assert "compact typed session state" in doc
+    assert "raw detail is fetched only on demand" in doc
+    assert "raw worker session history" in doc
+    assert "pasted transcript/log/detail" in doc
     assert "Write-through gate" in doc
     assert "executable now" in doc
+    archive_start = doc.index("const renderSessionCloseArchiveProof = () =>")
+    archive_end = doc.index("const renderReleaseAutonomy", archive_start)
+    archive_surface = doc[archive_start:archive_end]
+    assert "<button" not in archive_surface
+    assert "<form" not in archive_surface
+    assert "method: 'POST'" not in archive_surface
+    assert "bridgeUrl('message')" not in archive_surface
+    assert "bridgeUrl('restart')" not in archive_surface
+    assert "bridgeUrl('call-result')" not in archive_surface
+    assert "archive-session" not in archive_surface
+    assert "close-session" not in archive_surface
+    assert "reload-session" not in archive_surface
+    assert "run-again" not in archive_surface
+    assert "delete" not in archive_surface.lower()
+    assert "raw_worker_chat =" not in archive_surface
+    assert "transcript" not in archive_surface.lower()
+    assert "session_history" not in archive_surface
+    assert "detail_body" not in archive_surface
+    assert "log_body" not in archive_surface
+    assert "prompt:" not in archive_surface.lower()
 
 
 def test_index_release_harness_uses_prime_autonomy_snapshot():
@@ -1375,6 +1403,19 @@ def test_bridge_exposes_session_close_archive_proof_route():
     assert '"live_control_authorized": False' in doc
     assert '"raw_prompt_visible": False' in doc
     assert '"raw_worker_chat_visible": False' in doc
+    assert (
+        "req.method === 'POST' && req.url === BRIDGE_ROUTES.sessionCloseArchiveProof"
+        not in doc
+    )
+    assert (
+        "BRIDGE_ROUTES.sessionCloseArchiveProof"
+        not in doc[doc.index("if (req.method === 'POST' && req.url === BRIDGE_ROUTES.message"):]
+    )
+    assert '"raw_worker_session_history_visible": False' in doc
+    assert '"pasted_transcript_body_visible": False' in doc
+    assert '"pasted_log_body_visible": False' in doc
+    assert '"raw_detail_body_visible": False' in doc
+    assert '"orchestrator_intake": "compact_typed_session_state_only"' in doc
     assert '"mutation_authorized": True' not in doc
     assert "raw_worker_chat = " not in doc
     assert "SECRET_RAW_PROMPT" not in doc
@@ -1454,8 +1495,16 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "/bridge/workflow-dispatch-status" in doc
     assert "no routine execution, scheduler mutation, raw artifact/log/transcript/detail paste, raw worker history replay, or self-approval is authorized" in doc
     assert "| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired |" in doc
+    assert "| SK10 | Archive | Opens close/archive proof posture until reloadable archive controls exist. | wired |" in doc
     assert "/bridge/session-close-archive-proof" in doc
-    assert "no live control, raw prompt, raw worker chat, replay, reload, run-again, or deletion is authorized" in doc
+    assert "GET only" in doc
+    assert "no live close/archive/reload/run-again/delete control" in doc
+    assert "no POST route" in doc
+    assert "no message route" in doc
+    assert "raw worker session history" in doc
+    assert "pasted transcript/log/detail body" in doc
+    assert "compact typed session state only" in doc
+    assert "raw detail is fetched on demand only" in doc
 
 
 def test_model_harness_taxonomy_stays_ui_strategy_until_promoted():
@@ -1466,6 +1515,30 @@ def test_model_harness_taxonomy_stays_ui_strategy_until_promoted():
     assert "canonical taxonomy name list" in doc
     assert "must not create new Python enums, dataclasses, route fields, or package exports directly from UI-only labels" in doc
     assert "already-reviewed surfaces" in doc
+
+
+def test_v2_strategy_docs_keep_model_call_ownership_with_relay_and_model_harness():
+    plan = (ROOT / "docs" / "v2-detailed-build-plan.md").read_text(encoding="utf-8")
+    tracker = (ROOT / "docs" / "v2-progress-tracker.md").read_text(encoding="utf-8")
+    handoff = (ROOT / "docs" / "aegis-relay-summary-handoff-contract.md").read_text(encoding="utf-8")
+    model_contract = (ROOT / "docs" / "model-harness-v2-contract.md").read_text(encoding="utf-8")
+    stage = (ROOT / "docs" / "harness-stage-checklist.md").read_text(encoding="utf-8")
+    stage_html = (ROOT / "docs" / "harness-stage-checklist.html").read_text(encoding="utf-8")
+    for doc in (plan, tracker):
+        assert "Prime/Orchestrator owns intent" in doc or "Prime selects the work intent and risk tier" in doc
+        assert "Relay + Model Harness" in doc
+        assert "provider/model identity" in doc or "provider identity" in doc
+        assert "prompt payload" in doc
+        assert "transport" in doc
+        assert "provider balance" in doc
+    assert "No Prime-owned provider routing table" in plan
+    assert "Bifrost renders those backend-owned concepts; it does not rename or re-own them" in tracker
+    assert "Prompt/payload safety" in handoff
+    assert "Relay/Model Harness domain, with Aegis/Security policy gates" in handoff
+    assert "It does not own exact provider/model identity" in model_contract
+    assert "Those remain Model Harness/Relay-owned" in model_contract
+    assert "Bifrost renders backend-owned state and must not convert taxonomy labels into backend authority" in stage
+    assert "Relay + Model Harness own model-call mechanics" in stage_html
 
 
 def test_v2_tracker_has_deep_compass_and_vulcan_backend_items():
