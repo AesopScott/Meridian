@@ -8148,6 +8148,11 @@ body {
           ['visible proof', 'no backend logic snapshot is registered for this harness'],
           ['drift guard', 'no hidden backend mutation is available from this panel'],
         ]), true),
+        relaySection('Unsupported action guard', relayGrid([
+          ['selected harness', harness],
+          ['action status', 'unsupported until reviewed backend wiring exists'],
+          ['result', 'display-only; action stays blocked'],
+        ]), true),
       ],
     });
   };

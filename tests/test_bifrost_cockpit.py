@@ -186,6 +186,22 @@ def test_index_harness_mode_uses_full_panel_logic_surface_without_prompt_window(
     assert "setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist })" in doc
 
 
+def test_index_generic_harness_surface_blocks_unsupported_actions_without_backend_mutation():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    start = doc.index("const renderHarnessSurface = (button) =>")
+    end = doc.index("const renderRelayModels = () =>", start)
+    surface = doc[start:end]
+
+    assert "Unsupported action guard" in surface
+    assert "selected harness" in surface
+    assert "unsupported until reviewed backend wiring exists" in surface
+    assert "display-only; action stays blocked" in surface
+    assert "method: 'POST'" not in surface
+    assert "bridgeUrl('message')" not in surface
+    assert "bridgeUrl('restart')" not in surface
+    assert "call-result" not in surface
+
+
 def test_index_harness_title_toggles_model_icons():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert '<button class="harness-dock-title" type="button"' in doc
@@ -2031,6 +2047,8 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
         assert "| wired |" in row
     assert "| SUR9 | Harness item actions | Harness mode actions apply only to selected harness logic items. | planned |" in doc
     assert "`SUR9` remains a separate harness item action follow-up" in doc
+    assert "| HMS7 | Unsupported action guard | If harness logic action is not supported yet, action is blocked with readable warning. | wired |" in doc
+    assert "Generic planned harness surfaces render an explicit Unsupported action guard" in doc
     assert "const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) =>" in index
     assert "const renderHarnessSurface = (button) =>" in index
     assert "const renderSparkSurface = (label) =>" in index
