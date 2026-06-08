@@ -202,6 +202,22 @@ def test_index_generic_harness_surface_blocks_unsupported_actions_without_backen
     assert "call-result" not in surface
 
 
+def test_index_generic_harness_surface_frames_logic_updates_without_project_control():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    start = doc.index("const renderHarnessSurface = (button) =>")
+    end = doc.index("const renderRelayModels = () =>", start)
+    surface = doc[start:end]
+
+    assert "Logic update framing" in surface
+    assert "review or update harness logic items" in surface
+    assert "add or refine harness logic after backend review" in surface
+    assert "not arbitrary project/session control" in surface
+    assert "project switch" not in surface.lower()
+    assert "session close" not in surface.lower()
+    assert "method: 'POST'" not in surface
+    assert "bridgeUrl('message')" not in surface
+
+
 def test_index_harness_title_toggles_model_icons():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert '<button class="harness-dock-title" type="button"' in doc
@@ -2049,6 +2065,8 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     assert "`SUR9` remains a separate harness item action follow-up" in doc
     assert "| HMS7 | Unsupported action guard | If harness logic action is not supported yet, action is blocked with readable warning. | wired |" in doc
     assert "Generic planned harness surfaces render an explicit Unsupported action guard" in doc
+    assert "| HMS8 | Logic update framing | Harness mode language frames work as updating/adding harness logic. | wired |" in doc
+    assert "Generic planned harness surfaces render a Logic update framing section" in doc
     assert "const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) =>" in index
     assert "const renderHarnessSurface = (button) =>" in index
     assert "const renderSparkSurface = (label) =>" in index
