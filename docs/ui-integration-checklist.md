@@ -350,6 +350,8 @@ The Crosscheck icon owns review, proof, Aegis findings, and independent validati
 
 The Routines icon owns recurring or repeatable work patterns. It should make routine automation visible without turning the user into the scheduler.
 
+`ROU0` snapshots are compact continuity and workflow-dispatch posture only. They are not evidence of configured routine automation, schedule/trigger ownership, run history, next-run previews, or retry/escalation controls.
+
 | ID | Routine Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | ROU0 | Runtime continuity status | Shows current continuation/goal runtime and workflow dispatch posture until routine automation exists. | wired | Spark Routines opens `/bridge/goal-runtime` and `/bridge/workflow-dispatch-status` as display-only typed state; no routine execution, scheduler mutation, raw artifact/log/transcript/detail paste, raw worker history replay, or self-approval is authorized. |

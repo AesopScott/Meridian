@@ -1151,6 +1151,12 @@ def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     assert "bridgeUrl('goal-runtime')" in doc
     assert "bridgeUrl('workflow-dispatch-status')" in doc
     assert "renderWorkflowDispatchStatus()" in doc
+    assert "Success summary shape" in doc
+    assert "Failure summary shape" in doc
+    assert "Dispatch visibility policy" in doc
+    assert "proof trail" in doc
+    assert "failure kind" in doc
+    assert "tier three gate required" in doc
     routines_start = doc.index("const renderGoalRuntime = () =>")
     routines_end = doc.index("const renderWorkflowDispatchStatus = () =>", routines_start)
     routines_surface = doc[routines_start:routines_end]
@@ -1161,6 +1167,31 @@ def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     assert "run-now" not in routines_surface
     assert "raw_artifacts_visible ? 'yes'" not in routines_surface
     assert "raw worker session history" not in routines_surface
+    assert "routine list" not in routines_surface.lower()
+    assert "next run" not in routines_surface.lower()
+    assert "routine history" not in routines_surface.lower()
+    assert "create-automation" not in routines_surface
+
+
+def test_routines_checklist_keeps_automation_rows_deferred_until_backend_exists():
+    doc = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
+    assert "`ROU0` snapshots are compact continuity and workflow-dispatch posture only." in doc
+    assert "They are not evidence of configured routine automation" in doc
+    for row in (
+        "| ROU1 | Routine list | Shows configured routines for active project/system. | planned |",
+        "| ROU2 | Create routine | Creates a new repeatable workflow or monitor with explicit scope. | planned |",
+        "| ROU3 | Enable/disable routine | Toggles routine active state. | planned |",
+        "| ROU4 | Routine trigger | Supports manual run-now once routine execution exists. | planned |",
+        "| ROU5 | Cadence/trigger view | Shows schedule, heartbeat, or event trigger. | planned |",
+        "| ROU6 | Last run result | Shows last run status, duration, and proof/evidence link. | planned |",
+        "| ROU7 | Next run preview | Shows next expected run or waiting condition. | planned |",
+        "| ROU8 | Failure handling | Shows retry/escalation behavior for routine failures. | planned |",
+        "| ROU9 | Prime-owned routine review | Prime reviews routine outputs and only escalates meaningful user gates. | planned |",
+        "| ROU10 | Quiet routine mode | Routine noise respects Quiet mode while preserving blockers. | planned |",
+        "| ROU11 | Routine archive/history | Shows previous runs and outcomes without cluttering main panels. | planned |",
+        "| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | planned |",
+    ):
+        assert row in doc
 
 
 def test_index_bifrost_harness_uses_voice_io_snapshot():
