@@ -5797,6 +5797,11 @@ body {
         ['status', voice.status_call || 'standing by'],
         ['intent', voice.last_intent_ref || 'none'],
       ]), true),
+      relaySection('Public voice setup boundary', relayList([
+        'Public builds require browser microphone permission and a reviewed speech provider before capture, dictation, read-aloud, mute, interrupt, or voice-command execution can run.',
+        'Missing microphone or speech-provider authorization is shown as setup guidance from /bridge/voice-io; the UI does not request permission, start capture, synthesize speech, read secrets, or mutate provider settings.',
+        'Typed prompt and response paths remain available while voice input/output is unavailable.',
+      ]), false),
       ...controls.map((control, index) => relaySection(
         `Voice control ${index + 1}: ${control.id || 'unknown'}`,
         relayGrid([

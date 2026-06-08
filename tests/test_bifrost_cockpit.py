@@ -1817,6 +1817,9 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | wired |" in doc
     assert "Top speech icon and Settings/Spark render compact Voice I/O state from `/bridge/voice-io`" in doc
     assert "no microphone, speech output, read-aloud, mute mutation, raw prompt/response, or raw worker history is authorized" in doc
+    assert "| VOC12 | Public setup guidance | Explains microphone/browser permissions and speech provider setup in public builds. | wired |" in doc
+    assert "Voice I/O surfaces render a Public voice setup boundary from `/bridge/voice-io`" in doc
+    assert "no permission request, capture start, speech synthesis, secret read, provider settings mutation, or typed prompt/response disruption" in doc
     assert "| SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired |" in doc
     assert "| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | wired |" in doc
     assert "| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | wired |" in doc
@@ -1902,6 +1905,28 @@ def test_index_settings_surface_shows_public_cli_setup_without_mutation_paths():
     refresh_end = doc.index("window.addEventListener('focus', refreshRelayPanel);", refresh_start)
     refresh_surface = doc[refresh_start:refresh_end]
     assert "if (rightWorkspace?.querySelector('[data-spark-models]')) loadSparkModels();" in refresh_surface
+
+
+def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutation():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const renderVoiceIoSnapshot = (snapshot) =>")
+    render_end = doc.index("const renderSparkModelsSnapshot = (snapshot) =>", render_start)
+    voice_surface = doc[render_start:render_end]
+    assert "Public voice setup boundary" in voice_surface
+    assert "browser microphone permission and a reviewed speech provider" in voice_surface
+    assert "setup guidance from /bridge/voice-io" in voice_surface
+    assert "the UI does not request permission, start capture, synthesize speech, read secrets, or mutate provider settings" in voice_surface
+    assert "Typed prompt and response paths remain available while voice input/output is unavailable." in voice_surface
+    assert "microphone authorized" in voice_surface
+    assert "speech output authorized" in voice_surface
+    assert "read aloud authorized" in voice_surface
+    assert "controls disabled" in voice_surface
+    assert "navigator.mediaDevices" not in voice_surface
+    assert "getUserMedia" not in voice_surface
+    assert "speechSynthesis" not in voice_surface
+    assert "SpeechRecognition" not in voice_surface
+    assert "MediaRecorder" not in voice_surface
+    assert "method: 'POST'" not in voice_surface
 
 
 def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wired():
