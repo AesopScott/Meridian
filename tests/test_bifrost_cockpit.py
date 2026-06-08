@@ -1064,6 +1064,40 @@ def test_index_spark_and_workflow_surfaces_use_bridge_snapshots():
     assert "status_policy" in doc
 
 
+def test_index_crosscheck_renders_review_findings_and_proof_status_safely():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    review_console = doc[
+        doc.index("const renderReviewConsoleSnapshot = (snapshot) =>"):
+        doc.index("const renderFederationHorizonSnapshot")
+    ]
+    assert "const items = Array.isArray(queue.items) ? queue.items : []" in review_console
+    assert "const rawItemContentVisible = Boolean(snapshot.raw_item_content_visible)" in review_console
+    assert "const rawWorkerChatVisible = Boolean(snapshot.raw_worker_chat_visible)" in review_console
+    assert "Pending review items" in review_console
+    assert "item.id || 'unknown'" in review_console
+    assert "relayText(item.item_type)" in review_console
+    assert "relayText(item.severity)" in review_console
+    assert "item.title || 'unknown'" in review_console
+    assert "item.content_label || 'none'" in review_console
+    assert "item.content_length ?? '0'" in review_console
+    assert "relayJoin(item.suggested_actions)" in review_console
+    assert "relayText(item.status)" in review_console
+    assert "method: 'POST'" not in review_console
+
+    aegis_logic = doc[
+        doc.index("const renderAegisLogicSnapshot = (snapshot) =>"):
+        doc.index("const renderSessionCloseArchiveProofSnapshot")
+    ]
+    assert "const evidence = Array.isArray(trail.evidence) ? trail.evidence : []" in aegis_logic
+    assert "Proof trail summary" in aegis_logic
+    assert "Cognition policy gate" in aegis_logic
+    assert "raw evidence body visible" in aegis_logic
+    assert "relayText(item.status)" in aegis_logic
+    assert "item.summary || 'unknown'" in aegis_logic
+    assert "proof_blocking" in aegis_logic
+    assert "method: 'POST'" not in aegis_logic
+
+
 def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     provider_balance = doc[
@@ -1151,6 +1185,34 @@ def test_index_memory_retrieval_and_filemap_surfaces_use_bridge_snapshots():
     assert "hit.record.body" not in doc
     assert "record.body" not in doc
     assert "mutation_authorized ? 'yes'" not in doc
+    echo_memory = doc[
+        doc.index("const renderEchoMemorySnapshot = (snapshot) =>"):
+        doc.index("const renderAtlasRetrievalSnapshot")
+    ]
+    assert "Query boundary" in echo_memory
+    assert "hit.summary || 'unknown'" in echo_memory
+    assert "hit.reason || 'unknown'" in echo_memory
+    assert "method: 'POST'" not in echo_memory
+    assert "record.body" not in echo_memory
+    atlas_retrieval = doc[
+        doc.index("const renderAtlasRetrievalSnapshot = (snapshot) =>"):
+        doc.index("const renderFileMapSnapshot")
+    ]
+    assert "Retrieval query" in atlas_retrieval
+    assert "relayJoin(query.required_paths)" in atlas_retrieval
+    assert "hit.excerpt || 'none'" in atlas_retrieval
+    assert "method: 'POST'" not in atlas_retrieval
+    filemap = doc[
+        doc.index("const renderFileMapSnapshot = (snapshot) =>"):
+        doc.index("const renderAegisLogicSnapshot")
+    ]
+    assert "Registry summary" in filemap
+    assert "Area counts" in filemap
+    assert "entry.path || 'unknown'" in filemap
+    assert "relayJoin(entry.related_tests)" in filemap
+    assert "method: 'POST'" not in filemap
+    assert "C:\\\\Users\\\\" not in filemap
+    assert "C:/Users/" not in filemap
 
 
 def test_index_aegis_surface_uses_bridge_snapshot():
@@ -1553,6 +1615,10 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "/bridge/aegis-logic" in doc
     assert "does not start a review run, apply responses, mutate queues, execute providers, or ingest raw worker session history" in doc
     assert "| XCK0 | Review/proof state | Shows current Review Console and Aegis proof posture without running a new check. | wired |" in doc
+    assert "| XCK2 | Review findings | Shows current findings with severity, owner, and status. | partial |" in doc
+    assert "owner attribution remains deferred and raw item content stays hidden" in doc
+    assert "| XCK3 | Proof status | Shows pass/fail/waived proof state for active work. | wired |" in doc
+    assert "Aegis proof trail and policy gate state from `/bridge/aegis-logic`" in doc
     assert "worker transcripts are stored, not replayed" in doc
     assert "worker summaries stay small and update at checkpoints" in doc
     assert "session state packets are always available" in doc
@@ -1571,6 +1637,12 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "remains disabled/`aria-disabled=true`" in doc
     assert "| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | wired |" in doc
     assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
+    assert "| ECHO0 | Display-only memory ranking | Shows memory query boundary and ranked memory summaries from the backend. | wired |" in doc
+    assert "record bodies and memory mutation stay unavailable" in doc
+    assert "| ATL0 | Display-only retrieval metadata | Shows retrieval query, missing paths, truncation state, and display-safe hits. | wired |" in doc
+    assert "allowlisted excerpt text only" in doc
+    assert "| FM0 | Display-only relative-path registry | Shows FileMap area counts and focus entries from the backend registry. | wired |" in doc
+    assert "no absolute local paths or source-control actions are exposed" in doc
     assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
     assert "/bridge/provider-balance" in doc
     assert "| BAL3 | Token usage | Shows token use when a backend reports it. | partial |" in doc

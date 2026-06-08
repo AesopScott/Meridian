@@ -334,8 +334,8 @@ The Crosscheck icon owns review, proof, Aegis findings, and independent validati
 |---|---|---|---|---|
 | XCK0 | Review/proof state | Shows current Review Console and Aegis proof posture without running a new check. | wired | Spark Crosscheck renders `/bridge/review-console` and `/bridge/aegis-logic` as display-only typed state with no raw item content, raw evidence bodies, raw prompt/response, raw worker chat, or raw worker session history. |
 | XCK1 | Run crosscheck | Starts a bounded review/check for current work or selected artifact. | planned | Crosscheck creates a review/proof event only after an explicit execution backend exists. |
-| XCK2 | Review findings | Shows current findings with severity, owner, and status. | planned | Findings are structured, not raw logs. |
-| XCK3 | Proof status | Shows pass/fail/waived proof state for active work. | planned | Proof state comes from Aegis/review data. |
+| XCK2 | Review findings | Shows current findings with severity, owner, and status. | partial | Spark Crosscheck renders Review Console pending items from `/bridge/review-console` with id, type, severity, title, suggested actions, and status as structured metadata; owner attribution remains deferred and raw item content stays hidden. |
+| XCK3 | Proof status | Shows pass/fail/waived proof state for active work. | wired | Spark Crosscheck renders Aegis proof trail and policy gate state from `/bridge/aegis-logic`; raw evidence bodies and queue mutation controls stay unavailable. |
 | XCK4 | Repair routing | Routes validated findings ahead of normal build work. | planned | Repair task points to target lane/owner. |
 | XCK5 | Approve finding | Allows user/Prime to accept a finding as valid. | planned | Finding status changes and records actor. |
 | XCK6 | Dismiss/waive finding | Allows explicit waiver with rationale. | planned | Waiver stores reason and scope. |
@@ -484,6 +484,30 @@ Compass and Vulcan definitions are backend/V2 build requirements, not UI checkli
 | HBD1 | Compass backend checklist | Compass UI may render backend-sourced project logic, but must not invent project definitions or cross-project handoff controls before V2 backend rows are built. | wired | Compass panel reads `/bridge/compass-logic`; deeper backend rows live in `docs/v2-progress-tracker.md`. |
 | HBD2 | Vulcan backend checklist | Vulcan UI may render backend-sourced session lifecycle logic, but must not execute session command plans before V2 backend rows are built. | wired | Vulcan panel reads `/bridge/vulcan-logic`; deeper backend rows live in `docs/v2-progress-tracker.md`. |
 | HBD3 | Relay/Model backend ownership | UI may render model-call posture from existing backend snapshots, but must not create provider route tables, prompt payloads, fallback rules, transport gates, or provider-balance calculations in the UI or Prime layer. | wired | Models/Relay/Balance surfaces read `/bridge/models`, `/bridge/relay-logic`, `/bridge/relay-evidence`, and `/bridge/provider-balance` as display-safe backend-owned snapshots. |
+
+### Echo Memory Subitems
+
+Echo owns durable memory ranking and memory-result visibility. It may surface compact summaries, tags, ranking scores, and source refs, but it must not expose raw memory bodies or mutate recall/write state from the UI.
+
+| ID | Echo Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| ECHO0 | Display-only memory ranking | Shows memory query boundary and ranked memory summaries from the backend. | wired | Echo Memory renders `/bridge/echo-memory` with project/tags/limit plus id, kind, summary, source, importance, pinned state, tags, score, reason, and created time; record bodies and memory mutation stay unavailable. |
+
+### Atlas Retrieval Subitems
+
+Atlas owns retrieval over allowlisted project knowledge and FileMap context. It may surface retrieval metadata and display-safe excerpts, but it must not dump raw records, hidden context, or provider outputs into Prime.
+
+| ID | Atlas Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| ATL0 | Display-only retrieval metadata | Shows retrieval query, missing paths, truncation state, and display-safe hits. | wired | Atlas Retrieval renders `/bridge/atlas-retrieval` with terms, required paths, limit, truncated state, missing paths, hit path/title/source/score/reason, and allowlisted excerpt text only. |
+
+### FileMap / Charon Subitems
+
+Charon owns navigation through the FileMap registry. It may surface repo-relative path metadata and related tests, but it must not leak absolute local filesystem paths or move branches/worktrees.
+
+| ID | FileMap Item | Intended Behavior | Current Status | Verification |
+|---|---|---|---|---|
+| FM0 | Display-only relative-path registry | Shows FileMap area counts and focus entries from the backend registry. | wired | FileMap Registry renders `/bridge/filemap` with entry counts, test coverage counts, area counts, repo-relative paths, purpose, related tests, and notes; no absolute local paths or source-control actions are exposed. |
 
 ### Harness Mode Subitems
 
