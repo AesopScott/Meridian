@@ -279,10 +279,37 @@ def test_index_generic_harness_surface_preserves_unsaved_logic_draft_per_harness
     assert "storage scope', 'selected harness only" in surface
     assert "backend write', 'none" in surface
     assert "draft only; no harness action is run" in surface
-    assert "if (rendered) initializeHarnessDraftSurface(harness);" in surface
+    assert "if (rendered) {" in surface
+    assert "loadHarnessProofLink();" in surface
+    assert "initializeHarnessDraftSurface(harness);" in surface
     assert "method: 'POST'" not in surface
     assert "bridgeUrl('message')" not in surface
     assert "bridgeUrl('call-result')" not in surface
+
+
+def test_index_generic_harness_surface_links_filemap_proof_checks_without_execution():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    start = doc.index("const harnessProofMatches = (snapshot, harness) =>")
+    end = doc.index("let sparkSkillsRegistrySnapshot = null", start)
+    proof_renderer = doc[start:end]
+    surface_start = doc.index("const renderHarnessSurface = (button) =>")
+    surface_end = doc.index("const renderRelayModels = () =>", surface_start)
+    surface = doc[surface_start:surface_end]
+
+    assert "const renderHarnessProofLinkSnapshot = (snapshot, harness) =>" in proof_renderer
+    assert "Harness proof/checks" in proof_renderer
+    assert "related tests" in proof_renderer
+    assert "Proof links are FileMap metadata only" in proof_renderer
+    assert "do not execute tests, run workflow orders, move branches, write files, or call providers" in proof_renderer
+    assert "const loadHarnessProofLink = async () =>" in doc
+    assert "rightWorkspace?.querySelector('[data-harness-proof-link]')" in doc
+    assert "fetch(bridgeUrl('filemap'), { cache: 'no-store' })" in doc
+    assert "data-harness-proof-link" in surface
+    assert "loadHarnessProofLink();" in surface
+    assert "method: 'POST'" not in proof_renderer
+    assert "bridgeUrl('message')" not in proof_renderer
+    assert "bridgeUrl('call-result')" not in proof_renderer
+    assert "bridgeUrl('restart')" not in proof_renderer
 
 
 def test_index_harness_title_toggles_model_icons():
@@ -2232,6 +2259,9 @@ def test_bridge_exposes_memory_retrieval_and_filemap_routes():
     assert "meridian_core.echo" in doc
     assert "meridian_core.atlas" in doc
     assert "meridian_core.filemap" in doc
+    assert "FileArea.WORKFLOW_ATLAS" in doc
+    assert "workflow_focus_entries" in doc
+    assert "workflow_focus_paths" in doc
     assert '"display_only": True' in doc
     assert '"mutation_authorized": False' in doc
     assert "hit.record.body" not in doc

@@ -1154,6 +1154,7 @@ entries = fm.all_entries()
 areas = Counter(entry.area for entry in entries)
 focus_areas = (
     FileArea.FILE_MAP,
+    FileArea.WORKFLOW_ATLAS,
     "Architecture memory",
     "Echo memory",
     "Atlas retrieval",
@@ -1161,10 +1162,17 @@ focus_areas = (
     FileArea.GOAL_RUNTIME,
     FileArea.PROVIDER_BALANCE,
 )
-focus_entries = [
+workflow_focus_entries = [
     entry for entry in entries
-    if entry.area in focus_areas or "echo" in entry.path.lower() or "atlas" in entry.path.lower()
-][:10]
+    if entry.area == FileArea.WORKFLOW_ATLAS
+]
+workflow_focus_paths = {entry.path for entry in workflow_focus_entries}
+general_focus_entries = [
+    entry for entry in entries
+    if entry.path not in workflow_focus_paths
+    and (entry.area in focus_areas or "echo" in entry.path.lower() or "atlas" in entry.path.lower())
+]
+focus_entries = (workflow_focus_entries + general_focus_entries)[:12]
 print(json.dumps({
     "ok": True,
     "source": "meridian_core.filemap",

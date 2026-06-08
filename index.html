@@ -5847,6 +5847,51 @@ body {
       )),
     ].join('');
   };
+  const harnessProofMatches = (snapshot, harness) => {
+    const entries = Array.isArray(snapshot?.focus_entries) ? snapshot.focus_entries : [];
+    const normalized = String(harness || '').toLowerCase();
+    if (!normalized) return [];
+    return entries.filter((entry) => {
+      const area = String(entry.area || '').toLowerCase();
+      const path = String(entry.path || '').toLowerCase();
+      const purpose = String(entry.purpose || '').toLowerCase();
+      if (normalized === 'atlas') return area.includes('atlas') || path.includes('atlas') || purpose.includes('atlas');
+      return area.includes(normalized) || path.includes(normalized) || purpose.includes(normalized);
+    });
+  };
+  const renderHarnessProofLinkSnapshot = (snapshot, harness) => {
+    if (!snapshot?.ok) {
+      return relaySection('Harness proof link source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'FileMap proof/check metadata unavailable'],
+        ['selected harness', harness || 'unknown'],
+        ['mutation authorized', 'no'],
+      ]), true);
+    }
+    const matches = harnessProofMatches(snapshot, harness).slice(0, 6);
+    return [
+      relaySection('Harness proof link source', relayGrid([
+        ['source', snapshot.source || 'unknown'],
+        ['version', snapshot.version || 'unknown'],
+        ['selected harness', harness || 'unknown'],
+        ['display only', snapshot.display_only ? 'yes' : 'no'],
+        ['mutation authorized', 'no'],
+        ['proof/check entries', matches.length],
+      ]), true),
+      relaySection('Harness proof/checks', matches.length
+        ? matches.map((entry, index) => relayGrid([
+          [`proof ${index + 1}`, entry.path || 'unknown'],
+          ['area', entry.area || 'unknown'],
+          ['purpose', entry.purpose || 'unknown'],
+          ['related tests', relayJoin(entry.related_tests)],
+        ])).join('')
+        : relayGrid([['status', 'no FileMap proof/check entry for this selected harness']]), true),
+      relaySection('Proof link boundary', relayList([
+        'Proof links are FileMap metadata only; they do not execute tests, run workflow orders, move branches, write files, or call providers.',
+        'Related tests name the verification path for reviewed harness changes; raw artifacts and worker transcripts remain outside this panel.',
+      ]), false),
+    ].join('');
+  };
   let sparkSkillsRegistrySnapshot = null;
   const sparkSkillsPinKey = 'meridian.skills.pinned.v1';
   const readSparkSkillsPinned = () => {
@@ -6577,6 +6622,18 @@ body {
       logicNode.innerHTML = renderFileMapSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderFileMapSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadHarnessProofLink = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-harness-proof-link]');
+    if (!logicNode) return;
+    const harness = logicNode.dataset.harness || 'Harness';
+    try {
+      const response = await fetch(bridgeUrl('filemap'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      logicNode.innerHTML = renderHarnessProofLinkSnapshot(snapshot, harness);
+    } catch (error) {
+      logicNode.innerHTML = renderHarnessProofLinkSnapshot({ ok: false, error: error.message }, harness);
     }
   };
   const loadAegisLogic = async () => {
@@ -8656,6 +8713,7 @@ body {
           ['visible proof', 'no backend logic snapshot is registered for this harness'],
           ['drift guard', 'no hidden backend mutation is available from this panel'],
         ]), true),
+        `<div data-harness-proof-link data-harness="${escapeHtml(harness)}">${relaySection('Harness proof link source', relayGrid([['status', 'loading FileMap proof/check metadata']]), true)}</div>`,
         relaySection('Unsupported action guard', relayGrid([
           ['selected harness', harness],
           ['action status', 'unsupported until reviewed backend wiring exists'],
@@ -8700,7 +8758,10 @@ body {
         ]), true)] : []),
       ],
     });
-    if (rendered) initializeHarnessDraftSurface(harness);
+    if (rendered) {
+      loadHarnessProofLink();
+      initializeHarnessDraftSurface(harness);
+    }
     return rendered;
   };
   const renderRelayModels = () => {
@@ -9458,6 +9519,7 @@ body {
     if (rightWorkspace?.querySelector('[data-echo-memory]')) loadEchoMemory();
     if (rightWorkspace?.querySelector('[data-atlas-retrieval]')) loadAtlasRetrieval();
     if (rightWorkspace?.querySelector('[data-filemap]')) loadFileMap();
+    if (rightWorkspace?.querySelector('[data-harness-proof-link]')) loadHarnessProofLink();
     if (rightWorkspace?.querySelector('[data-aegis-logic]')) loadAegisLogic();
     if (rightWorkspace?.querySelector('[data-session-close-archive-proof]')) loadSessionCloseArchiveProof();
     if (rightWorkspace?.querySelector('[data-voice-io]')) loadVoiceIo();
