@@ -42,6 +42,31 @@ Worker requirement: implementation must run in a Polaris Build 1 Opus worker
 (`launch-chat`, tier `power`, `claude-opus-4-7`). Codex sessions may review only
 after a real worker candidate exists.
 
+Fresh worker launch packet:
+
+```text
+You are Polaris Build 1 for Meridian. Start from current origin/main and work
+only in your assigned unique detached worktree. Execute the first Active Now
+block in docs/live-build-1.md: Atlas Workflow Adapter Restart.
+
+Do not write shared main. Do not move branches/worktrees. Do not cherry-pick,
+copy, stash-pop, merge, rebase, reset, or salvage across worktrees. The prior
+2026-06-07 Atlas adapter candidate is reference only, not promoted truth.
+
+Allowed files only:
+- meridian_core/workflow_atlas.py
+- tests/test_workflow_atlas.py
+- docs/live-build-1.md
+
+Required proof before Ready marker:
+- python -m pytest tests/test_workflow_atlas.py tests/test_workflow_dispatch.py tests/test_atlas.py -q
+- git diff --check -- meridian_core/workflow_atlas.py tests/test_workflow_atlas.py docs/live-build-1.md
+- path-scope proof limited to the three allowed files
+
+Stop after implementation and Ready marker. Do not promote to main, do not push
+to main, and do not route Codex review yourself.
+```
+
 Source of authority:
 
 - `docs/workflow-subagent-harness-contract.md`
