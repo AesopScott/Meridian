@@ -309,10 +309,30 @@ def test_index_has_single_reachable_harness_dock():
     assert doc.count('<div class="harness-dock-wrap"') == 1
     assert doc.count('class="harness-dock harness-dock-bottom harness-model-dock"') == 1
     assert doc.count('data-harness="Release"') == 1
+    assert 'data-harness="Security" data-status="planned" data-session-title="Security-Guardrails"' in doc
+    assert '<span class="harness-label">Security</span><span class="harness-sub-label">Guardrails</span>' in doc
+    assert 'data-harness="TBD"' not in doc
     assert 'data-harness="Workflow" data-status="stable"' in doc
     assert 'data-harness="Federation" data-status="stable"' in doc
     assert 'data-harness="Echo" data-status="stable"' in doc
     assert 'data-harness="Atlas" data-status="stable"' in doc
+
+
+def test_index_security_harness_identity_is_display_only_until_backend_exists():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    start = doc.index("const renderHarnessSurface = (button) =>")
+    end = doc.index("const renderRelayModels = () =>", start)
+    surface = doc[start:end]
+
+    assert 'data-harness="Security" data-status="planned" data-session-title="Security-Guardrails"' in doc
+    assert "modelButton ? renderModelHarnessSurface(button) : renderHarnessSurface(button)" in doc
+    assert "Unsupported action guard" in surface
+    assert "real backend state unavailable" in surface
+    assert "no hidden backend mutation is available from this panel" in surface
+    assert "method: 'POST'" not in surface
+    assert "bridgeUrl('message')" not in surface
+    assert "branch" not in surface.lower()
+    assert "guardrail action" not in surface.lower()
 
 
 def test_index_speech_mode_icon_is_display_only():
@@ -2085,6 +2105,8 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     assert "Generic planned harness surfaces render a Logic update framing section" in doc
     assert "| HMS9 | Harness state summary | Shows concise harness status once real state exists. | wired |" in doc
     assert "Generic planned harness surfaces render a Harness state summary" in doc
+    assert "| HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | wired |" in doc
+    assert "Security is the planned reserved harness identity with `Security-Guardrails`" in doc
     assert "const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) =>" in index
     assert "const renderHarnessSurface = (button) =>" in index
     assert "const renderSparkSurface = (label) =>" in index
