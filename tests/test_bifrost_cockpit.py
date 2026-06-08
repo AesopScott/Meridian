@@ -1094,11 +1094,37 @@ def test_index_compass_harness_uses_backend_logic_snapshot():
     assert "renderCompassLogicSnapshot" in doc
     assert "renderCompassProjectLogic" in doc
     assert "Reviewed project definition" in doc
+    assert "Project metadata handoff" in doc
+    assert "active Compass context" in doc
+    assert "Vulcan live-state evidence" in doc
+    assert "FileMap relative-path registry" in doc
+    assert "Compass does not move branches, open local absolute paths, or invent source-control state." in doc
     assert "Identity and scope decisions" in doc
     assert "Bounds and difference decisions" in doc
     assert "Cross-project handoff review" in doc
     assert "merge authorized" in doc
     assert "execution authorized" in doc
+
+
+def test_index_project_metadata_handoff_uses_compass_state_without_source_control_actions():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    compass_start = doc.index("const renderCompassLogicSnapshot = (snapshot) =>")
+    compass_end = doc.index("const renderVulcanLogicSnapshot = (snapshot) =>", compass_start)
+    compass_surface = doc[compass_start:compass_end]
+    assert "Project metadata handoff" in compass_surface
+    assert "activeProjectContext()" in compass_surface
+    assert "project.project_id || 'unknown'" in compass_surface
+    assert "project.title || 'unknown'" in compass_surface
+    assert "relayText(identity.decision || scope.decision || 'unknown')" in compass_surface
+    assert "Vulcan live-state evidence" in compass_surface
+    assert "FileMap relative-path registry" in compass_surface
+    assert "project path, worktree path, branch, session status, health, and proof state" in compass_surface
+    assert "repo-relative source paths and related tests" in compass_surface
+    assert "does not move branches, open local absolute paths, or invent source-control state" in compass_surface
+    assert "method: 'POST'" not in compass_surface
+    assert "bridgeUrl('message')" not in compass_surface
+    assert "move-branch" not in compass_surface
+    assert "git " not in compass_surface.lower()
 
 
 def test_index_vulcan_harness_uses_backend_logic_snapshot():
@@ -1840,6 +1866,10 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| VOC12 | Public setup guidance | Explains microphone/browser permissions and speech provider setup in public builds. | wired |" in doc
     assert "Voice I/O surfaces render a Public voice setup boundary from `/bridge/voice-io`" in doc
     assert "no permission request, capture start, speech synthesis, secret read, provider settings mutation, or typed prompt/response disruption" in doc
+    assert "| PRJ10 | Project metadata | Shows or links working directory, repo, branch, and project status when that surface exists. | wired |" in doc
+    assert "Compass renders Project metadata handoff from `/bridge/compass-logic`" in doc
+    assert "Vulcan live-state evidence and FileMap relative-path registry" in doc
+    assert "does not move branches, expose absolute paths, or invent source-control state" in doc
     assert "| SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired |" in doc
     assert "| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | wired |" in doc
     assert "| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | wired |" in doc

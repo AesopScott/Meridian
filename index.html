@@ -4883,6 +4883,21 @@ body {
         ['artifacts', relayJoin(project.artifacts)],
         ['proof trail', relayJoin(project.proof_trail)],
       ]), true),
+      relaySection('Project metadata handoff', [
+        relayGrid([
+          ['active Compass context', activeProjectContext()],
+          ['definition source', project.project_id || 'unknown'],
+          ['project title', project.title || 'unknown'],
+          ['project status', relayText(identity.decision || scope.decision || 'unknown')],
+          ['repo/path evidence', 'Vulcan live-state evidence'],
+          ['navigation evidence', 'FileMap relative-path registry'],
+        ]),
+        relayList([
+          'Open Session Lifecycle for backend-sourced project path, worktree path, branch, session status, health, and proof state.',
+          'Open FileMap for repo-relative source paths and related tests.',
+          'Compass does not move branches, open local absolute paths, or invent source-control state.',
+        ]),
+      ].join(''), false),
       relaySection('Identity and scope decisions', relayGrid([
         ['identity decision', relayText(identity.decision)],
         ['identity execution authorized', identity.execution_authorized ? 'yes' : 'no'],
