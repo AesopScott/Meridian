@@ -286,7 +286,7 @@ The Models icon owns model visibility and manual override. It must not silently 
 | MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired | Prompt/Payload/Context model-aspect surfaces render Relay evidence and provider-balance posture from existing backend snapshots only; they do not infer budget state from transcript text or assemble model-bound payloads. |
 | MOD10 | Recent model calls | Shows recent call metadata without prompt text. | wired | Spark Models renders request id, channel, backend/model, result state, duration, project, target presence, and visible-context counts from `/bridge/recent-calls`; it does not call `/bridge/call-result` or render recovered bodies. |
 | MOD11 | Model label display | Response UI shows actual backend/model label when known. | wired | Response transcripts render bridge-returned model labels plus resolved/requested backend source, and Spark Models renders recent-call backend/model labels from `/bridge/recent-calls` without prompt or response bodies. |
-| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | partial | `/bridge/models` setup hints are visible in Spark Models; broader public onboarding copy remains deferred. |
+| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | wired | Spark Models renders `/bridge/models` setup hints plus a Public setup boundary explaining local Codex and Claude/Max CLI/account requirements without installing software, signing in, reading secrets, probing accounts, or enabling Auto routing. |
 
 ### Balance Surface Subitems
 
@@ -305,7 +305,7 @@ The Balance icon owns provider balance, cost pressure, prompt payload, and routi
 | BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | partial | Spark Balance shows backend-sourced provider posture and evidence refs; route recommendations remain advisory/display-only and remain Relay/Model Harness-owned. |
 | BAL10 | Routing recommendation | Shows Prime intent plus Relay/Model recommendation once routing logic exists. | planned | Recommendation is labeled as recommendation, not automatic action, and does not bypass Relay/Aegis policy. |
 | BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | planned | Override path is visible but does not bypass Relay policy. |
-| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | partial | Spark Balance keeps account/credential probing unavailable; public setup guidance is shared through Models readiness until fuller onboarding exists. |
+| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | wired | Spark Balance renders a Public account boundary saying users need their own accounts/keys/subscriptions/CLIs while keeping account/credential probing unavailable; account balance, credential, billing, secret probing, and route mutation stay unavailable. |
 
 ### Backlog Surface Subitems
 

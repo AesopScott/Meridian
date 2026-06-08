@@ -5396,6 +5396,11 @@ body {
         ]),
         index === 0,
       )),
+      relaySection('Public account boundary', relayList([
+        'Public users need their own provider accounts, keys, subscriptions, or local CLIs before a backend can be used.',
+        'This Balance surface displays backend-supplied posture and evidence refs only; it does not probe account balances, credentials, billing portals, or provider secrets.',
+        'Routing recommendations remain advisory until Relay/Model Harness owns and exposes a reviewed routing decision.',
+      ]), true),
     ].join('');
   };
   const renderGoalRuntimeSnapshot = (snapshot) => {
@@ -5830,6 +5835,11 @@ body {
           ['setup guidance', model.installed ? 'ready for manual prompt sends' : (model.setupHint || 'Install and sign in before use')],
         ])).join('')
         : relayGrid([['status', 'no model backends reported']]), true),
+      relaySection('Public setup boundary', relayList([
+        'Public builds use your locally installed Codex and Claude/Max CLIs or configured provider credentials.',
+        'Missing CLIs or missing login state are shown as setup guidance from /bridge/models; this panel does not install software, sign in, read secrets, or probe accounts.',
+        'Provider account readiness is informational only until Relay/Model Harness exposes a reviewed account-readiness backend.',
+      ]), false),
       relaySection('Recent model call metadata', recentCalls.length
         ? recentCalls.map((call, index) => relayGrid([
           [`call ${index + 1}`, call.at || 'unknown'],

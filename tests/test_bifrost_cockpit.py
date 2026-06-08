@@ -381,6 +381,11 @@ def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
     assert "renderSparkModels()" in doc
     assert "bridgeUrl('models')" in doc
     assert "bridgeUrl('recent-calls')" in doc
+    assert "Public setup boundary" in doc
+    assert "Public builds use your locally installed Codex and Claude/Max CLIs or configured provider credentials." in doc
+    assert "Missing CLIs or missing login state are shown as setup guidance from /bridge/models" in doc
+    assert "this panel does not install software, sign in, read secrets, or probe accounts" in doc
+    assert "Provider account readiness is informational only until Relay/Model Harness exposes a reviewed account-readiness backend." in doc
     assert "request id" in doc
     assert "model label" in doc
     assert "visible context entries" in doc
@@ -394,6 +399,7 @@ def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
     assert "call.error" not in models_surface
     assert "result.text" not in models_surface
     assert "call-result" not in models_surface
+    assert "provider secrets" not in models_surface
 
 
 def test_index_model_selector_defaults_to_codex_and_keeps_auto_disabled():
@@ -1228,6 +1234,10 @@ def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
     assert "provider.remaining_credit_label || ''" in provider_balance
     assert "provider.estimated_spend_label || 'unavailable'" in provider_balance
     assert "relayJoin(provider.evidence_refs)" in provider_balance
+    assert "Public account boundary" in provider_balance
+    assert "Public users need their own provider accounts, keys, subscriptions, or local CLIs before a backend can be used." in provider_balance
+    assert "does not probe account balances, credentials, billing portals, or provider secrets" in provider_balance
+    assert "Routing recommendations remain advisory until Relay/Model Harness owns and exposes a reviewed routing decision." in provider_balance
     assert "method: 'POST'" not in provider_balance
 
 
@@ -1807,10 +1817,14 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | wired |" in doc
     assert "quota state, credit status, and remaining-credit labels only" in doc
     assert "account balance probing remains unavailable" in doc
+    assert "| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | wired |" in doc
+    assert "Spark Models renders `/bridge/models` setup hints plus a Public setup boundary" in doc
     assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | wired |" in doc
     assert "Prompt Payload Visibility and Visible Prompt Payload Meter render backend-bound Relay payload size" in doc
     assert "| BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | wired |" in doc
     assert "`unexpected_growth_delta` and `q_mode_prompt_drag_degraded`" in doc
+    assert "| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | wired |" in doc
+    assert "account balance, credential, billing, secret probing, and route mutation stay unavailable" in doc
     assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
     assert "| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired |" in doc
     assert "| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired |" in doc
