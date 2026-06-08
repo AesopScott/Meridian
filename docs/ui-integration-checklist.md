@@ -123,7 +123,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 
 | ID | Icon / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | partial | Track `SPK-*` subitems before changing Spark focus behavior. |
+| SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | wired | Spark renders the center image asset as `role="img"` with `aria-label="Spark, voice of Prime"`, `data-name="Spark"`, and `data-role="voice-of-prime"`, plus a focusable Spark core toggle and Spark actions menu for right-panel surface focus; `SPK10` transition animation remains planned separately. |
 | SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | wired | `SUR1`-`SUR8` and `SUR10`-`SUR13` pin the switching, persistence, layout, close, stale-target, and settings-action behavior; `SUR9` remains a separate harness item action follow-up and does not block the toggle surface itself. |
 | SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired | Opens a Settings/Spark display-only surface with backend-sourced Voice I/O status from `/bridge/voice-io`; no microphone capture, speech output, read-aloud, mute mutation, raw prompt/response, raw worker history, worker chat, or settings mutation is authorized until an explicit settings backend exists. |
 | SK4 | Filter | Controls how much data is included in a session prompt/context stream. | planned | Track `FIL-*` subitems before wiring the surface. |

@@ -125,6 +125,10 @@ def test_index_spark_media_references_existing_assets():
     assert 'role="img" aria-label="Spark, voice of Prime"' in doc
     assert 'data-name="Spark"' in doc
     assert 'data-role="voice-of-prime"' in doc
+    assert 'class="spark-stage"' in doc
+    assert 'class="spark-core-toggle" type="button" aria-label="Toggle session panels"' in doc
+    assert 'class="spark-menu spark-icon-menu" aria-label="Spark actions"' in doc
+    assert 'class="spark-menu-icon-button is-selected" type="button" aria-label="Settings"' in doc
 
 
 def test_index_reset_uses_same_button_confirmation_and_visible_failure():
@@ -2173,6 +2177,9 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     doc = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
     index = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "| SP2 | Right interaction panel | Shows either User Session prompt UI, Settings configuration items, or Harness logic items. | wired |" in doc
+    assert "| SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | wired |" in doc
+    assert "`SPK10` transition animation remains planned separately" in doc
+    assert "| SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | planned |" in doc
     assert "| SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | wired |" in doc
     for row_id in ("SUR1", "SUR2", "SUR3", "SUR4", "SUR5", "SUR6", "SUR7", "SUR8", "SUR10", "SUR11", "SUR12", "SUR13"):
         row = doc[doc.index(f"| {row_id} |"):].splitlines()[0]
