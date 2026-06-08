@@ -121,6 +121,10 @@ def test_index_spark_media_references_existing_assets():
     assert not any(path.startswith("static/media/") for path in media_paths)
     missing = [path for path in media_paths if not (ROOT / path).is_file()]
     assert missing == []
+    assert 'class="core-animation spark-final-image"' in doc
+    assert 'role="img" aria-label="Spark, voice of Prime"' in doc
+    assert 'data-name="Spark"' in doc
+    assert 'data-role="voice-of-prime"' in doc
 
 
 def test_index_reset_uses_same_button_confirmation_and_visible_failure():

@@ -144,7 +144,7 @@ Spark is Prime's voice/core and the visual focus point for moving between right-
 
 | ID | Spark Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| SPK1 | Prime voice/core identity | Keeps Spark visually tied to Prime, speech, and system focus. | partial | Center image remains visible and labeled as Spark/Prime voice. |
+| SPK1 | Prime voice/core identity | Keeps Spark visually tied to Prime, speech, and system focus. | wired | Electron renderer uses the Spark center image asset with `role="img"`, `aria-label="Spark, voice of Prime"`, `data-name="Spark"`, and `data-role="voice-of-prime"`. |
 | SPK2 | Surface focus entry | Acts as the visual entry point for changing right-panel surface focus. | wired | Spark and harness controls call the shared right-panel authority path and expose panel mode/selection data without layout drift. |
 | SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | wired | Top speech icon and Settings/Spark render compact Voice I/O state from `/bridge/voice-io`; controls remain display-only/disabled and no microphone, speech output, read-aloud, mute mutation, raw prompt/response, or raw worker history is authorized. |
 | SPK4 | Surface mode indication | Makes it clear whether the right panel is User Session, Settings, or a harness. | wired | Active title/status plus `data-panel-mode` / `data-right-panel-mode` expose User Session, Spark/Settings, or Harness mode. |
