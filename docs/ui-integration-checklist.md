@@ -123,18 +123,18 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 |---|---|---|---|---|
 | SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | partial | Track `SPK-*` subitems before changing Spark focus behavior. |
 | SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | partial | Track `SUR-*` subitems before changing panel toggle behavior. |
-| SK3 | Settings | Opens settings surface for UI/model/project/session options. | planned | Track `SET-*` subitems before wiring the surface. |
+| SK3 | Settings | Opens settings surface for UI/model/project/session options. | partial | Opens a Settings/Spark display surface with backend-sourced Voice I/O status; settings mutations remain blocked until explicit settings backend exists. |
 | SK4 | Filter | Controls how much data is included in a session prompt/context stream. | planned | Track `FIL-*` subitems before wiring the surface. |
 | SK5 | Models | Opens model selector/settings surface. | planned | Until wired, model selection remains in explicit selector. |
 | SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
 | SK7 | Skills | Opens searchable skill/capability registry by model, project, and global scope. | planned | Track `SKL-*` subitems before wiring the surface. |
 | SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
 | SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | partial | Transient surface close is wired; session close/write-through remains tracked in `CLS-*`. |
-| SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | planned | Track `ARC-*` subitems before wiring the surface. |
+| SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | partial | Spark Archive opens Session Close Archive Proof from `/bridge/session-close-archive-proof`; it is display-only and must not close, delete, replay, or expose raw prompt/worker chat. |
 | SK11 | Reset | Confirms, clears session-window prompts/transcripts, then hard reloads UI. | partial | Track `RST-*` subitems before changing reset behavior. |
 | SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | partial | Track `RLD-*` subitems before changing reload behavior. |
-| SK13 | Routines | Opens routine/automation surface. | planned | Until wired, no fake routine status. |
-| SK14 | Balance | Opens balance/provider/routing view. | planned | Until wired, it must not make routing claims. |
+| SK13 | Routines | Opens routine/automation surface. | partial | Spark Routines opens backend-sourced Goal Runtime status, not runnable automation; no fake routine execution or self-approval. |
+| SK14 | Balance | Opens balance/provider/routing view. | wired | Spark Balance opens Provider Balance from `/bridge/provider-balance` with display-safe provider/routing posture and no raw prompt/response/evidence bodies. |
 
 ### Spark Surface Subitems
 
@@ -144,7 +144,7 @@ Spark is Prime's voice/core and the visual focus point for moving between right-
 |---|---|---|---|---|
 | SPK1 | Prime voice/core identity | Keeps Spark visually tied to Prime, speech, and system focus. | partial | Center image remains visible and labeled as Spark/Prime voice. |
 | SPK2 | Surface focus entry | Acts as the visual entry point for changing right-panel surface focus. | wired | Spark and harness controls call the shared right-panel authority path and expose panel mode/selection data without layout drift. |
-| SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | planned | State is visible and not faked. |
+| SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | partial | Settings/Spark renders Voice I/O status from `/bridge/voice-io`; controls remain display-only/disabled and no microphone or speech output is authorized. |
 | SPK4 | Surface mode indication | Makes it clear whether the right panel is User Session, Settings, or a harness. | wired | Active title/status plus `data-panel-mode` / `data-right-panel-mode` expose User Session, Spark/Settings, or Harness mode. |
 | SPK5 | Preserve prior session target | Switching away from User Session mode preserves the selected live session target. | wired | Return to User Session restores the prior `meridian.user-session.target.v1` target if still live. |
 | SPK6 | Stale target warning | If prior session target closes while away, returning shows a readable warning. | wired | Stale target restore shows `Selected session unavailable` / `selected session unavailable` and blocks send. |
@@ -423,7 +423,7 @@ Close is a targeted session-control action, not merely closing a panel. It shoul
 
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| VO1 | Speech mode icon | Enables/disables first-class spoken interaction with Prime through Spark. | planned | Track `VOC-*` subitems before wiring the surface. |
+| VO1 | Speech mode icon | Enables/disables first-class spoken interaction with Prime through Spark. | partial | Voice I/O status is rendered from `/bridge/voice-io`, but all voice controls are display-only/disabled and do not capture audio or speak responses. |
 
 ### Speech / Voice Subitems
 
@@ -432,11 +432,11 @@ Speech/Voice is first-class planning now. The user should be able to speak with 
 | ID | Voice Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | VOC1 | Push-to-talk | Lets user hold/click to speak to Prime. | planned | Speech capture starts/stops with visible state. |
-| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | planned | State changes are visible and not faked. |
+| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | partial | Backend-backed Voice I/O status can render listening/thinking/speaking/blocked states; executable capture/output remains unauthorized. |
 | VOC3 | Speech-to-text | Converts spoken user input into prompt text before send. | planned | Transcribed text is visible/editable before or after send by mode. |
 | VOC4 | Voice submit mode | Supports spoken prompt submission to Prime. | planned | Voice prompt follows same routing as typed Prime prompt. |
-| VOC5 | Read-aloud response | Speaks Prime/model responses through Spark. | planned | Response can be heard and muted. |
-| VOC6 | Mute output | Mutes spoken responses without disabling typed responses. | planned | Mute state persists in UI session. |
+| VOC5 | Read-aloud response | Speaks Prime/model responses through Spark. | partial | Read-aloud status/control is visible from the Voice I/O surface, but it is aria-disabled and does not speak response bodies. |
+| VOC6 | Mute output | Mutes spoken responses without disabling typed responses. | partial | Mute status/control is visible from the Voice I/O surface, but it is aria-disabled and does not mutate output state. |
 | VOC7 | Interrupt speech | Allows user to stop current spoken response. | planned | Speech stops without losing transcript. |
 | VOC8 | Voice selection | Chooses Spark voice once voice provider exists. | planned | Selected voice is visible and persistent. |
 | VOC9 | Dictation correction | Allows correction of misheard text before/after sending. | planned | Correction updates prompt/transcript metadata. |
@@ -453,21 +453,21 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 | HN1 | Prime | Opens/focuses Prime runtime logic surface. | wired | Click opens Prime Runtime Logic with backend-sourced decision, context, source refs, proof logic, and blockers. |
 | HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | partial | Click updates session title/focus without fake status text. |
 | HN3 | Relay | Opens/focuses model-routing surface. | wired | Click opens Relay Runtime Logic with bridge/access/model/dispatch/blocker logic; Auto remains disabled. |
-| HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | partial | Click updates session title/focus without fake heartbeat details. |
-| HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon should become Security before wiring actions. |
-| HN6 | Aegis | Opens/focuses proof/cross-check surface. | partial | Click updates session title/focus without fake proof status. |
+| HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | wired | Click opens Beacon Liveness with backend-sourced heartbeat/advisory/guardrail status from `/bridge/beacon-liveness`; no raw worker chat or local path leakage. |
+| HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon is Security, but there is no bridge-backed security snapshot or executable guardrail action yet. |
+| HN6 | Aegis | Opens/focuses proof/cross-check surface. | wired | Click opens Aegis Runtime Logic from `/bridge/aegis-logic`; proof state is display-only and does not apply console responses or expose raw evidence bodies. |
 | HN7 | Compass | Opens/focuses mission/project bearing surface. | wired | Click opens Compass Runtime Logic with backend-sourced project selector, Prime prompt context, and portfolio boundary sections. |
 | HN8 | Vulcan / Session Lifecycle | Opens/focuses session lifecycle controls. | wired | Click opens Vulcan Runtime Logic with backend-sourced User Session independence, project-aware session grouping, stale target guard, and lifecycle boundary sections. |
-| HN9 | Atlas | Opens/focuses knowledge/context retrieval surface. | planned | Until wired, no fake retrieved context. |
-| HN10 | Charon / FileMap | Opens/focuses navigation/FileMap surface. | partial | Click updates session title/focus; future view should read FileMap. |
-| HN11 | Arbiter / Codex Reviews | Opens/focuses review queue surface. | partial | Click updates session title/focus; no fake review findings. |
-| HN12 | Workflow | Opens/focuses workflow/sub-agent surface. | planned | Until wired, no fake sub-agent state. |
+| HN9 | Atlas | Opens/focuses knowledge/context retrieval surface. | wired | Click opens Atlas Retrieval from `/bridge/atlas-retrieval`; display uses safe retrieval metadata and must not expose raw record bodies. |
+| HN10 | Charon / FileMap | Opens/focuses navigation/FileMap surface. | wired | Click opens FileMap Registry from `/bridge/filemap`; entries use relative repo paths only, with no absolute/local filesystem path leakage. |
+| HN11 | Arbiter / Codex Reviews | Opens/focuses review queue surface. | wired | Click opens Review Console from `/bridge/review-console`; findings are display-safe and no raw prompt, raw response, or worker chat bodies are shown. |
+| HN12 | Workflow | Opens/focuses workflow/sub-agent surface. | wired | Click opens Workflow Dispatch Status from `/bridge/workflow-dispatch-status`; status is display-only and does not execute sub-agent work. |
 | HN13 | Federation | Opens/focuses federation/network surface. | wired | Click opens Federation Horizon with backend-sourced planning-only boundaries; no fake network state or remote execution controls. |
-| HN14 | Echo | Opens/focuses memory surface. | planned | Until wired, no fake memory recall. |
+| HN14 | Echo | Opens/focuses memory surface. | wired | Click opens Echo Memory from `/bridge/echo-memory`; records are display-safe and memory mutation/recall bodies are not exposed. |
 | HN15 | Ratchet / Tool | Opens/focuses tool execution surface. | planned | Until wired, no fake tool execution. |
 | HN16 | Source / Git | Opens/focuses git/source-control surface. | planned | Until wired, no branch movement from UI. |
 | HN17 | Vision / Browser | Opens/focuses browser/vision surface. | planned | Until wired, no fake browser state. |
-| HN18 | Autonomy / Release | Opens/focuses release/autonomy surface. | planned | Until wired, no public release action. |
+| HN18 | Autonomy / Release | Opens/focuses display-only release/autonomy posture from Prime autonomy. | wired | `/bridge/prime-autonomy` renders a safe snapshot with release/deployment execution, credentials/account probing, raw prompts/responses/evidence bodies, raw worker chat, PIDs, and filesystem paths all blocked. |
 
 ### Compass And Vulcan Backend Readiness
 

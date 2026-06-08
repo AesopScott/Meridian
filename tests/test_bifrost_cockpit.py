@@ -664,6 +664,59 @@ def test_federation_horizon_snapshot_is_planning_only_contract():
     assert "network protocol" in snapshot["out_of_v2_scope"]
 
 
+def test_release_autonomy_snapshot_is_display_safe_backend_contract():
+    import json
+
+    from meridian_core.release_autonomy_snapshot import release_autonomy_snapshot
+
+    snapshot = release_autonomy_snapshot()
+    posture = snapshot["release_posture"]
+    authority = snapshot["authority_boundary"]
+    validation = snapshot["validation_projection"]
+    serialized = json.dumps(snapshot)
+
+    assert snapshot["source"] == (
+        "meridian_core.release_autonomy_snapshot.release_autonomy_snapshot"
+    )
+    assert snapshot["harness"] == "Autonomy / Release"
+    assert snapshot["display_only"] is True
+    assert snapshot["mutation_authorized"] is False
+    assert snapshot["release_execution_authorized"] is False
+    assert snapshot["deployment_authorized"] is False
+    assert snapshot["credential_probe_authorized"] is False
+    assert snapshot["account_probe_authorized"] is False
+    assert snapshot["release_controls_visible"] is False
+    assert snapshot["deployment_controls_visible"] is False
+    assert snapshot["raw_prompt_visible"] is False
+    assert snapshot["raw_response_visible"] is False
+    assert snapshot["raw_evidence_body_visible"] is False
+    assert snapshot["raw_worker_chat_visible"] is False
+    assert snapshot["pids_visible"] is False
+    assert snapshot["raw_filesystem_paths_visible"] is False
+    assert posture["state"] == "blocked_display_only"
+    assert posture["release_ready"] is False
+    assert posture["human_gate_required"] is True
+    assert posture["ready_for_execution"] is False
+    assert posture["prime_action_type"] == "pause_and_wait"
+    assert authority["autonomous_implementation_authorized"] is False
+    assert authority["review_clearing_authorized"] is False
+    assert authority["branch_movement_authorized"] is False
+    assert authority["live_coding_authority_authorized"] is False
+    assert authority["relay_bypass_authorized"] is False
+    assert validation["validation_level"] == "level-0:metadata-only"
+    assert validation["variant_label_count"] == 1
+    assert "release_display_only_no_execution" in snapshot["blockers"]
+    assert "no_release_execution_controls" in snapshot["guardrails"]
+    assert "direct_endpoint_evidence_ref" not in serialized
+    assert "https://api.deepseek.com" not in serialized
+    assert "raw_prompt" in serialized
+    assert "RAW_PROMPT_SENTINEL" not in serialized
+    assert "raw_provider_response" not in serialized
+    assert "C:\\Users" not in serialized
+    assert "/Users/" not in serialized
+    assert '"pid"' not in serialized.lower()
+
+
 def test_index_projects_selector_is_compass_context_not_user_routing():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
@@ -856,6 +909,37 @@ def test_index_session_archive_surface_uses_backend_proof_snapshot():
     assert "executable now" in doc
 
 
+def test_index_release_harness_uses_prime_autonomy_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'data-harness="Release"' in doc
+    assert "Autonomy Release" in doc
+    assert "data-release-autonomy" in doc
+    assert "const renderReleaseAutonomySnapshot = (snapshot) =>" in doc
+    assert "const loadReleaseAutonomy = async () =>" in doc
+    assert "bridgeUrl('prime-autonomy')" in doc
+    assert "renderReleaseAutonomy()" in doc
+    assert "button.dataset.harness === 'Release'" in doc
+    assert (
+        "if (rightWorkspace?.querySelector('[data-release-autonomy]')) "
+        "loadReleaseAutonomy();"
+    ) in doc
+    assert "Release autonomy source" in doc
+    assert "Release posture" in doc
+    assert "Authority boundary" in doc
+    assert "Visibility guard" in doc
+    assert "Release blockers" in doc
+    assert "release execution authorized" in doc
+    assert "deployment authorized" in doc
+    assert "raw prompt visible" in doc
+    assert "raw response visible" in doc
+    assert "raw evidence body visible" in doc
+    assert "raw worker chat visible" in doc
+    assert "PIDs visible" in doc
+    assert "raw filesystem paths visible" in doc
+    assert "release-now" not in doc
+    assert "deploy-now" not in doc
+
+
 def test_index_wired_harness_titles_use_runtime_logic_naming():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Prime Runtime Logic" in doc
@@ -969,6 +1053,19 @@ def test_bridge_exposes_federation_horizon_route():
     assert "function federationHorizonSnapshot()" in doc
     assert "meridian_core.federation_horizon_snapshot" in doc
     assert "req.method === 'GET' && req.url === BRIDGE_ROUTES.federationHorizon" in doc
+
+
+def test_bridge_exposes_release_autonomy_route():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "primeAutonomyReleaseSnapshot: true" in doc
+    assert "primeAutonomyRelease: '/bridge/prime-autonomy'" in doc
+    assert "function primeAutonomyReleaseSnapshot()" in doc
+    assert "meridian_core.release_autonomy_snapshot" in doc
+    assert (
+        "req.method === 'GET' && req.url === BRIDGE_ROUTES.primeAutonomyRelease"
+    ) in doc
+    assert "BRIDGE_CAPABILITIES.primeAutonomyReleaseSnapshot" in doc
+    assert "Prime Autonomy Release snapshot returned invalid JSON" in doc
 
 
 def test_bridge_exposes_reviewed_display_only_capability_routes():

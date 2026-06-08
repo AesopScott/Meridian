@@ -1135,6 +1135,13 @@ def make_default_map() -> FileMap:
             related_tests=[],
             notes="V2 entry-point. Read before implementing stronger Prime autonomy or expanding harness delegation.",
         ),
+        FileMapEntry(
+            path="meridian_core/release_autonomy_snapshot.py",
+            area=FileArea.PRIME_AUTONOMY,
+            purpose="Display-only Autonomy/Release snapshot for the Electron Release panel: wraps Prime autonomy's DeepSeek validation non-authority export into a safe posture payload for `/bridge/prime-autonomy`.",
+            related_tests=["tests/test_bifrost_cockpit.py"],
+            notes="No release execution, deployment, credential/account probing, raw prompt/response/evidence bodies, raw worker chat, PIDs, or absolute/local filesystem paths. Bifrost/Electron consumes it as display-only status; it is not a release executor.",
+        ),
 
         # -- Bifrost / session harness ---------------------------------
         FileMapEntry(

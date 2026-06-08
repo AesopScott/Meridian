@@ -149,6 +149,7 @@ _REQUIRED_PATHS = [
     "docs/v2-package-api-surface-note.md",
     "docs/v2-progress-tracker.md",
     "docs/prime-autonomy-v2-contract.md",
+    "meridian_core/release_autonomy_snapshot.py",
     "docs/bifrost-session-queue-activation-brief.md",
     "meridian_core/cockpit_state.py",
     "meridian_core/cockpit_provider.py",
