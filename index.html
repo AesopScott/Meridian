@@ -5401,7 +5401,7 @@ body {
       ]), true),
     ].join('');
   };
-  const renderProviderBalanceSnapshot = (snapshot) => {
+  const renderProviderBalanceSnapshot = (snapshot, modelsSnapshot = null) => {
     if (!snapshot?.ok) {
       return relaySection('Provider balance source', relayGrid([
         ['status', 'offline'],
@@ -5416,6 +5416,7 @@ body {
     const balance = snapshot.provider_balance || {};
     const providers = Array.isArray(balance.providers) ? balance.providers : [];
     const evidence = Array.isArray(balance.evidence_refs) ? balance.evidence_refs : [];
+    const models = Array.isArray(modelsSnapshot?.models) ? modelsSnapshot.models : [];
     return [
       relaySection('Provider balance source', relayGrid([
         ['source', snapshot.source || 'unknown'],
@@ -5435,6 +5436,17 @@ body {
         ['visibility owner', 'Prime visibility from Relay / Model Harness evidence'],
         ['route authority', 'advisory display only; no route selection or mutation from Balance'],
       ]), true),
+      relaySection('CLI/account readiness', models.length
+        ? models.map((model) => relayGrid([
+          ['backend', model.backend || 'unknown'],
+          ['cli', model.cli || 'unknown'],
+          ['readiness', model.installed ? 'available' : 'setup required'],
+          ['setup guidance', model.installed ? 'ready for manual prompt sends' : (model.setupHint || 'Install and sign in before use')],
+        ])).join('')
+        : relayGrid([
+          ['models source', modelsSnapshot?.ok ? 'no local backends reported' : 'models snapshot unavailable'],
+          ['account readiness', 'informational only; no account probing'],
+        ]), true),
       ...providers.map((provider, index) => relaySection(
         `Provider ${index + 1}: ${provider.display_name || provider.provider_id || 'unknown'}`,
         relayGrid([
@@ -6150,9 +6162,13 @@ body {
     const logicNode = rightWorkspace?.querySelector('[data-provider-balance]');
     if (!logicNode) return;
     try {
-      const response = await fetch(bridgeUrl('provider-balance'), { cache: 'no-store' });
-      const snapshot = await response.json();
-      logicNode.innerHTML = renderProviderBalanceSnapshot(snapshot);
+      const [providerBalanceResponse, modelsResponse] = await Promise.all([
+        fetch(bridgeUrl('provider-balance'), { cache: 'no-store' }),
+        fetch(bridgeUrl('models'), { cache: 'no-store' }),
+      ]);
+      const providerBalanceSnapshot = await providerBalanceResponse.json();
+      const modelsSnapshot = await modelsResponse.json();
+      logicNode.innerHTML = renderProviderBalanceSnapshot(providerBalanceSnapshot, modelsSnapshot);
     } catch (error) {
       logicNode.innerHTML = renderProviderBalanceSnapshot({ ok: false, error: error.message });
     }

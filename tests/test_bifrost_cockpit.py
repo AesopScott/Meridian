@@ -1370,7 +1370,7 @@ def test_index_crosscheck_renders_review_findings_and_proof_status_safely():
 def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     provider_balance = doc[
-        doc.index("const renderProviderBalanceSnapshot = (snapshot) =>"):
+        doc.index("const renderProviderBalanceSnapshot = (snapshot"):
         doc.index("const renderGoalRuntimeSnapshot")
     ]
     assert "const providerMetricLabel = (value) => (value === 0 || value ? String(value) : 'unknown')" in provider_balance
@@ -1397,7 +1397,7 @@ def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
 def test_index_provider_balance_frames_provider_comparison_without_route_mutation():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     provider_balance = doc[
-        doc.index("const renderProviderBalanceSnapshot = (snapshot) =>"):
+        doc.index("const renderProviderBalanceSnapshot = (snapshot"):
         doc.index("const renderGoalRuntimeSnapshot")
     ]
 
@@ -1420,6 +1420,33 @@ def test_index_provider_balance_frames_provider_comparison_without_route_mutatio
     assert "bridgeUrl('call-result')" not in provider_balance
     assert "method: 'POST'" not in provider_balance
     assert "does not mutate routing, enable Auto, post a prompt, call a provider, or bypass Relay/Aegis policy" in provider_balance
+
+
+def test_index_provider_balance_renders_cli_readiness_from_models_snapshot_without_account_probe():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    provider_balance = doc[
+        doc.index("const renderProviderBalanceSnapshot = (snapshot") :
+        doc.index("const renderGoalRuntimeSnapshot")
+    ]
+    loader = doc[
+        doc.index("const loadProviderBalance = async () =>"):
+        doc.index("const loadGoalRuntime = async () =>")
+    ]
+
+    assert "modelsSnapshot = null" in provider_balance
+    assert "Array.isArray(modelsSnapshot?.models) ? modelsSnapshot.models : []" in provider_balance
+    assert "CLI/account readiness" in provider_balance
+    assert "model.installed ? 'available' : 'setup required'" in provider_balance
+    assert "model.setupHint || 'Install and sign in before use'" in provider_balance
+    assert "account readiness" in provider_balance
+    assert "informational only; no account probing" in provider_balance
+    assert "fetch(bridgeUrl('provider-balance'), { cache: 'no-store' })" in loader
+    assert "fetch(bridgeUrl('models'), { cache: 'no-store' })" in loader
+    assert "renderProviderBalanceSnapshot(providerBalanceSnapshot, modelsSnapshot)" in loader
+    assert "method: 'POST'" not in provider_balance
+    assert "bridgeUrl('message')" not in provider_balance
+    assert "bridgeUrl('call-result')" not in provider_balance
+    assert "probe accounts" not in provider_balance
 
 
 def test_index_provider_balance_handoff_switches_surfaces_without_backend_mutation():
@@ -2046,6 +2073,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | wired |" in doc
     assert "Provider Balance renders Open Models and Open Settings handoff controls" in doc
     assert "do not mutate routing, enable Auto, post prompts, call providers, or bypass Relay/Aegis policy" in doc
+    assert "| BAL2 | CLI/account readiness | Shows CLI installed/authenticated state for local backends. | wired |" in doc
+    assert "Spark Balance fetches `/bridge/models` beside `/bridge/provider-balance`" in doc
     assert "| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | wired |" in doc
     assert "Spark Balance renders a Provider comparison frame backed by `/bridge/provider-balance`" in doc
     assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
