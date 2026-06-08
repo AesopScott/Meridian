@@ -1267,7 +1267,27 @@ def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
     assert "Public users need their own provider accounts, keys, subscriptions, or local CLIs before a backend can be used." in provider_balance
     assert "does not probe account balances, credentials, billing portals, or provider secrets" in provider_balance
     assert "Routing recommendations remain advisory until Relay/Model Harness owns and exposes a reviewed routing decision." in provider_balance
+    assert "Manual override handoff" in provider_balance
+    assert 'data-balance-handoff="models"' in provider_balance
+    assert 'data-balance-handoff="settings"' in provider_balance
+    assert "This handoff only changes the visible surface; it does not mutate routing, enable Auto, post a prompt, call a provider, or bypass Relay/Aegis policy." in provider_balance
     assert "method: 'POST'" not in provider_balance
+
+
+def test_index_provider_balance_handoff_switches_surfaces_without_backend_mutation():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    handler_start = doc.index("const sparkButtonByLabel = (label) =>")
+    handler_end = doc.index("buttons.forEach((button) =>", handler_start)
+    handler = doc[handler_start:handler_end]
+    assert "rightWorkspace?.addEventListener('click', (event) =>" in handler
+    assert "[data-balance-handoff]" in handler
+    assert "handoff.dataset.balanceHandoff === 'models' ? 'Models' : 'Settings'" in handler
+    assert "activateSparkButton(targetButton);" in handler
+    assert "fetch(" not in handler
+    assert "bridgeUrl('message')" not in handler
+    assert "method: 'POST'" not in handler
+    assert "restartModelBridge" not in handler
+    assert "call-result" not in handler
 
 
 def test_index_routines_surface_combines_goal_and_workflow_typed_state():
@@ -1860,6 +1880,9 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "`unexpected_growth_delta` and `q_mode_prompt_drag_degraded`" in doc
     assert "| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | wired |" in doc
     assert "account balance, credential, billing, secret probing, and route mutation stay unavailable" in doc
+    assert "| BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | wired |" in doc
+    assert "Provider Balance renders Open Models and Open Settings handoff controls" in doc
+    assert "do not mutate routing, enable Auto, post prompts, call providers, or bypass Relay/Aegis policy" in doc
     assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
     assert "| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired |" in doc
     assert "| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired |" in doc

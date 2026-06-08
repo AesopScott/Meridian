@@ -2028,6 +2028,29 @@ body {
   box-shadow: 0 0 5px rgba(var(--session-electric), 0.6);
 }
 
+.relay-models-handoff {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.relay-models-handoff button {
+  min-height: 28px;
+  border: 1px solid rgba(var(--session-electric), 0.45);
+  background: rgba(var(--session-deep), 0.58);
+  color: rgb(var(--session-electric-soft));
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.relay-models-handoff button:focus-visible,
+.relay-models-handoff button:hover {
+  border-color: rgba(var(--session-electric), 0.8);
+  color: rgb(var(--session-electric));
+}
+
 .prime-logic-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5401,6 +5424,17 @@ body {
         'This Balance surface displays backend-supplied posture and evidence refs only; it does not probe account balances, credentials, billing portals, or provider secrets.',
         'Routing recommendations remain advisory until Relay/Model Harness owns and exposes a reviewed routing decision.',
       ]), true),
+      relaySection('Manual override handoff', `
+        <div class="relay-models-handoff" aria-label="Manual override handoff">
+          <button type="button" data-balance-handoff="models">Open Models</button>
+          <button type="button" data-balance-handoff="settings">Open Settings</button>
+        </div>
+        ${relayList([
+          'Use Models for manual backend readiness and recent-call metadata.',
+          'Use Settings for public CLI setup guidance.',
+          'This handoff only changes the visible surface; it does not mutate routing, enable Auto, post a prompt, call a provider, or bypass Relay/Aegis policy.',
+        ])}
+      `, false),
     ].join('');
   };
   const renderGoalRuntimeSnapshot = (snapshot) => {
@@ -9019,6 +9053,16 @@ body {
     next.focus({ preventScroll: true });
     openSpark();
   };
+  const sparkButtonByLabel = (label) => buttons.find((button) => button.getAttribute('aria-label') === label);
+  rightWorkspace?.addEventListener('click', (event) => {
+    const handoff = event.target.closest?.('[data-balance-handoff]');
+    if (!handoff) return;
+    const targetLabel = handoff.dataset.balanceHandoff === 'models' ? 'Models' : 'Settings';
+    const targetButton = sparkButtonByLabel(targetLabel);
+    if (!targetButton) return;
+    event.preventDefault();
+    activateSparkButton(targetButton);
+  });
   buttons.forEach((button) => {
     button.addEventListener('click', async () => {
       const actionLabel = button.getAttribute('aria-label') || '';
