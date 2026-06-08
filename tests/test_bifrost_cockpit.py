@@ -644,6 +644,11 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "aria-pressed" in doc
     assert "Pinned skills" in doc
     assert "pinned for active project/user" in doc
+    assert "Active project skills" in doc
+    assert "project-scoped pins" in doc
+    assert "global fallback capabilities" in doc
+    assert "active project context plus UI-local pins over loaded backend metadata" in doc
+    assert "project changes refresh this section and use that project pin bucket" in doc
     assert "path:string required repo-relative; area:string optional; related_tests:string[] default []" in doc
     assert "backend:string required from /bridge/models; prompt:text supplied only in Prime/User prompt after manual model selection; auto:boolean default false" in doc
     assert "argument schema" in doc
@@ -674,6 +679,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "enable Auto routing" in skills_registry
     assert "row.arguments" in skills_registry
     assert "bridgeUrl('skills')" not in skills_registry
+    assert "project-skills" not in skills_registry
     assert "bridgeUrl('message')" not in skills_registry
     assert "bridgeUrl('call-result')" not in skills_registry
     assert "method: 'POST'" not in skills_registry
@@ -2355,6 +2361,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "without fake skills backend, install/login/account probing, Auto routing, prompt send, file mutation, or skill execution" in doc
     assert "| SKL1 | Search skills | Dynamically search skills by name, purpose, provider, project, or keyword. | wired |" in doc
     assert "| SKL2 | Global skills | Shows skills available across all projects. | wired |" in doc
+    assert "| SKL3 | Project skills | Shows skills available for the active project. | wired |" in doc
+    assert "Skills Registry renders an Active project skills section keyed to `activeProjectContext()`" in doc
     assert "| SKL4 | Model/backend skills | Shows which skills are available by Codex, Max/Claude, or other backend. | wired |" in doc
     assert "| SKL5 | Skill description | Explains what each skill does in user-readable language. | wired |" in doc
     assert "| SKL6 | Arguments schema | Shows required and optional arguments for each skill. | wired |" in doc

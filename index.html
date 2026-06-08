@@ -5974,6 +5974,14 @@ body {
         'Argument schemas are display-only metadata; they do not execute skills, validate user prompts, assemble model payloads, or call providers.',
         'Pins persist locally for the active project/user UI profile and only reorder already loaded rows; they do not change backend skills, routes, files, accounts, or providers.',
       ]), true),
+      relaySection('Active project skills', relayGrid([
+        ['active project', activeProjectContext()],
+        ['project-scoped pins', pinnedRows.length],
+        ['global fallback capabilities', rows.length],
+        ['scope source', 'active project context plus UI-local pins over loaded backend metadata'],
+        ['project switch behavior', 'project changes refresh this section and use that project pin bucket'],
+        ['mutation authorized', 'no'],
+      ]), true),
       relaySection('Pinned skills', pinnedRows.length
         ? pinnedRows.map((row) => relayGrid([
           ['name', row.name || 'unknown'],
