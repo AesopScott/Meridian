@@ -71,6 +71,97 @@ Required proof before Ready marker:
 Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
 
+### Build 3 Atlas Workflow Adapter FileMap Registration Ready (2026-06-08T17:30:00-06:00)
+
+Status: implementation complete on this detached worktree; awaiting Codex
+Review A/B before any promotion to main. Stopped here per task scope.
+
+Worktree:
+`C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780960991255`.
+
+Source-of-authority commits this slice registers:
+
+- `7ba931bac` (`workflow: add atlas adapter`) — promoted Atlas Workflow
+  Adapter backend slice.
+- `a73bfe58a` (`docs(build-3): queue atlas adapter filemap registration`)
+  — queued this registration task on Build 3.
+
+Files changed (registration-only, scoped to the four allowed files):
+
+- `meridian_core/filemap.py` — added `FileArea.WORKFLOW_ATLAS`
+  ("Atlas Workflow Adapter") and two new `FileMapEntry` rows
+  (`meridian_core/workflow_atlas.py`, `tests/test_workflow_atlas.py`)
+  placed immediately after the existing Workflow Dispatch entries,
+  matching the Workflow Dispatch / Atlas registration style. Ownership
+  reads "Atlas Workflow Adapter / Workflow Sub-Agent Harness" with
+  Prime coordination issuing work orders and Atlas retrieval providing
+  the promoted query surface; the module is described as a pure
+  deterministic adapter that builds Atlas `WorkflowWorkOrder`s, decodes
+  typed inputs back into `AtlasQuery`, filters FileMap candidates
+  through promoted workflow path scope, fails closed on out-of-scope
+  FileMap/DOC result paths, preserves Echo `echo://` refs, preserves
+  `AtlasResult` shape, avoids private Workflow Dispatch helpers, and
+  performs no live workflow execution, process/session control, model
+  calls, network calls, UI/Electron/Bifrost behavior, Echo/FileMap
+  durable writes, provider/account calls, branch/worktree movement, or
+  FileMap self-registration.
+- `docs/FileMap.md` — added two matching human-readable rows in the
+  same area (`Atlas Workflow Adapter`), inserted directly after the
+  Workflow Dispatch rows.
+- `tests/test_filemap.py` — added `meridian_core/workflow_atlas.py`
+  and `tests/test_workflow_atlas.py` to `_REQUIRED_PATHS` so the
+  `TestDefaultMap` required-files-present and injection-summary
+  coverage tests assert the new registrations. The test file
+  registers `tests/test_workflow_atlas.py` as the 63-test proof
+  suite, with Review A/B regressions covering required-path scope,
+  display safety, sidecar-query avoidance, empty-query success, Echo
+  preservation, and non-required FileMap/DOC path-scope leakage.
+- `docs/live-build-3.md` — this completion marker only.
+
+No changes to Atlas adapter implementation, Atlas adapter tests,
+Workflow Dispatch implementation/tests, Atlas retrieval
+implementation/tests, Bifrost/Electron/UI files, generated artifacts,
+package files, worker queues outside this file, or runtime behavior.
+
+Proof:
+
+- `python -m pytest tests/test_filemap.py tests/test_workflow_atlas.py -q`
+  → `110 passed in 0.49s`. The new `_REQUIRED_PATHS` entries assert
+  both `meridian_core/workflow_atlas.py` and
+  `tests/test_workflow_atlas.py` are present, have non-empty
+  purpose/area, and appear in the injection summary; the existing
+  63-test Atlas Workflow Adapter suite continues to pass unchanged.
+- `git diff --check -- meridian_core/filemap.py docs/FileMap.md
+  tests/test_filemap.py docs/live-build-3.md` → exit 0 (no whitespace
+  errors).
+- `git diff --name-only` → `.mcp.json` (pre-existing, not touched by
+  this task), `docs/FileMap.md`, `meridian_core/filemap.py`,
+  `tests/test_filemap.py`. Adding this marker also touches
+  `docs/live-build-3.md`. All four task-touched files are inside the
+  allowed-file set; `.mcp.json` was already dirty in the worktree at
+  task start (per initial `git status`) and is not modified by this
+  slice.
+
+Remaining risk:
+
+- The runtime FileMap entries and the human-readable FileMap.md rows
+  were authored in parallel from the same source-of-authority text and
+  must stay in sync; a future change to the adapter contract that is
+  recorded in only one surface would re-open the drift this slice
+  closes. Both surfaces should be edited together in the same slice.
+- The new `FileArea.WORKFLOW_ATLAS` constant is the only newly-exposed
+  filemap symbol; consumers that enumerate `FileArea` values will see
+  this added category. No existing area constants were renamed or
+  removed.
+- This slice does not touch Atlas adapter runtime, Workflow Dispatch
+  runtime, Atlas retrieval runtime, or any UI surface; the
+  registration is descriptive only and cannot regress runtime
+  behavior. The promoted `7ba931bac` runtime risk notes in
+  `docs/live-build-1.md` continue to govern the adapter itself.
+- Codex Review A/B has not yet run on this registration slice.
+  Promotion to `main` is gated on both reviews per Build 3 policy and
+  must not occur from this worktree.
+
 ## Completed / Review-Cleared / Promoted To Main - Workflow Dispatch FileMap Registration
 
 Timestamp: 2026-06-07T17:15:00-06:00.

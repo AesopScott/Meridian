@@ -124,6 +124,8 @@ _REQUIRED_PATHS = [
     "tests/test_provider_balance.py",
     "meridian_core/workflow_dispatch.py",
     "tests/test_workflow_dispatch.py",
+    "meridian_core/workflow_atlas.py",
+    "tests/test_workflow_atlas.py",
     "docs/filemap-v2-v3-discoverability-audit.md",
     "docs/prime-status-console-cli-brief.md",
     "docs/non-orchestrator-surface-naming.md",
