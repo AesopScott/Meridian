@@ -1064,6 +1064,25 @@ def test_index_spark_and_workflow_surfaces_use_bridge_snapshots():
     assert "status_policy" in doc
 
 
+def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    provider_balance = doc[
+        doc.index("const renderProviderBalanceSnapshot = (snapshot) =>"):
+        doc.index("const renderGoalRuntimeSnapshot")
+    ]
+    assert "const providerMetricLabel = (value) => (value === 0 || value ? String(value) : 'unknown')" in provider_balance
+    assert "const providerTokenLabel = (value) => `${providerMetricLabel(value)} tokens`" in provider_balance
+    assert "const providerPromptBudgetLabel = (provider) =>" in provider_balance
+    assert "providerTokenLabel(provider.context_budget_tokens)" in provider_balance
+    assert "providerPromptBudgetLabel(provider)" in provider_balance
+    assert "relayText(provider.quota_state)" in provider_balance
+    assert "relayText(provider.credit_status)" in provider_balance
+    assert "provider.remaining_credit_label || ''" in provider_balance
+    assert "provider.estimated_spend_label || 'unavailable'" in provider_balance
+    assert "relayJoin(provider.evidence_refs)" in provider_balance
+    assert "method: 'POST'" not in provider_balance
+
+
 def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert 'aria-label="Routines"' in doc
@@ -1392,6 +1411,7 @@ def test_bridge_exposes_reviewed_display_only_capability_routes():
     assert "meridian_core.workflow_dispatch" in doc
     assert '"display_only": True' in doc
     assert '"mutation_authorized": False' in doc
+    assert '"summary": "Display-safe provider balance summary; no live account probing."' in doc
 
 
 def test_bridge_exposes_memory_retrieval_and_filemap_routes():
@@ -1553,6 +1573,14 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
     assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
     assert "/bridge/provider-balance" in doc
+    assert "| BAL3 | Token usage | Shows token use when a backend reports it. | partial |" in doc
+    assert "missing token numbers display as unknown, not zero" in doc
+    assert "| BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | partial |" in doc
+    assert "no live billing lookup is implied" in doc
+    assert "| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | partial |" in doc
+    assert "account balance probing remains unavailable" in doc
+    assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | partial |" in doc
+    assert "fuller Relay `PromptPayloadSnapshot` growth details remain deferred" in doc
     assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
     assert "| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired |" in doc
     assert "| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired |" in doc
@@ -1582,6 +1610,8 @@ def test_model_harness_taxonomy_stays_ui_strategy_until_promoted():
     assert "## Future Taxonomy Promotion Gate" in doc
     assert "display vocabulary, not a hard backend naming convention" in doc
     assert "Existing backend names and contract names remain authoritative" in doc
+    assert "Architecture taxonomy from `2-Architecture.md` is treated the same way for now" in doc
+    assert "useful UI/strategy vocabulary" in doc
     assert "canonical taxonomy name list" in doc
     assert "must not create new Python enums, dataclasses, route fields, or package exports directly from UI-only labels" in doc
     assert "already-reviewed surfaces" in doc

@@ -296,11 +296,11 @@ The Balance icon owns provider balance, cost pressure, prompt payload, and routi
 |---|---|---|---|---|
 | BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired | Spark Balance renders display-safe provider health from `/bridge/provider-balance`; missing data remains unknown rather than guessed. |
 | BAL2 | CLI/account readiness | Shows CLI installed/authenticated state for local backends. | partial | Codex and Max readiness match `/bridge/models`. |
-| BAL3 | Token usage | Shows token use when a backend reports it. | planned | Unknown usage displays as unknown, not zero. |
-| BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | planned | Missing data produces no fake cost. |
-| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | planned | Unknown quota displays as unavailable. |
+| BAL3 | Token usage | Shows token use when a backend reports it. | partial | Spark Balance renders backend-supplied context/prompt budget metrics from `/bridge/provider-balance`; missing token numbers display as unknown, not zero. |
+| BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | partial | Spark Balance renders backend-supplied spend labels only; missing spend displays as unavailable and no live billing lookup is implied. |
+| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | partial | Spark Balance renders backend-supplied quota/credit posture labels only; account balance probing remains unavailable. |
 | BAL6 | Cost pressure warning | Warns when cost, quota, or budget pressure should influence routing. | wired | Spark Balance renders backend cost-pressure state from `/bridge/provider-balance` without changing routing by itself. |
-| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | planned | Uses `PromptPayloadSnapshot` style metrics. |
+| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | partial | Spark Balance renders provider-balance prompt budget metrics; fuller Relay `PromptPayloadSnapshot` growth details remain deferred. |
 | BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | planned | Growth warning appears from Relay metrics. |
 | BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | partial | Spark Balance shows backend-sourced provider posture and evidence refs; route recommendations remain advisory/display-only and remain Relay/Model Harness-owned. |
 | BAL10 | Routing recommendation | Shows Prime intent plus Relay/Model recommendation once routing logic exists. | planned | Recommendation is labeled as recommendation, not automatic action, and does not bypass Relay/Aegis policy. |

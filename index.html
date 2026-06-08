@@ -5348,6 +5348,11 @@ body {
         ['backend error', snapshot?.error || 'Provider balance snapshot unavailable'],
       ]), true);
     }
+    const providerMetricLabel = (value) => (value === 0 || value ? String(value) : 'unknown');
+    const providerTokenLabel = (value) => `${providerMetricLabel(value)} tokens`;
+    const providerPromptBudgetLabel = (provider) => (
+      `${providerMetricLabel(provider.current_prompt_tokens)}/${providerMetricLabel(provider.prompt_budget_tokens)} tokens (${providerMetricLabel(provider.prompt_budget_percent)}%)`
+    );
     const balance = snapshot.provider_balance || {};
     const providers = Array.isArray(balance.providers) ? balance.providers : [];
     const evidence = Array.isArray(balance.evidence_refs) ? balance.evidence_refs : [];
@@ -5373,8 +5378,8 @@ body {
           ['trust', relayText(provider.trust_state)],
           ['health', relayText(provider.health)],
           ['route', relayText(provider.route_kind)],
-          ['context budget', `${provider.context_budget_tokens ?? 0} tokens`],
-          ['prompt budget', `${provider.current_prompt_tokens ?? 0}/${provider.prompt_budget_tokens ?? 0} tokens (${provider.prompt_budget_percent ?? 0}%)`],
+          ['context budget', providerTokenLabel(provider.context_budget_tokens)],
+          ['prompt budget', providerPromptBudgetLabel(provider)],
           ['cost pressure', relayText(provider.cost_pressure)],
           ['quota', relayText(provider.quota_state)],
           ['credit', `${relayText(provider.credit_status)} ${provider.remaining_credit_label || ''}`.trim()],

@@ -512,6 +512,8 @@ These tests belong in `tests/test_model_adapter.py` alongside existing `test_*mo
 
 The current Model Harness UI taxonomy is a display vocabulary, not a hard backend naming convention. Existing backend names and contract names remain authoritative.
 
+Architecture taxonomy from `2-Architecture.md` is treated the same way for now: useful UI/strategy vocabulary for describing the product shape, but not a source of new backend enums, dataclasses, route fields, package exports, or dispatch keys until a reviewed promotion pass says otherwise.
+
 Before any future backend promotion of Model Harness taxonomy terms, do a small normalization pass that creates one canonical taxonomy name list and maps UI labels to backend-owned concepts. That pass must preserve existing names unless there is a reviewed migration reason, and it must not create new Python enums, dataclasses, route fields, or package exports directly from UI-only labels.
 
 Backend binding for V2 should only use the already-reviewed surfaces represented by `ModelHarnessMetadata`, Relay dispatch/evidence records, Aegis policy evidence, provider balance summaries, prompt payload meter evidence, and DeepSeek validation/transport gates.
