@@ -90,7 +90,7 @@ The Prime panel's Projects dropdown selects the active project context for Prime
 | PRJ4 | Current project label | Displays the selected project name clearly. | wired | Selected project stays visible in the dropdown and Prime status reads `Compass project <project>`. |
 | PRJ5 | Last project restore | Restores last selected project when allowed by Settings. | wired | Reload restores `meridian.session.project`; invalid/missing stored value falls back to Meridian. |
 | PRJ6 | Project-scoped surfaces | Updates project-scoped backlog, review, progress, and session lists. | planned | Changing project updates dependent surfaces together. |
-| PRJ7 | User session independence | Does not silently route User prompts until a User session is selected. | wired | Vulcan owns this session lifecycle guard: project change updates Compass context only; User send remains blocked without a bridge-confirmed live session target. |
+| PRJ7 | User session independence | Routes User prompts only to a bridge-confirmed live User session target. | wired | Vulcan owns this session lifecycle guard: project change updates Compass context only; User send remains blocked until `/bridge/user-sessions` confirms a live target, either restored from prior selection or selected from the live target list. |
 | PRJ8 | Session list filtering | User Sessions dropdown filters/group-emphasizes sessions for selected project while still showing all live sessions by project. | wired | Vulcan owns this session lifecycle grouping: all projects remain visible and the active Compass project optgroup is marked `(active project)`. |
 | PRJ9 | Missing project state | Handles project with no live sessions or no loaded metadata clearly. | wired | Vulcan owns this empty live-session state: active project with no sessions shows `No live sessions for active project` without faking a route. |
 | PRJ10 | Project metadata | Shows or links working directory, repo, branch, and project status when that surface exists. | planned | Metadata comes from project state, not hard-coded labels. |
@@ -131,9 +131,9 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
 | SK9 | Close | Closes targeted session/surface after forcing write-through and Obsidian capture when applicable. | partial | Transient surface close is wired; session close/write-through remains tracked in `CLS-*`. |
 | SK10 | Archive | Opens reloadable session archive and preserves context for future session revival. | partial | Spark Archive opens Session Close Archive Proof from `/bridge/session-close-archive-proof`; it is display-only and must not close, delete, replay, or expose raw prompt/worker chat. |
-| SK11 | Reset | Confirms, clears session-window prompts/transcripts, then hard reloads UI. | partial | Track `RST-*` subitems before changing reset behavior. |
-| SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | partial | Track `RLD-*` subitems before changing reload behavior. |
-| SK13 | Routines | Opens routine/automation surface. | partial | Spark Routines opens backend-sourced Goal Runtime status, not runnable automation; no fake routine execution or self-approval. |
+| SK11 | Reset | Confirms, clears session-window prompts/transcripts, then hard reloads UI. | wired | `RST-*` subitems are wired: reset clears visible local prompt/transcript state, asks `/bridge/restart`, and does not close live sessions or claim memory deletion. |
+| SK12 | Reload | Hard reloads UI/cache without clearing session-window state. | wired | `RLD-*` subitems are wired: reload refreshes the UI/cache while preserving session target and visible prompt/transcript state. |
+| SK13 | Routines | Opens current runtime/goal status until a routine automation backend exists. | partial | Spark Routines opens backend-sourced Goal Runtime status, not runnable automation; no fake routine execution or self-approval. |
 | SK14 | Balance | Opens balance/provider/routing view. | wired | Spark Balance opens Provider Balance from `/bridge/provider-balance` with display-safe provider/routing posture and no raw prompt/response/evidence bodies. |
 
 ### Spark Surface Subitems
@@ -423,7 +423,7 @@ Close is a targeted session-control action, not merely closing a panel. It shoul
 
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| VO1 | Speech mode icon | Enables/disables first-class spoken interaction with Prime through Spark. | partial | Voice I/O status is rendered from `/bridge/voice-io`, but all voice controls are display-only/disabled and do not capture audio or speak responses. |
+| VO1 | Speech mode icon | Shows first-class spoken interaction as unavailable until capture/output backends exist. | partial | Voice I/O status is rendered from `/bridge/voice-io`; the top speech-mode icon and Voice I/O controls are display-only/disabled and do not capture audio or speak responses. |
 
 ### Speech / Voice Subitems
 
@@ -486,7 +486,7 @@ Harness mode is for reviewing and updating harness logic items. It may expose di
 | ID | Harness Mode Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | HMS1 | Enter harness mode | Clicking a harness button switches the right panel into Harness mode. | wired | Right panel title/target changes to selected harness. |
-| HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | planned | Return to User Session restores prior session or stale warning. |
+| HMS2 | Preserve User Session mode | Previous User Session target is preserved when entering Harness mode. | wired | Return to User Session restores the prior `meridian.user-session.target.v1` target or shows the stale-target warning if the session disappeared. |
 | HMS3 | Harness logic list | Shows a full-panel list of logic items for the selected harness. | partial | Harness mode opens with logic/backend-link sections, not a prompt window or blank chat. |
 | HMS4 | Prime review path | Prime reviews harness logic items before model interaction. | planned | Logic item has Prime review state before dispatch. |
 | HMS5 | Relay-mediated model interaction | Model calls for harness logic go through Relay routing. | planned | Dispatch metadata names Relay route/model target. |

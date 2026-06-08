@@ -233,6 +233,45 @@ def test_index_model_harness_icons_open_model_surface():
     assert "What proof shows the model action followed that logic?" in doc
 
 
+def test_index_has_single_reachable_harness_dock():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert doc.count('<div class="harness-dock-wrap"') == 1
+    assert doc.count('class="harness-dock harness-dock-bottom harness-model-dock"') == 1
+    assert doc.count('data-harness="Release"') == 1
+    assert 'data-harness="Workflow" data-status="stable"' in doc
+    assert 'data-harness="Federation" data-status="stable"' in doc
+    assert 'data-harness="Echo" data-status="stable"' in doc
+    assert 'data-harness="Atlas" data-status="stable"' in doc
+
+
+def test_index_speech_mode_icon_is_display_only():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'class="speech-mode-button"' in doc
+    assert 'aria-label="Speech mode unavailable"' in doc
+    assert 'aria-disabled="true"' in doc
+    assert " disabled>" in doc
+    assert "speechButton.addEventListener('click'" not in doc
+    assert "speechButton.setAttribute('aria-pressed'" not in doc
+
+
+def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const renderSparkSurface = (label) =>" in doc
+    assert "selectedLabel === 'Settings' ? 'voice I/O status wired' : 'not wired yet'" in doc
+    assert "unsupported until backend wiring exists" in doc
+    for label in ("Filter", "Models", "Backlog", "Skills", "Crosscheck"):
+        assert f'aria-label="{label}"' in doc
+    for route in (
+        "filter",
+        "backlog",
+        "skills",
+        "crosscheck",
+        "routines",
+        "settings",
+    ):
+        assert f"bridgeUrl('{route}')" not in doc
+
+
 def test_index_model_harness_detail_surface_names_runtime_signals():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "relaySection('Runtime signals', relayList(runtimeSignals), true)" in doc
@@ -508,6 +547,8 @@ def test_index_user_session_mode_names_target_and_preserves_storage():
     assert "User Session:" in doc
     assert "window.meridianRefreshUserSessionTarget = () =>" in doc
     assert "meridian.user-session.target.v1" in doc
+    assert "const firstLiveTarget = userSessions[0]" in doc
+    assert "userSessionSelect.value = firstLiveTarget.sessionId" in doc
     assert "localStorage.setItem(userSessionTargetKey, userSessionSelect.value)" in doc
     assert "Select a live User Session target before sending" in doc
 
