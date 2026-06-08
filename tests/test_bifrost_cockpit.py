@@ -613,14 +613,19 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "aria-pressed" in doc
     assert "Pinned skills" in doc
     assert "pinned for active project/user" in doc
+    assert "path:string required repo-relative; area:string optional; related_tests:string[] default []" in doc
+    assert "backend:string required from /bridge/models; prompt:text supplied only in Prime/User prompt after manual model selection; auto:boolean default false" in doc
+    assert "argument schema" in doc
     assert "Search skills/capabilities" in doc
     assert "Skills uses reviewed FileMap and Models bridge snapshots as capability metadata; it does not call a fake skills backend." in doc
     assert "Search is UI-local over already loaded metadata and does not send prompts, mutate files, install skills, sign in, probe accounts, or enable Auto routing." in doc
-    assert "Registry rows expose description, scope, backend/provider, setup posture, permission boundary, provenance, and a non-executing usage example." in doc
+    assert "Registry rows expose description, scope, backend/provider, setup posture, permission boundary, argument schema, provenance, and a non-executing usage example." in doc
+    assert "Argument schemas are display-only metadata; they do not execute skills, validate user prompts, assemble model payloads, or call providers." in doc
     assert "Pins persist locally for the active project/user UI profile and only reorder already loaded rows; they do not change backend skills, routes, files, accounts, or providers." in doc
     assert "backend:filemap" in doc
     assert "backend:models" in doc
     assert "permission boundary" in doc
+    assert "argument schema" in doc
     assert "usage example" in doc
     assert "Example: inspect" in doc
     assert "Example: select" in doc
@@ -636,6 +641,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "sign in" in skills_registry
     assert "probe accounts" in skills_registry
     assert "enable Auto routing" in skills_registry
+    assert "row.arguments" in skills_registry
     assert "bridgeUrl('skills')" not in skills_registry
     assert "bridgeUrl('message')" not in skills_registry
     assert "bridgeUrl('call-result')" not in skills_registry
@@ -2320,6 +2326,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| SKL2 | Global skills | Shows skills available across all projects. | wired |" in doc
     assert "| SKL4 | Model/backend skills | Shows which skills are available by Codex, Max/Claude, or other backend. | wired |" in doc
     assert "| SKL5 | Skill description | Explains what each skill does in user-readable language. | wired |" in doc
+    assert "| SKL6 | Arguments schema | Shows required and optional arguments for each skill. | wired |" in doc
+    assert "Skills Registry rows render display-only argument schema text for FileMap metadata" in doc
     assert "| SKL7 | Usage example | Shows a short example command or prompt pattern. | wired |" in doc
     assert "examples are display text only and do not execute, call providers, mutate files, send prompts, install tools, sign in, or enable Auto routing" in doc
     assert "| SKL8 | Permission boundary | Shows whether the skill reads files, writes files, uses network, or affects accounts. | wired |" in doc
