@@ -125,7 +125,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | partial | Track `SUR-*` subitems before changing panel toggle behavior. |
 | SK3 | Settings | Opens settings surface for UI/model/project/session options. | partial | Opens a Settings/Spark display surface with backend-sourced Voice I/O status; settings mutations remain blocked until explicit settings backend exists. |
 | SK4 | Filter | Controls how much data is included in a session prompt/context stream. | planned | Track `FIL-*` subitems before wiring the surface. |
-| SK5 | Models | Opens model selector/settings surface. | planned | Until wired, model selection remains in explicit selector. |
+| SK5 | Models | Opens model readiness and recent-call metadata surface. | wired | Spark Models opens Models Readiness from `/bridge/models` plus metadata-only `/bridge/recent-calls`; it does not enable Auto routing, mutate settings, or render prompt/response bodies. |
 | SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
 | SK7 | Skills | Opens searchable skill/capability registry by model, project, and global scope. | planned | Track `SKL-*` subitems before wiring the surface. |
 | SK8 | Crosscheck | Starts or opens review/cross-check surface. | planned | Until wired, it must not claim review is complete. |
@@ -273,18 +273,18 @@ The Models icon owns model visibility and manual override. It must not silently 
 
 | ID | Models Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| MOD1 | Available backends | Shows detected Codex, Max/Claude, and future model backends. | partial | `/bridge/models` populates backend availability without raw CLI errors. |
+| MOD1 | Available backends | Shows detected Codex, Max/Claude, and future model backends. | wired | Spark Models and the manual selector read `/bridge/models` for backend availability without raw CLI errors. |
 | MOD2 | Default backend | Defaults manual prompt sends to Codex until Prime/Relay auto-routing exists. | wired | Fresh page load selects Codex. |
 | MOD3 | Auto routing disabled state | Shows Auto as unavailable until Relay owns the decision logic. | wired | Auto option is disabled or clearly unavailable. |
 | MOD4 | Per-role mapping | Lists planned roles such as orchestrator, builder, reviewer, verifier, researcher, and release operator. | planned | Roles appear as mappings, not as provider-first choices. |
 | MOD5 | Manual role override | Allows user to pin a model for a role once role routing exists. | planned | Override persists and is visible in routing metadata. |
-| MOD6 | Provider setup status | Shows missing CLI/auth setup guidance for each backend. | partial | Missing backend gives install/login guidance. |
+| MOD6 | Provider setup status | Shows missing CLI/auth setup guidance for each backend. | wired | Spark Models renders display-safe setup guidance from `/bridge/models`; raw stderr and account probing are not exposed. |
 | MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | planned | Metadata comes from Model Harness, not hand-written UI claims. |
 | MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | planned | Trust state comes from Aegis/Relay evidence. |
 | MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | planned | Uses Relay prompt payload metrics, not transcript length guesses. |
-| MOD10 | Recent model calls | Shows recent call metadata without prompt text. | partial | Uses `/bridge/recent-calls`; no prompt content stored. |
+| MOD10 | Recent model calls | Shows recent call metadata without prompt text. | wired | Spark Models renders request id, channel, backend/model, result state, duration, project, target presence, and visible-context counts from `/bridge/recent-calls`; it does not call `/bridge/call-result` or render recovered bodies. |
 | MOD11 | Model label display | Response UI shows actual backend/model label when known. | partial | Send prompt; label appears below/near response. |
-| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | planned | Missing setup path is readable and non-technical enough to act on. |
+| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | partial | `/bridge/models` setup hints are visible in Spark Models; broader public onboarding copy remains deferred. |
 
 ### Balance Surface Subitems
 
@@ -292,18 +292,18 @@ The Balance icon owns provider balance, cost pressure, prompt payload, and routi
 
 | ID | Balance Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | planned | Health comes from bridge/harness checks. |
+| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired | Spark Balance renders display-safe provider health from `/bridge/provider-balance`; missing data remains unknown rather than guessed. |
 | BAL2 | CLI/account readiness | Shows CLI installed/authenticated state for local backends. | partial | Codex and Max readiness match `/bridge/models`. |
 | BAL3 | Token usage | Shows token use when a backend reports it. | planned | Unknown usage displays as unknown, not zero. |
 | BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | planned | Missing data produces no fake cost. |
 | BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | planned | Unknown quota displays as unavailable. |
-| BAL6 | Cost pressure warning | Warns when cost, quota, or budget pressure should influence routing. | planned | Warning is visible without changing routing by itself. |
+| BAL6 | Cost pressure warning | Warns when cost, quota, or budget pressure should influence routing. | wired | Spark Balance renders backend cost-pressure state from `/bridge/provider-balance` without changing routing by itself. |
 | BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | planned | Uses `PromptPayloadSnapshot` style metrics. |
 | BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | planned | Growth warning appears from Relay metrics. |
-| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | planned | Comparison separates evidence from recommendation. |
+| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | partial | Spark Balance shows backend-sourced provider posture and evidence refs; route recommendations remain advisory/display-only. |
 | BAL10 | Routing recommendation | Shows Prime/Relay recommendation once routing logic exists. | planned | Recommendation is labeled as recommendation, not automatic action. |
 | BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | planned | Override path is visible but does not bypass Relay policy. |
-| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | planned | Missing account state is user-readable. |
+| BAL12 | Public account warning | Explains public users need their own provider accounts or configured keys/CLIs. | partial | Spark Balance keeps account/credential probing unavailable; public setup guidance is shared through Models readiness until fuller onboarding exists. |
 
 ### Backlog Surface Subitems
 
@@ -349,6 +349,7 @@ The Routines icon owns recurring or repeatable work patterns. It should make rou
 
 | ID | Routine Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
+| ROU0 | Goal runtime status | Shows current continuation/goal runtime posture until routine automation exists. | wired | Spark Routines opens `/bridge/goal-runtime` as display-only status; no routine execution, scheduler mutation, or self-approval is authorized. |
 | ROU1 | Routine list | Shows configured routines for active project/system. | planned | List is real or empty; no fake routines. |
 | ROU2 | Create routine | Creates a new repeatable workflow or monitor with explicit scope. | planned | Routine has name, scope, cadence/trigger, and owner. |
 | ROU3 | Enable/disable routine | Toggles routine active state. | planned | Disabled routine does not run. |
@@ -387,6 +388,7 @@ Archive preserves reloadable sessions. It differs from long-term knowledge becau
 
 | ID | Archive Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
+| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired | Spark Archive opens `/bridge/session-close-archive-proof` as display-only proof; no live control, raw prompt, raw worker chat, replay, reload, run-again, or deletion is authorized. |
 | ARC1 | Session archive list | Shows archived sessions that can be inspected later. | planned | Archive list is real or empty; no fake sessions. |
 | ARC2 | Reload session | Restores an archived session into an active/reopened state where supported. | planned | Reloaded session preserves identity/source metadata. |
 | ARC3 | Run again | Allows rerun/resume/restart from archived session context where backend supports it. | planned | Action names the actual steering mode used. |
@@ -631,5 +633,5 @@ YYYY-MM-DD HH:MM TZ - <item#> cleared; proof: <short note>; commit: <hash>
 ```
 
 - 2026-06-01 20:02 -06:00 - Containment event: local main had implementation/UI commits touching `index.html`, `meridian_core/relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, and `tests/test_relay_logic_snapshot.py`. Preserved first head as `codex/quarantine-main-impl-6c03da75-20260601-200013`; an external child Codex app-server re-cherry-picked equivalent commits (`1292503d`, `d06f6a0b`, `8ceb7f18`) onto main, preserved as `codex/quarantine-main-impl-8ceb7f18-20260601-200218`. Stopped three `codex.exe app-server --listen stdio://` child helpers, then reset `main` clean to `origin/main` at `24520c5d`. No worker branch movement or push performed.
-- 2026-06-01 20:16 -06:00 - Containment event: local main had five implementation/UI commits ahead of `origin/main` (`bc49c722`, `f1d5ff4c`, `ba59a4f3`, `04818cc7`, `992caa8a`) touching `index.html`, `docs/ui-integration-checklist.md`, `meridian_core/relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, and `tests/test_relay_logic_snapshot.py`. Preserved head as `codex/quarantine-main-impl-992caa8a-20260601-201629`, then reset `main` clean to `origin/main` at `adc332d1`. The same implementation set reappeared with new commit ids (`feada92c`, `76efcc8f`, `fd3bd14e`, `a98e2d2c`, `00e205ed`); preserved second head as `codex/quarantine-main-impl-00e205ed-20260601-201746` and reset `main` clean to `origin/main` again. A third recurrence appeared as commits (`a5bc3d34`, `ab213410`, `3c9aba11`, `ab857311`, `53f5f205`) plus dirty Relay docs; preserved head as `codex/quarantine-main-impl-53f5f205-20260601-201847`, preserved dirty patch as `C:\Users\scott\Code\Meridian-Worktrees\quarantine-main-dirty-53f5f205-20260601-201847.patch`, and reset `main` clean to `origin/main` at `a7e150c7`. No worker branch movement or implementation push performed.
-- 2026-06-01 20:27 -06:00 - Containment event: local main had an uncommitted `index.html` Relay styling change. Preserved dirty patch as `C:\Users\scott\Code\Meridian-Worktrees\quarantine-main-dirty-index-20260601-202746.patch`, then reset `main` clean to `origin/main` at `05eb26d1`. No worker branch movement or implementation push performed.
+- 2026-06-01 20:16 -06:00 - Containment event: local main had five implementation/UI commits ahead of `origin/main` (`bc49c722`, `f1d5ff4c`, `ba59a4f3`, `04818cc7`, `992caa8a`) touching `index.html`, `docs/ui-integration-checklist.md`, `meridian_core/relay_logic_snapshot.py`, `scripts/meridian-model-bridge.js`, and `tests/test_relay_logic_snapshot.py`. Preserved head as `codex/quarantine-main-impl-992caa8a-20260601-201629`, then reset `main` clean to `origin/main` at `adc332d1`. The same implementation set reappeared with new commit ids (`feada92c`, `76efcc8f`, `fd3bd14e`, `a98e2d2c`, `00e205ed`); preserved second head as `codex/quarantine-main-impl-00e205ed-20260601-201746` and reset `main` clean to `origin/main` again. A third recurrence appeared as commits (`a5bc3d34`, `ab213410`, `3c9aba11`, `ab857311`, `53f5f205`) plus dirty Relay docs; preserved head as `codex/quarantine-main-impl-53f5f205-20260601-201847`, preserved dirty patch as `local quarantine patch preserved; path redacted`, and reset `main` clean to `origin/main` at `a7e150c7`. No worker branch movement or implementation push performed.
+- 2026-06-01 20:27 -06:00 - Containment event: local main had an uncommitted `index.html` Relay styling change. Preserved dirty patch as `local quarantine patch preserved; path redacted`, then reset `main` clean to `origin/main` at `05eb26d1`. No worker branch movement or implementation push performed.

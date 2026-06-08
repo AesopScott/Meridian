@@ -259,7 +259,7 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "const renderSparkSurface = (label) =>" in doc
     assert "selectedLabel === 'Settings' ? 'voice I/O status wired' : 'not wired yet'" in doc
     assert "unsupported until backend wiring exists" in doc
-    for label in ("Filter", "Models", "Backlog", "Skills", "Crosscheck"):
+    for label in ("Filter", "Backlog", "Skills", "Crosscheck"):
         assert f'aria-label="{label}"' in doc
     for route in (
         "filter",
@@ -270,6 +270,30 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
         "settings",
     ):
         assert f"bridgeUrl('{route}')" not in doc
+
+
+def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'aria-label="Models"' in doc
+    assert "Models Readiness" in doc
+    assert "data-spark-models" in doc
+    assert "const renderSparkModelsSnapshot = (snapshot) =>" in doc
+    assert "const loadSparkModels = async () =>" in doc
+    assert "renderSparkModels()" in doc
+    assert "bridgeUrl('models')" in doc
+    assert "bridgeUrl('recent-calls')" in doc
+    assert "request id" in doc
+    assert "visible context entries" in doc
+    assert "visible context chars" in doc
+    assert "No prompt text, response text, raw setup stderr, or recovered result bodies are rendered here." in doc
+    assert "Auto routing remains unavailable until Relay exposes an executable routing decision." in doc
+    assert "Changing models still happens through the existing manual selector" in doc
+    assert "bridgeUrl(`call-result?requestId=${encodeURIComponent(requestId)}`)" in doc
+    models_surface = doc[doc.index("const renderSparkModelsSnapshot"):doc.index("const renderReleaseAutonomySnapshot")]
+    assert "call.text" not in models_surface
+    assert "call.error" not in models_surface
+    assert "result.text" not in models_surface
+    assert "call-result" not in models_surface
 
 
 def test_index_model_harness_detail_surface_names_runtime_signals():
@@ -1246,6 +1270,31 @@ def test_ui_checklist_defers_deep_compass_and_vulcan_items_to_backend_tracker():
     assert "| HBD2 | Vulcan backend checklist |" in doc
     assert "| CMP1 | Project definition |" not in doc
     assert "| VLC1 | Session definition |" not in doc
+
+
+def test_ui_checklist_has_no_local_absolute_path_leakage():
+    doc = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
+    assert "C:\\Users\\" not in doc
+    assert "C:/Users/" not in doc
+    assert "Meridian-Worktrees\\" not in doc
+    assert "local quarantine patch preserved; path redacted" in doc
+
+
+def test_ui_checklist_pins_backend_backed_spark_surfaces():
+    doc = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
+    assert "| SK5 | Models | Opens model readiness and recent-call metadata surface. | wired |" in doc
+    assert "/bridge/models" in doc
+    assert "/bridge/recent-calls" in doc
+    assert "does not call `/bridge/call-result` or render recovered bodies" in doc
+    assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
+    assert "/bridge/provider-balance" in doc
+    assert "account/credential probing unavailable" in doc
+    assert "| ROU0 | Goal runtime status | Shows current continuation/goal runtime posture until routine automation exists. | wired |" in doc
+    assert "/bridge/goal-runtime" in doc
+    assert "no routine execution, scheduler mutation, or self-approval is authorized" in doc
+    assert "| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired |" in doc
+    assert "/bridge/session-close-archive-proof" in doc
+    assert "no live control, raw prompt, raw worker chat, replay, reload, run-again, or deletion is authorized" in doc
 
 
 def test_v2_tracker_has_deep_compass_and_vulcan_backend_items():

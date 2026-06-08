@@ -5748,6 +5748,58 @@ body {
       )),
     ].join('');
   };
+  const renderSparkModelsSnapshot = (snapshot) => {
+    if (!snapshot?.ok) {
+      return relaySection('Models bridge source', relayGrid([
+        ['status', 'offline'],
+        ['backend error', snapshot?.error || 'Models snapshot unavailable'],
+      ]), true);
+    }
+    const models = Array.isArray(snapshot.models) ? snapshot.models : [];
+    const recentCalls = Array.isArray(snapshot.recentCalls) ? snapshot.recentCalls.slice(0, 6) : [];
+    const capabilities = snapshot.capabilities || {};
+    return [
+      relaySection('Models bridge source', relayGrid([
+        ['service', snapshot.service || 'meridian-model-bridge'],
+        ['version', snapshot.version || 'unknown'],
+        ['visible context', capabilities.visibleTranscriptContext ? 'enabled' : 'blocked'],
+        ['result recovery', capabilities.requestResultRecovery ? 'metadata recovery available' : 'unavailable'],
+        ['auto routing', 'disabled until Relay owns the decision'],
+        ['mutation policy', 'display-only; manual selector still owns prompt sends'],
+      ]), true),
+      relaySection('Backend readiness', models.length
+        ? models.map((model) => relayGrid([
+          ['backend', model.backend || 'unknown'],
+          ['label', model.label || 'unknown'],
+          ['cli', model.cli || 'unknown'],
+          ['status', model.installed ? 'available' : 'setup required'],
+          ['setup guidance', model.installed ? 'ready for manual prompt sends' : (model.setupHint || 'Install and sign in before use')],
+        ])).join('')
+        : relayGrid([['status', 'no model backends reported']]), true),
+      relaySection('Recent model call metadata', recentCalls.length
+        ? recentCalls.map((call, index) => relayGrid([
+          [`call ${index + 1}`, call.at || 'unknown'],
+          ['request id', call.requestId || 'unknown'],
+          ['channel', relayText(call.channel)],
+          ['requested backend', relayText(call.requestedBackend)],
+          ['resolved backend', relayText(call.backend)],
+          ['model label', call.model || 'unknown'],
+          ['result', call.ok ? 'ok' : 'failed'],
+          ['setup required', call.setupRequired ? 'yes' : 'no'],
+          ['duration ms', call.durationMs ?? '0'],
+          ['visible context entries', call.sessionContextEntries ?? '0'],
+          ['visible context chars', call.sessionContextChars ?? '0'],
+          ['project', call.projectContext || 'unknown'],
+          ['session target present', call.sessionTargetId ? 'yes' : 'no'],
+        ])).join('')
+        : relayGrid([['status', snapshot.recentCallsError || 'no recent call metadata']]), false),
+      relaySection('Safety boundary', relayList([
+        'No prompt text, response text, raw setup stderr, or recovered result bodies are rendered here.',
+        'Auto routing remains unavailable until Relay exposes an executable routing decision.',
+        'Changing models still happens through the existing manual selector; this panel does not mutate settings.',
+      ]), true),
+    ].join('');
+  };
   const renderReleaseAutonomySnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Release autonomy source', relayGrid([
@@ -6003,6 +6055,32 @@ body {
       logicNode.innerHTML = renderVoiceIoSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVoiceIoSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadSparkModels = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-spark-models]');
+    if (!logicNode) return;
+    try {
+      const [modelsResponse, callsResponse] = await Promise.all([
+        fetch(bridgeUrl('models'), { cache: 'no-store' }),
+        fetch(bridgeUrl('recent-calls'), { cache: 'no-store' }),
+      ]);
+      const modelsSnapshot = await modelsResponse.json();
+      let recentCalls = [];
+      let recentCallsError = '';
+      try {
+        const callsSnapshot = await callsResponse.json();
+        recentCalls = Array.isArray(callsSnapshot.calls) ? callsSnapshot.calls : [];
+      } catch (error) {
+        recentCallsError = error.message;
+      }
+      logicNode.innerHTML = renderSparkModelsSnapshot({
+        ...modelsSnapshot,
+        recentCalls,
+        recentCallsError,
+      });
+    } catch (error) {
+      logicNode.innerHTML = renderSparkModelsSnapshot({ ok: false, error: error.message });
     }
   };
   const loadReleaseAutonomy = async () => {
@@ -8093,6 +8171,37 @@ body {
       return false;
     }
   };
+  const renderSparkModels = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Models readiness">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Models Readiness</div>
+            <div class="relay-models-status">Display-only</div>
+          </div>
+          <div class="relay-models-body">
+            <div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadSparkModels();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
   const renderProviderBalance = () => {
     if (!rightWindow || !rightWorkspace) return false;
     try {
@@ -8658,9 +8767,11 @@ body {
     if (userTitle) userTitle.textContent = actionLabel || 'Spark';
     const rendered = actionLabel === 'Balance'
       ? renderProviderBalance()
-      : (actionLabel === 'Routines'
-        ? renderGoalRuntime()
-        : (actionLabel === 'Archive' ? renderSessionCloseArchiveProof() : renderSparkSurface(actionLabel || 'Spark')));
+      : (actionLabel === 'Models'
+        ? renderSparkModels()
+        : (actionLabel === 'Routines'
+          ? renderGoalRuntime()
+          : (actionLabel === 'Archive' ? renderSessionCloseArchiveProof() : renderSparkSurface(actionLabel || 'Spark'))));
     if (!rendered) return;
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('spark', actionLabel || 'Spark', { persist });
