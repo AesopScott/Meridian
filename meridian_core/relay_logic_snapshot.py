@@ -167,7 +167,7 @@ def _capability_sections(tiers: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
             "title": "Prime Directives",
-            "summary": "Prime's Relay-facing routing principles are first-class section headers so the visible harness list cannot omit them.",
+            "summary": "Prime's Relay-facing model-routing principles are first-class section headers so the visible harness list cannot omit them.",
             "rows": [(item["name"], item["logic"]) for item in PRIME_DIRECTIVES],
         },
         {
