@@ -67,6 +67,29 @@ Stop after implementation and Ready marker. Do not promote to main, do not push
 to main, and do not route Codex review yourself.
 ```
 
+Coordinator pre-review risk notes for the fresh worker:
+
+- Do not copy the paused candidate's fail-open display-safety behavior. Unsafe
+  Atlas output fields should become a typed workflow error / validation failure,
+  not a successful result with fields silently blanked or hits silently dropped.
+- Enforce allowed/forbidden path scope for any Atlas required path that can
+  cause Atlas to read a doc allowlist file. The prior candidate encoded required
+  paths as a custom input kind that bypassed WorkflowInputPacket `file_path`
+  scope validation.
+- Preserve Atlas `ECHO` source compatibility. Echo conceptual refs such as
+  `echo://meridian/<record_id>` are allowed by the Atlas contract and must not
+  be silently dropped by repo-relative path validation.
+- Keep the workflow work order self-contained enough for review. If an
+  `AtlasQuery` is carried in an adapter request sidecar, tests must prove the
+  sidecar cannot diverge from the work order's typed inputs/audit records.
+- Preserve Atlas contract behavior for empty queries:
+  `AtlasQuery(terms=(), required_paths=())` should return an empty successful
+  Atlas result, not a resteer request, unless this task explicitly documents and
+  tests a narrower workflow-only precondition.
+- Avoid importing private helpers from `meridian_core.workflow_dispatch` unless
+  the task explicitly justifies why the adapter needs them and tests the
+  compatibility risk.
+
 Source of authority:
 
 - `docs/workflow-subagent-harness-contract.md`
