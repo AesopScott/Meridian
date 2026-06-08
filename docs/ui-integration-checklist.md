@@ -230,7 +230,7 @@ These are the first-pass settings subitems carried forward from Meridian's Polar
 | ID | Settings Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SET1 | Project focus | Switches active project context across Prime panel, Review Console, lane/progress state, and instrumentation. | planned | Change project; all project-scoped surfaces update together. |
-| SET2 | Last project persistence | Remembers the last active project across UI sessions. | planned | Reload; previous project is restored. |
+| SET2 | Last project persistence | Remembers the last active project across UI sessions. | wired | Project selector stores `meridian.session.project`, restores only known project options on reload, and falls back to Meridian for invalid/missing stored values. |
 | SET3 | Risk tier override | Lets Prime propose risk tier while user can pin/override for a session. | planned | Override appears in UI state and affects future routing/proof requirements. |
 | SET4 | Progress pin list | Persists pinned progress/session items. | planned | Pin item, reload, pin remains. |
 | SET5 | Progress mute list | Persists muted progress/session categories or items. | planned | Mute item/category, reload, muted state remains. |
@@ -248,7 +248,7 @@ These are the first-pass settings subitems carried forward from Meridian's Polar
 | SET17 | Session card defaults | Carries forward useful Polaris card defaults: hide/minimize/expand/pin/archive/transfer/rerun/size behavior. | planned | New session surfaces inherit defaults. |
 | SET18 | Diagnostic log visibility | Controls whether per-session diagnostic event logs are visible by default. | planned | Toggle setting; diagnostic log opens/closes without losing events. |
 | SET19 | Public CLI setup guidance | Exposes setup status/help for Codex and Max/Claude CLIs in public builds. | planned | Missing CLI/auth shows install/login guidance. |
-| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | planned | Settings surface does not expose these controls. |
+| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | wired | Settings/Spark surface exposes only display-only Voice I/O state from `/bridge/voice-io`; settings writes, message/restart/result routes, fake backend controls, and hidden harness internals remain blocked. |
 
 ### Filter Surface Subitems
 

@@ -930,11 +930,28 @@ def test_release_autonomy_snapshot_is_display_safe_backend_contract():
 def test_index_projects_selector_is_compass_context_not_user_routing():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
+    assert "const projectSelectKey = 'meridian.session.project'" in doc
+    assert "projectOptions.slice().sort((a, b) => a.localeCompare(b)).forEach((project) =>" in doc
+    assert "projectSelect.value = projectOptions.includes(storedProject) ? storedProject : 'Meridian'" in doc
+    assert "localStorage.setItem(projectSelectKey, projectSelect.value)" in doc
     assert "screen.dataset.projectContext" in doc
+    assert "primeWindow.dataset.projectContext = project" in doc
+    assert "projectSelect.dataset.projectContext = project" in doc
     assert "Compass project context:" in doc
+    assert "setStatus(input, `Compass project ${activeProjectContext()}`)" in doc
     assert "projectContext" in doc
     assert "renderUserSessionSelect();" in doc
+    assert "group.label = `${activeProject} (active project)`" in doc
+    assert "option.textContent = 'No live sessions for active project'" in doc
     assert "localStorage.setItem(userSessionTargetKey, projectSelect.value" not in doc
+
+
+def test_bridge_preserves_project_context_in_message_results_and_metadata():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "const projectContext = String(body.projectContext || 'Meridian').trim() || 'Meridian';" in doc
+    assert "result.projectContext = projectContext;" in doc
+    assert "projectContext," in doc
+    assert "calls: recentCalls.slice().reverse()" in doc
 
 
 def test_index_compass_harness_uses_backend_logic_snapshot():
@@ -1637,6 +1654,10 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "remains disabled/`aria-disabled=true`" in doc
     assert "| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | wired |" in doc
     assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
+    assert "| SET2 | Last project persistence | Remembers the last active project across UI sessions. | wired |" in doc
+    assert "falls back to Meridian for invalid/missing stored values" in doc
+    assert "| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | wired |" in doc
+    assert "settings writes, message/restart/result routes, fake backend controls, and hidden harness internals remain blocked" in doc
     assert "| ECHO0 | Display-only memory ranking | Shows memory query boundary and ranked memory summaries from the backend. | wired |" in doc
     assert "record bodies and memory mutation stay unavailable" in doc
     assert "| ATL0 | Display-only retrieval metadata | Shows retrieval query, missing paths, truncation state, and display-safe hits. | wired |" in doc
