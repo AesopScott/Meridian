@@ -373,6 +373,20 @@ def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
     assert "call-result" not in models_surface
 
 
+def test_index_model_selector_defaults_to_codex_and_keeps_auto_disabled():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert '<select class="session-model-select" aria-label="Models">' in doc
+    assert '<option value="codex" selected>Codex</option>' in doc
+    assert '<option value="max">Max</option>' in doc
+    assert '<option value="auto" disabled>Auto</option>' in doc
+    assert "const storedModel = localStorage.getItem('meridian.session.model')" in doc
+    assert "modelSelect.value = storedModel === 'auto' ? 'codex'" in doc
+    assert "if (storedModel === 'auto') localStorage.setItem('meridian.session.model', 'codex')" in doc
+    assert "localStorage.setItem('meridian.session.model', modelSelect.value || 'codex')" in doc
+    assert "const backend = selectedBackend === 'auto' ? 'codex' : selectedBackend" in doc
+    assert "Auto routing remains unavailable until Relay exposes an executable routing decision." in doc
+
+
 def test_index_response_transcripts_render_bridge_model_labels_when_known():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     transcript_renderer = doc[
