@@ -5430,6 +5430,11 @@ body {
         ['provider count', providers.length],
         ['evidence refs', evidence.length ? evidence.join(' | ') : 'none'],
       ]), true),
+      relaySection('Provider comparison', relayGrid([
+        ['comparison fields', 'trust | health | route | cost pressure | quota | credit | estimated spend | evidence refs'],
+        ['visibility owner', 'Prime visibility from Relay / Model Harness evidence'],
+        ['route authority', 'advisory display only; no route selection or mutation from Balance'],
+      ]), true),
       ...providers.map((provider, index) => relaySection(
         `Provider ${index + 1}: ${provider.display_name || provider.provider_id || 'unknown'}`,
         relayGrid([

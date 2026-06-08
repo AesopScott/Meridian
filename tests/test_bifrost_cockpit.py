@@ -1394,6 +1394,34 @@ def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
     assert "method: 'POST'" not in provider_balance
 
 
+def test_index_provider_balance_frames_provider_comparison_without_route_mutation():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    provider_balance = doc[
+        doc.index("const renderProviderBalanceSnapshot = (snapshot) =>"):
+        doc.index("const renderGoalRuntimeSnapshot")
+    ]
+
+    assert "Provider comparison" in provider_balance
+    assert "trust | health | route | cost pressure | quota | credit | estimated spend | evidence refs" in provider_balance
+    assert "Prime visibility from Relay / Model Harness evidence" in provider_balance
+    assert "advisory display only; no route selection or mutation from Balance" in provider_balance
+    for field in (
+        "relayText(provider.trust_state)",
+        "relayText(provider.health)",
+        "relayText(provider.route_kind)",
+        "relayText(provider.cost_pressure)",
+        "relayText(provider.quota_state)",
+        "relayText(provider.credit_status)",
+        "provider.estimated_spend_label || 'unavailable'",
+        "relayJoin(provider.evidence_refs)",
+    ):
+        assert field in provider_balance
+    assert "bridgeUrl('message')" not in provider_balance
+    assert "bridgeUrl('call-result')" not in provider_balance
+    assert "method: 'POST'" not in provider_balance
+    assert "does not mutate routing, enable Auto, post a prompt, call a provider, or bypass Relay/Aegis policy" in provider_balance
+
+
 def test_index_provider_balance_handoff_switches_surfaces_without_backend_mutation():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     handler_start = doc.index("const sparkButtonByLabel = (label) =>")
@@ -2018,6 +2046,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| BAL11 | Manual override handoff | Links to Models/Settings for explicit user override. | wired |" in doc
     assert "Provider Balance renders Open Models and Open Settings handoff controls" in doc
     assert "do not mutate routing, enable Auto, post prompts, call providers, or bypass Relay/Aegis policy" in doc
+    assert "| BAL9 | Provider comparison | Compares backend cost/availability/trust for Prime visibility. | wired |" in doc
+    assert "Spark Balance renders a Provider comparison frame backed by `/bridge/provider-balance`" in doc
     assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
     assert "| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired |" in doc
     assert "| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired |" in doc
