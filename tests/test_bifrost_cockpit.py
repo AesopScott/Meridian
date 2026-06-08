@@ -1740,11 +1740,14 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "no absolute local paths or source-control actions are exposed" in doc
     assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
     assert "/bridge/provider-balance" in doc
-    assert "| BAL3 | Token usage | Shows token use when a backend reports it. | partial |" in doc
+    assert "| BAL3 | Token usage | Shows token use when a backend reports it. | wired |" in doc
+    assert "context budget, current prompt tokens, prompt budget, and prompt budget percent" in doc
     assert "missing token numbers display as unknown, not zero" in doc
-    assert "| BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | partial |" in doc
+    assert "| BAL4 | Estimated spend | Shows estimated spend only when usage/cost data is trustworthy. | wired |" in doc
+    assert "backend-supplied spend posture labels only" in doc
     assert "no live billing lookup is implied" in doc
-    assert "| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | partial |" in doc
+    assert "| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | wired |" in doc
+    assert "quota state, credit status, and remaining-credit labels only" in doc
     assert "account balance probing remains unavailable" in doc
     assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | partial |" in doc
     assert "fuller Relay `PromptPayloadSnapshot` growth details remain deferred" in doc
