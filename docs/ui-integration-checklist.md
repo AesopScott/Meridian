@@ -462,7 +462,7 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 | HN10 | Charon / FileMap | Opens/focuses navigation/FileMap surface. | partial | Click updates session title/focus; future view should read FileMap. |
 | HN11 | Arbiter / Codex Reviews | Opens/focuses review queue surface. | partial | Click updates session title/focus; no fake review findings. |
 | HN12 | Workflow | Opens/focuses workflow/sub-agent surface. | planned | Until wired, no fake sub-agent state. |
-| HN13 | Federation | Opens/focuses federation/network surface. | planned | Until wired, no fake network state. |
+| HN13 | Federation | Opens/focuses federation/network surface. | wired | Click opens Federation Horizon with backend-sourced planning-only boundaries; no fake network state or remote execution controls. |
 | HN14 | Echo | Opens/focuses memory surface. | planned | Until wired, no fake memory recall. |
 | HN15 | Ratchet / Tool | Opens/focuses tool execution surface. | planned | Until wired, no fake tool execution. |
 | HN16 | Source / Git | Opens/focuses git/source-control surface. | planned | Until wired, no branch movement from UI. |
