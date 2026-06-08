@@ -4027,6 +4027,42 @@ body {
   const bridgeUrl = (path) => `${localBridgeBase}/${String(path || '').replace(/^\/+/, '')}`;
   const expectedBridgeVersion = 'local-bridge-routes-v2';
   const pathPattern = /((?:[A-Za-z]:\\|\.{0,2}[\\/])(?:[\w .()@%+=~-]+[\\/])*[\w .()@%+=~-]+\.[A-Za-z0-9]{1,12}|(?:[\w@%+=~-]+[\\/])+(?:[\w .()@%+=~-]+)(?:\.[A-Za-z0-9]{1,12})?|\b[\w@%+=~-]+\.[A-Za-z0-9]{1,12}\b)/g;
+  const speechButton = document.querySelector('.speech-mode-button');
+  const voiceStateLabel = (voice = {}) => {
+    if (voice.blocked) return 'blocked';
+    if (voice.speaking) return 'speaking';
+    if (voice.thinking) return 'thinking';
+    if (voice.dictating) return 'dictating';
+    if (voice.listening) return 'listening';
+    return 'unavailable';
+  };
+  const applySpeechButtonVoiceState = (snapshot = {}) => {
+    if (!speechButton) return;
+    const voice = snapshot.voice || {};
+    const state = snapshot.ok ? voiceStateLabel(voice) : 'unavailable';
+    const authorized = Boolean(
+      snapshot.microphone_authorized ||
+      snapshot.speech_output_authorized ||
+      snapshot.read_aloud_authorized,
+    );
+    speechButton.dataset.voiceState = state;
+    speechButton.setAttribute('aria-label', `Speech mode ${state}`);
+    speechButton.setAttribute('aria-pressed', state !== 'unavailable' && state !== 'blocked' ? 'true' : 'false');
+    speechButton.setAttribute('aria-disabled', 'true');
+    speechButton.disabled = true;
+    if (authorized) speechButton.dataset.voiceAuthorization = 'backend-authorized';
+    else speechButton.dataset.voiceAuthorization = 'display-only';
+  };
+  const refreshSpeechButtonVoiceState = async () => {
+    if (!speechButton) return;
+    try {
+      const response = await fetch(bridgeUrl('voice-io'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      applySpeechButtonVoiceState(snapshot);
+    } catch {
+      applySpeechButtonVoiceState({ ok: false });
+    }
+  };
   const selectedUserSessionId = () => userSessionSelect?.value || '';
   const selectedUserSession = () => userSessions.find((session) => session.sessionId === selectedUserSessionId()) || null;
   const sessionScope = (input) => {
@@ -4409,6 +4445,7 @@ body {
   });
   updateModelReadiness();
   loadUserSessions();
+  refreshSpeechButtonVoiceState();
   updatePrimeProjectStatus();
   window.meridianRefreshUserSessionTarget = () => {
     updateUserSessionTitle();
@@ -4417,6 +4454,7 @@ body {
   const refreshSessionBridgeState = () => {
     updateModelReadiness();
     loadUserSessions();
+    refreshSpeechButtonVoiceState();
   };
   window.addEventListener('focus', refreshSessionBridgeState);
   document.addEventListener('visibilitychange', () => {
@@ -6053,8 +6091,10 @@ body {
       const response = await fetch(bridgeUrl('voice-io'), { cache: 'no-store' });
       const snapshot = await response.json();
       logicNode.innerHTML = renderVoiceIoSnapshot(snapshot);
+      applySpeechButtonVoiceState(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVoiceIoSnapshot({ ok: false, error: error.message });
+      applySpeechButtonVoiceState({ ok: false });
     }
   };
   const loadSparkModels = async () => {

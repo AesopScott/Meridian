@@ -144,7 +144,7 @@ Spark is Prime's voice/core and the visual focus point for moving between right-
 |---|---|---|---|---|
 | SPK1 | Prime voice/core identity | Keeps Spark visually tied to Prime, speech, and system focus. | partial | Center image remains visible and labeled as Spark/Prime voice. |
 | SPK2 | Surface focus entry | Acts as the visual entry point for changing right-panel surface focus. | wired | Spark and harness controls call the shared right-panel authority path and expose panel mode/selection data without layout drift. |
-| SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | partial | Settings/Spark renders Voice I/O status from `/bridge/voice-io`; controls remain display-only/disabled and no microphone or speech output is authorized. |
+| SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | wired | Top speech icon and Settings/Spark render compact Voice I/O state from `/bridge/voice-io`; controls remain display-only/disabled and no microphone, speech output, read-aloud, mute mutation, raw prompt/response, or raw worker history is authorized. |
 | SPK4 | Surface mode indication | Makes it clear whether the right panel is User Session, Settings, or a harness. | wired | Active title/status plus `data-panel-mode` / `data-right-panel-mode` expose User Session, Spark/Settings, or Harness mode. |
 | SPK5 | Preserve prior session target | Switching away from User Session mode preserves the selected live session target. | wired | Return to User Session restores the prior `meridian.user-session.target.v1` target if still live. |
 | SPK6 | Stale target warning | If prior session target closes while away, returning shows a readable warning. | wired | Stale target restore shows `Selected session unavailable` / `selected session unavailable` and blocks send. |
@@ -426,7 +426,7 @@ Close is a targeted session-control action, not merely closing a panel. It shoul
 
 | ID | Control / Feature | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| VO1 | Speech mode icon | Shows first-class spoken interaction as unavailable until capture/output backends exist. | partial | Voice I/O status is rendered from `/bridge/voice-io`; the top speech-mode icon and Voice I/O controls are display-only/disabled and do not capture audio or speak responses. |
+| VO1 | Speech mode icon | Shows first-class spoken interaction state while capture/output backends remain unavailable. | wired | The top speech-mode icon reflects compact `/bridge/voice-io` states such as listening/thinking/speaking/blocked/unavailable, but remains disabled/`aria-disabled=true` and does not capture audio, speak responses, read aloud, or mutate mute state. |
 
 ### Speech / Voice Subitems
 
@@ -435,7 +435,7 @@ Speech/Voice is first-class planning now. The user should be able to speak with 
 | ID | Voice Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | VOC1 | Push-to-talk | Lets user hold/click to speak to Prime. | planned | Speech capture starts/stops with visible state. |
-| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | partial | Backend-backed Voice I/O status can render listening/thinking/speaking/blocked states; executable capture/output remains unauthorized. |
+| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | wired | Top speech icon and Voice I/O surface reflect backend-backed listening/thinking/speaking/blocked/unavailable states from compact typed status; executable capture/output remains unauthorized. |
 | VOC3 | Speech-to-text | Converts spoken user input into prompt text before send. | planned | Transcribed text is visible/editable before or after send by mode. |
 | VOC4 | Voice submit mode | Supports spoken prompt submission to Prime. | planned | Voice prompt follows same routing as typed Prime prompt. |
 | VOC5 | Read-aloud response | Speaks Prime/model responses through Spark. | partial | Read-aloud status/control is visible from the Voice I/O surface, but it is aria-disabled and does not speak response bodies. |

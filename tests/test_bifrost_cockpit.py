@@ -250,8 +250,31 @@ def test_index_speech_mode_icon_is_display_only():
     assert 'aria-label="Speech mode unavailable"' in doc
     assert 'aria-disabled="true"' in doc
     assert " disabled>" in doc
+    assert "const speechButton = document.querySelector('.speech-mode-button')" in doc
+    assert "const voiceStateLabel = (voice = {}) =>" in doc
+    assert "const applySpeechButtonVoiceState = (snapshot = {}) =>" in doc
+    assert "const refreshSpeechButtonVoiceState = async () =>" in doc
+    assert "speechButton.dataset.voiceState = state" in doc
+    assert "speechButton.dataset.voiceAuthorization = 'display-only'" in doc
+    assert "speechButton.setAttribute('aria-label', `Speech mode ${state}`)" in doc
+    assert "speechButton.setAttribute('aria-disabled', 'true')" in doc
+    assert "speechButton.disabled = true" in doc
+    assert "refreshSpeechButtonVoiceState();" in doc
+    assert "applySpeechButtonVoiceState(snapshot);" in doc
+    assert "bridgeUrl('voice-io')" in doc
     assert "speechButton.addEventListener('click'" not in doc
-    assert "speechButton.setAttribute('aria-pressed'" not in doc
+    assert "getUserMedia" not in doc
+    assert "SpeechRecognition" not in doc
+    assert "MediaRecorder" not in doc
+    assert "AudioContext" not in doc
+    assert "navigator.mediaDevices" not in doc
+    assert "speechSynthesis" not in doc
+    assert "readAloud" not in doc
+    assert "muteVoice" not in doc
+    assert 'data-action="voice"' not in doc
+    assert 'data-action="read-aloud"' not in doc
+    assert 'data-action="mute"' not in doc
+    assert 'data-action="unmute"' not in doc
 
 
 def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
@@ -1296,6 +1319,11 @@ def test_bridge_exposes_voice_io_route():
     assert '"microphone_authorized": True' not in doc
     assert '"speech_output_authorized": True' not in doc
     assert '"read_aloud_authorized": True' not in doc
+    voice_snapshot = doc[doc.index("function voiceIoSnapshot()"):doc.index("function primeAutonomyReleaseSnapshot()")]
+    assert "raw_prompt" not in voice_snapshot
+    assert "raw_response" not in voice_snapshot
+    assert "worker_chat" not in voice_snapshot
+    assert "worker_history" not in voice_snapshot
 
 
 def test_ui_checklist_defers_deep_compass_and_vulcan_items_to_backend_tracker():
@@ -1331,6 +1359,12 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "session state packets are always available" in doc
     assert "evidence refs are links/ids rather than pasted logs" in doc
     assert "raw detail is fetched only on demand" in doc
+    assert "| SPK3 | Listening/thinking/speaking state | Reflects Prime/Spark voice state once voice is wired. | wired |" in doc
+    assert "| VO1 | Speech mode icon | Shows first-class spoken interaction state while capture/output backends remain unavailable. | wired |" in doc
+    assert "| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | wired |" in doc
+    assert "Top speech icon and Settings/Spark render compact Voice I/O state from `/bridge/voice-io`" in doc
+    assert "no microphone, speech output, read-aloud, mute mutation, raw prompt/response, or raw worker history is authorized" in doc
+    assert "remains disabled/`aria-disabled=true`" in doc
     assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
     assert "/bridge/provider-balance" in doc
     assert "account/credential probing unavailable" in doc
