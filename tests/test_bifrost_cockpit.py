@@ -591,6 +591,47 @@ def test_index_spark_backlog_uses_typed_task_posture_without_fake_items_or_mutat
     assert "apply_console_response" not in backlog_surface
 
 
+def test_index_spark_skills_registry_searches_loaded_metadata_without_execution():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'aria-label="Skills"' in doc
+    assert 'aria-label="Skills registry"' in doc
+    assert "Skills Registry" in doc
+    assert "const renderSparkSkills = () =>" in doc
+    assert "const loadSparkSkills = async () =>" in doc
+    assert "const renderSparkSkillsRegistry = (snapshot, query = '') =>" in doc
+    assert "const skillRegistryRowsFromSnapshots = (fileMapSnapshot, modelsSnapshot) =>" in doc
+    assert "renderSparkSkills()" in doc
+    assert "data-spark-skills" in doc
+    assert "data-spark-skills-search" in doc
+    assert "Search skills/capabilities" in doc
+    assert "Skills uses reviewed FileMap and Models bridge snapshots as capability metadata; it does not call a fake skills backend." in doc
+    assert "Search is UI-local over already loaded metadata and does not send prompts, mutate files, install skills, sign in, probe accounts, or enable Auto routing." in doc
+    assert "Registry rows expose description, scope, backend/provider, setup posture, permission boundary, provenance, and a non-executing usage path." in doc
+    assert "backend:filemap" in doc
+    assert "backend:models" in doc
+    assert "permission boundary" in doc
+    assert "usage path" in doc
+    assert "logicNode.innerHTML = renderSparkSkillsRegistry(sparkSkillsRegistrySnapshot, target.value)" in doc
+    assert "bridgeUrl('filemap')" in doc
+    assert "bridgeUrl('models')" in doc
+    skills_loader = doc[doc.index("const loadSparkSkills = async () =>"):doc.index("const loadEchoMemory", doc.index("const loadSparkSkills = async () =>"))]
+    assert "Promise.all" in skills_loader
+    assert "skillRegistryRowsFromSnapshots(fileMapSnapshot, modelsSnapshot)" in skills_loader
+    assert "bridgeUrl('skills')" not in skills_loader
+    skills_registry = doc[doc.index("const renderSparkSkillsRegistry"):doc.index("const renderAegisLogicSnapshot")]
+    assert "install skills" in skills_registry
+    assert "sign in" in skills_registry
+    assert "probe accounts" in skills_registry
+    assert "enable Auto routing" in skills_registry
+    skills_start = doc.index("const renderSparkSkills = () =>")
+    skills_surface = doc[skills_start:doc.index("const renderProviderBalance", skills_start)]
+    assert "fetch(" not in skills_surface
+    assert "bridgeUrl('skills')" not in skills_surface
+    assert "bridgeUrl('message')" not in skills_surface
+    assert "bridgeUrl('call-result')" not in skills_surface
+    assert "method: 'POST'" not in skills_surface
+
+
 def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert 'aria-label="Models"' in doc
@@ -2210,6 +2251,18 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "Spark Backlog renders a Backlog candidate list from real `/bridge/review-console` queue items in the active Compass project display frame" in doc
     assert "empty snapshots render an explicit empty state and no fake items" in doc
     assert "no fake items, create/approve/deny/defer/convert/archive controls, owner assignment, priority mutation, prompt send, result recovery, or queue mutation are exposed" in doc
+    assert "| SK7 | Skills | Opens searchable skill/capability registry by model, project, and global scope. | wired |" in doc
+    assert "Spark Skills opens a display-only Skills Registry sourced from `/bridge/filemap` and `/bridge/models`" in doc
+    assert "search is UI-local over loaded metadata" in doc
+    assert "without fake skills backend, install/login/account probing, Auto routing, prompt send, file mutation, or skill execution" in doc
+    assert "| SKL1 | Search skills | Dynamically search skills by name, purpose, provider, project, or keyword. | wired |" in doc
+    assert "| SKL2 | Global skills | Shows skills available across all projects. | wired |" in doc
+    assert "| SKL4 | Model/backend skills | Shows which skills are available by Codex, Max/Claude, or other backend. | wired |" in doc
+    assert "| SKL5 | Skill description | Explains what each skill does in user-readable language. | wired |" in doc
+    assert "| SKL8 | Permission boundary | Shows whether the skill reads files, writes files, uses network, or affects accounts. | wired |" in doc
+    assert "| SKL9 | Install/setup status | Shows missing dependencies or login/setup requirements. | wired |" in doc
+    assert "| SKL10 | Run/request path | Provides a clear path to invoke or request the skill when supported. | wired |" in doc
+    assert "| SKL11 | Skill provenance | Shows whether skill is built-in, project-local, plugin-provided, or user-defined. | wired |" in doc
     assert "| XCK0 | Review/proof state | Shows current Review Console and Aegis proof posture without running a new check. | wired |" in doc
     assert "| XCK2 | Review findings | Shows current findings with severity, owner, and status. | partial |" in doc
     assert "owner attribution remains deferred and raw item content stays hidden" in doc
