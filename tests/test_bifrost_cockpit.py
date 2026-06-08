@@ -920,6 +920,28 @@ def test_index_spark_surface_controls_support_keyboard_navigation():
     assert "setRightPanelAuthority('spark', actionLabel || 'Spark', { persist })" in doc
 
 
+def test_index_spark_surface_transition_preserves_readability_and_reduced_motion():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    surface_css = doc[
+        doc.index(".relay-models-surface,"):
+        doc.index(".right-panel-surface.is-model-harness-surface")
+    ]
+
+    assert "animation: spark-surface-enter 140ms ease-out both;" in surface_css
+    assert "will-change: opacity, transform;" in surface_css
+    assert "@keyframes spark-surface-enter" in surface_css
+    assert "opacity: 0.82;" in surface_css
+    assert "transform: translateY(4px);" in surface_css
+    assert "opacity: 1;" in surface_css
+    assert "transform: translateY(0);" in surface_css
+    assert "@media (prefers-reduced-motion: reduce)" in surface_css
+    assert "animation: none;" in surface_css
+    assert "transform: none;" in surface_css
+    assert "filter:" not in surface_css
+    assert "blur(" not in surface_css
+    assert "display: none" not in surface_css
+
+
 def test_index_user_session_mode_names_target_and_preserves_storage():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "User Session:" in doc
@@ -2194,8 +2216,9 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     index = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "| SP2 | Right interaction panel | Shows either User Session prompt UI, Settings configuration items, or Harness logic items. | wired |" in doc
     assert "| SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | wired |" in doc
-    assert "`SPK10` transition animation remains planned separately" in doc
-    assert "| SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | planned |" in doc
+    assert "| SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | wired |" in doc
+    assert "opacity never below 0.82, no blur/filter/display hiding" in doc
+    assert "`prefers-reduced-motion: reduce` path" in doc
     assert "| SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | wired |" in doc
     for row_id in ("SUR1", "SUR2", "SUR3", "SUR4", "SUR5", "SUR6", "SUR7", "SUR8", "SUR10", "SUR11", "SUR12", "SUR13"):
         row = doc[doc.index(f"| {row_id} |"):].splitlines()[0]

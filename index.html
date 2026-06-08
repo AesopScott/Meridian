@@ -1451,6 +1451,28 @@ body {
   color: rgba(var(--session-electric-soft), 0.96);
   font-size: var(--session-text-size, 16px);
   line-height: 1.35;
+  animation: spark-surface-enter 140ms ease-out both;
+  will-change: opacity, transform;
+}
+
+@keyframes spark-surface-enter {
+  from {
+    opacity: 0.82;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relay-models-surface,
+  .right-panel-surface {
+    animation: none;
+    transform: none;
+  }
 }
 
 .right-panel-surface.is-model-harness-surface .relay-models-status {
