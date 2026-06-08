@@ -1,5 +1,34 @@
 # Live Build 1 Queue
 
+## Build 1 Ready Marker — 2026-06-08T17:14:02-06:00 (Atlas Workflow Adapter Review B path-scope repair)
+
+- Status: Ready for Codex Review A/B re-check after Review B FAIL repair.
+- Candidate worktree: `C:\Users\scott\AppData\Local\Temp\polaris-wt\chat_1780958955586`.
+- Base main for this candidate: `d98f52f16`.
+- Product files changed:
+  - `meridian_core/workflow_atlas.py`
+  - `tests/test_workflow_atlas.py`
+  - `docs/live-build-1.md`
+- Explicitly excluded from product delta: `.mcp.json` remains Polaris session glue and must not be promoted, staged, or treated as a candidate file.
+- Review B HIGH blocker addressed:
+  - FileMap entries are filtered per work order with the promoted public `is_path_in_scope()` helper before `atlas.query` receives them.
+  - FileMap/DOC output paths and `missing_paths` are checked again after query; any out-of-scope result fails closed as `WorkflowFailureKind.INPUT_INVALID` with a generic summary that does not include the leaking path or excerpt.
+  - Echo conceptual paths remain preserved for `AtlasSource.ECHO` and are not treated as repository FileMap/DOC paths.
+- Review B LOW documentation correction:
+  - The adapter no longer claims the default handler has no filesystem reads. It states the default Atlas query may read allowlisted docs when they are explicitly scoped as required paths, while preserving no process/session/model/network/control behavior and no filesystem writes.
+- Regression proof added:
+  - Term FileMap hit outside `allowed_paths` (`secrets/incident.md`) returns a successful empty result with no path/excerpt leak.
+  - Term FileMap hit inside `forbidden_paths` returns a successful empty result with no path/excerpt leak.
+  - Area/query candidate filtering proves the injected `query_fn` receives only in-scope FileMap entries.
+  - A fake `query_fn` returning an out-of-scope FileMap hit fails closed as `INPUT_INVALID` without leaking the path/excerpt in the error.
+  - Additional Polaris repair tests cover in-scope-vs-out-of-scope mixed hits, forbidden path filtering, out-of-scope DOC hits, Echo exemption, and captured query input filtering.
+- Proof run by coordinator in candidate worktree:
+  - `python -m pytest tests/test_workflow_atlas.py -q` -> 63 passed in 0.14s.
+  - `python -m pytest tests/test_workflow_atlas.py tests/test_workflow_dispatch.py tests/test_atlas.py -q` -> 257 passed in 0.23s.
+  - `git diff --check -- meridian_core/workflow_atlas.py tests/test_workflow_atlas.py docs/live-build-1.md` -> clean, with Git LF-to-CRLF normalization warning on `docs/live-build-1.md`.
+  - `git status --porcelain -- meridian_core/workflow_atlas.py tests/test_workflow_atlas.py docs/live-build-1.md .mcp.json` -> ` M .mcp.json`, ` M docs/live-build-1.md`, `?? meridian_core/workflow_atlas.py`, `?? tests/test_workflow_atlas.py`.
+- Stop condition: route fresh Codex Review A/B re-check before promotion. Do not promote unless both reviews pass and coordinator re-runs proof on `main`.
+
 ## Required First Command For Every New Task
 
 You must do all work inside your assigned unique worktree. You are not allowed to write to `C:\Users\scott\Code\Meridian` main or push/write to `main` without explicit coordinator approval. Do not move data between worktrees, branches, or the main checkout. Do not cherry-pick, copy files, stash-pop across worktrees, merge, rebase, reset, or salvage. If you believe work must move, stop and ask the coordinator. The coordinator may permit it only after verifying `C:\Users\scott\Code\Meridian` main is clean.
@@ -154,11 +183,12 @@ Implement only pure/local adapter behavior:
   raw retrieval bodies enter Prime-visible results.
 
 Keep this slice pure/local. No live workflow execution, no process/session
-control, no model calls, no network, no filesystem reads or writes beyond this
+control, no model calls, no network, no filesystem writes beyond this
 worker's allowed files, no branch/worktree movement, no Echo durable writes,
 no FileMap durable writes, no UI/Electron/Bifrost behavior, no generated
 artifacts, no provider/account calls, and no FileMap registration in this
-slice.
+slice. The default Atlas query may read allowlisted docs when they are
+explicitly scoped as required paths.
 
 Allowed files only:
 
@@ -182,6 +212,123 @@ Required proof before Ready marker:
 
 Stop after implementation and marker. Do not promote to main, do not push to
 main, do not move branches/worktrees, and do not touch shared main.
+
+Build 1 Ready Marker — 2026-06-08T17:30:00-06:00 (Atlas Workflow Adapter
+Restart, fresh worker rebuild from `d98f52f16`):
+
+- Worker: Polaris Build 1 Opus (`launch-chat`, tier `power`,
+  `claude-opus-4-7`) in detached worktree
+  `C:/Users/scott/AppData/Local/Temp/polaris-wt/chat_1780958955586`.
+  Reference-only candidates `...-1755` and `...-1815` were not opened,
+  cherry-picked, salvaged, or copied from.
+- Files changed (path-scope limited to the three allowed paths):
+  - `meridian_core/workflow_atlas.py` — new pure adapter module (frozen
+    `AtlasOutputRecord` and `AtlasResultRecord`; bounded vocabulary
+    constants; `build_atlas_work_order` encoder; pure
+    `query_from_work_order` decoder; `make_atlas_handler` factory).
+  - `tests/test_workflow_atlas.py` — new test module covering builder,
+    decoder, dispatch round-trip, tier proof, display-safety,
+    heartbeats, no-sidecar-query, empty-query, Echo compatibility,
+    private-helper avoidance, defensive paths, and promotion
+    compatibility.
+  - `docs/live-build-1.md` — this Ready Marker only.
+- Required proof (run from the worker's detached worktree):
+  - `python -m pytest tests/test_workflow_atlas.py
+    tests/test_workflow_dispatch.py tests/test_atlas.py -q` -> 245
+    passed in 0.38s (51 new adapter tests in `test_workflow_atlas.py` +
+    161 unchanged tests in the promoted `test_workflow_dispatch.py` +
+    33 unchanged tests in the promoted `test_atlas.py`; no regressions
+    on the promoted suites).
+  - `git diff --check -- meridian_core/workflow_atlas.py
+    tests/test_workflow_atlas.py docs/live-build-1.md` -> clean.
+  - Path-scope proof: `git status --porcelain` shows only the three
+    allowed paths attributable to this slice. The pre-existing
+    `.mcp.json` modification in the worktree is Polaris session glue
+    that predates this worker's first action; it is not part of this
+    slice and is not staged.
+- Review A blocking-finding clearance:
+  1. Required paths surface as `kind="file_path"` records, so
+     `WorkflowInputPacket.__post_init__` runs `is_path_in_scope` on each
+     against the packet's `allowed_paths` / `forbidden_paths`. Required
+     paths outside scope are rejected by promoted dispatch construction
+     before any handler runs. Covered by
+     `TestBuildWorkOrder::test_required_path_outside_allowed_scope_is_rejected`
+     and
+     `TestBuildWorkOrder::test_required_path_inside_forbidden_paths_is_rejected`.
+  2. Unsafe `title` / `reason` / `excerpt` content is NOT silently
+     blanked. The adapter forwards the full Atlas hit to a
+     `WorkflowResultSummary`; the promoted dispatcher's prompt-drag
+     guard then rejects unsafe payload content as `INPUT_INVALID`.
+     Covered by
+     `TestDisplaySafetyEndToEnd::test_unsafe_title_rejected_end_to_end_through_dispatch`,
+     `::test_unsafe_excerpt_rejected_end_to_end_through_dispatch`, and
+     `::test_unsafe_field_does_not_silently_blank_and_succeed`.
+  3. The handler does NOT close over an `AtlasQuery`.
+     `make_atlas_handler` takes no query argument; the handler decodes
+     the query from `work_order.input.inputs` via
+     `query_from_work_order` each invocation. Covered by
+     `TestHandlerHasNoSidecarQuery::test_same_handler_serves_different_queries_distinctly`
+     and `::test_factory_signature_takes_no_query_argument`.
+  4. Empty `AtlasQuery` returns a successful empty `AtlasResult`, not a
+     `WorkflowResteerRequest`. Covered by
+     `TestEmptyQuery::test_empty_query_returns_successful_empty_result_not_resteer`
+     and `::test_empty_query_via_atlas_default_does_not_resteer`.
+  5. The adapter does NOT import the private
+     `_is_safe_output_string` helper (or any other private dispatch
+     helper) from `meridian_core.workflow_dispatch`. Asserted by
+     `TestNoPrivateDispatchHelperImport::test_module_attribute_does_not_carry_private_helper`
+     and `::test_module_source_does_not_reference_private_helper`,
+     which fail closed on either an attribute leak or a textual
+     reference in the module source.
+- Review B proof-gap clearance:
+  - Path-scope behavior is proven against promoted Workflow Dispatch
+    rules: the builder relies on `WorkflowInputPacket` construction
+    (which calls the promoted `is_path_in_scope`) and the tests assert
+    that outside-allowed and inside-forbidden required paths are
+    rejected by the packet — not by a local adapter check.
+  - Result shape is proven through `dispatch_work_order`: the
+    `AtlasResultRecord(hits, missing_paths, truncated)` preserves the
+    promoted `AtlasResult` shape and rides inside a
+    `WorkflowResultSummary` whose `result_shape == "atlas.query.v1"`
+    and `harness == ATLAS`. Covered by
+    `TestDispatchHappyPath::test_returns_atlas_result_record_via_promoted_contract`,
+    `::test_preserves_hit_order_and_source_attribution`, and
+    `::test_preserves_missing_paths_and_truncated`.
+  - Display-safety rejection is proven end-to-end through
+    `dispatch_work_order` (see Review A finding #2 tests above) — the
+    rejection path runs the promoted dispatcher's payload validation,
+    not an adapter-local wrapper.
+  - Echo compatibility is proven through an injected Echo source path:
+    `TestEchoCompatibility::test_echo_source_path_preserved_through_dispatch`
+    asserts that an injected `echo_store` is forwarded to
+    `atlas.query`, and an `AtlasSource.ECHO` hit with an
+    `echo://meridian/r-001` path flows through the dispatcher into the
+    `AtlasResultRecord` with `source == "echo"` and the conceptual ref
+    preserved verbatim.
+    `TestEchoCompatibility::test_include_echo_false_skips_echo_store`
+    documents that the adapter forwards the injected store without
+    second-guessing the promoted Atlas surface.
+- Remaining risk (none load-bearing for this slice; recorded for
+  reviewers):
+  - The handler returns a single output record (the
+    `AtlasResultRecord`). Downstream consumers that expect each hit as
+    a top-level output entry would need a thin unwrap; this is a per-
+    harness convention, not a contract violation.
+  - The Atlas allowlist's `DOC` source still performs file I/O inside
+    the promoted `atlas.query` when a required path is in
+    `DOC_ALLOWLIST`. The adapter does not itself read files; tests
+    avoid touching that branch by using stub `query_fn`s and FileMap
+    entries, keeping this slice's runtime pure / local. Callers in a
+    production worker must accept that promoted-Atlas behavior or
+    constrain `required_paths`.
+  - Heartbeat emission is exercised by the dispatcher's sink
+    (`TestHeartbeatsExcluded`), but the adapter does not emit
+    heartbeats from its own handler in this slice. That matches the
+    promoted contract (heartbeats are operational, not narrative) and
+    keeps the slice deterministic.
+- Stop posture: implementation and Ready marker complete. No promotion
+  to main, no push to main, no branch/worktree movement, and no
+  self-routed Codex review. Awaiting coordinator review.
 
 ## Coordinator Override - Completed / Review-Cleared / Promoted To Main
 
