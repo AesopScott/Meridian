@@ -8001,6 +8001,7 @@ body {
   };
   const renderSparkSurface = (label) => {
     const selectedLabel = label || 'Settings';
+    const settingsSelected = selectedLabel === 'Settings';
     const sections = [
       relaySection('Surface logic', relayGrid([
         ['mode', 'Settings/Spark'],
@@ -8008,20 +8009,26 @@ body {
         ['prompt window', 'hidden in this mode'],
       ]), true),
       relaySection('Backend link', relayGrid([
-        ['state', selectedLabel === 'Settings' ? 'voice I/O status wired' : 'not wired yet'],
-        ['mutation policy', selectedLabel === 'Settings' ? 'blocked until an explicit settings backend exists' : 'unsupported until backend wiring exists'],
+        ['state', settingsSelected ? 'voice I/O status wired from backend snapshot' : 'not wired yet'],
+        ['snapshot route', settingsSelected ? '/bridge/voice-io' : 'none'],
+        ['mutation policy', settingsSelected ? 'display-only; settings and voice mutations are blocked' : 'unsupported until backend wiring exists'],
         ['drift guard', 'visible controls must match backend settings before writes are enabled'],
       ]), true),
     ];
-    if (selectedLabel === 'Settings') {
+    if (settingsSelected) {
+      sections.push(relaySection('Settings voice boundary', relayList([
+        'Settings/Spark renders compact Voice I/O state from the reviewed backend snapshot.',
+        'No microphone capture, speech output, read-aloud, mute mutation, prompt text, response text, raw worker history, or worker chat is exposed.',
+        'Settings writes remain blocked until an explicit settings backend exists.',
+      ]), true));
       sections.push(`<div data-voice-io>${relaySection('Voice I/O source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
     }
     const rendered = renderRightPanelSurface({
       title: `${label || 'Settings'} Surface`,
-      status: 'planned',
+      status: settingsSelected ? 'Display-only' : 'planned',
       sections,
     });
-    if (rendered && selectedLabel === 'Settings') loadVoiceIo();
+    if (rendered && settingsSelected) loadVoiceIo();
     return rendered;
   };
   const renderHarnessSurface = (button) => {

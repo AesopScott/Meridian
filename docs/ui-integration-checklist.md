@@ -125,7 +125,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 |---|---|---|---|---|
 | SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | partial | Track `SPK-*` subitems before changing Spark focus behavior. |
 | SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | partial | Track `SUR-*` subitems before changing panel toggle behavior. |
-| SK3 | Settings | Opens settings surface for UI/model/project/session options. | partial | Opens a Settings/Spark display surface with backend-sourced Voice I/O status; settings mutations remain blocked until explicit settings backend exists. |
+| SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired | Opens a Settings/Spark display-only surface with backend-sourced Voice I/O status from `/bridge/voice-io`; no microphone capture, speech output, read-aloud, mute mutation, raw prompt/response, raw worker history, worker chat, or settings mutation is authorized until an explicit settings backend exists. |
 | SK4 | Filter | Controls how much data is included in a session prompt/context stream. | planned | Track `FIL-*` subitems before wiring the surface. |
 | SK5 | Models | Opens model readiness and recent-call metadata surface. | wired | Spark Models opens Models Readiness from `/bridge/models` plus metadata-only `/bridge/recent-calls`; it does not enable Auto routing, mutate settings, or render prompt/response bodies. |
 | SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
@@ -170,7 +170,7 @@ Mode meanings:
 | ID | Surface Toggle Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | SUR1 | User Session mode | Right panel targets user review/decision work Prime has surfaced in a project-specific context. | wired | User mode title reads `User Session` / `User Session: <target>` and the routing target comes from the selected live session. |
-| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | partial | Settings title replaces User session target, prompt UI is absent, and unwired backend mutation is visibly blocked. |
+| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | wired | Settings title replaces User session target, prompt UI is absent, `/bridge/voice-io` display state is rendered, and settings/voice mutations are visibly blocked. |
 | SUR3 | Harness mode | Right panel uses full panel for selected harness logic items, with no prompt window. | partial | Harness title replaces User session target and displays logic/backend-link sections. |
 | SUR4 | Immediate interaction switch | Switching surface immediately changes the right-panel interaction model. | wired | User Session shows prompt; Settings/Harness show item lists. |
 | SUR5 | Prior target memory | Each surface remembers its last selected target where applicable. | wired | Right-panel mode/selection and User Session target persist independently through storage keys. |
@@ -178,7 +178,7 @@ Mode meanings:
 | SUR7 | Surface state preservation | Unsaved drafts or item edits are preserved per surface unless reset/close confirms otherwise. | wired | Switching surfaces does not call prompt/transcript clearing and User drafts remain keyed by selected target. |
 | SUR8 | Surface close behavior | Closing an overlay/surface returns to previous valid right-panel mode. | wired | Close returns Settings/Harness surfaces to User mode without destroying session state. |
 | SUR9 | Harness item actions | Harness mode actions apply only to selected harness logic items. | planned | Unsupported harness action is blocked with readable warning. |
-| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | partial | Settings surface blocks mutation until an explicit settings backend exists and does not send to live session accidentally. |
+| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | wired | Settings surface exposes display-only Voice I/O state, blocks mutation until an explicit settings backend exists, and does not send to live sessions, `/bridge/message`, `/bridge/restart`, or result-recovery routes. |
 | SUR11 | User session stale guard | If selected session is no longer live, User Session mode blocks send with warning. | wired | Missing/stale selected target shows a readable target warning and send emits a visible target error. |
 | SUR12 | Visual baseline preservation | Surface switching does not move approved project/session selector layout or center image. | wired | Surface switching reuses the existing right-panel workspace, hides prompt controls only in surface mode, and preserves Spark media references. |
 | SUR13 | Active mode persistence | User, Settings/Spark, and Harness modes persist as the right-panel mode across reload/reset/focus churn. | wired | Open Relay or Settings, reload/reset the UI, and confirm the right panel does not revert to User. |

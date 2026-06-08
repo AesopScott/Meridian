@@ -259,6 +259,7 @@ def test_index_speech_mode_icon_is_display_only():
     assert "speechButton.setAttribute('aria-label', `Speech mode ${state}`)" in doc
     assert "speechButton.setAttribute('aria-disabled', 'true')" in doc
     assert "speechButton.disabled = true" in doc
+    assert "speechButton.setAttribute('aria-pressed', state !== 'unavailable' && state !== 'blocked' ? 'true' : 'false')" in doc
     assert "refreshSpeechButtonVoiceState();" in doc
     assert "applySpeechButtonVoiceState(snapshot);" in doc
     assert "bridgeUrl('voice-io')" in doc
@@ -280,8 +281,16 @@ def test_index_speech_mode_icon_is_display_only():
 def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const renderSparkSurface = (label) =>" in doc
-    assert "selectedLabel === 'Settings' ? 'voice I/O status wired' : 'not wired yet'" in doc
+    assert "const settingsSelected = selectedLabel === 'Settings';" in doc
+    assert "settingsSelected ? 'voice I/O status wired from backend snapshot' : 'not wired yet'" in doc
+    assert "settingsSelected ? '/bridge/voice-io' : 'none'" in doc
+    assert "settingsSelected ? 'display-only; settings and voice mutations are blocked' : 'unsupported until backend wiring exists'" in doc
     assert "unsupported until backend wiring exists" in doc
+    assert "Settings/Spark renders compact Voice I/O state from the reviewed backend snapshot." in doc
+    assert "No microphone capture, speech output, read-aloud, mute mutation, prompt text, response text, raw worker history, or worker chat is exposed." in doc
+    assert "Settings writes remain blocked until an explicit settings backend exists." in doc
+    assert "status: settingsSelected ? 'Display-only' : 'planned'" in doc
+    assert "if (rendered && settingsSelected) loadVoiceIo();" in doc
     for label in ("Filter", "Backlog", "Skills"):
         assert f'aria-label="{label}"' in doc
     for route in (
@@ -293,6 +302,15 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
         "settings",
     ):
         assert f"bridgeUrl('{route}')" not in doc
+    settings_surface = doc[doc.index("const renderSparkSurface = (label) =>"):doc.index("const renderHarnessSurface")]
+    assert "bridgeUrl('message')" not in settings_surface
+    assert "bridgeUrl('restart')" not in settings_surface
+    assert "bridgeUrl('call-result')" not in settings_surface
+    assert "method: 'POST'" not in settings_surface
+    assert "getUserMedia" not in settings_surface
+    assert "speechSynthesis" not in settings_surface
+    assert "MediaRecorder" not in settings_surface
+    assert "SpeechRecognition" not in settings_surface
 
 
 def test_index_spark_crosscheck_aggregates_typed_review_and_aegis_state():
@@ -1493,6 +1511,11 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| VOC2 | Wake/listening state | Shows when Spark is listening, idle, thinking, or speaking. | wired |" in doc
     assert "Top speech icon and Settings/Spark render compact Voice I/O state from `/bridge/voice-io`" in doc
     assert "no microphone, speech output, read-aloud, mute mutation, raw prompt/response, or raw worker history is authorized" in doc
+    assert "| SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired |" in doc
+    assert "| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | wired |" in doc
+    assert "| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | wired |" in doc
+    assert "no microphone capture, speech output, read-aloud, mute mutation, raw prompt/response, raw worker history, worker chat, or settings mutation is authorized" in doc
+    assert "does not send to live sessions, `/bridge/message`, `/bridge/restart`, or result-recovery routes" in doc
     assert "remains disabled/`aria-disabled=true`" in doc
     assert "| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | wired |" in doc
     assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
