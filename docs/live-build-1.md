@@ -90,6 +90,35 @@ Coordinator pre-review risk notes for the fresh worker:
   the task explicitly justifies why the adapter needs them and tests the
   compatibility risk.
 
+Coordinator Codex review checkpoint:
+
+- 2026-06-08T16:47:26-06:00: Codex Review A (`Kant`) and Codex Review B
+  (`Tesla`) reviewed old candidate
+  `C:/Users/scott/AppData/Local/Temp/polaris-wt/build1-atlas-workflow-adapter-20260607-1815`.
+  Both reviews returned FAIL for promotion. The candidate's narrow proof passed
+  (`python -m pytest tests/test_workflow_atlas.py tests/test_workflow_dispatch.py tests/test_atlas.py -q`
+  -> 251 passed; `git diff --check -- meridian_core/workflow_atlas.py
+  tests/test_workflow_atlas.py docs/live-build-1.md` -> clean), but it does
+  not satisfy this restarted Active Now contract.
+- Treat both old Atlas candidate worktrees (`...-1755` and `...-1815`) as
+  reference only. Do not promote, cherry-pick, salvage, or copy from either
+  worktree unless the coordinator explicitly authorizes a fresh rebuild plan.
+- Review A blocking findings to clear in a fresh worker:
+  required_paths bypass `allowed_paths` / `forbidden_paths` because they are
+  surfaced as config records while the handler executes a sidecar `AtlasQuery`;
+  unsafe title/reason/excerpt fields are silently blanked and still return
+  success; the handler's closed-over `AtlasQuery` can diverge from the work
+  order's typed inputs; empty Atlas queries are turned into resteer requests
+  instead of successful empty Atlas results; the adapter imports a private
+  `_is_safe_output_string` helper from `workflow_dispatch`.
+- Review B proof gaps to clear in a fresh worker: path-scope behavior must be
+  proven against promoted Workflow Dispatch scope rules; result shape must be
+  compatible with the promoted Atlas/Workflow contract rather than only a local
+  wrapper assertion; display-safety rejection must be proven end-to-end through
+  `dispatch_work_order`; Echo compatibility must be proven through an injected
+  Echo source path when available, not only direct construction of an
+  `echo://...` hit.
+
 Source of authority:
 
 - `docs/workflow-subagent-harness-contract.md`
