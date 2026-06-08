@@ -4815,13 +4815,76 @@ body {
       ]), true);
     }
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    const runtime = snapshot.runtime_sample || {};
+    const liveEvidence = runtime.session_live_state_evidence || {};
+    const liveProjection = runtime.session_live_state_projection || {};
+    const readiness = runtime.recovery_readiness || {};
+    const permissionGate = runtime.live_control_permission_gate || {};
+    const workflowRecovery = runtime.workflow_recovery || {};
+    const permissionSummary = runtime.permission_summary || {};
+    const beaconAdvisories = Array.isArray(runtime.beacon_advisories) ? runtime.beacon_advisories : [];
+    const displayContract = runtime.display_contract || {};
+    const mutationAllowed = Boolean(snapshot.mutation_authorized || displayContract.mutation_authorized);
+    const executionControlsVisible = Boolean(snapshot.execution_controls_visible || displayContract.execution_controls_visible);
+    const rawWorkerChatVisible = Boolean(snapshot.raw_worker_chat_visible || displayContract.raw_worker_chat_visible);
+    const rawFilesystemPathsVisible = Boolean(snapshot.raw_filesystem_paths_visible || displayContract.raw_filesystem_paths_visible);
     return [
       relaySection('Vulcan logic source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
         ['harness', snapshot.harness || 'Vulcan / Session Lifecycle'],
+        ['display only', snapshot.display_only ? 'yes' : 'no'],
+        ['mutation authorized', mutationAllowed ? 'yes' : 'no'],
+        ['execution controls visible', executionControlsVisible ? 'yes' : 'no'],
       ]), true),
       relaySection('Vulcan summary', relaySummary(snapshot.summary || ''), true),
+      relaySection('Session live-state evidence', relayGrid([
+        ['session id', liveEvidence.session_id || 'unknown'],
+        ['session name', liveEvidence.session_name || 'unknown'],
+        ['project', liveEvidence.project_name || 'unknown'],
+        ['queue', liveEvidence.assigned_queue_file || 'unknown'],
+        ['branch', liveEvidence.branch_name || 'unknown'],
+        ['model', `${liveEvidence.model_provider || 'unknown'} / ${liveEvidence.model_name || 'unknown'}`],
+        ['status', relayText(liveEvidence.status)],
+        ['health', relayText(liveEvidence.health_state)],
+        ['proof', relayText(liveEvidence.proof_state)],
+        ['project path', liveEvidence.project_path_label || 'none'],
+        ['worktree path', liveEvidence.worktree_path_label || 'none'],
+        ['blocker label', liveEvidence.blocker_summary_label || 'none'],
+      ]), true),
+      relaySection('Bifrost advisory projection', [
+        relayGrid([
+          ['projection id', liveProjection.projection_id || 'unknown'],
+          ['human gate required', liveProjection.human_gate_required ? 'yes' : 'no'],
+          ['executable now', liveProjection.is_executable_now ? 'yes' : 'no'],
+          ['blocker present', liveProjection.blocker_present ? 'yes' : 'no'],
+          ['blocker length', liveProjection.blocker_summary_length ?? '0'],
+          ['raw worker chat visible', rawWorkerChatVisible ? 'yes' : 'no'],
+          ['raw filesystem paths visible', rawFilesystemPathsVisible ? 'yes' : 'no'],
+        ]),
+        relayList(liveProjection.advisory_blockers || []),
+      ].join(''), true),
+      relaySection('Recovery readiness', relayGrid([
+        ['readiness', relayText(readiness.readiness_status)],
+        ['recommended action', relayText(readiness.recommended_action)],
+        ['command kind', relayText(readiness.command_kind)],
+        ['required operation', relayText(readiness.required_operation)],
+        ['heartbeat', relayText(readiness.heartbeat_status || workflowRecovery.heartbeat_status)],
+        ['result', relayText(readiness.result_kind || workflowRecovery.result_kind)],
+        ['permission', relayText(readiness.permission_state || permissionSummary.permission_state)],
+        ['ready for execution', readiness.ready_for_execution ? 'yes' : 'no'],
+        ['human gate required', readiness.human_gate_required ? 'yes' : 'no'],
+        ['permission gate ready', permissionGate.ready_for_execution ? 'yes' : 'no'],
+        ['can accept work', permissionSummary.can_accept_work ? 'yes' : 'no'],
+      ]), true),
+      relaySection('Beacon advisory evidence', beaconAdvisories.length
+        ? beaconAdvisories.map((advisory) => relayGrid([
+          ['harness', advisory.harness_id || 'unknown'],
+          ['type', relayText(advisory.advisory_type)],
+          ['human gate required', advisory.human_gate_required ? 'yes' : 'no'],
+          ['blockers', relayJoin(advisory.blockers)],
+        ])).join('')
+        : relayGrid([['status', 'no Beacon advisories reported']]), false),
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };

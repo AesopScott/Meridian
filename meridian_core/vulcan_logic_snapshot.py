@@ -1,15 +1,48 @@
 """Backend snapshot for Vulcan Session Lifecycle logic shown in the harness UI."""
 
+from datetime import datetime, timedelta, timezone
+
+from .beacon import (
+    live_state_advisory_evidence,
+    recovery_readiness_advisory_evidence,
+)
+from .session_lifecycle import (
+    HarnessRole,
+    HealthState,
+    OperationScope,
+    PermissionContext,
+    PermissionState,
+    ProofState,
+    ReviewCadenceState,
+    SessionLifecycleState,
+    SessionStatus,
+    WorkflowResultKind,
+    build_session_live_state_advisory_projection,
+    build_session_live_state_evidence,
+    evaluate_live_control_permission_gate,
+    export_session_runtime_state_for_workflow_recovery,
+    summarize_recovery_readiness,
+    summarize_session_permission_state,
+    summarize_workflow_work_order_recovery,
+)
+
 SNAPSHOT_VERSION = "vulcan-session-lifecycle-v1"
 
 
 def vulcan_logic_snapshot() -> dict:
     """Return the Vulcan capability list used by Bifrost's visible harness."""
+    runtime_sample = _runtime_sample()
     return {
         "version": SNAPSHOT_VERSION,
         "source": "meridian_core.vulcan_logic_snapshot.vulcan_logic_snapshot",
         "harness": "Vulcan / Session Lifecycle",
         "summary": "Vulcan owns live session lifecycle, User Session targets, stale target guards, and session grouping behavior.",
+        "display_only": True,
+        "mutation_authorized": False,
+        "execution_controls_visible": False,
+        "raw_worker_chat_visible": False,
+        "raw_filesystem_paths_visible": False,
+        "runtime_sample": runtime_sample,
         "capabilitySections": [
             {
                 "title": "Vulcan Job",
@@ -97,6 +130,125 @@ def vulcan_logic_snapshot() -> dict:
             },
         ],
     }
+
+
+def _runtime_sample() -> dict:
+    """Build a deterministic display-only sample from reviewed runtime APIs."""
+    observed_at = datetime(2026, 6, 7, 18, 0, tzinfo=timezone.utc)
+    session = _sample_session(observed_at)
+    live_evidence = build_session_live_state_evidence(
+        session,
+        timestamp=observed_at,
+    )
+    live_projection = build_session_live_state_advisory_projection(
+        live_evidence,
+        timestamp=observed_at,
+    )
+    permission_summary = summarize_session_permission_state(
+        session,
+        approvals_pending=(("session-ui-live-build-2", "aegis-command-plan-review"),),
+        timestamp=observed_at,
+    )
+    workflow_summary = summarize_workflow_work_order_recovery(
+        session,
+        work_order_id="workflow-ui-live-state",
+        heartbeat_emitted_at=observed_at - timedelta(minutes=12),
+        result_kind=WorkflowResultKind.PENDING,
+        timestamp=observed_at,
+    )
+    runtime_export = export_session_runtime_state_for_workflow_recovery(
+        session,
+        permission_summary=permission_summary,
+        workflow_recovery_summary=workflow_summary,
+        timestamp=observed_at,
+    )
+    permission_gate = evaluate_live_control_permission_gate(
+        session,
+        runtime_export,
+        timestamp=observed_at,
+    )
+    recovery_readiness = summarize_recovery_readiness(
+        runtime_export,
+        permission_gate,
+        timestamp=observed_at,
+    )
+    beacon_live_state = live_state_advisory_evidence(
+        live_projection,
+        now=observed_at,
+    )
+    beacon_readiness = recovery_readiness_advisory_evidence(
+        recovery_readiness,
+        now=observed_at,
+    )
+
+    return {
+        "session_live_state_evidence": live_evidence.to_dict(),
+        "session_live_state_projection": live_projection.to_dict(),
+        "permission_summary": {
+            "session_id": permission_summary.session_id,
+            "permission_state": permission_summary.permission_state.value,
+            "can_accept_work": permission_summary.can_accept_work,
+            "blockers": list(permission_summary.blockers),
+            "review_gate_blockers": list(permission_summary.review_gate_blockers),
+            "restart_resteer_findings": [
+                finding.finding_type.value
+                for finding in permission_summary.restart_resteer_findings
+            ],
+        },
+        "workflow_recovery": workflow_summary.to_dict(),
+        "runtime_state_export": runtime_export.to_dict(),
+        "live_control_permission_gate": permission_gate.to_dict(),
+        "recovery_readiness": recovery_readiness.to_dict(),
+        "beacon_advisories": [
+            beacon_live_state.to_dict(),
+            beacon_readiness.to_dict(),
+        ],
+        "display_contract": {
+            "display_only": True,
+            "mutation_authorized": False,
+            "execution_controls_visible": False,
+            "raw_worker_chat_visible": False,
+            "raw_filesystem_paths_visible": False,
+        },
+    }
+
+
+def _sample_session(observed_at: datetime) -> SessionLifecycleState:
+    """Create a deterministic session snapshot without exposing local paths."""
+    permission_context = PermissionContext(
+        approved_by="prime",
+        approval_scope=frozenset({OperationScope.RESTART}),
+        escalation_gate=False,
+        escalation_reason=None,
+        branch_permission_state=PermissionState.LOCKED_BY_DEFAULT,
+        approved_by_secondary=None,
+        unlock_expiry=None,
+        task_scope=None,
+        last_permission_change=observed_at - timedelta(minutes=45),
+    )
+    return SessionLifecycleState(
+        session_id="session-ui-live-build-2",
+        session_name="Build 2 UI Integration",
+        project_name="Meridian",
+        project_path="project-ref:meridian",
+        harness_role=HarnessRole.UI,
+        assigned_queue_file="live-build-2",
+        model_provider="codex",
+        model_name="gpt-5.3-codex-spark",
+        status=SessionStatus.STALE,
+        worktree_path="worktree-ref:ui-live-build-2",
+        branch_name="main",
+        current_task_id="ui-backend-catch-up",
+        last_queue_read_at=observed_at - timedelta(minutes=16),
+        last_queue_write_at=observed_at - timedelta(minutes=21),
+        last_prompt_sent_at=observed_at - timedelta(minutes=42),
+        last_prompt_payload_size=1840,
+        review_cadence_state=ReviewCadenceState.PENDING,
+        proof_state=ProofState.WORKTREE_VERIFIED,
+        health_state=HealthState.STALE,
+        blocker_summary="Recovery staging requires Aegis review.",
+        permission_context=permission_context,
+    )
 
 
 def main() -> None:

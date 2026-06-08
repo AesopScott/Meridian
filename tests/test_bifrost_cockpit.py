@@ -545,11 +545,37 @@ def test_compass_logic_snapshot_documents_project_context_harness():
 
 
 def test_vulcan_logic_snapshot_documents_session_lifecycle_harness():
+    import json
+
     from meridian_core.vulcan_logic_snapshot import vulcan_logic_snapshot
 
     snapshot = vulcan_logic_snapshot()
     titles = [section["title"] for section in snapshot["capabilitySections"]]
+    runtime = snapshot["runtime_sample"]
+    live_evidence = runtime["session_live_state_evidence"]
+    live_projection = runtime["session_live_state_projection"]
+    readiness = runtime["recovery_readiness"]
+    beacon_advisories = runtime["beacon_advisories"]
     assert snapshot["source"] == "meridian_core.vulcan_logic_snapshot.vulcan_logic_snapshot"
+    assert snapshot["display_only"] is True
+    assert snapshot["mutation_authorized"] is False
+    assert snapshot["execution_controls_visible"] is False
+    assert snapshot["raw_worker_chat_visible"] is False
+    assert snapshot["raw_filesystem_paths_visible"] is False
+    assert live_evidence["worktree_path_label"] == "<worktree_path>"
+    assert live_evidence["project_path_label"] == "<project_path>"
+    assert live_evidence["blocker_summary_label"] == "<blocker_summary>"
+    assert live_projection["human_gate_required"] is True
+    assert live_projection["is_executable_now"] is False
+    assert "advisory_only.requires_human_gate" in live_projection["advisory_blockers"]
+    assert readiness["readiness_status"] == "blocked"
+    assert readiness["ready_for_execution"] is False
+    assert readiness["human_gate_required"] is True
+    assert any(item["advisory_type"] == "live_state_stale" for item in beacon_advisories)
+    serialized = json.dumps(runtime)
+    assert "C:\\Users" not in serialized
+    assert "Code\\Meridian" not in serialized
+    assert "Recovery staging requires Aegis review." not in serialized
     assert "Session Definition Logic" in titles
     assert "Lifecycle State Logic" in titles
     assert "Command Plan Logic" in titles
@@ -592,6 +618,13 @@ def test_index_vulcan_harness_uses_backend_logic_snapshot():
     assert "bridgeUrl('vulcan-logic')" in doc
     assert "renderVulcanLogicSnapshot" in doc
     assert "renderVulcanSessionLogic" in doc
+    assert "Session live-state evidence" in doc
+    assert "Bifrost advisory projection" in doc
+    assert "Recovery readiness" in doc
+    assert "Beacon advisory evidence" in doc
+    assert "execution controls visible" in doc
+    assert "raw worker chat visible" in doc
+    assert "raw filesystem paths visible" in doc
 
 
 def test_index_prime_harness_uses_backend_runtime_snapshot():
