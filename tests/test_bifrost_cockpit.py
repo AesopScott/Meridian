@@ -1786,8 +1786,10 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| BAL5 | Remaining credit/quota | Shows remaining balance/quota where provider exposes it. | wired |" in doc
     assert "quota state, credit status, and remaining-credit labels only" in doc
     assert "account balance probing remains unavailable" in doc
-    assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | partial |" in doc
-    assert "fuller Relay `PromptPayloadSnapshot` growth details remain deferred" in doc
+    assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | wired |" in doc
+    assert "Prompt Payload Visibility and Visible Prompt Payload Meter render backend-bound Relay payload size" in doc
+    assert "| BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | wired |" in doc
+    assert "`unexpected_growth_delta` and `q_mode_prompt_drag_degraded`" in doc
     assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
     assert "| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired |" in doc
     assert "| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired |" in doc
@@ -1828,6 +1830,26 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     assert "setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist })" in index
     assert "setRightPanelAuthority('spark', actionLabel || 'Spark', { persist })" in index
     assert ".session-window-right.is-panel-surface .session-prompt-input" in index
+
+
+def test_ui_checklist_promotes_prompt_payload_balance_rows_from_backend_bound_evidence():
+    checklist = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
+    progress = (ROOT / "docs" / "v2-progress-tracker.md").read_text(encoding="utf-8")
+    tests = (ROOT / "tests" / "test_bifrost_cockpit.py").read_text(encoding="utf-8")
+    assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | wired |" in checklist
+    assert "| BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | wired |" in checklist
+    assert "Bifrost + Prompt Payload Visibility" in progress
+    assert "review-cleared" in progress
+    assert "Relay prompt payload size, budget pressure, growth/flat state, Q-mode prompt-drag, evidence refs" in progress
+    assert "def test_backend_bound_prompt_payload_visibility_renders_adjacent_to_dispatch_and_queue_poll():" in tests
+    assert 'meter_section = _slice_aria_section(doc, "Visible Prompt Payload Meter")' in tests
+    assert 'payload_section = _slice_aria_section(doc, "Prompt Payload Visibility")' in tests
+    assert 'data-growth-state="flat"' in tests
+    assert "Growth delta: +240 tokens / 6.0%" in tests
+    assert "Q-mode prompt drag: degraded" in tests
+    assert "q_mode_prompt_drag_degraded" in tests
+    assert "unexpected_growth_delta" in tests
+    assert "Payload evidence: payload-snapshot:deepseek-qmode" in tests
 
 
 def test_model_harness_taxonomy_stays_ui_strategy_until_promoted():
