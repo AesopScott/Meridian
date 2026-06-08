@@ -1063,9 +1063,15 @@ def test_index_projects_selector_is_compass_context_not_user_routing():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "projectOptions = ['Bifrost', 'Meridian', 'Spark']" in doc
     assert "const projectSelectKey = 'meridian.session.project'" in doc
+    assert "let lastProjectValue = ''" in doc
+    assert "const hasUnsentPromptDraft = () => Array.from(document.querySelectorAll('.session-prompt-input'))" in doc
+    assert "const confirmProjectSwitchIfNeeded = (nextProject) =>" in doc
     assert "projectOptions.slice().sort((a, b) => a.localeCompare(b)).forEach((project) =>" in doc
     assert "projectSelect.value = projectOptions.includes(storedProject) ? storedProject : 'Meridian'" in doc
+    assert "lastProjectValue = projectSelect.value" in doc
     assert "localStorage.setItem(projectSelectKey, projectSelect.value)" in doc
+    assert "if (!confirmProjectSwitchIfNeeded(nextProject))" in doc
+    assert "projectSelect.value = lastProjectValue || 'Meridian'" in doc
     assert "screen.dataset.projectContext" in doc
     assert "primeWindow.dataset.projectContext = project" in doc
     assert "projectSelect.dataset.projectContext = project" in doc
@@ -1076,6 +1082,26 @@ def test_index_projects_selector_is_compass_context_not_user_routing():
     assert "group.label = `${activeProject} (active project)`" in doc
     assert "option.textContent = 'No live sessions for active project'" in doc
     assert "localStorage.setItem(userSessionTargetKey, projectSelect.value" not in doc
+
+
+def test_index_project_switch_guard_preserves_prompt_drafts_without_session_retargeting():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    guard_start = doc.index("let lastProjectValue = ''")
+    guard_end = doc.index("if (modelSelect) {", guard_start)
+    guard = doc[guard_start:guard_end]
+    assert "hasUnsentPromptDraft" in guard
+    assert "String(input.value || '').trim().length > 0" in guard
+    assert "window.confirm('Switch project context? Unsent prompt drafts will be preserved" in guard
+    assert "const nextProject = projectSelect.value || 'Meridian';" in guard
+    assert "projectSelect.value = lastProjectValue || 'Meridian';" in guard
+    assert "return;" in guard
+    assert "localStorage.setItem(projectSelectKey, projectSelect.value || 'Meridian');" in guard
+    assert "lastProjectValue = projectSelect.value || 'Meridian';" in guard
+    assert "renderUserSessionSelect();" in guard
+    assert "updatePrimeProjectStatus();" in guard
+    assert "localStorage.removeItem" not in guard
+    assert "localStorage.setItem(userSessionTargetKey" not in guard
+    assert "bridgeUrl('message')" not in guard
 
 
 def test_bridge_preserves_project_context_in_message_results_and_metadata():
@@ -1870,6 +1896,9 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "Compass renders Project metadata handoff from `/bridge/compass-logic`" in doc
     assert "Vulcan live-state evidence and FileMap relative-path registry" in doc
     assert "does not move branches, expose absolute paths, or invent source-control state" in doc
+    assert "| PRJ11 | Project switch guard | Warns before switching away from unsaved prompt/session edits if needed. | wired |" in doc
+    assert "Project selector checks visible Prime/User prompt drafts before changing Compass context" in doc
+    assert "cancel restores the prior project, confirm preserves draft storage" in doc
     assert "| SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired |" in doc
     assert "| SUR2 | Settings mode | Right panel uses full panel for Meridian configuration items, with no prompt window. | wired |" in doc
     assert "| SUR10 | Settings item actions | Settings mode actions mutate only explicit settings items. | wired |" in doc

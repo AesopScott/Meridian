@@ -3994,6 +3994,13 @@ body {
   const projectSelectKey = 'meridian.session.project';
   const projectOptions = ['Bifrost', 'Meridian', 'Spark'];
   const activeProjectContext = () => projectSelect?.value || 'Meridian';
+  let lastProjectValue = '';
+  const hasUnsentPromptDraft = () => Array.from(document.querySelectorAll('.session-prompt-input'))
+    .some((input) => String(input.value || '').trim().length > 0);
+  const confirmProjectSwitchIfNeeded = (nextProject) => {
+    if (!lastProjectValue || nextProject === lastProjectValue || !hasUnsentPromptDraft()) return true;
+    return window.confirm('Switch project context? Unsent prompt drafts will be preserved, but the visible Compass context and project-grouped session list will change.');
+  };
   const updateProjectContextAuthority = () => {
     const project = activeProjectContext();
     window.meridianActiveProject = project;
@@ -4019,10 +4026,18 @@ body {
       projectSelect.append(option);
     });
     projectSelect.value = projectOptions.includes(storedProject) ? storedProject : 'Meridian';
+    lastProjectValue = projectSelect.value;
     localStorage.setItem(projectSelectKey, projectSelect.value);
     updateProjectContextAuthority();
     projectSelect.addEventListener('change', () => {
+      const nextProject = projectSelect.value || 'Meridian';
+      if (!confirmProjectSwitchIfNeeded(nextProject)) {
+        projectSelect.value = lastProjectValue || 'Meridian';
+        updateProjectContextAuthority();
+        return;
+      }
       localStorage.setItem(projectSelectKey, projectSelect.value || 'Meridian');
+      lastProjectValue = projectSelect.value || 'Meridian';
       updateProjectContextAuthority();
       renderUserSessionSelect();
       updatePrimeProjectStatus();
