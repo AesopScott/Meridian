@@ -517,7 +517,23 @@ def test_compass_logic_snapshot_documents_project_context_harness():
 
     snapshot = compass_logic_snapshot()
     titles = [section["title"] for section in snapshot["capabilitySections"]]
-    assert snapshot["source"] == "meridian_core.compass_logic_snapshot.compass_logic_snapshot"
+    runtime = snapshot["runtime_sample"]
+    assert snapshot["source"] == "meridian_core.compass / meridian_core.compass_logic_snapshot"
+    assert snapshot["display_only"] is True
+    assert snapshot["mutation_authorized"] is False
+    assert runtime["project_definition"]["project_id"] == "meridian-v2"
+    assert runtime["identity"]["decision"] == "defined"
+    assert runtime["identity"]["execution_authorized"] is False
+    assert runtime["scope"]["decision"] == "in_scope"
+    assert runtime["scope"]["execution_authorized"] is False
+    assert runtime["bounds"]["decision"] == "in_scope"
+    assert runtime["bounds"]["execution_authorized"] is False
+    assert runtime["difference"]["decision"] == "distinct"
+    assert runtime["difference"]["merge_authorized"] is False
+    assert runtime["difference"]["execution_authorized"] is False
+    assert runtime["handoff"]["decision"] == "review_ready"
+    assert runtime["handoff"]["review_ready"] is True
+    assert runtime["handoff"]["execution_authorized"] is False
     assert "Project Definition Logic" in titles
     assert "Bounds and Scope Logic" in titles
     assert "Project Difference Logic" in titles
@@ -561,6 +577,12 @@ def test_index_compass_harness_uses_backend_logic_snapshot():
     assert "bridgeUrl('compass-logic')" in doc
     assert "renderCompassLogicSnapshot" in doc
     assert "renderCompassProjectLogic" in doc
+    assert "Reviewed project definition" in doc
+    assert "Identity and scope decisions" in doc
+    assert "Bounds and difference decisions" in doc
+    assert "Cross-project handoff review" in doc
+    assert "merge authorized" in doc
+    assert "execution authorized" in doc
 
 
 def test_index_vulcan_harness_uses_backend_logic_snapshot():

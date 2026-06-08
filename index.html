@@ -4751,13 +4751,59 @@ body {
       ]), true);
     }
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
+    const runtime = snapshot.runtime_sample || {};
+    const project = runtime.project_definition || {};
+    const identity = runtime.identity || {};
+    const scope = runtime.scope || {};
+    const bounds = runtime.bounds || {};
+    const difference = runtime.difference || {};
+    const handoff = runtime.handoff || {};
+    const mutationAllowed = Boolean(snapshot.mutation_authorized);
     return [
       relaySection('Compass logic source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
         ['harness', snapshot.harness || 'Compass'],
+        ['display only', snapshot.display_only ? 'yes' : 'no'],
+        ['mutation authorized', mutationAllowed ? 'yes' : 'no'],
       ]), true),
       relaySection('Compass summary', relaySummary(snapshot.summary || ''), true),
+      relaySection('Reviewed project definition', relayGrid([
+        ['project id', project.project_id || 'unknown'],
+        ['title', project.title || 'unknown'],
+        ['outcome', project.outcome || 'unknown'],
+        ['context', relayJoin(project.context)],
+        ['artifacts', relayJoin(project.artifacts)],
+        ['proof trail', relayJoin(project.proof_trail)],
+      ]), true),
+      relaySection('Identity and scope decisions', relayGrid([
+        ['identity decision', relayText(identity.decision)],
+        ['identity execution authorized', identity.execution_authorized ? 'yes' : 'no'],
+        ['scope decision', relayText(scope.decision)],
+        ['scope subject', `${relayText(scope.subject_kind)} ${scope.subject_ref || ''}`.trim()],
+        ['scope execution authorized', scope.execution_authorized ? 'yes' : 'no'],
+        ['scope blockers', relayJoin(scope.blockers)],
+      ]), true),
+      relaySection('Bounds and difference decisions', relayGrid([
+        ['bounds decision', relayText(bounds.decision)],
+        ['bounds execution authorized', bounds.execution_authorized ? 'yes' : 'no'],
+        ['in-scope refs', relayJoin(bounds.in_scope_refs)],
+        ['out-of-scope refs', relayJoin(bounds.out_of_scope_refs)],
+        ['difference decision', relayText(difference.decision)],
+        ['merge authorized', difference.merge_authorized ? 'yes' : 'no'],
+        ['difference execution authorized', difference.execution_authorized ? 'yes' : 'no'],
+        ['shared relationship refs', relayJoin(difference.shared_relationship_refs)],
+      ]), true),
+      relaySection('Cross-project handoff review', relayGrid([
+        ['handoff decision', relayText(handoff.decision)],
+        ['reason category', relayText(handoff.reason_category)],
+        ['payload type', relayText(handoff.payload_type)],
+        ['review ready', handoff.review_ready ? 'yes' : 'no'],
+        ['execution authorized', handoff.execution_authorized ? 'yes' : 'no'],
+        ['approval required', handoff.approval_required ? 'yes' : 'no'],
+        ['approval refs', relayJoin(handoff.approval_refs)],
+        ['blockers', relayJoin(handoff.blockers)],
+      ]), false),
       ...capabilitySections.map(renderCompassCapabilitySection),
     ].join('');
   };

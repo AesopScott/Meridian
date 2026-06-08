@@ -1,15 +1,140 @@
 """Backend snapshot for Compass project-context logic shown in the harness UI."""
 
+from meridian_core.compass import (
+    ProjectBoundsRequest,
+    ProjectHandoffRequest,
+    ProjectScopeCandidate,
+    define_project,
+    evaluate_cross_project_handoff,
+    evaluate_project_bounds,
+    evaluate_project_difference,
+    evaluate_project_identity,
+    evaluate_project_scope,
+    project_difference_profile_from_definition,
+    project_identity_candidate_from_definition,
+)
+
 SNAPSHOT_VERSION = "compass-domain-v1"
+
+
+def _reviewed_runtime_sample() -> dict:
+    """Build display-safe sample decisions from the reviewed Compass runtime."""
+    project = define_project(
+        project_id="meridian-v2",
+        title="Meridian V2",
+        outcome="Prime can coordinate V2 harness runtime without project drift.",
+        context=(
+            "Compass owns project identity and bearing.",
+            "V2 runtime stays pure until reviewed.",
+        ),
+        artifacts=(
+            "docs/v2-progress-tracker.md",
+            "meridian_core/compass.py",
+        ),
+        objectives=(
+            "Define project runtime identity.",
+            "Keep repo, venture, and session relationships explicit.",
+        ),
+        tasks=(
+            "Create pure domain object.",
+            "Add deterministic serialization tests.",
+        ),
+        proof_trail=(
+            "docs/harness-stage-checklist.md#Compass",
+            "tests/test_compass.py",
+        ),
+        repo_refs=("repo:meridian",),
+        venture_refs=("venture:meridian",),
+        session_refs=("session:build-4-compass",),
+    )
+    target_project = define_project(
+        project_id="meridian-ui-review",
+        title="Meridian UI Review",
+        outcome="Expose reviewed backend capabilities in the Electron UI.",
+        context=("UI renders reviewed backend summaries only.",),
+        artifacts=("index.html", "scripts/meridian-model-bridge.js"),
+        objectives=("Keep Electron UI caught up with reviewed backend state.",),
+        tasks=("Render display-only proof surfaces.",),
+        proof_trail=("tests/test_bifrost_cockpit.py",),
+        repo_refs=("repo:meridian",),
+        venture_refs=("venture:meridian",),
+        session_refs=("session:ui-catchup",),
+    )
+    scope_candidate = ProjectScopeCandidate(
+        project_id="meridian-v2",
+        subject_kind="artifact",
+        subject_ref="meridian_core/compass.py",
+        evidence_refs=("proof:scope-check",),
+    )
+    bounds_request = ProjectBoundsRequest(
+        project_id="meridian-v2",
+        request_kind="feature_change",
+        request_ref="request:compass-runtime-panel",
+        candidates=(scope_candidate,),
+        repo_refs=("repo:meridian",),
+        venture_refs=("venture:meridian",),
+        session_refs=("session:build-4-compass",),
+        evidence_refs=("proof:bounds-check",),
+    )
+    source_profile = project_difference_profile_from_definition(
+        project,
+        mission_bearing="Ship Meridian V2 project-boundary runtime.",
+        memory_pins=("memory:compass-definition-runtime",),
+        blockers=("blocker:none",),
+        proof_expectations=("pytest:tests/test_compass.py",),
+    )
+    target_profile = project_difference_profile_from_definition(
+        target_project,
+        mission_bearing="Expose reviewed backend capability state in Electron.",
+        memory_pins=("memory:electron-ui-catchup",),
+        blockers=("blocker:none",),
+        proof_expectations=("pytest:tests/test_bifrost_cockpit.py",),
+    )
+    handoff_request = ProjectHandoffRequest(
+        source_project_id="meridian-v2",
+        target_project_id="meridian-ui-review",
+        reason_category="proof_packet",
+        payload_type="proof_refs",
+        payload_summary_refs=("proof-summary:compass-project-difference",),
+        evidence_refs=("proof:cross-project-handoff",),
+        approval_required=True,
+        approval_refs=("approval:codex-review-cleared",),
+        raw_context_blocked=True,
+    )
+    return {
+        "project_definition": project.to_dict(),
+        "identity": evaluate_project_identity(
+            project_identity_candidate_from_definition(
+                project,
+                mission_bearing="Ship Meridian V2 project-boundary runtime.",
+                evidence_refs=("proof:identity-check",),
+            )
+        ).to_dict(),
+        "scope": evaluate_project_scope(project, scope_candidate).to_dict(),
+        "bounds": evaluate_project_bounds(project, bounds_request).to_dict(),
+        "difference": evaluate_project_difference(
+            source_profile,
+            target_profile,
+            evidence_refs=("proof:project-difference",),
+        ).to_dict(),
+        "handoff": evaluate_cross_project_handoff(
+            source_profile,
+            target_profile,
+            handoff_request,
+        ).to_dict(),
+    }
 
 
 def compass_logic_snapshot() -> dict:
     """Return the Compass capability list used by Bifrost's visible harness."""
     return {
         "version": SNAPSHOT_VERSION,
-        "source": "meridian_core.compass_logic_snapshot.compass_logic_snapshot",
+        "source": "meridian_core.compass / meridian_core.compass_logic_snapshot",
         "harness": "Compass",
         "summary": "Compass owns project context, mission bearing, and portfolio boundary logic. Vulcan owns live session lifecycle and User Session target behavior.",
+        "display_only": True,
+        "mutation_authorized": False,
+        "runtime_sample": _reviewed_runtime_sample(),
         "capabilitySections": [
             {
                 "title": "Compass Job",
@@ -88,11 +213,11 @@ def compass_logic_snapshot() -> dict:
             },
             {
                 "title": "Current Limits",
-                "summary": "Compass is visible for project context now; deeper project metadata and switch guards remain planned.",
+                "summary": "Compass is visible for project context and reviewed runtime decisions now; live project mutation and switch guards remain planned.",
                 "rows": [
-                    {"key": "not wired yet", "value": "project metadata panel, dirty-switch confirmation, backlog/review surface refresh"},
+                    {"key": "not wired yet", "value": "dirty-switch confirmation, backlog/review surface refresh, live project mutation controls"},
                     {"key": "safe behavior", "value": "missing metadata is reported as unavailable rather than invented"},
-                    {"key": "next proof", "value": "future Compass backend state should replace static project option seed"},
+                    {"key": "next proof", "value": "future Compass backend state should replace static project option seed when project registry is reviewed"},
                 ],
             },
         ],
