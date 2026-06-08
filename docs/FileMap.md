@@ -15,7 +15,7 @@ C:\Users\scott\Code\Meridian\docs\FileMap.md
 Obsidian mirror path:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
+G:\My Drive\Obsidian\Meridian_Build\FileMap.md
 ```
 
 ## Core Authority And Context
@@ -164,7 +164,7 @@ This block mirrors the backend restart wave registrations added to runtime FileM
 | --- | --- | --- | --- | --- |
 | `meridian_core/filemap.py` | File map / knowledge tracker | Domain-level knowledge tracker: `FileMapEntry`, `FileMap`, `make_default_map()`. | `tests/test_filemap.py` | Feed to Echo/Atlas for session memory injection. |
 | `tests/test_filemap.py` | File map / knowledge tracker | Test suite for meridian_core/filemap.py: verifies required FileMap entries, deterministic summaries, area filtering, and injection-summary coverage. | n/a | Run before changing FileMap entries, required-path coverage, or FileMap summary behavior. |
-| `docs/FileMap.md` | File map / knowledge tracker | Human-readable living knowledge tracker for important Meridian files. | n/a | Obsidian mirror: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md` |
+| `docs/FileMap.md` | File map / knowledge tracker | Human-readable living knowledge tracker for important Meridian files. | n/a | Obsidian mirror: `G:\My Drive\Obsidian\Meridian_Build\FileMap.md` |
 
 ## Planning And Handoffs
 

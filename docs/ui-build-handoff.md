@@ -186,6 +186,6 @@ docs/FileMap.md
 When complete:
 
 - Commit and push only the UI slice.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark the changed UI slice ready for Codex review.
 - Include screenshot or browser verification notes in the completion summary.

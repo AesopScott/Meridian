@@ -1862,7 +1862,7 @@ Rules:
 - Run the requested tests if the task calls for tests.
 - Commit only your slice.
 - Push to `origin/main`.
-- Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian build notes in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
@@ -6290,7 +6290,7 @@ Completion:
 
 - Commit only this docs slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 ~~Previous Active Task (COMPLETED 2026-05-31 04:21 -06:00): write the detailed V2 build plan. Commit `71b8d5f`; coordinator review passed; FileMap follow-up routed to Build 3.~~
@@ -6342,7 +6342,7 @@ Completion:
 
 - Commit only this docs slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 ---
@@ -6395,7 +6395,7 @@ Completion:
 
 - Commit only this docs slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 ---
@@ -6448,7 +6448,7 @@ Completion:
 
 - Commit only this docs slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 **Ready for Codex Review**

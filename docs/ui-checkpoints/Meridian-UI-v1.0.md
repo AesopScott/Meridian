@@ -24,5 +24,5 @@ Copy-Item -LiteralPath "C:\Users\scott\Code\Meridian\bifrost\versions\Meridian-U
 
 Created: 
 2026-05-31T23:22:03.3862767-06:00
-- Obsidian note: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\UI Checkpoints\Meridian UI v1.0.md`
+- Obsidian note: `G:\My Drive\Obsidian\Meridian_Build\UI Checkpoints\Meridian UI v1.0.md`
 

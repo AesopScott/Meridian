@@ -188,7 +188,7 @@ def make_default_map() -> FileMap:
             area=FileArea.FILE_MAP,
             purpose="Human-readable living knowledge tracker for important Meridian files.",
             related_tests=[],
-            notes="Obsidian mirror: G:\\My Drive\\Aesop Academy\\Obsidian\\Meridian_Build\\FileMap.md",
+            notes="Obsidian mirror: G:\\My Drive\\Obsidian\\Meridian_Build\\FileMap.md",
         ),
         FileMapEntry(
             path="docs/harness-stage-checklist.md",

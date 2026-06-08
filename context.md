@@ -33,13 +33,13 @@ https://github.com/AesopScott/Meridian.git
 Obsidian build folder:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Build
+G:\My Drive\Obsidian\Meridian_Build
 ```
 
 Obsidian sessions folder:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Sessions
+G:\My Drive\Obsidian\Meridian_Sessions
 ```
 
 Current build files:
@@ -888,8 +888,8 @@ Claude handoff rule: every build handoff should include a completion protocol fo
 
 Default Obsidian locations:
 
-- `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`
-- `G:\My Drive\Aesop Academy\Obsidian\Meridian_Sessions`
+- `G:\My Drive\Obsidian\Meridian_Build`
+- `G:\My Drive\Obsidian\Meridian_Sessions`
 
 When Codex gives Scott a handoff to paste into Claude, it should be presented in a fenced text block so the UI provides a copy button.
 

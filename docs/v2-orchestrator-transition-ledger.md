@@ -513,7 +513,7 @@ Coordinator Build 1 movement rejection - 2026-06-02:
 
 Coordinator rolling checkpoint - 2026-06-02 12:03 -06:00:
 
-- Goal update: user added the requirement that the coordinator update Obsidian and Git regularly. Obsidian checkpoint was appended to `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\8-Logs.md`; this Git-tracked checkpoint records the same durable state under the frontend-ACKed docs-only lease.
+- Goal update: user added the requirement that the coordinator update Obsidian and Git regularly. Obsidian checkpoint was appended to `G:\My Drive\Obsidian\Meridian_Build\8-Logs.md`; this Git-tracked checkpoint records the same durable state under the frontend-ACKed docs-only lease.
 - Main-write coordination: frontend lane ACKed the docs-only checkpoint scope for `docs/main-write-coordination-ledger.md` and `docs/v2-orchestrator-transition-ledger.md`; no worker implementation movement or frontend branch movement is included.
 - Shared main gate before this checkpoint: fetched `origin/main`, fast-forwarded shared `main` cleanly by one queue-doc commit, verified `C:\Users\scott\Code\Meridian` on `main`, clean, and aligned with `origin/main`.
 - Build 1: Model Harness provider-neutral metadata retry produced concrete blocker `89ab8578`. Evidence says model adapter metadata edits were patched, staged, and tested once, then staged/working diffs disappeared; blocker is routed to Reviews A for provenance, not accepted as code completion.
@@ -537,7 +537,7 @@ Coordinator seven-lane evidence checkpoint - 2026-06-04 07:05 -06:00:
 - Build 4: clean but branch-stale/noisy (`ahead 2`, `behind 7127`). Exact pending Aegis checkpoint advisory commits are path-limited to `meridian_core/aegis.py`, `tests/test_aegis.py`, and `docs/live-build-4.md`; proof passed 298/298 Aegis tests.
 - Build 5: clean but branch-stale/noisy (`ahead 2`, `behind 7127`). Exact pending render audit commits are path-limited to Bifrost tests plus `docs/live-build-5.md`; proof passed 312/312 Bifrost cockpit/preview tests.
 - Reviews B: clean and has local review-clearance provenance for Build 3 (`eb0e8a7ee`), Build 4 (`646851b2c`), and Build 5 (`213aa2366`) in `docs/live-codex-reviews-2.md`.
-- Coordination: frontend lane ACKed this docs-only coordinator checkpoint write and separately ACKed inclusion of an already-present `docs/live-build-4.md` queue-doc commit if the push bundled it. Obsidian was also updated at `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\8-Logs.md`.
+- Coordination: frontend lane ACKed this docs-only coordinator checkpoint write and separately ACKed inclusion of an already-present `docs/live-build-4.md` queue-doc commit if the push bundled it. Obsidian was also updated at `G:\My Drive\Obsidian\Meridian_Build\8-Logs.md`.
 - Next coordinator action: prepare an exact-commit, path-limited movement plan for the reviewed Build 3/4/5 slices and separately determine whether Build 2 has Reviews A clearance or needs review/repair. Do not use stale branch ranges for movement.
 
 ## Full Takeover Criteria

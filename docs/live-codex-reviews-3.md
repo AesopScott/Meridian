@@ -87,7 +87,7 @@ Review C must declare scope before reviewing. It must not silently broaden into 
 - CRITICAL and HIGH findings block the lane until repaired.
 - MEDIUM findings should usually be repaired before more work unless intentionally deferred.
 - LOW findings may be deferred, but must be recorded.
-- Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build` when a review finds or clears important V0 gate issues.
+- Update Obsidian build notes in `G:\My Drive\Obsidian\Meridian_Build` when a review finds or clears important V0 gate issues.
 
 ## Review Inputs
 
@@ -479,7 +479,7 @@ Round C1 complete at 2026-05-30 13:58 MDT. All three commits passed:
 
 Build 2 cadence cleared for the three-commit window ending at `989366f`. No repairs routed. Idle — polling docs/live-build-1.md, docs/live-build-2.md, docs/live-codex-reviews.md every 30 seconds for next delegated assignment.
 
-Durable proof trail also captured in Obsidian: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\2026-05-30 Codex Reviews C Round C1 V0 Gate Clearance.md`.
+Durable proof trail also captured in Obsidian: `G:\My Drive\Obsidian\Meridian_Build\2026-05-30 Codex Reviews C Round C1 V0 Gate Clearance.md`.
 
 ## Coordinator Addendum - Round C5 FileMap Repair Closed
 

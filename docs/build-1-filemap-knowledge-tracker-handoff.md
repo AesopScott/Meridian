@@ -56,7 +56,7 @@ docs/FileMap.md
 The Obsidian mirror is:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
+G:\My Drive\Obsidian\Meridian_Build\FileMap.md
 ```
 
 ## Suggested Objects
@@ -124,7 +124,7 @@ Follow `docs/claude-handoff-completion-protocol.md`:
 Also update the Obsidian mirror of `docs/FileMap.md` if you change that file:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\FileMap.md
+G:\My Drive\Obsidian\Meridian_Build\FileMap.md
 ```
 
 Keep scope tight. No UI, persistence, model calls, or worker automation yet.

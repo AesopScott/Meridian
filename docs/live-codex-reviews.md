@@ -2411,7 +2411,7 @@ This split is deliberate: Meridian must be able to dynamically spawn review sess
 - After every three task-changing commits from any one build lane, perform a cadence review before that lane receives more normal build work.
 - A single `Ready for Codex Review` marker is a review signal, not automatically a build stop. Normal build work may continue until the lane reaches three task-changing commits since its last checkpoint, unless a reviewer has routed a repair, marked the lane blocked, or Prime explicitly escalates the slice as high risk.
 - Reviews should catch up in parallel while builders keep moving. Prime's default throughput target is three build slices per active lane per review cadence.
-- Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build` when a review finds or clears important issues.
+- Update Obsidian build notes in `G:\My Drive\Obsidian\Meridian_Build` when a review finds or clears important issues.
 
 ## Review Inputs
 

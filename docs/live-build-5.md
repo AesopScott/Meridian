@@ -1420,7 +1420,7 @@ Rules:
 - Run requested tests if the task calls for tests.
 - Commit only your slice.
 - Push to `origin/main`.
-- Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian build notes in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
@@ -2213,7 +2213,7 @@ Completion:
 
 - Commit only this Bifrost Harness Dashboard slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 - This should complete V1's 12/12 cockpit item count if tests pass and review routing is recorded.
 
@@ -2264,7 +2264,7 @@ Completion:
 
 - Commit only this Bifrost progress-surface slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 - Because this will be the third Build 5 task-changing commit in the cadence window, request Codex Reviews before taking another Build 5 implementation task.
 
@@ -2312,7 +2312,7 @@ Completion:
 
 - Commit only this Bifrost mapping slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Stale prior task follows.
@@ -2365,7 +2365,7 @@ Completion:
 
 - Commit only this Bifrost scaffold slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Stale prior text follows.

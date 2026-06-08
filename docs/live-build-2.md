@@ -492,7 +492,7 @@ Proof:
 Completion:
 - Commit only this repair on the Build 2 worktree branch.
 - Do not push/write `main`; request coordinator movement after Reviews A clearance.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Next Candidate: bind reviewed close/archive proof into Prime/Beacon advisory serialization after this deterministic proof repair clears review.
@@ -1358,7 +1358,7 @@ Rules:
 - Run the requested tests.
 - Commit only your slice.
 - Push to `origin/main`.
-- Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian build notes in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark completed slices `Ready for Codex Review` in this file. Include commit hash, files changed, and tests run so `docs/live-codex-reviews.md` can clear or route repairs.
 
 ## Read Checks
@@ -4250,7 +4250,7 @@ Completion:
 
 - Commit only this tracker slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 Stale prior task follows.
@@ -4294,7 +4294,7 @@ Completion:
 
 - Commit only this docs/API policy slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 - Return to polling `docs/live-build-2.md` every 30 seconds.
 
@@ -4349,7 +4349,7 @@ Completion:
 
 - Commit only this package API slice.
 - Push to `origin/main`.
-- Update Obsidian in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`.
+- Update Obsidian in `G:\My Drive\Obsidian\Meridian_Build`.
 - Mark this slice `Ready for Codex Review` with commit hash, files changed, and tests run.
 
 2026-06-01 18:25 -06:00 - Build 2 completed enforce remaining Session Lifecycle permission-invariant gaps (Codex Reviews A repair); commit e41851ae; files changed: meridian_core/session_lifecycle.py (added __post_init__ validation to PermissionContext for UNLOCKED_TEMPORARY/UNLOCKED_PERMANENT invariants; updated can_accept_work() to check task_scope; fixed can_execute_operation() to delegate to PermissionContext.can_execute_operation()), tests/test_session_lifecycle.py (fixed 4 fixtures to use valid permission states; added 8 new focused regression tests for invariant enforcement); tests: 60 passed (52 prior + 8 new permission invariant tests); push: origin/main successful (merged with concurrent updates); cadence count: 1 of 3; Ready for Codex Review

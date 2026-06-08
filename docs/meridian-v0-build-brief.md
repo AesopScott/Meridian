@@ -8,8 +8,8 @@ Canonical repo and knowledge workspace:
 
 - Local repo: `C:\Users\scott\Code\Meridian`
 - Remote repo: `https://github.com/AesopScott/Meridian.git`
-- Obsidian build folder: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build`
-- Obsidian sessions folder: `G:\My Drive\Aesop Academy\Obsidian\Meridian_Sessions`
+- Obsidian build folder: `G:\My Drive\Obsidian\Meridian_Build`
+- Obsidian sessions folder: `G:\My Drive\Obsidian\Meridian_Sessions`
 
 Its first win is not building one large app. Its first win is proving that the local orchestrator can act as the local brain across many initiatives:
 

@@ -28,13 +28,13 @@ git push origin main
 Obsidian build folder:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Build
+G:\My Drive\Obsidian\Meridian_Build
 ```
 
 Obsidian sessions folder:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Sessions
+G:\My Drive\Obsidian\Meridian_Sessions
 ```
 
 The Obsidian update should include:

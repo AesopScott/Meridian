@@ -33,7 +33,7 @@ When the Active Task is complete:
 - run the required tests
 - commit only your owned slice
 - push to origin/main
-- update Obsidian in G:\My Drive\Aesop Academy\Obsidian\Meridian_Build
+- update Obsidian in G:\My Drive\Obsidian\Meridian_Build
 - report the commit hash and test result in this chat
 - return to polling docs/live-build-<N>.md every 30 seconds
 

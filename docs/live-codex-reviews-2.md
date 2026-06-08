@@ -3131,7 +3131,7 @@ Both review lanes must declare scope before reviewing, and neither lane may sile
 - CRITICAL and HIGH findings block the lane until repaired.
 - MEDIUM findings should usually be repaired before more work unless intentionally deferred.
 - LOW findings may be deferred, but must be recorded.
-- Update Obsidian build notes in `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build` when a review finds or clears important architecture issues.
+- Update Obsidian build notes in `G:\My Drive\Obsidian\Meridian_Build` when a review finds or clears important architecture issues.
 
 ## Review Inputs
 

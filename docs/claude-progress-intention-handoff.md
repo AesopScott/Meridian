@@ -96,7 +96,7 @@ git push origin main
 Obsidian build folder:
 
 ```text
-G:\My Drive\Aesop Academy\Obsidian\Meridian_Build
+G:\My Drive\Obsidian\Meridian_Build
 ```
 
 If the working tree contains unrelated uncommitted files, do not include them in the commit. Commit only the files for this slice.

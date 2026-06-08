@@ -77,7 +77,7 @@ FileMap:
 
 Obsidian log updated during this work:
 
-- `G:\My Drive\Aesop Academy\Obsidian\Meridian_Build\8-Logs.md`
+- `G:\My Drive\Obsidian\Meridian_Build\8-Logs.md`
 
 ## What Was Built
 
