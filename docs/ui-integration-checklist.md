@@ -366,7 +366,7 @@ The Routines icon owns recurring or repeatable work patterns. It should make rou
 | ROU9 | Prime-owned routine review | Prime reviews routine outputs and only escalates meaningful user gates. | planned | Routine result can be accepted/routed without user micromanagement. |
 | ROU10 | Quiet routine mode | Routine noise respects Quiet mode while preserving blockers. | planned | Quiet mode suppresses normal success chatter. |
 | ROU11 | Routine archive/history | Shows previous runs and outcomes without cluttering main panels. | planned | History is inspectable by routine. |
-| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | planned | Missing permission/account gets readable setup state. |
+| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | wired | Spark Routines renders a Public automation boundary beside `/bridge/goal-runtime` and `/bridge/workflow-dispatch-status`; missing permission/account setup is guidance only, with no automation creation, schedule mutation, routine execution, credential request, or self-approval. |
 
 ### Skills Surface Subitems
 

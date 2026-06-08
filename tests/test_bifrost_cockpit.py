@@ -1352,6 +1352,10 @@ def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     assert "worker summaries stay small and checkpoint-updated" in doc
     assert "Session state packets and evidence refs are surfaced as typed state" in doc
     assert "raw artifacts, logs, transcripts, worker history, and raw detail are not pasted" in doc
+    assert "Public automation boundary" in doc
+    assert "Public builds require explicit local permissions, configured accounts, and reviewed scheduler authority before recurring automation can run." in doc
+    assert "this surface does not create automations, mutate schedules, run routines, request credentials, or approve itself." in doc
+    assert "Routine results remain display-only typed state until a reviewed routine automation backend exists." in doc
     assert "data-goal-runtime" in doc
     assert "data-workflow-dispatch-status" in doc
     assert "loadGoalRuntime();" in doc
@@ -1371,7 +1375,9 @@ def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     assert "fetch(" not in routines_surface
     assert "bridgeUrl('message')" not in routines_surface
     assert "method: 'POST'" not in routines_surface
-    assert "scheduler" not in routines_surface.lower()
+    assert "scheduler mutation" not in routines_surface.lower()
+    assert "create automations" in routines_surface
+    assert "mutate schedules" in routines_surface
     assert "run-now" not in routines_surface
     assert "raw_artifacts_visible ? 'yes'" not in routines_surface
     assert "raw worker session history" not in routines_surface
@@ -1397,9 +1403,11 @@ def test_routines_checklist_keeps_automation_rows_deferred_until_backend_exists(
         "| ROU9 | Prime-owned routine review | Prime reviews routine outputs and only escalates meaningful user gates. | planned |",
         "| ROU10 | Quiet routine mode | Routine noise respects Quiet mode while preserving blockers. | planned |",
         "| ROU11 | Routine archive/history | Shows previous runs and outcomes without cluttering main panels. | planned |",
-        "| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | planned |",
     ):
         assert row in doc
+    assert "| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | wired |" in doc
+    assert "missing permission/account setup is guidance only" in doc
+    assert "no automation creation, schedule mutation, routine execution, credential request, or self-approval" in doc
 
 
 def test_index_bifrost_harness_uses_voice_io_snapshot():
@@ -1953,6 +1961,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "/bridge/goal-runtime" in doc
     assert "/bridge/workflow-dispatch-status" in doc
     assert "no routine execution, scheduler mutation, raw artifact/log/transcript/detail paste, raw worker history replay, or self-approval is authorized" in doc
+    assert "| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | wired |" in doc
+    assert "Spark Routines renders a Public automation boundary beside `/bridge/goal-runtime` and `/bridge/workflow-dispatch-status`" in doc
     assert "| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired |" in doc
     assert "| SK10 | Archive | Opens close/archive proof posture until reloadable archive controls exist. | wired |" in doc
     assert "/bridge/session-close-archive-proof" in doc
