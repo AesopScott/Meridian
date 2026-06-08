@@ -8031,9 +8031,9 @@ body {
         ['prompt window', 'hidden in this mode'],
       ]), true),
       relaySection('Backend link', relayGrid([
-        ['state', settingsSelected ? 'voice I/O status wired from backend snapshot' : 'not wired yet'],
-        ['snapshot route', settingsSelected ? '/bridge/voice-io' : 'none'],
-        ['mutation policy', settingsSelected ? 'display-only; settings and voice mutations are blocked' : 'unsupported until backend wiring exists'],
+        ['state', settingsSelected ? 'voice I/O and public CLI setup status wired from backend snapshots' : 'not wired yet'],
+        ['snapshot route', settingsSelected ? '/bridge/voice-io + /bridge/models' : 'none'],
+        ['mutation policy', settingsSelected ? 'display-only; settings, voice, model, install, login, and account mutations are blocked' : 'unsupported until backend wiring exists'],
         ['drift guard', 'visible controls must match backend settings before writes are enabled'],
       ]), true),
     ];
@@ -8044,13 +8044,22 @@ body {
         'Settings writes remain blocked until an explicit settings backend exists.',
       ]), true));
       sections.push(`<div data-voice-io>${relaySection('Voice I/O source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
+      sections.push(relaySection('Settings public CLI setup boundary', relayList([
+        'Settings/Spark renders public Codex and Claude/Max CLI setup status from the reviewed Models bridge snapshot.',
+        'Missing CLI/install/login state is setup guidance only; Settings does not install software, sign in, read secrets, probe provider accounts, or mutate model routing.',
+        'Manual prompt sends still use the existing model selector; Auto remains disabled until Relay owns the decision.',
+      ]), true));
+      sections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
     }
     const rendered = renderRightPanelSurface({
       title: `${label || 'Settings'} Surface`,
       status: settingsSelected ? 'Display-only' : 'planned',
       sections,
     });
-    if (rendered && settingsSelected) loadVoiceIo();
+    if (rendered && settingsSelected) {
+      loadVoiceIo();
+      loadSparkModels();
+    }
     return rendered;
   };
   const renderHarnessSurface = (button) => {
@@ -8719,6 +8728,7 @@ body {
     if (rightWorkspace?.querySelector('[data-aegis-logic]')) loadAegisLogic();
     if (rightWorkspace?.querySelector('[data-session-close-archive-proof]')) loadSessionCloseArchiveProof();
     if (rightWorkspace?.querySelector('[data-voice-io]')) loadVoiceIo();
+    if (rightWorkspace?.querySelector('[data-spark-models]')) loadSparkModels();
     if (rightWorkspace?.querySelector('[data-release-autonomy]')) loadReleaseAutonomy();
     if (rightWorkspace?.querySelector('[data-model-harness-backend-binding]')) loadModelHarnessBackendBinding();
   };

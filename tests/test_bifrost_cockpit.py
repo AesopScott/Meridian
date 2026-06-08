@@ -305,15 +305,18 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const renderSparkSurface = (label) =>" in doc
     assert "const settingsSelected = selectedLabel === 'Settings';" in doc
-    assert "settingsSelected ? 'voice I/O status wired from backend snapshot' : 'not wired yet'" in doc
-    assert "settingsSelected ? '/bridge/voice-io' : 'none'" in doc
-    assert "settingsSelected ? 'display-only; settings and voice mutations are blocked' : 'unsupported until backend wiring exists'" in doc
+    assert "settingsSelected ? 'voice I/O and public CLI setup status wired from backend snapshots' : 'not wired yet'" in doc
+    assert "settingsSelected ? '/bridge/voice-io + /bridge/models' : 'none'" in doc
+    assert "settingsSelected ? 'display-only; settings, voice, model, install, login, and account mutations are blocked' : 'unsupported until backend wiring exists'" in doc
     assert "unsupported until backend wiring exists" in doc
     assert "Settings/Spark renders compact Voice I/O state from the reviewed backend snapshot." in doc
     assert "No microphone capture, speech output, read-aloud, mute mutation, prompt text, response text, raw worker history, or worker chat is exposed." in doc
     assert "Settings writes remain blocked until an explicit settings backend exists." in doc
+    assert "Settings/Spark renders public Codex and Claude/Max CLI setup status from the reviewed Models bridge snapshot." in doc
+    assert "Settings does not install software, sign in, read secrets, probe provider accounts, or mutate model routing." in doc
     assert "status: settingsSelected ? 'Display-only' : 'planned'" in doc
-    assert "if (rendered && settingsSelected) loadVoiceIo();" in doc
+    assert "loadVoiceIo();" in doc
+    assert "loadSparkModels();" in doc
     for label in ("Filter", "Backlog", "Skills"):
         assert f'aria-label="{label}"' in doc
     for route in (
@@ -1191,7 +1194,7 @@ def test_index_spark_and_workflow_surfaces_use_bridge_snapshots():
     assert "data-voice-io" in doc
     assert "bridgeUrl('voice-io')" in doc
     assert "renderVoiceIoSnapshot" in doc
-    assert "voice I/O status wired" in doc
+    assert "voice I/O and public CLI setup status wired" in doc
     assert "microphone authorized" in doc
     assert "controls disabled" in doc
     assert "execution authorized" in doc
@@ -1845,6 +1848,9 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "account balance probing remains unavailable" in doc
     assert "| MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | wired |" in doc
     assert "Spark Models renders `/bridge/models` setup hints plus a Public setup boundary" in doc
+    assert "| SET19 | Public CLI setup guidance | Exposes setup status/help for Codex and Max/Claude CLIs in public builds. | wired |" in doc
+    assert "Settings/Spark renders public Codex and Claude/Max CLI setup status from `/bridge/models`" in doc
+    assert "no software install, sign-in, secret read, provider-account probe, model routing mutation, Auto enablement, or prompt send" in doc
     assert "| BAL7 | Prompt payload size | Shows Relay prompt payload size and budget percentage. | wired |" in doc
     assert "Prompt Payload Visibility and Visible Prompt Payload Meter render backend-bound Relay payload size" in doc
     assert "| BAL8 | Prompt drag warning | Flags growing prompt overhead or degraded queue-mode payload growth. | wired |" in doc
@@ -1873,6 +1879,29 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "pasted transcript/log/detail body" in doc
     assert "compact typed session state only" in doc
     assert "raw detail is fetched on demand only" in doc
+
+
+def test_index_settings_surface_shows_public_cli_setup_without_mutation_paths():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const renderSparkSurface = (label) =>")
+    render_end = doc.index("const renderHarnessSurface = (button) =>", render_start)
+    settings_surface = doc[render_start:render_end]
+    assert "voice I/O and public CLI setup status wired from backend snapshots" in settings_surface
+    assert "/bridge/voice-io + /bridge/models" in settings_surface
+    assert "Settings public CLI setup boundary" in settings_surface
+    assert "data-spark-models" in settings_surface
+    assert "loadSparkModels();" in settings_surface
+    assert "does not install software, sign in, read secrets, probe provider accounts, or mutate model routing" in settings_surface
+    assert "Auto remains disabled until Relay owns the decision" in settings_surface
+    assert "bridgeUrl('message')" not in settings_surface
+    assert "method: 'POST'" not in settings_surface
+    assert "bridgeUrl('restart')" not in settings_surface
+    assert "bridgeUrl('call-result')" not in settings_surface
+
+    refresh_start = doc.index("const refreshRelayPanel = () =>")
+    refresh_end = doc.index("window.addEventListener('focus', refreshRelayPanel);", refresh_start)
+    refresh_surface = doc[refresh_start:refresh_end]
+    assert "if (rightWorkspace?.querySelector('[data-spark-models]')) loadSparkModels();" in refresh_surface
 
 
 def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wired():

@@ -247,7 +247,7 @@ These are the first-pass settings subitems carried forward from Meridian's Polar
 | SET16 | Quick reply order | Chooses which prompt macro buttons appear and their order. | planned | Buttons update order without changing injection semantics. |
 | SET17 | Session card defaults | Carries forward useful Polaris card defaults: hide/minimize/expand/pin/archive/transfer/rerun/size behavior. | planned | New session surfaces inherit defaults. |
 | SET18 | Diagnostic log visibility | Controls whether per-session diagnostic event logs are visible by default. | planned | Toggle setting; diagnostic log opens/closes without losing events. |
-| SET19 | Public CLI setup guidance | Exposes setup status/help for Codex and Max/Claude CLIs in public builds. | planned | Missing CLI/auth shows install/login guidance. |
+| SET19 | Public CLI setup guidance | Exposes setup status/help for Codex and Max/Claude CLIs in public builds. | wired | Settings/Spark renders public Codex and Claude/Max CLI setup status from `/bridge/models` alongside Voice I/O state; missing CLI/install/login remains setup guidance only, with no software install, sign-in, secret read, provider-account probe, model routing mutation, Auto enablement, or prompt send. |
 | SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | wired | Settings/Spark surface exposes only display-only Voice I/O state from `/bridge/voice-io`; settings writes, message/restart/result routes, fake backend controls, and hidden harness internals remain blocked. |
 
 ### Filter Surface Subitems
