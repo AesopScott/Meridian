@@ -454,7 +454,7 @@ Harness buttons switch the right panel into Harness mode. They are not merely la
 | ID | Harness Button | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
 | HN1 | Prime | Opens/focuses Prime runtime logic surface. | wired | Click opens Prime Runtime Logic with backend-sourced decision, context, source refs, proof logic, and blockers. |
-| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | partial | Click updates session title/focus without fake status text. |
+| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | wired | Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only; no microphone capture, speech output, read-aloud, mute mutation, raw prompt/response, raw worker history, or worker chat is exposed. |
 | HN3 | Relay | Opens/focuses model-routing surface. | wired | Click opens Relay Runtime Logic with bridge/access/model/dispatch/blocker logic; Auto remains disabled. |
 | HN4 | Beacon | Opens/focuses heartbeat/liveness surface. | wired | Click opens Beacon Liveness with backend-sourced heartbeat/advisory/guardrail status from `/bridge/beacon-liveness`; no raw worker chat or local path leakage. |
 | HN5 | Security | Reserved TBD harness identity; replaces generic TBD. | planned | Button label/icon is Security, but there is no bridge-backed security snapshot or executable guardrail action yet. |

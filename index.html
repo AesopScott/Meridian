@@ -5838,6 +5838,51 @@ body {
       ]), true),
     ].join('');
   };
+  const renderModelHarnessBackendBindingSnapshot = (snapshots = {}) => [
+    relaySection('Backend binding source', relayGrid([
+      ['aspect', snapshots.aspect || 'Model'],
+      ['binding mode', 'existing backend snapshots only'],
+      ['model metadata source', snapshots.models?.ok ? 'models bridge metadata' : 'offline'],
+      ['relay evidence source', snapshots.relayEvidence?.ok ? 'relay evidence advisory' : 'offline'],
+      ['provider balance source', snapshots.providerBalance?.ok ? 'provider balance summary' : 'offline'],
+      ['aegis policy source', snapshots.aegisLogic?.ok ? 'aegis logic snapshot' : 'offline'],
+      ['relay dispatch source', snapshots.relayLogic?.ok ? 'relay logic snapshot' : 'offline'],
+      ['mutation policy', 'display-only; no provider calls or settings writes'],
+    ]), true),
+    renderSparkModelsSnapshot(snapshots.models || { ok: false, error: 'Models snapshot unavailable' }),
+    renderRelayEvidenceSnapshot(snapshots.relayEvidence || { ok: false, error: 'Relay evidence snapshot unavailable' }),
+    renderProviderBalanceSnapshot(snapshots.providerBalance || { ok: false, error: 'Provider balance snapshot unavailable' }),
+    renderAegisLogicSnapshot(snapshots.aegisLogic || { ok: false, error: 'Aegis logic snapshot unavailable' }),
+    renderRelayLogicSnapshot(snapshots.relayLogic || { ok: false, error: 'Relay logic snapshot unavailable' }),
+  ].join('');
+  const fetchBridgeSnapshot = async (path, label) => {
+    try {
+      const response = await fetch(bridgeUrl(path), { cache: 'no-store' });
+      return await response.json();
+    } catch (error) {
+      return { ok: false, error: `${label} snapshot unavailable: ${error.message}` };
+    }
+  };
+  const loadModelHarnessBackendBinding = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-model-harness-backend-binding]');
+    if (!logicNode) return;
+    const aspect = logicNode.dataset.modelHarnessAspect || 'Model';
+    const [models, relayEvidence, providerBalance, aegisLogic, relayLogic] = await Promise.all([
+      fetchBridgeSnapshot('models', 'Models'),
+      fetchBridgeSnapshot('relay-evidence', 'Relay evidence'),
+      fetchBridgeSnapshot('provider-balance', 'Provider balance'),
+      fetchBridgeSnapshot('aegis-logic', 'Aegis logic'),
+      fetchBridgeSnapshot('relay-logic', 'Relay logic'),
+    ]);
+    logicNode.innerHTML = renderModelHarnessBackendBindingSnapshot({
+      aspect,
+      models,
+      relayEvidence,
+      providerBalance,
+      aegisLogic,
+      relayLogic,
+    });
+  };
   const renderReleaseAutonomySnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Release autonomy source', relayGrid([
@@ -7932,10 +7977,11 @@ body {
         relaySection('Runtime signals', relayList(runtimeSignals), true),
         relaySection('Runtime contract', relayGrid([
           ['surface mode', 'Model Harness'],
-          ['mutation policy', 'display-only until model harness backend is registered'],
+          ['mutation policy', 'display-only; backend snapshots are bound, writes remain disabled'],
           ['visible gate', visibleGate],
           ['drift guard', 'visible model state must match backend proof before writes are enabled'],
         ]), true),
+        `<div data-model-harness-backend-binding data-model-harness-aspect="${escapeHtml(aspect)}">${relaySection('Backend binding source', relayGrid([['status', 'loading existing backend snapshots']]), true)}</div>`,
         relaySection('Proof questions', relayList([
           'What context was visible before this model action?',
           'What intention was visible before execution?',
@@ -8143,6 +8189,42 @@ body {
         localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
       }, true);
       loadBeaconLiveness();
+      return true;
+    } catch {
+      restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
+      return false;
+    }
+  };
+  const renderBifrostVoiceIo = () => {
+    if (!rightWindow || !rightWorkspace) return false;
+    try {
+      clearRightPanelSurface();
+      rightWindow.classList.add('is-panel-surface');
+      rightWorkspace.removeAttribute('aria-hidden');
+      rightWorkspace.insertAdjacentHTML('beforeend', `
+        <div class="relay-models-surface" role="region" aria-label="Bifrost Voice I/O">
+          <div class="relay-models-header">
+            <div class="relay-models-title">Bifrost Voice I/O</div>
+            <div class="relay-models-status">Display-only</div>
+          </div>
+          <div class="relay-models-body">
+            ${relaySection('Bifrost boundary', relayList([
+              'Bifrost reflects compact Voice I/O state from the reviewed backend snapshot.',
+              'No microphone capture, speech output, read-aloud, mute mutation, prompt text, response text, raw worker history, or worker chat is exposed.',
+              'Orchestrator intake remains compact typed voice/session state; raw detail is fetched only on demand.',
+            ]), true)}
+            <div data-voice-io>${relaySection('Voice I/O source', relayGrid([['status', 'loading backend snapshot']]))}</div>
+          </div>
+        </div>
+      `);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('toggle', (event) => {
+        const section = event.target;
+        if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
+        const state = relaySectionState();
+        state[section.dataset.relaySection] = section.open;
+        localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
+      }, true);
+      loadVoiceIo();
       return true;
     } catch {
       restoreUserPanel({ warning: 'surface unavailable; User Session restored' });
@@ -8800,6 +8882,8 @@ body {
     let rendered = false;
     if (button.dataset.harness === 'Prime') {
       rendered = renderPrimeLogic();
+    } else if (button.dataset.harness === 'Bifrost') {
+      rendered = renderBifrostVoiceIo();
     } else if (button.dataset.harness === 'Relay') {
       rendered = renderRelayModels();
     } else if (button.dataset.harness === 'Beacon') {
@@ -8832,6 +8916,7 @@ body {
       setHarnessDockMode('model');
       setSelectedModelHarnessButton(button, { persist });
       screen.classList.add('session-theme-green');
+      loadModelHarnessBackendBinding();
     }
     screen.classList.add('sessions-visible');
     setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist });

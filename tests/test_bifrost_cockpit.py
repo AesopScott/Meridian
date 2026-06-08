@@ -227,7 +227,7 @@ def test_index_model_harness_icons_open_model_surface():
     assert "setHarnessDockMode('model')" in doc
     assert "screen.classList.add('session-theme-green')" in doc
     assert "modelButton ? renderModelHarnessSurface(button) : renderHarnessSurface(button)" in doc
-    assert "display-only until model harness backend is registered" in doc
+    assert "display-only; backend snapshots are bound, writes remain disabled" in doc
     assert "What context was visible before this model action?" in doc
     assert "What intention was visible before execution?" in doc
     assert "What proof shows the model action followed that logic?" in doc
@@ -584,6 +584,33 @@ def test_index_model_harness_detail_surface_shows_drift_policy():
     assert "provider endpoint, health, or credential posture changed" in doc
     assert "drift detection required" in doc
     assert "unexplained goal drift blocks continuation" in doc
+
+
+def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "const renderModelHarnessBackendBindingSnapshot = (snapshots = {}) =>" in doc
+    assert "const loadModelHarnessBackendBinding = async () =>" in doc
+    assert 'data-model-harness-backend-binding' in doc
+    assert "loading existing backend snapshots" in doc
+    assert "existing backend snapshots only" in doc
+    assert "display-only; no provider calls or settings writes" in doc
+    assert "renderSparkModelsSnapshot(snapshots.models" in doc
+    assert "renderRelayEvidenceSnapshot(snapshots.relayEvidence" in doc
+    assert "renderProviderBalanceSnapshot(snapshots.providerBalance" in doc
+    assert "renderAegisLogicSnapshot(snapshots.aegisLogic" in doc
+    assert "renderRelayLogicSnapshot(snapshots.relayLogic" in doc
+    assert "fetchBridgeSnapshot('models', 'Models')" in doc
+    assert "fetchBridgeSnapshot('relay-evidence', 'Relay evidence')" in doc
+    assert "fetchBridgeSnapshot('provider-balance', 'Provider balance')" in doc
+    assert "fetchBridgeSnapshot('aegis-logic', 'Aegis logic')" in doc
+    assert "fetchBridgeSnapshot('relay-logic', 'Relay logic')" in doc
+    assert "loadModelHarnessBackendBinding();" in doc
+    backend_binding = doc[
+        doc.index("const renderModelHarnessBackendBindingSnapshot"):
+        doc.index("const renderReleaseAutonomySnapshot")
+    ]
+    assert "bridgeUrl('message')" not in backend_binding
+    assert "method: 'POST'" not in backend_binding
 
 
 def test_index_model_harness_selection_is_visible_and_persistent():
@@ -977,6 +1004,28 @@ def test_index_spark_and_workflow_surfaces_use_bridge_snapshots():
     assert "status_policy" in doc
 
 
+def test_index_bifrost_harness_uses_voice_io_snapshot():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'data-harness="Bifrost"' in doc
+    assert "Bifrost Voice I/O" in doc
+    assert "const renderBifrostVoiceIo = () =>" in doc
+    assert "renderBifrostVoiceIo()" in doc
+    assert "button.dataset.harness === 'Bifrost'" in doc
+    assert "Bifrost reflects compact Voice I/O state from the reviewed backend snapshot." in doc
+    assert "Orchestrator intake remains compact typed voice/session state; raw detail is fetched only on demand." in doc
+    assert "data-voice-io" in doc
+    assert "loadVoiceIo();" in doc
+    assert "bridgeUrl('voice-io')" in doc
+    bifrost_start = doc.index("const renderBifrostVoiceIo")
+    bifrost_end = doc.index("const renderReviewConsole", bifrost_start)
+    bifrost_surface = doc[bifrost_start:bifrost_end]
+    assert "fetch(" not in bifrost_surface
+    assert "getUserMedia" not in bifrost_surface
+    assert "speechSynthesis" not in bifrost_surface
+    assert "raw worker history" in bifrost_surface
+    assert "worker chat" in bifrost_surface
+
+
 def test_index_memory_retrieval_and_filemap_surfaces_use_bridge_snapshots():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Echo Memory" in doc
@@ -1365,6 +1414,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "Top speech icon and Settings/Spark render compact Voice I/O state from `/bridge/voice-io`" in doc
     assert "no microphone, speech output, read-aloud, mute mutation, raw prompt/response, or raw worker history is authorized" in doc
     assert "remains disabled/`aria-disabled=true`" in doc
+    assert "| HN2 | Bifrost | Opens/focuses UI/Bifrost surface. | wired |" in doc
+    assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
     assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
     assert "/bridge/provider-balance" in doc
     assert "account/credential probing unavailable" in doc
@@ -1374,6 +1425,16 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired |" in doc
     assert "/bridge/session-close-archive-proof" in doc
     assert "no live control, raw prompt, raw worker chat, replay, reload, run-again, or deletion is authorized" in doc
+
+
+def test_model_harness_taxonomy_stays_ui_strategy_until_promoted():
+    doc = (ROOT / "docs" / "model-harness-v2-contract.md").read_text(encoding="utf-8")
+    assert "## Future Taxonomy Promotion Gate" in doc
+    assert "display vocabulary, not a hard backend naming convention" in doc
+    assert "Existing backend names and contract names remain authoritative" in doc
+    assert "canonical taxonomy name list" in doc
+    assert "must not create new Python enums, dataclasses, route fields, or package exports directly from UI-only labels" in doc
+    assert "already-reviewed surfaces" in doc
 
 
 def test_v2_tracker_has_deep_compass_and_vulcan_backend_items():

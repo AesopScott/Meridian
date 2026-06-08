@@ -506,6 +506,16 @@ These tests belong in `tests/test_model_adapter.py` alongside existing `test_*mo
 
 ---
 
+## Future Taxonomy Promotion Gate
+
+The current Model Harness UI taxonomy is a display vocabulary, not a hard backend naming convention. Existing backend names and contract names remain authoritative.
+
+Before any future backend promotion of Model Harness taxonomy terms, do a small normalization pass that creates one canonical taxonomy name list and maps UI labels to backend-owned concepts. That pass must preserve existing names unless there is a reviewed migration reason, and it must not create new Python enums, dataclasses, route fields, or package exports directly from UI-only labels.
+
+Backend binding for V2 should only use the already-reviewed surfaces represented by `ModelHarnessMetadata`, Relay dispatch/evidence records, Aegis policy evidence, provider balance summaries, prompt payload meter evidence, and DeepSeek validation/transport gates.
+
+---
+
 ## Completion Criteria
 
 - [x] `docs/model-harness-v2-contract.md` created with full domain shape, enums, provider defaults, gating rules, telemetry, snapshot evidence, Q-mode flatness, and registration API.
