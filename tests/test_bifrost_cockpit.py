@@ -446,6 +446,32 @@ def test_index_response_transcripts_render_bridge_model_labels_when_known():
     assert "Bridge completed ${completedCall.backend || backend} request" in send_prompt
 
 
+def test_ui_checklist_promotes_prime_and_user_prompt_response_surfaces_from_bridge_flow():
+    checklist = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
+    index = (ROOT / "index.html").read_text(encoding="utf-8")
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "| SP1 | Prime panel | User types directly to Prime/orchestrator. | wired |" in checklist
+    assert "| SP5 | Prime response window | Displays Prime/model output below Prime prompt. | wired |" in checklist
+    assert "| SP6 | User Session response window | Displays routed session/model output below User prompt only in User Session mode. | wired |" in checklist
+    assert 'aria-label="${isUser ? \'User\' : \'Prime\'} session interface"' in index
+    assert 'aria-label="${isUser ? \'User prompt input\' : \'Prime prompt input\'}"' in index
+    assert 'aria-label="${isUser ? \'User response output\' : \'Prime response output\'}"' in index
+    assert "const outputFor = (input) => input?.closest('.session-window')?.querySelector('.session-response-output')" in index
+    assert "const renderTranscript = (input) =>" in index
+    assert "if (entry.role === 'user') row.textContent = entry.text || ''" in index
+    assert "row.replaceChildren(...renderOutputFragments(entry.text));" in index
+    assert "pushEntry(input, 'user', prompt, ''," in index
+    assert "pushEntry(input, result.ok ? 'model'" in index
+    assert "channel: sessionChannel(input)" in index
+    assert "if (sessionChannel(input) === 'user' && !targetSession)" in index
+    assert ".session-window-right.is-panel-surface .session-response-output" in index
+    assert "display: none;" in index
+    assert "const channel = String(body.channel || 'prime').toLowerCase();" in bridge
+    assert "const result = await runModel({ backend, prompt, cwd, transcript });" in bridge
+    assert "result.channel = channel;" in bridge
+    assert "cwd = sessionTarget.cwd;" in bridge
+
+
 def test_bridge_message_results_include_resolved_backend_for_transcript_source_labels():
     doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
     assert "result.requestedBackend = requestedBackend;" in doc
