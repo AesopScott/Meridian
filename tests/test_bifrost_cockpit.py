@@ -603,10 +603,21 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "renderSparkSkills()" in doc
     assert "data-spark-skills" in doc
     assert "data-spark-skills-search" in doc
+    assert "data-spark-skill-pin" in doc
+    assert "const sparkSkillsPinKey = 'meridian.skills.pinned.v1'" in doc
+    assert "const readSparkSkillsPinned = () =>" in doc
+    assert "const writeSparkSkillsPinned = (pins) =>" in doc
+    assert "const skillRegistryRowId = (row) =>" in doc
+    assert "parsed[activeProjectContext()] = [...pins].sort()" in doc
+    assert "localStorage.setItem(sparkSkillsPinKey, JSON.stringify(parsed))" in doc
+    assert "aria-pressed" in doc
+    assert "Pinned skills" in doc
+    assert "pinned for active project/user" in doc
     assert "Search skills/capabilities" in doc
     assert "Skills uses reviewed FileMap and Models bridge snapshots as capability metadata; it does not call a fake skills backend." in doc
     assert "Search is UI-local over already loaded metadata and does not send prompts, mutate files, install skills, sign in, probe accounts, or enable Auto routing." in doc
     assert "Registry rows expose description, scope, backend/provider, setup posture, permission boundary, provenance, and a non-executing usage example." in doc
+    assert "Pins persist locally for the active project/user UI profile and only reorder already loaded rows; they do not change backend skills, routes, files, accounts, or providers." in doc
     assert "backend:filemap" in doc
     assert "backend:models" in doc
     assert "permission boundary" in doc
@@ -625,6 +636,10 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "sign in" in skills_registry
     assert "probe accounts" in skills_registry
     assert "enable Auto routing" in skills_registry
+    assert "bridgeUrl('skills')" not in skills_registry
+    assert "bridgeUrl('message')" not in skills_registry
+    assert "bridgeUrl('call-result')" not in skills_registry
+    assert "method: 'POST'" not in skills_registry
     skills_start = doc.index("const renderSparkSkills = () =>")
     skills_surface = doc[skills_start:doc.index("const renderProviderBalance", skills_start)]
     assert "fetch(" not in skills_surface
@@ -632,6 +647,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "bridgeUrl('message')" not in skills_surface
     assert "bridgeUrl('call-result')" not in skills_surface
     assert "method: 'POST'" not in skills_surface
+    assert "writeSparkSkillsPinned(pins)" in skills_surface
 
 
 def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
@@ -2267,6 +2283,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| SKL9 | Install/setup status | Shows missing dependencies or login/setup requirements. | wired |" in doc
     assert "| SKL10 | Run/request path | Provides a clear path to invoke or request the skill when supported. | wired |" in doc
     assert "| SKL11 | Skill provenance | Shows whether skill is built-in, project-local, plugin-provided, or user-defined. | wired |" in doc
+    assert "| SKL12 | Favorite/pin skill | Allows important skills to be pinned for the active project/user. | wired |" in doc
+    assert "Skills Registry pin controls persist row ids under `meridian.skills.pinned.v1` bucketed by active project context in the local user UI profile" in doc
     assert "| XCK0 | Review/proof state | Shows current Review Console and Aegis proof posture without running a new check. | wired |" in doc
     assert "| XCK2 | Review findings | Shows current findings with severity, owner, and status. | partial |" in doc
     assert "owner attribution remains deferred and raw item content stays hidden" in doc

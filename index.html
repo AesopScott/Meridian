@@ -2073,6 +2073,36 @@ body {
   color: rgb(var(--session-electric));
 }
 
+.relay-skill-result {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.relay-small-action {
+  justify-self: start;
+  min-height: 28px;
+  border: 1px solid rgba(var(--session-electric), 0.45);
+  background: rgba(var(--session-deep), 0.58);
+  color: rgb(var(--session-electric-soft));
+  font: inherit;
+  padding: 3px 9px;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.relay-small-action[aria-pressed="true"] {
+  border-color: rgba(255, 176, 0, 0.7);
+  color: #ffb000;
+}
+
+.relay-small-action:focus-visible,
+.relay-small-action:hover {
+  border-color: rgba(var(--session-electric), 0.82);
+  color: rgb(var(--session-electric));
+}
+
 .prime-logic-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5787,6 +5817,31 @@ body {
     ].join('');
   };
   let sparkSkillsRegistrySnapshot = null;
+  const sparkSkillsPinKey = 'meridian.skills.pinned.v1';
+  const readSparkSkillsPinned = () => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(sparkSkillsPinKey) || '{}');
+      const scoped = parsed && typeof parsed === 'object' ? parsed[activeProjectContext()] : [];
+      return new Set(Array.isArray(scoped) ? scoped.map((item) => String(item)) : []);
+    } catch {
+      return new Set();
+    }
+  };
+  const writeSparkSkillsPinned = (pins) => {
+    let parsed = {};
+    try {
+      const stored = JSON.parse(localStorage.getItem(sparkSkillsPinKey) || '{}');
+      if (stored && typeof stored === 'object' && !Array.isArray(stored)) parsed = stored;
+    } catch {}
+    parsed[activeProjectContext()] = [...pins].sort();
+    localStorage.setItem(sparkSkillsPinKey, JSON.stringify(parsed));
+  };
+  const skillRegistryRowId = (row) => [
+    row?.provenance || 'unknown',
+    row?.scope || 'unknown',
+    row?.provider || 'unknown',
+    row?.name || 'unknown',
+  ].map((part) => String(part).toLowerCase().replace(/[^a-z0-9._:/-]+/g, '-')).join('|');
   const skillRegistryRowsFromSnapshots = (fileMapSnapshot, modelsSnapshot) => {
     const entries = Array.isArray(fileMapSnapshot?.focus_entries) ? fileMapSnapshot.focus_entries : [];
     const models = Array.isArray(modelsSnapshot?.models) ? modelsSnapshot.models : [];
@@ -5826,7 +5881,8 @@ body {
     }
     const rows = Array.isArray(snapshot.rows) ? snapshot.rows : [];
     const normalizedQuery = String(query || '').trim().toLowerCase();
-    const visibleRows = normalizedQuery
+    const pinnedSkillIds = readSparkSkillsPinned();
+    const visibleRows = (normalizedQuery
       ? rows.filter((row) => [
         row.name,
         row.scope,
@@ -5837,26 +5893,18 @@ body {
         row.permission,
         row.example,
       ].some((value) => String(value || '').toLowerCase().includes(normalizedQuery)))
-      : rows;
-    return [
-      relaySection('Skills registry source', relayGrid([
-        ['source', '/bridge/filemap + /bridge/models'],
-        ['active project', activeProjectContext()],
-        ['global capabilities', snapshot.fileMapEntryCount ?? 0],
-        ['model backends', snapshot.modelCount ?? 0],
-        ['search query', normalizedQuery || 'none'],
-        ['visible results', visibleRows.length],
-        ['mutation authorized', 'no'],
-      ]), true),
-      `<label class="relay-section-summary" for="spark-skills-search">Search skills/capabilities</label>
-      <input id="spark-skills-search" data-spark-skills-search type="search" value="${escapeHtml(query)}" placeholder="Search name, scope, backend, setup, permission" autocomplete="off" />`,
-      relaySection('Skills registry boundary', relayList([
-        'Skills uses reviewed FileMap and Models bridge snapshots as capability metadata; it does not call a fake skills backend.',
-        'Search is UI-local over already loaded metadata and does not send prompts, mutate files, install skills, sign in, probe accounts, or enable Auto routing.',
-        'Registry rows expose description, scope, backend/provider, setup posture, permission boundary, provenance, and a non-executing usage example.',
-      ]), true),
-      relaySection('Skill capability results', visibleRows.length
-        ? visibleRows.map((row) => relayGrid([
+      : rows).slice().sort((left, right) => {
+        const leftPinned = pinnedSkillIds.has(skillRegistryRowId(left));
+        const rightPinned = pinnedSkillIds.has(skillRegistryRowId(right));
+        if (leftPinned === rightPinned) return String(left.name || '').localeCompare(String(right.name || ''));
+        return leftPinned ? -1 : 1;
+      });
+    const pinnedRows = rows.filter((row) => pinnedSkillIds.has(skillRegistryRowId(row)));
+    const skillResult = (row) => {
+      const rowId = skillRegistryRowId(row);
+      const pinned = pinnedSkillIds.has(rowId);
+      return `<div class="relay-skill-result">
+        ${relayGrid([
           ['name', row.name || 'unknown'],
           ['scope', row.scope || 'unknown'],
           ['backend/provider', row.provider || 'unknown'],
@@ -5865,7 +5913,40 @@ body {
           ['permission boundary', row.permission || 'unknown'],
           ['provenance', row.provenance || 'unknown'],
           ['usage example', row.example || 'none'],
+          ['favorite', pinned ? 'pinned for active project/user' : 'not pinned'],
+        ])}
+        <button class="relay-small-action" type="button" data-spark-skill-pin="${escapeHtml(rowId)}" aria-pressed="${pinned ? 'true' : 'false'}">${pinned ? 'Unpin' : 'Pin'}</button>
+      </div>`;
+    };
+    return [
+      relaySection('Skills registry source', relayGrid([
+        ['source', '/bridge/filemap + /bridge/models'],
+        ['active project', activeProjectContext()],
+        ['global capabilities', snapshot.fileMapEntryCount ?? 0],
+        ['model backends', snapshot.modelCount ?? 0],
+        ['search query', normalizedQuery || 'none'],
+        ['visible results', visibleRows.length],
+        ['pinned skills', pinnedRows.length],
+        ['pin scope', 'active project/user UI profile'],
+        ['mutation authorized', 'no'],
+      ]), true),
+      `<label class="relay-section-summary" for="spark-skills-search">Search skills/capabilities</label>
+      <input id="spark-skills-search" data-spark-skills-search type="search" value="${escapeHtml(query)}" placeholder="Search name, scope, backend, setup, permission" autocomplete="off" />`,
+      relaySection('Skills registry boundary', relayList([
+        'Skills uses reviewed FileMap and Models bridge snapshots as capability metadata; it does not call a fake skills backend.',
+        'Search is UI-local over already loaded metadata and does not send prompts, mutate files, install skills, sign in, probe accounts, or enable Auto routing.',
+        'Registry rows expose description, scope, backend/provider, setup posture, permission boundary, provenance, and a non-executing usage example.',
+        'Pins persist locally for the active project/user UI profile and only reorder already loaded rows; they do not change backend skills, routes, files, accounts, or providers.',
+      ]), true),
+      relaySection('Pinned skills', pinnedRows.length
+        ? pinnedRows.map((row) => relayGrid([
+          ['name', row.name || 'unknown'],
+          ['backend/provider', row.provider || 'unknown'],
+          ['provenance', row.provenance || 'unknown'],
         ])).join('')
+        : relayGrid([['status', 'no pinned skills for this active project/user UI profile']]), false),
+      relaySection('Skill capability results', visibleRows.length
+        ? visibleRows.map((row) => skillResult(row)).join('')
         : relayGrid([['status', 'no matching skills or capabilities in loaded metadata']]), true),
     ].join('');
   };
@@ -8931,6 +9012,20 @@ body {
         const logicNode = rightWorkspace?.querySelector('[data-spark-skills]');
         if (!logicNode) return;
         logicNode.innerHTML = renderSparkSkillsRegistry(sparkSkillsRegistrySnapshot, target.value);
+        logicNode.querySelector('[data-spark-skills-search]')?.focus({ preventScroll: true });
+      });
+      rightWorkspace.querySelector('[data-spark-skills]')?.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!target?.matches?.('[data-spark-skill-pin]')) return;
+        const logicNode = rightWorkspace?.querySelector('[data-spark-skills]');
+        if (!logicNode) return;
+        const searchValue = logicNode.querySelector('[data-spark-skills-search]')?.value || '';
+        const pins = readSparkSkillsPinned();
+        const rowId = target.dataset.sparkSkillPin;
+        if (pins.has(rowId)) pins.delete(rowId);
+        else pins.add(rowId);
+        writeSparkSkillsPinned(pins);
+        logicNode.innerHTML = renderSparkSkillsRegistry(sparkSkillsRegistrySnapshot, searchValue);
         logicNode.querySelector('[data-spark-skills-search]')?.focus({ preventScroll: true });
       });
       loadSparkSkills();

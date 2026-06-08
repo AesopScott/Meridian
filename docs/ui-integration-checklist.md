@@ -386,7 +386,7 @@ Skills is a searchable registry of available skills and capabilities. It should 
 | SKL9 | Install/setup status | Shows missing dependencies or login/setup requirements. | wired | Skills Registry renders model/backend setup posture from `/bridge/models`; FileMap capabilities show related-test/setup metadata when available. |
 | SKL10 | Run/request path | Provides a clear path to invoke or request the skill when supported. | wired | Skills Registry shows non-executing usage examples such as opening a relative path through FileMap/Atlas or selecting an already available backend in the manual model selector; the surface itself does not run skills. |
 | SKL11 | Skill provenance | Shows whether skill is built-in, project-local, plugin-provided, or user-defined. | wired | Skills Registry marks rows with backend provenance such as `backend:filemap` or `backend:models`; it does not infer user-defined/plugin provenance without backend metadata. |
-| SKL12 | Favorite/pin skill | Allows important skills to be pinned for the active project/user. | planned | Pinned skills persist in the correct scope. |
+| SKL12 | Favorite/pin skill | Allows important skills to be pinned for the active project/user. | wired | Skills Registry pin controls persist row ids under `meridian.skills.pinned.v1` bucketed by active project context in the local user UI profile, sort pinned rows first, show a Pinned skills section, and do not mutate backend skills, routes, files, accounts, providers, or prompts. |
 
 ### Archive Surface Subitems
 
