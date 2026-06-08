@@ -594,6 +594,10 @@ def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
     assert "loading existing backend snapshots" in doc
     assert "existing backend snapshots only" in doc
     assert "display-only; no provider calls or settings writes" in doc
+    assert "Backend binding safety" in doc
+    assert "No provider call, Auto enablement, settings mutation, route mutation, or prompt payload assembly is authorized here." in doc
+    assert "No prompt text, response text, recovered result body, raw provider output, raw evidence body, or worker chat is rendered." in doc
+    assert "The aspect surface reads existing GET-only bridge snapshots and never posts to message, restart, or result-recovery paths." in doc
     assert "renderSparkModelsSnapshot(snapshots.models" in doc
     assert "renderRelayEvidenceSnapshot(snapshots.relayEvidence" in doc
     assert "renderProviderBalanceSnapshot(snapshots.providerBalance" in doc
@@ -605,12 +609,18 @@ def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
     assert "fetchBridgeSnapshot('aegis-logic', 'Aegis logic')" in doc
     assert "fetchBridgeSnapshot('relay-logic', 'Relay logic')" in doc
     assert "loadModelHarnessBackendBinding();" in doc
+    assert "if (rightWorkspace?.querySelector('[data-model-harness-backend-binding]')) loadModelHarnessBackendBinding();" in doc
     backend_binding = doc[
         doc.index("const renderModelHarnessBackendBindingSnapshot"):
         doc.index("const renderReleaseAutonomySnapshot")
     ]
     assert "bridgeUrl('message')" not in backend_binding
+    assert "bridgeUrl('call-result')" not in backend_binding
+    assert "bridgeUrl('restart')" not in backend_binding
     assert "method: 'POST'" not in backend_binding
+    assert "fetch(bridgeUrl('message')" not in backend_binding
+    assert "fetch(bridgeUrl('call-result')" not in backend_binding
+    assert "fetch(bridgeUrl('restart')" not in backend_binding
 
 
 def test_index_model_harness_selection_is_visible_and_persistent():
@@ -1488,6 +1498,11 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
     assert "| BAL1 | Provider health | Shows whether each configured provider/backend is reachable. | wired |" in doc
     assert "/bridge/provider-balance" in doc
+    assert "| MOD7 | Capability metadata | Shows backend strengths, limits, steering mode, context limits, and supported tools. | wired |" in doc
+    assert "| MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired |" in doc
+    assert "| MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired |" in doc
+    assert "Model Harness aspect buttons open display-only surfaces bound to `/bridge/models`, `/bridge/relay-evidence`, `/bridge/provider-balance`, `/bridge/aegis-logic`, and `/bridge/relay-logic`" in doc
+    assert "no provider call, Auto enablement, route mutation, prompt payload assembly, POST, `/bridge/message`, `/bridge/call-result`, raw prompt/response/provider output/evidence body, or worker chat is authorized" in doc
     assert "account/credential probing unavailable" in doc
     assert "| SK13 | Routines | Opens current runtime continuity status until a routine automation backend exists. | wired |" in doc
     assert "| ROU0 | Runtime continuity status | Shows current continuation/goal runtime and workflow dispatch posture until routine automation exists. | wired |" in doc

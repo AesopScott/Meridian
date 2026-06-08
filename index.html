@@ -5853,6 +5853,11 @@ body {
       ['relay dispatch source', snapshots.relayLogic?.ok ? 'relay logic snapshot' : 'offline'],
       ['mutation policy', 'display-only; no provider calls or settings writes'],
     ]), true),
+    relaySection('Backend binding safety', relayList([
+      'No provider call, Auto enablement, settings mutation, route mutation, or prompt payload assembly is authorized here.',
+      'No prompt text, response text, recovered result body, raw provider output, raw evidence body, or worker chat is rendered.',
+      'The aspect surface reads existing GET-only bridge snapshots and never posts to message, restart, or result-recovery paths.',
+    ]), true),
     renderSparkModelsSnapshot(snapshots.models || { ok: false, error: 'Models snapshot unavailable' }),
     renderRelayEvidenceSnapshot(snapshots.relayEvidence || { ok: false, error: 'Relay evidence snapshot unavailable' }),
     renderProviderBalanceSnapshot(snapshots.providerBalance || { ok: false, error: 'Provider balance snapshot unavailable' }),
@@ -8686,6 +8691,7 @@ body {
     if (rightWorkspace?.querySelector('[data-session-close-archive-proof]')) loadSessionCloseArchiveProof();
     if (rightWorkspace?.querySelector('[data-voice-io]')) loadVoiceIo();
     if (rightWorkspace?.querySelector('[data-release-autonomy]')) loadReleaseAutonomy();
+    if (rightWorkspace?.querySelector('[data-model-harness-backend-binding]')) loadModelHarnessBackendBinding();
   };
   window.addEventListener('focus', refreshRelayPanel);
   document.addEventListener('visibilitychange', () => {
