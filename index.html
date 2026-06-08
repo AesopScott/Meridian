@@ -8145,9 +8145,117 @@ body {
       ],
     });
   };
+  const contextFilterDefaults = {
+    responses: true,
+    tools: false,
+    tokenUsage: true,
+    inbound: true,
+    outbound: true,
+    workStatements: false,
+    evidence: true,
+    diagnostics: false,
+    verbosity: 'normal',
+    scope: 'prime',
+  };
+  const contextFilterPresets = {
+    compact: { responses: true, tools: false, tokenUsage: false, inbound: true, outbound: true, workStatements: false, evidence: true, diagnostics: false },
+    normal: { responses: true, tools: false, tokenUsage: true, inbound: true, outbound: true, workStatements: false, evidence: true, diagnostics: false },
+    verbose: { responses: true, tools: true, tokenUsage: true, inbound: true, outbound: true, workStatements: true, evidence: true, diagnostics: false },
+    debug: { responses: true, tools: true, tokenUsage: true, inbound: true, outbound: true, workStatements: true, evidence: true, diagnostics: true },
+  };
+  const readContextFilterState = () => {
+    try {
+      return { ...contextFilterDefaults, ...JSON.parse(localStorage.getItem('meridian.context-filter.v1') || '{}') };
+    } catch {
+      return { ...contextFilterDefaults };
+    }
+  };
+  const writeContextFilterState = (state) => {
+    try { localStorage.setItem('meridian.context-filter.v1', JSON.stringify(state)); } catch {}
+  };
+  const filterToggle = (key, label, state) => `
+    <label class="relay-models-handoff">
+      <input type="checkbox" data-filter-toggle="${key}" ${state[key] ? 'checked' : ''}>
+      <span>${label}</span>
+    </label>`;
+  const renderContextFilterPreview = (state) => {
+    const rows = [
+      ['scope target', state.scope],
+      ['verbosity preset', state.verbosity],
+      ['inbound messages', state.inbound ? 'included as inbound metadata' : 'hidden from preview only'],
+      ['outbound messages', state.outbound ? 'included as outbound metadata' : 'hidden from preview only'],
+      ['model responses', state.responses ? 'included as response summaries' : 'hidden from preview only'],
+      ['tool calls/results', state.tools ? 'included as tool metadata' : 'hidden from preview only'],
+      ['token usage', state.tokenUsage ? 'included as telemetry' : 'hidden from preview only'],
+      ['work statements', state.workStatements ? 'included as compact work statements' : 'hidden from preview only'],
+      ['proof/evidence', state.evidence ? 'included as evidence refs only' : 'hidden from preview only'],
+      ['diagnostics', state.diagnostics ? 'included as structured diagnostic events' : 'hidden from preview only'],
+      ['send behavior', 'preview only; no prompt is sent or saved'],
+      ['source data', 'filtering never deletes source session data'],
+    ];
+    return relayGrid(rows);
+  };
+  const renderContextFilterSurface = () => {
+    const state = readContextFilterState();
+    return [
+      relaySection('Context filter controls', `
+        <div class="relay-models-handoff" aria-label="Context filter preset">
+          <label>Preset
+            <select data-filter-preset>
+              ${['compact', 'normal', 'verbose', 'debug'].map((preset) => `<option value="${preset}" ${state.verbosity === preset ? 'selected' : ''}>${preset}</option>`).join('')}
+            </select>
+          </label>
+          <label>Scope
+            <select data-filter-scope>
+              ${['prime', 'user-session', 'selected-harness', 'current-project'].map((scope) => `<option value="${scope}" ${state.scope === scope ? 'selected' : ''}>${scope}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+        <div class="relay-models-handoff" aria-label="Context filter toggles">
+          ${filterToggle('responses', 'Responses', state)}
+          ${filterToggle('tools', 'Tools', state)}
+          ${filterToggle('tokenUsage', 'Token usage', state)}
+          ${filterToggle('inbound', 'Inbound messages', state)}
+          ${filterToggle('outbound', 'Outbound messages', state)}
+          ${filterToggle('workStatements', 'Work statements', state)}
+          ${filterToggle('evidence', 'Proof/evidence refs', state)}
+          ${filterToggle('diagnostics', 'Diagnostic events', state)}
+        </div>
+      `, true),
+      relaySection('Context preview', `<div data-filter-preview>${renderContextFilterPreview(state)}</div>`, true),
+      relaySection('No destructive filtering', relayList([
+        'This surface changes only the visible context preview.',
+        'Turning a toggle back on restores the preview row because source transcript/session data is not deleted.',
+        'The filter surface does not call /bridge/message, /bridge/call-result, or any fake filter backend.',
+      ]), true),
+    ];
+  };
+  const initializeContextFilterSurface = () => {
+    const root = rightWorkspace?.querySelector('[data-context-filter-surface]');
+    if (!root) return;
+    const refresh = () => {
+      const state = readContextFilterState();
+      const preview = root.querySelector('[data-filter-preview]');
+      if (preview) preview.innerHTML = renderContextFilterPreview(state);
+    };
+    root.addEventListener('change', (event) => {
+      const target = event.target;
+      const state = readContextFilterState();
+      if (target?.matches?.('[data-filter-preset]')) {
+        state.verbosity = target.value;
+        Object.assign(state, contextFilterPresets[target.value] || {});
+      }
+      if (target?.matches?.('[data-filter-scope]')) state.scope = target.value;
+      if (target?.matches?.('[data-filter-toggle]')) state[target.dataset.filterToggle] = target.checked;
+      writeContextFilterState(state);
+      refresh();
+    });
+    refresh();
+  };
   const renderSparkSurface = (label) => {
     const selectedLabel = label || 'Settings';
     const settingsSelected = selectedLabel === 'Settings';
+    const filterSelected = selectedLabel === 'Filter';
     const sections = [
       relaySection('Surface logic', relayGrid([
         ['mode', 'Settings/Spark'],
@@ -8155,9 +8263,9 @@ body {
         ['prompt window', 'hidden in this mode'],
       ]), true),
       relaySection('Backend link', relayGrid([
-        ['state', settingsSelected ? 'voice I/O and public CLI setup status wired from backend snapshots' : 'not wired yet'],
+        ['state', settingsSelected ? 'voice I/O and public CLI setup status wired from backend snapshots' : (filterSelected ? 'UI-local context preview wired' : 'not wired yet')],
         ['snapshot route', settingsSelected ? '/bridge/voice-io + /bridge/models' : 'none'],
-        ['mutation policy', settingsSelected ? 'display-only; settings, voice, model, install, login, and account mutations are blocked' : 'unsupported until backend wiring exists'],
+        ['mutation policy', settingsSelected ? 'display-only; settings, voice, model, install, login, and account mutations are blocked' : (filterSelected ? 'preview-only; no prompt send, backend write, or source deletion' : 'unsupported until backend wiring exists')],
         ['drift guard', 'visible controls must match backend settings before writes are enabled'],
       ]), true),
     ];
@@ -8175,15 +8283,19 @@ body {
       ]), true));
       sections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
     }
+    if (filterSelected) {
+      sections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
+    }
     const rendered = renderRightPanelSurface({
       title: `${label || 'Settings'} Surface`,
-      status: settingsSelected ? 'Display-only' : 'planned',
+      status: settingsSelected || filterSelected ? 'Display-only' : 'planned',
       sections,
     });
     if (rendered && settingsSelected) {
       loadVoiceIo();
       loadSparkModels();
     }
+    if (rendered && filterSelected) initializeContextFilterSurface();
     return rendered;
   };
   const renderHarnessSurface = (button) => {

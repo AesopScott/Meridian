@@ -434,18 +434,19 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "const renderSparkSurface = (label) =>" in doc
     assert "const settingsSelected = selectedLabel === 'Settings';" in doc
-    assert "settingsSelected ? 'voice I/O and public CLI setup status wired from backend snapshots' : 'not wired yet'" in doc
-    assert "settingsSelected ? '/bridge/voice-io + /bridge/models' : 'none'" in doc
-    assert "settingsSelected ? 'display-only; settings, voice, model, install, login, and account mutations are blocked' : 'unsupported until backend wiring exists'" in doc
+    assert "const filterSelected = selectedLabel === 'Filter';" in doc
+    assert "filterSelected ? 'UI-local context preview wired' : 'not wired yet'" in doc
+    assert "filterSelected ? 'preview-only; no prompt send, backend write, or source deletion' : 'unsupported until backend wiring exists'" in doc
     assert "unsupported until backend wiring exists" in doc
     assert "Settings/Spark renders compact Voice I/O state from the reviewed backend snapshot." in doc
     assert "No microphone capture, speech output, read-aloud, mute mutation, prompt text, response text, raw worker history, or worker chat is exposed." in doc
     assert "Settings writes remain blocked until an explicit settings backend exists." in doc
     assert "Settings/Spark renders public Codex and Claude/Max CLI setup status from the reviewed Models bridge snapshot." in doc
     assert "Settings does not install software, sign in, read secrets, probe provider accounts, or mutate model routing." in doc
-    assert "status: settingsSelected ? 'Display-only' : 'planned'" in doc
+    assert "status: settingsSelected || filterSelected ? 'Display-only' : 'planned'" in doc
     assert "loadVoiceIo();" in doc
     assert "loadSparkModels();" in doc
+    assert "initializeContextFilterSurface();" in doc
     for label in ("Filter", "Backlog", "Skills"):
         assert f'aria-label="{label}"' in doc
     for route in (
@@ -466,6 +467,45 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "speechSynthesis" not in settings_surface
     assert "MediaRecorder" not in settings_surface
     assert "SpeechRecognition" not in settings_surface
+
+
+def test_index_spark_filter_surface_updates_local_preview_without_backend_or_deletion():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const contextFilterDefaults = {")
+    render_end = doc.index("const renderHarnessSurface = (button) =>", render_start)
+    filter_surface = doc[render_start:render_end]
+
+    assert "const contextFilterDefaults = {" in filter_surface
+    assert "const contextFilterPresets = {" in filter_surface
+    for key in (
+        "responses",
+        "tools",
+        "tokenUsage",
+        "inbound",
+        "outbound",
+        "workStatements",
+        "evidence",
+        "diagnostics",
+    ):
+        assert key in filter_surface
+        assert f'data-filter-toggle="${{key}}"' in filter_surface
+    for preset in ("compact", "normal", "verbose", "debug"):
+        assert preset in filter_surface
+    for scope in ("prime", "user-session", "selected-harness", "current-project"):
+        assert scope in filter_surface
+    assert "data-filter-preview" in filter_surface
+    assert "initializeContextFilterSurface" in filter_surface
+    assert "preview only; no prompt is sent or saved" in filter_surface
+    assert "filtering never deletes source session data" in filter_surface
+    assert "Turning a toggle back on restores the preview row" in filter_surface
+    assert "state.verbosity = target.value" in filter_surface
+    assert "Object.assign(state, contextFilterPresets[target.value] || {})" in filter_surface
+    assert "state[target.dataset.filterToggle] = target.checked" in filter_surface
+    assert "writeContextFilterState(state)" in filter_surface
+    assert "bridgeUrl('filter')" not in filter_surface
+    assert "bridgeUrl('message')" not in filter_surface
+    assert "bridgeUrl('call-result')" not in filter_surface
+    assert "method: 'POST'" not in filter_surface
 
 
 def test_index_spark_crosscheck_aggregates_typed_review_and_aegis_state():
@@ -2267,6 +2307,11 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     assert "| SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | wired |" in doc
     assert "opacity never below 0.82, no blur/filter/display hiding" in doc
     assert "`prefers-reduced-motion: reduce` path" in doc
+    assert "| SK4 | Filter | Controls how much data is included in a session prompt/context stream. | wired |" in doc
+    assert "Spark Filter opens a UI-local context filter surface" in doc
+    for row_id in ("FIL1", "FIL2", "FIL3", "FIL4", "FIL5", "FIL6", "FIL7", "FIL8", "FIL9", "FIL10", "FIL11", "FIL12"):
+        row = doc[doc.index(f"| {row_id} |"):].splitlines()[0]
+        assert "| wired |" in row
     assert "| SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | wired |" in doc
     for row_id in ("SUR1", "SUR2", "SUR3", "SUR4", "SUR5", "SUR6", "SUR7", "SUR8", "SUR10", "SUR11", "SUR12", "SUR13"):
         row = doc[doc.index(f"| {row_id} |"):].splitlines()[0]

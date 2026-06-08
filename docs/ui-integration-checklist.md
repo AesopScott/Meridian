@@ -126,7 +126,7 @@ The right panel needs a Sessions dropdown when it is in User Session mode. Prime
 | SK1 | Spark center image | Visual voice/core of Prime and entry point for right-panel surface focus. | wired | Spark renders the center image asset as `role="img"` with `aria-label="Spark, voice of Prime"`, `data-name="Spark"`, and `data-role="voice-of-prime"`, plus a focusable Spark core toggle and Spark actions menu for right-panel surface focus. |
 | SK2 | Toggle session panels | Switches the right panel between User Session, Settings, and harness-scoped surfaces. | wired | `SUR1`-`SUR8` and `SUR10`-`SUR13` pin the switching, persistence, layout, close, stale-target, and settings-action behavior; `SUR9` remains a separate harness item action follow-up and does not block the toggle surface itself. |
 | SK3 | Settings | Opens settings surface for UI/model/project/session options. | wired | Opens a Settings/Spark display-only surface with backend-sourced Voice I/O status from `/bridge/voice-io`; no microphone capture, speech output, read-aloud, mute mutation, raw prompt/response, raw worker history, worker chat, or settings mutation is authorized until an explicit settings backend exists. |
-| SK4 | Filter | Controls how much data is included in a session prompt/context stream. | planned | Track `FIL-*` subitems before wiring the surface. |
+| SK4 | Filter | Controls how much data is included in a session prompt/context stream. | wired | Spark Filter opens a UI-local context filter surface with scope, verbosity presets, visibility toggles, and a non-sending preview; it does not call `/bridge/message`, result recovery, fake filter backends, or delete source session data. |
 | SK5 | Models | Opens model readiness and recent-call metadata surface. | wired | Spark Models opens Models Readiness from `/bridge/models` plus metadata-only `/bridge/recent-calls`; it does not enable Auto routing, mutate settings, or render prompt/response bodies. |
 | SK6 | Backlog | Opens backlog/task surface. | planned | Until wired, it must not show fake backlog items. |
 | SK7 | Skills | Opens searchable skill/capability registry by model, project, and global scope. | planned | Track `SKL-*` subitems before wiring the surface. |
@@ -256,18 +256,18 @@ Filter is not primarily for finding session cards in this interface. It controls
 
 | ID | Filter Item | Intended Behavior | Current Status | Verification |
 |---|---|---|---|---|
-| FIL1 | Response visibility | Include/exclude model response text from the session context view. | planned | Toggle changes context preview without deleting transcript. |
-| FIL2 | Tool visibility | Include/exclude tool calls and tool results. | planned | Tool details appear only when enabled. |
-| FIL3 | Token usage visibility | Include/exclude token usage and budget telemetry. | planned | Token data appears as telemetry, not prose injected into the prompt. |
-| FIL4 | Inbound messages | Include/exclude inbound user/session messages. | planned | Context preview marks inbound content separately. |
-| FIL5 | Outbound messages | Include/exclude outbound model/session messages. | planned | Context preview marks outbound content separately. |
-| FIL6 | Work statements | Include/exclude work statements, intentions, and status summaries. | planned | Work statements can be shown without raw logs. |
-| FIL7 | Proof/evidence summaries | Include/exclude proof links and compact evidence summaries. | planned | Evidence links appear without dumping full artifacts. |
-| FIL8 | Diagnostic events | Include/exclude error/info diagnostic events. | planned | Diagnostic events are structured and filterable. |
-| FIL9 | Verbosity preset | Provides compact, normal, verbose, and debug presets. | planned | Presets change multiple filter toggles predictably. |
-| FIL10 | Scope target | Applies filter to Prime, User/session panel, selected harness, or current project. | planned | Filter state clearly names its target scope. |
-| FIL11 | Context preview | Shows what would be included before sending or saving context. | planned | Preview changes with toggles and does not send automatically. |
-| FIL12 | No destructive filtering | Filtering limits visibility/context but never deletes source session data. | planned | Turning filter off restores hidden content. |
+| FIL1 | Response visibility | Include/exclude model response text from the session context view. | wired | Response toggle updates the local context preview as included/hidden without deleting transcript data. |
+| FIL2 | Tool visibility | Include/exclude tool calls and tool results. | wired | Tools toggle updates the local preview as tool metadata only and remains hidden unless enabled. |
+| FIL3 | Token usage visibility | Include/exclude token usage and budget telemetry. | wired | Token usage toggle renders token data as telemetry in the preview, not prose injected into a prompt. |
+| FIL4 | Inbound messages | Include/exclude inbound user/session messages. | wired | Inbound toggle marks inbound content separately in the preview. |
+| FIL5 | Outbound messages | Include/exclude outbound model/session messages. | wired | Outbound toggle marks outbound content separately in the preview. |
+| FIL6 | Work statements | Include/exclude work statements, intentions, and status summaries. | wired | Work statements toggle shows compact work statements without raw logs. |
+| FIL7 | Proof/evidence summaries | Include/exclude proof links and compact evidence summaries. | wired | Evidence toggle shows evidence refs only and does not dump full artifacts. |
+| FIL8 | Diagnostic events | Include/exclude error/info diagnostic events. | wired | Diagnostics toggle shows structured diagnostic events only when enabled. |
+| FIL9 | Verbosity preset | Provides compact, normal, verbose, and debug presets. | wired | Compact/normal/verbose/debug presets update multiple preview toggles predictably and persist in UI-local state. |
+| FIL10 | Scope target | Applies filter to Prime, User/session panel, selected harness, or current project. | wired | Scope selector clearly names prime, user-session, selected-harness, or current-project as the preview target. |
+| FIL11 | Context preview | Shows what would be included before sending or saving context. | wired | Preview changes with toggles and explicitly says no prompt is sent or saved. |
+| FIL12 | No destructive filtering | Filtering limits visibility/context but never deletes source session data. | wired | No destructive filtering section states toggles affect only preview visibility and turning a toggle back on restores preview rows because source data is not deleted. |
 
 ### Models Surface Subitems
 
