@@ -4106,7 +4106,11 @@ body {
       snapshot.read_aloud_authorized,
     );
     speechButton.dataset.voiceState = state;
+    speechButton.dataset.captureState = snapshot.microphone_authorized && voice.listening ? 'capturing' : 'not-capturing';
     speechButton.setAttribute('aria-label', `Speech mode ${state}`);
+    speechButton.title = snapshot.microphone_authorized && voice.listening
+      ? 'Microphone capture active'
+      : 'Microphone capture inactive';
     speechButton.setAttribute('aria-pressed', state !== 'unavailable' && state !== 'blocked' ? 'true' : 'false');
     speechButton.setAttribute('aria-disabled', 'true');
     speechButton.disabled = true;
@@ -6028,6 +6032,13 @@ body {
         ['permission', voice.permission_state || 'unknown'],
         ['status', voice.status_call || 'standing by'],
         ['intent', voice.last_intent_ref || 'none'],
+      ]), true),
+      relaySection('Voice privacy indicator', relayGrid([
+        ['microphone capture', snapshot.microphone_authorized && voice.listening ? 'active' : 'inactive'],
+        ['capture can start', snapshot.microphone_authorized && !snapshot.controls_disabled ? 'yes' : 'no'],
+        ['top icon capture state', snapshot.microphone_authorized && voice.listening ? 'capturing' : 'not-capturing'],
+        ['permission prompt active', 'no'],
+        ['privacy posture', 'capture state visible and fail-closed'],
       ]), true),
       relaySection('Public voice setup boundary', relayList([
         'Public builds require browser microphone permission and a reviewed speech provider before capture, dictation, read-aloud, mute, interrupt, or voice-command execution can run.',

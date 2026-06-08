@@ -2285,6 +2285,10 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| VOC12 | Public setup guidance | Explains microphone/browser permissions and speech provider setup in public builds. | wired |" in doc
     assert "Voice I/O surfaces render a Public voice setup boundary from `/bridge/voice-io`" in doc
     assert "no permission request, capture start, speech synthesis, secret read, provider settings mutation, or typed prompt/response disruption" in doc
+    assert "| VOC11 | Privacy indicator | Makes microphone capture state obvious. | wired |" in doc
+    assert "Top speech icon carries `data-capture-state` and a capture title" in doc
+    assert "Voice I/O renders a backend-sourced Voice privacy indicator from `/bridge/voice-io`" in doc
+    assert "fail-closed posture" in doc
     assert "| PRJ10 | Project metadata | Shows or links working directory, repo, branch, and project status when that surface exists. | wired |" in doc
     assert "Compass renders Project metadata handoff from `/bridge/compass-logic`" in doc
     assert "Vulcan live-state evidence and FileMap relative-path registry" in doc
@@ -2404,10 +2408,27 @@ def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutati
     assert "speech output authorized" in voice_surface
     assert "read aloud authorized" in voice_surface
     assert "controls disabled" in voice_surface
+    assert "Voice privacy indicator" in voice_surface
+    assert "microphone capture" in voice_surface
+    assert "capture can start" in voice_surface
+    assert "top icon capture state" in voice_surface
+    assert "permission prompt active" in voice_surface
+    assert "capture state visible and fail-closed" in voice_surface
+    assert "snapshot.microphone_authorized && voice.listening ? 'active' : 'inactive'" in voice_surface
+    assert "snapshot.microphone_authorized && !snapshot.controls_disabled ? 'yes' : 'no'" in voice_surface
     assert "navigator.mediaDevices" not in voice_surface
     assert "getUserMedia" not in voice_surface
     assert "speechSynthesis" not in voice_surface
     assert "SpeechRecognition" not in voice_surface
+
+    button_start = doc.index("const applySpeechButtonVoiceState = (snapshot = {}) =>")
+    button_end = doc.index("const refreshSpeechButtonVoiceState = async () =>", button_start)
+    speech_button = doc[button_start:button_end]
+    assert "speechButton.dataset.captureState" in speech_button
+    assert "Microphone capture active" in speech_button
+    assert "Microphone capture inactive" in speech_button
+    assert "speechButton.title" in speech_button
+    assert "speechButton.disabled = true" in speech_button
     assert "MediaRecorder" not in voice_surface
     assert "method: 'POST'" not in voice_surface
 

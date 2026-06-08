@@ -449,7 +449,7 @@ Speech/Voice is first-class planning now. The user should be able to speak with 
 | VOC8 | Voice selection | Chooses Spark voice once voice provider exists. | planned | Selected voice is visible and persistent. |
 | VOC9 | Dictation correction | Allows correction of misheard text before/after sending. | planned | Correction updates prompt/transcript metadata. |
 | VOC10 | Voice command intents | Recognizes command families such as reset, reload, open, close, filter, and crosscheck. | planned | Recognized command previews intended action before risky execution. |
-| VOC11 | Privacy indicator | Makes microphone capture state obvious. | planned | Capture state cannot be hidden or ambiguous. |
+| VOC11 | Privacy indicator | Makes microphone capture state obvious. | wired | Top speech icon carries `data-capture-state` and a capture title, and Voice I/O renders a backend-sourced Voice privacy indicator from `/bridge/voice-io` showing microphone capture active/inactive, whether capture can start, permission prompt state, and fail-closed posture; no permission request, microphone capture, speech synthesis, read-aloud, mute mutation, prompt send, or provider/settings mutation is exposed. |
 | VOC12 | Public setup guidance | Explains microphone/browser permissions and speech provider setup in public builds. | wired | Voice I/O surfaces render a Public voice setup boundary from `/bridge/voice-io`; missing microphone or speech-provider authorization is setup guidance only, with no permission request, capture start, speech synthesis, secret read, provider settings mutation, or typed prompt/response disruption. |
 
 ### Harness Dock Buttons
