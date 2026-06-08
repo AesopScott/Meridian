@@ -16,14 +16,14 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Prime Autonomy | 3 | 0 | 0 | 0 | 3 | 100% |
 | Echo Harness | 2 | 0 | 2 | 0 | 4 | 100% |
-| Atlas Harness | 2 | 0 | 1 | 0 | 3 | 100% |
+| Atlas Harness | 3 | 0 | 1 | 0 | 4 | 100% |
 | Relay/Model Harness | 8 | 0 | 2 | 0 | 10 | 80% clear + 20% baseline |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
 | Compass Harness | 4 | 0 | 1 | 0 | 5 | 80% clear + 20% baseline |
 | Session Lifecycle Harness | 6 | 0 | 1 | 0 | 7 | 86% clear + 14% baseline |
 | Bifrost Harness | 7 | 0 | 2 | 0 | 9 | 78% clear + 22% baseline |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **35** | **0** | **9** | **0** | **44** | **80% Clear + 20% Baseline** |
+| **Total V2** | **36** | **0** | **9** | **0** | **45** | **80% Clear + 20% Baseline** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -69,6 +69,7 @@ Ownership correction: future Relay/Model Harness follow-ups should bind existing
 
 - [x] **Atlas + Ranking:** deterministic file/docs-first retrieval using `AtlasQuery`, `AtlasHit`, `AtlasResult`, source-aware ranking, and failure-soft behavior - built in `7e95ede`; review cleared by Reviews A on 2026-05-31 with `tests/test_atlas.py` passing.
 - [x] **Atlas + FileMap Integration:** `meridian_core/atlas.py` and `tests/test_atlas.py` registered in runtime FileMap and required-path coverage - built in `a138b1d`; review cleared by Reviews B on 2026-05-31.
+- [x] **Atlas + Workflow Adapter:** `meridian_core/workflow_atlas.py` bridges the promoted Atlas retrieval surface and Workflow Sub-Agent Harness dispatch contract. It builds and decodes Atlas work orders, filters FileMap candidates through promoted workflow path scope, fails closed on out-of-scope FileMap and DOC outputs, preserves Echo refs and `AtlasResult` shape, and avoids private Workflow Dispatch helpers. Built and review-promoted in `7ba931bac`; FileMap registration promoted in `4ee0599f4`; proof included `tests/test_workflow_atlas.py`, `tests/test_workflow_dispatch.py`, `tests/test_atlas.py`, and `tests/test_filemap.py`.
 
 ### Session Lifecycle Harness
 

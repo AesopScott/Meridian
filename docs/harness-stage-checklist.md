@@ -26,18 +26,18 @@
 
 | Harness | Contract / Baseline | V2 Backend | Core Implementation | Prime Integration | Runtime Logic UI | Proofs / Review | Operations | Next Build |
 |---|---|---|---|---|---|---|---|---|
-| Prime | built | review-cleared | review-cleared | review-cleared | review-cleared | review-cleared | not live execution | Bind live Compass/Vulcan/Relay inputs as source refs only after their backend runtime truth is ready; do not absorb model-call mechanics. |
-| Relay / Model | built | needs build | partial | partial via Prime source refs | wired | partial | Auto disabled | Own provider metadata, route/dispatch evidence, prompt payload visibility, fallback/transport gates, provider balance, and model telemetry. |
-| Compass | baseline | needs build | snapshot only | partial via Prime source refs | wired | not reviewed as runtime | no writes | Project definition, bounds/scope, difference, cross-project handoff runtime. |
-| Vulcan / Session Lifecycle | baseline | needs build | partial | partial via Prime source refs | wired | partial | no live command execution | Live session state evidence, command-plan proof, permissions, close/archive write-through. |
+| Prime | built | review-cleared | review-cleared | review-cleared | review-cleared | review-cleared | not live execution | Post-V2 live source refs and operations gating; do not absorb model-call mechanics. |
+| Relay / Model | built | review-cleared | review-cleared | partial via Prime source refs | wired | review-cleared | Auto disabled | Post-V2 live provider telemetry and operations gating; keep model-call mechanics Relay/Model-owned. |
+| Compass | baseline | review-cleared | review-cleared | partial via Prime source refs | wired | review-cleared | no writes | Post-V2 Prime/live orchestration integration or operations gating. |
+| Vulcan / Session Lifecycle | baseline | review-cleared | review-cleared | partial via Prime/Beacon advisory refs | wired | review-cleared | no live command execution | Post-V2 live session operation gating and recovery UX. |
 | Aegis | built | built | built | wired into Prime risk input | partial | review-cleared core; Prime binding awaiting review | proof gates only | Runtime Logic UI for Aegis and live proof packet surfaces. |
-| Bifrost | built | needs build | partial | renders Prime/Relay/Compass/Vulcan snapshots | owns UI shell | partial | UI only | V2 cockpit extensions, balance, prompt payload, voice surface. |
-| Echo | built | built | built | not wired into Prime runtime | not wired | review-cleared core | query only | Feed live memory hits into Prime runtime packet. |
-| Atlas | built | built | built | not wired into Prime runtime | not wired | review-cleared core | retrieval only | Feed live retrieval hits into Prime runtime packet. |
+| Bifrost | built | review-cleared | review-cleared | renders backend snapshots | review-cleared | review-cleared | UI only | Post-V2 operations-gated UI integration. |
+| Echo | built | review-cleared | review-cleared | not wired into Prime runtime | not wired | review-cleared core | query only | Post-V2 live memory feed into Prime runtime packet. |
+| Atlas | built | review-cleared | review-cleared | not wired into Prime runtime | not wired | review-cleared core + adapter | retrieval only | Post-V2 live retrieval feed into Prime runtime packet. |
 | Beacon | baseline/partial | not queued here | partial | not wired into Prime runtime | not wired | partial | observes only | Define heartbeat/liveness Runtime Logic UI and Prime heartbeat input boundary. |
-| Charon / FileMap | built | built | built | indirect via docs/context | partial | tests passing | lookup only | Runtime Logic UI reading FileMap state. |
+| Charon / FileMap | built | review-cleared | review-cleared | indirect via docs/context | partial | review-cleared | lookup only | Post-V2 Runtime Logic UI reading FileMap state. |
 | Arbiter / Reviews | partial | partial | partial | not wired into Prime runtime | not wired | partial | review queue only | Runtime Logic UI for review state and Prime acceptance gates. |
-| Workflow | baseline | baseline | not implemented | not wired | not wired | contract only | no dispatch | Workflow/sub-agent runtime and Prime work-order binding. |
+| Workflow | built | review-cleared | review-cleared | bounded work orders only | partial status surface | review-cleared dispatch + Atlas adapter | no live workflow execution | Post-V2 Prime binding and live workflow execution gates. |
 | Federation | horizon | horizon | planning only | not wired | not wired | review-cleared planning | no runtime | Keep out of V2 runtime until Prime core is stable. |
 | Security / Guardrails | reserved | not queued | not implemented | not wired | not wired | none | none | Define Security harness scope separate from Aegis proof gates. |
 | Ratchet / Tool | planned | not queued | not implemented | not wired | not wired | none | none | Define tool execution contract and permission boundaries. |
@@ -70,7 +70,7 @@ Update the Harness Stage Checklist.
 
 ## Current Priority
 
-1. Compass backend runtime.
-2. Vulcan live session state and command-plan proof.
-3. Relay / Model Harness ownership correction: keep provider/model identity, prompt payload construction, context fit, fallback, provider balance, transport gates, and telemetry out of Prime-owned runtime.
-4. Echo/Atlas live inputs into Prime runtime.
+1. Keep V2 trackers synchronized with reviewed backend and FileMap landings.
+2. Audit post-V2 Prime/live wiring candidates before queueing any operations-capable work.
+3. Keep Relay / Model ownership boundaries intact for model-call mechanics.
+4. Route Echo/Atlas live-input wiring as post-V2 Prime integration only after backend source refs are explicitly scoped.
