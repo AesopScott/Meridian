@@ -2103,6 +2103,21 @@ body {
   color: rgb(var(--session-electric));
 }
 
+.relay-draft-input {
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid rgba(var(--session-electric), 0.38);
+  background: rgba(0, 0, 0, 0.48);
+  color: rgba(var(--session-electric-soft), 0.95);
+  font: inherit;
+  padding: 6px;
+  resize: vertical;
+}
+
+.relay-draft-input:focus {
+  outline: 1px solid rgba(var(--session-electric), 0.76);
+}
+
 .prime-logic-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8592,6 +8607,24 @@ body {
     if (rendered && filterSelected) initializeContextFilterSurface();
     return rendered;
   };
+  const harnessDraftStorageKey = (harness) => `meridian.harness.draft.v1.${String(harness || 'Harness').toLowerCase().replace(/[^a-z0-9._-]+/g, '-')}`;
+  const readHarnessDraft = (harness) => {
+    try {
+      return localStorage.getItem(harnessDraftStorageKey(harness)) || '';
+    } catch {
+      return '';
+    }
+  };
+  const writeHarnessDraft = (harness, value) => {
+    try {
+      localStorage.setItem(harnessDraftStorageKey(harness), String(value || ''));
+    } catch {}
+  };
+  const initializeHarnessDraftSurface = (harness) => {
+    const draftInput = rightWorkspace?.querySelector('[data-harness-draft]');
+    if (!draftInput) return;
+    draftInput.addEventListener('input', () => writeHarnessDraft(harness, draftInput.value));
+  };
   const renderHarnessSurface = (button) => {
     const harness = button?.dataset.harness || 'Harness';
     const title = button?.dataset.sessionTitle || harness;
@@ -8601,7 +8634,7 @@ body {
       Browser: ['browser/vision', 'no fake browser state, page control, screenshot, or remote navigation is exposed'],
     };
     const capabilityBoundary = plannedCapabilityBoundaries[harness];
-    return renderRightPanelSurface({
+    const rendered = renderRightPanelSurface({
       title,
       status: button?.dataset.status || 'planned',
       sections: [
@@ -8632,6 +8665,15 @@ body {
           ['allowed language', 'add or refine harness logic after backend review'],
           ['boundary', 'not arbitrary project/session control'],
         ]), true),
+        relaySection('Harness draft preservation', `
+          <label class="relay-section-summary" for="harness-draft-${escapeHtml(harness)}">Unsaved harness logic note</label>
+          <textarea id="harness-draft-${escapeHtml(harness)}" class="relay-draft-input" data-harness-draft data-harness="${escapeHtml(harness)}" autocomplete="off">${escapeHtml(readHarnessDraft(harness))}</textarea>
+          ${relayGrid([
+            ['storage scope', 'selected harness only'],
+            ['backend write', 'none'],
+            ['execution state', 'draft only; no harness action is run'],
+          ])}
+        `, false),
         relaySection('Harness state summary', relayGrid([
           ['selected harness', harness],
           ['state summary', 'real backend state unavailable'],
@@ -8650,6 +8692,8 @@ body {
         ]), true)] : []),
       ],
     });
+    if (rendered) initializeHarnessDraftSurface(harness);
+    return rendered;
   };
   const renderRelayModels = () => {
     if (!rightWindow || !rightWorkspace) return false;

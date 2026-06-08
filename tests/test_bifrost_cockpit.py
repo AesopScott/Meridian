@@ -261,6 +261,30 @@ def test_index_generic_harness_surface_blocks_cross_harness_leakage():
     assert "bridgeUrl('call-result')" not in surface
 
 
+def test_index_generic_harness_surface_preserves_unsaved_logic_draft_per_harness():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    start = doc.index("const harnessDraftStorageKey = (harness) =>")
+    end = doc.index("const renderRelayModels = () =>", start)
+    surface = doc[start:end]
+
+    assert "const harnessDraftStorageKey = (harness) => `meridian.harness.draft.v1." in surface
+    assert "const readHarnessDraft = (harness) =>" in surface
+    assert "const writeHarnessDraft = (harness, value) =>" in surface
+    assert "const initializeHarnessDraftSurface = (harness) =>" in surface
+    assert "localStorage.getItem(harnessDraftStorageKey(harness))" in surface
+    assert "localStorage.setItem(harnessDraftStorageKey(harness), String(value || ''))" in surface
+    assert "data-harness-draft" in surface
+    assert "Unsaved harness logic note" in surface
+    assert "readHarnessDraft(harness)" in surface
+    assert "storage scope', 'selected harness only" in surface
+    assert "backend write', 'none" in surface
+    assert "draft only; no harness action is run" in surface
+    assert "if (rendered) initializeHarnessDraftSurface(harness);" in surface
+    assert "method: 'POST'" not in surface
+    assert "bridgeUrl('message')" not in surface
+    assert "bridgeUrl('call-result')" not in surface
+
+
 def test_index_harness_title_toggles_model_icons():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert '<button class="harness-dock-title" type="button"' in doc
@@ -2551,6 +2575,8 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     assert "Generic harness surfaces expose display-only action metadata naming the selected harness and `Harness logic` item" in doc
     assert "| HMS15 | No cross-harness leakage | Logic item edits/actions for one harness do not silently route to another harness. | wired |" in doc
     assert "Generic planned harness surfaces render a Harness isolation boundary" in doc
+    assert "| HMS14 | Harness edit preservation | Unsaved harness-mode item edits are preserved per harness where useful. | wired |" in doc
+    assert "Generic planned harness surfaces render a UI-local unsaved harness logic note stored under `meridian.harness.draft.v1.<harness>`" in doc
     assert "| HMS12 | Harness permission boundary | High-risk harness actions require explicit approval. | wired |" in doc
     assert "Planned Tool/Git/Browser harness surfaces render a permission boundary" in doc
     assert "const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) =>" in index
