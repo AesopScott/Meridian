@@ -154,7 +154,7 @@ Spark is Prime's voice/core and the visual focus point for moving between right-
 | SPK8 | No implicit archive/close | Spark surface interaction does not archive, close, stop, or delete sessions. | wired | Surface switching calls no archive/close/delete controls; bridge targets remain read-only until prompt send. |
 | SPK9 | Active mode visibility | Active right-panel mode is visible before interaction. | wired | Surface shows User Session, Settings/Spark, or Harness title/status and matching data attributes. |
 | SPK10 | Surface transition animation | Any transition animation preserves readability and does not hide state changes. | planned | Surface switch is visually clear, not disorienting. |
-| SPK11 | Keyboard accessibility | Surface switching can be done without mouse-only interaction. | planned | Keyboard focus reaches surface controls. |
+| SPK11 | Keyboard accessibility | Surface switching can be done without mouse-only interaction. | wired | Spark controls are focusable buttons, preserve native Enter/Space activation, and add Arrow/Home/End keyboard navigation across surface controls without changing backend authority or firing hidden routes. |
 | SPK12 | Recovery on bad surface | If a surface cannot load, return to prior usable surface with error. | wired | Failed/missing stored surface restores User Session and shows `surface unavailable; User Session restored`. |
 
 ### Right Panel Surface Toggle Subitems

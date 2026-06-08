@@ -755,6 +755,27 @@ def test_index_model_harness_icons_support_keyboard_navigation():
     assert "activateModelHarnessAspectAt(modelHarnessButtons().length - 1)" in doc
 
 
+def test_index_spark_surface_controls_support_keyboard_navigation():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    checklist = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
+    assert "| SPK11 | Keyboard accessibility | Surface switching can be done without mouse-only interaction. | wired |" in checklist
+    assert "Spark controls are focusable buttons, preserve native Enter/Space activation" in checklist
+    assert "const navigateSparkButton = (button, delta) =>" in doc
+    assert "const focusSparkButtonAt = (index) =>" in doc
+    assert "const next = buttons[(current + delta + buttons.length) % buttons.length]" in doc
+    assert "next.focus({ preventScroll: true })" in doc
+    assert "button.addEventListener('keydown', (event) =>" in doc
+    assert "event.key === 'ArrowRight' || event.key === 'ArrowDown'" in doc
+    assert "navigateSparkButton(button, 1)" in doc
+    assert "event.key === 'ArrowLeft' || event.key === 'ArrowUp'" in doc
+    assert "navigateSparkButton(button, -1)" in doc
+    assert "event.key === 'Home'" in doc
+    assert "focusSparkButtonAt(0)" in doc
+    assert "event.key === 'End'" in doc
+    assert "focusSparkButtonAt(buttons.length - 1)" in doc
+    assert "setRightPanelAuthority('spark', actionLabel || 'Spark', { persist })" in doc
+
+
 def test_index_user_session_mode_names_target_and_preserves_storage():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "User Session:" in doc

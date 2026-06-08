@@ -8981,6 +8981,19 @@ body {
     setRightPanelAuthority('spark', actionLabel || 'Spark', { persist });
     openSpark();
   };
+  const navigateSparkButton = (button, delta) => {
+    const current = buttons.indexOf(button);
+    if (current < 0 || !buttons.length) return;
+    const next = buttons[(current + delta + buttons.length) % buttons.length];
+    next.focus({ preventScroll: true });
+    openSpark();
+  };
+  const focusSparkButtonAt = (index) => {
+    const next = buttons[index] || null;
+    if (!next) return;
+    next.focus({ preventScroll: true });
+    openSpark();
+  };
   buttons.forEach((button) => {
     button.addEventListener('click', async () => {
       const actionLabel = button.getAttribute('aria-label') || '';
@@ -8999,6 +9012,21 @@ body {
         return;
       }
       activateSparkButton(button);
+    });
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        navigateSparkButton(button, 1);
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        navigateSparkButton(button, -1);
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        focusSparkButtonAt(0);
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        focusSparkButtonAt(buttons.length - 1);
+      }
     });
   });
   mockupButtons.forEach((button, index) => {
