@@ -4219,6 +4219,10 @@ body {
           const meta = document.createElement('div');
           meta.className = 'session-output-meta';
           const metaParts = [entry.model];
+          const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || '';
+          if (backendLabel) {
+            metaParts.push(`source ${backendLabel}`);
+          }
           if (Number(entry.sessionContextEntries) > 0) {
             metaParts.push(`visible context ${entry.sessionContextEntries} entries`);
           }
@@ -4362,6 +4366,7 @@ body {
       setStatus(input, modelLabel);
       pushEntry(input, result.ok ? 'model' : (result.setupRequired ? 'setup' : 'error'), result.ok ? (result.text || '(empty response)') : `Error: ${result.error || 'Model call failed'}`, modelLabel, {
         requestedBackend: result.requestedBackend || selectedBackend,
+        resolvedBackend: result.backend || backend,
         responseChannel: result.channel || sessionChannel(input),
         requestId: result.requestId || requestId,
         sessionContextEntries: result.sessionContextEntries || 0,
@@ -4377,6 +4382,7 @@ body {
         setStatus(input, modelLabel);
         pushEntry(input, recovered.ok ? 'model' : (recovered.setupRequired ? 'setup' : 'error'), recovered.ok ? (recovered.text || '(empty response)') : `Error: ${recovered.error || 'Model call failed'}`, modelLabel, {
           requestedBackend: recovered.requestedBackend || selectedBackend,
+          resolvedBackend: recovered.backend || backend,
           responseChannel: recovered.channel || sessionChannel(input),
           requestId: recovered.requestId || requestId,
           sessionContextEntries: recovered.sessionContextEntries || 0,
@@ -4392,6 +4398,7 @@ body {
         const modelLabel = completedCall.model || backend;
         pushEntry(input, 'error', `Error: Bridge completed ${completedCall.backend || backend} request, but the browser lost the response.`, modelLabel, {
           requestedBackend: completedCall.requestedBackend || selectedBackend,
+          resolvedBackend: completedCall.backend || backend,
           responseChannel: completedCall.channel || sessionChannel(input),
           requestId,
           sessionContextEntries: completedCall.sessionContextEntries || 0,

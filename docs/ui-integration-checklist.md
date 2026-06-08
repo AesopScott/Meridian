@@ -57,7 +57,7 @@ Use this as the working UI checklist. Every visible icon, selector, session cont
 | SP8 | User text-size slider | Removed as a duplicate control; text size is owned by the Prime slider. | wired | Right panel has no separate slider, and the Prime slider still controls right-panel text. |
 | SP9 | User prompt color | User-entered transcript text is bright yellow anywhere it appears. | wired | Send prompt from either panel; transcript prompt is yellow. |
 | SP10 | Path/file highlighting | File paths and filenames in output render bright orange. | wired | Ask model for working directory; path is orange. |
-| SP11 | Model/source label | Shows the model/source used for a response when known. | partial | Send prompt; confirm model label appears near/below response. |
+| SP11 | Model/source label | Shows the model/source used for a response when known. | wired | Session transcript entries render bridge-returned model labels and resolved/requested backend source below model/setup/error output when available; fallback labels use the selected backend only when the exact model is unknown. |
 
 ### Top Session Buttons
 
@@ -285,7 +285,7 @@ The Models icon owns model visibility and manual override. It must not silently 
 | MOD8 | Trust state | Shows candidate/trusted/restricted/degraded state for each backend. | wired | Model Harness aspect buttons include Trust route and Aegis/Relay evidence from existing backend snapshots; no provider call, Auto enablement, route mutation, prompt payload assembly, POST, `/bridge/message`, `/bridge/call-result`, raw prompt/response/provider output/evidence body, or worker chat is authorized. |
 | MOD9 | Prompt payload impact | Shows prompt size/budget pressure for recent dispatches. | wired | Prompt/Payload/Context model-aspect surfaces render Relay evidence and provider-balance posture from existing backend snapshots only; they do not infer budget state from transcript text or assemble model-bound payloads. |
 | MOD10 | Recent model calls | Shows recent call metadata without prompt text. | wired | Spark Models renders request id, channel, backend/model, result state, duration, project, target presence, and visible-context counts from `/bridge/recent-calls`; it does not call `/bridge/call-result` or render recovered bodies. |
-| MOD11 | Model label display | Response UI shows actual backend/model label when known. | partial | Send prompt; label appears below/near response. |
+| MOD11 | Model label display | Response UI shows actual backend/model label when known. | wired | Response transcripts render bridge-returned model labels plus resolved/requested backend source, and Spark Models renders recent-call backend/model labels from `/bridge/recent-calls` without prompt or response bodies. |
 | MOD12 | Public model setup help | Public build explains required CLI installs/logins and account boundaries. | partial | `/bridge/models` setup hints are visible in Spark Models; broader public onboarding copy remains deferred. |
 
 ### Balance Surface Subitems

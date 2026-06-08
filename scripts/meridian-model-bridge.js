@@ -1914,6 +1914,7 @@ const server = http.createServer(async (req, res) => {
       const started = Date.now();
       const result = await runModel({ backend, prompt, cwd, transcript });
       result.requestedBackend = requestedBackend;
+      result.backend = backend;
       result.channel = channel;
       result.projectContext = projectContext;
       result.requestId = requestId;

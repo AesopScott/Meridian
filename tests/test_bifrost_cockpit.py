@@ -359,6 +359,7 @@ def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
     assert "bridgeUrl('models')" in doc
     assert "bridgeUrl('recent-calls')" in doc
     assert "request id" in doc
+    assert "model label" in doc
     assert "visible context entries" in doc
     assert "visible context chars" in doc
     assert "No prompt text, response text, raw setup stderr, or recovered result bodies are rendered here." in doc
@@ -370,6 +371,44 @@ def test_index_spark_models_surface_uses_metadata_only_bridge_snapshots():
     assert "call.error" not in models_surface
     assert "result.text" not in models_surface
     assert "call-result" not in models_surface
+
+
+def test_index_response_transcripts_render_bridge_model_labels_when_known():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    transcript_renderer = doc[
+        doc.index("const renderTranscript = (input) =>"):
+        doc.index("const pushEntry = (input")
+    ]
+    assert "if (entry.model)" in transcript_renderer
+    assert "meta.className = 'session-output-meta'" in transcript_renderer
+    assert "const metaParts = [entry.model]" in transcript_renderer
+    assert "const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || ''" in transcript_renderer
+    assert "metaParts.push(`source ${backendLabel}`)" in transcript_renderer
+    assert "visible context ${entry.sessionContextEntries} entries" in transcript_renderer
+    assert "row.append(meta)" in transcript_renderer
+
+    send_prompt = doc[
+        doc.index("const sendPrompt = async (input) =>"):
+        doc.index("const insertPromptToken = (input")
+    ]
+    assert "const modelLabel = result.model || backend" in send_prompt
+    assert "const modelLabel = recovered.model || backend" in send_prompt
+    assert "const modelLabel = completedCall.model || backend" in send_prompt
+    assert "resolvedBackend: result.backend || backend" in send_prompt
+    assert "resolvedBackend: recovered.backend || backend" in send_prompt
+    assert "resolvedBackend: completedCall.backend || backend" in send_prompt
+    assert "setStatus(input, modelLabel)" in send_prompt
+    assert "pushEntry(input, result.ok ? 'model'" in send_prompt
+    assert "pushEntry(input, recovered.ok ? 'model'" in send_prompt
+    assert "Bridge completed ${completedCall.backend || backend} request" in send_prompt
+
+
+def test_bridge_message_results_include_resolved_backend_for_transcript_source_labels():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "result.requestedBackend = requestedBackend;" in doc
+    assert "result.backend = backend;" in doc
+    assert "model: result.model" in doc
+    assert "backend," in doc
 
 
 def test_index_model_harness_detail_surface_names_runtime_signals():
@@ -1658,6 +1697,10 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "/bridge/models" in doc
     assert "/bridge/recent-calls" in doc
     assert "does not call `/bridge/call-result` or render recovered bodies" in doc
+    assert "| SP11 | Model/source label | Shows the model/source used for a response when known. | wired |" in doc
+    assert "resolved/requested backend source below model/setup/error output" in doc
+    assert "| MOD11 | Model label display | Response UI shows actual backend/model label when known. | wired |" in doc
+    assert "bridge-returned model labels plus resolved/requested backend source" in doc
     assert "| SK8 | Crosscheck | Opens display-only review/proof state from existing backend snapshots. | wired |" in doc
     assert "/bridge/review-console" in doc
     assert "/bridge/aegis-logic" in doc
