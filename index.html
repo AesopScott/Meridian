@@ -5615,7 +5615,7 @@ body {
       ]), true),
     ].join('');
   };
-  const renderProviderBalanceSnapshot = (snapshot, modelsSnapshot = null) => {
+  const renderProviderBalanceSnapshot = (snapshot, modelsSnapshot = null, relayEvidenceSnapshot = null, relayLogicSnapshot = null) => {
     if (!snapshot?.ok) {
       return relaySection('Provider balance source', relayGrid([
         ['status', 'offline'],
@@ -5631,6 +5631,21 @@ body {
     const providers = Array.isArray(balance.providers) ? balance.providers : [];
     const evidence = Array.isArray(balance.evidence_refs) ? balance.evidence_refs : [];
     const models = Array.isArray(modelsSnapshot?.models) ? modelsSnapshot.models : [];
+    const callIntent = relayEvidenceSnapshot?.per_call_intent || {};
+    const relayTiers = Array.isArray(relayLogicSnapshot?.tiers) ? relayLogicSnapshot.tiers : [];
+    const recommendedTier = relayTiers.find((tier) => tier.tier === callIntent.risk_tier) || null;
+    const routingRecommendationRows = [
+      ['intent source', relayEvidenceSnapshot?.per_call_intent ? '/bridge/relay-evidence per_call_intent' : 'not exposed by Relay'],
+      ['Prime intent', callIntent.call_goal || 'not exposed'],
+      ['action type', relayText(callIntent.action_type)],
+      ['risk tier', callIntent.risk_tier ?? 'unknown'],
+      ['recommended provider', balance.selected_provider || 'not exposed'],
+      ['routing owner', balance.routing_owner || 'unknown'],
+      ['policy state', relayText(balance.policy_state)],
+      ['lane plan', recommendedTier ? relayLaneSummary(recommendedTier) : 'not exposed by Relay logic'],
+      ['proof posture', recommendedTier ? ((recommendedTier.audit?.proofRequired || []).map(relayText).join(' | ') || 'none') : 'not exposed by Relay logic'],
+      ['recommendation boundary', 'advisory only; Relay/Aegis still owns dispatch approval and execution'],
+    ];
     return [
       relaySection('Provider balance source', relayGrid([
         ['source', snapshot.source || 'unknown'],
@@ -5650,6 +5665,7 @@ body {
         ['visibility owner', 'Prime visibility from Relay / Model Harness evidence'],
         ['route authority', 'advisory display only; no route selection or mutation from Balance'],
       ]), true),
+      relaySection('Routing recommendation', relayGrid(routingRecommendationRows), true),
       relaySection('CLI/account readiness', models.length
         ? models.map((model) => relayGrid([
           ['backend', model.backend || 'unknown'],
@@ -6419,7 +6435,12 @@ body {
     ]), true),
     renderSparkModelsSnapshot(snapshots.models || { ok: false, error: 'Models snapshot unavailable' }),
     renderRelayEvidenceSnapshot(snapshots.relayEvidence || { ok: false, error: 'Relay evidence snapshot unavailable' }),
-    renderProviderBalanceSnapshot(snapshots.providerBalance || { ok: false, error: 'Provider balance snapshot unavailable' }),
+    renderProviderBalanceSnapshot(
+      snapshots.providerBalance || { ok: false, error: 'Provider balance snapshot unavailable' },
+      snapshots.models || null,
+      snapshots.relayEvidence || null,
+      snapshots.relayLogic || null,
+    ),
     renderAegisLogicSnapshot(snapshots.aegisLogic || { ok: false, error: 'Aegis logic snapshot unavailable' }),
     renderRelayLogicSnapshot(snapshots.relayLogic || { ok: false, error: 'Relay logic snapshot unavailable' }),
   ].join('');
@@ -6619,7 +6640,9 @@ body {
       ]);
       const providerBalanceSnapshot = await providerBalanceResponse.json();
       const modelsSnapshot = await modelsResponse.json();
-      logicNode.innerHTML = renderProviderBalanceSnapshot(providerBalanceSnapshot, modelsSnapshot);
+      const relayEvidenceSnapshot = await fetchBridgeSnapshot('relay-evidence', 'Relay evidence');
+      const relayLogicSnapshot = await fetchBridgeSnapshot('relay-logic', 'Relay logic');
+      logicNode.innerHTML = renderProviderBalanceSnapshot(providerBalanceSnapshot, modelsSnapshot, relayEvidenceSnapshot, relayLogicSnapshot);
     } catch (error) {
       logicNode.innerHTML = renderProviderBalanceSnapshot({ ok: false, error: error.message });
     }

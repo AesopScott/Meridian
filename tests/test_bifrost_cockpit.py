@@ -1107,7 +1107,11 @@ def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
     assert "backend-owned dispatch scope; not inferred from transcript text and not a provider route" in doc
     assert "renderSparkModelsSnapshot(snapshots.models" in doc
     assert "renderRelayEvidenceSnapshot(snapshots.relayEvidence" in doc
-    assert "renderProviderBalanceSnapshot(snapshots.providerBalance" in doc
+    assert "renderProviderBalanceSnapshot(" in doc
+    assert "snapshots.providerBalance || { ok: false, error: 'Provider balance snapshot unavailable' }" in doc
+    assert "snapshots.models || null" in doc
+    assert "snapshots.relayEvidence || null" in doc
+    assert "snapshots.relayLogic || null" in doc
     assert "renderAegisLogicSnapshot(snapshots.aegisLogic" in doc
     assert "renderRelayLogicSnapshot(snapshots.relayLogic" in doc
     assert "fetchBridgeSnapshot('models', 'Models')" in doc
@@ -1756,6 +1760,9 @@ def test_index_provider_balance_renders_backend_supplied_usage_labels_safely():
     assert "provider.remaining_credit_label || ''" in provider_balance
     assert "provider.estimated_spend_label || 'unavailable'" in provider_balance
     assert "relayJoin(provider.evidence_refs)" in provider_balance
+    assert "const callIntent = relayEvidenceSnapshot?.per_call_intent || {}" in provider_balance
+    assert "const relayTiers = Array.isArray(relayLogicSnapshot?.tiers) ? relayLogicSnapshot.tiers : []" in provider_balance
+    assert "const recommendedTier = relayTiers.find((tier) => tier.tier === callIntent.risk_tier) || null" in provider_balance
     assert "Public account boundary" in provider_balance
     assert "Public users need their own provider accounts, keys, subscriptions, or local CLIs before a backend can be used." in provider_balance
     assert "does not probe account balances, credentials, billing portals, or provider secrets" in provider_balance
@@ -1795,6 +1802,25 @@ def test_index_provider_balance_frames_provider_comparison_without_route_mutatio
     assert "does not mutate routing, enable Auto, post a prompt, call a provider, or bypass Relay/Aegis policy" in provider_balance
 
 
+def test_index_provider_balance_renders_advisory_routing_recommendation_from_backend_snapshots():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    provider_balance = doc[
+        doc.index("const renderProviderBalanceSnapshot = (snapshot"):
+        doc.index("const renderGoalRuntimeSnapshot")
+    ]
+
+    assert "relaySection('Routing recommendation', relayGrid(routingRecommendationRows), true)" in provider_balance
+    assert "['intent source', relayEvidenceSnapshot?.per_call_intent ? '/bridge/relay-evidence per_call_intent' : 'not exposed by Relay']" in provider_balance
+    assert "['Prime intent', callIntent.call_goal || 'not exposed']" in provider_balance
+    assert "['recommended provider', balance.selected_provider || 'not exposed']" in provider_balance
+    assert "['routing owner', balance.routing_owner || 'unknown']" in provider_balance
+    assert "['policy state', relayText(balance.policy_state)]" in provider_balance
+    assert "['lane plan', recommendedTier ? relayLaneSummary(recommendedTier) : 'not exposed by Relay logic']" in provider_balance
+    assert "['proof posture', recommendedTier ? ((recommendedTier.audit?.proofRequired || []).map(relayText).join(' | ') || 'none') : 'not exposed by Relay logic']" in provider_balance
+    assert "['recommendation boundary', 'advisory only; Relay/Aegis still owns dispatch approval and execution']" in provider_balance
+    assert "method: 'POST'" not in provider_balance
+
+
 def test_index_provider_balance_renders_cli_readiness_from_models_snapshot_without_account_probe():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     provider_balance = doc[
@@ -1806,7 +1832,7 @@ def test_index_provider_balance_renders_cli_readiness_from_models_snapshot_witho
         doc.index("const loadGoalRuntime = async () =>")
     ]
 
-    assert "modelsSnapshot = null" in provider_balance
+    assert "modelsSnapshot = null, relayEvidenceSnapshot = null, relayLogicSnapshot = null" in provider_balance
     assert "Array.isArray(modelsSnapshot?.models) ? modelsSnapshot.models : []" in provider_balance
     assert "CLI/account readiness" in provider_balance
     assert "model.installed ? 'available' : 'setup required'" in provider_balance
@@ -1815,7 +1841,9 @@ def test_index_provider_balance_renders_cli_readiness_from_models_snapshot_witho
     assert "informational only; no account probing" in provider_balance
     assert "fetch(bridgeUrl('provider-balance'), { cache: 'no-store' })" in loader
     assert "fetch(bridgeUrl('models'), { cache: 'no-store' })" in loader
-    assert "renderProviderBalanceSnapshot(providerBalanceSnapshot, modelsSnapshot)" in loader
+    assert "const relayEvidenceSnapshot = await fetchBridgeSnapshot('relay-evidence', 'Relay evidence');" in loader
+    assert "const relayLogicSnapshot = await fetchBridgeSnapshot('relay-logic', 'Relay logic');" in loader
+    assert "renderProviderBalanceSnapshot(providerBalanceSnapshot, modelsSnapshot, relayEvidenceSnapshot, relayLogicSnapshot)" in loader
     assert "method: 'POST'" not in provider_balance
     assert "bridgeUrl('message')" not in provider_balance
     assert "bridgeUrl('call-result')" not in provider_balance
