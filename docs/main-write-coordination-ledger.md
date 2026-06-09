@@ -54,16 +54,6 @@ Requires other party ACK: yes
 Status: Intent posted
 ```
 
-```text
-Time: 2026-06-08 18:50 -06:00
-ACK by: Front-end developer lane, thread 019ea586-a296-7833-b4cd-fdab7683a8a8
-Intent acknowledged: backend-only Prime/Beacon liveness input push after rebase onto UI commit d285ffdc0d29b1d059a6a1585cc65308e0877ed2.
-Approved scope: meridian_core/prime_runtime.py; tests/test_prime_runtime.py; meridian_core/filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md.
-Lease expires: 2026-06-08 19:00 -06:00
-Conditions: Fresh fetch must confirm no newer origin/main movement; candidate must remain rebased/reproofed; no index.html, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, UI/renderer/bridge-route, Bifrost/Electron, or UI implementation changes.
-Status: ACK granted
-```
-
 ## ACK Template
 
 ```text
@@ -94,18 +84,7 @@ Status: Complete | Aborted | Blocked
 
 ## Active Coordination
 
-```text
-Time: 2026-06-08 18:46 -06:00
-Writer: Meridian coordinator
-Requested action: push
-Target base: origin/main d285ffdc0d29b1d059a6a1585cc65308e0877ed2
-Path-limited scope: meridian_core/prime_runtime.py; tests/test_prime_runtime.py; meridian_core/filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md.
-Reason: land Codex Review A/B-cleared backend-only Prime/Beacon liveness input boundary; no UI wiring, bridge route, renderer, Bifrost/Electron, index.html, scripts/meridian-model-bridge.js, or UI checklist movement.
-Proof to run: python -m pytest tests/test_prime_runtime.py tests/test_beacon.py tests/test_filemap.py -q; python -m pytest tests/test_prime_runtime.py tests/test_beacon.py tests/test_bifrost_cockpit.py tests/test_filemap.py -q; git diff --check HEAD~1..HEAD for backend candidate paths plus ledger commit check.
-Expected duration: 10 minutes after UI-lane ACK.
-Requires other party ACK: yes
-Status: Intent posted
-```
+No active write lease.
 
 ## Standing Acknowledgements
 
@@ -115,6 +94,20 @@ Status: Intent posted
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-08 18:50 -06:00
+Writer: Meridian coordinator
+Intent: land Codex Review A/B-cleared backend-only Prime/Beacon liveness input boundary under UI-lane ACK.
+Action completed: pushed reviewed backend candidate plus ledger intent and ACK records to origin/main from isolated backend worktree; did not touch shared UI checkout.
+Commit(s): 5060930e4 (prime: add beacon liveness input); 3e508959 (docs: post prime beacon main-write intent); 5e2830d1 (docs: record prime beacon main-write ack); this completion commit.
+Pushed to origin/main: yes.
+Files changed: meridian_core/prime_runtime.py; tests/test_prime_runtime.py; meridian_core/filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_prime_runtime.py tests/test_beacon.py tests/test_filemap.py -q -> 101 passed; python -m pytest tests/test_prime_runtime.py tests/test_beacon.py tests/test_bifrost_cockpit.py tests/test_filemap.py -q -> 564 passed; git diff --check for the path-limited scope passed.
+Final shared main status: origin/main advanced to 5e2830d1 after the backend/intent/ACK push; this completion commit closes the active lease.
+Notes/blockers: UI-lane ACK granted in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 with conditions after origin/main moved to d285ffdc0; candidate was cleanly rebased and reproofed. Scope excluded index.html, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, Bifrost/Electron/renderer/bridge-route/UI wiring, and UI implementation files. Reviews A and B passed again on rebased commit 5060930e4.
+Status: Complete
+```
 
 ```text
 Time: 2026-06-08 18:23 -06:00
