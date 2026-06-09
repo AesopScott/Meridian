@@ -5875,12 +5875,25 @@ body {
     const failure = workflow.error_summary || {};
     const statusPolicy = workflow.status_policy || {};
     const quietMode = readQuietMode();
+    const lastRunStatus = failure.summary ? 'failed' : (success.summary ? 'completed' : 'unknown');
+    const lastRunDuration = failure.summary
+      ? `${failure.time_used_seconds ?? 0}s`
+      : `${success.time_used_seconds ?? 0}s`;
+    const lastRunProof = failure.summary
+      ? relayJoin(failure.proof_trail)
+      : relayJoin(success.proof_trail);
     return [
       relaySection('Workflow dispatch source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
         ['harness', snapshot.harness || 'Workflow Sub-agents'],
         ['display only', snapshot.display_only ? 'yes' : 'no'],
+      ]), true),
+      relaySection('Last run result', relayGrid([
+        ['status', lastRunStatus],
+        ['duration', lastRunDuration],
+        ['proof/evidence link', lastRunProof],
+        ['result summary', failure.summary || success.summary || 'unknown'],
       ]), true),
       ...(quietMode ? [relaySection('Quiet mode workflow status', relayGrid([
         ['quiet mode', 'enabled'],

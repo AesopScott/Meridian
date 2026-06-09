@@ -361,7 +361,7 @@ The Routines icon owns recurring or repeatable work patterns. It should make rou
 | ROU3 | Enable/disable routine | Toggles routine active state. | planned | Disabled routine does not run. |
 | ROU4 | Routine trigger | Supports manual run-now once routine execution exists. | planned | Run creates a visible event/result. |
 | ROU5 | Cadence/trigger view | Shows schedule, heartbeat, or event trigger. | planned | Display uses concrete time/trigger data. |
-| ROU6 | Last run result | Shows last run status, duration, and proof/evidence link. | planned | Failed run is visible and actionable. |
+| ROU6 | Last run result | Shows last run status, duration, and proof/evidence link. | wired | Spark Routines renders a display-only Last run result frame from `/bridge/workflow-dispatch-status`, surfacing the current success/failure summary status, duration, compact proof/evidence refs, and result summary for the latest reviewed workflow snapshot without running automation, retrying work, or inventing routine execution history. |
 | ROU7 | Next run preview | Shows next expected run or waiting condition. | planned | Unknown next run displays as unknown. |
 | ROU8 | Failure handling | Shows retry/escalation behavior for routine failures. | planned | Failure state does not silently disappear. |
 | ROU9 | Prime-owned routine review | Prime reviews routine outputs and only escalates meaningful user gates. | planned | Routine result can be accepted/routed without user micromanagement. |
