@@ -97,6 +97,16 @@ Requires other party ACK: yes
 Status: Intent posted; awaiting UI lane ACK
 ```
 
+```text
+Time: 2026-06-08 18:22 -06:00
+ACK by: UI lane / front-end developer session 019ea586-a296-7833-b4cd-fdab7683a8a8
+Intent acknowledged: backend-owned Aegis Runtime Logic snapshot promotion from branch codex/backend-aegis-logic-snapshot-20260608
+Approved scope: meridian_core/aegis_logic_snapshot.py; tests/test_aegis_logic_snapshot.py; meridian_core/filemap.py; tests/test_filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md
+Lease expires: 2026-06-08 18:32 -06:00
+Conditions: If origin/main moves or scope/base changes, rebase/reproof or request fresh ACK before pushing. Shared checkout has an unpromoted dirty UI branch, so do not touch C:\Users\scott\Code\Meridian.
+Status: ACK granted
+```
+
 ## Standing Acknowledgements
 
 - 2026-06-02 09:53 -06:00 - Front-end developer: read this coordination protocol and will comply. Before every shared `main` write, this lane will re-read/check this ledger for updates, post/update the ledger with the intended path-limited write, wait for explicit ACK where required, and record completion, abort, or blocker status after the attempt.
