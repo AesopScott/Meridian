@@ -2446,6 +2446,9 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "Click opens Bifrost Voice I/O from `/bridge/voice-io` with compact typed state only" in doc
     assert "| SET2 | Last project persistence | Remembers the last active project across UI sessions. | wired |" in doc
     assert "falls back to Meridian for invalid/missing stored values" in doc
+    assert "| SET18 | Diagnostic log visibility | Controls whether per-session diagnostic event logs are visible by default. | wired |" in doc
+    assert "UI-local diagnostic event visibility default backed by `meridian.context-filter.v1`" in doc
+    assert "without deleting source session data and without calling a backend event-log route" in doc
     assert "| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | wired |" in doc
     assert "settings writes, message/restart/result routes, fake backend controls, and hidden harness internals remain blocked" in doc
     assert "| ECHO0 | Display-only memory ranking | Shows memory query boundary and ranked memory summaries from the backend. | wired |" in doc
@@ -2534,6 +2537,30 @@ def test_index_settings_surface_shows_public_cli_setup_without_mutation_paths():
     refresh_end = doc.index("window.addEventListener('focus', refreshRelayPanel);", refresh_start)
     refresh_surface = doc[refresh_start:refresh_end]
     assert "if (rightWorkspace?.querySelector('[data-spark-models]')) loadSparkModels();" in refresh_surface
+
+
+def test_index_settings_surface_controls_diagnostic_visibility_default_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const renderDiagnosticDefaultPreview = (state) =>")
+    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
+    diagnostic_surface = doc[render_start:render_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const renderHarnessSurface = (button) =>", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+
+    assert "Diagnostic log visibility default" in diagnostic_surface
+    assert "data-diagnostic-default-toggle" in diagnostic_surface
+    assert "data-diagnostic-default-preview" in diagnostic_surface
+    assert "meridian.context-filter.v1" in diagnostic_surface
+    assert "state.diagnostics = target.checked" in diagnostic_surface
+    assert "writeContextFilterState(state)" in diagnostic_surface
+    assert "Diagnostic rows can be hidden or shown again without losing source session data." in diagnostic_surface
+    assert "No backend per-session event-log route, prompt send, result recovery, provider call, or settings mutation is invoked." in diagnostic_surface
+    assert "data-diagnostic-default-surface" in settings_surface
+    assert "initializeDiagnosticDefaultSurface();" in settings_surface
+    assert "bridgeUrl('message')" not in diagnostic_surface
+    assert "bridgeUrl('call-result')" not in diagnostic_surface
+    assert "method: 'POST'" not in diagnostic_surface
 
 
 def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutation():
