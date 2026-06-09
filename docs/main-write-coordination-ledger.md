@@ -54,6 +54,16 @@ Requires other party ACK: yes
 Status: Intent posted
 ```
 
+```text
+Time: 2026-06-08 18:50 -06:00
+ACK by: Front-end developer lane, thread 019ea586-a296-7833-b4cd-fdab7683a8a8
+Intent acknowledged: backend-only Prime/Beacon liveness input push after rebase onto UI commit d285ffdc0d29b1d059a6a1585cc65308e0877ed2.
+Approved scope: meridian_core/prime_runtime.py; tests/test_prime_runtime.py; meridian_core/filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md.
+Lease expires: 2026-06-08 19:00 -06:00
+Conditions: Fresh fetch must confirm no newer origin/main movement; candidate must remain rebased/reproofed; no index.html, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, UI/renderer/bridge-route, Bifrost/Electron, or UI implementation changes.
+Status: ACK granted
+```
+
 ## ACK Template
 
 ```text
