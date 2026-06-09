@@ -153,6 +153,33 @@ def test_planning_exports():
     assert "build_planning_brief" in meridian_core.__all__
 
 
+def test_session_lifecycle_close_write_through_exports():
+    from meridian_core import (
+        CloseArchiveWriteThroughAction,
+        ObsidianCaptureResult,
+        SessionCloseWriteThroughRequest,
+        SessionCloseWriteThroughResult,
+        SessionWriteThroughResult,
+        close_session_with_write_through,
+    )
+
+    assert CloseArchiveWriteThroughAction
+    assert ObsidianCaptureResult
+    assert SessionCloseWriteThroughRequest
+    assert SessionCloseWriteThroughResult
+    assert SessionWriteThroughResult
+    assert close_session_with_write_through
+    for name in (
+        "CloseArchiveWriteThroughAction",
+        "ObsidianCaptureResult",
+        "SessionCloseWriteThroughRequest",
+        "SessionCloseWriteThroughResult",
+        "SessionWriteThroughResult",
+        "close_session_with_write_through",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
 def test_internal_helpers_are_not_root_exports():
     assert "_TIER_SEMANTICS" not in meridian_core.__all__
     assert "_ROUTING_TABLE" not in meridian_core.__all__

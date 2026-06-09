@@ -124,6 +124,14 @@ from .planning import (
     PlanningContext,
     build_planning_brief,
 )
+from .session_lifecycle import (
+    CloseArchiveWriteThroughAction,
+    ObsidianCaptureResult,
+    SessionCloseWriteThroughRequest,
+    SessionCloseWriteThroughResult,
+    SessionWriteThroughResult,
+    close_session_with_write_through,
+)
 
 from .cockpit_state import (
     CockpitStatus,
@@ -282,6 +290,13 @@ __all__ = [
     "PlanningBrief",
     "PlanningContext",
     "build_planning_brief",
+    # -- Session Lifecycle SK9 close/write-through authority -----------------
+    "CloseArchiveWriteThroughAction",
+    "ObsidianCaptureResult",
+    "SessionCloseWriteThroughRequest",
+    "SessionCloseWriteThroughResult",
+    "SessionWriteThroughResult",
+    "close_session_with_write_through",
     # -- Cockpit state --------------------------------------------------------
     "CockpitStatus",
     "QueuePolicy",

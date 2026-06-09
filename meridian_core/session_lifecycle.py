@@ -8,7 +8,7 @@ and Prime coordinates state transitions via typed command plans.
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 
 class SessionStatus(Enum):
@@ -989,6 +989,154 @@ class SessionCloseArchiveWriteThroughProof:
             "blockers": list(self.blockers),
             "evidence_refs": list(self.evidence_refs),
             "raw_worker_chat_included": self.raw_worker_chat_included,
+            "raw_prompt_included": self.raw_prompt_included,
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+
+@dataclass(frozen=True)
+class SessionCloseWriteThroughRequest:
+    """Backend authority request for durable session close/archive write-through."""
+
+    request_id: str
+    target_session_id: str
+    intended_action: CloseArchiveWriteThroughAction
+    requested_by: str
+    reason: Optional[str]
+    human_gate_approved: bool
+    stop_before_close_completed: bool = False
+    obsidian_capture_required: bool = False
+    evidence_refs: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the request without exposing caller free text."""
+        return {
+            "request_id": self.request_id,
+            "target_session_id": self.target_session_id,
+            "intended_action": self.intended_action.value,
+            "requested_by": self.requested_by,
+            "reason_present": _has_meaningful_text(self.reason),
+            "human_gate_approved": self.human_gate_approved,
+            "stop_before_close_completed": self.stop_before_close_completed,
+            "obsidian_capture_required": self.obsidian_capture_required,
+            "evidence_refs": list(
+                _close_write_through_safe_refs(self.evidence_refs)
+            ),
+        }
+
+
+@dataclass(frozen=True)
+class SessionWriteThroughResult:
+    """Display-safe durable write-through result returned by an injected writer."""
+
+    writer_id: str
+    target_session_id: str
+    completed: bool
+    proof_ref: str
+    failure_kind: Optional[str] = None
+    evidence_refs: tuple[str, ...] = ()
+    raw_transcript_included: bool = False
+    raw_prompt_included: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize writer evidence with unsafe refs redacted."""
+        return {
+            "writer_id": _close_write_through_safe_label(
+                self.writer_id,
+                "writer_id_redacted",
+            ),
+            "target_session_id": self.target_session_id,
+            "completed": self.completed,
+            "proof_ref": _close_write_through_safe_ref(self.proof_ref),
+            "failure_kind": _close_write_through_safe_failure_kind(
+                self.failure_kind,
+                "write_through.failure_kind_redacted",
+            ),
+            "evidence_refs": list(
+                _close_write_through_safe_refs(self.evidence_refs)
+            ),
+            "raw_transcript_included": self.raw_transcript_included,
+            "raw_prompt_included": self.raw_prompt_included,
+        }
+
+
+@dataclass(frozen=True)
+class ObsidianCaptureResult:
+    """Display-safe Obsidian capture result returned by an injected writer."""
+
+    capture_id: str
+    target_session_id: str
+    completed: bool
+    proof_ref: str
+    failure_kind: Optional[str] = None
+    evidence_refs: tuple[str, ...] = ()
+    raw_transcript_included: bool = False
+    raw_prompt_included: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize capture evidence with unsafe refs redacted."""
+        return {
+            "capture_id": _close_write_through_safe_label(
+                self.capture_id,
+                "capture_id_redacted",
+            ),
+            "target_session_id": self.target_session_id,
+            "completed": self.completed,
+            "proof_ref": _close_write_through_safe_ref(self.proof_ref),
+            "failure_kind": _close_write_through_safe_failure_kind(
+                self.failure_kind,
+                "obsidian_capture.failure_kind_redacted",
+            ),
+            "evidence_refs": list(
+                _close_write_through_safe_refs(self.evidence_refs)
+            ),
+            "raw_transcript_included": self.raw_transcript_included,
+            "raw_prompt_included": self.raw_prompt_included,
+        }
+
+
+@dataclass(frozen=True)
+class SessionCloseWriteThroughResult:
+    """Backend close/archive result with durable write-through proof."""
+
+    request_id: str
+    target_session_id: str
+    intended_action: CloseArchiveWriteThroughAction
+    initial_status: SessionStatus
+    final_status: SessionStatus
+    close_authorized: bool
+    write_through_attempted: bool
+    write_through_completed: bool
+    obsidian_capture_attempted: bool
+    obsidian_capture_completed: bool
+    session_left_recoverable: bool
+    failure_reason: Optional[str]
+    blockers: tuple[str, ...]
+    proof_refs: tuple[str, ...]
+    final_state: "SessionLifecycleState"
+    raw_transcript_included: bool
+    raw_prompt_included: bool
+    timestamp: datetime
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize close/write-through result to display-safe metadata."""
+        return {
+            "request_id": self.request_id,
+            "target_session_id": self.target_session_id,
+            "intended_action": self.intended_action.value,
+            "initial_status": self.initial_status.value,
+            "final_status": self.final_status.value,
+            "close_authorized": self.close_authorized,
+            "write_through_attempted": self.write_through_attempted,
+            "write_through_completed": self.write_through_completed,
+            "obsidian_capture_attempted": self.obsidian_capture_attempted,
+            "obsidian_capture_completed": self.obsidian_capture_completed,
+            "session_left_recoverable": self.session_left_recoverable,
+            "failure_reason": self.failure_reason,
+            "blockers": list(self.blockers),
+            "proof_refs": list(_close_write_through_safe_refs(self.proof_refs)),
+            "final_state": _close_write_through_safe_state_dict(self.final_state),
+            "raw_transcript_included": self.raw_transcript_included,
             "raw_prompt_included": self.raw_prompt_included,
             "timestamp": self.timestamp.isoformat(),
         }
@@ -2809,6 +2957,192 @@ def build_close_archive_write_through_proof(
     )
 
 
+def close_session_with_write_through(
+    session: SessionLifecycleState,
+    request: SessionCloseWriteThroughRequest,
+    write_through_writer: Callable[
+        [SessionLifecycleState, SessionCloseWriteThroughRequest],
+        SessionWriteThroughResult,
+    ],
+    obsidian_writer: Optional[
+        Callable[
+            [SessionLifecycleState, SessionCloseWriteThroughRequest],
+            ObsidianCaptureResult,
+        ]
+    ] = None,
+    timestamp: Optional[datetime] = None,
+) -> SessionCloseWriteThroughResult:
+    """Authorize and perform backend close/archive write-through via adapters.
+
+    The function owns the backend authority boundary for SK9. Side effects are
+    injected through writer callables so tests can prove gate behavior without
+    wiring UI, browser, provider, or filesystem operations into this module.
+    """
+    observed_at = _as_utc(timestamp or datetime.now(timezone.utc))
+    blockers = list(
+        _close_write_through_authority_blockers(session, request, observed_at)
+    )
+    if request.obsidian_capture_required and obsidian_writer is None:
+        blockers.append("obsidian_capture.writer_required")
+
+    if blockers:
+        return _close_write_through_result(
+            session=session,
+            request=request,
+            observed_at=observed_at,
+            close_authorized=False,
+            write_through_attempted=False,
+            write_through_completed=False,
+            obsidian_capture_attempted=False,
+            obsidian_capture_completed=False,
+            failure_reason=blockers[0],
+            blockers=tuple(dict.fromkeys(blockers)),
+            proof_refs=_close_write_through_base_refs(
+                session, request, observed_at, blockers
+            ),
+            final_state=session,
+        )
+
+    try:
+        write_result = write_through_writer(session, request)
+    except Exception:
+        failure = "write_through.exception"
+        blockers = (failure,)
+        return _close_write_through_result(
+            session=session,
+            request=request,
+            observed_at=observed_at,
+            close_authorized=False,
+            write_through_attempted=True,
+            write_through_completed=False,
+            obsidian_capture_attempted=False,
+            obsidian_capture_completed=False,
+            failure_reason=failure,
+            blockers=blockers,
+            proof_refs=_close_write_through_base_refs(
+                session, request, observed_at, blockers
+            ),
+            final_state=session,
+        )
+    write_refs = _close_write_through_writer_refs(write_result)
+    if not _close_write_result_is_accepted(session, request, write_result):
+        failure = _close_write_through_safe_failure_kind(
+            write_result.failure_kind,
+            "write_through.failed",
+        ) or "write_through.failed"
+        blockers = (failure,)
+        return _close_write_through_result(
+            session=session,
+            request=request,
+            observed_at=observed_at,
+            close_authorized=False,
+            write_through_attempted=True,
+            write_through_completed=False,
+            obsidian_capture_attempted=False,
+            obsidian_capture_completed=False,
+            failure_reason=failure,
+            blockers=blockers,
+            proof_refs=_close_write_through_base_refs(
+                session, request, observed_at, blockers
+            )
+            + write_refs,
+            final_state=session,
+            raw_transcript_included=write_result.raw_transcript_included,
+            raw_prompt_included=write_result.raw_prompt_included,
+        )
+
+    obsidian_attempted = False
+    obsidian_completed = False
+    obsidian_refs: tuple[str, ...] = ()
+    raw_transcript_included = write_result.raw_transcript_included
+    raw_prompt_included = write_result.raw_prompt_included
+    if request.obsidian_capture_required:
+        obsidian_attempted = True
+        if obsidian_writer is None:
+            raise AssertionError("obsidian writer gate should have blocked earlier")
+        try:
+            obsidian_result = obsidian_writer(session, request)
+        except Exception:
+            failure = "obsidian_capture.exception"
+            blockers = (failure,)
+            return _close_write_through_result(
+                session=session,
+                request=request,
+                observed_at=observed_at,
+                close_authorized=False,
+                write_through_attempted=True,
+                write_through_completed=True,
+                obsidian_capture_attempted=True,
+                obsidian_capture_completed=False,
+                failure_reason=failure,
+                blockers=blockers,
+                proof_refs=_close_write_through_base_refs(
+                    session, request, observed_at, blockers
+                )
+                + write_refs,
+                final_state=session,
+                raw_transcript_included=raw_transcript_included,
+                raw_prompt_included=raw_prompt_included,
+            )
+        obsidian_refs = _close_write_through_obsidian_refs(obsidian_result)
+        obsidian_completed = _obsidian_capture_result_is_accepted(
+            session, obsidian_result
+        )
+        raw_transcript_included = (
+            raw_transcript_included or obsidian_result.raw_transcript_included
+        )
+        raw_prompt_included = (
+            raw_prompt_included or obsidian_result.raw_prompt_included
+        )
+        if not obsidian_completed:
+            failure = _close_write_through_safe_failure_kind(
+                obsidian_result.failure_kind,
+                "obsidian_capture.failed",
+            ) or "obsidian_capture.failed"
+            blockers = (failure,)
+            return _close_write_through_result(
+                session=session,
+                request=request,
+                observed_at=observed_at,
+                close_authorized=False,
+                write_through_attempted=True,
+                write_through_completed=True,
+                obsidian_capture_attempted=True,
+                obsidian_capture_completed=False,
+                failure_reason=failure,
+                blockers=blockers,
+                proof_refs=_close_write_through_base_refs(
+                    session, request, observed_at, blockers
+                )
+                + write_refs
+                + obsidian_refs,
+                final_state=session,
+                raw_transcript_included=raw_transcript_included,
+                raw_prompt_included=raw_prompt_included,
+            )
+
+    final_state = _close_write_through_final_state(session, request, observed_at)
+    success_refs = _close_write_through_base_refs(
+        session, request, observed_at, ()
+    ) + write_refs + obsidian_refs
+    return _close_write_through_result(
+        session=session,
+        request=request,
+        observed_at=observed_at,
+        close_authorized=True,
+        write_through_attempted=True,
+        write_through_completed=True,
+        obsidian_capture_attempted=obsidian_attempted,
+        obsidian_capture_completed=obsidian_completed,
+        failure_reason=None,
+        blockers=(),
+        proof_refs=success_refs,
+        final_state=final_state,
+        raw_transcript_included=raw_transcript_included,
+        raw_prompt_included=raw_prompt_included,
+    )
+
+
 def build_v3_goal_runtime_checkpoint_proof_packet(
     checkpoint_id: str,
     goal_id: str,
@@ -3086,6 +3420,307 @@ def _close_archive_write_through_evidence_refs(
     )
     refs.extend(f"close_archive.blocker={blocker}" for blocker in blockers)
     return tuple(dict.fromkeys(refs))
+
+
+_CLOSE_WRITE_THROUGH_UNSAFE_FRAGMENTS = (
+    "secret",
+    "credential",
+    "password",
+    "token",
+    "apikey",
+    "rawprompt",
+    "workerchat",
+    "providerresponse",
+    "transcript",
+    "localpath",
+)
+
+
+def _close_write_through_normalized_text(value: str) -> str:
+    return "".join(ch for ch in value.lower() if ch.isalnum())
+
+
+def _close_write_through_safe_ref(value: str) -> str:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    if not text:
+        return "proof_ref_missing"
+    safe_generated_flag = (
+        lowered.endswith(".raw_prompt_included=false")
+        or lowered.endswith(".raw_transcript_included=false")
+        or lowered.endswith("raw_prompt_included=false")
+        or lowered.endswith("raw_transcript_included=false")
+    )
+    if (
+        not safe_generated_flag
+        and any(
+            fragment in _close_write_through_normalized_text(lowered)
+            for fragment in _CLOSE_WRITE_THROUGH_UNSAFE_FRAGMENTS
+        )
+    ):
+        return "proof_ref_redacted"
+    if "\\" in text or text.startswith("/") or (
+        len(text) > 2 and text[1] == ":" and text[0].isalpha()
+    ):
+        return "proof_ref_redacted"
+    return text
+
+
+def _close_write_through_safe_label(value: str, default: str) -> str:
+    text = str(value or "").strip()
+    if not _close_write_through_ref_is_display_safe(text):
+        return default
+    return text
+
+
+def _close_write_through_safe_failure_kind(
+    value: Optional[str],
+    default: str,
+) -> Optional[str]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    if not _close_write_through_ref_is_display_safe(text):
+        return default
+    if not all(ch.isalnum() or ch in "._-" for ch in text):
+        return default
+    return text
+
+
+def _close_write_through_safe_refs(
+    refs: tuple[str, ...] | list[str],
+) -> tuple[str, ...]:
+    return tuple(dict.fromkeys(_close_write_through_safe_ref(ref) for ref in refs))
+
+
+def _close_write_through_ref_is_display_safe(value: str) -> bool:
+    safe_value = _close_write_through_safe_ref(value)
+    return safe_value == value and safe_value not in (
+        "proof_ref_missing",
+        "proof_ref_redacted",
+    )
+
+
+def _close_write_through_authority_blockers(
+    session: SessionLifecycleState,
+    request: SessionCloseWriteThroughRequest,
+    observed_at: datetime,
+) -> tuple[str, ...]:
+    blockers: list[str] = []
+    if request.target_session_id != session.session_id:
+        blockers.append("target_session.mismatch")
+    if request.intended_action not in (
+        CloseArchiveWriteThroughAction.CLOSE,
+        CloseArchiveWriteThroughAction.ARCHIVE,
+    ):
+        blockers.append("intended_action.close_or_archive_required")
+    if not request.human_gate_approved:
+        blockers.append("human_gate.required")
+    if not _permission_context_can_execute_operation_at(
+        session.permission_context,
+        OperationScope.ARCHIVE,
+        session.current_task_id,
+        observed_at,
+    ):
+        blockers.append("permission.archive_required")
+    if (
+        request.intended_action == CloseArchiveWriteThroughAction.CLOSE
+        and session.status == SessionStatus.RUNNING
+        and not request.stop_before_close_completed
+    ):
+        blockers.append("close.stop_before_close_required")
+    if any(
+        not _close_write_through_ref_is_display_safe(ref)
+        for ref in request.evidence_refs
+    ):
+        blockers.append("request.evidence_ref_unsafe")
+    return tuple(dict.fromkeys(blockers))
+
+
+def _close_write_result_is_accepted(
+    session: SessionLifecycleState,
+    request: SessionCloseWriteThroughRequest,
+    result: SessionWriteThroughResult,
+) -> bool:
+    if not _close_write_through_ref_is_display_safe(result.writer_id):
+        return False
+    if result.target_session_id != session.session_id:
+        return False
+    if result.target_session_id != request.target_session_id:
+        return False
+    if not result.completed:
+        return False
+    if result.raw_transcript_included or result.raw_prompt_included:
+        return False
+    if not _close_write_through_ref_is_display_safe(result.proof_ref):
+        return False
+    return all(
+        _close_write_through_ref_is_display_safe(ref)
+        for ref in result.evidence_refs
+    )
+
+
+def _obsidian_capture_result_is_accepted(
+    session: SessionLifecycleState,
+    result: ObsidianCaptureResult,
+) -> bool:
+    if not _close_write_through_ref_is_display_safe(result.capture_id):
+        return False
+    if result.target_session_id != session.session_id:
+        return False
+    if not result.completed:
+        return False
+    if result.raw_transcript_included or result.raw_prompt_included:
+        return False
+    if not _close_write_through_ref_is_display_safe(result.proof_ref):
+        return False
+    return all(
+        _close_write_through_ref_is_display_safe(ref)
+        for ref in result.evidence_refs
+    )
+
+
+def _close_write_through_writer_refs(
+    result: SessionWriteThroughResult,
+) -> tuple[str, ...]:
+    safe_writer_id = _close_write_through_safe_label(
+        result.writer_id,
+        "writer_id_redacted",
+    )
+    refs = (
+        f"write_through.writer_id={safe_writer_id}",
+        f"write_through.completed={result.completed}",
+        f"write_through.proof_ref={_close_write_through_safe_ref(result.proof_ref)}",
+        f"write_through.raw_transcript_included={result.raw_transcript_included}",
+        f"write_through.raw_prompt_included={result.raw_prompt_included}",
+    )
+    return tuple(dict.fromkeys(refs + _close_write_through_safe_refs(result.evidence_refs)))
+
+
+def _close_write_through_obsidian_refs(
+    result: ObsidianCaptureResult,
+) -> tuple[str, ...]:
+    safe_capture_id = _close_write_through_safe_label(
+        result.capture_id,
+        "capture_id_redacted",
+    )
+    refs = (
+        f"obsidian_capture.capture_id={safe_capture_id}",
+        f"obsidian_capture.completed={result.completed}",
+        f"obsidian_capture.proof_ref={_close_write_through_safe_ref(result.proof_ref)}",
+        f"obsidian_capture.raw_transcript_included={result.raw_transcript_included}",
+        f"obsidian_capture.raw_prompt_included={result.raw_prompt_included}",
+    )
+    return tuple(dict.fromkeys(refs + _close_write_through_safe_refs(result.evidence_refs)))
+
+
+def _close_write_through_base_refs(
+    session: SessionLifecycleState,
+    request: SessionCloseWriteThroughRequest,
+    observed_at: datetime,
+    blockers: tuple[str, ...] | list[str],
+) -> tuple[str, ...]:
+    refs = [
+        f"close_write_through.request_id={request.request_id}",
+        f"close_write_through.target_session_id={session.session_id}",
+        f"close_write_through.intended_action={request.intended_action.value}",
+        f"close_write_through.initial_status={session.status.value}",
+        f"close_write_through.permission_state={session.permission_context.branch_permission_state.value}",
+        f"close_write_through.human_gate_approved={request.human_gate_approved}",
+        f"close_write_through.stop_before_close_completed={request.stop_before_close_completed}",
+        f"close_write_through.obsidian_capture_required={request.obsidian_capture_required}",
+        f"close_write_through.timestamp={observed_at.isoformat()}",
+        "close_write_through.raw_transcript_included=False",
+        "close_write_through.raw_prompt_included=False",
+    ]
+    refs.extend(f"close_write_through.blocker={blocker}" for blocker in blockers)
+    refs.extend(_close_write_through_safe_refs(request.evidence_refs))
+    return tuple(dict.fromkeys(refs))
+
+
+def _close_write_through_final_state(
+    session: SessionLifecycleState,
+    request: SessionCloseWriteThroughRequest,
+    observed_at: datetime,
+) -> SessionLifecycleState:
+    final_status = (
+        SessionStatus.ARCHIVED
+        if request.intended_action == CloseArchiveWriteThroughAction.ARCHIVE
+        else SessionStatus.STOPPED
+    )
+    return SessionLifecycleState(
+        **{
+            **session.__dict__,
+            "status": final_status,
+            "proof_state": ProofState.EXECUTED,
+            "last_queue_write_at": observed_at,
+        }
+    )
+
+
+def _close_write_through_safe_state_dict(
+    state: SessionLifecycleState,
+) -> dict[str, Any]:
+    return {
+        "session_id": state.session_id,
+        "session_name": state.session_name,
+        "project_name": state.project_name,
+        "project_path_present": _has_meaningful_text(state.project_path),
+        "harness_role": state.harness_role.value,
+        "assigned_queue_file": state.assigned_queue_file,
+        "model_provider": state.model_provider,
+        "model_name": state.model_name,
+        "status": state.status.value,
+        "worktree_path_present": _has_meaningful_text(state.worktree_path),
+        "branch_name": state.branch_name,
+        "current_task_id": state.current_task_id,
+        "review_cadence_state": state.review_cadence_state.value,
+        "proof_state": state.proof_state.value,
+        "health_state": state.health_state.value,
+        "blocker_summary_present": _has_meaningful_text(state.blocker_summary),
+        "permission_state": state.permission_context.branch_permission_state.value,
+        "last_queue_write_at": state.last_queue_write_at.isoformat(),
+    }
+
+
+def _close_write_through_result(
+    session: SessionLifecycleState,
+    request: SessionCloseWriteThroughRequest,
+    observed_at: datetime,
+    close_authorized: bool,
+    write_through_attempted: bool,
+    write_through_completed: bool,
+    obsidian_capture_attempted: bool,
+    obsidian_capture_completed: bool,
+    failure_reason: Optional[str],
+    blockers: tuple[str, ...],
+    proof_refs: tuple[str, ...],
+    final_state: SessionLifecycleState,
+    raw_transcript_included: bool = False,
+    raw_prompt_included: bool = False,
+) -> SessionCloseWriteThroughResult:
+    return SessionCloseWriteThroughResult(
+        request_id=request.request_id,
+        target_session_id=request.target_session_id,
+        intended_action=request.intended_action,
+        initial_status=session.status,
+        final_status=final_state.status,
+        close_authorized=close_authorized,
+        write_through_attempted=write_through_attempted,
+        write_through_completed=write_through_completed,
+        obsidian_capture_attempted=obsidian_capture_attempted,
+        obsidian_capture_completed=obsidian_capture_completed,
+        session_left_recoverable=not close_authorized,
+        failure_reason=failure_reason,
+        blockers=blockers,
+        proof_refs=_close_write_through_safe_refs(proof_refs),
+        final_state=final_state,
+        raw_transcript_included=raw_transcript_included,
+        raw_prompt_included=raw_prompt_included,
+        timestamp=observed_at,
+    )
 
 
 _GOAL_CHECKPOINT_UNSAFE_FRAGMENTS = (

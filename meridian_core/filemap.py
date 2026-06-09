@@ -984,7 +984,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="meridian_core/session_lifecycle.py",
             area=FileArea.BIFROST,
-            purpose="Session Lifecycle domain objects: typed enums and frozen dataclasses for session state, command planning, legality checking, and executability gates per V2 contract.",
+            purpose="Session Lifecycle domain objects: typed enums and frozen dataclasses for session state, command planning, legality checking, executability gates, and SK9 backend close/write-through authority per V2 contract.",
             related_tests=["tests/test_session_lifecycle.py"],
             notes="Core harness implementation; read the v2-contract and implementation-checklist before modifying.",
         ),
@@ -998,7 +998,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="tests/test_session_lifecycle.py",
             area=FileArea.BIFROST,
-            purpose="Test suite for meridian_core/session_lifecycle.py: session state transitions, legality matrix, executability helpers, immutability, and proof progression.",
+            purpose="Test suite for meridian_core/session_lifecycle.py: session state transitions, legality matrix, executability helpers, immutability, proof progression, and SK9 close/write-through authority.",
             related_tests=[],
             notes="Run before changing meridian_core/session_lifecycle.py or Session Lifecycle behavior.",
         ),
