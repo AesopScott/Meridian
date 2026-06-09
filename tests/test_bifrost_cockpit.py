@@ -1130,6 +1130,7 @@ def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
     assert "loading existing backend snapshots" in doc
     assert "existing backend snapshots only" in doc
     assert "display-only; no provider calls or settings writes" in doc
+    assert "Relay-mediated dispatch posture" in doc
     assert "Backend binding safety" in doc
     assert "No provider call, Auto enablement, settings mutation, route mutation, or prompt payload assembly is authorized here." in doc
     assert "No prompt text, response text, recovered result body, raw provider output, raw evidence body, or worker chat is rendered." in doc
@@ -1160,6 +1161,24 @@ def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
     assert "bridgeUrl('message')" not in backend_binding
     assert "bridgeUrl('call-result')" not in backend_binding
     assert "bridgeUrl('restart')" not in backend_binding
+
+
+def test_index_model_harness_backend_binding_names_relay_mediated_dispatch_posture():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    backend_binding = doc[
+        doc.index("const renderModelHarnessBackendBindingSnapshot = (snapshots = {}) =>"):
+        doc.index("const fetchBridgeSnapshot = async (path, label) =>")
+    ]
+    assert "relaySection('Relay-mediated dispatch posture', relayGrid([" in backend_binding
+    assert "['dispatch route source', snapshots.relayLogic?.ok ? '/bridge/relay-logic' : 'offline']" in backend_binding
+    assert "['selected provider', snapshots.providerBalance?.provider_balance?.selected_provider || 'not exposed']" in backend_binding
+    assert "['routing owner', snapshots.providerBalance?.provider_balance?.routing_owner || 'unknown']" in backend_binding
+    assert "['policy state', relayText(snapshots.providerBalance?.provider_balance?.policy_state)]" in backend_binding
+    assert "['payload continuity refs', relayJoin(snapshots.relayEvidence?.prompt_payload_meter?.route_continuity_refs)]" in backend_binding
+    assert "['payload evidence refs', relayJoin(snapshots.relayEvidence?.prompt_payload_meter?.evidence_refs)]" in backend_binding
+    assert "['intent evidence refs', relayJoin(snapshots.relayEvidence?.per_call_intent?.evidence_refs)]" in backend_binding
+    assert "Relay + Model Harness own route/model/payload posture; this surface renders evidence only and does not call providers" in backend_binding
+    assert "method: 'POST'" not in backend_binding
     assert "method: 'POST'" not in backend_binding
     assert "fetch(bridgeUrl('message')" not in backend_binding
     assert "fetch(bridgeUrl('call-result')" not in backend_binding

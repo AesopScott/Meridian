@@ -6452,6 +6452,21 @@ body {
       ['relay dispatch source', snapshots.relayLogic?.ok ? 'relay logic snapshot' : 'offline'],
       ['mutation policy', 'display-only; no provider calls or settings writes'],
     ]), true),
+    relaySection('Relay-mediated dispatch posture', relayGrid([
+      ['dispatch route source', snapshots.relayLogic?.ok ? '/bridge/relay-logic' : 'offline'],
+      ['selected provider', snapshots.providerBalance?.provider_balance?.selected_provider || 'not exposed'],
+      ['routing owner', snapshots.providerBalance?.provider_balance?.routing_owner || 'unknown'],
+      ['policy state', relayText(snapshots.providerBalance?.provider_balance?.policy_state)],
+      ['exact lane plan', (() => {
+        const tier = (Array.isArray(snapshots.relayLogic?.tiers) ? snapshots.relayLogic.tiers : [])
+          .find((item) => item.tier === snapshots.relayEvidence?.per_call_intent?.risk_tier);
+        return tier ? relayLaneSummary(tier) : 'not exposed by Relay logic';
+      })()],
+      ['payload continuity refs', relayJoin(snapshots.relayEvidence?.prompt_payload_meter?.route_continuity_refs)],
+      ['payload evidence refs', relayJoin(snapshots.relayEvidence?.prompt_payload_meter?.evidence_refs)],
+      ['intent evidence refs', relayJoin(snapshots.relayEvidence?.per_call_intent?.evidence_refs)],
+      ['dispatch boundary', 'Relay + Model Harness own route/model/payload posture; this surface renders evidence only and does not call providers'],
+    ]), true),
     snapshots.aspect === 'Goal' ? relaySection('Goal aspect per-call intent', relayGrid([
       ['intent source', snapshots.relayEvidence?.per_call_intent ? '/bridge/relay-evidence per_call_intent' : 'not exposed by Relay'],
       ['call goal', snapshots.relayEvidence?.per_call_intent?.call_goal || 'not exposed'],
