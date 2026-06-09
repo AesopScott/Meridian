@@ -2000,6 +2000,7 @@ def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     assert "renderWorkflowDispatchStatus()" in doc
     assert "Quiet mode routine status" in doc
     assert "Quiet mode workflow status" in doc
+    assert "Next run preview" in doc
     assert "Last run result" in doc
     assert "Success summary shape" in doc
     assert "Failure summary shape" in doc
@@ -2008,6 +2009,8 @@ def test_index_routines_surface_combines_goal_and_workflow_typed_state():
     assert "proof trail" in doc
     assert "failure kind" in doc
     assert "tier three gate required" in doc
+    for field in ("next run", "waiting condition", "scheduler authority"):
+        assert f"['{field}'" in doc
     for field in ("status", "duration", "proof/evidence link", "result summary"):
         assert f"['{field}'" in doc
     for field in ("posture", "failure visible", "review gate required", "retry control available", "escalation control available"):
@@ -2052,13 +2055,14 @@ def test_routines_checklist_keeps_automation_rows_deferred_until_backend_exists(
         "| ROU3 | Enable/disable routine | Toggles routine active state. | planned |",
         "| ROU4 | Routine trigger | Supports manual run-now once routine execution exists. | planned |",
         "| ROU5 | Cadence/trigger view | Shows schedule, heartbeat, or event trigger. | planned |",
-        "| ROU7 | Next run preview | Shows next expected run or waiting condition. | planned |",
         "| ROU9 | Prime-owned routine review | Prime reviews routine outputs and only escalates meaningful user gates. | planned |",
         "| ROU11 | Routine archive/history | Shows previous runs and outcomes without cluttering main panels. | planned |",
     ):
         assert row in doc
     assert "| ROU10 | Quiet routine mode | Routine noise respects Quiet mode while preserving blockers. | wired |" in doc
     assert "| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | wired |" in doc
+    assert "| ROU7 | Next run preview | Shows next expected run or waiting condition. | wired |" in doc
+    assert "Spark Routines renders a display-only Next run preview frame from `/bridge/workflow-dispatch-status`" in doc
     assert "| ROU6 | Last run result | Shows last run status, duration, and proof/evidence link. | wired |" in doc
     assert "Spark Routines renders a display-only Last run result frame from `/bridge/workflow-dispatch-status`" in doc
     assert "| ROU8 | Failure handling | Shows retry/escalation behavior for routine failures. | wired |" in doc

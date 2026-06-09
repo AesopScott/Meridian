@@ -5885,12 +5885,20 @@ body {
     const failureHandlingPosture = failure.summary
       ? (statusPolicy.tier_three_gate_required ? 'review gate required before retry/escalation' : 'display-only failure posture')
       : 'no failure handling required';
+    const nextRunPreview = statusPolicy.dispatch_surface === 'display_only'
+      ? 'unknown'
+      : 'not exposed';
     return [
       relaySection('Workflow dispatch source', relayGrid([
         ['source', snapshot.source || 'unknown'],
         ['version', snapshot.version || 'unknown'],
         ['harness', snapshot.harness || 'Workflow Sub-agents'],
         ['display only', snapshot.display_only ? 'yes' : 'no'],
+      ]), true),
+      relaySection('Next run preview', relayGrid([
+        ['next run', nextRunPreview],
+        ['waiting condition', statusPolicy.tier_three_gate_required ? 'review gate or scheduler state not exposed' : 'unknown'],
+        ['scheduler authority', 'not exposed by reviewed workflow snapshot'],
       ]), true),
       relaySection('Last run result', relayGrid([
         ['status', lastRunStatus],
