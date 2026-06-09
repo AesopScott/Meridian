@@ -403,6 +403,13 @@ def make_default_map() -> FileMap:
             notes="Frozen dataclass. No metadata, lineage, or tokens sent to model.",
         ),
         FileMapEntry(
+            path="meridian_core/relay_auto_routing.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="BR7 Prime/Relay Auto routing evidence: converts Prime intent and constraints into Relay-owned route, prompt packet, dispatch plan, and display-safe evidence without provider transport or UI route selection.",
+            related_tests=["tests/test_relay_auto_routing.py"],
+            notes="Run before changing Auto routing evidence, Prime/Relay ownership boundaries, prompt visibility, or BR7 dispatch proof fields.",
+        ),
+        FileMapEntry(
             path="meridian_core/relay_executor.py",
             area=FileArea.RELAY_DISPATCH,
             purpose="Relay executor: executes RelayDispatch routing plans and dispatches work to model providers via model_adapter.",
@@ -450,6 +457,13 @@ def make_default_map() -> FileMap:
             purpose="Test suite for meridian_core/relay_dispatch.py: covers immutable dispatch plan mapping and per-lane model work routing.",
             related_tests=[],
             notes="Run before changing meridian_core/relay_dispatch.py or dispatch planning logic.",
+        ),
+        FileMapEntry(
+            path="tests/test_relay_auto_routing.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Test suite for meridian_core/relay_auto_routing.py: proves BR7 Auto routing evidence is Relay-owned, deterministic, display-safe, and free of provider transport or UI route-selection authority.",
+            related_tests=[],
+            notes="Run before promoting Auto routing evidence or changing Prime/Relay BR7 boundaries.",
         ),
         FileMapEntry(
             path="meridian_core/model_adapter.py",

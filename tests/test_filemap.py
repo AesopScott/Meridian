@@ -83,6 +83,8 @@ _REQUIRED_PATHS = [
     "meridian_core/relay_packet.py",
     "tests/test_relay_packet.py",
     "meridian_core/relay_dispatch.py",
+    "meridian_core/relay_auto_routing.py",
+    "tests/test_relay_auto_routing.py",
     "meridian_core/relay_executor.py",
     "tests/test_relay_executor.py",
     "meridian_core/relay_logic_snapshot.py",
