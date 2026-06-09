@@ -8673,6 +8673,28 @@ body {
     muted: [],
     collapsed: false,
   };
+  const progressRedirectDefaultsKey = 'meridian.progress-redirects.v1';
+  const progressRedirectCategories = [
+    'routine progress',
+    'blocker',
+    'review result',
+    'proof summary',
+    'repair routed',
+    'completion',
+    'human gate',
+    'system health',
+  ];
+  const progressRedirectDefaults = {
+    'routine progress': 'Progress Surface only',
+    blocker: 'Progress Surface + lane row attention',
+    'review result': 'Progress Surface + Review Console',
+    'proof summary': 'Progress Surface + Review Console when waiver or human gate is needed',
+    'repair routed': 'Progress Surface + lane row attention',
+    completion: 'Progress Surface + Compass',
+    'human gate': 'Orchestrator Queue + Review Console + Progress Surface',
+    'system health': 'Progress Surface + instrumentation band glyph updates',
+  };
+  const progressRedirectOptions = Array.from(new Set(Object.values(progressRedirectDefaults)));
   const progressStateList = (value) => Array.isArray(value)
     ? value.map((item) => String(item || '').trim()).filter(Boolean)
     : String(value || '').split(/[\n,]+/).map((item) => item.trim()).filter(Boolean);
@@ -8697,6 +8719,28 @@ body {
       collapsed: Boolean(state.collapsed),
     };
     try { localStorage.setItem(progressStateKey, JSON.stringify(next)); } catch {}
+    return next;
+  };
+  const readProgressRedirectDefaults = () => {
+    const defaults = { ...progressRedirectDefaults };
+    try {
+      const stored = JSON.parse(localStorage.getItem(progressRedirectDefaultsKey) || '{}');
+      progressRedirectCategories.forEach((category) => {
+        const value = String(stored?.[category] || '').trim();
+        if (progressRedirectOptions.includes(value)) defaults[category] = value;
+      });
+      return defaults;
+    } catch {
+      return defaults;
+    }
+  };
+  const writeProgressRedirectDefaults = (state) => {
+    const next = { ...progressRedirectDefaults };
+    progressRedirectCategories.forEach((category) => {
+      const value = String(state?.[category] || '').trim();
+      if (progressRedirectOptions.includes(value)) next[category] = value;
+    });
+    try { localStorage.setItem(progressRedirectDefaultsKey, JSON.stringify(next)); } catch {}
     return next;
   };
   const roleModelOverrideKey = 'meridian.role-model-overrides.v1';
@@ -8977,6 +9021,52 @@ body {
     });
     refresh();
   };
+  const renderProgressRedirectDefaultsPreview = (state) => relayGrid([
+    ['storage key', progressRedirectDefaultsKey],
+    ['scope', 'UI-local routing metadata preview'],
+    ['prompt text effect', 'none; redirect defaults stay out of prompt text'],
+    ['review result route', state['review result']],
+    ['human gate route', state['human gate']],
+    ['system health route', state['system health']],
+  ]);
+  const renderProgressRedirectDefaultsSurface = () => {
+    const state = readProgressRedirectDefaults();
+    return [
+      relaySection('Progress redirect defaults', progressRedirectCategories.map((category) => `
+        <div class="relay-models-handoff" aria-label="${escapeHtml(category)} redirect default">
+          <label>${escapeHtml(category)}
+            <select data-progress-redirect-category="${escapeHtml(category)}">
+              ${progressRedirectOptions.map((option) => `<option value="${escapeHtml(option)}" ${state[category] === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+      `).join(''), true),
+      relaySection('Progress redirect preview', `<div data-progress-redirect-preview>${renderProgressRedirectDefaultsPreview(state)}</div>`, true),
+      relaySection('Progress redirect boundary', relayList([
+        'Progress redirect defaults are stored only as UI-local routing metadata preview.',
+        'Category routes appear in Settings and Filter metadata only; they do not alter prompt text, Prime intent, backend queue routing, or review authority.',
+        'No backend progress route, prompt send, result recovery, provider call, or settings mutation is invoked.',
+      ]), false),
+    ];
+  };
+  const initializeProgressRedirectDefaultsSurface = () => {
+    const root = rightWorkspace?.querySelector('[data-progress-redirect-surface]');
+    if (!root) return;
+    const refresh = (state = readProgressRedirectDefaults()) => {
+      const preview = root.querySelector('[data-progress-redirect-preview]');
+      if (preview) preview.innerHTML = renderProgressRedirectDefaultsPreview(state);
+      const filterPreview = rightWorkspace?.querySelector('[data-filter-preview]');
+      if (filterPreview) filterPreview.innerHTML = renderContextFilterPreview(readContextFilterState());
+    };
+    root.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!target?.matches?.('[data-progress-redirect-category]')) return;
+      const state = readProgressRedirectDefaults();
+      state[target.dataset.progressRedirectCategory] = target.value;
+      refresh(writeProgressRedirectDefaults(state));
+    });
+    refresh();
+  };
   const renderRoleModelOverridePreview = (state) => relayGrid([
     ['storage key', roleModelOverrideKey],
     ['available backends', availableRoleModelOptions().join(', ')],
@@ -9243,6 +9333,9 @@ body {
       ['progress info default', state.progressInfo ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress warning default', state.progressWarning ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress error default', state.progressError ? 'visible for new progress previews' : 'hidden from preview only'],
+      ['review result route default', readProgressRedirectDefaults()['review result']],
+      ['human gate route default', readProgressRedirectDefaults()['human gate']],
+      ['system health route default', readProgressRedirectDefaults()['system health']],
       ['quiet mode', readQuietMode() ? 'enabled for routine surfaces' : 'disabled'],
       ['wake mode', readWakeMode()],
       ['quick replies', readQuickReplyOrder().join(', ')],
@@ -9350,6 +9443,7 @@ body {
       sections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
       sections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
       sections.push(`<div data-progress-state-surface>${renderProgressStateDefaultsSurface().join('')}</div>`);
+      sections.push(`<div data-progress-redirect-surface>${renderProgressRedirectDefaultsSurface().join('')}</div>`);
     }
     if (filterSelected) {
       sections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
@@ -9370,6 +9464,7 @@ body {
       initializeDiagnosticDefaultSurface();
       initializeProgressFilterDefaultsSurface();
       initializeProgressStateDefaultsSurface();
+      initializeProgressRedirectDefaultsSurface();
     }
     if (rendered && filterSelected) initializeContextFilterSurface();
     return rendered;

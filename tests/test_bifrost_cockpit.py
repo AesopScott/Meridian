@@ -2477,6 +2477,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "UI-local muted progress/session item/category list backed by `meridian.progress-state.v1`" in doc
     assert "| SET6 | Progress collapse state | Persists collapsed progress surface state. | wired |" in doc
     assert "UI-local progress collapse default backed by `meridian.progress-state.v1`" in doc
+    assert "| SET8 | Progress redirect defaults | Configures default routing by category when Prime surfaces progress or review items. | wired |" in doc
+    assert "UI-local progress redirect defaults backed by `meridian.progress-redirects.v1`" in doc
     assert "| SET14 | Role/model mapping | Shows role-to-model mapping and allows per-role override/pin. | wired |" in doc
     assert "UI-local per-role model preferences backed by `meridian.role-model-overrides.v1`" in doc
     assert "| SET18 | Diagnostic log visibility | Controls whether per-session diagnostic event logs are visible by default. | wired |" in doc
@@ -2669,6 +2671,40 @@ def test_index_settings_surface_controls_progress_filter_defaults_locally():
     assert "bridgeUrl('message')" not in progress_surface
     assert "bridgeUrl('call-result')" not in progress_surface
     assert "method: 'POST'" not in progress_surface
+
+
+def test_index_settings_surface_controls_progress_redirect_defaults_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const progressRedirectDefaultsKey = 'meridian.progress-redirects.v1'")
+    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
+    redirect_surface = doc[render_start:render_end]
+    filter_start = doc.index("const renderContextFilterPreview = (state) =>")
+    filter_end = doc.index("const renderContextFilterSurface = () =>", filter_start)
+    filter_preview = doc[filter_start:filter_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const renderHarnessSurface = (button) =>", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+
+    assert "const progressRedirectDefaultsKey = 'meridian.progress-redirects.v1'" in redirect_surface
+    assert "progressRedirectCategories" in redirect_surface
+    assert "'routine progress'" in redirect_surface
+    assert "'human gate'" in redirect_surface
+    assert "progressRedirectDefaults" in redirect_surface
+    assert "readProgressRedirectDefaults" in redirect_surface
+    assert "writeProgressRedirectDefaults" in redirect_surface
+    assert "Progress redirect defaults" in redirect_surface
+    assert "data-progress-redirect-category" in redirect_surface
+    assert "data-progress-redirect-preview" in redirect_surface
+    assert "Category routes appear in Settings and Filter metadata only" in redirect_surface
+    assert "No backend progress route, prompt send, result recovery, provider call, or settings mutation is invoked." in redirect_surface
+    assert "review result route default" in filter_preview
+    assert "human gate route default" in filter_preview
+    assert "system health route default" in filter_preview
+    assert "data-progress-redirect-surface" in settings_surface
+    assert "initializeProgressRedirectDefaultsSurface();" in settings_surface
+    assert "bridgeUrl('message')" not in redirect_surface
+    assert "bridgeUrl('call-result')" not in redirect_surface
+    assert "method: 'POST'" not in redirect_surface
 
 
 def test_index_settings_surface_persists_progress_pin_mute_and_collapse_state_locally():
