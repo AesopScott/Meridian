@@ -5882,6 +5882,9 @@ body {
     const lastRunProof = failure.summary
       ? relayJoin(failure.proof_trail)
       : relayJoin(success.proof_trail);
+    const failureHandlingPosture = failure.summary
+      ? (statusPolicy.tier_three_gate_required ? 'review gate required before retry/escalation' : 'display-only failure posture')
+      : 'no failure handling required';
     return [
       relaySection('Workflow dispatch source', relayGrid([
         ['source', snapshot.source || 'unknown'],
@@ -5919,6 +5922,14 @@ body {
         ['proof trail', relayJoin(failure.proof_trail)],
         ['tokens used', failure.tokens_used ?? 0],
         ['time used', `${failure.time_used_seconds ?? 0}s`],
+      ]), true),
+      relaySection('Failure handling', relayGrid([
+        ['posture', failureHandlingPosture],
+        ['failure visible', failure.summary ? 'yes' : 'no'],
+        ['proof trail', relayJoin(failure.proof_trail)],
+        ['review gate required', statusPolicy.tier_three_gate_required ? 'yes' : 'no'],
+        ['retry control available', 'no'],
+        ['escalation control available', 'no'],
       ]), true),
       relaySection('Dispatch visibility policy', relayGrid([
         ['dispatch surface', relayText(statusPolicy.dispatch_surface)],
