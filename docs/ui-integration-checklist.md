@@ -404,7 +404,7 @@ Archive preserves reloadable sessions. It differs from long-term knowledge becau
 | ARC7 | Archive summary | Stores compact session summary for scanability. | planned | Summary is visible without loading full transcript. |
 | ARC8 | Transcript access | Allows full transcript access when available and authorized. | planned | Full transcript opens on demand only. |
 | ARC9 | Archive to knowledge handoff | Allows extracting durable lessons/memory into Echo/Atlas separately. | planned | Extraction is explicit and does not replace archive. |
-| ARC10 | Restore proof/artifacts | Links archived session to proof, files, or artifacts created. | planned | Evidence links remain inspectable. |
+| ARC10 | Restore proof/artifacts | Links archived session to proof, files, or artifacts created. | wired | Spark Archive renders a display-only Restore proof/artifacts frame from `/bridge/session-close-archive-proof`, exposing compact archive proof/evidence refs as inspectable ids for the current preview while keeping raw artifact bodies, reload/run-again controls, and a real archive restoration backend unavailable. |
 | ARC11 | Archive retention | Supports retention/archive policy once storage model exists. | planned | Retention state is visible and reversible where possible. |
 | ARC12 | Safe deletion boundary | Deleting an archive is separate from closing or filtering and requires explicit intent. | planned | No archive deletion from one-click close. |
 

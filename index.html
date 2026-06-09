@@ -6302,6 +6302,12 @@ body {
       ...(Array.isArray(preview.evidence_refs) ? preview.evidence_refs : []),
       ...(Array.isArray(archiveProof.evidence_refs) ? archiveProof.evidence_refs : []),
     ]));
+    const archiveArtifactRefs = Array.from(new Set([
+      ...(Array.isArray(preview.evidence_refs) ? preview.evidence_refs : []),
+      ...(Array.isArray(archiveProof.evidence_refs) ? archiveProof.evidence_refs : []),
+      ...(Array.isArray(writeThroughProof.evidence_refs) ? writeThroughProof.evidence_refs : []),
+      ...(Array.isArray(closeProof.evidence_refs) ? closeProof.evidence_refs : []),
+    ]));
     const closeSummaryStatus = preview.is_executable_now
       ? 'ready'
       : (preview.human_gate_required ? 'review gated' : 'proof only');
@@ -6342,6 +6348,12 @@ body {
         ['blockers', relayJoin(closeSummaryBlockers)],
         ['proof refs', relayJoin(closeSummaryRefs)],
       ]), true),
+      relaySection('Restore proof/artifacts', relayGrid([
+        ['archive proof refs', relayJoin(archiveArtifactRefs)],
+        ['artifact posture', archiveArtifactRefs.length ? 'inspectable refs only' : 'no archive proof refs reported'],
+        ['raw artifact body visible', 'no'],
+        ['reload/run again available', 'no'],
+      ]), false),
       relaySection('Archive write-through proof', relayGrid([
         ['target session', archiveProof.target_session_id || 'unknown'],
         ['session name', archiveProof.session_name || 'unknown'],
