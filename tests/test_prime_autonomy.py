@@ -1,8 +1,12 @@
 """Tests for Prime Autonomy domain model."""
 
+from dataclasses import dataclass, fields, is_dataclass
+
 import pytest
 from datetime import datetime, timedelta, timezone
 
+from meridian_core.atlas import AtlasHit, AtlasSource
+from meridian_core.echo import MemoryHit, MemoryHitSummary, MemoryKind, MemoryRecord, MemorySource
 from meridian_core.model_adapter import (
     DeepSeekValidationDisposition,
     bind_deepseek_validation_disposition,
@@ -56,6 +60,56 @@ from meridian_core.session_lifecycle import (
     summarize_recovery_readiness,
     summarize_workflow_work_order_recovery,
 )
+
+
+def _memory_hit(index: int, *, body: str | None = None) -> MemoryHit:
+    record = MemoryRecord(
+        record_id=f"mem-{index}",
+        project="Meridian",
+        kind=MemoryKind.DECISION,
+        summary=f"Memory summary {index}",
+        body=body or f"RAW_MEMORY_BODY_{index}",
+        source=MemorySource.PRIME,
+        created_at=datetime(2026, 6, 8, 12, 0, tzinfo=timezone.utc),
+        importance=5,
+        pinned=index == 0,
+        tags=("v2", "prime"),
+    )
+    return MemoryHit(record=record, score=1.0 - (index * 0.01), reason=f"rank reason {index}")
+
+
+def _atlas_hit(index: int, *, excerpt: str | None = None) -> AtlasHit:
+    return AtlasHit(
+        path=f"docs/context-{index}.md",
+        title=f"Atlas hit {index}",
+        reason=f"retrieval reason {index}",
+        excerpt=excerpt or f"bounded excerpt {index}",
+        source=AtlasSource.DOC,
+        score=0.9 - (index * 0.01),
+    )
+
+
+def _string_values(value):
+    if isinstance(value, str):
+        yield value
+        return
+    if is_dataclass(value):
+        for item in fields(value):
+            yield from _string_values(getattr(value, item.name))
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from _string_values(key)
+            yield from _string_values(item)
+        return
+    if isinstance(value, (list, tuple, set, frozenset)):
+        for item in value:
+            yield from _string_values(item)
+
+
+@dataclass(frozen=True)
+class _AtlasHitWithRawContent(AtlasHit):
+    raw_full_file_content: str = ""
 
 
 class TestPrimeActionEnums:
@@ -551,6 +605,168 @@ class TestSelectNextActionFromProjectState:
         )
         action = select_next_action_from_project_state(state)
         assert action.action_type == PrimeActionType.ADVANCE_COGNITION
+
+    def test_typed_echo_atlas_inputs_are_carried_to_action(self):
+        """Typed Echo/Atlas context is preserved on the Prime action."""
+        state = ProjectStateSignal(
+            active_task="task_001",
+            echo_inputs=(_memory_hit(0),),
+            atlas_inputs=(_atlas_hit(0),),
+        )
+        action = select_next_action_from_project_state(state)
+
+        assert action.echo_inputs == (
+            MemoryHitSummary(
+                summary="Memory summary 0",
+                reason="rank reason 0",
+            ),
+        )
+        assert action.atlas_inputs == (
+            AtlasHit(
+                path="docs/context-0.md",
+                title="Atlas hit 0",
+                reason="retrieval reason 0",
+                excerpt="bounded excerpt 0",
+                source=AtlasSource.DOC,
+                score=0.9,
+            ),
+        )
+
+    def test_echo_input_excludes_raw_memory_body(self):
+        """Prime carries Echo summaries and rank reasons, never MemoryRecord.body."""
+        secret_body = "RAW_MEMORY_BODY_SHOULD_NOT_REACH_PRIME"
+        state = ProjectStateSignal(
+            active_task="task_001",
+            echo_inputs=(_memory_hit(0, body=secret_body),),
+        )
+        action = select_next_action_from_project_state(state)
+
+        assert action.echo_inputs[0].summary == "Memory summary 0"
+        assert action.echo_inputs[0].reason == "rank reason 0"
+        assert not hasattr(action.echo_inputs[0], "record")
+        assert not hasattr(action.echo_inputs[0], "body")
+        assert not hasattr(action.echo_inputs[0], "record_id")
+        assert not hasattr(action.echo_inputs[0], "project")
+        assert not hasattr(action.echo_inputs[0], "kind")
+        assert not hasattr(action.echo_inputs[0], "source")
+        assert not hasattr(action.echo_inputs[0], "score")
+        assert secret_body not in tuple(_string_values(action))
+
+    def test_atlas_input_uses_bounded_excerpt_not_raw_file_content(self):
+        """Prime carries the Atlas excerpt field and no invented raw file body."""
+        raw_file_marker = "RAW_FULL_FILE_CONTENT_SHOULD_NOT_REACH_PRIME"
+        hit = _AtlasHitWithRawContent(
+            path="docs/context-0.md",
+            title="Atlas hit 0",
+            reason="retrieval reason 0",
+            excerpt="safe selected excerpt",
+            source=AtlasSource.DOC,
+            score=0.9,
+            raw_full_file_content=raw_file_marker,
+        )
+        state = ProjectStateSignal(
+            active_task="task_001",
+            atlas_inputs=(hit,),
+        )
+        action = select_next_action_from_project_state(state)
+
+        assert type(action.atlas_inputs[0]) is AtlasHit
+        assert action.atlas_inputs[0].excerpt == "safe selected excerpt"
+        assert raw_file_marker not in tuple(_string_values(action))
+
+    def test_direct_action_construction_normalizes_context_collections(self):
+        """Direct constructors expose the same immutable collection shape as helpers."""
+        echo_input = _memory_hit(0).to_summary()
+        atlas_input = _atlas_hit(0)
+        action = PrimeNextAction(
+            action_type=PrimeActionType.POLL_SESSION,
+            confidence=PrimeActionConfidence.HIGH,
+            risk_tier=PrimeActionRiskTier.SAFE,
+            source=PrimeActionSource.SESSION_STATE,
+            soft_blockers=["MISSING_ECHO_CONTEXT"],
+            echo_inputs=[echo_input],
+            atlas_inputs=[atlas_input],
+        )
+
+        assert action.soft_blockers == frozenset(["MISSING_ECHO_CONTEXT"])
+        assert action.echo_inputs == (echo_input,)
+        assert action.atlas_inputs == (atlas_input,)
+        with pytest.raises(AttributeError):
+            action.echo_inputs.append(echo_input)
+
+    def test_direct_project_state_construction_normalizes_context_collections(self):
+        """ProjectStateSignal does not retain caller-owned mutable context lists."""
+        echo_input = _memory_hit(0)
+        atlas_input = _atlas_hit(0)
+        state = ProjectStateSignal(
+            blockers=["OPEN_REVIEW_GATE"],
+            echo_inputs=[echo_input],
+            atlas_inputs=[atlas_input],
+        )
+
+        assert state.blockers == frozenset(["OPEN_REVIEW_GATE"])
+        assert state.echo_inputs == (echo_input,)
+        assert state.atlas_inputs == (atlas_input,)
+        with pytest.raises(AttributeError):
+            state.echo_inputs.append(echo_input)
+
+    def test_echo_atlas_inputs_are_capped_for_prime_action(self):
+        """Prime action carries only the top bounded context subset."""
+        state = ProjectStateSignal(
+            active_task="task_001",
+            echo_inputs=tuple(_memory_hit(i) for i in range(7)),
+            atlas_inputs=tuple(_atlas_hit(i) for i in range(8)),
+        )
+        action = select_next_action_from_project_state(state)
+
+        assert len(action.echo_inputs) == 5
+        assert len(action.atlas_inputs) == 5
+        assert [item.summary for item in action.echo_inputs] == [
+            "Memory summary 0",
+            "Memory summary 1",
+            "Memory summary 2",
+            "Memory summary 3",
+            "Memory summary 4",
+        ]
+        assert [item.path for item in action.atlas_inputs] == [
+            "docs/context-0.md",
+            "docs/context-1.md",
+            "docs/context-2.md",
+            "docs/context-3.md",
+            "docs/context-4.md",
+        ]
+
+    def test_missing_expected_context_adds_soft_blockers(self):
+        """Missing Echo/Atlas context lowers confidence without hard-blocking."""
+        state = ProjectStateSignal(
+            active_task="task_001",
+            expect_echo_context=True,
+            expect_atlas_context=True,
+        )
+        action = select_next_action_from_project_state(state)
+
+        assert action.action_type == PrimeActionType.ADVANCE_COGNITION
+        assert action.confidence == PrimeActionConfidence.LOW
+        assert action.soft_blockers == frozenset([
+            "MISSING_ECHO_CONTEXT",
+            "MISSING_ATLAS_CONTEXT",
+        ])
+        assert action.blockers == frozenset()
+        assert action.is_executable() is True
+
+    def test_one_missing_expected_context_steps_confidence_to_medium(self):
+        """A single missing context source steps HIGH confidence down once."""
+        state = ProjectStateSignal(
+            active_task="task_001",
+            expect_echo_context=True,
+            atlas_inputs=(_atlas_hit(0),),
+        )
+        action = select_next_action_from_project_state(state)
+
+        assert action.confidence == PrimeActionConfidence.MEDIUM
+        assert action.soft_blockers == frozenset(["MISSING_ECHO_CONTEXT"])
+        assert action.atlas_inputs[0].path == "docs/context-0.md"
+        assert action.is_executable() is True
 
     def test_existing_select_prime_next_action_unaffected(self):
         """Regression: existing select_prime_next_action still returns safe defaults."""

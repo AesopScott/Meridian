@@ -8,12 +8,14 @@ and deterministic fallback action selection.
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional, List, FrozenSet
+from typing import Any, Optional, List, FrozenSet, Tuple
 
+from meridian_core.atlas import AtlasHit
 from meridian_core.beacon import (
     BeaconAdvisoryEvidence,
     deepseek_validation_disposition_advisory_evidence,
 )
+from meridian_core.echo import MemoryHit, MemoryHitSummary
 from meridian_core.model_adapter import DeepSeekValidationDisposition
 from meridian_core.session_lifecycle import (
     CommandIntent,
@@ -70,6 +72,9 @@ class PrimeActionSource(Enum):
     HUMAN_OVERRIDE = "human_override"
 
 
+_CONTEXT_INPUT_RENDER_LIMIT = 5
+
+
 @dataclass(frozen=True)
 class PrimeNextAction:
     """Immutable representation of Prime's next deterministic action.
@@ -95,6 +100,16 @@ class PrimeNextAction:
     # Constraints
     human_gate_required: bool = False  # Must wait for human approval before executing
     blockers: FrozenSet[str] = field(default_factory=frozenset)  # Blocking conditions preventing execution
+    soft_blockers: FrozenSet[str] = field(default_factory=frozenset)  # Non-blocking context gaps
+    echo_inputs: Tuple[MemoryHitSummary, ...] = field(default_factory=tuple)
+    atlas_inputs: Tuple[AtlasHit, ...] = field(default_factory=tuple)
+
+    def __post_init__(self):
+        object.__setattr__(self, "evidence", frozenset(self.evidence or ()))
+        object.__setattr__(self, "blockers", frozenset(self.blockers or ()))
+        object.__setattr__(self, "soft_blockers", frozenset(self.soft_blockers or ()))
+        object.__setattr__(self, "echo_inputs", tuple(self.echo_inputs or ()))
+        object.__setattr__(self, "atlas_inputs", tuple(self.atlas_inputs or ()))
 
     def is_blocked(self) -> bool:
         """Return True if any blockers prevent execution."""
@@ -117,6 +132,9 @@ def select_prime_next_action(
     evidence: Optional[List[str]] = None,
     human_gate_required: bool = False,
     blockers: Optional[List[str]] = None,
+    soft_blockers: Optional[List[str]] = None,
+    echo_inputs: Tuple[MemoryHitSummary, ...] = (),
+    atlas_inputs: Tuple[AtlasHit, ...] = (),
 ) -> PrimeNextAction:
     """Deterministic helper to construct a Prime next-action with fallback defaults.
 
@@ -133,6 +151,7 @@ def select_prime_next_action(
     # Convert lists to frozen sets
     final_evidence = frozenset(evidence or [])
     final_blockers = frozenset(blockers or [])
+    final_soft_blockers = frozenset(soft_blockers or [])
 
     return PrimeNextAction(
         action_type=final_action_type,
@@ -146,6 +165,9 @@ def select_prime_next_action(
         evidence=final_evidence,
         human_gate_required=human_gate_required,
         blockers=final_blockers,
+        soft_blockers=final_soft_blockers,
+        echo_inputs=tuple(echo_inputs),
+        atlas_inputs=tuple(atlas_inputs),
     )
 
 
@@ -161,6 +183,9 @@ def make_prime_next_action(
     evidence: Optional[List[str]] = None,
     human_gate_required: bool = False,
     blockers: Optional[List[str]] = None,
+    soft_blockers: Optional[List[str]] = None,
+    echo_inputs: Tuple[MemoryHitSummary, ...] = (),
+    atlas_inputs: Tuple[AtlasHit, ...] = (),
 ) -> PrimeNextAction:
     """Strict constructor for Prime next-action: requires action_type and confidence.
 
@@ -179,6 +204,9 @@ def make_prime_next_action(
         evidence=evidence,
         human_gate_required=human_gate_required,
         blockers=blockers,
+        soft_blockers=soft_blockers,
+        echo_inputs=echo_inputs,
+        atlas_inputs=atlas_inputs,
     )
 
 
@@ -204,6 +232,79 @@ class ProjectStateSignal:
     risk_tier: PrimeActionRiskTier = PrimeActionRiskTier.SAFE
     echo_signal: Optional[str] = None        # Echo memory context placeholder (plain data)
     atlas_signal: Optional[str] = None       # Atlas retrieval context placeholder (plain data)
+    echo_inputs: Tuple[MemoryHit, ...] = field(default_factory=tuple)
+    atlas_inputs: Tuple[AtlasHit, ...] = field(default_factory=tuple)
+    expect_echo_context: bool = False
+    expect_atlas_context: bool = False
+
+    def __post_init__(self):
+        object.__setattr__(self, "blockers", frozenset(self.blockers or ()))
+        object.__setattr__(self, "echo_inputs", tuple(self.echo_inputs or ()))
+        object.__setattr__(self, "atlas_inputs", tuple(self.atlas_inputs or ()))
+
+
+def _prime_echo_input_from_hit(hit: MemoryHit) -> MemoryHitSummary:
+    return hit.to_summary()
+
+
+def _prime_atlas_input_from_hit(hit: AtlasHit) -> AtlasHit:
+    return AtlasHit(
+        path=hit.path,
+        title=hit.title,
+        reason=hit.reason,
+        excerpt=hit.excerpt,
+        source=hit.source,
+        score=hit.score,
+    )
+
+
+def _context_inputs_for_state(
+    state: ProjectStateSignal,
+) -> tuple[Tuple[MemoryHitSummary, ...], Tuple[AtlasHit, ...], list[str]]:
+    echo_inputs = tuple(
+        _prime_echo_input_from_hit(hit)
+        for hit in state.echo_inputs[:_CONTEXT_INPUT_RENDER_LIMIT]
+    )
+    atlas_inputs = tuple(
+        _prime_atlas_input_from_hit(hit)
+        for hit in state.atlas_inputs[:_CONTEXT_INPUT_RENDER_LIMIT]
+    )
+    soft_blockers: list[str] = []
+    if state.expect_echo_context and not echo_inputs:
+        soft_blockers.append("MISSING_ECHO_CONTEXT")
+    if state.expect_atlas_context and not atlas_inputs:
+        soft_blockers.append("MISSING_ATLAS_CONTEXT")
+    return echo_inputs, atlas_inputs, soft_blockers
+
+
+def _confidence_with_soft_blockers(
+    confidence: PrimeActionConfidence,
+    soft_blockers: list[str],
+) -> PrimeActionConfidence:
+    if not soft_blockers:
+        return confidence
+    if confidence == PrimeActionConfidence.HIGH:
+        return (
+            PrimeActionConfidence.MEDIUM
+            if len(soft_blockers) == 1
+            else PrimeActionConfidence.LOW
+        )
+    if confidence == PrimeActionConfidence.MEDIUM:
+        return PrimeActionConfidence.LOW
+    return confidence
+
+
+def _context_kwargs_for_state(
+    state: ProjectStateSignal,
+    confidence: PrimeActionConfidence,
+) -> dict[str, Any]:
+    echo_inputs, atlas_inputs, soft_blockers = _context_inputs_for_state(state)
+    return {
+        "confidence": _confidence_with_soft_blockers(confidence, soft_blockers),
+        "soft_blockers": soft_blockers,
+        "echo_inputs": echo_inputs,
+        "atlas_inputs": atlas_inputs,
+    }
 
 
 def select_next_action_from_project_state(
@@ -235,37 +336,37 @@ def select_next_action_from_project_state(
     if state.human_gate_required:
         return make_prime_next_action(
             action_type=PrimeActionType.PAUSE_AND_WAIT,
-            confidence=PrimeActionConfidence.HIGH,
             risk_tier=state.risk_tier,
             source=PrimeActionSource.SESSION_STATE,
             target_lane=state.lane_id,
             rationale="Human gate is required before proceeding.",
             blockers=list(state.blockers),
             human_gate_required=True,
+            **_context_kwargs_for_state(state, PrimeActionConfidence.HIGH),
         )
 
     # Priority 3: Blockers
     if state.blockers:
         return make_prime_next_action(
             action_type=PrimeActionType.ESCALATE_ERROR,
-            confidence=PrimeActionConfidence.HIGH,
             risk_tier=state.risk_tier,
             source=PrimeActionSource.ERROR_RECOVERY,
             target_lane=state.lane_id,
             rationale=f"Blockers prevent execution: {'; '.join(sorted(state.blockers))}",
             blockers=list(state.blockers),
+            **_context_kwargs_for_state(state, PrimeActionConfidence.HIGH),
         )
 
     # Priority 4: HIGH risk tier auto-gates to human approval
     if state.risk_tier == PrimeActionRiskTier.HIGH:
         return make_prime_next_action(
             action_type=PrimeActionType.PAUSE_AND_WAIT,
-            confidence=PrimeActionConfidence.MEDIUM,
             risk_tier=PrimeActionRiskTier.HIGH,
             source=PrimeActionSource.COGNITION_POLICY,
             target_lane=state.lane_id,
             rationale="High risk tier requires human gate before execution.",
             human_gate_required=True,
+            **_context_kwargs_for_state(state, PrimeActionConfidence.MEDIUM),
         )
 
     # Priority 5: Review gate (explicit close or commit-count limit)
@@ -276,7 +377,6 @@ def select_next_action_from_project_state(
     if review_gate_tripped:
         return make_prime_next_action(
             action_type=PrimeActionType.PAUSE_AND_WAIT,
-            confidence=PrimeActionConfidence.MEDIUM,
             risk_tier=state.risk_tier,
             source=PrimeActionSource.COGNITION_POLICY,
             target_lane=state.lane_id,
@@ -284,27 +384,28 @@ def select_next_action_from_project_state(
                 f"Review gate: {state.commits_since_review} commit(s) since last review, "
                 f"gate_open={state.review_gate_open}."
             ),
+            **_context_kwargs_for_state(state, PrimeActionConfidence.MEDIUM),
         )
 
     # Priority 6: No active task — poll for new assignment
     if state.active_task is None:
         return make_prime_next_action(
             action_type=PrimeActionType.POLL_SESSION,
-            confidence=PrimeActionConfidence.HIGH,
             risk_tier=PrimeActionRiskTier.SAFE,
             source=PrimeActionSource.SESSION_STATE,
             target_lane=state.lane_id,
             rationale="No active task; polling queue for new assignment.",
+            **_context_kwargs_for_state(state, PrimeActionConfidence.HIGH),
         )
 
     # Priority 7: Active task — advance cognition
     return make_prime_next_action(
         action_type=PrimeActionType.ADVANCE_COGNITION,
-        confidence=PrimeActionConfidence.HIGH,
         risk_tier=state.risk_tier,
         source=PrimeActionSource.COGNITION_POLICY,
         target_lane=state.lane_id,
         rationale=f"Active task '{state.active_task}' is ready; advancing cognition.",
+        **_context_kwargs_for_state(state, PrimeActionConfidence.HIGH),
     )
 
 

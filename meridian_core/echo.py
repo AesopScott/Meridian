@@ -75,6 +75,21 @@ class MemoryHit:
         if not (0.0 <= self.score <= 1.0):
             raise ValueError(f"score must be in [0.0, 1.0], got {self.score}")
 
+    def to_summary(self) -> "MemoryHitSummary":
+        """Return the display-safe hit surface without ``MemoryRecord.body``."""
+        return MemoryHitSummary(
+            summary=self.record.summary,
+            reason=self.reason,
+        )
+
+
+@dataclass(frozen=True)
+class MemoryHitSummary:
+    """Display-safe Echo hit projection for Prime, Aegis, and Review Console."""
+
+    summary: str
+    reason: str
+
 
 class EchoRepository:
     """Local filesystem-backed, append-only repository for durable memory.
