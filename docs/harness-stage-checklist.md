@@ -32,8 +32,8 @@
 | Vulcan / Session Lifecycle | baseline | review-cleared | review-cleared | partial via Prime/Beacon advisory refs | wired | review-cleared | no live command execution | Post-V2 live session operation gating and recovery UX. |
 | Aegis | built | built | built | wired into Prime risk input | partial | review-cleared core; Prime binding awaiting review | proof gates only | Runtime Logic UI for Aegis and live proof packet surfaces. |
 | Bifrost | built | review-cleared | review-cleared | renders backend snapshots | review-cleared | review-cleared | UI only | Post-V2 operations-gated UI integration. |
-| Echo | built | review-cleared | review-cleared | not wired into Prime runtime | not wired | review-cleared core | query only | Post-V2 live memory feed into Prime runtime packet. |
-| Atlas | built | review-cleared | review-cleared | not wired into Prime runtime | not wired | review-cleared core + adapter | retrieval only | Post-V2 live retrieval feed into Prime runtime packet. |
+| Echo | built | review-cleared | review-cleared | typed Prime ingestion, not live-query wired | not wired | review-cleared core | query only | Post-V2 live memory feed into Prime runtime packet. |
+| Atlas | built | review-cleared | review-cleared | typed Prime ingestion, not live-query wired | not wired | review-cleared core + adapter | retrieval only | Post-V2 live retrieval feed into Prime runtime packet. |
 | Beacon | baseline/partial | not queued here | partial | not wired into Prime runtime | not wired | partial | observes only | Define heartbeat/liveness Runtime Logic UI and Prime heartbeat input boundary. |
 | Charon / FileMap | built | review-cleared | review-cleared | indirect via docs/context | partial | review-cleared | lookup only | Post-V2 Runtime Logic UI reading FileMap state. |
 | Arbiter / Reviews | partial | partial | partial | not wired into Prime runtime | not wired | partial | review queue only | Runtime Logic UI for review state and Prime acceptance gates. |
@@ -73,4 +73,4 @@ Update the Harness Stage Checklist.
 1. Keep V2 trackers synchronized with reviewed backend and FileMap landings.
 2. Audit post-V2 Prime/live wiring candidates before queueing any operations-capable work.
 3. Keep Relay / Model ownership boundaries intact for model-call mechanics.
-4. Route Echo/Atlas live-input wiring as post-V2 Prime integration only after backend source refs are explicitly scoped.
+4. Route Echo/Atlas live-query wiring as post-V2 Prime integration only after backend source refs are explicitly scoped; V2 now supports bounded typed context ingestion when those hits are supplied to Prime.

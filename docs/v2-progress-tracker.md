@@ -30,7 +30,7 @@
 ### Prime Autonomy
 
 - [x] **Prime + Autonomy Contract:** `PrimeNextAction` domain object with action type, confidence, blockers, human-gate requirements, immutable evidence, and deterministic executability semantics - built in `40def3d`, repaired in `39c9ac8`; review cleared by Reviews C on 2026-05-31.
-- [x] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - built in `57aad9a`, queue provenance in `a2b8cd0`; review cleared by Reviews A on 2026-05-31 with 55 `tests/test_prime_autonomy.py` tests passing.
+- [x] **Prime + Project State:** deterministic next-action selector taking project/backlog/lane/tier/review gate state - built in `57aad9a`, queue provenance in `a2b8cd0`; review cleared by Reviews A on 2026-05-31 with 55 `tests/test_prime_autonomy.py` tests passing. Follow-up `70e506131` replaced Echo/Atlas placeholders with bounded typed `ProjectStateSignal` context ingestion: Echo contributes shared `MemoryHitSummary(summary, reason)` values, Atlas contributes sanitized `AtlasHit` values, and missing expected context records soft `MISSING_*` blockers without hard-blocking otherwise executable actions.
 - [x] **Prime + Runtime Logic UI Completion:** Prime Runtime Logic UI renders the `/bridge/prime-logic` backend packet with Prime Directives, Prime Directive Proofs, Prime backend source, runtime truth map, typed interaction request, decision/owner logic, no-drift audit logic, backend context logic, Aegis risk logic, backend source refs, proof/invalidation logic, visible-to-user declarations, execution blockers, and backend capability sections. Review cleared on 2026-06-02 with Prime runtime, Bifrost cockpit, FileMap, Prime JSON, and bridge self-tests passing. Operations remain not-live.
 
 Prime runtime packets may consume Relay/Model Harness source refs for model-call posture, but provider selection mechanics, prompt payload assembly, fallback execution, transport authorization, provider balance, and model telemetry remain Relay/Model Harness-owned.
@@ -181,7 +181,7 @@ Ownership correction: future Relay/Model Harness follow-ups should bind existing
 1. **Aegis:** `CognitionPolicy` domain model (DONE: commit e08e598)
 2. **Echo Harness:** deterministic memory records and query
 3. **Atlas Harness:** FileMap/docs-first retrieval
-4. **Prime Autonomy:** `PrimeNextAction` selector using Echo/Atlas placeholders
+4. **Prime Autonomy:** `PrimeNextAction` selector using bounded typed Echo/Atlas context inputs
 5. **Session Lifecycle Harness:** typed lifecycle state and command plan
 6. **Bifrost Harness:** static V2 extensions rendering the above
 7. **Relay/Model Harness:** metadata binding and prompt-drag hardening
