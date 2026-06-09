@@ -8560,6 +8560,38 @@ body {
   const writeContextFilterState = (state) => {
     try { localStorage.setItem('meridian.context-filter.v1', JSON.stringify(state)); } catch {}
   };
+  const progressStateKey = 'meridian.progress-state.v1';
+  const progressStateDefaults = {
+    pinned: [],
+    muted: [],
+    collapsed: false,
+  };
+  const progressStateList = (value) => Array.isArray(value)
+    ? value.map((item) => String(item || '').trim()).filter(Boolean)
+    : String(value || '').split(/[\n,]+/).map((item) => item.trim()).filter(Boolean);
+  const readProgressState = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(progressStateKey) || '{}');
+      return {
+        ...progressStateDefaults,
+        ...stored,
+        pinned: progressStateList(stored.pinned),
+        muted: progressStateList(stored.muted),
+        collapsed: Boolean(stored.collapsed),
+      };
+    } catch {
+      return { ...progressStateDefaults };
+    }
+  };
+  const writeProgressState = (state) => {
+    const next = {
+      pinned: progressStateList(state.pinned),
+      muted: progressStateList(state.muted),
+      collapsed: Boolean(state.collapsed),
+    };
+    try { localStorage.setItem(progressStateKey, JSON.stringify(next)); } catch {}
+    return next;
+  };
   const renderProjectFocusSnapshot = () => [
     relaySection('Project focus authority', relayGrid([
       ['active project', activeProjectContext()],
@@ -8676,6 +8708,63 @@ body {
     });
     refresh();
   };
+  const renderProgressStatePreview = (state) => relayGrid([
+    ['pinned progress/session items', state.pinned.length ? state.pinned.join(', ') : 'none'],
+    ['muted progress/session items', state.muted.length ? state.muted.join(', ') : 'none'],
+    ['progress surface default', state.collapsed ? 'collapsed' : 'expanded'],
+    ['storage key', progressStateKey],
+    ['scope', 'UI-local progress/session display state'],
+    ['source data', 'visibility and ordering only; source progress/session data is not deleted'],
+  ]);
+  const renderProgressStateDefaultsSurface = () => {
+    const state = readProgressState();
+    return [
+      relaySection('Progress pin list', `
+        <label class="relay-section-summary" for="progress-pinned-defaults">Pinned progress/session item ids</label>
+        <textarea id="progress-pinned-defaults" class="relay-draft-input" data-progress-state-list="pinned" autocomplete="off">${escapeHtml(state.pinned.join('\n'))}</textarea>
+      `, true),
+      relaySection('Progress mute list', `
+        <label class="relay-section-summary" for="progress-muted-defaults">Muted progress/session categories or item ids</label>
+        <textarea id="progress-muted-defaults" class="relay-draft-input" data-progress-state-list="muted" autocomplete="off">${escapeHtml(state.muted.join('\n'))}</textarea>
+      `, true),
+      relaySection('Progress collapse state', `
+        <label class="relay-models-handoff">
+          <input type="checkbox" data-progress-collapse-default ${state.collapsed ? 'checked' : ''}>
+          <span>Collapse progress surfaces by default</span>
+        </label>
+        <div data-progress-state-preview>${renderProgressStatePreview(state)}</div>
+      `, true),
+      relaySection('Progress state boundary', relayList([
+        'Pinned, muted, and collapsed progress state is stored only in the local UI profile.',
+        'Changing these defaults does not delete progress, proof, session, review, or transcript source data.',
+        'No backend progress route, prompt send, result recovery, provider call, or settings mutation is invoked.',
+      ]), false),
+    ];
+  };
+  const initializeProgressStateDefaultsSurface = () => {
+    const root = rightWorkspace?.querySelector('[data-progress-state-surface]');
+    if (!root) return;
+    const refresh = (state = readProgressState()) => {
+      const preview = root.querySelector('[data-progress-state-preview]');
+      if (preview) preview.innerHTML = renderProgressStatePreview(state);
+    };
+    const updateFromSurface = () => {
+      const state = readProgressState();
+      root.querySelectorAll('[data-progress-state-list]').forEach((node) => {
+        state[node.dataset.progressStateList] = progressStateList(node.value);
+      });
+      const collapsed = root.querySelector('[data-progress-collapse-default]');
+      if (collapsed) state.collapsed = collapsed.checked;
+      refresh(writeProgressState(state));
+    };
+    root.addEventListener('input', (event) => {
+      if (event.target?.matches?.('[data-progress-state-list]')) updateFromSurface();
+    });
+    root.addEventListener('change', (event) => {
+      if (event.target?.matches?.('[data-progress-collapse-default]')) updateFromSurface();
+    });
+    refresh();
+  };
   const filterToggle = (key, label, state) => `
     <label class="relay-models-handoff">
       <input type="checkbox" data-filter-toggle="${key}" ${state[key] ? 'checked' : ''}>
@@ -8696,6 +8785,9 @@ body {
       ['progress info default', state.progressInfo ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress warning default', state.progressWarning ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress error default', state.progressError ? 'visible for new progress previews' : 'hidden from preview only'],
+      ['pinned progress items', readProgressState().pinned.length ? readProgressState().pinned.join(', ') : 'none'],
+      ['muted progress items', readProgressState().muted.length ? readProgressState().muted.join(', ') : 'none'],
+      ['progress collapse default', readProgressState().collapsed ? 'collapsed' : 'expanded'],
       ['send behavior', 'preview only; no prompt is sent or saved'],
       ['source data', 'filtering never deletes source session data'],
     ];
@@ -8791,6 +8883,7 @@ body {
       sections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
       sections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
       sections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
+      sections.push(`<div data-progress-state-surface>${renderProgressStateDefaultsSurface().join('')}</div>`);
     }
     if (filterSelected) {
       sections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
@@ -8805,6 +8898,7 @@ body {
       loadSparkModels();
       initializeDiagnosticDefaultSurface();
       initializeProgressFilterDefaultsSurface();
+      initializeProgressStateDefaultsSurface();
     }
     if (rendered && filterSelected) initializeContextFilterSurface();
     return rendered;

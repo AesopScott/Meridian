@@ -2468,6 +2468,12 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "does not retarget sessions, POST prompts, call result recovery, or invoke close/archive controls" in doc
     assert "| SET2 | Last project persistence | Remembers the last active project across UI sessions. | wired |" in doc
     assert "falls back to Meridian for invalid/missing stored values" in doc
+    assert "| SET4 | Progress pin list | Persists pinned progress/session items. | wired |" in doc
+    assert "UI-local pinned progress/session item list backed by `meridian.progress-state.v1`" in doc
+    assert "| SET5 | Progress mute list | Persists muted progress/session categories or items. | wired |" in doc
+    assert "UI-local muted progress/session item/category list backed by `meridian.progress-state.v1`" in doc
+    assert "| SET6 | Progress collapse state | Persists collapsed progress surface state. | wired |" in doc
+    assert "UI-local progress collapse default backed by `meridian.progress-state.v1`" in doc
     assert "| SET18 | Diagnostic log visibility | Controls whether per-session diagnostic event logs are visible by default. | wired |" in doc
     assert "UI-local diagnostic event visibility default backed by `meridian.context-filter.v1`" in doc
     assert "without deleting source session data and without calling a backend event-log route" in doc
@@ -2648,6 +2654,44 @@ def test_index_settings_surface_controls_progress_filter_defaults_locally():
     assert "bridgeUrl('message')" not in progress_surface
     assert "bridgeUrl('call-result')" not in progress_surface
     assert "method: 'POST'" not in progress_surface
+
+
+def test_index_settings_surface_persists_progress_pin_mute_and_collapse_state_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const progressStateKey = 'meridian.progress-state.v1'")
+    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
+    progress_state = doc[render_start:render_end]
+    filter_start = doc.index("const renderContextFilterPreview = (state) =>")
+    filter_end = doc.index("const renderContextFilterSurface = () =>", filter_start)
+    filter_preview = doc[filter_start:filter_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const renderHarnessSurface = (button) =>", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+
+    assert "progressStateDefaults" in progress_state
+    assert "pinned: []" in progress_state
+    assert "muted: []" in progress_state
+    assert "collapsed: false" in progress_state
+    assert "progressStateList" in progress_state
+    assert "localStorage.getItem(progressStateKey)" in progress_state
+    assert "localStorage.setItem(progressStateKey, JSON.stringify(next))" in progress_state
+    assert "Progress pin list" in progress_state
+    assert "data-progress-state-list=\"pinned\"" in progress_state
+    assert "Progress mute list" in progress_state
+    assert "data-progress-state-list=\"muted\"" in progress_state
+    assert "Progress collapse state" in progress_state
+    assert "data-progress-collapse-default" in progress_state
+    assert "data-progress-state-preview" in progress_state
+    assert "source progress/session data is not deleted" in progress_state
+    assert "No backend progress route, prompt send, result recovery, provider call, or settings mutation is invoked." in progress_state
+    assert "pinned progress items" in filter_preview
+    assert "muted progress items" in filter_preview
+    assert "progress collapse default" in filter_preview
+    assert "data-progress-state-surface" in settings_surface
+    assert "initializeProgressStateDefaultsSurface();" in settings_surface
+    assert "bridgeUrl('message')" not in progress_state
+    assert "bridgeUrl('call-result')" not in progress_state
+    assert "method: 'POST'" not in progress_state
 
 
 def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutation():
