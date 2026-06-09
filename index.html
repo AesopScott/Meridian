@@ -6373,6 +6373,12 @@ body {
         ['source session id', archiveMetadata.source_session_id || archiveProof.target_session_id || 'unknown'],
         ['observed at', archiveMetadata.observed_at || snapshot.timestamp || 'unknown'],
       ]), true),
+      relaySection('Context reference', relayGrid([
+        ['target session id', archiveMetadata.target_session_id || archiveProof.target_session_id || 'unknown'],
+        ['source session id', archiveMetadata.source_session_id || archiveProof.target_session_id || 'unknown'],
+        ['reference mode', relayText(snapshot.orchestrator_intake || 'compact typed session state only')],
+        ['raw detail access', snapshot.raw_detail_access === 'fetched_on_demand_only' ? 'on demand only' : relayText(snapshot.raw_detail_access)],
+      ]), false),
       relaySection('Archive summary', relayGrid([
         ['summary', archiveSummary],
         ['status', closeSummaryStatus],

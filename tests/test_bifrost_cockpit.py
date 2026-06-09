@@ -2174,10 +2174,13 @@ def test_index_session_archive_surface_uses_backend_proof_snapshot():
     assert "raw worker chat visible" in doc
     assert "Command plan preview" in doc
     assert "Archive metadata" in doc
+    assert "Context reference" in doc
     assert "Archive summary" in doc
     assert "Close summary" in doc
     assert "Restore proof/artifacts" in doc
     for field in ("target session id", "project", "role", "model provider", "model name", "source session id", "observed at"):
+        assert f"['{field}'" in doc
+    for field in ("reference mode", "raw detail access"):
         assert f"['{field}'" in doc
     for field in ("summary", "session", "proof posture"):
         assert f"['{field}'" in doc
@@ -2739,6 +2742,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "/bridge/session-close-archive-proof" in doc
     assert "| ARC4 | Archive metadata | Stores project, model/backend, role, timestamps, status, and source session id. | wired |" in doc
     assert "Spark Archive renders a display-only Archive metadata frame from `/bridge/session-close-archive-proof`" in doc
+    assert "| ARC5 | Context reference | Allows Prime/session to reference archived context intentionally. | wired |" in doc
+    assert "Spark Archive renders a display-only Context reference frame from `/bridge/session-close-archive-proof`" in doc
     assert "| ARC7 | Archive summary | Stores compact session summary for scanability. | wired |" in doc
     assert "Spark Archive renders a compact display-only Archive summary from `/bridge/session-close-archive-proof`" in doc
     assert "| ARC10 | Restore proof/artifacts | Links archived session to proof, files, or artifacts created. | wired |" in doc
