@@ -683,10 +683,24 @@ def make_default_map() -> FileMap:
             notes="Proof-blocking is severity + status aware; ESCALATED is always blocking.",
         ),
         FileMapEntry(
+            path="meridian_core/aegis_logic_snapshot.py",
+            area=FileArea.AEGIS,
+            purpose="Display-safe backend Aegis Runtime Logic snapshot: ProofTrail evidence counts, cognition-policy gate result, Relay route posture, non-executable guardrails, and source refs.",
+            related_tests=["tests/test_aegis_logic_snapshot.py", "tests/test_aegis.py", "tests/test_cognition_policy.py"],
+            notes="Backend-owned snapshot only; no UI wiring, model calls, review responses, live dispatch, branch movement, or raw evidence bodies.",
+        ),
+        FileMapEntry(
             path="tests/test_aegis.py",
             area=FileArea.AEGIS,
             purpose="Test suite for meridian_core/aegis.py: covers proof harness, AegisEvidence, ProofTrail, and review console integration.",
             related_tests=[],
+        ),
+        FileMapEntry(
+            path="tests/test_aegis_logic_snapshot.py",
+            area=FileArea.AEGIS,
+            purpose="Regression tests for the backend-owned Aegis Runtime Logic snapshot, including display-only guardrails, proof trail serialization, and cognition-policy blocking behavior.",
+            related_tests=[],
+            notes="Run before changing meridian_core/aegis_logic_snapshot.py or the backend Aegis Runtime Logic payload.",
         ),
         FileMapEntry(
             path="docs/aegis-relay-summary-handoff-contract.md",
