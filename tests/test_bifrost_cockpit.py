@@ -2471,6 +2471,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "does not retarget sessions, POST prompts, call result recovery, or invoke close/archive controls" in doc
     assert "| SET2 | Last project persistence | Remembers the last active project across UI sessions. | wired |" in doc
     assert "falls back to Meridian for invalid/missing stored values" in doc
+    assert "| SET3 | Risk tier override | Lets Prime propose risk tier while user can pin/override for a session. | wired |" in doc
+    assert "UI-local session risk overrides backed by `meridian.risk-tier-overrides.v1`" in doc
     assert "| SET4 | Progress pin list | Persists pinned progress/session items. | wired |" in doc
     assert "UI-local pinned progress/session item list backed by `meridian.progress-state.v1`" in doc
     assert "| SET5 | Progress mute list | Persists muted progress/session categories or items. | wired |" in doc
@@ -2913,6 +2915,40 @@ def test_index_settings_surface_controls_wake_mode_locally():
     assert "bridgeUrl('message')" not in wake_mode
     assert "bridgeUrl('call-result')" not in wake_mode
     assert "method: 'POST'" not in wake_mode
+
+
+def test_index_settings_surface_controls_risk_tier_override_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const riskTierOverrideKey = 'meridian.risk-tier-overrides.v1'")
+    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
+    risk_override = doc[render_start:render_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const harnessDraftStorageKey", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+    filter_start = doc.index("const renderContextFilterPreview = (state) =>")
+    filter_end = doc.index("const renderContextFilterSurface = () =>", filter_start)
+    filter_preview = doc[filter_start:filter_end]
+
+    assert "const riskTierOverrideKey = 'meridian.risk-tier-overrides.v1'" in risk_override
+    assert "riskTierOverrideOptions" in risk_override
+    assert "'follow-prime-proposal'" in risk_override
+    assert "'tier-4'" in risk_override
+    assert "riskOverrideScopeEntries" in risk_override
+    assert "readRiskTierOverrides" in risk_override
+    assert "writeRiskTierOverrides" in risk_override
+    assert "riskTierProofSummary" in risk_override
+    assert "Risk tier override" in risk_override
+    assert "data-risk-tier-override" in risk_override
+    assert "data-risk-tier-override-preview" in risk_override
+    assert "Prime still owns the live proposed risk tier" in risk_override
+    assert "No backend settings route, prompt send, result recovery, or proof-gate mutation is invoked." in risk_override
+    assert "Prime risk override" in filter_preview
+    assert "User risk override" in filter_preview
+    assert "data-risk-tier-override-surface" in settings_surface
+    assert "initializeRiskTierOverrideSurface();" in settings_surface
+    assert "bridgeUrl('message')" not in risk_override
+    assert "bridgeUrl('call-result')" not in risk_override
+    assert "method: 'POST'" not in risk_override
 
 
 def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutation():

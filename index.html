@@ -8695,6 +8695,8 @@ body {
     'system health': 'Progress Surface + instrumentation band glyph updates',
   };
   const progressRedirectOptions = Array.from(new Set(Object.values(progressRedirectDefaults)));
+  const riskTierOverrideKey = 'meridian.risk-tier-overrides.v1';
+  const riskTierOverrideOptions = ['follow-prime-proposal', 'tier-0', 'tier-1', 'tier-2', 'tier-3', 'tier-4'];
   const progressStateList = (value) => Array.isArray(value)
     ? value.map((item) => String(item || '').trim()).filter(Boolean)
     : String(value || '').split(/[\n,]+/).map((item) => item.trim()).filter(Boolean);
@@ -8742,6 +8744,46 @@ body {
     });
     try { localStorage.setItem(progressRedirectDefaultsKey, JSON.stringify(next)); } catch {}
     return next;
+  };
+  const riskOverrideScopeEntries = () => {
+    const primeScope = `prime.${activeProjectContext()}`;
+    const userSessionId = selectedUserSessionId() || 'unselected';
+    const userLabel = selectedUserSession()?.sessionName || 'selected User session';
+    return [
+      { key: primeScope, label: `Prime (${activeProjectContext()})` },
+      { key: `user.${userSessionId}`, label: `User (${userLabel})` },
+    ];
+  };
+  const readRiskTierOverrides = () => {
+    const defaults = Object.fromEntries(riskOverrideScopeEntries().map(({ key }) => [key, 'follow-prime-proposal']));
+    try {
+      const stored = JSON.parse(localStorage.getItem(riskTierOverrideKey) || '{}');
+      Object.keys(defaults).forEach((key) => {
+        const value = String(stored?.[key] || '').trim();
+        if (riskTierOverrideOptions.includes(value)) defaults[key] = value;
+      });
+      return defaults;
+    } catch {
+      return defaults;
+    }
+  };
+  const writeRiskTierOverrides = (state) => {
+    const next = Object.fromEntries(riskOverrideScopeEntries().map(({ key }) => [key, 'follow-prime-proposal']));
+    Object.keys(next).forEach((key) => {
+      const value = String(state?.[key] || '').trim();
+      if (riskTierOverrideOptions.includes(value)) next[key] = value;
+    });
+    try { localStorage.setItem(riskTierOverrideKey, JSON.stringify(next)); } catch {}
+    return next;
+  };
+  const riskTierProofSummary = (value) => {
+    const tier = String(value || '').replace('tier-', '');
+    if (!/^[0-4]$/.test(tier)) return 'follow Prime proposal';
+    if (tier === '0') return 'minimal proof; no human gate expected';
+    if (tier === '1') return 'light proof; normal routing posture';
+    if (tier === '2') return 'heightened proof review; stronger routing checks';
+    if (tier === '3') return 'dual-lane / Aegis-heavy proof posture likely';
+    return 'highest proof and human-gate posture likely';
   };
   const roleModelOverrideKey = 'meridian.role-model-overrides.v1';
   const roleModelRoles = [
@@ -9067,6 +9109,56 @@ body {
     });
     refresh();
   };
+  const renderRiskTierOverridePreview = (state) => relayGrid([
+    ['storage key', riskTierOverrideKey],
+    ['Prime override', riskTierScopeValue(state, `prime.${activeProjectContext()}`)],
+    ['User override', riskTierScopeValue(state, `user.${selectedUserSessionId() || 'unselected'}`)],
+    ['routing effect', 'future routing/proof metadata preview only'],
+    ['authority boundary', 'no backend route or proof gate mutation'],
+  ]);
+  const riskTierScopeValue = (state, key) => {
+    const value = state[key] || 'follow-prime-proposal';
+    return value === 'follow-prime-proposal' ? 'follow Prime proposal' : `${value} - ${riskTierProofSummary(value)}`;
+  };
+  const renderRiskTierOverrideSurface = () => {
+    const state = readRiskTierOverrides();
+    return [
+      relaySection('Risk tier override', riskOverrideScopeEntries().map(({ key, label }) => `
+        <div class="relay-models-handoff" aria-label="${escapeHtml(label)} risk tier override">
+          <label>${escapeHtml(label)}
+            <select data-risk-tier-override="${escapeHtml(key)}">
+              ${riskTierOverrideOptions.map((option) => `<option value="${escapeHtml(option)}" ${state[key] === option ? 'selected' : ''}>${escapeHtml(option === 'follow-prime-proposal' ? 'follow Prime proposal' : option)}</option>`).join('')}
+            </select>
+          </label>
+          <div class="relay-section-summary">${escapeHtml(riskTierScopeValue(state, key))}</div>
+        </div>
+      `).join(''), true),
+      relaySection('Risk tier override preview', `<div data-risk-tier-override-preview>${renderRiskTierOverridePreview(state)}</div>`, true),
+      relaySection('Risk tier override boundary', relayList([
+        'Risk tier overrides are stored only as UI-local session metadata.',
+        'Prime still owns the live proposed risk tier; overrides preview future routing and proof posture without mutating Relay, Aegis, provider routes, or prompt payloads.',
+        'No backend settings route, prompt send, result recovery, or proof-gate mutation is invoked.',
+      ]), false),
+    ];
+  };
+  const initializeRiskTierOverrideSurface = () => {
+    const root = rightWorkspace?.querySelector('[data-risk-tier-override-surface]');
+    if (!root) return;
+    const refresh = (state = readRiskTierOverrides()) => {
+      const preview = root.querySelector('[data-risk-tier-override-preview]');
+      if (preview) preview.innerHTML = renderRiskTierOverridePreview(state);
+      const filterPreview = rightWorkspace?.querySelector('[data-filter-preview]');
+      if (filterPreview) filterPreview.innerHTML = renderContextFilterPreview(readContextFilterState());
+    };
+    root.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!target?.matches?.('[data-risk-tier-override]')) return;
+      const state = readRiskTierOverrides();
+      state[target.dataset.riskTierOverride] = target.value;
+      refresh(writeRiskTierOverrides(state));
+    });
+    refresh();
+  };
   const renderRoleModelOverridePreview = (state) => relayGrid([
     ['storage key', roleModelOverrideKey],
     ['available backends', availableRoleModelOptions().join(', ')],
@@ -9336,6 +9428,8 @@ body {
       ['review result route default', readProgressRedirectDefaults()['review result']],
       ['human gate route default', readProgressRedirectDefaults()['human gate']],
       ['system health route default', readProgressRedirectDefaults()['system health']],
+      ['Prime risk override', riskTierScopeValue(readRiskTierOverrides(), `prime.${activeProjectContext()}`)],
+      ['User risk override', riskTierScopeValue(readRiskTierOverrides(), `user.${selectedUserSessionId() || 'unselected'}`)],
       ['quiet mode', readQuietMode() ? 'enabled for routine surfaces' : 'disabled'],
       ['wake mode', readWakeMode()],
       ['quick replies', readQuickReplyOrder().join(', ')],
@@ -9438,6 +9532,7 @@ body {
       sections.push(`<div data-focus-mode-surface>${renderFocusModeSurface().join('')}</div>`);
       sections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
       sections.push(`<div data-wake-mode-surface>${renderWakeModeSurface().join('')}</div>`);
+      sections.push(`<div data-risk-tier-override-surface>${renderRiskTierOverrideSurface().join('')}</div>`);
       sections.push(`<div data-quick-reply-order-surface>${renderQuickReplyOrderSurface().join('')}</div>`);
       sections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
       sections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
@@ -9459,6 +9554,7 @@ body {
       initializeFocusModeSurface();
       initializeQuietModeSurface();
       initializeWakeModeSurface();
+      initializeRiskTierOverrideSurface();
       initializeQuickReplyOrderSurface();
       initializeRoleModelOverridesSurface();
       initializeDiagnosticDefaultSurface();
