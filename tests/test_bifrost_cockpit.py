@@ -588,6 +588,8 @@ def test_index_spark_crosscheck_aggregates_typed_review_and_aegis_state():
     assert "bridgeUrl('aegis-logic')" in doc
     assert "raw item content visible" in doc
     assert "raw evidence body visible" in doc
+    assert "data-crosscheck-stop-conditions" in doc
+    assert "loadCrosscheckStopConditions();" in doc
     crosscheck_surface = doc[doc.index("const renderSparkCrosscheck"):doc.index("const renderProviderBalance")]
     assert "fetch(" not in crosscheck_surface
     assert "bridgeUrl('message')" not in crosscheck_surface
@@ -599,6 +601,36 @@ def test_index_spark_crosscheck_aggregates_typed_review_and_aegis_state():
     assert "apply_console_response" not in crosscheck_surface
     assert "enqueue_to_review_console" not in crosscheck_surface
     assert "provider_call_authorized" not in crosscheck_surface
+
+
+def test_index_crosscheck_stop_condition_alert_uses_existing_review_and_aegis_snapshots_only():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    stop_logic = doc[
+        doc.index("const renderCrosscheckStopConditionsSnapshot = (reviewSnapshot, aegisSnapshot) =>"):
+        doc.index("const renderBacklogReviewSnapshot")
+    ]
+    loader = doc[
+        doc.index("const loadCrosscheckStopConditions = async () =>"):
+        doc.index("const loadSparkBacklog = async () =>")
+    ]
+
+    assert "queue.pending_gate_count" in stop_logic
+    assert "proofTrail.blocking_count" in stop_logic
+    assert "policy.requires_human_gate" in stop_logic
+    assert "policy.can_dispatch === false" in stop_logic
+    assert "review_console_pending_gate" in stop_logic
+    assert "aegis_proof_blocking" in stop_logic
+    assert "aegis_human_gate_required" in stop_logic
+    assert "aegis_dispatch_blocked" in stop_logic
+    assert "Stop condition: ${condition}" in stop_logic
+    assert "Further UI wiring should pause until the blocking review/proof condition is cleared or explicitly waived by reviewed backend policy." in stop_logic
+    assert "Crosscheck remains display-only; this alert does not approve, waive, rerun, or mutate any review/proof state." in stop_logic
+    assert "fetch(bridgeUrl('review-console'), { cache: 'no-store' })" in loader
+    assert "fetch(bridgeUrl('aegis-logic'), { cache: 'no-store' })" in loader
+    assert "renderCrosscheckStopConditionsSnapshot(reviewSnapshot, aegisSnapshot)" in loader
+    assert "bridgeUrl('message')" not in loader
+    assert "bridgeUrl('call-result')" not in loader
+    assert "method: 'POST'" not in loader
 
 
 def test_index_spark_backlog_uses_typed_task_posture_without_fake_items_or_mutation():

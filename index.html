@@ -5264,6 +5264,41 @@ body {
       relaySection('Review guardrails', relayList(guardrails), false),
     ].join('');
   };
+  const renderCrosscheckStopConditionsSnapshot = (reviewSnapshot, aegisSnapshot) => {
+    const reviewOk = Boolean(reviewSnapshot?.ok);
+    const aegisOk = Boolean(aegisSnapshot?.ok);
+    const queue = reviewSnapshot?.queue || {};
+    const proofTrail = aegisSnapshot?.proof_trail || {};
+    const policy = aegisSnapshot?.cognition_policy || {};
+    const stopConditions = [];
+    if (!reviewOk) stopConditions.push('review_console_snapshot_unavailable');
+    if (!aegisOk) stopConditions.push('aegis_logic_snapshot_unavailable');
+    if ((queue.pending_gate_count ?? 0) > 0) stopConditions.push('review_console_pending_gate');
+    if ((proofTrail.blocking_count ?? 0) > 0) stopConditions.push('aegis_proof_blocking');
+    if (policy.requires_human_gate) stopConditions.push('aegis_human_gate_required');
+    if (policy.can_dispatch === false) stopConditions.push('aegis_dispatch_blocked');
+    const uniqueConditions = relayUnique(stopConditions);
+    return relaySection('Stop condition alert', [
+      relayGrid([
+        ['review console source', reviewOk ? 'online' : 'offline'],
+        ['Aegis source', aegisOk ? 'online' : 'offline'],
+        ['pending gates', queue.pending_gate_count ?? 'unknown'],
+        ['proof blockers', proofTrail.blocking_count ?? 'unknown'],
+        ['human gate required', policy.requires_human_gate ? 'yes' : 'no'],
+        ['dispatch allowed', policy.can_dispatch ? 'yes' : 'no'],
+        ['stop condition count', uniqueConditions.length],
+      ]),
+      uniqueConditions.length
+        ? relayList([
+          ...uniqueConditions.map((condition) => `Stop condition: ${condition}`),
+          'Further UI wiring should pause until the blocking review/proof condition is cleared or explicitly waived by reviewed backend policy.',
+        ])
+        : relayList([
+          'No current hard-stop conditions are reported by the loaded Review Console and Aegis snapshots.',
+          'Crosscheck remains display-only; this alert does not approve, waive, rerun, or mutate any review/proof state.',
+        ]),
+    ].join(''), true);
+  };
   const renderBacklogReviewSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Backlog candidate source', relayGrid([
@@ -6606,6 +6641,26 @@ body {
       logicNode.innerHTML = renderReviewConsoleSnapshot(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderReviewConsoleSnapshot({ ok: false, error: error.message });
+    }
+  };
+  const loadCrosscheckStopConditions = async () => {
+    const logicNode = rightWorkspace?.querySelector('[data-crosscheck-stop-conditions]');
+    if (!logicNode) return;
+    try {
+      const [reviewResponse, aegisResponse] = await Promise.all([
+        fetch(bridgeUrl('review-console'), { cache: 'no-store' }),
+        fetch(bridgeUrl('aegis-logic'), { cache: 'no-store' }),
+      ]);
+      const [reviewSnapshot, aegisSnapshot] = await Promise.all([
+        reviewResponse.json(),
+        aegisResponse.json(),
+      ]);
+      logicNode.innerHTML = renderCrosscheckStopConditionsSnapshot(reviewSnapshot, aegisSnapshot);
+    } catch (error) {
+      logicNode.innerHTML = renderCrosscheckStopConditionsSnapshot(
+        { ok: false, error: error.message },
+        { ok: false, error: error.message },
+      );
     }
   };
   const loadFederationHorizon = async () => {
@@ -9990,6 +10045,7 @@ body {
               'Evidence refs are links/ids, not pasted logs; raw detail is fetched only on demand.',
               'Findings are visible as safe metadata until an explicit crosscheck execution backend exists.',
             ]), true)}
+            <div data-crosscheck-stop-conditions>${relaySection('Stop condition alert', relayGrid([['status', 'loading backend snapshot']]))}</div>
             <div data-review-console>${relaySection('Review Console source', relayGrid([['status', 'loading backend snapshot']]))}</div>
             <div data-aegis-logic>${relaySection('Aegis logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
           </div>
@@ -10002,6 +10058,7 @@ body {
         state[section.dataset.relaySection] = section.open;
         localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
       }, true);
+      loadCrosscheckStopConditions();
       loadReviewConsole();
       loadAegisLogic();
       return true;
@@ -10408,6 +10465,7 @@ body {
   const refreshProjectScopedSurfaces = () => {
     refreshProjectFocusSurface();
     if (rightWorkspace?.querySelector('[data-review-console]')) loadReviewConsole();
+    if (rightWorkspace?.querySelector('[data-crosscheck-stop-conditions]')) loadCrosscheckStopConditions();
     if (rightWorkspace?.querySelector('[data-compass-logic]')) loadCompassLogic();
     if (rightWorkspace?.querySelector('[data-goal-runtime]')) loadGoalRuntime();
     if (rightWorkspace?.querySelector('[data-workflow-dispatch-status]')) loadWorkflowDispatchStatus();
@@ -10429,6 +10487,7 @@ body {
     if (rightWorkspace?.querySelector('[data-vulcan-logic]')) loadVulcanLogic();
     if (rightWorkspace?.querySelector('[data-beacon-liveness]')) loadBeaconLiveness();
     if (rightWorkspace?.querySelector('[data-review-console]')) loadReviewConsole();
+    if (rightWorkspace?.querySelector('[data-crosscheck-stop-conditions]')) loadCrosscheckStopConditions();
     if (rightWorkspace?.querySelector('[data-federation-horizon]')) loadFederationHorizon();
     if (rightWorkspace?.querySelector('[data-provider-balance]')) loadProviderBalance();
     if (rightWorkspace?.querySelector('[data-goal-runtime]')) loadGoalRuntime();

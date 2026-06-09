@@ -345,7 +345,7 @@ The Crosscheck icon owns review, proof, Aegis findings, and independent validati
 | XCK9 | Gate irreversible actions | Sends public/financial/account-risking decisions through review gate. | planned | Action cannot proceed without required gate state. |
 | XCK10 | Recent review ledger | Shows recent reviews and repair routing history. | planned | Ledger is concise and chronological. |
 | XCK11 | Open evidence | Opens proof artifacts, commands, or summaries. | planned | Evidence opens without injecting raw logs into Prime prompt. |
-| XCK12 | Stop condition alert | Highlights active hard-stop conditions from this checklist. | planned | Stop condition blocks further UI wiring until cleared. |
+| XCK12 | Stop condition alert | Highlights active hard-stop conditions from this checklist. | wired | Spark Crosscheck renders a display-only Stop condition alert by joining `/bridge/review-console` gate counts with `/bridge/aegis-logic` proof-blocking, human-gate, and dispatch-block fields; it flags when further UI wiring should pause until review/proof blockers clear, without approving, waiving, rerunning, or mutating any review state. |
 
 ### Routines Surface Subitems
 
