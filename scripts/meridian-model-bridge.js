@@ -1415,6 +1415,17 @@ print(json.dumps({
     "raw_detail_body_visible": False,
     "orchestrator_intake": "compact_typed_session_state_only",
     "raw_detail_access": "fetched_on_demand_only",
+    "archive_metadata": {
+        "target_session_id": stopped_session.session_id,
+        "session_name": stopped_session.session_name,
+        "project_name": stopped_session.project_name,
+        "harness_role": stopped_session.harness_role.value,
+        "model_provider": stopped_session.model_provider,
+        "model_name": stopped_session.model_name,
+        "status": stopped_session.status.value,
+        "source_session_id": running_session.session_id,
+        "observed_at": observed_at.isoformat(),
+    },
     "proofs": {
         "archive": archive_proof.to_dict(),
         "close": close_proof.to_dict(),

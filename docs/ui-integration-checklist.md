@@ -398,7 +398,7 @@ Archive preserves reloadable sessions. It differs from long-term knowledge becau
 | ARC1 | Session archive list | Shows archived sessions that can be inspected later. | planned | Archive list is real or empty; no fake sessions. |
 | ARC2 | Reload session | Restores an archived session into an active/reopened state where supported. | planned | Reloaded session preserves identity/source metadata. |
 | ARC3 | Run again | Allows rerun/resume/restart from archived session context where backend supports it. | planned | Action names the actual steering mode used. |
-| ARC4 | Archive metadata | Stores project, model/backend, role, timestamps, status, and source session id. | planned | Metadata is visible without opening full transcript. |
+| ARC4 | Archive metadata | Stores project, model/backend, role, timestamps, status, and source session id. | wired | Spark Archive renders a display-only Archive metadata frame from `/bridge/session-close-archive-proof`, showing target/source session ids plus session name, project, role, model provider/name, observed timestamp, and stopped status for the current archive preview without exposing transcript bodies, reload/run-again controls, or a real archive storage backend. |
 | ARC5 | Context reference | Allows Prime/session to reference archived context intentionally. | planned | Reference creates explicit context link, not hidden prompt drag. |
 | ARC6 | Search archived sessions | Searches archive by project, role, model, status, date, and text summary. | planned | Search results are scoped and fast. |
 | ARC7 | Archive summary | Stores compact session summary for scanability. | planned | Summary is visible without loading full transcript. |

@@ -6288,6 +6288,7 @@ body {
     const closeProof = proofs.close || {};
     const writeThroughProof = proofs.write_through || {};
     const preview = snapshot.command_plan_preview || {};
+    const archiveMetadata = snapshot.archive_metadata || {};
     const mutationAllowed = Boolean(snapshot.mutation_authorized);
     const transition = Array.isArray(preview.expected_state_transition)
       ? preview.expected_state_transition.join(' -> ')
@@ -6306,6 +6307,17 @@ body {
         ['pasted transcript/log/detail', (snapshot.pasted_transcript_body_visible || snapshot.pasted_log_body_visible || snapshot.raw_detail_body_visible) ? 'yes' : 'no'],
         ['Orchestrator intake', relayText(snapshot.orchestrator_intake || 'compact typed session state')],
         ['raw detail is fetched only on demand', snapshot.raw_detail_access === 'fetched_on_demand_only' ? 'yes' : relayText(snapshot.raw_detail_access)],
+      ]), true),
+      relaySection('Archive metadata', relayGrid([
+        ['target session id', archiveMetadata.target_session_id || archiveProof.target_session_id || 'unknown'],
+        ['session name', archiveMetadata.session_name || archiveProof.session_name || 'unknown'],
+        ['project', archiveMetadata.project_name || 'unknown'],
+        ['role', relayText(archiveMetadata.harness_role)],
+        ['model provider', archiveMetadata.model_provider || 'unknown'],
+        ['model name', archiveMetadata.model_name || 'unknown'],
+        ['status', relayText(archiveMetadata.status)],
+        ['source session id', archiveMetadata.source_session_id || archiveProof.target_session_id || 'unknown'],
+        ['observed at', archiveMetadata.observed_at || snapshot.timestamp || 'unknown'],
       ]), true),
       relaySection('Archive write-through proof', relayGrid([
         ['target session', archiveProof.target_session_id || 'unknown'],

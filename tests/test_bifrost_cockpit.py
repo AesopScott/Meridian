@@ -2161,6 +2161,9 @@ def test_index_session_archive_surface_uses_backend_proof_snapshot():
     assert "raw prompt visible" in doc
     assert "raw worker chat visible" in doc
     assert "Command plan preview" in doc
+    assert "Archive metadata" in doc
+    for field in ("target session id", "project", "role", "model provider", "model name", "source session id", "observed at"):
+        assert f"['{field}'" in doc
     assert "aegis gate" in doc
     assert "human gate required" in doc
     assert "Orchestrator intake" in doc
@@ -2711,6 +2714,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired |" in doc
     assert "| SK10 | Archive | Opens close/archive proof posture until reloadable archive controls exist. | wired |" in doc
     assert "/bridge/session-close-archive-proof" in doc
+    assert "| ARC4 | Archive metadata | Stores project, model/backend, role, timestamps, status, and source session id. | wired |" in doc
+    assert "Spark Archive renders a display-only Archive metadata frame from `/bridge/session-close-archive-proof`" in doc
     assert "GET only" in doc
     assert "no live close/archive/reload/run-again/delete control" in doc
     assert "no POST route" in doc
