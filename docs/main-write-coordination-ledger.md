@@ -84,28 +84,7 @@ Status: Complete | Aborted | Blocked
 
 ## Active Coordination
 
-```text
-Time: 2026-06-08 18:20 -06:00
-Writer: Meridian coordinator
-Requested action: push
-Target base: origin/main 7090c2507
-Path-limited scope: meridian_core/aegis_logic_snapshot.py; tests/test_aegis_logic_snapshot.py; meridian_core/filemap.py; tests/test_filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md
-Reason: land Codex Review A/B-cleared backend-owned Aegis Runtime Logic snapshot and record coordinated main-write provenance without touching UI/bridge/Bifrost/Electron files.
-Proof to run: python -m pytest tests/test_aegis_logic_snapshot.py tests/test_aegis.py tests/test_cognition_policy.py tests/test_filemap.py -q; python -m pytest tests/test_aegis_logic_snapshot.py tests/test_aegis.py tests/test_cognition_policy.py tests/test_bifrost_cockpit.py tests/test_filemap.py -q; git diff --check for the path-limited scope.
-Expected duration: 10 minutes after ACK
-Requires other party ACK: yes
-Status: Intent posted; awaiting UI lane ACK
-```
-
-```text
-Time: 2026-06-08 18:22 -06:00
-ACK by: UI lane / front-end developer session 019ea586-a296-7833-b4cd-fdab7683a8a8
-Intent acknowledged: backend-owned Aegis Runtime Logic snapshot promotion from branch codex/backend-aegis-logic-snapshot-20260608
-Approved scope: meridian_core/aegis_logic_snapshot.py; tests/test_aegis_logic_snapshot.py; meridian_core/filemap.py; tests/test_filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md
-Lease expires: 2026-06-08 18:32 -06:00
-Conditions: If origin/main moves or scope/base changes, rebase/reproof or request fresh ACK before pushing. Shared checkout has an unpromoted dirty UI branch, so do not touch C:\Users\scott\Code\Meridian.
-Status: ACK granted
-```
+No active write lease.
 
 ## Standing Acknowledgements
 
@@ -115,6 +94,20 @@ Status: ACK granted
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-08 18:23 -06:00
+Writer: Meridian coordinator
+Intent: land Codex Review A/B-cleared backend-owned Aegis Runtime Logic snapshot under UI-lane ACK.
+Action completed: pushed reviewed backend snapshot and coordination intent/ACK records to origin/main from isolated backend worktree; did not touch shared UI checkout.
+Commit(s): aa60b2d42 (aegis: add backend logic snapshot); 42eb694d2 (docs: post aegis backend main-write intent); 7bbfe62b (docs: record aegis backend main-write ack); this completion commit.
+Pushed to origin/main: yes.
+Files changed: meridian_core/aegis_logic_snapshot.py; tests/test_aegis_logic_snapshot.py; meridian_core/filemap.py; tests/test_filemap.py; docs/FileMap.md; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_aegis_logic_snapshot.py tests/test_aegis.py tests/test_cognition_policy.py tests/test_filemap.py -q -> 366 passed; python -m pytest tests/test_aegis_logic_snapshot.py tests/test_aegis.py tests/test_cognition_policy.py tests/test_bifrost_cockpit.py tests/test_filemap.py -q -> 824 passed; git diff --check for the path-limited scope passed.
+Final shared main status: origin/main advanced to 7bbfe62b after push; shared UI checkout was intentionally not touched because UI lane reported an unpromoted dirty UI branch.
+Notes/blockers: UI-lane ACK granted in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for a 10-minute lease through 2026-06-08 18:32 -06:00. Scope excluded index.html, scripts/meridian-model-bridge.js, Bifrost/Electron/renderer/bridge route/UI wiring, and UI checklist changes. Reviews A and B passed after the Tier 3 wording repair.
+Status: Complete
+```
 
 ```text
 Time: 2026-06-04 10:36 -06:00
