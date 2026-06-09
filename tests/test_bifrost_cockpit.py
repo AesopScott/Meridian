@@ -587,6 +587,7 @@ def test_index_spark_crosscheck_aggregates_typed_review_and_aegis_state():
     assert "bridgeUrl('review-console')" in doc
     assert "bridgeUrl('aegis-logic')" in doc
     assert "Open evidence" in doc
+    assert "Irreversible action gate" in doc
     assert 'data-crosscheck-handoff="aegis"' in doc
     assert 'data-crosscheck-handoff="archive"' in doc
     assert "raw item content visible" in doc
@@ -645,6 +646,10 @@ def test_index_crosscheck_stop_condition_alert_uses_existing_review_and_aegis_sn
     assert "proofTrail.blocking_count" in stop_logic
     assert "policy.requires_human_gate" in stop_logic
     assert "policy.can_dispatch === false" in stop_logic
+    assert "const renderCrosscheckIrreversibleActionGateSnapshot = (reviewSnapshot, aegisSnapshot) =>" in doc
+    assert "data-crosscheck-irreversible-gate" in doc
+    assert "Public, financial, account-risking, or otherwise irreversible actions must stay behind the current review/proof gate state." in doc
+    assert "Crosscheck can show the blocking posture, but it cannot approve, bypass, or execute the gated action from this surface." in doc
     assert "review_console_pending_gate" in stop_logic
     assert "aegis_proof_blocking" in stop_logic
     assert "aegis_human_gate_required" in stop_logic
@@ -655,6 +660,7 @@ def test_index_crosscheck_stop_condition_alert_uses_existing_review_and_aegis_sn
     assert "fetch(bridgeUrl('review-console'), { cache: 'no-store' })" in loader
     assert "fetch(bridgeUrl('aegis-logic'), { cache: 'no-store' })" in loader
     assert "renderCrosscheckStopConditionsSnapshot(reviewSnapshot, aegisSnapshot)" in loader
+    assert "renderCrosscheckIrreversibleActionGateSnapshot(reviewSnapshot, aegisSnapshot)" in loader
     assert "bridgeUrl('message')" not in loader
     assert "bridgeUrl('call-result')" not in loader
     assert "method: 'POST'" not in loader
@@ -2614,6 +2620,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| XCK0 | Review/proof state | Shows current Review Console and Aegis proof posture without running a new check. | wired |" in doc
     assert "| XCK2 | Review findings | Shows current findings with severity, owner, and status. | partial |" in doc
     assert "owner attribution remains deferred and raw item content stays hidden" in doc
+    assert "| XCK9 | Gate irreversible actions | Sends public/financial/account-risking decisions through review gate. | wired |" in doc
+    assert "Spark Crosscheck renders a display-only Irreversible action gate frame by joining `/bridge/review-console` pending-gate state with `/bridge/aegis-logic` human-gate and dispatch-block posture" in doc
     assert "| XCK3 | Proof status | Shows pass/fail/waived proof state for active work. | wired |" in doc
     assert "Aegis proof trail and policy gate state from `/bridge/aegis-logic`" in doc
     assert "worker transcripts are stored, not replayed" in doc

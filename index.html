@@ -5299,6 +5299,26 @@ body {
         ]),
     ].join(''), true);
   };
+  const renderCrosscheckIrreversibleActionGateSnapshot = (reviewSnapshot, aegisSnapshot) => {
+    const queue = reviewSnapshot?.queue || {};
+    const policy = aegisSnapshot?.cognition_policy || {};
+    const gateRequired = (queue.pending_gate_count ?? 0) > 0 || policy.requires_human_gate || policy.can_dispatch === false;
+    return relaySection('Irreversible action gate', [
+      relayGrid([
+        ['gate required', gateRequired ? 'yes' : 'no'],
+        ['pending review gates', queue.pending_gate_count ?? 'unknown'],
+        ['human gate required', policy.requires_human_gate ? 'yes' : 'no'],
+        ['dispatch allowed', policy.can_dispatch ? 'yes' : 'no'],
+      ]),
+      relayList(gateRequired ? [
+        'Public, financial, account-risking, or otherwise irreversible actions must stay behind the current review/proof gate state.',
+        'Crosscheck can show the blocking posture, but it cannot approve, bypass, or execute the gated action from this surface.',
+      ] : [
+        'No irreversible-action gate is currently reported by the loaded review/proof snapshots.',
+        'Crosscheck remains display-only; gate state is visible here before any reviewed backend execution path exists.',
+      ]),
+    ].join(''), false);
+  };
   const renderBacklogReviewSnapshot = (snapshot) => {
     if (!snapshot?.ok) {
       return relaySection('Backlog candidate source', relayGrid([
@@ -6805,6 +6825,7 @@ body {
   };
   const loadCrosscheckStopConditions = async () => {
     const logicNode = rightWorkspace?.querySelector('[data-crosscheck-stop-conditions]');
+    const gateNode = rightWorkspace?.querySelector('[data-crosscheck-irreversible-gate]');
     if (!logicNode) return;
     try {
       const [reviewResponse, aegisResponse] = await Promise.all([
@@ -6816,8 +6837,13 @@ body {
         aegisResponse.json(),
       ]);
       logicNode.innerHTML = renderCrosscheckStopConditionsSnapshot(reviewSnapshot, aegisSnapshot);
+      if (gateNode) gateNode.innerHTML = renderCrosscheckIrreversibleActionGateSnapshot(reviewSnapshot, aegisSnapshot);
     } catch (error) {
       logicNode.innerHTML = renderCrosscheckStopConditionsSnapshot(
+        { ok: false, error: error.message },
+        { ok: false, error: error.message },
+      );
+      if (gateNode) gateNode.innerHTML = renderCrosscheckIrreversibleActionGateSnapshot(
         { ok: false, error: error.message },
         { ok: false, error: error.message },
       );
@@ -10223,6 +10249,7 @@ body {
               ])}
             `, false)}
             <div data-crosscheck-stop-conditions>${relaySection('Stop condition alert', relayGrid([['status', 'loading backend snapshot']]))}</div>
+            <div data-crosscheck-irreversible-gate>${relaySection('Irreversible action gate', relayGrid([['status', 'loading backend snapshot']]))}</div>
             <div data-review-console>${relaySection('Review Console source', relayGrid([['status', 'loading backend snapshot']]))}</div>
             <div data-aegis-logic>${relaySection('Aegis logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
           </div>
