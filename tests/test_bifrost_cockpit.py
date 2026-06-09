@@ -2485,6 +2485,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| SET7 | Progress filter defaults | Configures default filter/severity visibility for progress items. | wired |" in doc
     assert "UI-local progress severity defaults backed by `meridian.context-filter.v1`" in doc
     assert "without deleting progress source data or calling backend progress" in doc
+    assert "| SET11 | Focus mode | Collapses portfolio noise to the active project. | wired |" in doc
+    assert "UI-local focus mode backed by `meridian.focus-mode.v1`" in doc
     assert "| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | wired |" in doc
     assert "settings writes, message/restart/result routes, fake backend controls, and hidden harness internals remain blocked" in doc
     assert "| ECHO0 | Display-only memory ranking | Shows memory query boundary and ranked memory summaries from the backend. | wired |" in doc
@@ -2731,6 +2733,36 @@ def test_index_settings_surface_persists_role_model_overrides_locally():
     assert "bridgeUrl('message')" not in role_override
     assert "bridgeUrl('call-result')" not in role_override
     assert "method: 'POST'" not in role_override
+
+
+def test_index_settings_surface_controls_focus_mode_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.index("const focusModeKey = 'meridian.focus-mode.v1'")
+    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
+    focus_mode = doc[render_start:render_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const harnessDraftStorageKey", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+    session_select_start = doc.index("const renderUserSessionSelect = () =>")
+    session_select_end = doc.index("const loadUserSessions = async () =>", session_select_start)
+    session_select = doc[session_select_start:session_select_end]
+
+    assert "const focusModeKey = 'meridian.focus-mode.v1'" in focus_mode
+    assert "readFocusMode" in focus_mode
+    assert "writeFocusMode" in focus_mode
+    assert "Focus mode" in focus_mode
+    assert "data-focus-mode-toggle" in focus_mode
+    assert "data-focus-mode-preview" in focus_mode
+    assert "renderUserSessionSelect();" in focus_mode
+    assert "Focus mode does not retarget sessions" in focus_mode
+    assert "const focusMode = readFocusMode();" in session_select
+    assert "Selected session outside active project" in session_select
+    assert "if (focusMode && project !== activeProject) return;" in session_select
+    assert "data-focus-mode-surface" in settings_surface
+    assert "initializeFocusModeSurface();" in settings_surface
+    assert "bridgeUrl('message')" not in focus_mode
+    assert "bridgeUrl('call-result')" not in focus_mode
+    assert "method: 'POST'" not in focus_mode
 
 
 def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutation():
