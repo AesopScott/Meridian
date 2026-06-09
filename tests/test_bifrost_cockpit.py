@@ -2489,6 +2489,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "UI-local quiet mode backed by `meridian.quiet-mode.v1`" in doc
     assert "| SET11 | Focus mode | Collapses portfolio noise to the active project. | wired |" in doc
     assert "UI-local focus mode backed by `meridian.focus-mode.v1`" in doc
+    assert "| SET16 | Quick reply order | Chooses which prompt macro buttons appear and their order. | wired |" in doc
+    assert "UI-local quick reply order backed by `meridian.quick-reply-order.v1`" in doc
     assert "| SET20 | Non-exposed harness internals | Confirms heartbeat thresholds, capability toggles, and cross-harness routing internals stay hidden unless explicitly promoted. | wired |" in doc
     assert "settings writes, message/restart/result routes, fake backend controls, and hidden harness internals remain blocked" in doc
     assert "| ECHO0 | Display-only memory ranking | Shows memory query boundary and ranked memory summaries from the backend. | wired |" in doc
@@ -2804,6 +2806,38 @@ def test_index_settings_surface_controls_quiet_mode_locally():
     assert "bridgeUrl('message')" not in quiet_mode
     assert "bridgeUrl('call-result')" not in quiet_mode
     assert "method: 'POST'" not in quiet_mode
+
+
+def test_index_settings_surface_controls_quick_reply_order_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    render_start = doc.rindex("const quickReplyOrderKey = 'meridian.quick-reply-order.v1'")
+    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
+    quick_reply = doc[render_start:render_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const harnessDraftStorageKey", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+    prompt_start = doc.index("const insertPromptToken = (input, token) => {")
+    prompt_end = doc.index("})();", prompt_start)
+    prompt_surface = doc[prompt_start:prompt_end]
+
+    assert "const quickReplyOrderKey = 'meridian.quick-reply-order.v1'" in quick_reply
+    assert "quickReplyDefaults = ['Yes', 'No', 'Continue', 'Confirm']" in quick_reply
+    assert "normalizeQuickReplyOrder" in quick_reply
+    assert "readQuickReplyOrder" in quick_reply
+    assert "writeQuickReplyOrder" in quick_reply
+    assert "Quick reply order" in quick_reply
+    assert "data-quick-reply-order" in quick_reply
+    assert "data-quick-reply-order-preview" in quick_reply
+    assert "applyQuickReplyOrder();" in quick_reply
+    assert "Visible buttons still inject their literal word" in quick_reply
+    assert "button.hidden = !order.includes(label);" in prompt_surface
+    assert "const token = button.getAttribute('aria-label') || '';" in prompt_surface
+    assert "insertPromptToken(input, token);" in prompt_surface
+    assert "data-quick-reply-order-surface" in settings_surface
+    assert "initializeQuickReplyOrderSurface();" in settings_surface
+    assert "bridgeUrl('message')" not in quick_reply
+    assert "bridgeUrl('call-result')" not in quick_reply
+    assert "method: 'POST'" not in quick_reply
 
 
 def test_index_voice_io_surface_shows_public_setup_guidance_without_voice_mutation():

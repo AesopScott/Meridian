@@ -4244,6 +4244,27 @@ body {
     const input = primeWindow?.querySelector('.session-prompt-input');
     if (input) setStatus(input, `Compass project ${activeProjectContext()}`);
   };
+  const quickReplyOrderKey = 'meridian.quick-reply-order.v1';
+  const quickReplyDefaults = ['Yes', 'No', 'Continue', 'Confirm'];
+  const normalizeQuickReplyOrder = (value) => {
+    const items = Array.isArray(value)
+      ? value
+      : String(value || '').split(/[\n,]+/);
+    const normalized = [];
+    items.forEach((item) => {
+      const match = quickReplyDefaults.find((label) => label.toLowerCase() === String(item || '').trim().toLowerCase());
+      if (!match || normalized.includes(match)) return;
+      normalized.push(match);
+    });
+    return normalized.length ? normalized : [...quickReplyDefaults];
+  };
+  const readQuickReplyOrder = () => {
+    try {
+      return normalizeQuickReplyOrder(JSON.parse(localStorage.getItem(quickReplyOrderKey) || '[]'));
+    } catch {
+      return [...quickReplyDefaults];
+    }
+  };
   const renderUserSessionSelect = () => {
     if (!userSessionSelect) return;
     const stored = localStorage.getItem(userSessionTargetKey) || '';
@@ -4550,6 +4571,25 @@ body {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.focus();
   };
+  const applyQuickReplyOrder = () => {
+    const order = readQuickReplyOrder();
+    document.querySelectorAll('.session-window').forEach((windowEl) => {
+      const nav = windowEl.querySelector('.session-outside-icons');
+      if (!nav) return;
+      const buttons = Array.from(nav.querySelectorAll('.session-outside-icon'));
+      const buttonMap = new Map(buttons.map((button) => [button.getAttribute('aria-label') || '', button]));
+      order.forEach((label) => {
+        const button = buttonMap.get(label);
+        if (!button) return;
+        button.hidden = false;
+        nav.appendChild(button);
+      });
+      buttons.forEach((button) => {
+        const label = button.getAttribute('aria-label') || '';
+        button.hidden = !order.includes(label);
+      });
+    });
+  };
 
   document.querySelectorAll('.session-prompt-input').forEach((input) => {
     input.value = localStorage.getItem(draftKey(input)) || '';
@@ -4599,6 +4639,7 @@ body {
       });
     });
   });
+  applyQuickReplyOrder();
 })();
 (() => {
   const screen = document.querySelector('.harness-screen');
@@ -8702,6 +8743,32 @@ body {
     try { localStorage.setItem(quietModeKey, enabled ? 'true' : 'false'); } catch {}
     return enabled;
   };
+  const quickReplyOrderKey = 'meridian.quick-reply-order.v1';
+  const quickReplyDefaults = ['Yes', 'No', 'Continue', 'Confirm'];
+  const normalizeQuickReplyOrder = (value) => {
+    const items = Array.isArray(value)
+      ? value
+      : String(value || '').split(/[\n,]+/);
+    const normalized = [];
+    items.forEach((item) => {
+      const match = quickReplyDefaults.find((label) => label.toLowerCase() === String(item || '').trim().toLowerCase());
+      if (!match || normalized.includes(match)) return;
+      normalized.push(match);
+    });
+    return normalized.length ? normalized : [...quickReplyDefaults];
+  };
+  const readQuickReplyOrder = () => {
+    try {
+      return normalizeQuickReplyOrder(JSON.parse(localStorage.getItem(quickReplyOrderKey) || '[]'));
+    } catch {
+      return [...quickReplyDefaults];
+    }
+  };
+  const writeQuickReplyOrder = (value) => {
+    const next = normalizeQuickReplyOrder(value);
+    try { localStorage.setItem(quickReplyOrderKey, JSON.stringify(next)); } catch {}
+    return next;
+  };
   const renderProjectFocusSnapshot = () => [
     relaySection('Project focus authority', relayGrid([
       ['active project', activeProjectContext()],
@@ -9015,6 +9082,69 @@ body {
     });
     refresh();
   };
+  const renderQuickReplyOrderPreview = (order) => relayGrid([
+    ['visible quick replies', order.join(', ')],
+    ['hidden quick replies', quickReplyDefaults.filter((label) => !order.includes(label)).join(', ') || 'none'],
+    ['storage key', quickReplyOrderKey],
+    ['injection semantics', 'unchanged; visible buttons still insert literal text only'],
+    ['send behavior', 'no submit or backend mutation'],
+  ]);
+  const renderQuickReplyOrderSurface = () => {
+    const order = readQuickReplyOrder();
+    return [
+      relaySection('Quick reply order', `
+        <label class="relay-section-summary" for="quick-reply-order-defaults">Visible quick reply labels in display order</label>
+        <textarea id="quick-reply-order-defaults" class="relay-draft-input" data-quick-reply-order autocomplete="off">${escapeHtml(order.join('\n'))}</textarea>
+        <div data-quick-reply-order-preview>${renderQuickReplyOrderPreview(order)}</div>
+      `, true),
+      relaySection('Quick reply boundary', relayList([
+        'Quick reply visibility and order are stored only in the local UI profile.',
+        'Visible buttons still inject their literal word into the active prompt and do not submit by themselves.',
+        'No prompt send, backend settings route, session retarget, or model/provider mutation is invoked.',
+      ]), false),
+    ];
+  };
+  const applyQuickReplyOrder = () => {
+    const order = readQuickReplyOrder();
+    document.querySelectorAll('.session-window').forEach((windowEl) => {
+      const nav = windowEl.querySelector('.session-outside-icons');
+      if (!nav) return;
+      const buttons = Array.from(nav.querySelectorAll('.session-outside-icon'));
+      const buttonMap = new Map(buttons.map((button) => [button.getAttribute('aria-label') || '', button]));
+      order.forEach((label) => {
+        const button = buttonMap.get(label);
+        if (!button) return;
+        button.hidden = false;
+        nav.appendChild(button);
+      });
+      buttons.forEach((button) => {
+        const label = button.getAttribute('aria-label') || '';
+        button.hidden = !order.includes(label);
+      });
+    });
+  };
+  const initializeQuickReplyOrderSurface = () => {
+    const root = rightWorkspace?.querySelector('[data-quick-reply-order-surface]');
+    if (!root) return;
+    const refresh = (order = readQuickReplyOrder()) => {
+      const preview = root.querySelector('[data-quick-reply-order-preview]');
+      if (preview) preview.innerHTML = renderQuickReplyOrderPreview(order);
+      const input = root.querySelector('[data-quick-reply-order]');
+      if (input && document.activeElement !== input) input.value = order.join('\n');
+    };
+    const updateFromSurface = () => {
+      const input = root.querySelector('[data-quick-reply-order]');
+      const next = writeQuickReplyOrder(input?.value || '');
+      applyQuickReplyOrder();
+      refresh(next);
+    };
+    root.addEventListener('input', (event) => {
+      if (!event.target?.matches?.('[data-quick-reply-order]')) return;
+      updateFromSurface();
+    });
+    applyQuickReplyOrder();
+    refresh();
+  };
   const filterToggle = (key, label, state) => `
     <label class="relay-models-handoff">
       <input type="checkbox" data-filter-toggle="${key}" ${state[key] ? 'checked' : ''}>
@@ -9036,6 +9166,7 @@ body {
       ['progress warning default', state.progressWarning ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress error default', state.progressError ? 'visible for new progress previews' : 'hidden from preview only'],
       ['quiet mode', readQuietMode() ? 'enabled for routine surfaces' : 'disabled'],
+      ['quick replies', readQuickReplyOrder().join(', ')],
       ['pinned progress items', readProgressState().pinned.length ? readProgressState().pinned.join(', ') : 'none'],
       ['muted progress items', readProgressState().muted.length ? readProgressState().muted.join(', ') : 'none'],
       ['progress collapse default', readProgressState().collapsed ? 'collapsed' : 'expanded'],
@@ -9134,6 +9265,7 @@ body {
       sections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
       sections.push(`<div data-focus-mode-surface>${renderFocusModeSurface().join('')}</div>`);
       sections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
+      sections.push(`<div data-quick-reply-order-surface>${renderQuickReplyOrderSurface().join('')}</div>`);
       sections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
       sections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
       sections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
@@ -9152,6 +9284,7 @@ body {
       loadSparkModels();
       initializeFocusModeSurface();
       initializeQuietModeSurface();
+      initializeQuickReplyOrderSurface();
       initializeRoleModelOverridesSurface();
       initializeDiagnosticDefaultSurface();
       initializeProgressFilterDefaultsSurface();
