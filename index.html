@@ -5650,6 +5650,7 @@ body {
     const policy = goal.continuation_policy || {};
     const objective = goal.objective_ref || {};
     const checkpointDiscipline = snapshot.checkpoint_discipline || {};
+    const quietMode = readQuietMode();
     return [
       relaySection('Goal runtime source', relayGrid([
         ['source', snapshot.source || 'unknown'],
@@ -5674,13 +5675,19 @@ body {
         ['proof required', policy.proof_required_for_resume ? 'yes' : 'no'],
         ['human gate kinds', relayJoin(policy.human_gate_on_resume_kinds)],
       ]), true),
-      relaySection('Runtime counters', relayGrid([
-        ['dispatched sessions', goal.dispatched_sessions ?? 0],
-        ['blocked occurrences', goal.blocked_occurrences ?? 0],
-        ['usage-limited occurrences', goal.usage_limited_occurrences ?? 0],
-        ['telemetry snapshots', Array.isArray(goal.telemetry) ? goal.telemetry.length : 0],
-        ['lineage entries', Array.isArray(goal.lineage) ? goal.lineage.length : 0],
-      ]), false),
+      quietMode
+        ? relaySection('Quiet mode routine status', relayGrid([
+          ['quiet mode', 'enabled'],
+          ['routine success chatter', 'suppressed in this surface'],
+          ['blockers and proof gates', 'still visible below'],
+        ]), false)
+        : relaySection('Runtime counters', relayGrid([
+          ['dispatched sessions', goal.dispatched_sessions ?? 0],
+          ['blocked occurrences', goal.blocked_occurrences ?? 0],
+          ['usage-limited occurrences', goal.usage_limited_occurrences ?? 0],
+          ['telemetry snapshots', Array.isArray(goal.telemetry) ? goal.telemetry.length : 0],
+          ['lineage entries', Array.isArray(goal.lineage) ? goal.lineage.length : 0],
+        ]), false),
       relaySection('Checkpoint discipline advisory', relayGrid([
         ['decision', relayText(checkpointDiscipline.decision)],
         ['severity', relayText(checkpointDiscipline.severity)],
@@ -5704,11 +5711,11 @@ body {
         ['prime advisory', relayText(checkpointDiscipline.prime_advisory)],
         ['compass advisory', relayText(checkpointDiscipline.compass_advisory)],
       ]), false),
-      relaySection('Objective ref', relayGrid([
+      ...(!quietMode ? [relaySection('Objective ref', relayGrid([
         ['id', objective.id || 'none'],
         ['label', objective.label || 'none'],
         ['source', objective.source || 'none'],
-      ]), false),
+      ]), false)] : []),
     ].join('');
   };
   const renderWorkflowDispatchStatusSnapshot = (snapshot) => {
@@ -5722,6 +5729,7 @@ body {
     const success = workflow.success_summary || {};
     const failure = workflow.error_summary || {};
     const statusPolicy = workflow.status_policy || {};
+    const quietMode = readQuietMode();
     return [
       relaySection('Workflow dispatch source', relayGrid([
         ['source', snapshot.source || 'unknown'],
@@ -5729,7 +5737,11 @@ body {
         ['harness', snapshot.harness || 'Workflow Sub-agents'],
         ['display only', snapshot.display_only ? 'yes' : 'no'],
       ]), true),
-      relaySection('Success summary shape', relayGrid([
+      ...(quietMode ? [relaySection('Quiet mode workflow status', relayGrid([
+        ['quiet mode', 'enabled'],
+        ['success summaries', 'suppressed in this surface'],
+        ['failure and proof policy', 'still visible below'],
+      ]), true)] : [relaySection('Success summary shape', relayGrid([
         ['work order', success.work_order_id || 'unknown'],
         ['harness', relayText(success.harness)],
         ['result shape', success.result_shape || 'unknown'],
@@ -5739,7 +5751,7 @@ body {
         ['tokens used', success.tokens_used ?? 0],
         ['time used', `${success.time_used_seconds ?? 0}s`],
         ['human gate', success.requires_human_gate ? 'yes' : 'no'],
-      ]), true),
+      ]), true)]),
       relaySection('Failure summary shape', relayGrid([
         ['work order', failure.work_order_id || 'unknown'],
         ['harness', relayText(failure.harness)],
@@ -6559,8 +6571,10 @@ body {
     try {
       const response = await fetch(bridgeUrl('goal-runtime'), { cache: 'no-store' });
       const snapshot = await response.json();
+      logicNode.dataset.goalRuntimeSnapshot = JSON.stringify(snapshot);
       logicNode.innerHTML = renderGoalRuntimeSnapshot(snapshot);
     } catch (error) {
+      delete logicNode.dataset.goalRuntimeSnapshot;
       logicNode.innerHTML = renderGoalRuntimeSnapshot({ ok: false, error: error.message });
     }
   };
@@ -6570,8 +6584,10 @@ body {
     try {
       const response = await fetch(bridgeUrl('workflow-dispatch-status'), { cache: 'no-store' });
       const snapshot = await response.json();
+      logicNode.dataset.workflowDispatchStatusSnapshot = JSON.stringify(snapshot);
       logicNode.innerHTML = renderWorkflowDispatchStatusSnapshot(snapshot);
     } catch (error) {
+      delete logicNode.dataset.workflowDispatchStatusSnapshot;
       logicNode.innerHTML = renderWorkflowDispatchStatusSnapshot({ ok: false, error: error.message });
     }
   };
@@ -6586,12 +6602,26 @@ body {
         workflowNode ? fetch(bridgeUrl('workflow-dispatch-status'), { cache: 'no-store' }) : Promise.resolve(null),
       ]);
       if (reviewNode && reviewResponse) reviewNode.innerHTML = renderBacklogReviewSnapshot(await reviewResponse.json());
-      if (runtimeNode && runtimeResponse) runtimeNode.innerHTML = renderGoalRuntimeSnapshot(await runtimeResponse.json());
-      if (workflowNode && workflowResponse) workflowNode.innerHTML = renderWorkflowDispatchStatusSnapshot(await workflowResponse.json());
+      if (runtimeNode && runtimeResponse) {
+        const snapshot = await runtimeResponse.json();
+        runtimeNode.dataset.goalRuntimeSnapshot = JSON.stringify(snapshot);
+        runtimeNode.innerHTML = renderGoalRuntimeSnapshot(snapshot);
+      }
+      if (workflowNode && workflowResponse) {
+        const snapshot = await workflowResponse.json();
+        workflowNode.dataset.workflowDispatchStatusSnapshot = JSON.stringify(snapshot);
+        workflowNode.innerHTML = renderWorkflowDispatchStatusSnapshot(snapshot);
+      }
     } catch (error) {
       if (reviewNode) reviewNode.innerHTML = renderBacklogReviewSnapshot({ ok: false, error: error.message });
-      if (runtimeNode) runtimeNode.innerHTML = renderGoalRuntimeSnapshot({ ok: false, error: error.message });
-      if (workflowNode) workflowNode.innerHTML = renderWorkflowDispatchStatusSnapshot({ ok: false, error: error.message });
+      if (runtimeNode) {
+        delete runtimeNode.dataset.goalRuntimeSnapshot;
+        runtimeNode.innerHTML = renderGoalRuntimeSnapshot({ ok: false, error: error.message });
+      }
+      if (workflowNode) {
+        delete workflowNode.dataset.workflowDispatchStatusSnapshot;
+        workflowNode.innerHTML = renderWorkflowDispatchStatusSnapshot({ ok: false, error: error.message });
+      }
     }
   };
   const loadSparkSkills = async () => {
@@ -8660,6 +8690,18 @@ body {
     try { localStorage.setItem(focusModeKey, enabled ? 'true' : 'false'); } catch {}
     return enabled;
   };
+  const quietModeKey = 'meridian.quiet-mode.v1';
+  const readQuietMode = () => {
+    try {
+      return localStorage.getItem(quietModeKey) === 'true';
+    } catch {
+      return false;
+    }
+  };
+  const writeQuietMode = (enabled) => {
+    try { localStorage.setItem(quietModeKey, enabled ? 'true' : 'false'); } catch {}
+    return enabled;
+  };
   const renderProjectFocusSnapshot = () => [
     relaySection('Project focus authority', relayGrid([
       ['active project', activeProjectContext()],
@@ -8920,6 +8962,59 @@ body {
     });
     refresh();
   };
+  const renderQuietModePreview = () => relayGrid([
+    ['quiet mode', readQuietMode() ? 'enabled' : 'disabled'],
+    ['storage key', quietModeKey],
+    ['runtime continuity', readQuietMode() ? 'routine success chatter suppressed' : 'routine success chatter visible'],
+    ['workflow status', readQuietMode() ? 'success summaries suppressed' : 'success summaries visible'],
+    ['blockers and proof gates', 'always visible'],
+  ]);
+  const renderQuietModeSurface = () => [
+    relaySection('Quiet mode', `
+      <label class="relay-models-handoff">
+        <input type="checkbox" data-quiet-mode-toggle ${readQuietMode() ? 'checked' : ''}>
+        <span>Reduce routine noise</span>
+      </label>
+      <div data-quiet-mode-preview>${renderQuietModePreview()}</div>
+    `, true),
+    relaySection('Quiet mode boundary', relayList([
+      'Quiet mode is stored only in the local UI profile.',
+      'Routine success chatter is suppressed in Runtime Continuity and Workflow Dispatch while blockers, proof gates, and failure state remain visible.',
+      'Quiet mode does not stop routines, mutate backend workflow state, archive source data, or hide proof-critical warnings.',
+    ]), false),
+  ];
+  const initializeQuietModeSurface = () => {
+    const root = rightWorkspace?.querySelector('[data-quiet-mode-surface]');
+    if (!root) return;
+    const refresh = () => {
+      const preview = root.querySelector('[data-quiet-mode-preview]');
+      if (preview) preview.innerHTML = renderQuietModePreview();
+    };
+    const rerenderRuntimeSurfaces = () => {
+      const goalNodes = Array.from(document.querySelectorAll('[data-goal-runtime]'));
+      goalNodes.forEach((node) => {
+        if (!node.dataset.goalRuntimeSnapshot) return;
+        try {
+          node.innerHTML = renderGoalRuntimeSnapshot(JSON.parse(node.dataset.goalRuntimeSnapshot));
+        } catch {}
+      });
+      const workflowNodes = Array.from(document.querySelectorAll('[data-workflow-dispatch-status]'));
+      workflowNodes.forEach((node) => {
+        if (!node.dataset.workflowDispatchStatusSnapshot) return;
+        try {
+          node.innerHTML = renderWorkflowDispatchStatusSnapshot(JSON.parse(node.dataset.workflowDispatchStatusSnapshot));
+        } catch {}
+      });
+    };
+    root.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!target?.matches?.('[data-quiet-mode-toggle]')) return;
+      writeQuietMode(target.checked);
+      refresh();
+      rerenderRuntimeSurfaces();
+    });
+    refresh();
+  };
   const filterToggle = (key, label, state) => `
     <label class="relay-models-handoff">
       <input type="checkbox" data-filter-toggle="${key}" ${state[key] ? 'checked' : ''}>
@@ -8940,6 +9035,7 @@ body {
       ['progress info default', state.progressInfo ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress warning default', state.progressWarning ? 'visible for new progress previews' : 'hidden from preview only'],
       ['progress error default', state.progressError ? 'visible for new progress previews' : 'hidden from preview only'],
+      ['quiet mode', readQuietMode() ? 'enabled for routine surfaces' : 'disabled'],
       ['pinned progress items', readProgressState().pinned.length ? readProgressState().pinned.join(', ') : 'none'],
       ['muted progress items', readProgressState().muted.length ? readProgressState().muted.join(', ') : 'none'],
       ['progress collapse default', readProgressState().collapsed ? 'collapsed' : 'expanded'],
@@ -9037,6 +9133,7 @@ body {
       ]), true));
       sections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
       sections.push(`<div data-focus-mode-surface>${renderFocusModeSurface().join('')}</div>`);
+      sections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
       sections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
       sections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
       sections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
@@ -9054,6 +9151,7 @@ body {
       loadVoiceIo();
       loadSparkModels();
       initializeFocusModeSurface();
+      initializeQuietModeSurface();
       initializeRoleModelOverridesSurface();
       initializeDiagnosticDefaultSurface();
       initializeProgressFilterDefaultsSurface();
