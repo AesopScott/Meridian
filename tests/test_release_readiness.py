@@ -249,6 +249,65 @@ def test_direct_rollback_gate_record_display_sanitizes_unsafe_fields():
     assert "private label" not in rendered
 
 
+def test_direct_proof_package_record_redacts_github_token_digest():
+    record = ProofPackageRecord(
+        manifest_id="proof-package:fine",
+        requirement="release proof requirement",
+        proof_ref="proof:fine",
+        status=ProofPackageStatus.PRESENT,
+        captured_at_seconds=NOW - 1,
+        age_seconds=1,
+        max_age_seconds=600,
+        content_digest="ghp_abcdefghijklmnopqrstuvwxyz0123456789",
+        reason_tags=("proof_present",),
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["content_digest"] == "[redacted]"
+    assert "ghp_abcdefghijklmnopqrstuvwxyz" not in rendered
+
+
+def test_direct_proof_package_record_redacts_traceback_reason_tag():
+    record = ProofPackageRecord(
+        manifest_id="proof-package:fine",
+        requirement="release proof requirement",
+        proof_ref="proof:fine",
+        status=ProofPackageStatus.STALE,
+        captured_at_seconds=NOW - 1,
+        age_seconds=1,
+        max_age_seconds=600,
+        content_digest="sha256:fine",
+        reason_tags=("Traceback hidden incident detail",),
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["reason_tags"] == ("[redacted]",)
+    assert "Traceback" not in rendered
+    assert "hidden incident detail" not in rendered
+
+
+def test_direct_rollback_gate_record_redacts_github_token_label():
+    record = RollbackGateRecord(
+        gate_id="rollback:fine",
+        label="ghs_abcdefghijklmnopqrstuvwxyz0123456789",
+        state=RollbackGateState.OPEN,
+        blocking=True,
+        summary="exception: hidden rollback exception body",
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["label"] == "[redacted]"
+    assert display["summary"] == "[redacted]"
+    assert "ghs_abcdefghijklmnopqrstuvwxyz" not in rendered
+    assert "hidden rollback exception body" not in rendered
+
+
 def test_direct_release_readiness_snapshot_display_sanitizes_unsafe_fields():
     snapshot = ReleaseReadinessSnapshot(
         release_id=r"C:\Users\scott\release",

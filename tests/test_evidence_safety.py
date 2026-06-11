@@ -144,3 +144,67 @@ def test_direct_evidence_safety_finding_display_sanitizes_unsafe_fields():
     assert display["reason"] == "[redacted]"
     assert r"C:\Users\scott" not in rendered
     assert "this-must-not-leak" not in rendered
+
+
+def test_direct_evidence_safety_finding_display_redacts_credential_artifact_id():
+    finding = EvidenceSafetyFinding(
+        artifact_id="artifact:api_key=abcdef1234567890",
+        category=EvidenceSafetyCategory.SECRET,
+        severity=EvidenceSafetySeverity.CRITICAL,
+        reason="credential pattern observed",
+    )
+
+    display = finding.to_display_dict()
+    rendered = str(display)
+
+    assert display["artifact_id"] == "artifact:unsafe-id"
+    assert "abcdef1234567890" not in rendered
+    assert "api_key=" not in rendered
+
+
+def test_direct_evidence_safety_finding_display_redacts_raw_prompt_artifact_id():
+    finding = EvidenceSafetyFinding(
+        artifact_id="artifact:raw prompt: hidden body",
+        category=EvidenceSafetyCategory.RAW_PROMPT,
+        severity=EvidenceSafetySeverity.ERROR,
+        reason="raw prompt marker detected",
+    )
+
+    display = finding.to_display_dict()
+    rendered = str(display)
+
+    assert display["artifact_id"] == "artifact:unsafe-id"
+    assert "hidden body" not in rendered
+
+
+def test_direct_evidence_safety_finding_display_redacts_provider_output_artifact_id():
+    finding = EvidenceSafetyFinding(
+        artifact_id="artifact:provider output: confidential payload",
+        category=EvidenceSafetyCategory.PROVIDER_RESPONSE,
+        severity=EvidenceSafetySeverity.ERROR,
+        reason="raw provider response marker detected",
+    )
+
+    display = finding.to_display_dict()
+    rendered = str(display)
+
+    assert display["artifact_id"] == "artifact:unsafe-id"
+    assert "confidential payload" not in rendered
+
+
+def test_scan_redacts_unsafe_credential_artifact_id_in_finding_records():
+    proof = scan_evidence_artifacts(
+        (
+            (
+                "artifact:api_key=abcdef1234567890",
+                "raw prompt: hidden body",
+            ),
+        )
+    )
+
+    assert proof.status is EvidenceSafetyStatus.FAIL
+    for finding in proof.findings:
+        assert finding.artifact_id == "artifact:unsafe-id"
+    rendered = str(proof.to_display_dict())
+    assert "abcdef1234567890" not in rendered
+    assert "api_key=" not in rendered

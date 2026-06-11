@@ -376,6 +376,69 @@ def test_direct_browser_evidence_display_sanitizes_evidence_ref():
     assert r"C:\Users\scott" not in rendered
 
 
+def test_direct_reversible_action_plan_redacts_provider_output_mutation_kind():
+    plan = ReversibleActionPlan(
+        action_ref="action:ok",
+        tool_ref="tool:ok",
+        action_label="provider output: hidden label",
+        target_ref="target:ok",
+        mutation_kind="model output: hidden mutation kind",
+        reversible=True,
+        rollback_plan_ref="rollback:ok",
+        would_execute=False,
+        external_mutation_blocked=True,
+    )
+
+    display = plan.to_display_dict()
+    rendered = str(display)
+
+    assert display["action_label"] == "planned action"
+    assert display["mutation_kind"] == "mutation"
+    assert "hidden label" not in rendered
+    assert "hidden mutation kind" not in rendered
+
+
+def test_direct_tool_failure_routing_redacts_model_output_next_route():
+    record = ToolFailureRoutingRecord(
+        route_ref="route:ok",
+        failure_kind="provider output: hidden failure body",
+        severity=DryRunSeverity.ERROR,
+        retryable=False,
+        next_route="model output: hidden next route",
+        evidence_ref="evidence:ok",
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["failure_kind"] == "tool_failure"
+    assert display["next_route"] == "manual_review"
+    assert "hidden failure body" not in rendered
+    assert "hidden next route" not in rendered
+
+
+def test_direct_reversible_action_plan_redacts_full_prompt_label():
+    plan = ReversibleActionPlan(
+        action_ref="action:ok",
+        tool_ref="tool:ok",
+        action_label="full prompt: hidden label body",
+        target_ref="target:ok",
+        mutation_kind="complete prompt: hidden mutation",
+        reversible=True,
+        rollback_plan_ref="rollback:ok",
+        would_execute=False,
+        external_mutation_blocked=True,
+    )
+
+    display = plan.to_display_dict()
+    rendered = str(display)
+
+    assert display["action_label"] == "planned action"
+    assert display["mutation_kind"] == "mutation"
+    assert "hidden label body" not in rendered
+    assert "hidden mutation" not in rendered
+
+
 def test_direct_safe_navigation_summary_display_sanitizes_unsafe_schemes_and_warnings():
     summary = SafeNavigationPolicySummary(
         status=DryRunReviewState.BLOCKED,

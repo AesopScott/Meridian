@@ -367,6 +367,8 @@ def _looks_unsafe(value: str) -> bool:
         "provider output:",
         "model response:",
         "model output:",
+        "traceback",
+        "exception:",
     )
     if any(marker in lowered for marker in unsafe_markers):
         return True
@@ -377,4 +379,6 @@ def _looks_unsafe(value: str) -> bool:
         value,
     ):
         return True
-    return bool(re.search(r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}", value))
+    if re.search(r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}", value):
+        return True
+    return bool(re.search(r"gh[pousr]_[A-Za-z0-9_]{20,}", value))

@@ -520,7 +520,8 @@ def _looks_unsafe(value: str) -> bool:
         re.search(
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
             r"\n|traceback|exception:|api[_-]?key|secret|token|password|"
-            r"raw transcript:|full transcript:|raw log:|provider response:|model response:)",
+            r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)\s*:|"
+            r"(?:provider|model)\s+(?:response|output)\s*:)",
             value,
         )
     )

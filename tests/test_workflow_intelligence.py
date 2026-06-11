@@ -272,3 +272,71 @@ def test_direct_task_result_summary_display_sanitizes_reason_tags():
 
     assert summary.to_display_dict()["reason_tags"] == ("[redacted]",)
     assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_task_result_summary_display_redacts_raw_prompt_failure_kind():
+    summary = TaskResultSummary(
+        task_ref="task:fine",
+        lane="lane",
+        outcome=TaskResultOutcome.FAILED,
+        headline="task failed",
+        artifact_refs=(),
+        failure_kind="raw prompt: hidden failure body",
+        retryable=False,
+        duration_seconds=None,
+        reason_tags=("full prompt: another hidden body",),
+    )
+
+    display = summary.to_display_dict()
+    rendered = str(display)
+
+    assert display["failure_kind"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]",)
+    assert "hidden failure body" not in rendered
+    assert "another hidden body" not in rendered
+
+
+def test_direct_task_result_summary_display_redacts_provider_output_reason_tags():
+    summary = TaskResultSummary(
+        task_ref="task:fine",
+        lane="lane",
+        outcome=TaskResultOutcome.FAILED,
+        headline="task failed",
+        artifact_refs=(),
+        failure_kind="provider output: hidden body",
+        retryable=False,
+        duration_seconds=None,
+        reason_tags=(
+            "model output: hidden body",
+            "complete prompt: another hidden body",
+        ),
+    )
+
+    display = summary.to_display_dict()
+    rendered = str(display)
+
+    assert display["failure_kind"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]", "[redacted]")
+    assert "hidden body" not in rendered
+    assert "another hidden body" not in rendered
+
+
+def test_direct_failure_recovery_recommendation_redacts_raw_prompt_and_model_output():
+    recommendation = FailureRecoveryRecommendation(
+        task_ref="task:fine",
+        action=FailureRecoveryAction.ESCALATE,
+        reason_tags=(
+            "raw prompt: hidden reason",
+            "model output: another hidden reason",
+        ),
+        message="complete prompt: hidden escalation note",
+    )
+
+    display = recommendation.to_display_dict()
+    rendered = str(display)
+
+    assert display["message"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]", "[redacted]")
+    assert "hidden reason" not in rendered
+    assert "another hidden reason" not in rendered
+    assert "hidden escalation note" not in rendered

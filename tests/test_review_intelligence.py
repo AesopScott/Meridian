@@ -241,6 +241,51 @@ def test_direct_waiver_visibility_display_sanitizes_waiver_ref():
     assert r"C:\Users\scott" not in rendered
 
 
+def test_direct_review_finding_fingerprint_redacts_raw_prompt_refs():
+    fingerprint = ReviewFindingFingerprint(
+        fingerprint="rfp:deadbeef",
+        source_ref="raw prompt: hidden source body",
+        artifact_ref="provider output: hidden artifact body",
+        rule_ref="model output: hidden rule body",
+    )
+
+    display = fingerprint.to_display_dict()
+    rendered = str(display)
+
+    assert display["source_ref"].startswith("source:unsafe:")
+    assert display["artifact_ref"].startswith("artifact:unsafe:")
+    assert display["rule_ref"].startswith("rule:unsafe:")
+    assert "hidden source body" not in rendered
+    assert "hidden artifact body" not in rendered
+    assert "hidden rule body" not in rendered
+
+
+def test_direct_severity_calibration_redacts_provider_response_rationale():
+    calibration = SeverityCalibration(
+        severity=ReviewFindingSeverity.ERROR,
+        rationale="provider response: hidden rationale body",
+    )
+
+    display = calibration.to_display_dict()
+    rendered = str(display)
+
+    assert display["rationale"] == "[redacted]"
+    assert "hidden rationale body" not in rendered
+
+
+def test_direct_severity_calibration_redacts_full_prompt_rationale():
+    calibration = SeverityCalibration(
+        severity=ReviewFindingSeverity.ERROR,
+        rationale="full prompt: another hidden rationale",
+    )
+
+    display = calibration.to_display_dict()
+    rendered = str(display)
+
+    assert display["rationale"] == "[redacted]"
+    assert "another hidden rationale" not in rendered
+
+
 def test_direct_duplicate_finding_group_display_sanitizes_sources():
     group = DuplicateFindingGroup(
         fingerprint=ReviewFindingFingerprint(

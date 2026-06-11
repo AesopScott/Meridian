@@ -170,7 +170,7 @@ def _clean_artifact_id(artifact_id: str) -> str:
     clean = artifact_id.strip()
     if not clean:
         raise ValueError("artifact_id must not be empty")
-    if _looks_like_local_path(clean):
+    if _looks_like_local_path(clean) or _looks_like_unsafe_reason(clean):
         return "artifact:unsafe-id"
     return clean
 
@@ -215,6 +215,8 @@ def _safe_artifact_id(value: str) -> str:
     if not clean:
         return "artifact:unknown-id"
     if _looks_like_local_path(clean):
+        return "artifact:unsafe-id"
+    if _looks_like_unsafe_reason(clean):
         return "artifact:unsafe-id"
     return clean[:120]
 

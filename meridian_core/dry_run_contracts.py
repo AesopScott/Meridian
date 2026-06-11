@@ -478,7 +478,9 @@ def _looks_like_unsafe_content(value: str) -> bool:
     return bool(
         re.search(
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
-            r"\n|traceback|exception:|raw\s+(?:prompt|transcript|content)|provider\s+response|"
+            r"\n|traceback|exception:|"
+            r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)|"
+            r"(?:provider|model)\s+(?:response|output)|"
             r"api[_-]?key|secret|token|password|sk-(?:proj-)?[A-Za-z0-9_-]{16,})",
             value,
         )

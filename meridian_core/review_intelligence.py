@@ -385,7 +385,9 @@ def _looks_like_path_or_log(value: str) -> bool:
     return bool(
         re.search(
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
-            r"\n|traceback|exception:|api[_-]?key|secret|token|password)",
+            r"\n|traceback|exception:|api[_-]?key|secret|token|password|"
+            r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)|"
+            r"(?:provider|model)\s+(?:response|output))",
             value,
         )
     )
