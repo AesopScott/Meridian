@@ -50,6 +50,20 @@ Status: In progress
 ```
 
 ```text
+Time: 2026-06-11 00:02 -06:00
+Writer: front-end developer lane
+Intent: complete reviewed VOC10 preview-only voice command-intent UI promotion under backend/orchestrator ACK.
+Action completed: landed reviewed VOC10 UI candidate plus intent bookkeeping on origin/main from the clean UI worktree, preserving preview-only/display-safe command intent visibility with no live audio or mutation behavior.
+Commit(s): d90102b5d81d5229d55e6899b8f8a345a86c09a8, 062f15fcae257ba1985bff19cb7664f2d17c303d, this commit
+Pushed to origin/main: yes
+Files changed: scripts/meridian-model-bridge.js, index.html, tests/test_bifrost_cockpit.py, docs/ui-integration-checklist.md, docs/main-write-coordination-ledger.md
+Proof run: python -m pytest tests/test_bifrost_cockpit.py -q -> 467 passed; python -m pytest tests/test_voice_io.py tests/test_bifrost_cockpit.py -q -> 511 passed; node --check scripts/meridian-model-bridge.js passed; node scripts/meridian-model-bridge.js --self-test returned ok true; git diff --check passed with no output.
+Final shared main status: candidate and intent landed on origin/main at 062f15fca before this completion write; completion push/fetch verification follows immediately from the same clean worktree.
+Notes/blockers: scope stayed path-limited to the four approved UI files plus this ledger. No shared-checkout promotion source, no backend tracker edits, no provider/model transport change, and no microphone/audio/prompt/mutation execution behavior landed.
+Status: Complete
+```
+
+```text
 Time: 2026-06-10 23:45 -06:00
 Writer: Meridian backend lane
 Intent: promote reviewed final V2 backend tracker/baseline disposition candidate `9a99420e8` to `origin/main` under frontend ACK from the UI lane.
