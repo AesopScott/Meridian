@@ -48,13 +48,13 @@ Approved implementation files: docs/FileMap.md, docs/voice-io-authority-contract
 Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no microphone/audio provider work, no Relay prompt submission, and no dirty shared-checkout promotion source.
 Pre-write check: `origin/main` fetched at `ba321268cbacb473b86c14162142c56284afef0e`; VOC10 branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
 Proof expected before push: focused Voice/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
-Action completed: pending.
-Commit(s): pending
-Pushed to origin/main: pending
+Action completed: pushed reviewed VOC10 voice command-intent backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `6451afda8`, `d52e9c485`
+Pushed to origin/main: yes
 Files changed: docs/FileMap.md, docs/voice-io-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/voice_io.py, tests/test_package_api.py, tests/test_voice_io.py, docs/main-write-coordination-ledger.md
-Proof run: pending
-Final shared main status: pending
-Status: In progress
+Proof run: `python -m pytest tests/test_voice_io.py tests/test_package_api.py tests/test_filemap.py -q` -> 115 passed; `python -m pytest -q` -> 3547 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `d52e9c4854ece3c7ae044b6a03ae4e8c8062b510` before this completion ledger write.
+Status: Complete
 ```
 
 ```text
