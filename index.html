@@ -5519,13 +5519,6 @@ body {
         ['observed at', snapshot.timestamp || 'unknown'],
       ]), true),
       relaySection('Review Console summary', relaySummary(snapshot.summary || ''), true),
-      relaySection('Review intelligence advisory', relayGrid([
-        ['duplicate grouping', 'duplicate findings should collapse into reviewed groups instead of reading as unrelated repeats'],
-        ['severity calibration', 'severity labels remain backend-owned review metadata and are not recomputed from UI-local filters'],
-        ['repair verification', 'verified, pending, failed, or waived repair posture stays display-only until a reviewed repair route exists'],
-        ['waiver visibility', 'waiver presence may be visible, but the UI does not create, approve, or remove waivers'],
-        ['regression-risk labels', 'regression-risk posture is advisory review metadata only and does not authorize rerun or repair execution'],
-      ]), false),
       relaySection('Queue status', relayGrid([
         ['pending items', queue.pending_count ?? '0'],
         ['pending gates', queue.pending_gate_count ?? '0'],
@@ -5533,6 +5526,13 @@ body {
         ['raw item content visible', rawItemContentVisible ? 'yes' : 'no'],
         ['raw worker chat visible', rawWorkerChatVisible ? 'yes' : 'no'],
       ]), true),
+      relaySection('Review intelligence advisory', relayGrid([
+        ['duplicate grouping', 'duplicate findings should collapse into reviewed groups instead of reading as unrelated repeats'],
+        ['severity calibration', 'severity labels remain backend-owned review metadata and are not recomputed from UI-local filters'],
+        ['repair verification', 'verified, pending, failed, or waived repair posture stays display-only until a reviewed repair route exists'],
+        ['waiver visibility', 'waiver presence may be visible, but the UI does not create, approve, or remove waivers'],
+        ['regression-risk labels', 'regression-risk posture is advisory review metadata only and does not authorize rerun or repair execution'],
+      ]), false),
       relaySection('Findings filter', `
         <input data-review-console-search type="search" value="${escapeHtml(snapshot._ui_query || '')}" placeholder="Search id, title, type, severity, owner, action" autocomplete="off" />
         <div class="relay-models-handoff" aria-label="Review findings filter controls">
@@ -6759,18 +6759,18 @@ body {
         ['mutation authorized', snapshot.mutation_authorized ? 'yes' : 'no'],
       ]), true),
       relaySection('Echo memory summary', relaySummary(snapshot.summary || 'Echo memory summary unavailable.'), true),
-      relaySection('Memory provenance advisory', relayGrid([
-        ['memory provenance', 'memory rows stay display-safe summaries with source and ranking metadata only'],
-        ['stale knowledge detection', 'stale or superseded memory posture remains advisory metadata when surfaced by the backend'],
-        ['conflict visibility', 'conflicts between memory signals should stay visible as summary posture, not as raw record bodies'],
-        ['mutation boundary', 'this surface does not write memory, merge memory, or replay hidden memory content into another harness'],
-      ]), false),
       relaySection('Query boundary', relayGrid([
         ['project', query.project || 'unknown'],
         ['tags', relayJoin(query.tags)],
         ['limit', query.limit ?? 0],
         ['include superseded', query.include_superseded ? 'yes' : 'no'],
       ]), true),
+      relaySection('Memory provenance advisory', relayGrid([
+        ['memory provenance', 'memory rows stay display-safe summaries with source and ranking metadata only'],
+        ['stale knowledge detection', 'stale or superseded memory posture remains advisory metadata when surfaced by the backend'],
+        ['conflict visibility', 'conflicts between memory signals should stay visible as summary posture, not as raw record bodies'],
+        ['mutation boundary', 'this surface does not write memory, merge memory, or replay hidden memory content into another harness'],
+      ]), false),
       ...hits.map((hit, index) => relaySection(
         `Memory ${index + 1}: ${hit.record_id || 'unknown'}`,
         relayGrid([
@@ -6806,13 +6806,6 @@ body {
         ['mutation authorized', snapshot.mutation_authorized ? 'yes' : 'no'],
       ]), true),
       relaySection('Atlas retrieval summary', relaySummary(snapshot.summary || 'Atlas retrieval summary unavailable.'), true),
-      relaySection('Retrieval provenance advisory', relayGrid([
-        ['retrieval evidence', 'retrieval rows remain display-safe evidence of what Atlas considered, not raw source dumps'],
-        ['citation ranking', 'ranking and score stay advisory retrieval metadata only'],
-        ['chunk lineage', 'lineage and missing-path posture belong to backend retrieval evidence, not UI-local reconstruction'],
-        ['stale knowledge detection', 'stale or missing knowledge remains visible as advisory posture when reported by the backend'],
-        ['conflict visibility', 'conflicting retrieval signals should stay summarized without exposing hidden context or provider output'],
-      ]), false),
       relaySection('Retrieval query', relayGrid([
         ['terms', relayJoin(query.terms)],
         ['required paths', relayJoin(query.required_paths)],
@@ -6820,6 +6813,13 @@ body {
         ['truncated', snapshot.truncated ? 'yes' : 'no'],
         ['missing paths', relayJoin(snapshot.missing_paths)],
       ]), true),
+      relaySection('Retrieval provenance advisory', relayGrid([
+        ['retrieval evidence', 'retrieval rows remain display-safe evidence of what Atlas considered, not raw source dumps'],
+        ['citation ranking', 'ranking and score stay advisory retrieval metadata only'],
+        ['chunk lineage', 'lineage and missing-path posture belong to backend retrieval evidence, not UI-local reconstruction'],
+        ['stale knowledge detection', 'stale or missing knowledge remains visible as advisory posture when reported by the backend'],
+        ['conflict visibility', 'conflicting retrieval signals should stay summarized without exposing hidden context or provider output'],
+      ]), false),
       ...hits.map((hit, index) => relaySection(
         `Hit ${index + 1}: ${hit.path || 'unknown'}`,
         relayGrid([
@@ -6852,6 +6852,12 @@ body {
         ['mutation authorized', snapshot.mutation_authorized ? 'yes' : 'no'],
       ]), true),
       relaySection('FileMap summary', relaySummary(snapshot.summary || 'FileMap summary unavailable.'), true),
+      relaySection('Registry summary', relayGrid([
+        ['entries', snapshot.entry_count ?? 0],
+        ['entries with tests', snapshot.with_tests_count ?? 0],
+        ['area count', areaCounts.length],
+      ]), true),
+      relaySection('Injection summary', relaySummary(injectionSummary || 'no injection summary reported'), true),
       relaySection('FileMap intelligence advisory', relayGrid([
         ['freshness checks', 'fresh, stale, or unknown FileMap posture should remain reviewed metadata rather than UI-local inference'],
         ['capability ownership maps', 'ownership stays backend-sourced so the UI does not invent who owns a capability or route'],
@@ -6859,12 +6865,6 @@ body {
         ['boundary advisories', 'boundary warnings remain advisory metadata and do not move branches, files, or worktrees'],
         ['related test hints', 'test hints name the verification path without executing the test suite from this panel'],
       ]), false),
-      relaySection('Registry summary', relayGrid([
-        ['entries', snapshot.entry_count ?? 0],
-        ['entries with tests', snapshot.with_tests_count ?? 0],
-        ['area count', areaCounts.length],
-      ]), true),
-      relaySection('Injection summary', relaySummary(injectionSummary || 'no injection summary reported'), true),
       relaySection('Area counts', areaCounts.length
         ? relayGrid(areaCounts.slice(0, 12).map((item) => [item.area || 'unknown', item.count ?? 0]))
         : relaySummary('none'), false),
@@ -7092,12 +7092,6 @@ body {
         ['raw evidence body visible', snapshot.raw_evidence_body_visible ? 'yes' : 'no'],
       ]), true),
       relaySection('Aegis summary', relaySummary(snapshot.summary || 'Aegis summary unavailable.'), true),
-      relaySection('Security advisory coverage', relayGrid([
-        ['evidence safety', 'display-safe proof categories cover secret-like values, local paths, raw prompt/transcript markers, and provider-output markers without echoing unsafe text'],
-        ['proof quality', 'fresh, stale, missing, and waived proof posture remains advisory until a reviewed execution path is wired'],
-        ['decision transparency', 'Aegis decisions stay visible as action, blockers, and rationale metadata without exposing raw evidence bodies'],
-        ['dry-run boundary', 'proof and policy posture may inform dry-run planning later, but this panel does not execute a dry run or dispatch work'],
-      ]), false),
       relaySection('Proof trail summary', relayGrid([
         ['clean', trail.is_clean ? 'yes' : 'no'],
         ['evidence count', trail.evidence_count ?? 0],
@@ -7115,6 +7109,12 @@ body {
         ['can dispatch', policy.can_dispatch ? 'yes' : 'no'],
         ['blocking reasons', relayJoin(policy.blocking_reasons)],
       ]), true),
+      relaySection('Security advisory coverage', relayGrid([
+        ['evidence safety', 'display-safe proof categories cover secret-like values, local paths, raw prompt/transcript markers, and provider-output markers without echoing unsafe text'],
+        ['proof quality', 'fresh, stale, missing, and waived proof posture remains advisory until a reviewed execution path is wired'],
+        ['decision transparency', 'Aegis decisions stay visible as action, blockers, and rationale metadata without exposing raw evidence bodies'],
+        ['dry-run boundary', 'proof and policy posture may inform dry-run planning later, but this panel does not execute a dry run or dispatch work'],
+      ]), false),
       relaySection('Relay route gate', relayGrid([
         ['risk tier', route.risk_tier ?? 'unknown'],
         ['mode', relayText(route.mode)],
@@ -7864,13 +7864,6 @@ body {
       ['intent evidence refs', relayJoin(snapshots.relayEvidence?.per_call_intent?.evidence_refs)],
       ['dispatch boundary', 'Relay + Model Harness own route/model/payload posture; this surface renders evidence only and does not call providers'],
     ]), true),
-    relaySection('Diagnostics advisory coverage', relayGrid([
-      ['heartbeat anomaly classification', 'documented as reviewed backend diagnostics posture; this panel does not classify or restart workers locally'],
-      ['stale worker posture', 'read-only stale, blocked, missing, under-proven, or active posture when the backend provides it'],
-      ['reliability score', 'display-safe reliability summary is advisory only and not a permission to execute or recover work'],
-      ['backend/display snapshot drift', 'visible drift should trigger review of backend vs. rendered state before trusting the harness display'],
-      ['escalation guidance', 'read-only escalation guidance only; no restart, dispatch, queue mutation, or recovery action is performed here'],
-    ]), false),
     relaySection('Harness diagnostics', relayGrid([
       ['prompt packet decision', relayText(snapshots.relayEvidence?.prompt_packet?.decision)],
       ['prompt packet severity', relayText(snapshots.relayEvidence?.prompt_packet?.severity)],
@@ -7886,6 +7879,13 @@ body {
       ['heartbeat history visible', snapshots.workflowDispatchStatus?.workflow?.status_policy?.heartbeat_history_visible ? 'yes' : 'no'],
       ['raw artifacts visible', snapshots.workflowDispatchStatus?.workflow?.status_policy?.raw_artifacts_visible ? 'yes' : 'no'],
     ]), true),
+    relaySection('Diagnostics advisory coverage', relayGrid([
+      ['heartbeat anomaly classification', 'documented as reviewed backend diagnostics posture; this panel does not classify or restart workers locally'],
+      ['stale worker posture', 'read-only stale, blocked, missing, under-proven, or active posture when the backend provides it'],
+      ['reliability score', 'display-safe reliability summary is advisory only and not a permission to execute or recover work'],
+      ['backend/display snapshot drift', 'visible drift should trigger review of backend vs. rendered state before trusting the harness display'],
+      ['escalation guidance', 'read-only escalation guidance only; no restart, dispatch, queue mutation, or recovery action is performed here'],
+    ]), false),
     snapshots.aspect === 'Goal' ? relaySection('Goal aspect per-call intent', relayGrid([
       ['intent source', snapshots.relayEvidence?.per_call_intent ? '/bridge/relay-evidence per_call_intent' : 'not exposed by Relay'],
       ['call goal', snapshots.relayEvidence?.per_call_intent?.call_goal || 'not exposed'],
@@ -7971,13 +7971,6 @@ body {
         ['deployment authorized', snapshot.deployment_authorized ? 'yes' : 'no'],
       ]), true),
       relaySection('Release autonomy summary', relaySummary(snapshot.summary || 'Release autonomy summary unavailable.'), true),
-      relaySection('Release provenance advisory', relayGrid([
-        ['dispatch evidence', 'dispatch evidence remains a reviewed summary of release validation posture, not a live provider or transport action'],
-        ['dry-run contracts', 'dry-run planning stays advisory and non-executing until a reviewed runtime path exists'],
-        ['workflow intelligence', 'workflow readiness and escalation posture remain backend-owned evidence, not UI-authored state'],
-        ['release readiness', 'release-ready posture is visible, but this surface does not authorize release, deployment, or branch movement'],
-        ['promotion provenance', 'candidate, review, intent, and main-chain provenance remain display-safe records only'],
-      ]), false),
       relaySection('Release posture', relayGrid([
         ['state', relayText(posture.state)],
         ['release ready', posture.release_ready ? 'yes' : 'no'],
@@ -8015,6 +8008,13 @@ body {
         ['serialization only', validation.serialization_only ? 'yes' : 'no'],
         ['validation evidence ref', validation.validation_evidence_ref || 'unknown'],
         ['external review ref', validation.external_review_evidence_ref || 'none'],
+      ]), false),
+      relaySection('Release provenance advisory', relayGrid([
+        ['dispatch evidence', 'dispatch evidence remains a reviewed summary of release validation posture, not a live provider or transport action'],
+        ['dry-run contracts', 'dry-run planning stays advisory and non-executing until a reviewed runtime path exists'],
+        ['workflow intelligence', 'workflow readiness and escalation posture remain backend-owned evidence, not UI-authored state'],
+        ['release readiness', 'release-ready posture is visible, but this surface does not authorize release, deployment, or branch movement'],
+        ['promotion provenance', 'candidate, review, intent, and main-chain provenance remain display-safe records only'],
       ]), false),
       relaySection('Beacon advisory', relayGrid([
         ['harness id', beacon.harness_id || 'unknown'],
