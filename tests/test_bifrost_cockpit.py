@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import re
+import socket
+import subprocess
+import time
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -2076,6 +2081,71 @@ def test_session_archive_bridge_snapshot_uses_backend_archive_authority():
     assert '"raw_detail_body_visible": False' in snapshot
     assert "transcript_access.to_dict()" in snapshot
     assert "archive_catalog.to_dict()" in snapshot
+
+
+def test_session_archive_bridge_endpoint_smoke_returns_display_safe_archive_authority():
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+
+    env = {
+        **__import__("os").environ,
+        "MERIDIAN_MODEL_HOST": "127.0.0.1",
+        "MERIDIAN_MODEL_PORT": str(port),
+        "MERIDIAN_MODEL_CWD": str(ROOT),
+        "MERIDIAN_MODEL_ALLOWED_ORIGINS": "http://127.0.0.1:5500",
+    }
+    proc = subprocess.Popen(
+        ["node", "scripts/meridian-model-bridge.js"],
+        cwd=ROOT,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        deadline = time.time() + 15
+        health_ok = False
+        health_error = None
+        while time.time() < deadline:
+            try:
+                req = urllib.request.Request(
+                    f"http://127.0.0.1:{port}/bridge/health",
+                    headers={"Origin": "http://127.0.0.1:5500"},
+                )
+                with urllib.request.urlopen(req, timeout=2) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                if payload.get("ok") is True:
+                    health_ok = True
+                    break
+            except Exception as error:  # pragma: no cover - retry loop
+                health_error = error
+                time.sleep(0.2)
+        assert health_ok, f"bridge failed to become healthy: {health_error}"
+
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/bridge/session-close-archive-proof",
+            headers={"Origin": "http://127.0.0.1:5500"},
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            assert response.status == 200
+            payload = json.loads(response.read().decode("utf-8"))
+
+        assert payload["ok"] is True
+        assert payload["archive_metadata"]["archive_id"] == "archive-session-close-proof"
+        assert len(payload["archive_catalog"]) == 1
+        assert payload["archive_reload_plan"]["execution_authorized"] is False
+        assert payload["archive_run_again_plan"]["execution_authorized"] is False
+        assert payload["transcript_access"]["authorized"] is False
+        assert "safe bounded session summary" not in json.dumps(payload)
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=5)
 
 
 def test_index_release_harness_uses_prime_autonomy_snapshot():

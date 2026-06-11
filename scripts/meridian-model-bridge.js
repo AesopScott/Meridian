@@ -80,69 +80,85 @@ function beginRestartRequest() {
 }
 
 if (process.argv.includes('--self-test')) {
-  const samples = [
-    classifySetupError('codex', 'codex is not recognized as an internal or external command'),
-    classifySetupError('max', 'not authenticated, please login'),
-  ];
-  const setupFlags = [
-    needsSetup('codex', 'codex is not recognized as an internal or external command'),
-    needsSetup('max', 'not authenticated, please login'),
-    needsSetup('codex', 'Process exited with code 1'),
-  ];
-  const contextPrompt = promptWithVisibleSession('What should I do next?', [
-    { role: 'user', text: 'Remember this visible detail.' },
-    { role: 'model', text: 'I can see the visible detail.' },
-  ]);
-  const emptyPrompt = promptWithVisibleSession('Fresh question', []);
-  const contextOk = (
-    contextPrompt.entries === 2 &&
-    contextPrompt.chars > 0 &&
-    contextPrompt.prompt.includes('USER: Remember this visible detail.') &&
-    contextPrompt.prompt.includes('MODEL: I can see the visible detail.') &&
-    contextPrompt.prompt.includes('CURRENT USER PROMPT: What should I do next?') &&
-    emptyPrompt.entries === 0 &&
-    emptyPrompt.prompt === 'Fresh question'
-  );
-  const maxJsonOk = normalizeModelText('max', JSON.stringify({ result: 'max clean ok' })) === 'max clean ok';
-  rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
-  const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
-  const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
-  const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot && BRIDGE_CAPABILITIES.relayEvidenceSnapshot && BRIDGE_CAPABILITIES.primeRuntimeSnapshot && BRIDGE_CAPABILITIES.compassLogicSnapshot && BRIDGE_CAPABILITIES.vulcanLogicSnapshot && BRIDGE_CAPABILITIES.beaconLivenessSnapshot && BRIDGE_CAPABILITIES.reviewConsoleSnapshot && BRIDGE_CAPABILITIES.federationHorizonSnapshot && BRIDGE_CAPABILITIES.providerBalanceSnapshot && BRIDGE_CAPABILITIES.goalRuntimeSnapshot && BRIDGE_CAPABILITIES.workflowDispatchStatusSnapshot && BRIDGE_CAPABILITIES.echoMemorySnapshot && BRIDGE_CAPABILITIES.atlasRetrievalSnapshot && BRIDGE_CAPABILITIES.fileMapSnapshot && BRIDGE_CAPABILITIES.aegisLogicSnapshot && BRIDGE_CAPABILITIES.sessionCloseArchiveProofSnapshot && BRIDGE_CAPABILITIES.voiceIoSnapshot && BRIDGE_CAPABILITIES.primeAutonomyReleaseSnapshot;
-  const sampleSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-bifrost',
-    branch: 'refs/heads/worktree-build-5-bifrost',
-    head: 'abc123',
+  (async () => {
+    const samples = [
+      classifySetupError('codex', 'codex is not recognized as an internal or external command'),
+      classifySetupError('max', 'not authenticated, please login'),
+    ];
+    const setupFlags = [
+      needsSetup('codex', 'codex is not recognized as an internal or external command'),
+      needsSetup('max', 'not authenticated, please login'),
+      needsSetup('codex', 'Process exited with code 1'),
+    ];
+    const contextPrompt = promptWithVisibleSession('What should I do next?', [
+      { role: 'user', text: 'Remember this visible detail.' },
+      { role: 'model', text: 'I can see the visible detail.' },
+    ]);
+    const emptyPrompt = promptWithVisibleSession('Fresh question', []);
+    const contextOk = (
+      contextPrompt.entries === 2 &&
+      contextPrompt.chars > 0 &&
+      contextPrompt.prompt.includes('USER: Remember this visible detail.') &&
+      contextPrompt.prompt.includes('MODEL: I can see the visible detail.') &&
+      contextPrompt.prompt.includes('CURRENT USER PROMPT: What should I do next?') &&
+      emptyPrompt.entries === 0 &&
+      emptyPrompt.prompt === 'Fresh question'
+    );
+    const maxJsonOk = normalizeModelText('max', JSON.stringify({ result: 'max clean ok' })) === 'max clean ok';
+    rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
+    const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
+    const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
+    const capabilitiesOk = BRIDGE_CAPABILITIES.visibleTranscriptContext && BRIDGE_CAPABILITIES.samePortRestart && BRIDGE_CAPABILITIES.requestResultRecovery && BRIDGE_CAPABILITIES.relayLogicSnapshot && BRIDGE_CAPABILITIES.relayEvidenceSnapshot && BRIDGE_CAPABILITIES.primeRuntimeSnapshot && BRIDGE_CAPABILITIES.compassLogicSnapshot && BRIDGE_CAPABILITIES.vulcanLogicSnapshot && BRIDGE_CAPABILITIES.beaconLivenessSnapshot && BRIDGE_CAPABILITIES.reviewConsoleSnapshot && BRIDGE_CAPABILITIES.federationHorizonSnapshot && BRIDGE_CAPABILITIES.providerBalanceSnapshot && BRIDGE_CAPABILITIES.goalRuntimeSnapshot && BRIDGE_CAPABILITIES.workflowDispatchStatusSnapshot && BRIDGE_CAPABILITIES.echoMemorySnapshot && BRIDGE_CAPABILITIES.atlasRetrievalSnapshot && BRIDGE_CAPABILITIES.fileMapSnapshot && BRIDGE_CAPABILITIES.aegisLogicSnapshot && BRIDGE_CAPABILITIES.sessionCloseArchiveProofSnapshot && BRIDGE_CAPABILITIES.voiceIoSnapshot && BRIDGE_CAPABILITIES.primeAutonomyReleaseSnapshot;
+    const sampleSession = sessionTargetFromWorktree({
+      path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-bifrost',
+      branch: 'refs/heads/worktree-build-5-bifrost',
+      head: 'abc123',
+    });
+    const waitingSession = sessionTargetFromWorktree({
+      path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-test-waiting',
+      branch: 'refs/heads/worktree-build-5-test-waiting',
+      head: 'def456',
+    });
+    const hiddenSession = sessionTargetFromWorktree({
+      path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\codex-reviews-b',
+      branch: 'refs/heads/codex-reviews-b',
+      head: 'fed789',
+    });
+    const sharedMainSession = sessionTargetFromWorktree({
+      path: 'C:\\Users\\scott\\Code\\Meridian',
+      branch: 'refs/heads/main',
+      head: 'abc789',
+    });
+    const sessionTargetsOk = (
+      BRIDGE_CAPABILITIES.userSessionTargets &&
+      sampleSession?.sessionId === 'build-5-bifrost' &&
+      sampleSession.routable &&
+      sampleSession.status === 'live' &&
+      waitingSession?.status === 'waiting' &&
+      hiddenSession?.status === 'hidden' &&
+      sharedMainSession === null
+    );
+    const versionOk = BRIDGE_VERSION === 'local-bridge-routes-v2';
+    const routeNamesOk = Object.values(BRIDGE_ROUTES).every((route) => route.startsWith('/bridge/') && !route.startsWith('/api/'));
+    const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
+    const restartGuardOk = beginRestartRequest() && !beginRestartRequest();
+    const archiveSnapshot = await sessionCloseArchiveProofSnapshot();
+    const archiveOk = Boolean(
+      archiveSnapshot?.ok &&
+      archiveSnapshot.archive_metadata?.archive_id === 'archive-session-close-proof' &&
+      Array.isArray(archiveSnapshot.archive_catalog) &&
+      archiveSnapshot.archive_catalog.length === 1 &&
+      archiveSnapshot.archive_reload_plan?.execution_authorized === false &&
+      archiveSnapshot.archive_run_again_plan?.execution_authorized === false &&
+      archiveSnapshot.transcript_access?.authorized === false &&
+      !JSON.stringify(archiveSnapshot).includes('safe bounded session summary')
+    );
+    console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && resultRecoveryOk && capabilitiesOk && sessionTargetsOk && versionOk && routeNamesOk && originOk && restartGuardOk && archiveOk, samples, setupFlags, contextOk, maxJsonOk, resultRecoveryOk, capabilitiesOk, sessionTargetsOk, versionOk, routeNamesOk, originOk, restartGuardOk, archiveOk }, null, 2));
+    process.exit(0);
+  })().catch((error) => {
+    console.error(error?.stack || String(error));
+    process.exit(1);
   });
-  const waitingSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\build-5-test-waiting',
-    branch: 'refs/heads/worktree-build-5-test-waiting',
-    head: 'def456',
-  });
-  const hiddenSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian-Worktrees\\codex-reviews-b',
-    branch: 'refs/heads/codex-reviews-b',
-    head: 'fed789',
-  });
-  const sharedMainSession = sessionTargetFromWorktree({
-    path: 'C:\\Users\\scott\\Code\\Meridian',
-    branch: 'refs/heads/main',
-    head: 'abc789',
-  });
-  const sessionTargetsOk = (
-    BRIDGE_CAPABILITIES.userSessionTargets &&
-    sampleSession?.sessionId === 'build-5-bifrost' &&
-    sampleSession.routable &&
-    sampleSession.status === 'live' &&
-    waitingSession?.status === 'waiting' &&
-    hiddenSession?.status === 'hidden' &&
-    sharedMainSession === null
-  );
-  const versionOk = BRIDGE_VERSION === 'local-bridge-routes-v2';
-  const routeNamesOk = Object.values(BRIDGE_ROUTES).every((route) => route.startsWith('/bridge/') && !route.startsWith('/api/'));
-  const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
-  const restartGuardOk = beginRestartRequest() && !beginRestartRequest();
-  console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && resultRecoveryOk && capabilitiesOk && sessionTargetsOk && versionOk && routeNamesOk && originOk && restartGuardOk, samples, setupFlags, contextOk, maxJsonOk, resultRecoveryOk, capabilitiesOk, sessionTargetsOk, versionOk, routeNamesOk, originOk, restartGuardOk }, null, 2));
-  process.exit(0);
 }
 
 function isAllowedOrigin(req) {
@@ -1309,6 +1325,7 @@ from meridian_core.session_lifecycle import (
     ProofState,
     ReviewCadenceState,
     SessionCommandPlan,
+    SessionCloseWriteThroughResult,
     SessionLifecycleState,
     SessionStatus,
     build_close_archive_write_through_proof,
@@ -1352,6 +1369,9 @@ running_session = SessionLifecycleState(
 )
 stopped_session = SessionLifecycleState(
     **{**running_session.__dict__, "status": SessionStatus.STOPPED}
+)
+archived_session = SessionLifecycleState(
+    **{**stopped_session.__dict__, "status": SessionStatus.ARCHIVED}
 )
 archive_command_plan = SessionCommandPlan(
     session_id=stopped_session.session_id,
@@ -1405,8 +1425,28 @@ command_preview = build_v2_command_plan_preview_proof(
     archive_command_plan,
     timestamp=observed_at,
 )
+archive_result = SessionCloseWriteThroughResult(
+    request_id="close-request-archive",
+    target_session_id=archived_session.session_id,
+    intended_action=CloseArchiveWriteThroughAction.ARCHIVE,
+    initial_status=SessionStatus.STOPPED,
+    final_status=SessionStatus.ARCHIVED,
+    close_authorized=True,
+    write_through_attempted=True,
+    write_through_completed=True,
+    obsidian_capture_attempted=True,
+    obsidian_capture_completed=True,
+    session_left_recoverable=True,
+    failure_reason=None,
+    blockers=(),
+    proof_refs=("proof://archive/sk9", "obsidian://capture/session-archive"),
+    final_state=archived_session,
+    raw_transcript_included=False,
+    raw_prompt_included=False,
+    timestamp=observed_at,
+)
 archive_record = archive_record_from_close_result(
-    archive_proof,
+    archive_result,
     archive_id="archive-session-close-proof",
     session_name=stopped_session.session_name,
     transcript_text="safe bounded session summary",
