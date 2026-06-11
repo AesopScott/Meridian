@@ -1291,6 +1291,13 @@ function sessionCloseArchiveProofSnapshot() {
   return pythonJsonSnapshot('Session close/archive proof', String.raw`
 import json
 from datetime import datetime, timedelta, timezone
+from meridian_core.session_archive import (
+    archive_record_from_close_result,
+    authorize_transcript_access,
+    catalog_entry_from_record,
+    plan_archive_reload,
+    plan_archive_run_again,
+)
 from meridian_core.session_lifecycle import (
     CloseArchiveWriteThroughAction,
     CommandIntent,
@@ -1398,12 +1405,38 @@ command_preview = build_v2_command_plan_preview_proof(
     archive_command_plan,
     timestamp=observed_at,
 )
+archive_record = archive_record_from_close_result(
+    archive_proof,
+    archive_id="archive-session-close-proof",
+    session_name=stopped_session.session_name,
+    transcript_text="safe bounded session summary",
+)
+archive_catalog = catalog_entry_from_record(archive_record)
+archive_reload_plan = plan_archive_reload(
+    archive_record,
+    plan_id="archive-reload-plan",
+    requested_by="prime",
+    evidence_refs=("proof://archive/reload",),
+)
+archive_run_again_plan = plan_archive_run_again(
+    archive_record,
+    plan_id="archive-run-again-plan",
+    requested_by="prime",
+    evidence_refs=("proof://archive/run-again",),
+)
+transcript_access = authorize_transcript_access(
+    archive_record,
+    handle_id="archive-transcript-handle",
+    requested_by="prime",
+    human_gate_approved=False,
+    evidence_refs=("proof://archive/transcript-access",),
+)
 print(json.dumps({
     "ok": True,
-    "source": "meridian_core.session_lifecycle",
-    "version": "v2-session-close-archive-proof-2026-06-07",
-    "harness": "Session Lifecycle",
-    "summary": "Display-safe close/archive write-through and command-plan preview proof.",
+    "source": "meridian_core.session_lifecycle + meridian_core.session_archive",
+    "version": "v2-session-archive-authority-2026-06-11",
+    "harness": "Session Lifecycle + Archive Authority",
+    "summary": "Display-safe close/archive proof plus preview-only archive catalog, reload/run-again, and transcript-access posture.",
     "display_only": True,
     "mutation_authorized": False,
     "live_control_authorized": False,
@@ -1415,6 +1448,30 @@ print(json.dumps({
     "raw_detail_body_visible": False,
     "orchestrator_intake": "compact_typed_session_state_only",
     "raw_detail_access": "fetched_on_demand_only",
+    "archive_metadata": {
+        "archive_id": archive_record.archive_id,
+        "target_session_id": archive_record.session_id,
+        "session_name": archive_record.session_name,
+        "final_status": archive_record.final_status.value,
+        "archived_at": archive_record.archived_at.isoformat(),
+        "close_request_id": archive_record.close_request_id,
+        "intended_action": archive_record.intended_action.value,
+        "write_through_completed": archive_record.write_through_completed,
+        "obsidian_capture_completed": archive_record.obsidian_capture_completed,
+        "session_left_recoverable": archive_record.session_left_recoverable,
+        "transcript_hash": archive_record.transcript_hash,
+        "transcript_length": archive_record.transcript_length,
+        "proof_refs": list(archive_record.proof_refs),
+    },
+    "archive_catalog": [archive_catalog.to_dict()],
+    "archive_reload_plan": archive_reload_plan.to_dict(),
+    "archive_run_again_plan": archive_run_again_plan.to_dict(),
+    "transcript_access": transcript_access.to_dict(),
+    "archive_context_refs": [
+        "archive://archive-session-close-proof",
+        "session://session-close-archive-proof",
+        "proof://archive/sk9",
+    ],
     "proofs": {
         "archive": archive_proof.to_dict(),
         "close": close_proof.to_dict(),

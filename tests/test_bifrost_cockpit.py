@@ -1993,6 +1993,7 @@ def test_index_aegis_surface_uses_bridge_snapshot():
 
 def test_index_session_archive_surface_uses_backend_proof_snapshot():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    checklist = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
     assert "Session Close Archive Proof" in doc
     assert "data-session-close-archive-proof" in doc
     assert "const renderSessionCloseArchiveProofSnapshot = (snapshot) =>" in doc
@@ -2015,6 +2016,16 @@ def test_index_session_archive_surface_uses_backend_proof_snapshot():
     assert "raw detail is fetched only on demand" in doc
     assert "raw worker session history" in doc
     assert "pasted transcript/log/detail" in doc
+    assert "Session archive list" in doc
+    assert "Archive metadata" in doc
+    assert "Archive reload posture" in doc
+    assert "Archive run-again posture" in doc
+    assert "Transcript access posture" in doc
+    assert "Archive context reference" in doc
+    assert "reload authorized" in doc
+    assert "run again authorized" in doc
+    assert "transcript access mode" in doc
+    assert "full transcript body remains unavailable and on-demand only" in doc
     assert "Write-through gate" in doc
     assert "executable now" in doc
     archive_start = doc.index("const renderSessionCloseArchiveProof = () =>")
@@ -2026,17 +2037,45 @@ def test_index_session_archive_surface_uses_backend_proof_snapshot():
     assert "bridgeUrl('message')" not in archive_surface
     assert "bridgeUrl('restart')" not in archive_surface
     assert "bridgeUrl('call-result')" not in archive_surface
-    assert "archive-session" not in archive_surface
-    assert "close-session" not in archive_surface
-    assert "reload-session" not in archive_surface
-    assert "run-again" not in archive_surface
-    assert "delete" not in archive_surface.lower()
-    assert "raw_worker_chat =" not in archive_surface
-    assert "transcript" not in archive_surface.lower()
-    assert "session_history" not in archive_surface
-    assert "detail_body" not in archive_surface
-    assert "log_body" not in archive_surface
-    assert "prompt:" not in archive_surface.lower()
+    assert "| ARC1 | Session archive list | Shows archived sessions that can be inspected later. | wired |" in checklist
+    assert "| ARC2 | Reload session | Restores an archived session into an active/reopened state where supported. | wired |" in checklist
+    assert "| ARC3 | Run again | Allows rerun/resume/restart from archived session context where backend supports it. | wired |" in checklist
+    assert "| ARC4 | Archive metadata | Stores project, model/backend, role, timestamps, status, and source session id. | wired |" in checklist
+    assert "| ARC5 | Context reference | Allows Prime/session to reference archived context intentionally. | wired |" in checklist
+    assert "| ARC8 | Transcript access | Allows full transcript access when available and authorized. | wired |" in checklist
+    assert "| ARC10 | Restore proof/artifacts | Links archived session to proof, files, or artifacts created. | wired |" in checklist
+
+
+def test_session_archive_bridge_snapshot_uses_backend_archive_authority():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    snapshot = doc[
+        doc.index("function sessionCloseArchiveProofSnapshot() {"):
+        doc.index("function voiceIoSnapshot()", doc.index("function sessionCloseArchiveProofSnapshot() {"))
+    ]
+
+    assert "from meridian_core.session_archive import (" in snapshot
+    assert "archive_record_from_close_result" in snapshot
+    assert "catalog_entry_from_record" in snapshot
+    assert "plan_archive_reload" in snapshot
+    assert "plan_archive_run_again" in snapshot
+    assert "authorize_transcript_access" in snapshot
+    assert '"source": "meridian_core.session_lifecycle + meridian_core.session_archive"' in snapshot
+    assert '"version": "v2-session-archive-authority-2026-06-11"' in snapshot
+    assert '"archive_metadata": {' in snapshot
+    assert '"archive_catalog": [archive_catalog.to_dict()]' in snapshot
+    assert '"archive_reload_plan": archive_reload_plan.to_dict()' in snapshot
+    assert '"archive_run_again_plan": archive_run_again_plan.to_dict()' in snapshot
+    assert '"transcript_access": transcript_access.to_dict()' in snapshot
+    assert '"archive_context_refs": [' in snapshot
+    assert '"raw_prompt_visible": False' in snapshot
+    assert '"raw_worker_chat_visible": False' in snapshot
+    assert '"raw_worker_session_history_visible": False' in snapshot
+    assert '"raw_detail_access": "fetched_on_demand_only"' in snapshot
+    assert '"pasted_transcript_body_visible": False' in snapshot
+    assert '"pasted_log_body_visible": False' in snapshot
+    assert '"raw_detail_body_visible": False' in snapshot
+    assert "transcript_access.to_dict()" in snapshot
+    assert "archive_catalog.to_dict()" in snapshot
 
 
 def test_index_release_harness_uses_prime_autonomy_snapshot():
@@ -2554,7 +2593,7 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "| ROU12 | Public automation boundary | Public build explains what automation needs local permissions/accounts. | wired |" in doc
     assert "Spark Routines renders a Public automation boundary beside `/bridge/goal-runtime` and `/bridge/workflow-dispatch-status`" in doc
     assert "| ARC0 | Close/archive proof snapshot | Shows current session-close/archive proof posture before any live archive controls exist. | wired |" in doc
-    assert "| SK10 | Archive | Opens close/archive proof posture until reloadable archive controls exist. | wired |" in doc
+    assert "| SK10 | Archive | Opens close/archive proof posture plus reviewed archive authority metadata until live archive controls exist. | wired |" in doc
     assert "/bridge/session-close-archive-proof" in doc
     assert "GET only" in doc
     assert "no live close/archive/reload/run-again/delete control" in doc

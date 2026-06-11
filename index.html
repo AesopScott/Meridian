@@ -6202,6 +6202,12 @@ body {
     const closeProof = proofs.close || {};
     const writeThroughProof = proofs.write_through || {};
     const preview = snapshot.command_plan_preview || {};
+    const archiveMetadata = snapshot.archive_metadata || {};
+    const archiveCatalog = Array.isArray(snapshot.archive_catalog) ? snapshot.archive_catalog : [];
+    const archiveReloadPlan = snapshot.archive_reload_plan || {};
+    const archiveRunAgainPlan = snapshot.archive_run_again_plan || {};
+    const transcriptAccess = snapshot.transcript_access || {};
+    const archiveContextRefs = Array.isArray(snapshot.archive_context_refs) ? snapshot.archive_context_refs : [];
     const mutationAllowed = Boolean(snapshot.mutation_authorized);
     const transition = Array.isArray(preview.expected_state_transition)
       ? preview.expected_state_transition.join(' -> ')
@@ -6221,6 +6227,66 @@ body {
         ['Orchestrator intake', relayText(snapshot.orchestrator_intake || 'compact typed session state')],
         ['raw detail is fetched only on demand', snapshot.raw_detail_access === 'fetched_on_demand_only' ? 'yes' : relayText(snapshot.raw_detail_access)],
       ]), true),
+      relaySection('Session archive list', archiveCatalog.length
+        ? archiveCatalog.map((entry) => relayGrid([
+          ['archive id', entry.archive_id || 'unknown'],
+          ['session id', entry.session_id || 'unknown'],
+          ['session name', entry.session_name || 'unknown'],
+          ['final status', relayText(entry.final_status)],
+          ['archived at', entry.archived_at || 'unknown'],
+          ['reload available', entry.reload_available ? 'yes' : 'no'],
+          ['run again available', entry.run_again_available ? 'yes' : 'no'],
+          ['transcript access mode', relayText(entry.transcript_access_mode)],
+          ['proof refs', relayJoin(entry.proof_refs)],
+        ])).join('')
+        : relayGrid([['status', 'no archived sessions reported by the reviewed archive authority snapshot']]),
+      true),
+      relaySection('Archive metadata', relayGrid([
+        ['archive id', archiveMetadata.archive_id || 'unknown'],
+        ['target session', archiveMetadata.target_session_id || 'unknown'],
+        ['session name', archiveMetadata.session_name || 'unknown'],
+        ['final status', relayText(archiveMetadata.final_status)],
+        ['archived at', archiveMetadata.archived_at || 'unknown'],
+        ['close request id', archiveMetadata.close_request_id || 'unknown'],
+        ['intended action', relayText(archiveMetadata.intended_action)],
+        ['write-through completed', archiveMetadata.write_through_completed ? 'yes' : 'no'],
+        ['obsidian capture completed', archiveMetadata.obsidian_capture_completed ? 'yes' : 'no'],
+        ['recoverable session', archiveMetadata.session_left_recoverable ? 'yes' : 'no'],
+      ]), true),
+      relaySection('Archive reload posture', relayGrid([
+        ['plan id', archiveReloadPlan.plan_id || 'unknown'],
+        ['status', relayText(archiveReloadPlan.status)],
+        ['reload authorized', archiveReloadPlan.reload_authorized ? 'yes' : 'no'],
+        ['execution authorized', archiveReloadPlan.execution_authorized ? 'yes' : 'no'],
+        ['blockers', relayJoin(archiveReloadPlan.blockers)],
+        ['proof refs', relayJoin(archiveReloadPlan.proof_refs)],
+        ['boundary', 'display-only archive reload posture; no reopen or active-session restore is executed'],
+      ]), false),
+      relaySection('Archive run-again posture', relayGrid([
+        ['plan id', archiveRunAgainPlan.plan_id || 'unknown'],
+        ['status', relayText(archiveRunAgainPlan.status)],
+        ['run again authorized', archiveRunAgainPlan.run_again_authorized ? 'yes' : 'no'],
+        ['execution authorized', archiveRunAgainPlan.execution_authorized ? 'yes' : 'no'],
+        ['blockers', relayJoin(archiveRunAgainPlan.blockers)],
+        ['proof refs', relayJoin(archiveRunAgainPlan.proof_refs)],
+        ['boundary', 'display-only archive run-again posture; no rerun, resume, or restart action is executed'],
+      ]), false),
+      relaySection('Transcript access posture', relayGrid([
+        ['handle id', transcriptAccess.handle_id || 'unknown'],
+        ['mode', relayText(transcriptAccess.mode)],
+        ['authorized', transcriptAccess.authorized ? 'yes' : 'no'],
+        ['transcript hash visible', transcriptAccess.transcript_hash ? 'yes' : 'no'],
+        ['transcript length', transcriptAccess.transcript_length ?? 'unknown'],
+        ['raw transcript included', transcriptAccess.raw_transcript_included ? 'yes' : 'no'],
+        ['proof refs', relayJoin(transcriptAccess.proof_refs)],
+        ['boundary', 'display-only transcript-access posture; full transcript body remains unavailable and on-demand only'],
+      ]), false),
+      relaySection('Archive context reference', relayGrid([
+        ['archive refs', relayJoin(archiveContextRefs)],
+        ['context reference posture', archiveContextRefs.length ? 'explicit archive/session/proof refs only' : 'no archive context refs reported'],
+        ['hidden prompt drag', 'no'],
+        ['boundary', 'archive context is referenced intentionally through display-safe ids only'],
+      ]), false),
       relaySection('Archive write-through proof', relayGrid([
         ['target session', archiveProof.target_session_id || 'unknown'],
         ['session name', archiveProof.session_name || 'unknown'],
