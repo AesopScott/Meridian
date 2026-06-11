@@ -40,6 +40,24 @@ Use this cadence whenever either party expects to write:
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
 ```text
+Time: 2026-06-10 22:49 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend session archive authority candidate `0e2bb23f4` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 22:48 coordination request; approved scope is the eight reviewed Archive files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/session-archive-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/session_archive.py, tests/test_filemap.py, tests/test_package_api.py, tests/test_session_archive.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `e2882cf9905ea397c2c4989a73614874cdb194f7`; Archive branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused Archive/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pending.
+Commit(s): pending.
+Pushed to origin/main: pending.
+Files changed: docs/FileMap.md, docs/session-archive-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/session_archive.py, tests/test_filemap.py, tests/test_package_api.py, tests/test_session_archive.py, docs/main-write-coordination-ledger.md
+Proof run: pending.
+Final shared main status: pending.
+Status: In progress
+```
+
+```text
 Time: 2026-06-10 22:07 -06:00
 Writer: Meridian backend lane
 Intent: promote reviewed backend cross-check authority candidate `7df8e191` to `origin/main` under frontend ACK from the UI lane.
