@@ -40,6 +40,17 @@ Use this cadence whenever either party expects to write:
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
 ```text
+Time: 2026-06-11 00:28 -06:00
+Writer: front-end developer lane
+Intent: promote reviewed Archive authority UI wiring and repair under backend/orchestrator exact-hash ACK through 2026-06-11 00:38 -06:00.
+ACK: backend/orchestrator lane granted a 10-minute path-limited UI lease on exact reviewed candidate `8da1a729bc378095e5d68bf960b27ec9d426c8c2`; approved promotion scope is `docs/ui-integration-checklist.md`, `index.html`, `scripts/meridian-model-bridge.js`, `tests/test_bifrost_cockpit.py`, plus this ledger file for intent/completion bookkeeping only.
+Expected proof: `python -m pytest tests/test_bifrost_cockpit.py -q`; `python -m pytest tests/test_session_archive.py tests/test_bifrost_cockpit.py -q`; `node --check scripts/meridian-model-bridge.js`; `node scripts/meridian-model-bridge.js --self-test`; live smoke `GET /bridge/session-close-archive-proof`; `git diff --check origin/main...HEAD`.
+Pre-write check: `git fetch origin` confirmed `origin/main` still at `cfc02b5080fefa983aeee74607d5ee60381f0b91`; clean promotion worktree `C:\Users\scott\.codex\worktrees\meridian-ui-voc10-20260610` is ahead only by reviewed Archive commits; diff scope matches the four approved UI files before this ledger entry.
+Notes/blockers: promote only the reviewed Archive UI slice from the clean worktree, not from the dirty shared checkout. Route remains display-only/non-executing, with no backend code movement, no provider/model transport changes, no raw prompt/transcript/detail body exposure, and no archive mutation execution.
+Status: In progress
+```
+
+```text
 Time: 2026-06-11 00:01 -06:00
 Writer: front-end developer lane
 Intent: promote reviewed VOC10 preview-only voice command-intent UI wiring under backend/orchestrator ACK through 2026-06-11 00:11 -06:00.
