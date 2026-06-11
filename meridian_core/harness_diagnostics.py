@@ -181,8 +181,8 @@ class HarnessDiagnosticSnapshot:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "version": self.version,
-            "generated_at": self.generated_at,
+            "version": _display_safe_text(self.version),
+            "generated_at": _display_safe_text(self.generated_at),
             "display_only": True,
             "mutation_authorized": False,
             "automatic_intervention_authorized": False,
@@ -194,7 +194,7 @@ class HarnessDiagnosticSnapshot:
             "records": tuple(record.to_display_dict() for record in self.records),
             "backend_drift": self.backend_drift.to_display_dict(),
             "reliability": self.reliability.to_display_dict(),
-            "escalation_recommendation": self.escalation_recommendation,
+            "escalation_recommendation": _display_safe_text(self.escalation_recommendation),
             "guardrails": (
                 "display_only",
                 "no_process_inspection",
@@ -390,10 +390,31 @@ def _display_token(value: str) -> str:
     return clean
 
 
+def _display_safe_text(value: str) -> str:
+    clean = re.sub(r"\s+", " ", str(value).strip())
+    if not clean:
+        return "[redacted]"
+    if _looks_unsafe_text(clean):
+        return "[redacted]"
+    return clean[:240]
+
+
 def _looks_like_local_path(value: str) -> bool:
     return bool(
         re.search(
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/)",
+            value,
+        )
+    )
+
+
+def _looks_unsafe_text(value: str) -> bool:
+    return bool(
+        re.search(
+            r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
+            r"traceback|exception:|raw\s+(?:prompt|transcript|content|log)|"
+            r"provider\s+(?:response|output)|model\s+(?:response|output)|"
+            r"api[_-]?key|secret|token|password|sk-(?:proj-)?[A-Za-z0-9_-]{16,})",
             value,
         )
     )

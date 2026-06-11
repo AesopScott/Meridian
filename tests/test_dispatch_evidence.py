@@ -78,6 +78,20 @@ def test_payload_hash_contract_never_stores_prompt_body():
     assert "raw prompt body" not in str(display)
 
 
+def test_direct_payload_hash_display_sanitizes_unsafe_digest():
+    record = hash_prompt_payload("safe payload")
+    unsafe = type(record)(
+        payload_ref=record.payload_ref,
+        sha256="api_key=abcdef1234567890",
+        byte_length=record.byte_length,
+    )
+
+    display = unsafe.to_display_dict()
+
+    assert display["sha256"] == "[redacted]"
+    assert "abcdef1234567890" not in str(display)
+
+
 def test_trust_state_expiration_blocks_route_confidence():
     route = route_from_tier(1)
     proof = provider_identity_proof_from_metadata(

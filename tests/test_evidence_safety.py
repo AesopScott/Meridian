@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from meridian_core.evidence_safety import (
     EvidenceSafetyCategory,
+    EvidenceSafetyFinding,
     EvidenceSafetySeverity,
     EvidenceSafetyStatus,
     scan_evidence_artifact,
@@ -126,3 +127,20 @@ def test_none_text_fails_closed_as_missing_artifact_text():
     assert proof.status is EvidenceSafetyStatus.FAIL
     assert proof.findings[0].category is EvidenceSafetyCategory.MISSING_TEXT
     assert proof.findings[0].severity is EvidenceSafetySeverity.ERROR
+
+
+def test_direct_evidence_safety_finding_display_sanitizes_unsafe_fields():
+    finding = EvidenceSafetyFinding(
+        artifact_id=r"C:\Users\scott\Code\Meridian\artifact.log",
+        category=EvidenceSafetyCategory.SECRET,
+        severity=EvidenceSafetySeverity.CRITICAL,
+        reason=r"traceback at C:\Users\scott\Code\Meridian\secret.log with token=sk-proj-this-must-not-leak-1234567890",
+    )
+
+    display = finding.to_display_dict()
+    rendered = str(display)
+
+    assert display["artifact_id"] == "artifact:unsafe-id"
+    assert display["reason"] == "[redacted]"
+    assert r"C:\Users\scott" not in rendered
+    assert "this-must-not-leak" not in rendered

@@ -120,7 +120,7 @@ class StaleKnowledgeDetection:
     def to_display_dict(self) -> dict[str, object]:
         return {
             "state": self.state.value,
-            "reason": self.reason,
+            "reason": _safe_text(self.reason),
             "source_updated_at": _safe_date(self.source_updated_at),
             "knowledge_cutoff": _safe_date(self.knowledge_cutoff),
             "stale_after": _safe_date(self.stale_after),

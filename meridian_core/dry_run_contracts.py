@@ -95,10 +95,14 @@ class SafeNavigationPolicySummary:
     def to_display_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
-            "allowed_schemes": self.allowed_schemes,
-            "blocked_schemes": self.blocked_schemes,
+            "allowed_schemes": tuple(
+                _safe_label(scheme, "scheme") for scheme in self.allowed_schemes
+            ),
+            "blocked_schemes": tuple(
+                _safe_label(scheme, "scheme") for scheme in self.blocked_schemes
+            ),
             "warning_count": self.warning_count,
-            "warnings": self.warnings,
+            "warnings": tuple(_safe_label(warning, "navigation_warning") for warning in self.warnings),
         }
 
 
@@ -116,13 +120,17 @@ class ReversibleActionPlan:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "action_ref": self.action_ref,
-            "tool_ref": self.tool_ref,
-            "action_label": self.action_label,
-            "target_ref": self.target_ref,
-            "mutation_kind": self.mutation_kind,
+            "action_ref": _safe_ref(self.action_ref, "action:unsafe"),
+            "tool_ref": _safe_ref(self.tool_ref, "tool:unsafe"),
+            "action_label": _safe_label(self.action_label, "planned action"),
+            "target_ref": _safe_ref(self.target_ref, "target:unsafe") if self.target_ref else "",
+            "mutation_kind": _safe_label(self.mutation_kind, "mutation"),
             "reversible": self.reversible,
-            "rollback_plan_ref": self.rollback_plan_ref,
+            "rollback_plan_ref": (
+                _safe_ref(self.rollback_plan_ref, "rollback:unsafe")
+                if self.rollback_plan_ref
+                else ""
+            ),
             "would_execute": self.would_execute,
             "external_mutation_blocked": self.external_mutation_blocked,
         }
@@ -139,12 +147,14 @@ class ToolFailureRoutingRecord:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "route_ref": self.route_ref,
-            "failure_kind": self.failure_kind,
+            "route_ref": _safe_ref(self.route_ref, "failure-route:unsafe"),
+            "failure_kind": _safe_label(self.failure_kind, "tool_failure"),
             "severity": self.severity.value,
             "retryable": self.retryable,
-            "next_route": self.next_route,
-            "evidence_ref": self.evidence_ref,
+            "next_route": _safe_label(self.next_route, "manual_review"),
+            "evidence_ref": (
+                _safe_ref(self.evidence_ref, "evidence:unsafe") if self.evidence_ref else ""
+            ),
         }
 
 
@@ -157,9 +167,11 @@ class ScreenshotEvidenceLink:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "evidence_ref": self.evidence_ref,
-            "thumbnail_ref": self.thumbnail_ref,
-            "viewport_label": self.viewport_label,
+            "evidence_ref": _safe_ref(self.evidence_ref, "screenshot:unsafe"),
+            "thumbnail_ref": (
+                _safe_ref(self.thumbnail_ref, "thumbnail:unsafe") if self.thumbnail_ref else ""
+            ),
+            "viewport_label": _safe_label(self.viewport_label, "viewport"),
             "raw_content_available": self.raw_content_available,
         }
 
@@ -176,9 +188,19 @@ class VisualDiffProof:
     def to_display_dict(self) -> dict[str, object]:
         return {
             "status": self.status.value,
-            "baseline_ref": self.baseline_ref,
-            "candidate_ref": self.candidate_ref,
-            "diff_ref": self.diff_ref,
+            "baseline_ref": (
+                _safe_ref(self.baseline_ref, "visual-baseline:unsafe")
+                if self.baseline_ref
+                else ""
+            ),
+            "candidate_ref": (
+                _safe_ref(self.candidate_ref, "visual-candidate:unsafe")
+                if self.candidate_ref
+                else ""
+            ),
+            "diff_ref": (
+                _safe_ref(self.diff_ref, "visual-diff:unsafe") if self.diff_ref else ""
+            ),
             "changed_region_count": self.changed_region_count,
             "threshold": self.threshold,
         }
@@ -198,7 +220,9 @@ class ReviewAffordanceState:
             "can_approve": self.can_approve,
             "can_reject": self.can_reject,
             "requires_human_review": self.requires_human_review,
-            "blocked_reason": self.blocked_reason,
+            "blocked_reason": (
+                _safe_label(self.blocked_reason, "review_blocked") if self.blocked_reason else ""
+            ),
         }
 
 
@@ -213,7 +237,7 @@ class ToolDryRunPlan:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "plan_ref": self.plan_ref,
+            "plan_ref": _safe_ref(self.plan_ref, "plan:unsafe"),
             "dry_run_only": self.dry_run_only,
             "safe_navigation": self.safe_navigation.to_display_dict(),
             "reversible_actions": tuple(
@@ -235,7 +259,7 @@ class BrowserEvidence:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "evidence_ref": self.evidence_ref,
+            "evidence_ref": _safe_ref(self.evidence_ref, "browser-evidence:unsafe"),
             "dry_run_only": self.dry_run_only,
             "safe_navigation": self.safe_navigation.to_display_dict(),
             "screenshot_links": tuple(link.to_display_dict() for link in self.screenshot_links),

@@ -14,6 +14,7 @@ from meridian_core.context_provenance import (
     ProvenanceState,
     RetrievalEvidence,
     RetrievalExplanation,
+    StaleKnowledgeDetection,
     StaleKnowledgeState,
 )
 
@@ -223,3 +224,19 @@ def test_display_dicts_do_not_leak_paths_prompts_transcripts_or_provider_respons
     assert "provider response:" not in display_text.lower()
     assert "raw prompt:" not in display_text.lower()
     assert "full transcript:" not in display_text.lower()
+
+
+def test_direct_stale_knowledge_detection_display_sanitizes_reason():
+    detection = StaleKnowledgeDetection(
+        state=StaleKnowledgeState.STALE,
+        reason=r"reason embedding C:\Users\scott\Code\Meridian\secret.md",
+        source_updated_at="2026-01-01",
+        knowledge_cutoff="2025-01-01",
+        stale_after="2025-06-01",
+    )
+
+    display = detection.to_display_dict()
+    rendered = str(display)
+
+    assert display["reason"] == "[redacted]"
+    assert r"C:\Users\scott" not in rendered

@@ -63,7 +63,7 @@ class PromptPayloadHashRecord:
         return {
             "payload_ref": _safe_ref(self.payload_ref, "prompt-payload:redacted"),
             "algorithm": _safe_label(self.algorithm),
-            "sha256": self.sha256,
+            "sha256": _safe_digest(self.sha256),
             "byte_length": self.byte_length,
             "prompt_body_stored": self.prompt_body_stored,
         }
@@ -551,6 +551,13 @@ def _safe_ref(value: object, fallback: str) -> str:
 
 
 def _safe_label(value: object) -> str:
+    text = str(value).strip()
+    if not text or _UNSAFE_DISPLAY_PATTERN.search(text):
+        return "[redacted]"
+    return text
+
+
+def _safe_digest(value: object) -> str:
     text = str(value).strip()
     if not text or _UNSAFE_DISPLAY_PATTERN.search(text):
         return "[redacted]"

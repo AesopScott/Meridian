@@ -4,10 +4,15 @@ from __future__ import annotations
 
 from meridian_core.release_readiness import (
     ProofPackageEvidence,
+    ProofPackageRecord,
     ProofPackageStatus,
     ReleaseReadinessClassification,
+    ReleaseReadinessSnapshot,
     RollbackGate,
+    RollbackGateRecord,
     RollbackGateState,
+    RollbackGateSummary,
+    ProofPackageManifest,
     build_release_readiness_snapshot,
 )
 
@@ -196,3 +201,71 @@ def test_display_records_do_not_leak_local_paths_or_raw_logs():
     assert "this-must-not-leak" not in display_text
     assert "private rollback chat" not in display_text
     assert "[redacted]" in display_text
+
+
+def test_direct_proof_package_record_display_sanitizes_unsafe_fields():
+    record = ProofPackageRecord(
+        manifest_id=r"C:\Users\scott\proof-id",
+        requirement="raw prompt: private requirement text",
+        proof_ref="/home/scott/proof.log",
+        status=ProofPackageStatus.STALE,
+        captured_at_seconds=NOW - 1,
+        age_seconds=1,
+        max_age_seconds=600,
+        content_digest=r"C:\Users\scott\Code\Meridian\digest",
+        reason_tags=("provider response: hidden response body",),
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["manifest_id"] == "[redacted]"
+    assert display["requirement"] == "[redacted]"
+    assert display["proof_ref"] == "[redacted]"
+    assert display["content_digest"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]",)
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered
+    assert "private requirement text" not in rendered
+    assert "hidden response body" not in rendered
+
+
+def test_direct_rollback_gate_record_display_sanitizes_unsafe_fields():
+    record = RollbackGateRecord(
+        gate_id=r"C:\Users\scott\rollback-id",
+        label="model response: private label",
+        state=RollbackGateState.OPEN,
+        blocking=True,
+        summary=r"summary at C:\Users\scott\rollback.md",
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["gate_id"] == "[redacted]"
+    assert display["label"] == "[redacted]"
+    assert display["summary"] == "[redacted]"
+    assert r"C:\Users\scott" not in rendered
+    assert "private label" not in rendered
+
+
+def test_direct_release_readiness_snapshot_display_sanitizes_unsafe_fields():
+    snapshot = ReleaseReadinessSnapshot(
+        release_id=r"C:\Users\scott\release",
+        generated_at_seconds=NOW,
+        classification=ReleaseReadinessClassification.NOT_READY,
+        ready=False,
+        proof_package_manifest=ProofPackageManifest(records=()),
+        rollback_gate_summary=RollbackGateSummary(records=()),
+        cannot_release_because=(r"missing proof at C:\Users\scott\proof",),
+        reason_tags=("provider response: hidden reason",),
+    )
+
+    display = snapshot.to_display_dict()
+    rendered = str(display)
+
+    assert display["release_id"] == "[redacted]"
+    assert display["cannot_release_because"] == ("[redacted]",)
+    assert display["reason_tags"] == ("[redacted]",)
+    assert r"C:\Users\scott" not in rendered
+    assert "hidden reason" not in rendered

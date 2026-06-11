@@ -87,15 +87,17 @@ class ProofPackageRecord:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "manifest_id": self.manifest_id,
-            "requirement": self.requirement,
-            "proof_ref": self.proof_ref,
+            "manifest_id": _display_safe_text(self.manifest_id),
+            "requirement": _display_safe_text(self.requirement),
+            "proof_ref": _display_safe_text(self.proof_ref),
             "status": self.status.value,
             "captured_at_seconds": self.captured_at_seconds,
             "age_seconds": self.age_seconds,
             "max_age_seconds": self.max_age_seconds,
-            "content_digest": self.content_digest,
-            "reason_tags": self.reason_tags,
+            "content_digest": (
+                None if self.content_digest is None else _display_safe_text(self.content_digest)
+            ),
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
         }
 
 
@@ -147,11 +149,11 @@ class RollbackGateRecord:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "gate_id": self.gate_id,
-            "label": self.label,
+            "gate_id": _display_safe_text(self.gate_id),
+            "label": _display_safe_text(self.label),
             "state": self.state.value,
             "blocking": self.blocking,
-            "summary": self.summary,
+            "summary": _display_safe_text(self.summary),
         }
 
 
@@ -197,14 +199,16 @@ class ReleaseReadinessSnapshot:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "release_id": self.release_id,
+            "release_id": _display_safe_text(self.release_id),
             "generated_at_seconds": self.generated_at_seconds,
             "classification": self.classification.value,
             "ready": self.ready,
             "display_only": self.display_only,
             "mutation_authorized": self.mutation_authorized,
-            "cannot_release_because": self.cannot_release_because,
-            "reason_tags": self.reason_tags,
+            "cannot_release_because": tuple(
+                _display_safe_text(reason) for reason in self.cannot_release_because
+            ),
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
             "proof_package_manifest": self.proof_package_manifest.to_display_dict(),
             "rollback_gate_summary": self.rollback_gate_summary.to_display_dict(),
         }

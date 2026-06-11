@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 from meridian_core.review_intelligence import (
+    DuplicateFindingGroup,
     RegressionRiskLabel,
+    RepairVerification,
     RepairVerificationState,
+    ReviewFindingFingerprint,
     ReviewFindingInput,
     ReviewFindingSeverity,
+    SeverityCalibration,
+    WaiverVisibility,
     build_review_intelligence,
     fingerprint_finding,
 )
@@ -174,3 +179,90 @@ def test_display_dicts_do_not_expose_raw_finding_bodies_logs_or_unsafe_refs():
     assert group["fingerprint"]["source_ref"].startswith("source:unsafe:")
     assert group["fingerprint"]["artifact_ref"].startswith("artifact:unsafe:")
     assert group["repair"]["evidence_refs"][0].startswith("evidence:unsafe:")
+
+
+def test_direct_review_finding_fingerprint_display_sanitizes_unsafe_refs():
+    fingerprint = ReviewFindingFingerprint(
+        fingerprint="rfp:deadbeef",
+        source_ref=r"C:\Users\scott\source",
+        artifact_ref="/home/scott/artifact",
+        rule_ref=r"C:\Users\scott\rule",
+    )
+
+    display = fingerprint.to_display_dict()
+    rendered = str(display)
+
+    assert display["fingerprint"] == "rfp:deadbeef"
+    assert display["source_ref"].startswith("source:unsafe:")
+    assert display["artifact_ref"].startswith("artifact:unsafe:")
+    assert display["rule_ref"].startswith("rule:unsafe:")
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered
+
+
+def test_direct_severity_calibration_display_sanitizes_rationale():
+    calibration = SeverityCalibration(
+        severity=ReviewFindingSeverity.ERROR,
+        rationale=r"traceback at C:\Users\scott\Code\Meridian\review.log",
+    )
+
+    display = calibration.to_display_dict()
+    rendered = str(display)
+
+    assert display["rationale"] == "[redacted]"
+    assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_repair_verification_display_sanitizes_evidence_refs():
+    repair = RepairVerification(
+        state=RepairVerificationState.FIXED,
+        evidence_refs=(r"C:\Users\scott\evidence", "/home/scott/log"),
+    )
+
+    display = repair.to_display_dict()
+    rendered = str(display)
+
+    assert all(ref.startswith("evidence:unsafe:") for ref in display["evidence_refs"])
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered
+
+
+def test_direct_waiver_visibility_display_sanitizes_waiver_ref():
+    waiver = WaiverVisibility(
+        present=True,
+        waiver_ref=r"C:\Users\scott\waiver",
+        reason_visible=False,
+    )
+
+    display = waiver.to_display_dict()
+    rendered = str(display)
+
+    assert display["waiver_ref"].startswith("waiver:unsafe:")
+    assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_duplicate_finding_group_display_sanitizes_sources():
+    group = DuplicateFindingGroup(
+        fingerprint=ReviewFindingFingerprint(
+            fingerprint="rfp:cafebabe",
+            source_ref="source:ok",
+            artifact_ref="artifact:ok",
+            rule_ref="rule:ok",
+        ),
+        duplicate_count=1,
+        sources=(r"C:\Users\scott\source-a", "/home/scott/source-b"),
+        severity=SeverityCalibration(
+            severity=ReviewFindingSeverity.INFO,
+            rationale="highest observed severity is info",
+        ),
+        repair=RepairVerification(state=RepairVerificationState.FIXED),
+        waiver=WaiverVisibility(present=False),
+        regression_risk=RegressionRiskLabel.LOW,
+    )
+
+    display = group.to_display_dict()
+    rendered = str(display)
+
+    assert all(source.startswith("source:unsafe:") for source in display["sources"])
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered

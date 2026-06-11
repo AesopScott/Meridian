@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from meridian_core.workflow_intelligence import (
+    BlockedLaneSummary,
     FailureRecoveryAction,
+    FailureRecoveryRecommendation,
     LaneCapacityStatus,
     TaskResultInput,
     TaskResultOutcome,
+    TaskResultSummary,
     WorkflowTaskDefinition,
+    WorkflowTaskPlan,
     WorkflowTaskReadiness,
     ingest_task_results,
     plan_workflow_tasks,
@@ -200,3 +204,71 @@ def test_display_dicts_do_not_leak_raw_transcripts_logs_or_local_paths():
     assert "raw transcript" not in display_text
     assert report.to_display_dict()["task_plans"][0]["task_ref"].startswith("task:unsafe:")
     assert result.to_display_dict()["artifact_refs"][0].startswith("artifact:unsafe:")
+
+
+def test_direct_failure_recovery_recommendation_display_sanitizes_message_and_tags():
+    recommendation = FailureRecoveryRecommendation(
+        task_ref="task:fine",
+        action=FailureRecoveryAction.ESCALATE,
+        reason_tags=("provider response: hidden failure reason",),
+        message=r"escalation note at C:\Users\scott\private.log",
+    )
+
+    display = recommendation.to_display_dict()
+    rendered = str(display)
+
+    assert display["message"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]",)
+    assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_workflow_task_plan_display_sanitizes_reason_tags():
+    plan = WorkflowTaskPlan(
+        task_ref="task:fine",
+        lane="lane",
+        title="title",
+        dependency_refs=(),
+        readiness=WorkflowTaskReadiness.BLOCKED,
+        sequence=None,
+        capacity_units=1,
+        blocking_refs=(),
+        reason_tags=(r"raw transcript: hidden tag at C:\Users\scott\file",),
+    )
+
+    rendered = str(plan.to_display_dict())
+
+    assert plan.to_display_dict()["reason_tags"] == ("[redacted]",)
+    assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_blocked_lane_summary_display_sanitizes_reason_tags():
+    summary = BlockedLaneSummary(
+        lane="lane",
+        blocked_count=1,
+        blocking_refs=(),
+        reason_tags=("provider response: hidden blocker reason",),
+    )
+
+    rendered = str(summary.to_display_dict())
+
+    assert summary.to_display_dict()["reason_tags"] == ("[redacted]",)
+    assert "hidden blocker reason" not in rendered
+
+
+def test_direct_task_result_summary_display_sanitizes_reason_tags():
+    summary = TaskResultSummary(
+        task_ref="task:fine",
+        lane="lane",
+        outcome=TaskResultOutcome.FAILED,
+        headline="task failed",
+        artifact_refs=(),
+        failure_kind="unknown",
+        retryable=False,
+        duration_seconds=None,
+        reason_tags=(r"traceback at C:\Users\scott\file",),
+    )
+
+    rendered = str(summary.to_display_dict())
+
+    assert summary.to_display_dict()["reason_tags"] == ("[redacted]",)
+    assert r"C:\Users\scott" not in rendered

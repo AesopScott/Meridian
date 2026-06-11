@@ -84,7 +84,7 @@ class WorkflowTaskPlan:
             "blocking_refs": tuple(
                 _safe_ref(ref, "task:unsafe") for ref in self.blocking_refs
             ),
-            "reason_tags": self.reason_tags,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
         }
 
 
@@ -127,7 +127,7 @@ class BlockedLaneSummary:
             "blocking_refs": tuple(
                 _safe_ref(ref, "task:unsafe") for ref in self.blocking_refs
             ),
-            "reason_tags": self.reason_tags,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
         }
 
 
@@ -175,7 +175,7 @@ class TaskResultSummary:
             "failure_kind": _display_safe_text(self.failure_kind),
             "retryable": self.retryable,
             "duration_seconds": self.duration_seconds,
-            "reason_tags": self.reason_tags,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
         }
 
 
@@ -190,8 +190,8 @@ class FailureRecoveryRecommendation:
         return {
             "task_ref": _safe_ref(self.task_ref, "task:unsafe"),
             "action": self.action.value,
-            "reason_tags": self.reason_tags,
-            "message": self.message,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
+            "message": _display_safe_text(self.message),
         }
 
 

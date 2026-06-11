@@ -6,13 +6,21 @@ import builtins
 import subprocess
 
 from meridian_core.dry_run_contracts import (
+    BrowserEvidence,
     BrowserNavigationInput,
     DryRunReviewState,
     DryRunSeverity,
+    ReversibleActionPlan,
+    ReviewAffordanceState,
+    SafeNavigationPolicySummary,
     ScreenshotEvidenceInput,
+    ScreenshotEvidenceLink,
     ToolActionInput,
+    ToolDryRunPlan,
     ToolFailureInput,
+    ToolFailureRoutingRecord,
     VisualDiffInput,
+    VisualDiffProof,
     VisualDiffStatus,
     build_browser_evidence,
     build_tool_dry_run_plan,
@@ -205,3 +213,182 @@ def test_display_records_do_not_leak_local_paths_raw_content_or_secret_values():
     assert "raw content" not in display_text
     assert "browser-evidence:unsafe:" in display_text
     assert "target:unsafe:" in display_text
+
+
+def test_direct_reversible_action_plan_display_sanitizes_unsafe_fields():
+    plan = ReversibleActionPlan(
+        action_ref=r"C:\Users\scott\action-id",
+        tool_ref=r"C:\Users\scott\tool",
+        action_label="raw prompt: hidden label body",
+        target_ref="/home/scott/target",
+        mutation_kind="provider response: hidden kind",
+        reversible=True,
+        rollback_plan_ref=r"\\share\path\rollback\\",
+        would_execute=False,
+        external_mutation_blocked=True,
+    )
+
+    display = plan.to_display_dict()
+    rendered = str(display)
+
+    assert "action:unsafe:" in str(display["action_ref"])
+    assert "tool:unsafe:" in str(display["tool_ref"])
+    assert display["action_label"] == "planned action"
+    assert "target:unsafe:" in str(display["target_ref"])
+    assert display["mutation_kind"] == "mutation"
+    assert "rollback:unsafe:" in str(display["rollback_plan_ref"])
+    assert r"C:\Users\scott" not in rendered
+    assert "hidden label body" not in rendered
+    assert "hidden kind" not in rendered
+
+
+def test_direct_tool_failure_routing_display_sanitizes_unsafe_fields():
+    record = ToolFailureRoutingRecord(
+        route_ref=r"C:\Users\scott\route",
+        failure_kind="raw transcript: private failure body",
+        severity=DryRunSeverity.ERROR,
+        retryable=False,
+        next_route="provider response: hidden next route",
+        evidence_ref="/home/scott/evidence",
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert "failure-route:unsafe:" in str(display["route_ref"])
+    assert display["failure_kind"] == "tool_failure"
+    assert display["next_route"] == "manual_review"
+    assert "evidence:unsafe:" in str(display["evidence_ref"])
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered
+
+
+def test_direct_screenshot_evidence_link_display_sanitizes_unsafe_fields():
+    link = ScreenshotEvidenceLink(
+        evidence_ref=r"C:\Users\scott\screenshot.png",
+        thumbnail_ref="/home/scott/thumb.png",
+        viewport_label="raw prompt: hidden viewport",
+        raw_content_available=False,
+    )
+
+    display = link.to_display_dict()
+    rendered = str(display)
+
+    assert "screenshot:unsafe:" in str(display["evidence_ref"])
+    assert "thumbnail:unsafe:" in str(display["thumbnail_ref"])
+    assert display["viewport_label"] == "viewport"
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered
+
+
+def test_direct_visual_diff_proof_display_sanitizes_unsafe_fields():
+    proof = VisualDiffProof(
+        status=VisualDiffStatus.CHANGED,
+        baseline_ref=r"C:\Users\scott\baseline",
+        candidate_ref="/home/scott/candidate",
+        diff_ref=r"C:\Users\scott\diff",
+        changed_region_count=1,
+        threshold=0.1,
+    )
+
+    display = proof.to_display_dict()
+    rendered = str(display)
+
+    assert "visual-baseline:unsafe:" in str(display["baseline_ref"])
+    assert "visual-candidate:unsafe:" in str(display["candidate_ref"])
+    assert "visual-diff:unsafe:" in str(display["diff_ref"])
+    assert r"C:\Users\scott" not in rendered
+    assert "/home/scott" not in rendered
+
+
+def test_direct_review_affordance_state_display_sanitizes_blocked_reason():
+    state = ReviewAffordanceState(
+        state=DryRunReviewState.BLOCKED,
+        can_approve=False,
+        can_reject=True,
+        requires_human_review=True,
+        blocked_reason="provider response: hidden block reason",
+    )
+
+    display = state.to_display_dict()
+    rendered = str(display)
+
+    assert display["blocked_reason"] == "review_blocked"
+    assert "hidden block reason" not in rendered
+
+
+def test_direct_tool_dry_run_plan_display_sanitizes_plan_ref():
+    plan = ToolDryRunPlan(
+        plan_ref=r"C:\Users\scott\plan",
+        safe_navigation=SafeNavigationPolicySummary(
+            status=DryRunReviewState.READY,
+            allowed_schemes=(),
+            blocked_schemes=(),
+            warning_count=0,
+            warnings=(),
+        ),
+        reversible_actions=(),
+        failure_routing=(),
+        review=ReviewAffordanceState(
+            state=DryRunReviewState.READY,
+            can_approve=True,
+            can_reject=True,
+            requires_human_review=False,
+        ),
+    )
+
+    rendered = str(plan.to_display_dict())
+
+    assert "plan:unsafe:" in rendered
+    assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_browser_evidence_display_sanitizes_evidence_ref():
+    evidence = BrowserEvidence(
+        evidence_ref=r"C:\Users\scott\evidence",
+        safe_navigation=SafeNavigationPolicySummary(
+            status=DryRunReviewState.READY,
+            allowed_schemes=(),
+            blocked_schemes=(),
+            warning_count=0,
+            warnings=(),
+        ),
+        screenshot_links=(),
+        visual_diff=VisualDiffProof(
+            status=VisualDiffStatus.NOT_PROVIDED,
+            baseline_ref="",
+            candidate_ref="",
+            diff_ref="",
+            changed_region_count=0,
+            threshold=0.0,
+        ),
+        review=ReviewAffordanceState(
+            state=DryRunReviewState.READY,
+            can_approve=True,
+            can_reject=True,
+            requires_human_review=False,
+        ),
+    )
+
+    rendered = str(evidence.to_display_dict())
+
+    assert "browser-evidence:unsafe:" in rendered
+    assert r"C:\Users\scott" not in rendered
+
+
+def test_direct_safe_navigation_summary_display_sanitizes_unsafe_schemes_and_warnings():
+    summary = SafeNavigationPolicySummary(
+        status=DryRunReviewState.BLOCKED,
+        allowed_schemes=("http",),
+        blocked_schemes=("raw prompt: hidden scheme",),
+        warning_count=1,
+        warnings=(r"navigation at C:\Users\scott\private blocked",),
+    )
+
+    display = summary.to_display_dict()
+    rendered = str(display)
+
+    assert display["blocked_schemes"] == ("scheme",)
+    assert display["warnings"] == ("navigation_warning",)
+    assert r"C:\Users\scott" not in rendered
+    assert "hidden scheme" not in rendered
