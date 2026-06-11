@@ -120,7 +120,18 @@ Status: Complete | Aborted | Blocked
 
 ## Active Coordination
 
-No active write lease.
+```text
+Time: 2026-06-10 22:20 -06:00
+Writer: Meridian coordinator
+Requested action: push
+Target base: origin/main f7e239fac61577c3a8046cdfb8b304c99b75b62b
+Path-limited scope: docs/FileMap.md; docs/voice-io-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/voice_io.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_voice_io.py; docs/main-write-coordination-ledger.md
+Reason: land Review A/B-cleared backend-only Voice I/O authority boundary for VOC1/VOC3-VOC9.
+Proof to run: python -m pytest tests/test_voice_io.py tests/test_package_api.py tests/test_filemap.py -q; python -m pytest -q; scoped git diff --check.
+Expected duration: 10 minutes
+Requires other party ACK: yes
+Status: ACK granted by frontend lane in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for this exact scope and hash 2635794bf91af62a9c06caa1e8a6046a048d8187.
+```
 
 ## Standing Acknowledgements
 
