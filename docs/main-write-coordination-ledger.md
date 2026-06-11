@@ -296,6 +296,20 @@ No active write lease.
 Start new entries below this line.
 
 ```text
+Time: 2026-06-11 11:12 -06:00
+Writer: Meridian coordinator
+Intent: complete backend V2.5 PR #3 merge under renewed UI-lane ACK.
+Action completed: merged reviewed backend PR #3 from the clean PR path, then verified the resulting `origin/main` from a clean detached verification worktree.
+Commit(s): PR #3 tip `033531dfa841267c023af190fd41e920f427d262`; merge commit `9a58075bf28126138a59004dcf53823898ad4642`; this ledger completion commit.
+Pushed to origin/main: yes
+Files changed: backend modules, backend tests, docs/FileMap.md, package export files from PR #3; docs/main-write-coordination-ledger.md for completion bookkeeping only.
+Proof run: `python -m pytest tests/test_evidence_safety.py tests/test_dispatch_evidence.py tests/test_filemap_intelligence.py tests/test_proof_quality.py tests/test_harness_diagnostics.py tests/test_promotion_provenance.py tests/test_review_intelligence.py tests/test_context_provenance.py tests/test_decision_transparency.py tests/test_dry_run_contracts.py tests/test_release_readiness.py tests/test_workflow_intelligence.py -q` -> 141 passed; `python -m pytest -q` -> 3760 passed; `python -m compileall -q meridian_core` passed; `git diff --check HEAD~1..HEAD` passed.
+Final shared main status: `origin/main` advanced to merge commit `9a58075bf28126138a59004dcf53823898ad4642`; clean verification worktree at that commit was clean/aligned with `origin/main` before this ledger-only completion commit.
+Notes/blockers: renewed ACK was granted by the UI lane in thread `019ea586-a296-7833-b4cd-fdab7683a8a8`; scope stayed limited to backend PR #3 exact reviewed tip. No UI-owned files, `index.html`, `scripts/meridian-model-bridge.js`, `docs/ui-integration-checklist.md`, or dirty shared-checkout artifacts were used as promotion sources.
+Status: Complete
+```
+
+```text
 Time: 2026-06-10 22:42 -06:00
 Writer: Meridian coordinator
 Intent: land Review A/B-cleared backend-only Routine authority boundary under UI-lane ACK.
