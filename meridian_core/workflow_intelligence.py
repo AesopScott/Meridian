@@ -521,6 +521,7 @@ def _looks_unsafe(value: str) -> bool:
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
             r"\n|traceback|exception:|api[_-]?key|secret|token|password|"
             r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|"
+            r"github_pat_[A-Za-z0-9_]{20,}|"
             r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)\s*:|"
             r"(?:provider|model)\s+(?:response|output)\s*:)",
             value,

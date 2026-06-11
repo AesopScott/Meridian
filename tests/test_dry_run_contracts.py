@@ -477,3 +477,26 @@ def test_tool_dry_run_plan_redacts_github_token_shaped_refs():
     for prefix in ("ghp_", "gho_", "ghs_"):
         assert prefix not in rendered
     assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+
+
+def test_tool_dry_run_plan_redacts_fine_grained_github_pat_refs():
+    pat = "github_pat_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    plan = build_tool_dry_run_plan(
+        f"plan:{pat}",
+        (
+            ToolActionInput(
+                tool_name=pat,
+                action_label="would run command",
+                target_ref=pat,
+                mutation_kind="write",
+                reversible=True,
+                rollback_plan_ref=pat,
+            ),
+        ),
+    )
+
+    rendered = str(plan.to_display_dict())
+
+    assert "github_pat_" not in rendered
+    assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+    assert "ABCDEFGHIJKLMNOPQRSTUVWXYZ" not in rendered

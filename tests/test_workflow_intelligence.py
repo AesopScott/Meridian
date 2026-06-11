@@ -359,3 +359,23 @@ def test_direct_failure_recovery_recommendation_redacts_github_token_shaped_refs
     for prefix in ("ghp_", "ghs_"):
         assert prefix not in rendered
     assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+
+
+def test_direct_failure_recovery_recommendation_redacts_fine_grained_github_pat():
+    pat = "github_pat_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    recommendation = FailureRecoveryRecommendation(
+        task_ref=f"task:{pat}",
+        action=FailureRecoveryAction.ESCALATE,
+        reason_tags=(pat,),
+        message=pat,
+    )
+
+    display = recommendation.to_display_dict()
+    rendered = str(display)
+
+    assert display["task_ref"].startswith("task:unsafe:")
+    assert display["message"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]",)
+    assert "github_pat_" not in rendered
+    assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+    assert "ABCDEFGHIJKLMNOPQRSTUVWXYZ" not in rendered

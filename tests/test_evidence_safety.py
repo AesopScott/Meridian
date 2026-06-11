@@ -270,3 +270,36 @@ def test_direct_finding_redacts_github_token_shaped_artifact_id():
         assert display["artifact_id"] == "artifact:unsafe-id"
         assert prefix not in rendered
         assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+
+
+def test_direct_finding_redacts_fine_grained_github_pat_artifact_id():
+    pat = "github_pat_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    finding = EvidenceSafetyFinding(
+        artifact_id=f"artifact:{pat}",
+        category=EvidenceSafetyCategory.SECRET,
+        severity=EvidenceSafetySeverity.CRITICAL,
+        reason=f"possible credential or secret token detected {pat}",
+    )
+    display = finding.to_display_dict()
+    rendered = str(display)
+    assert display["artifact_id"] == "artifact:unsafe-id"
+    assert display["reason"] == "[redacted]"
+    assert "github_pat_" not in rendered
+    assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+    assert "ABCDEFGHIJKLMNOPQRSTUVWXYZ" not in rendered
+
+
+def test_scan_evidence_artifact_flags_fine_grained_github_pat_secret():
+    pat = "github_pat_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    proof = scan_evidence_artifact(
+        artifact_id="proof:fine-grained-pat",
+        text=f"leaked credential value {pat} should be flagged",
+    )
+
+    assert proof.status is EvidenceSafetyStatus.FAIL
+    categories = tuple(f.category for f in proof.findings)
+    assert EvidenceSafetyCategory.SECRET in categories
+    rendered = str(proof.to_display_dict())
+    assert "github_pat_" not in rendered
+    assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+    assert "ABCDEFGHIJKLMNOPQRSTUVWXYZ" not in rendered

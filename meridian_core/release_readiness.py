@@ -381,4 +381,6 @@ def _looks_unsafe(value: str) -> bool:
         return True
     if re.search(r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}", value):
         return True
-    return bool(re.search(r"gh[pousr]_[A-Za-z0-9_]{20,}", value))
+    if re.search(r"gh[pousr]_[A-Za-z0-9_]{20,}", value):
+        return True
+    return bool(re.search(r"github_pat_[A-Za-z0-9_]{20,}", value))

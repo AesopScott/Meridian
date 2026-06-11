@@ -100,6 +100,7 @@ _RULES: tuple[_PatternRule, ...] = (
             r"(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}"
             r"|sk-(?:proj-)?[A-Za-z0-9_-]{16,}"
             r"|gh[pousr]_[A-Za-z0-9_]{20,}"
+            r"|github_pat_[A-Za-z0-9_]{20,}"
             r")"
         ),
     ),
@@ -240,7 +241,8 @@ def _looks_like_unsafe_reason(value: str) -> bool:
             r"provider\s+(?:response|output)|model\s+(?:response|output)|"
             r"\b(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}|"
             r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|"
-            r"gh[pousr]_[A-Za-z0-9_]{20,})",
+            r"gh[pousr]_[A-Za-z0-9_]{20,}|"
+            r"github_pat_[A-Za-z0-9_]{20,})",
             value,
         )
     )

@@ -387,6 +387,7 @@ def _looks_like_path_or_log(value: str) -> bool:
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
             r"\n|traceback|exception:|api[_-]?key|secret|token|password|"
             r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|"
+            r"github_pat_[A-Za-z0-9_]{20,}|"
             r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)|"
             r"(?:provider|model)\s+(?:response|output))",
             value,

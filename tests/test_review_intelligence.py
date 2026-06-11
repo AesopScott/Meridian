@@ -337,3 +337,30 @@ def test_direct_duplicate_finding_group_redacts_github_token_shaped_sources():
     for prefix in ("ghp_", "gho_", "ghs_", "ghu_"):
         assert prefix not in rendered
     assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+
+
+def test_direct_duplicate_finding_group_redacts_fine_grained_github_pat_sources():
+    pat = "github_pat_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    group = DuplicateFindingGroup(
+        fingerprint=ReviewFindingFingerprint(
+            fingerprint="rfp:cafebabe",
+            source_ref=pat,
+            artifact_ref=pat,
+            rule_ref=pat,
+        ),
+        duplicate_count=1,
+        sources=(pat,),
+        severity=SeverityCalibration(
+            severity=ReviewFindingSeverity.INFO,
+            rationale="highest observed severity is info",
+        ),
+        repair=RepairVerification(state=RepairVerificationState.FIXED),
+        waiver=WaiverVisibility(present=False),
+        regression_risk=RegressionRiskLabel.LOW,
+    )
+
+    rendered = str(group.to_display_dict())
+
+    assert "github_pat_" not in rendered
+    assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+    assert "ABCDEFGHIJKLMNOPQRSTUVWXYZ" not in rendered

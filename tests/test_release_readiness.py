@@ -269,6 +269,29 @@ def test_direct_proof_package_record_redacts_github_token_digest():
     assert "ghp_abcdefghijklmnopqrstuvwxyz" not in rendered
 
 
+def test_direct_proof_package_record_redacts_fine_grained_github_pat_digest():
+    pat = "github_pat_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    record = ProofPackageRecord(
+        manifest_id="proof-package:fine",
+        requirement="release proof requirement",
+        proof_ref="proof:fine",
+        status=ProofPackageStatus.PRESENT,
+        captured_at_seconds=NOW - 1,
+        age_seconds=1,
+        max_age_seconds=600,
+        content_digest=pat,
+        reason_tags=("proof_present",),
+    )
+
+    display = record.to_display_dict()
+    rendered = str(display)
+
+    assert display["content_digest"] == "[redacted]"
+    assert "github_pat_" not in rendered
+    assert "abcdefghijklmnopqrstuvwxyz0123456789" not in rendered
+    assert "ABCDEFGHIJKLMNOPQRSTUVWXYZ" not in rendered
+
+
 def test_direct_proof_package_record_redacts_traceback_reason_tag():
     record = ProofPackageRecord(
         manifest_id="proof-package:fine",
