@@ -48,7 +48,13 @@ Approved implementation files: docs/FileMap.md, docs/backlog-authority-contract.
 Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout changes.
 Pre-write check: `origin/main` fetched at `0e6f02105c6cd8d1cfa0cb9cb18a63f06b069c48`; BAK branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
 Proof expected before push: focused BAK/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
-Status: In progress
+Action completed: pushed reviewed BAK backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `2e0c93142`, `7e5e3689e`
+Pushed to origin/main: yes
+Files changed: docs/FileMap.md, docs/backlog-authority-contract.md, meridian_core/__init__.py, meridian_core/backlog.py, meridian_core/filemap.py, tests/test_backlog.py, tests/test_filemap.py, tests/test_package_api.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_backlog.py tests/test_package_api.py tests/test_filemap.py -q` -> 96 passed; `python -m pytest -q` -> 3419 passed; `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: pending final fetch/status after completion ledger push.
+Status: Complete
 ```
 
 ## Intent Template
