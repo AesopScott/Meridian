@@ -89,9 +89,9 @@ class ReviewFindingFingerprint:
     def to_display_dict(self) -> dict[str, str]:
         return {
             "fingerprint": self.fingerprint,
-            "source_ref": self.source_ref,
-            "artifact_ref": self.artifact_ref,
-            "rule_ref": self.rule_ref,
+            "source_ref": _safe_ref(self.source_ref, "source:unsafe"),
+            "artifact_ref": _safe_ref(self.artifact_ref, "artifact:unsafe"),
+            "rule_ref": _safe_ref(self.rule_ref, "rule:unsafe"),
         }
 
 
@@ -103,7 +103,7 @@ class SeverityCalibration:
     def to_display_dict(self) -> dict[str, str]:
         return {
             "severity": self.severity.value,
-            "rationale": self.rationale,
+            "rationale": _safe_text(self.rationale),
         }
 
 
@@ -123,7 +123,7 @@ class RepairVerification:
         return {
             "state": self.state.value,
             "is_closed": self.is_closed,
-            "evidence_refs": self.evidence_refs,
+            "evidence_refs": tuple(_safe_ref(ref, "evidence:unsafe") for ref in self.evidence_refs),
         }
 
 
@@ -136,7 +136,9 @@ class WaiverVisibility:
     def to_display_dict(self) -> dict[str, object]:
         return {
             "present": self.present,
-            "waiver_ref": self.waiver_ref,
+            "waiver_ref": (
+                _safe_ref(self.waiver_ref, "waiver:unsafe") if self.waiver_ref else ""
+            ),
             "reason_visible": self.reason_visible,
         }
 
@@ -155,7 +157,7 @@ class DuplicateFindingGroup:
         return {
             "fingerprint": self.fingerprint.to_display_dict(),
             "duplicate_count": self.duplicate_count,
-            "sources": self.sources,
+            "sources": tuple(_safe_ref(source, "source:unsafe") for source in self.sources),
             "severity": self.severity.to_display_dict(),
             "repair": self.repair.to_display_dict(),
             "waiver": self.waiver.to_display_dict(),
@@ -370,11 +372,24 @@ def _safe_ref(value: str, fallback: str) -> str:
     return clean
 
 
+def _safe_text(value: str) -> str:
+    clean = re.sub(r"\s+", " ", str(value).strip())
+    if not clean:
+        return "[redacted]"
+    if _looks_like_path_or_log(clean):
+        return "[redacted]"
+    return clean[:240]
+
+
 def _looks_like_path_or_log(value: str) -> bool:
     return bool(
         re.search(
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
-            r"\n|traceback|exception:|api[_-]?key|secret|token|password)",
+            r"\n|traceback|exception:|api[_-]?key|secret|token|password|"
+            r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|"
+            r"github_pat_[A-Za-z0-9_]{20,}|"
+            r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)|"
+            r"(?:provider|model)\s+(?:response|output))",
             value,
         )
     )

@@ -30,11 +30,11 @@
 | Relay / Model | built | review-cleared | review-cleared | partial via Prime source refs | wired | review-cleared | Auto disabled | Post-V2 live provider telemetry and operations gating; keep model-call mechanics Relay/Model-owned. |
 | Compass | baseline | review-cleared | review-cleared | partial via Prime source refs | wired | review-cleared | no writes | Post-V2 Prime/live orchestration integration or operations gating. |
 | Vulcan / Session Lifecycle | baseline | review-cleared | review-cleared | partial via Prime/Beacon advisory refs | wired | review-cleared | no live command execution | Post-V2 live session operation gating and recovery UX. |
-| Aegis | built | built | built | wired into Prime risk input | partial | review-cleared core; Prime binding awaiting review | proof gates only | Runtime Logic UI for Aegis and live proof packet surfaces. |
+| Aegis | built | built | built | wired into Prime risk input | partial | review-cleared core + Prime risk binding | proof gates only | UI-owned Runtime Logic completion and live proof packet surfaces. |
 | Bifrost | built | review-cleared | review-cleared | renders backend snapshots | review-cleared | review-cleared | UI only | Post-V2 operations-gated UI integration. |
 | Echo | built | review-cleared | review-cleared | typed Prime ingestion, not live-query wired | not wired | review-cleared core | query only | Post-V2 live memory feed into Prime runtime packet. |
 | Atlas | built | review-cleared | review-cleared | typed Prime ingestion, not live-query wired | not wired | review-cleared core + adapter | retrieval only | Post-V2 live retrieval feed into Prime runtime packet. |
-| Beacon | baseline/partial | not queued here | partial | not wired into Prime runtime | not wired | partial | observes only | Define heartbeat/liveness Runtime Logic UI and Prime heartbeat input boundary. |
+| Beacon | baseline/partial | supporting boundary review-cleared | partial | advisory wired into Prime runtime | not wired | Prime input review-cleared; Beacon core partial | observes only | UI-owned heartbeat/liveness Runtime Logic surface; keep Beacon advisory-only and non-executable. |
 | Charon / FileMap | built | review-cleared | review-cleared | indirect via docs/context | partial | review-cleared | lookup only | Post-V2 Runtime Logic UI reading FileMap state. |
 | Arbiter / Reviews | partial | partial | partial | not wired into Prime runtime | not wired | partial | review queue only | Runtime Logic UI for review state and Prime acceptance gates. |
 | Workflow | built | review-cleared | review-cleared | bounded work orders only | partial status surface | review-cleared dispatch + Atlas adapter | no live workflow execution | Post-V2 Prime binding and live workflow execution gates. |

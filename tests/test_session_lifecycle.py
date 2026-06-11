@@ -35,6 +35,10 @@ from meridian_core.session_lifecycle import (
     SessionCommandStagingReviewPacket,
     SessionCommandPreviewProof,
     SessionCloseArchiveWriteThroughProof,
+    SessionCloseWriteThroughRequest,
+    SessionCloseWriteThroughResult,
+    SessionWriteThroughResult,
+    ObsidianCaptureResult,
     V2CommandPlanPreviewProof,
     V3GoalRuntimeCheckpointProofPacket,
     SessionLifecycleState,
@@ -45,6 +49,7 @@ from meridian_core.session_lifecycle import (
     build_command_staging_review_packet,
     build_command_preview_proof,
     build_close_archive_write_through_proof,
+    close_session_with_write_through,
     build_v3_goal_runtime_checkpoint_proof_packet,
     evaluate_live_control_permission_gate,
     export_session_runtime_state_for_workflow_recovery,
@@ -3682,6 +3687,543 @@ class TestSessionCloseArchiveWriteThroughProof:
         assert raw_prompt not in evidence_text
         assert "SECRET_WORKER_CHAT" not in serialized_text
         assert "SECRET_RAW_PROMPT" not in serialized_text
+
+    def _close_request(
+        self,
+        close_state,
+        *,
+        action=CloseArchiveWriteThroughAction.CLOSE,
+        target_session_id=None,
+        human_gate_approved=True,
+        stop_before_close_completed=True,
+        obsidian_capture_required=False,
+        evidence_refs=("proof://human-gate/sk9",),
+    ):
+        return SessionCloseWriteThroughRequest(
+            request_id="sk9-close-1",
+            target_session_id=target_session_id or close_state.session_id,
+            intended_action=action,
+            requested_by="prime",
+            reason="close after durable write-through",
+            human_gate_approved=human_gate_approved,
+            stop_before_close_completed=stop_before_close_completed,
+            obsidian_capture_required=obsidian_capture_required,
+            evidence_refs=evidence_refs,
+        )
+
+    def test_close_write_through_executes_with_injected_writers(
+        self,
+        close_state,
+    ):
+        """Approved close writes through, captures Obsidian proof, then stops."""
+        observed_at = datetime(2026, 6, 2, 17, 10, tzinfo=timezone.utc)
+        calls = []
+
+        def writer(session, request):
+            calls.append(("writer", session.session_id, request.request_id))
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://write-through/sk9-close-1",
+                evidence_refs=("echo://session/sk9-close-1",),
+            )
+
+        def obsidian_writer(session, request):
+            calls.append(("obsidian", session.session_id, request.request_id))
+            return ObsidianCaptureResult(
+                capture_id="obsidian-sk9-close-1",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="obsidian://Meridian_Build/sk9-close-1",
+                evidence_refs=("proof://obsidian/captured",),
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(
+                close_state,
+                obsidian_capture_required=True,
+            ),
+            writer,
+            obsidian_writer=obsidian_writer,
+            timestamp=observed_at,
+        )
+        serialized = result.to_dict()
+        serialized_text = repr(serialized)
+
+        assert isinstance(result, SessionCloseWriteThroughResult)
+        assert calls == [
+            ("writer", close_state.session_id, "sk9-close-1"),
+            ("obsidian", close_state.session_id, "sk9-close-1"),
+        ]
+        assert result.close_authorized is True
+        assert result.write_through_attempted is True
+        assert result.write_through_completed is True
+        assert result.obsidian_capture_attempted is True
+        assert result.obsidian_capture_completed is True
+        assert result.session_left_recoverable is False
+        assert result.failure_reason is None
+        assert result.final_status == SessionStatus.STOPPED
+        assert result.final_state.status == SessionStatus.STOPPED
+        assert result.final_state.proof_state == ProofState.EXECUTED
+        assert result.final_state.last_queue_write_at == observed_at
+        assert "close_write_through.intended_action=close" in result.proof_refs
+        assert "write_through.proof_ref=proof://write-through/sk9-close-1" in result.proof_refs
+        assert "obsidian_capture.proof_ref=obsidian://Meridian_Build/sk9-close-1" in result.proof_refs
+        assert serialized["close_authorized"] is True
+        assert serialized["final_state"]["status"] == "stopped"
+        assert serialized["final_state"]["project_path_present"] is True
+        assert serialized["final_state"]["worktree_path_present"] is True
+        assert serialized["raw_prompt_included"] is False
+        assert close_state.project_path not in serialized_text
+        assert close_state.worktree_path not in serialized_text
+
+    def test_archive_write_through_sets_archived_state(self, close_state):
+        """Archive uses the same authority path and ends in ARCHIVED."""
+        stopped_state = SessionLifecycleState(
+            **{**close_state.__dict__, "status": SessionStatus.STOPPED}
+        )
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="archive-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://archive/sk9",
+            )
+
+        result = close_session_with_write_through(
+            stopped_state,
+            self._close_request(
+                stopped_state,
+                action=CloseArchiveWriteThroughAction.ARCHIVE,
+            ),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 11, tzinfo=timezone.utc),
+        )
+
+        assert result.close_authorized is True
+        assert result.final_status == SessionStatus.ARCHIVED
+        assert result.final_state.status == SessionStatus.ARCHIVED
+
+    def test_target_mismatch_fails_before_writer_is_called(self, close_state):
+        """A request for another session never reaches the write adapter."""
+        calls = []
+
+        def writer(session, request):
+            calls.append(request.request_id)
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://should-not-run",
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state, target_session_id="other-session"),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 12, tzinfo=timezone.utc),
+        )
+
+        assert calls == []
+        assert result.close_authorized is False
+        assert result.write_through_attempted is False
+        assert result.session_left_recoverable is True
+        assert result.failure_reason == "target_session.mismatch"
+        assert "target_session.mismatch" in result.blockers
+        assert result.final_state is close_state
+
+    def test_running_close_requires_stop_before_close_proof(self, close_state):
+        """Running sessions fail closed until stop-before-close proof exists."""
+        calls = []
+
+        def writer(session, request):
+            calls.append(request.request_id)
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://should-not-run",
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(
+                close_state,
+                stop_before_close_completed=False,
+            ),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 13, tzinfo=timezone.utc),
+        )
+
+        assert calls == []
+        assert result.close_authorized is False
+        assert result.write_through_attempted is False
+        assert result.failure_reason == "close.stop_before_close_required"
+        assert "close.stop_before_close_required" in result.blockers
+
+    def test_write_failure_leaves_session_recoverable(self, close_state):
+        """Writer failure records proof attempt but does not close the session."""
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=False,
+                proof_ref="proof://write-through/failed",
+                failure_kind="write_through.queue_write_failed",
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 14, tzinfo=timezone.utc),
+        )
+
+        assert result.close_authorized is False
+        assert result.write_through_attempted is True
+        assert result.write_through_completed is False
+        assert result.session_left_recoverable is True
+        assert result.failure_reason == "write_through.queue_write_failed"
+        assert result.final_state is close_state
+
+    def test_writer_exception_returns_recoverable_failure(self, close_state):
+        """Adapter exceptions are bounded and do not close the session."""
+
+        def writer(session, request):
+            raise RuntimeError("SECRET_RAW_PROMPT should not leak")
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 14, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+
+        assert result.close_authorized is False
+        assert result.write_through_attempted is True
+        assert result.write_through_completed is False
+        assert result.session_left_recoverable is True
+        assert result.failure_reason == "write_through.exception"
+        assert "SECRET_RAW_PROMPT" not in serialized
+        assert result.final_state is close_state
+
+    def test_required_obsidian_capture_failure_blocks_close(self, close_state):
+        """Required Obsidian capture must succeed before final close."""
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://write-through/sk9",
+            )
+
+        def obsidian_writer(session, request):
+            return ObsidianCaptureResult(
+                capture_id="obsidian-sk9",
+                target_session_id=session.session_id,
+                completed=False,
+                proof_ref="obsidian://Meridian_Build/sk9",
+                failure_kind="obsidian_capture.write_failed",
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(
+                close_state,
+                obsidian_capture_required=True,
+            ),
+            writer,
+            obsidian_writer=obsidian_writer,
+            timestamp=datetime(2026, 6, 2, 17, 15, tzinfo=timezone.utc),
+        )
+
+        assert result.close_authorized is False
+        assert result.write_through_completed is True
+        assert result.obsidian_capture_attempted is True
+        assert result.obsidian_capture_completed is False
+        assert result.session_left_recoverable is True
+        assert result.failure_reason == "obsidian_capture.write_failed"
+        assert result.final_state is close_state
+
+    def test_obsidian_exception_returns_recoverable_failure(self, close_state):
+        """Obsidian adapter exceptions are bounded after write-through."""
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://write-through/sk9",
+            )
+
+        def obsidian_writer(session, request):
+            raise RuntimeError("SECRET_WORKER_CHAT should not leak")
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(
+                close_state,
+                obsidian_capture_required=True,
+            ),
+            writer,
+            obsidian_writer=obsidian_writer,
+            timestamp=datetime(2026, 6, 2, 17, 15, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+
+        assert result.close_authorized is False
+        assert result.write_through_completed is True
+        assert result.obsidian_capture_attempted is True
+        assert result.obsidian_capture_completed is False
+        assert result.session_left_recoverable is True
+        assert result.failure_reason == "obsidian_capture.exception"
+        assert "SECRET_WORKER_CHAT" not in serialized
+        assert result.final_state is close_state
+
+    def test_unsafe_request_evidence_fails_before_writer_is_called(self, close_state):
+        """Request evidence refs are validated before any write adapter runs."""
+        calls = []
+
+        def writer(session, request):
+            calls.append(request.request_id)
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://should-not-run",
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(
+                close_state,
+                evidence_refs=(r"C:\Users\scott\SECRET_RAW_PROMPT.txt",),
+            ),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 15, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+
+        assert calls == []
+        assert result.close_authorized is False
+        assert result.write_through_attempted is False
+        assert result.failure_reason == "request.evidence_ref_unsafe"
+        assert "request.evidence_ref_unsafe" in result.blockers
+        assert "SECRET_RAW_PROMPT" not in serialized
+        assert "proof_ref_redacted" in serialized
+
+    @pytest.mark.parametrize(
+        "unsafe_ref",
+        (
+            "credential=openai",
+            "token=abc123",
+            "api-key=abc123",
+            "provider response refused",
+            "worker chat snippet",
+            "raw prompt excerpt",
+            "transcript excerpt",
+        ),
+    )
+    def test_policy_forbidden_request_refs_fail_before_writer(
+        self,
+        close_state,
+        unsafe_ref,
+    ):
+        """Policy-forbidden evidence words are rejected across common variants."""
+        calls = []
+
+        def writer(session, request):
+            calls.append(request.request_id)
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://should-not-run",
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state, evidence_refs=(unsafe_ref,)),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 15, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+
+        assert calls == []
+        assert result.close_authorized is False
+        assert result.failure_reason == "request.evidence_ref_unsafe"
+        assert unsafe_ref not in serialized
+        assert "proof_ref_redacted" in serialized
+
+    def test_unsafe_writer_evidence_is_rejected_and_redacted(
+        self,
+        close_state,
+    ):
+        """Writer results containing local/raw refs fail closed."""
+        raw_ref = r"C:\Users\scott\secret_raw_prompt.txt"
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref=raw_ref,
+                evidence_refs=("SECRET_WORKER_CHAT: close now",),
+                raw_prompt_included=True,
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 16, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+
+        assert result.close_authorized is False
+        assert result.write_through_attempted is True
+        assert result.write_through_completed is False
+        assert result.failure_reason == "write_through.failed"
+        assert result.raw_prompt_included is True
+        assert raw_ref not in serialized
+        assert "SECRET_WORKER_CHAT" not in serialized
+        assert "proof_ref_redacted" in serialized
+
+    def test_policy_forbidden_writer_metadata_is_rejected_and_redacted(
+        self,
+        close_state,
+    ):
+        """Unsafe writer IDs and refs cannot leak through result surfaces."""
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="credential=openai",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="provider response refused",
+                evidence_refs=("token=abc123",),
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 17, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+        inner_serialized = repr(
+            SessionWriteThroughResult(
+                writer_id="credential=openai",
+                target_session_id=close_state.session_id,
+                completed=False,
+                proof_ref="provider response refused",
+                evidence_refs=("token=abc123",),
+                failure_kind="provider response refused",
+            ).to_dict()
+        )
+
+        assert result.close_authorized is False
+        assert result.failure_reason == "write_through.failed"
+        assert "credential=openai" not in serialized
+        assert "provider response refused" not in serialized
+        assert "token=abc123" not in serialized
+        assert "writer_id_redacted" in serialized
+        assert "proof_ref_redacted" in serialized
+        assert "credential=openai" not in inner_serialized
+        assert "provider response refused" not in inner_serialized
+        assert "token=abc123" not in inner_serialized
+
+    def test_unsafe_failure_kind_falls_back_to_generic_failure(
+        self,
+        close_state,
+    ):
+        """Adapter-controlled failure strings cannot become outer failure text."""
+        unsafe_failure = "SECRET_RAW_PROMPT: /path/to/private"
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=False,
+                proof_ref="proof://write-through/failed",
+                failure_kind=unsafe_failure,
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state),
+            writer,
+            timestamp=datetime(2026, 6, 2, 17, 18, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+
+        assert result.close_authorized is False
+        assert result.failure_reason == "write_through.failed"
+        assert unsafe_failure not in serialized
+        assert "/path/to/private" not in serialized
+
+    def test_unsafe_obsidian_metadata_and_failure_are_redacted(
+        self,
+        close_state,
+    ):
+        """Unsafe Obsidian IDs/refs/failures cannot leak through result surfaces."""
+        unsafe_failure = "provider response: credential token"
+
+        def writer(session, request):
+            return SessionWriteThroughResult(
+                writer_id="queue-writer",
+                target_session_id=session.session_id,
+                completed=True,
+                proof_ref="proof://write-through/sk9",
+            )
+
+        def obsidian_writer(session, request):
+            return ObsidianCaptureResult(
+                capture_id="worker chat capture",
+                target_session_id=session.session_id,
+                completed=False,
+                proof_ref="transcript excerpt",
+                evidence_refs=("api-key=abc123",),
+                failure_kind=unsafe_failure,
+            )
+
+        result = close_session_with_write_through(
+            close_state,
+            self._close_request(close_state, obsidian_capture_required=True),
+            writer,
+            obsidian_writer=obsidian_writer,
+            timestamp=datetime(2026, 6, 2, 17, 19, tzinfo=timezone.utc),
+        )
+        serialized = repr(result.to_dict())
+        inner_serialized = repr(
+            ObsidianCaptureResult(
+                capture_id="worker chat capture",
+                target_session_id=close_state.session_id,
+                completed=False,
+                proof_ref="transcript excerpt",
+                evidence_refs=("api-key=abc123",),
+                failure_kind=unsafe_failure,
+            ).to_dict()
+        )
+
+        assert result.close_authorized is False
+        assert result.failure_reason == "obsidian_capture.failed"
+        for unsafe in (
+            "worker chat capture",
+            "transcript excerpt",
+            "api-key=abc123",
+            unsafe_failure,
+        ):
+            assert unsafe not in serialized
+            assert unsafe not in inner_serialized
+        assert "capture_id_redacted" in serialized
+        assert "proof_ref_redacted" in serialized
 
 
 class TestV3GoalRuntimeCheckpointProofPacket:

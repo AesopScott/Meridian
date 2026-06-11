@@ -12,6 +12,7 @@ from meridian_core.filemap_intelligence import (
     advise_architecture_boundary,
     build_capability_navigation_links,
     build_capability_ownership_map,
+    display_safe_path,
     evaluate_filemap_freshness,
     infer_related_test_hint,
 )
@@ -202,3 +203,27 @@ def test_direct_records_sanitize_messages_and_reason_tags():
     assert freshness.to_display_dict()["reason_tags"] == ("[redacted]",)
     assert advisory.to_display_dict()["message"] == "[redacted]"
     assert hint.to_display_dict()["reason_tags"] == ("[redacted]",)
+
+
+def test_filemap_metadata_redacts_unsafe_path_and_related_tests():
+    meta = FileMapMetadata(
+        path="meridian_core/api_key=abcdef1234567890.py",
+        owner="FileMap",
+        capability="Architecture Memory",
+        related_tests=("tests/raw prompt: private.py",),
+    )
+
+    display = meta.to_display_dict()
+    rendered = str(display)
+
+    assert display["path"] == "[redacted]"
+    assert display["related_tests"] == ("[redacted]",)
+    assert "abcdef1234567890" not in rendered
+    assert "api_key=" not in rendered
+    assert "raw prompt" not in rendered
+    assert (
+        display_safe_path(
+            r"C:\Users\scott\Code\Meridian\meridian_core\token=abcdef1234567890.py"
+        )
+        == "[redacted]"
+    )

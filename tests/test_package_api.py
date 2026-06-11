@@ -98,10 +98,259 @@ def test_evidence_safety_exports():
         assert name in meridian_core.__all__, f"{name} missing from __all__"
 
 
+def test_v25_backend_hardening_exports():
+    from meridian_core import (
+        BackendSnapshotDrift,
+        BackendSnapshotProof,
+        BoundaryAdvisory,
+        BoundaryAdvisoryStatus,
+        BranchLeaseStatus,
+        CapabilityNavigationLink,
+        CapabilityOwnershipRecord,
+        CommitIntentVerificationStatus,
+        DuplicateFindingGroup,
+        FileMapFreshnessRecord,
+        FileMapFreshnessStatus,
+        FileMapMetadata,
+        HarnessDiagnosticInput,
+        HarnessDiagnosticRecord,
+        HarnessDiagnosticSnapshot,
+        HeartbeatAnomaly,
+        ProofFreshnessState,
+        ProofQualityResult,
+        ProofQualityStatus,
+        ProofRef,
+        ProofSnapshot,
+        PromotionProvenance,
+        PromotionStage,
+        RegressionRiskLabel,
+        RelatedTestHint,
+        ReliabilityScore,
+        RepairVerification,
+        RepairVerificationState,
+        ReviewFindingFingerprint,
+        ReviewFindingInput,
+        ReviewFindingSeverity,
+        ReviewIntelligenceReport,
+        RollbackBundlePlan,
+        SessionFreshnessStatus,
+        SessionProvenance,
+        SeverityCalibration,
+        SnapshotDriftClassification,
+        StaleWorkerClassification,
+        WaiverVisibility,
+        advise_architecture_boundary,
+        build_capability_navigation_links,
+        build_capability_ownership_map,
+        build_harness_diagnostic_snapshot,
+        build_promotion_provenance,
+        build_review_intelligence,
+        build_session_provenance,
+        classify_heartbeat_anomaly,
+        classify_stale_worker,
+        detect_backend_snapshot_drift,
+        display_safe_path,
+        evaluate_filemap_freshness,
+        evaluate_proof_quality,
+        fingerprint_finding,
+        infer_related_test_hint,
+    )
+
+    exported = (
+        BackendSnapshotDrift,
+        BackendSnapshotProof,
+        BoundaryAdvisory,
+        BoundaryAdvisoryStatus,
+        BranchLeaseStatus,
+        CapabilityNavigationLink,
+        CapabilityOwnershipRecord,
+        CommitIntentVerificationStatus,
+        DuplicateFindingGroup,
+        FileMapFreshnessRecord,
+        FileMapFreshnessStatus,
+        FileMapMetadata,
+        HarnessDiagnosticInput,
+        HarnessDiagnosticRecord,
+        HarnessDiagnosticSnapshot,
+        HeartbeatAnomaly,
+        ProofFreshnessState,
+        ProofQualityResult,
+        ProofQualityStatus,
+        ProofRef,
+        ProofSnapshot,
+        PromotionProvenance,
+        PromotionStage,
+        RegressionRiskLabel,
+        RelatedTestHint,
+        ReliabilityScore,
+        RepairVerification,
+        RepairVerificationState,
+        ReviewFindingFingerprint,
+        ReviewFindingInput,
+        ReviewFindingSeverity,
+        ReviewIntelligenceReport,
+        RollbackBundlePlan,
+        SessionFreshnessStatus,
+        SessionProvenance,
+        SeverityCalibration,
+        SnapshotDriftClassification,
+        StaleWorkerClassification,
+        WaiverVisibility,
+        advise_architecture_boundary,
+        build_capability_navigation_links,
+        build_capability_ownership_map,
+        build_harness_diagnostic_snapshot,
+        build_promotion_provenance,
+        build_review_intelligence,
+        build_session_provenance,
+        classify_heartbeat_anomaly,
+        classify_stale_worker,
+        detect_backend_snapshot_drift,
+        display_safe_path,
+        evaluate_filemap_freshness,
+        evaluate_proof_quality,
+        fingerprint_finding,
+        infer_related_test_hint,
+    )
+    assert all(exported)
+
+    for name in (
+        "ProofQualityStatus",
+        "evaluate_proof_quality",
+        "PromotionProvenance",
+        "build_promotion_provenance",
+        "HarnessDiagnosticSnapshot",
+        "build_harness_diagnostic_snapshot",
+        "ReviewIntelligenceReport",
+        "build_review_intelligence",
+        "FileMapFreshnessRecord",
+        "evaluate_filemap_freshness",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
+def test_v25_backend_transparency_dispatch_and_release_exports():
+    from meridian_core import (
+        BrowserEvidence,
+        ChunkLineage,
+        CitationRankingMetadata,
+        DispatchEvidence,
+        DriftStatus,
+        DryRunReviewState,
+        EvidenceBackedRationale,
+        FailureRecoveryRecommendation,
+        MemoryProvenance,
+        NextActionRationale,
+        ProofPackageManifest,
+        ReleaseReadinessSnapshot,
+        RetrievalEvidence,
+        RouteSimulation,
+        ToolDryRunPlan,
+        WorkflowIntelligenceReport,
+        build_dispatch_evidence,
+        build_evidence_backed_rationale,
+        build_release_readiness_snapshot,
+        build_tool_dry_run_plan,
+        hash_prompt_payload,
+        ingest_task_results,
+        plan_workflow_tasks,
+        simulate_route_dispatch,
+    )
+
+    exported = (
+        BrowserEvidence,
+        ChunkLineage,
+        CitationRankingMetadata,
+        DispatchEvidence,
+        DriftStatus,
+        DryRunReviewState,
+        EvidenceBackedRationale,
+        FailureRecoveryRecommendation,
+        MemoryProvenance,
+        NextActionRationale,
+        ProofPackageManifest,
+        ReleaseReadinessSnapshot,
+        RetrievalEvidence,
+        RouteSimulation,
+        ToolDryRunPlan,
+        WorkflowIntelligenceReport,
+        build_dispatch_evidence,
+        build_evidence_backed_rationale,
+        build_release_readiness_snapshot,
+        build_tool_dry_run_plan,
+        hash_prompt_payload,
+        ingest_task_results,
+        plan_workflow_tasks,
+        simulate_route_dispatch,
+    )
+    assert all(exported)
+
+    for name in (
+        "RetrievalEvidence",
+        "MemoryProvenance",
+        "NextActionRationale",
+        "RouteSimulation",
+        "DispatchEvidence",
+        "ToolDryRunPlan",
+        "BrowserEvidence",
+        "WorkflowIntelligenceReport",
+        "ReleaseReadinessSnapshot",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
 def test_prompt_metrics_bridge_exports():
     from meridian_core import make_prompt_metrics_finding
 
     assert make_prompt_metrics_finding
+
+
+def test_cross_check_authority_exports():
+    from meridian_core import (
+        CrossCheckDisposition,
+        CrossCheckDispositionAction,
+        CrossCheckFinding,
+        CrossCheckFindingStatus,
+        CrossCheckRepairRoute,
+        CrossCheckRunRequest,
+        CrossCheckRunResult,
+        CrossCheckRunStatus,
+        CrossCheckSeverity,
+        CrossCheckValidationError,
+        CrossCheckVerificationRequest,
+        CrossCheckVerificationResult,
+        dispose_finding,
+        execute_cross_check,
+        rerun_verification,
+        route_finding_for_repair,
+    )
+
+    assert CrossCheckDisposition
+    assert CrossCheckDispositionAction
+    assert CrossCheckFinding
+    assert CrossCheckFindingStatus
+    assert CrossCheckRepairRoute
+    assert CrossCheckRunRequest
+    assert CrossCheckRunResult
+    assert CrossCheckRunStatus
+    assert CrossCheckSeverity
+    assert CrossCheckValidationError
+    assert CrossCheckVerificationRequest
+    assert CrossCheckVerificationResult
+    assert dispose_finding
+    assert execute_cross_check
+    assert rerun_verification
+    assert route_finding_for_repair
+
+    for name in (
+        "CrossCheckDisposition",
+        "CrossCheckFinding",
+        "CrossCheckRunRequest",
+        "CrossCheckVerificationResult",
+        "execute_cross_check",
+        "rerun_verification",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
 
 
 def test_build_and_filemap_exports():
@@ -184,10 +433,256 @@ def test_planning_exports():
     assert "build_planning_brief" in meridian_core.__all__
 
 
+def test_session_lifecycle_close_write_through_exports():
+    from meridian_core import (
+        CloseArchiveWriteThroughAction,
+        ObsidianCaptureResult,
+        SessionCloseWriteThroughRequest,
+        SessionCloseWriteThroughResult,
+        SessionWriteThroughResult,
+        close_session_with_write_through,
+    )
+
+    assert CloseArchiveWriteThroughAction
+    assert ObsidianCaptureResult
+    assert SessionCloseWriteThroughRequest
+    assert SessionCloseWriteThroughResult
+    assert SessionWriteThroughResult
+    assert close_session_with_write_through
+    for name in (
+        "CloseArchiveWriteThroughAction",
+        "ObsidianCaptureResult",
+        "SessionCloseWriteThroughRequest",
+        "SessionCloseWriteThroughResult",
+        "SessionWriteThroughResult",
+        "close_session_with_write_through",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
+def test_backlog_authority_exports():
+    from meridian_core import (
+        BacklogBlockedStatus,
+        BacklogImportBatch,
+        BacklogImportCandidate,
+        BacklogItem,
+        BacklogItemState,
+        BacklogOwner,
+        BacklogPriority,
+        BacklogQuery,
+        BacklogScope,
+        BacklogSource,
+        BacklogTaskDraft,
+        BacklogValidationError,
+        approve_backlog_item,
+        archive_backlog_item,
+        capture_backlog_item,
+        convert_backlog_item_to_task_draft,
+        defer_backlog_item,
+        deny_backlog_item,
+        import_backlog_candidates,
+        link_backlog_item_scope,
+        load_backlog,
+        modify_backlog_item,
+        query_backlog,
+        reject_backlog_item,
+        save_backlog,
+        to_goal_objective_ref,
+    )
+
+    assert BacklogBlockedStatus
+    assert BacklogImportBatch
+    assert BacklogImportCandidate
+    assert BacklogItem
+    assert BacklogItemState
+    assert BacklogOwner
+    assert BacklogPriority
+    assert BacklogQuery
+    assert BacklogScope
+    assert BacklogSource
+    assert BacklogTaskDraft
+    assert BacklogValidationError
+    assert approve_backlog_item
+    assert archive_backlog_item
+    assert capture_backlog_item
+    assert convert_backlog_item_to_task_draft
+    assert defer_backlog_item
+    assert deny_backlog_item
+    assert import_backlog_candidates
+    assert link_backlog_item_scope
+    assert load_backlog
+    assert modify_backlog_item
+    assert query_backlog
+    assert reject_backlog_item
+    assert save_backlog
+    assert to_goal_objective_ref
+    for name in (
+        "BacklogItem",
+        "BacklogItemState",
+        "BacklogScope",
+        "BacklogTaskDraft",
+        "capture_backlog_item",
+        "query_backlog",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
 def test_internal_helpers_are_not_root_exports():
     assert "_TIER_SEMANTICS" not in meridian_core.__all__
     assert "_ROUTING_TABLE" not in meridian_core.__all__
     assert "_SEVERITY_MAP" not in meridian_core.__all__
+
+
+def test_voice_io_authority_exports():
+    from meridian_core import (
+        VoiceCommandFamily,
+        VoiceCommandIntent,
+        VoiceIntentFamily,
+        VoiceMode,
+        VoiceOutputJob,
+        VoiceOutputStatus,
+        VoicePrivacyLevel,
+        VoiceProviderCapability,
+        VoiceRuntimeState,
+        VoiceTranscriptDraft,
+        VoiceTrustState,
+        VoiceValidationError,
+        apply_transcript_correction,
+        build_voice_runtime_state,
+        create_output_job,
+        create_transcript_draft,
+        interrupt_output_job,
+        mute_output_job,
+        normalize_voice_intent,
+        recognize_voice_command_intent,
+    )
+
+    assert VoiceCommandFamily
+    assert VoiceCommandIntent
+    assert VoiceIntentFamily
+    assert VoiceMode
+    assert VoiceOutputJob
+    assert VoiceOutputStatus
+    assert VoicePrivacyLevel
+    assert VoiceProviderCapability
+    assert VoiceRuntimeState
+    assert VoiceTranscriptDraft
+    assert VoiceTrustState
+    assert VoiceValidationError
+    assert apply_transcript_correction
+    assert build_voice_runtime_state
+    assert create_output_job
+    assert create_transcript_draft
+    assert interrupt_output_job
+    assert mute_output_job
+    assert normalize_voice_intent
+    assert recognize_voice_command_intent
+    for name in (
+        "VoiceCommandFamily",
+        "VoiceCommandIntent",
+        "VoiceRuntimeState",
+        "VoiceTranscriptDraft",
+        "VoiceValidationError",
+        "build_voice_runtime_state",
+        "create_transcript_draft",
+        "normalize_voice_intent",
+        "recognize_voice_command_intent",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
+def test_routine_authority_exports():
+    from meridian_core import (
+        PrimeRoutineReview,
+        RoutineDefinition,
+        RoutineReviewDisposition,
+        RoutineReviewSource,
+        RoutineRunPlan,
+        RoutineRunPlanStatus,
+        RoutineState,
+        RoutineTrigger,
+        RoutineTriggerKind,
+        RoutineValidationError,
+        create_routine,
+        plan_routine_run,
+        review_routine_result,
+        set_routine_enabled,
+    )
+
+    assert PrimeRoutineReview
+    assert RoutineDefinition
+    assert RoutineReviewDisposition
+    assert RoutineReviewSource
+    assert RoutineRunPlan
+    assert RoutineRunPlanStatus
+    assert RoutineState
+    assert RoutineTrigger
+    assert RoutineTriggerKind
+    assert RoutineValidationError
+    assert create_routine
+    assert plan_routine_run
+    assert review_routine_result
+    assert set_routine_enabled
+    for name in (
+        "PrimeRoutineReview",
+        "RoutineDefinition",
+        "RoutineReviewDisposition",
+        "RoutineReviewSource",
+        "RoutineRunPlan",
+        "RoutineState",
+        "RoutineTrigger",
+        "RoutineValidationError",
+        "create_routine",
+        "plan_routine_run",
+        "review_routine_result",
+        "set_routine_enabled",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
+def test_session_archive_authority_exports():
+    from meridian_core import (
+        ArchiveCatalogEntry,
+        ArchiveReloadPlan,
+        ArchiveRunAgainPlan,
+        ArchivedSessionRecord,
+        SessionArchivePlanStatus,
+        SessionArchiveValidationError,
+        TranscriptAccessHandle,
+        TranscriptAccessMode,
+        archive_record_from_close_result,
+        authorize_transcript_access,
+        catalog_entry_from_record,
+        plan_archive_reload,
+        plan_archive_run_again,
+    )
+
+    assert ArchiveCatalogEntry
+    assert ArchiveReloadPlan
+    assert ArchiveRunAgainPlan
+    assert ArchivedSessionRecord
+    assert SessionArchivePlanStatus
+    assert SessionArchiveValidationError
+    assert TranscriptAccessHandle
+    assert TranscriptAccessMode
+    assert archive_record_from_close_result
+    assert authorize_transcript_access
+    assert catalog_entry_from_record
+    assert plan_archive_reload
+    assert plan_archive_run_again
+    for name in (
+        "ArchiveCatalogEntry",
+        "ArchiveReloadPlan",
+        "ArchiveRunAgainPlan",
+        "ArchivedSessionRecord",
+        "SessionArchiveValidationError",
+        "TranscriptAccessHandle",
+        "archive_record_from_close_result",
+        "authorize_transcript_access",
+        "plan_archive_reload",
+        "plan_archive_run_again",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
 
 
 def test_cockpit_state_exports():

@@ -5,8 +5,12 @@ from __future__ import annotations
 import json
 
 from meridian_core.harness_diagnostics import (
+    BackendSnapshotDrift,
     BackendSnapshotProof,
     HarnessDiagnosticInput,
+    HarnessDiagnosticSnapshot,
+    ReliabilityScore,
+    SnapshotDriftClassification,
     build_harness_diagnostic_snapshot,
     classify_heartbeat_anomaly,
     detect_backend_snapshot_drift,
@@ -216,3 +220,36 @@ def test_display_dicts_do_not_leak_local_paths_or_raw_logs() -> None:
 def test_heartbeat_anomaly_classification_covers_warning_and_missing() -> None:
     assert classify_heartbeat_anomaly("alive", 49, 60).value == "warning"
     assert classify_heartbeat_anomaly("unknown", None, 60).value == "missing"
+
+
+def test_direct_harness_snapshot_display_sanitizes_unsafe_recommendation() -> None:
+    snapshot = HarnessDiagnosticSnapshot(
+        version="harness-diagnostics-v1",
+        generated_at="2026-06-11T00:00:00+00:00",
+        records=(),
+        backend_drift=BackendSnapshotDrift(
+            classification=SnapshotDriftClassification.ALIGNED,
+            backend_snapshot_present=True,
+            displayed_snapshot_present=True,
+            backend_proof_count=1,
+            required_proof_count=1,
+        ),
+        reliability=ReliabilityScore(
+            score=100,
+            total_workers=0,
+            healthy_count=0,
+            stale_count=0,
+            failed_count=0,
+            missing_count=0,
+            blocked_count=0,
+            under_proven_count=0,
+            divergent_snapshot_count=0,
+        ),
+        escalation_recommendation=r"escalation notes at C:\Users\scott\Code\private.log",
+    )
+
+    display = snapshot.to_display_dict()
+    rendered = str(display)
+
+    assert display["escalation_recommendation"] == "[redacted]"
+    assert r"C:\Users\scott" not in rendered

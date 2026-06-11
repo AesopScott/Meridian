@@ -34,6 +34,18 @@ _REQUIRED_PATHS = [
     "meridian_core/session_lifecycle.py",
     "meridian_core/vulcan_logic_snapshot.py",
     "tests/test_session_lifecycle.py",
+    "docs/backlog-authority-contract.md",
+    "meridian_core/backlog.py",
+    "tests/test_backlog.py",
+    "docs/voice-io-authority-contract.md",
+    "meridian_core/voice_io.py",
+    "tests/test_voice_io.py",
+    "docs/routine-authority-contract.md",
+    "meridian_core/routines.py",
+    "tests/test_routines.py",
+    "docs/session-archive-authority-contract.md",
+    "meridian_core/session_archive.py",
+    "tests/test_session_archive.py",
     "docs/federation-harness-horizon.md",
     "docs/session-card-queue-activation-contract.md",
     "docs/bifrost-voice-command-contract.md",
@@ -83,6 +95,8 @@ _REQUIRED_PATHS = [
     "meridian_core/relay_packet.py",
     "tests/test_relay_packet.py",
     "meridian_core/relay_dispatch.py",
+    "meridian_core/relay_auto_routing.py",
+    "tests/test_relay_auto_routing.py",
     "meridian_core/relay_executor.py",
     "tests/test_relay_executor.py",
     "meridian_core/relay_logic_snapshot.py",
@@ -150,6 +164,7 @@ _REQUIRED_PATHS = [
     "docs/main-write-coordination-ledger.md",
     "docs/v2-package-api-surface-note.md",
     "docs/v2-progress-tracker.md",
+    "docs/v2-backend-completion-audit-20260608.md",
     "docs/prime-autonomy-v2-contract.md",
     "meridian_core/release_autonomy_snapshot.py",
     "docs/bifrost-session-queue-activation-brief.md",
@@ -178,11 +193,14 @@ _REQUIRED_PATHS = [
     "docs/relay-bifrost-proof-payload-contract.md",
     "docs/aegis-relay-summary-handoff-contract.md",
     "docs/aegis-promptpacket-proof-policy-checklist.md",
+    "docs/cross-check-authority-contract.md",
     "docs/relay-executor-api-policy.md",
     "docs/relay-package-api-policy-note.md",
     "meridian_core/aegis.py",
+    "meridian_core/cross_check.py",
     "meridian_core/aegis_logic_snapshot.py",
     "tests/test_aegis.py",
+    "tests/test_cross_check.py",
     "tests/test_aegis_logic_snapshot.py",
     "docs/ui-integration-checklist.md",
     "tests/test_cockpit_provider.py",
@@ -521,5 +539,31 @@ def test_harness_stage_html_dashboard_tracks_core_stages():
         "Vulcan / Session Lifecycle",
     ]:
         assert expected in html
+
+
+def test_v2_tracker_records_converted_baseline_provenance_without_open_baselines():
+    tracker = Path("docs/v2-progress-tracker.md").read_text(encoding="utf-8")
+    summary_line = next(
+        line for line in tracker.splitlines()
+        if line.startswith("| **Total V2** |")
+    )
+    summary_built_count = int(summary_line.split("|")[2].strip().strip("*"))
+    summary_contract_count = int(summary_line.split("|")[4].strip().strip("*"))
+    assert summary_built_count == 45
+    assert summary_contract_count == 0
+
+    baseline_section = tracker.split("## Converted Contract Baseline Provenance", 1)[1]
+    baseline_section = baseline_section.split("## In Progress / Stabilizing", 1)[0]
+    detail_count = sum(
+        1 for line in baseline_section.splitlines()
+        if line.startswith("- [x] **")
+    )
+    assert detail_count == 9
+    assert "do not authorize live operations" in baseline_section
+
+    audit = Path("docs/v2-backend-completion-audit-20260608.md").read_text(encoding="utf-8")
+    assert "45/45 reviewed implementation/provenance items" in audit
+    assert "0/45 accepted contract baselines" in audit
+    assert "baseline count at 2" not in audit
 
 

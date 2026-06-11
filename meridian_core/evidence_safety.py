@@ -51,10 +51,10 @@ class EvidenceSafetyFinding:
 
     def to_display_dict(self) -> dict[str, str]:
         return {
-            "artifact_id": self.artifact_id,
+            "artifact_id": _safe_artifact_id(self.artifact_id),
             "category": self.category.value,
             "severity": self.severity.value,
-            "reason": self.reason,
+            "reason": _safe_reason(self.reason),
         }
 
 
@@ -100,6 +100,7 @@ _RULES: tuple[_PatternRule, ...] = (
             r"(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}"
             r"|sk-(?:proj-)?[A-Za-z0-9_-]{16,}"
             r"|gh[pousr]_[A-Za-z0-9_]{20,}"
+            r"|github_pat_[A-Za-z0-9_]{20,}"
             r")"
         ),
     ),
@@ -170,7 +171,7 @@ def _clean_artifact_id(artifact_id: str) -> str:
     clean = artifact_id.strip()
     if not clean:
         raise ValueError("artifact_id must not be empty")
-    if _looks_like_local_path(clean):
+    if _looks_like_local_path(clean) or _looks_like_unsafe_reason(clean):
         return "artifact:unsafe-id"
     return clean
 
@@ -205,6 +206,43 @@ def _looks_like_local_path(value: str) -> bool:
     return bool(
         re.search(
             r"(?i)(?:[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/)",
+            value,
+        )
+    )
+
+
+def _safe_artifact_id(value: str) -> str:
+    clean = str(value).strip()
+    if not clean:
+        return "artifact:unknown-id"
+    if _looks_like_local_path(clean):
+        return "artifact:unsafe-id"
+    if _looks_like_unsafe_reason(clean):
+        return "artifact:unsafe-id"
+    return clean[:120]
+
+
+def _safe_reason(value: str) -> str:
+    clean = re.sub(r"\s+", " ", str(value).strip())
+    if not clean:
+        return "[redacted]"
+    if _looks_like_local_path(clean):
+        return "[redacted]"
+    if _looks_like_unsafe_reason(clean):
+        return "[redacted]"
+    return clean[:240]
+
+
+def _looks_like_unsafe_reason(value: str) -> bool:
+    return bool(
+        re.search(
+            r"(?i)(?:traceback|exception:|"
+            r"(?:raw|full|complete)\s+(?:prompt|transcript|content|log)|"
+            r"provider\s+(?:response|output)|model\s+(?:response|output)|"
+            r"\b(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}|"
+            r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|"
+            r"gh[pousr]_[A-Za-z0-9_]{20,}|"
+            r"github_pat_[A-Za-z0-9_]{20,})",
             value,
         )
     )

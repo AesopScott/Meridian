@@ -343,10 +343,10 @@ def display_safe_path(path: str) -> str:
     for root in roots:
         if root.lower() in lowered_parts:
             index = lowered_parts.index(root.lower())
-            return "/".join(parts[index:])
+            return _display_safe_path_candidate("/".join(parts[index:]))
 
     if len(parts) > 1 and (":" in parts[0] or clean.startswith("/")):
-        return parts[-1]
+        return _display_safe_path_candidate(parts[-1])
     if _looks_like_unsafe_text(clean):
         return "[redacted]"
     return clean
@@ -377,6 +377,12 @@ def _display_safe_ref(value: str) -> str:
     if _looks_like_unsafe_text(clean):
         return "[redacted]"
     return clean
+
+
+def _display_safe_path_candidate(value: str) -> str:
+    if _looks_like_unsafe_text(value):
+        return "[redacted]"
+    return value
 
 
 def _display_safe_text(value: str | None) -> str:

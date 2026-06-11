@@ -50,6 +50,10 @@ class FileArea:
     PACKAGE_POLICY   = "Package API policy"
     BIFROST          = "Bifrost / session harness"
     GOAL_RUNTIME     = "Goal Runtime / Goal Harness"
+    BACKLOG          = "Backlog Authority"
+    VOICE_IO         = "Voice I/O Authority"
+    ROUTINES         = "Routine Authority"
+    SESSION_ARCHIVE  = "Session Archive Authority"
     PROVIDER_BALANCE = "Provider Balance / Usage"
     WORKFLOW_DISPATCH = "Workflow Sub-Agent Harness / Dispatch"
     WORKFLOW_ATLAS    = "Atlas Workflow Adapter"
@@ -403,6 +407,13 @@ def make_default_map() -> FileMap:
             notes="Frozen dataclass. No metadata, lineage, or tokens sent to model.",
         ),
         FileMapEntry(
+            path="meridian_core/relay_auto_routing.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="BR7 Prime/Relay Auto routing evidence: converts Prime intent and constraints into Relay-owned route, prompt packet, dispatch plan, and display-safe evidence without provider transport or UI route selection.",
+            related_tests=["tests/test_relay_auto_routing.py"],
+            notes="Run before changing Auto routing evidence, Prime/Relay ownership boundaries, prompt visibility, or BR7 dispatch proof fields.",
+        ),
+        FileMapEntry(
             path="meridian_core/relay_executor.py",
             area=FileArea.RELAY_DISPATCH,
             purpose="Relay executor: executes RelayDispatch routing plans and dispatches work to model providers via model_adapter.",
@@ -450,6 +461,13 @@ def make_default_map() -> FileMap:
             purpose="Test suite for meridian_core/relay_dispatch.py: covers immutable dispatch plan mapping and per-lane model work routing.",
             related_tests=[],
             notes="Run before changing meridian_core/relay_dispatch.py or dispatch planning logic.",
+        ),
+        FileMapEntry(
+            path="tests/test_relay_auto_routing.py",
+            area=FileArea.RELAY_DISPATCH,
+            purpose="Test suite for meridian_core/relay_auto_routing.py: proves BR7 Auto routing evidence is Relay-owned, deterministic, display-safe, and free of provider transport or UI route-selection authority.",
+            related_tests=[],
+            notes="Run before promoting Auto routing evidence or changing Prime/Relay BR7 boundaries.",
         ),
         FileMapEntry(
             path="meridian_core/model_adapter.py",
@@ -683,6 +701,13 @@ def make_default_map() -> FileMap:
             notes="Proof-blocking is severity + status aware; ESCALATED is always blocking.",
         ),
         FileMapEntry(
+            path="meridian_core/cross_check.py",
+            area=FileArea.AEGIS,
+            purpose="Backend cross-check authority: typed run requests/results, findings, repair routes, approve/dismiss/waive disposition, and repair verification reruns.",
+            related_tests=["tests/test_cross_check.py"],
+            notes="Pure domain authority for XCK rows; no UI, bridge, model/provider calls, persistence, process/session control, or repair execution.",
+        ),
+        FileMapEntry(
             path="meridian_core/aegis_logic_snapshot.py",
             area=FileArea.AEGIS,
             purpose="Display-safe backend Aegis Runtime Logic snapshot: ProofTrail evidence counts, cognition-policy gate result, Relay route posture, non-executable guardrails, and source refs.",
@@ -696,11 +721,25 @@ def make_default_map() -> FileMap:
             related_tests=[],
         ),
         FileMapEntry(
+            path="tests/test_cross_check.py",
+            area=FileArea.AEGIS,
+            purpose="Test suite for meridian_core/cross_check.py: covers cross-check execution, repair routing, approve/dismiss/waive disposition, verification reruns, and display-safety boundaries.",
+            related_tests=[],
+            notes="Run before changing backend cross-check authority or XCK row semantics.",
+        ),
+        FileMapEntry(
             path="tests/test_aegis_logic_snapshot.py",
             area=FileArea.AEGIS,
             purpose="Regression tests for the backend-owned Aegis Runtime Logic snapshot, including display-only guardrails, proof trail serialization, and cognition-policy blocking behavior.",
             related_tests=[],
             notes="Run before changing meridian_core/aegis_logic_snapshot.py or the backend Aegis Runtime Logic payload.",
+        ),
+        FileMapEntry(
+            path="docs/cross-check-authority-contract.md",
+            area=FileArea.AEGIS,
+            purpose="Backend contract for V2 cross-check authority: execution, repair routing, disposition, rerun verification, and display-safety guardrails.",
+            related_tests=["tests/test_cross_check.py"],
+            notes="Read before wiring XCK authority into Prime, Aegis, Review Console, or Bifrost-visible display surfaces.",
         ),
         FileMapEntry(
             path="docs/aegis-relay-summary-handoff-contract.md",
@@ -970,7 +1009,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="meridian_core/session_lifecycle.py",
             area=FileArea.BIFROST,
-            purpose="Session Lifecycle domain objects: typed enums and frozen dataclasses for session state, command planning, legality checking, and executability gates per V2 contract.",
+            purpose="Session Lifecycle domain objects: typed enums and frozen dataclasses for session state, command planning, legality checking, executability gates, and SK9 backend close/write-through authority per V2 contract.",
             related_tests=["tests/test_session_lifecycle.py"],
             notes="Core harness implementation; read the v2-contract and implementation-checklist before modifying.",
         ),
@@ -984,7 +1023,7 @@ def make_default_map() -> FileMap:
         FileMapEntry(
             path="tests/test_session_lifecycle.py",
             area=FileArea.BIFROST,
-            purpose="Test suite for meridian_core/session_lifecycle.py: session state transitions, legality matrix, executability helpers, immutability, and proof progression.",
+            purpose="Test suite for meridian_core/session_lifecycle.py: session state transitions, legality matrix, executability helpers, immutability, proof progression, and SK9 close/write-through authority.",
             related_tests=[],
             notes="Run before changing meridian_core/session_lifecycle.py or Session Lifecycle behavior.",
         ),
@@ -1081,6 +1120,90 @@ def make_default_map() -> FileMap:
             notes="Run before changing meridian_core/goal_runtime.py or any Goal Runtime ownership, lifecycle, transition matrix, proof requirement, or display-safety behavior.",
         ),
         FileMapEntry(
+            path="docs/backlog-authority-contract.md",
+            area=FileArea.BACKLOG,
+            purpose="Backlog Authority backend contract for BAK3-BAK11: capture, modify, approve/reject/defer, task-draft conversion, project/initiative links, import candidates, archive, and query/filter field ownership.",
+            related_tests=["tests/test_backlog.py"],
+            notes="Backend-only contract. Read before adding backlog persistence, UI routes, bridge mutations, Polaris imports, or Prime backlog recommendations.",
+        ),
+        FileMapEntry(
+            path="meridian_core/backlog.py",
+            area=FileArea.BACKLOG,
+            purpose="Backlog Authority domain slice: typed backlog records, revisions, audit entries, task drafts, import batches, query filters, display-safety validation, and caller-supplied JSON load/save for BAK3-BAK11.",
+            related_tests=["tests/test_backlog.py"],
+            notes="Pure backend authority only: no UI bridge, no live session dispatch, no model calls, and no writeback to Polaris or external systems.",
+        ),
+        FileMapEntry(
+            path="tests/test_backlog.py",
+            area=FileArea.BACKLOG,
+            purpose="Test suite for meridian_core/backlog.py: capture/provenance, revision persistence/reload, legal transitions, archive inspectability, Polaris import no-writeback, task-draft projection, query/filter fields, and display-safety rejection.",
+            related_tests=[],
+            notes="Run before changing meridian_core/backlog.py or Backlog Authority behavior.",
+        ),
+        FileMapEntry(
+            path="docs/voice-io-authority-contract.md",
+            area=FileArea.VOICE_IO,
+            purpose="Voice I/O Authority backend contract for VOC1/VOC3-VOC10 provider/runtime and command-recognition boundary: fail-closed capability state, transcript metadata, command intent normalization, output job state, VOC10 command-family recognition, and privacy redaction.",
+            related_tests=["tests/test_voice_io.py"],
+            notes="Backend-only contract. Read before adding voice providers, capture, read-aloud, mute/interrupt, correction, command-intent runtime, or UI/bridge wiring.",
+        ),
+        FileMapEntry(
+            path="meridian_core/voice_io.py",
+            area=FileArea.VOICE_IO,
+            purpose="Voice I/O Authority domain slice: typed provider capabilities, fail-closed runtime state, transcript draft metadata, command intents, VOC10 deterministic command-family recognition, output jobs, and display-safe serialization.",
+            related_tests=["tests/test_voice_io.py"],
+            notes="Pure backend authority only: no microphone capture, browser speech APIs, audio playback, provider/network calls, Relay prompt submission, bridge routes, or UI wiring.",
+        ),
+        FileMapEntry(
+            path="tests/test_voice_io.py",
+            area=FileArea.VOICE_IO,
+            purpose="Test suite for meridian_core/voice_io.py: fail-closed runtime defaults, capability-gated authorization, transcript/output metadata privacy, correction metadata, VOC10 command-family recognition, command confirmation gates, mute/interrupt state, and unsafe text/ref rejection.",
+            related_tests=[],
+            notes="Run before changing meridian_core/voice_io.py or Voice I/O Authority behavior.",
+        ),
+        FileMapEntry(
+            path="docs/routine-authority-contract.md",
+            area=FileArea.ROUTINES,
+            purpose="Routine Authority backend contract for ROU2-ROU4 and ROU9: routine definitions, enable/disable state, non-executable run plans, and Prime-owned routine review posture.",
+            related_tests=["tests/test_routines.py"],
+            notes="Backend-only contract. Read before adding routine scheduler mutation, workflow execution, executable review actions, run history, UI routes, or bridge controls.",
+        ),
+        FileMapEntry(
+            path="meridian_core/routines.py",
+            area=FileArea.ROUTINES,
+            purpose="Routine Authority domain slice: typed routine triggers, definitions, enable/disable transitions, display-safe non-executable run plans, and Prime routine review decisions.",
+            related_tests=["tests/test_routines.py"],
+            notes="Pure backend authority only: no scheduler, no workflow execution, no provider calls, no queue mutation, no executable accept/reroute/retry/escalate action, no bridge route, and no UI wiring.",
+        ),
+        FileMapEntry(
+            path="tests/test_routines.py",
+            area=FileArea.ROUTINES,
+            purpose="Test suite for meridian_core/routines.py: routine creation, enable/disable transitions, disabled-run blocking, enabled-run non-executable planning, Prime review posture, trigger validation, and display-safety rejection.",
+            related_tests=[],
+            notes="Run before changing meridian_core/routines.py or Routine Authority behavior.",
+        ),
+        FileMapEntry(
+            path="docs/session-archive-authority-contract.md",
+            area=FileArea.SESSION_ARCHIVE,
+            purpose="Session Archive Authority backend contract for archive catalog records, reload plans, run-again plans, and authorized transcript access handles.",
+            related_tests=["tests/test_session_archive.py"],
+            notes="Backend-only contract. Read before adding archive storage, reload execution, run-again execution, transcript retrieval, UI routes, or bridge controls.",
+        ),
+        FileMapEntry(
+            path="meridian_core/session_archive.py",
+            area=FileArea.SESSION_ARCHIVE,
+            purpose="Session Archive Authority domain slice: metadata-only archive records from close/write-through results, catalog entries, non-executable reload/run-again plans, and transcript access handles.",
+            related_tests=["tests/test_session_archive.py"],
+            notes="Pure backend authority only: no raw transcripts, no UI bridge, no live session restart/replay, no provider calls, and no filesystem persistence.",
+        ),
+        FileMapEntry(
+            path="tests/test_session_archive.py",
+            area=FileArea.SESSION_ARCHIVE,
+            purpose="Test suite for meridian_core/session_archive.py: archive record ingestion, catalog posture, non-executable reload/run-again plans, transcript handle authorization, and display-safety rejection.",
+            related_tests=[],
+            notes="Run before changing meridian_core/session_archive.py or Session Archive Authority behavior.",
+        ),
+        FileMapEntry(
             path="meridian_core/provider_balance.py",
             area=FileArea.PROVIDER_BALANCE,
             purpose="V3 Provider Balance / Usage domain slice: frozen ProviderBalanceSnapshot and ProviderBalanceSummary dataclasses carrying provider health, route kind, quota state, credit status, token-usage counters, estimated-spend labels, cost-pressure state, selected-provider policy state, provider-neutral provider families, and display-safe evidence refs. Exposes build_provider_balance_snapshot, build_provider_balance_summary, unknown_provider_snapshot, and safe_display_label / safe_display_notes / safe_provider_id / safe_evidence_ref helpers; summary mapping shape is structurally compatible with bifrost.cockpit.provider_balance_view_from_summary without importing Bifrost.",
@@ -1156,6 +1279,13 @@ def make_default_map() -> FileMap:
             purpose="V2 progress tracker: countable progress view for Echo, Atlas, workflow subagent harnesses, and expanded model harnesses. Refines v0-v1-progress-tracker.md for V2 capabilities.",
             related_tests=[],
             notes="Companion to v0-v1-progress-tracker.md. Update when a V2 capability status changes.",
+        ),
+        FileMapEntry(
+            path="docs/v2-backend-completion-audit-20260608.md",
+            area=FileArea.BUILD_PROCESS,
+            purpose="Backend completion audit for the June 8 V2 restart wave: records tracker counts, reviewed backend closure evidence, contract-baseline disposition, harness matrix dependencies, and UI-owned exclusions.",
+            related_tests=["tests/test_filemap.py"],
+            notes="Read before declaring backend V2 closed, launching more backend workers, or confusing UI-owned Runtime Logic wiring with backend scope.",
         ),
         FileMapEntry(
             path="docs/prime-autonomy-v2-contract.md",

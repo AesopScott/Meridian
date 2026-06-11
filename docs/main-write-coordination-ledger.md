@@ -39,6 +39,206 @@ Use this cadence whenever either party expects to write:
 - **Completion:** writer records commit hash, pushed/not pushed, files changed, proof, and final `main` status.
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
+```text
+Time: 2026-06-11 00:51 -06:00
+Writer: front-end developer lane
+Intent: complete reviewed Routine authority depth UI promotion under backend/orchestrator exact-hash ACK.
+Action completed: landed the reviewed Routine authority depth UI slice on `origin/main` from the clean Routine worktree, adding display-only routine definitions, enabled/disabled posture, trigger metadata, non-executable run plans, and Prime routine review posture sourced from reviewed backend routine authority.
+Commit(s): `39e716de4c4bcd1e738c69a50968a0730cae11e8`, `b8216cd80429260c00060d93f29c8598787be398`, this commit
+Pushed to origin/main: yes
+Files changed: docs/ui-integration-checklist.md, index.html, scripts/meridian-model-bridge.js, tests/test_bifrost_cockpit.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_bifrost_cockpit.py tests/test_routines.py -q` -> 497 passed; `node --check scripts/meridian-model-bridge.js` passed; `node scripts/meridian-model-bridge.js --self-test` returned `ok: true` with `routineOk: true`; live smoke `GET /bridge/routines` -> 200 with `ok: true`, `display_only: true`, mutation/scheduler execution false, 2 routines, 3 run plans, 3 Prime reviews, and no checked raw/local sentinel leaks; `git diff --check origin/main...HEAD` passed cleanly before push.
+Final shared main status: reviewed Routine UI candidate and intent landed on `origin/main` at `b8216cd80429260c00060d93f29c8598787be398` before this completion write; authoritative promoted UI checklist state is now `243/305 wired`, `4 partial`, `58 planned`, `0 blocked`.
+Notes/blockers: scope stayed path-limited to the four approved UI files plus this ledger. No backend code moved, no scheduler/run-now/create/toggle mutation authority landed, and no queue/provider/executable review action authority was added. Next separate V2 UI gate is harness closeout for `HMS5` and `HMS10`.
+Status: Complete
+```
+
+```text
+Time: 2026-06-11 00:50 -06:00
+Writer: front-end developer lane
+Intent: promote reviewed Routine authority depth UI wiring under backend/orchestrator exact-hash ACK through 2026-06-11 01:00 -06:00.
+ACK: backend/orchestrator lane granted a 10-minute path-limited UI lease on exact reviewed candidate `39e716de4c4bcd1e738c69a50968a0730cae11e8`; approved promotion scope is `docs/ui-integration-checklist.md`, `index.html`, `scripts/meridian-model-bridge.js`, `tests/test_bifrost_cockpit.py`, plus this ledger file for intent/completion bookkeeping only.
+Expected proof: `python -m pytest tests/test_bifrost_cockpit.py tests/test_routines.py -q`; `node --check scripts/meridian-model-bridge.js`; `node scripts/meridian-model-bridge.js --self-test`; live smoke `GET /bridge/routines`; `git diff --check origin/main...HEAD`.
+Pre-write check: `git fetch origin` confirmed `origin/main` still at `e89cf32c1de662d02b55131534f67f15ef9dee62`; clean promotion worktree `C:\Users\scott\.codex\worktrees\meridian-ui-routine-review-20260611` is ahead only by reviewed Routine candidate `39e716de4c4bcd1e738c69a50968a0730cae11e8`; diff scope matches the four approved UI files before this ledger entry.
+Notes/blockers: shared checkout `C:\Users\scott\Code\Meridian` remains dirty/diverged and is not a promotion source, so this move must come only from the clean Routine worktree. Scope is display-only routine definitions, enabled/disabled posture, trigger metadata, non-executable run plans, and Prime routine review posture only; no scheduler execution, run-now execution, queue mutation, provider calls, or executable review actions are included.
+Status: In progress
+```
+
+```text
+Time: 2026-06-11 00:29 -06:00
+Writer: front-end developer lane
+Intent: complete reviewed Archive authority UI promotion under backend/orchestrator exact-hash ACK.
+Action completed: landed the reviewed Archive UI slice on `origin/main` from the clean UI worktree, preserving display-only Session Close Archive Proof posture while adding reviewed archive metadata, catalog, reload/run-again posture, and transcript-access posture with runtime smoke coverage for the route.
+Commit(s): `8e896420567b78eb8b1c4213cabe469b2f00dac1`, `8da1a729bc378095e5d68bf960b27ec9d426c8c2`, `4e07b5e67034a316241ed13639d3da7e455d4d5e`, this commit
+Pushed to origin/main: yes
+Files changed: docs/ui-integration-checklist.md, index.html, scripts/meridian-model-bridge.js, tests/test_bifrost_cockpit.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 469 passed; `python -m pytest tests/test_session_archive.py tests/test_bifrost_cockpit.py -q` -> 490 passed; `node --check scripts/meridian-model-bridge.js` passed; `node scripts/meridian-model-bridge.js --self-test` returned `ok: true` with `archiveOk: true`; live smoke `GET /bridge/session-close-archive-proof` -> 200 with `ok: true`, `archive_id: archive-session-close-proof`, `catalog_count: 1`, reload/run-again/transcript authorized all false, and no `safe bounded session summary` leak; `git diff --check origin/main...HEAD` passed cleanly before push.
+Final shared main status: reviewed Archive UI candidate and intent landed on `origin/main` at `4e07b5e67034a316241ed13639d3da7e455d4d5e` before this completion write; authoritative promoted UI checklist state is now `239/305 wired`, `4 partial`, `62 planned`, `0 blocked`.
+Notes/blockers: scope stayed path-limited to the four approved UI files plus this ledger. No backend code moved, no provider/model transport change landed, and the archive route remains display-only/non-executing with raw transcript/prompt/detail bodies still withheld.
+Status: Complete
+```
+
+```text
+Time: 2026-06-11 00:28 -06:00
+Writer: front-end developer lane
+Intent: promote reviewed Archive authority UI wiring and repair under backend/orchestrator exact-hash ACK through 2026-06-11 00:38 -06:00.
+ACK: backend/orchestrator lane granted a 10-minute path-limited UI lease on exact reviewed candidate `8da1a729bc378095e5d68bf960b27ec9d426c8c2`; approved promotion scope is `docs/ui-integration-checklist.md`, `index.html`, `scripts/meridian-model-bridge.js`, `tests/test_bifrost_cockpit.py`, plus this ledger file for intent/completion bookkeeping only.
+Expected proof: `python -m pytest tests/test_bifrost_cockpit.py -q`; `python -m pytest tests/test_session_archive.py tests/test_bifrost_cockpit.py -q`; `node --check scripts/meridian-model-bridge.js`; `node scripts/meridian-model-bridge.js --self-test`; live smoke `GET /bridge/session-close-archive-proof`; `git diff --check origin/main...HEAD`.
+Pre-write check: `git fetch origin` confirmed `origin/main` still at `cfc02b5080fefa983aeee74607d5ee60381f0b91`; clean promotion worktree `C:\Users\scott\.codex\worktrees\meridian-ui-voc10-20260610` is ahead only by reviewed Archive commits; diff scope matches the four approved UI files before this ledger entry.
+Notes/blockers: promote only the reviewed Archive UI slice from the clean worktree, not from the dirty shared checkout. Route remains display-only/non-executing, with no backend code movement, no provider/model transport changes, no raw prompt/transcript/detail body exposure, and no archive mutation execution.
+Status: In progress
+```
+
+```text
+Time: 2026-06-11 00:01 -06:00
+Writer: front-end developer lane
+Intent: promote reviewed VOC10 preview-only voice command-intent UI wiring under backend/orchestrator ACK through 2026-06-11 00:11 -06:00.
+Expected scope: scripts/meridian-model-bridge.js, index.html, tests/test_bifrost_cockpit.py, docs/ui-integration-checklist.md, plus docs/main-write-coordination-ledger.md for this intent/completion bookkeeping only.
+Expected proof: python -m pytest tests/test_bifrost_cockpit.py -q; python -m pytest tests/test_voice_io.py tests/test_bifrost_cockpit.py -q; node --check scripts/meridian-model-bridge.js; node scripts/meridian-model-bridge.js --self-test; git diff --check.
+Notes/blockers: promote only exact reviewed UI candidate d90102b5d81d5229d55e6899b8f8a345a86c09a8 from clean worktree C:\Users\scott\.codex\worktrees\meridian-ui-voc10-20260610. No shared-checkout promotion source, no backend tracker edits, no provider/model transport change, and no live audio/permission/mutation behavior.
+Status: In progress
+```
+
+```text
+Time: 2026-06-11 00:02 -06:00
+Writer: front-end developer lane
+Intent: complete reviewed VOC10 preview-only voice command-intent UI promotion under backend/orchestrator ACK.
+Action completed: landed reviewed VOC10 UI candidate plus intent bookkeeping on origin/main from the clean UI worktree, preserving preview-only/display-safe command intent visibility with no live audio or mutation behavior.
+Commit(s): d90102b5d81d5229d55e6899b8f8a345a86c09a8, 062f15fcae257ba1985bff19cb7664f2d17c303d, this commit
+Pushed to origin/main: yes
+Files changed: scripts/meridian-model-bridge.js, index.html, tests/test_bifrost_cockpit.py, docs/ui-integration-checklist.md, docs/main-write-coordination-ledger.md
+Proof run: python -m pytest tests/test_bifrost_cockpit.py -q -> 467 passed; python -m pytest tests/test_voice_io.py tests/test_bifrost_cockpit.py -q -> 511 passed; node --check scripts/meridian-model-bridge.js passed; node scripts/meridian-model-bridge.js --self-test returned ok true; git diff --check passed with no output.
+Final shared main status: candidate and intent landed on origin/main at 062f15fca before this completion write; completion push/fetch verification follows immediately from the same clean worktree.
+Notes/blockers: scope stayed path-limited to the four approved UI files plus this ledger. No shared-checkout promotion source, no backend tracker edits, no provider/model transport change, and no microphone/audio/prompt/mutation execution behavior landed.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 23:45 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed final V2 backend tracker/baseline disposition candidate `9a99420e8` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 23:45 coordination request; approved scope is the two reviewed tracker/audit docs, one tracker guard test, plus this ledger record required by the protocol.
+Approved implementation files: docs/v2-progress-tracker.md, docs/v2-backend-completion-audit-20260608.md, tests/test_filemap.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no provider/model transport changes, no runtime code changes, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `7583eaf00c9350042bafb85d9a45ef32634cc484`; tracker branch is clean and one commit ahead; diff scope matches approved docs/test files before this ledger entry.
+Proof expected before push: focused FileMap/Bifrost tracker pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed final V2 backend tracker/baseline disposition and required ledger record to `origin/main`.
+Commit(s): `9a99420e8`, `72b18cefd`
+Pushed to origin/main: yes
+Files changed: docs/v2-progress-tracker.md, docs/v2-backend-completion-audit-20260608.md, tests/test_filemap.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_filemap.py tests/test_bifrost_cockpit.py -q` -> 514 passed; `python -m pytest -q` -> 3548 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `72b18cefd7547684049a2cf84c88e09daabbec93` before this completion ledger write.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 23:36 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend BR7 Auto routing display-safety repair candidate `2c8cb0337` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 23:35 coordination request; approved scope is the two reviewed BR7 files plus this ledger record required by the protocol.
+Approved implementation files: meridian_core/relay_auto_routing.py, tests/test_relay_auto_routing.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no provider/model transport changes, no Relay prompt submission behavior change, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `ec4e7f9a7a4f9dec8dfcb3ceb537f49084d53f2c`; BR7 branch is clean and one commit ahead; diff scope matches approved backend/test files before this ledger entry.
+Proof expected before push: focused BR7/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed BR7 Auto routing display-safety repair and required ledger record to `origin/main`.
+Commit(s): `2c8cb0337`, `7c5be8048`
+Pushed to origin/main: yes
+Files changed: meridian_core/relay_auto_routing.py, tests/test_relay_auto_routing.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_relay_auto_routing.py tests/test_filemap.py -q` -> 63 passed; `python -m pytest -q` -> 3548 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `7c5be8048c2a4303a0ee9957153f5570f2f99157` before this completion ledger write.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 23:29 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend VOC10 voice command-intent authority candidate `6451afda8` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 23:28 coordination request; approved scope is the seven reviewed VOC10 files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/voice-io-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/voice_io.py, tests/test_package_api.py, tests/test_voice_io.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no microphone/audio provider work, no Relay prompt submission, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `ba321268cbacb473b86c14162142c56284afef0e`; VOC10 branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused Voice/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed VOC10 voice command-intent backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `6451afda8`, `d52e9c485`
+Pushed to origin/main: yes
+Files changed: docs/FileMap.md, docs/voice-io-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/voice_io.py, tests/test_package_api.py, tests/test_voice_io.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_voice_io.py tests/test_package_api.py tests/test_filemap.py -q` -> 115 passed; `python -m pytest -q` -> 3547 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `d52e9c4854ece3c7ae044b6a03ae4e8c8062b510` before this completion ledger write.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 23:07 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend ROU9 Prime routine review authority candidate `8235eb4c1` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 23:05 coordination request; approved scope is the seven reviewed ROU9 files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/routine-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/routines.py, tests/test_package_api.py, tests/test_routines.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `4260ba07a8ba8ef0741fdaa1a78ac56737deb194`; ROU9 branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused Routine/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed ROU9 Prime routine review backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `8235eb4c1`, `06bc4d465`
+Pushed to origin/main: yes
+Files changed: docs/FileMap.md, docs/routine-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/routines.py, tests/test_package_api.py, tests/test_routines.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_routines.py tests/test_package_api.py tests/test_filemap.py -q` -> 97 passed; `python -m pytest -q` -> 3522 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `06bc4d465f470881a852e913bd3e809ac74e41a1` before this completion ledger write.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 22:49 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend session archive authority candidate `0e2bb23f4` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 22:48 coordination request; approved scope is the eight reviewed Archive files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/session-archive-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/session_archive.py, tests/test_filemap.py, tests/test_package_api.py, tests/test_session_archive.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `e2882cf9905ea397c2c4989a73614874cdb194f7`; Archive branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused Archive/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed Archive backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `0e2bb23f4`, `d5f794790`
+Pushed to origin/main: yes
+Files changed: docs/FileMap.md, docs/session-archive-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/session_archive.py, tests/test_filemap.py, tests/test_package_api.py, tests/test_session_archive.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_session_archive.py tests/test_package_api.py tests/test_filemap.py -q` -> 92 passed; `python -m pytest -q` -> 3513 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `d5f7947907100659921529eb8e47af76376f8d91` before this completion ledger write.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 22:07 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend cross-check authority candidate `7df8e191` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 22:06 coordination request; approved scope is the eight reviewed XCK files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/cross-check-authority-contract.md, meridian_core/__init__.py, meridian_core/cross_check.py, meridian_core/filemap.py, tests/test_cross_check.py, tests/test_filemap.py, tests/test_package_api.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no bridge route changes, and no dirty shared-checkout changes.
+Pre-write check: `origin/main` fetched at `07e8b67cdf7b97140688ef70762df956025b5e02`; XCK branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused XCK/package/FileMap/Aegis/Review Console pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed XCK backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `7df8e191`, `5d5d08255`
+Pushed to origin/main: yes
+Files changed: docs/FileMap.md, docs/cross-check-authority-contract.md, meridian_core/__init__.py, meridian_core/cross_check.py, meridian_core/filemap.py, tests/test_cross_check.py, tests/test_filemap.py, tests/test_package_api.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_cross_check.py tests/test_package_api.py tests/test_filemap.py tests/test_aegis.py tests/test_review_console.py -q` -> 484 passed; `python -m pytest -q` -> 3453 passed; `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: pending final fetch/status after completion ledger push.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 21:50 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend backlog authority candidate `2e0c93142` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 21:46 coordination request; approved scope is the eight reviewed BAK files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/backlog-authority-contract.md, meridian_core/__init__.py, meridian_core/backlog.py, meridian_core/filemap.py, tests/test_backlog.py, tests/test_filemap.py, tests/test_package_api.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout changes.
+Pre-write check: `origin/main` fetched at `0e6f02105c6cd8d1cfa0cb9cb18a63f06b069c48`; BAK branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused BAK/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pushed reviewed BAK backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `2e0c93142`, `7e5e3689e`
+Pushed to origin/main: yes
+Files changed: docs/FileMap.md, docs/backlog-authority-contract.md, meridian_core/__init__.py, meridian_core/backlog.py, meridian_core/filemap.py, tests/test_backlog.py, tests/test_filemap.py, tests/test_package_api.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_backlog.py tests/test_package_api.py tests/test_filemap.py -q` -> 96 passed; `python -m pytest -q` -> 3419 passed; `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: pending final fetch/status after completion ledger push.
+Status: Complete
+```
+
 ## Intent Template
 
 ```text
@@ -105,6 +305,48 @@ Status: Intent posted; awaiting explicit ACK before merge.
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-11 11:12 -06:00
+Writer: Meridian coordinator
+Intent: complete backend V2.5 PR #3 merge under renewed UI-lane ACK.
+Action completed: merged reviewed backend PR #3 from the clean PR path, then verified the resulting `origin/main` from a clean detached verification worktree.
+Commit(s): PR #3 tip `033531dfa841267c023af190fd41e920f427d262`; merge commit `9a58075bf28126138a59004dcf53823898ad4642`; this ledger completion commit.
+Pushed to origin/main: yes
+Files changed: backend modules, backend tests, docs/FileMap.md, package export files from PR #3; docs/main-write-coordination-ledger.md for completion bookkeeping only.
+Proof run: `python -m pytest tests/test_evidence_safety.py tests/test_dispatch_evidence.py tests/test_filemap_intelligence.py tests/test_proof_quality.py tests/test_harness_diagnostics.py tests/test_promotion_provenance.py tests/test_review_intelligence.py tests/test_context_provenance.py tests/test_decision_transparency.py tests/test_dry_run_contracts.py tests/test_release_readiness.py tests/test_workflow_intelligence.py -q` -> 141 passed; `python -m pytest -q` -> 3760 passed; `python -m compileall -q meridian_core` passed; `git diff --check HEAD~1..HEAD` passed.
+Final shared main status: `origin/main` advanced to merge commit `9a58075bf28126138a59004dcf53823898ad4642`; clean verification worktree at that commit was clean/aligned with `origin/main` before this ledger-only completion commit.
+Notes/blockers: renewed ACK was granted by the UI lane in thread `019ea586-a296-7833-b4cd-fdab7683a8a8`; scope stayed limited to backend PR #3 exact reviewed tip. No UI-owned files, `index.html`, `scripts/meridian-model-bridge.js`, `docs/ui-integration-checklist.md`, or dirty shared-checkout artifacts were used as promotion sources.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 22:42 -06:00
+Writer: Meridian coordinator
+Intent: land Review A/B-cleared backend-only Routine authority boundary under UI-lane ACK.
+Action completed: pushed reviewed Routine candidate plus ledger intent record to origin/main from isolated Routine worktree; did not touch shared UI checkout.
+Commit(s): 8609c0d67 (routines: add backend authority boundary); 7846fb05d (docs: post routine authority main-write intent); this completion commit.
+Pushed to origin/main: yes.
+Files changed: docs/FileMap.md; docs/routine-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/routines.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_routines.py; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_routines.py tests/test_package_api.py tests/test_filemap.py -q -> 87 passed; python -m pytest -q -> 3491 passed; scoped git diff --check returned only the ledger LF/CRLF warning.
+Final shared main status: origin/main advanced to 7846fb05d after Routine push; this completion commit closes the active lease.
+Notes/blockers: UI-lane ACK granted in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for exact Routine hash 8609c0d67ca2b0b783794b431493d190012b725b and backend-only scope. Scope excluded index.html, Electron/renderer/Bifrost UI, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, bridge routes, and UI wiring.
+Status: Complete
+```
+
+```text
+Time: 2026-06-10 22:24 -06:00
+Writer: Meridian coordinator
+Intent: land Review A/B-cleared backend-only Voice I/O authority boundary under UI-lane ACK.
+Action completed: pushed reviewed Voice candidate plus ledger intent record to origin/main from isolated Voice worktree; did not touch shared UI checkout.
+Commit(s): 2635794bf (voice: add backend authority boundary); bca5942ba (docs: post voice authority main-write intent); this completion commit.
+Pushed to origin/main: yes.
+Files changed: docs/FileMap.md; docs/voice-io-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/voice_io.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_voice_io.py; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_voice_io.py tests/test_package_api.py tests/test_filemap.py -q -> 88 passed; python -m pytest -q -> 3473 passed; scoped git diff --check returned only the ledger LF/CRLF warning.
+Final shared main status: origin/main advanced to bca5942ba after Voice push; this completion commit closes the active lease.
+Notes/blockers: UI-lane ACK granted in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for exact Voice hash 2635794bf91af62a9c06caa1e8a6046a048d8187 and backend-only scope. Scope excluded index.html, Electron/renderer/Bifrost UI, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, bridge routes, and UI wiring.
+Status: Complete
+```
 
 ```text
 Time: 2026-06-08 18:50 -06:00

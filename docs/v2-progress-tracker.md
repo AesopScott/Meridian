@@ -15,15 +15,15 @@
 | Owner | Built/Review-Cleared | Built-Awaiting-Review | Contract Baseline | Needs Build | Total | Percent Complete |
 |---|---:|---:|---:|---:|---:|---:|
 | Prime Autonomy | 3 | 0 | 0 | 0 | 3 | 100% |
-| Echo Harness | 2 | 0 | 2 | 0 | 4 | 100% |
-| Atlas Harness | 3 | 0 | 1 | 0 | 4 | 100% |
-| Relay/Model Harness | 8 | 0 | 2 | 0 | 10 | 80% clear + 20% baseline |
+| Echo Harness | 4 | 0 | 0 | 0 | 4 | 100% |
+| Atlas Harness | 4 | 0 | 0 | 0 | 4 | 100% |
+| Relay/Model Harness | 10 | 0 | 0 | 0 | 10 | 100% |
 | Aegis Harness | 2 | 0 | 0 | 0 | 2 | 100% |
-| Compass Harness | 4 | 0 | 1 | 0 | 5 | 80% clear + 20% baseline |
-| Session Lifecycle Harness | 6 | 0 | 1 | 0 | 7 | 86% clear + 14% baseline |
-| Bifrost Harness | 7 | 0 | 2 | 0 | 9 | 78% clear + 22% baseline |
+| Compass Harness | 5 | 0 | 0 | 0 | 5 | 100% |
+| Session Lifecycle Harness | 7 | 0 | 0 | 0 | 7 | 100% |
+| Bifrost Harness | 9 | 0 | 0 | 0 | 9 | 100% |
 | Federation Harness | 1 | 0 | 0 | 0 | 1 | 100% |
-| **Total V2** | **36** | **0** | **9** | **0** | **45** | **80% Clear + 20% Baseline** |
+| **Total V2** | **45** | **0** | **0** | **0** | **45** | **100% Backend/Tracker Closure** |
 
 ## Built and Review-Cleared V2 Capabilities
 
@@ -98,16 +98,22 @@ Ownership correction: future Relay/Model Harness follow-ups should bind existing
 
 - None currently.
 
-## Contract Baselines Complete (Not Runtime Implementation)
+## Converted Contract Baseline Provenance
+
+These rows were previously counted as `Contract Baseline`. They are now
+closed as accepted V2 backend/tracker provenance because each baseline is
+represented by reviewed runtime, reviewed authority contracts, or an explicit
+non-duplicate disposition above. They do not authorize live operations, bridge
+routes, UI wiring, provider transport, or post-V2/V3 scope by themselves.
 
 ### Echo Harness
 
-- [x] **Echo + Memory Contract:** `docs/echo-memory-contract.md` - architecture and interface contract defined; runtime implementation awaiting.
-- [x] **Echo + Repository Integration:** contract defined for local storage abstraction and query interface.
+- [x] **Echo + Memory Contract:** `docs/echo-memory-contract.md` - accepted architecture provenance; reviewed Echo runtime and FileMap integration above cover deterministic memory records, query, ranking, pinning, and project filtering for V2.
+- [x] **Echo + Repository Integration:** accepted local storage/query baseline; no duplicate V2 backend implementation task remains unless a future tracker row names durable storage or live-feed work explicitly.
 
 ### Atlas Harness
 
-- [x] **Atlas + Retrieval Contract:** `docs/atlas-retrieval-contract.md` - file/docs-first RAG interface contract defined; source-aware ranking principles established; runtime implementation awaiting.
+- [x] **Atlas + Retrieval Contract:** `docs/atlas-retrieval-contract.md` - accepted retrieval provenance; reviewed Atlas ranking, FileMap integration, and Atlas Workflow Adapter above cover the V2 backend runtime requirement.
 
 ### Session Lifecycle Harness
 
@@ -121,7 +127,7 @@ Ownership correction: future Relay/Model Harness follow-ups should bind existing
 
 - [x] **Model Harness + DeepSeek Validation Gate:** `docs/deepseek-provider-validation-gate.md` - DeepSeek trust criteria and validation-gate baseline. The transport-authority runtime is now represented above under Built and Review-Cleared; DeepSeek still cannot clear reviews, move branches/worktrees, run autonomous implementation lanes, hold live coding authority, or bypass Relay.
 - [x] **Model Harness + Metadata Contract:** `docs/model-harness-v2-contract.md` - provider capability metadata, prompt-drag telemetry, trust state, route ownership, direct-vs-aggregator evidence, allowed/blocked task types, external-review requirements, and Aegis/Relay policy binding; review-cleared by Reviews B on 2026-05-31. Runtime metadata binding is now represented above under Built and Review-Cleared.
-- [x] **Model Harness + Per-Call GOAL/Intent Definition:** `docs/model-harness-v2-contract.md` now separates Prime-level user intent analysis from dispatch-scoped per-call intent. Per-call GOAL/Intent belongs to Relay + Model Harness evidence and should express call goal, action type, output shape, risk tier, proof requirement, disallowed outputs, payload budget ref, and source evidence refs without creating taxonomy-derived backend names.
+  - **Per-Call GOAL/Intent disposition:** `docs/model-harness-v2-contract.md` now separates Prime-level user intent analysis from dispatch-scoped per-call intent. This is tracked as part of the Model Harness metadata contract count, not as an additional contract-baseline row. Per-call GOAL/Intent belongs to Relay + Model Harness evidence and should express call goal, action type, output shape, risk tier, proof requirement, disallowed outputs, payload budget ref, and source evidence refs without creating taxonomy-derived backend names.
 
 ### Bifrost Harness
 
