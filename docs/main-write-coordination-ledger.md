@@ -40,6 +40,16 @@ Use this cadence whenever either party expects to write:
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
 ```text
+Time: 2026-06-11 00:01 -06:00
+Writer: front-end developer lane
+Intent: promote reviewed VOC10 preview-only voice command-intent UI wiring under backend/orchestrator ACK through 2026-06-11 00:11 -06:00.
+Expected scope: scripts/meridian-model-bridge.js, index.html, tests/test_bifrost_cockpit.py, docs/ui-integration-checklist.md, plus docs/main-write-coordination-ledger.md for this intent/completion bookkeeping only.
+Expected proof: python -m pytest tests/test_bifrost_cockpit.py -q; python -m pytest tests/test_voice_io.py tests/test_bifrost_cockpit.py -q; node --check scripts/meridian-model-bridge.js; node scripts/meridian-model-bridge.js --self-test; git diff --check.
+Notes/blockers: promote only exact reviewed UI candidate d90102b5d81d5229d55e6899b8f8a345a86c09a8 from clean worktree C:\Users\scott\.codex\worktrees\meridian-ui-voc10-20260610. No shared-checkout promotion source, no backend tracker edits, no provider/model transport change, and no live audio/permission/mutation behavior.
+Status: In progress
+```
+
+```text
 Time: 2026-06-10 23:45 -06:00
 Writer: Meridian backend lane
 Intent: promote reviewed final V2 backend tracker/baseline disposition candidate `9a99420e8` to `origin/main` under frontend ACK from the UI lane.
