@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from meridian_core.filemap_intelligence import (
+    BoundaryAdvisory,
     BoundaryAdvisoryStatus,
+    FileMapFreshnessRecord,
     FileMapFreshnessStatus,
     FileMapMetadata,
+    RelatedTestHint,
     advise_architecture_boundary,
     build_capability_navigation_links,
     build_capability_ownership_map,
@@ -159,3 +162,43 @@ def test_non_path_fields_are_sanitized_for_paths_and_secrets():
     assert entry.to_display_dict()["owner"] == "[redacted]"
     assert entry.to_display_dict()["capability"] == "[redacted]"
     assert links["proof_refs"] == ("[redacted]",)
+
+
+def test_direct_records_sanitize_messages_and_reason_tags():
+    freshness = FileMapFreshnessRecord(
+        path="meridian_core/filemap.py",
+        status=FileMapFreshnessStatus.STALE,
+        age_seconds=100,
+        max_age_seconds=10,
+        reason_tags=("token=abcdef1234567890",),
+    )
+    advisory = BoundaryAdvisory(
+        path="meridian_core/filemap.py",
+        capability="Architecture Memory",
+        actual_owner="FileMap",
+        expected_owner="Aegis",
+        status=BoundaryAdvisoryStatus.WARN,
+        reason_tags=("raw transcript: private text",),
+        message=r"C:\Users\scott\private-path",
+    )
+    hint = RelatedTestHint(
+        code_path="meridian_core/filemap.py",
+        related_tests=("tests/test_filemap.py",),
+        reason_tags=("provider response: private output",),
+    )
+
+    rendered = str(
+        (
+            freshness.to_display_dict(),
+            advisory.to_display_dict(),
+            hint.to_display_dict(),
+        )
+    )
+
+    assert "abcdef1234567890" not in rendered
+    assert "private text" not in rendered
+    assert "private output" not in rendered
+    assert r"C:\Users" not in rendered
+    assert freshness.to_display_dict()["reason_tags"] == ("[redacted]",)
+    assert advisory.to_display_dict()["message"] == "[redacted]"
+    assert hint.to_display_dict()["reason_tags"] == ("[redacted]",)

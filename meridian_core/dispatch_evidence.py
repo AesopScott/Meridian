@@ -203,7 +203,7 @@ class RouteSimulation:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "route_ref": self.route_ref,
+            "route_ref": _safe_ref(self.route_ref, "relay-route:redacted"),
             "confidence_label": self.confidence_label.value,
             "no_provider_call": self.no_provider_call,
             "lanes": tuple(lane.to_display_dict() for lane in self.lanes),

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from meridian_core.proof_quality import (
     ProofFreshnessState,
+    ProofQualityResult,
     ProofQualityStatus,
     ProofRef,
     ProofSnapshot,
@@ -154,3 +155,30 @@ def test_display_dict_sanitizes_unsafe_digest_and_waiver_refs():
     assert r"C:\Users" not in rendered
     assert "/home/scott" not in rendered
     assert "abcdef1234567890" not in rendered
+
+
+def test_direct_result_display_sanitizes_unsafe_fields():
+    result = ProofQualityResult(
+        proof_ref=r"C:\Users\scott\proof",
+        requirement="raw prompt: private text",
+        status=ProofQualityStatus.WAIVED,
+        freshness=ProofFreshnessState.NOT_APPLICABLE,
+        passed=False,
+        age_seconds=None,
+        content_digest="/home/scott/digest",
+        waiver_ref="token=abcdef1234567890",
+        reason_tags=("provider response: private output",),
+    )
+
+    display = result.to_display_dict()
+    rendered = str(display)
+
+    assert display["proof_ref"] == "[redacted]"
+    assert display["requirement"] == "[redacted]"
+    assert display["content_digest"] == "[redacted]"
+    assert display["waiver_ref"] == "[redacted]"
+    assert display["reason_tags"] == ("[redacted]",)
+    assert r"C:\Users" not in rendered
+    assert "/home/scott" not in rendered
+    assert "abcdef1234567890" not in rendered
+    assert "private output" not in rendered

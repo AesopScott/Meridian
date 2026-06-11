@@ -78,7 +78,7 @@ class FileMapFreshnessRecord:
             "status": self.status.value,
             "age_seconds": self.age_seconds,
             "max_age_seconds": self.max_age_seconds,
-            "reason_tags": self.reason_tags,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
         }
 
 
@@ -139,8 +139,8 @@ class BoundaryAdvisory:
                 else None
             ),
             "status": self.status.value,
-            "reason_tags": self.reason_tags,
-            "message": self.message,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
+            "message": _display_safe_text(self.message),
         }
 
 
@@ -154,7 +154,7 @@ class RelatedTestHint:
         return {
             "code_path": display_safe_path(self.code_path),
             "related_tests": tuple(display_safe_path(path) for path in self.related_tests),
-            "reason_tags": self.reason_tags,
+            "reason_tags": tuple(_display_safe_text(tag) for tag in self.reason_tags),
         }
 
 

@@ -6,6 +6,9 @@ import hashlib
 
 from meridian_core.dispatch_evidence import (
     DispatchEvidenceValidationStatus,
+    RouteReplayMetadata,
+    RouteSimulation,
+    RouteSimulationLane,
     ProviderHealthStatus,
     ProviderIdentityProof,
     RouteConfidenceLabel,
@@ -215,3 +218,36 @@ def test_dispatch_display_sanitizes_unsafe_refs_and_provider_metadata():
     assert "private body" not in rendered
     assert "provider:redacted" in rendered
     assert "prompt-payload:redacted" in rendered
+
+
+def test_direct_route_simulation_display_sanitizes_route_ref():
+    simulation = RouteSimulation(
+        route_ref=r"C:\Users\scott\secret_raw_prompt.txt",
+        confidence_label=RouteConfidenceLabel.LOW,
+        no_provider_call=True,
+        lanes=(
+            RouteSimulationLane(
+                role="primary",
+                preferred_model="fast-default",
+                independent=False,
+                provider_ref=None,
+                provider_health_status="unknown",
+                confidence_label=RouteConfidenceLabel.LOW,
+            ),
+        ),
+        fallback_explanations=(),
+        replay_metadata=RouteReplayMetadata(
+            route_ref="relay-route:safe",
+            route_mode="direct",
+            risk_tier=1,
+            lane_roles=("primary",),
+            selected_models=("fast-default",),
+            route_reason_ref="route-reason:safe",
+        ),
+    )
+
+    rendered = str(simulation.to_display_dict())
+
+    assert r"C:\Users" not in rendered
+    assert "secret_raw_prompt" not in rendered
+    assert simulation.to_display_dict()["route_ref"] == "relay-route:redacted"

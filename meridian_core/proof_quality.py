@@ -92,15 +92,19 @@ class ProofQualityResult:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "proof_ref": self.proof_ref,
-            "requirement": self.requirement,
+            "proof_ref": _display_safe_ref(self.proof_ref),
+            "requirement": _display_safe_ref(self.requirement),
             "status": self.status.value,
             "freshness": self.freshness.value,
             "passed": self.passed,
             "age_seconds": self.age_seconds,
-            "content_digest": self.content_digest,
-            "waiver_ref": self.waiver_ref,
-            "reason_tags": self.reason_tags,
+            "content_digest": (
+                None if self.content_digest is None else _display_safe_ref(self.content_digest)
+            ),
+            "waiver_ref": (
+                None if self.waiver_ref is None else _display_safe_ref(self.waiver_ref)
+            ),
+            "reason_tags": tuple(_display_safe_ref(tag) for tag in self.reason_tags),
         }
 
 
