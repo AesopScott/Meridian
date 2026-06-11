@@ -48,13 +48,13 @@ Approved implementation files: docs/FileMap.md, docs/session-archive-authority-c
 Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout promotion source.
 Pre-write check: `origin/main` fetched at `e2882cf9905ea397c2c4989a73614874cdb194f7`; Archive branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
 Proof expected before push: focused Archive/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
-Action completed: pending.
-Commit(s): pending.
-Pushed to origin/main: pending.
+Action completed: pushed reviewed Archive backend authority candidate and required ledger record to `origin/main`.
+Commit(s): `0e2bb23f4`, `d5f794790`
+Pushed to origin/main: yes
 Files changed: docs/FileMap.md, docs/session-archive-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/session_archive.py, tests/test_filemap.py, tests/test_package_api.py, tests/test_session_archive.py, docs/main-write-coordination-ledger.md
-Proof run: pending.
-Final shared main status: pending.
-Status: In progress
+Proof run: `python -m pytest tests/test_session_archive.py tests/test_package_api.py tests/test_filemap.py -q` -> 92 passed; `python -m pytest -q` -> 3513 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `d5f7947907100659921529eb8e47af76376f8d91` before this completion ledger write.
+Status: Complete
 ```
 
 ```text
