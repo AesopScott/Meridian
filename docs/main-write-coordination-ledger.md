@@ -40,6 +40,24 @@ Use this cadence whenever either party expects to write:
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
 ```text
+Time: 2026-06-10 23:36 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend BR7 Auto routing display-safety repair candidate `2c8cb0337` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 23:35 coordination request; approved scope is the two reviewed BR7 files plus this ledger record required by the protocol.
+Approved implementation files: meridian_core/relay_auto_routing.py, tests/test_relay_auto_routing.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no provider/model transport changes, no Relay prompt submission behavior change, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `ec4e7f9a7a4f9dec8dfcb3ceb537f49084d53f2c`; BR7 branch is clean and one commit ahead; diff scope matches approved backend/test files before this ledger entry.
+Proof expected before push: focused BR7/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pending.
+Commit(s): pending
+Pushed to origin/main: pending
+Files changed: meridian_core/relay_auto_routing.py, tests/test_relay_auto_routing.py, docs/main-write-coordination-ledger.md
+Proof run: pending
+Final shared main status: pending
+Status: In progress
+```
+
+```text
 Time: 2026-06-10 23:29 -06:00
 Writer: Meridian backend lane
 Intent: promote reviewed backend VOC10 voice command-intent authority candidate `6451afda8` to `origin/main` under frontend ACK from the UI lane.
