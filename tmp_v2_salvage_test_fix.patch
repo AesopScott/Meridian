@@ -41,6 +41,5 @@ index e98ad2343..9fa9642aa 100644
      assert gate["item_type"] == "approval_gate"
      assert gate["content_label"] == "<review_content>"
      assert "approve" in gate["suggested_actions"]
--- 
+--
 2.54.0.windows.1
-
