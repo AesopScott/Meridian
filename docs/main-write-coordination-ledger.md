@@ -40,6 +40,24 @@ Use this cadence whenever either party expects to write:
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
 ```text
+Time: 2026-06-10 23:29 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend VOC10 voice command-intent authority candidate `6451afda8` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 23:28 coordination request; approved scope is the seven reviewed VOC10 files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/voice-io-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/voice_io.py, tests/test_package_api.py, tests/test_voice_io.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no microphone/audio provider work, no Relay prompt submission, and no dirty shared-checkout promotion source.
+Pre-write check: `origin/main` fetched at `ba321268cbacb473b86c14162142c56284afef0e`; VOC10 branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused Voice/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Action completed: pending.
+Commit(s): pending
+Pushed to origin/main: pending
+Files changed: docs/FileMap.md, docs/voice-io-authority-contract.md, meridian_core/__init__.py, meridian_core/filemap.py, meridian_core/voice_io.py, tests/test_package_api.py, tests/test_voice_io.py, docs/main-write-coordination-ledger.md
+Proof run: pending
+Final shared main status: pending
+Status: In progress
+```
+
+```text
 Time: 2026-06-10 23:07 -06:00
 Writer: Meridian backend lane
 Intent: promote reviewed backend ROU9 Prime routine review authority candidate `8235eb4c1` to `origin/main` under frontend ACK from the UI lane.
