@@ -39,6 +39,18 @@ Use this cadence whenever either party expects to write:
 - **Completion:** writer records commit hash, pushed/not pushed, files changed, proof, and final `main` status.
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
+```text
+Time: 2026-06-10 21:50 -06:00
+Writer: Meridian backend lane
+Intent: promote reviewed backend backlog authority candidate `2e0c93142` to `origin/main` under frontend ACK from the UI lane.
+ACK: frontend lane granted a 10-minute backend-only lease after the 2026-06-10 21:46 coordination request; approved scope is the eight reviewed BAK files plus this ledger record required by the protocol.
+Approved implementation files: docs/FileMap.md, docs/backlog-authority-contract.md, meridian_core/__init__.py, meridian_core/backlog.py, meridian_core/filemap.py, tests/test_backlog.py, tests/test_filemap.py, tests/test_package_api.py
+Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, and no dirty shared-checkout changes.
+Pre-write check: `origin/main` fetched at `0e6f02105c6cd8d1cfa0cb9cb18a63f06b069c48`; BAK branch is clean and one commit ahead; diff scope matches approved backend files before this ledger entry.
+Proof expected before push: focused BAK/package/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
+Status: In progress
+```
+
 ## Intent Template
 
 ```text
