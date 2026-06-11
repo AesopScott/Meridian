@@ -120,18 +120,7 @@ Status: Complete | Aborted | Blocked
 
 ## Active Coordination
 
-```text
-Time: 2026-06-10 22:38 -06:00
-Writer: Meridian coordinator
-Requested action: push
-Target base: origin/main 648a651d5421da843b42299b700480ef8130a1a6
-Path-limited scope: docs/FileMap.md; docs/routine-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/routines.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_routines.py; docs/main-write-coordination-ledger.md
-Reason: land Review A/B-cleared backend-only Routine authority boundary for ROU2-ROU4 planning/state.
-Proof to run: python -m pytest tests/test_routines.py tests/test_package_api.py tests/test_filemap.py -q; python -m pytest -q; scoped git diff --check.
-Expected duration: 10 minutes
-Requires other party ACK: yes
-Status: ACK granted by frontend lane in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for this exact scope and hash 8609c0d67ca2b0b783794b431493d190012b725b.
-```
+No active write lease.
 
 ## Standing Acknowledgements
 
@@ -141,6 +130,20 @@ Status: ACK granted by frontend lane in thread 019ea586-a296-7833-b4cd-fdab7683a
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-10 22:42 -06:00
+Writer: Meridian coordinator
+Intent: land Review A/B-cleared backend-only Routine authority boundary under UI-lane ACK.
+Action completed: pushed reviewed Routine candidate plus ledger intent record to origin/main from isolated Routine worktree; did not touch shared UI checkout.
+Commit(s): 8609c0d67 (routines: add backend authority boundary); 7846fb05d (docs: post routine authority main-write intent); this completion commit.
+Pushed to origin/main: yes.
+Files changed: docs/FileMap.md; docs/routine-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/routines.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_routines.py; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_routines.py tests/test_package_api.py tests/test_filemap.py -q -> 87 passed; python -m pytest -q -> 3491 passed; scoped git diff --check returned only the ledger LF/CRLF warning.
+Final shared main status: origin/main advanced to 7846fb05d after Routine push; this completion commit closes the active lease.
+Notes/blockers: UI-lane ACK granted in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for exact Routine hash 8609c0d67ca2b0b783794b431493d190012b725b and backend-only scope. Scope excluded index.html, Electron/renderer/Bifrost UI, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, bridge routes, and UI wiring.
+Status: Complete
+```
 
 ```text
 Time: 2026-06-10 22:24 -06:00
