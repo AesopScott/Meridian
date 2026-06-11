@@ -199,7 +199,10 @@ from .voice_io import (
     normalize_voice_intent,
 )
 from .routines import (
+    PrimeRoutineReview,
     RoutineDefinition,
+    RoutineReviewDisposition,
+    RoutineReviewSource,
     RoutineRunPlan,
     RoutineRunPlanStatus,
     RoutineState,
@@ -208,6 +211,7 @@ from .routines import (
     RoutineValidationError,
     create_routine,
     plan_routine_run,
+    review_routine_result,
     set_routine_enabled,
 )
 from .session_archive import (
@@ -454,7 +458,10 @@ __all__ = [
     "mute_output_job",
     "normalize_voice_intent",
     # -- Routine Authority --------------------------------------------------
+    "PrimeRoutineReview",
     "RoutineDefinition",
+    "RoutineReviewDisposition",
+    "RoutineReviewSource",
     "RoutineRunPlan",
     "RoutineRunPlanStatus",
     "RoutineState",
@@ -463,6 +470,7 @@ __all__ = [
     "RoutineValidationError",
     "create_routine",
     "plan_routine_run",
+    "review_routine_result",
     "set_routine_enabled",
     # -- Session Archive Authority ------------------------------------------
     "ArchiveCatalogEntry",

@@ -13,6 +13,12 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Iterable
 
+from .workflow_dispatch import (
+    WorkflowErrorSummary,
+    WorkflowFailureKind,
+    WorkflowResultSummary,
+)
+
 
 SHORT_TEXT_MAX = 160
 SUMMARY_MAX = 420
@@ -54,6 +60,18 @@ class RoutineTriggerKind(Enum):
 class RoutineRunPlanStatus(Enum):
     PLANNED = "planned"
     BLOCKED_DISABLED = "blocked_disabled"
+
+
+class RoutineReviewSource(Enum):
+    RESULT_SUMMARY = "result_summary"
+    ERROR_SUMMARY = "error_summary"
+
+
+class RoutineReviewDisposition(Enum):
+    ACCEPTED = "accepted"
+    ROUTE_REPAIR = "route_repair"
+    RETRY_AFTER_REPAIR = "retry_after_repair"
+    ESCALATE_HUMAN_GATE = "escalate_human_gate"
 
 
 def _as_utc(value: datetime) -> datetime:
@@ -318,3 +336,143 @@ def plan_routine_run(
         reason="Routine run plan is display-safe and non-executable.",
         evidence_refs=evidence_refs,
     )
+
+
+@dataclass(frozen=True)
+class PrimeRoutineReview:
+    review_id: str
+    routine_id: str
+    run_ref: str
+    reviewed_by: str
+    reviewed_at: datetime
+    source: RoutineReviewSource
+    disposition: RoutineReviewDisposition
+    summary: str
+    proof_trail: tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()
+    gate_required: bool = False
+    escalation_required: bool = False
+
+    def __post_init__(self) -> None:
+        _safe_text(self.review_id, "PrimeRoutineReview.review_id")
+        _safe_text(self.routine_id, "PrimeRoutineReview.routine_id")
+        _safe_text(self.run_ref, "PrimeRoutineReview.run_ref")
+        _safe_text(self.reviewed_by, "PrimeRoutineReview.reviewed_by")
+        _as_utc(self.reviewed_at)
+        if not isinstance(self.source, RoutineReviewSource):
+            raise RoutineValidationError("source must be RoutineReviewSource")
+        if not isinstance(self.disposition, RoutineReviewDisposition):
+            raise RoutineValidationError("disposition must be RoutineReviewDisposition")
+        _safe_text(self.summary, "PrimeRoutineReview.summary", SUMMARY_MAX)
+        object.__setattr__(self, "proof_trail", _safe_refs(self.proof_trail, "PrimeRoutineReview.proof_trail"))
+        object.__setattr__(self, "evidence_refs", _safe_refs(self.evidence_refs, "PrimeRoutineReview.evidence_refs"))
+        if not isinstance(self.gate_required, bool):
+            raise RoutineValidationError("gate_required must be bool")
+        if not isinstance(self.escalation_required, bool):
+            raise RoutineValidationError("escalation_required must be bool")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "review_id": self.review_id,
+            "routine_id": self.routine_id,
+            "run_ref": self.run_ref,
+            "reviewed_by": self.reviewed_by,
+            "reviewed_at": _as_utc(self.reviewed_at).isoformat(),
+            "source": self.source.value,
+            "disposition": self.disposition.value,
+            "summary": self.summary,
+            "proof_trail": self.proof_trail,
+            "evidence_refs": self.evidence_refs,
+            "gate_required": self.gate_required,
+            "escalation_required": self.escalation_required,
+            "accept_authorized": False,
+            "reroute_authorized": False,
+            "retry_authorized": False,
+            "escalate_authorized": False,
+            "scheduler_mutation_authorized": False,
+            "execution_authorized": False,
+            "raw_result_body_visible": False,
+            "raw_worker_history_visible": False,
+        }
+
+
+def review_routine_result(
+    routine: RoutineDefinition,
+    plan: RoutineRunPlan,
+    result: WorkflowResultSummary | WorkflowErrorSummary,
+    *,
+    review_id: str,
+    reviewed_by: str,
+    reviewed_at: datetime,
+    evidence_refs: tuple[str, ...] = (),
+) -> PrimeRoutineReview:
+    if not isinstance(routine, RoutineDefinition):
+        raise RoutineValidationError("routine must be RoutineDefinition")
+    if not isinstance(plan, RoutineRunPlan):
+        raise RoutineValidationError("plan must be RoutineRunPlan")
+    if plan.routine_id != routine.routine_id:
+        raise RoutineValidationError("plan.routine_id must match routine.routine_id")
+    if plan.status is RoutineRunPlanStatus.BLOCKED_DISABLED:
+        raise RoutineValidationError("blocked routine plans cannot produce routine review")
+    if not isinstance(result, (WorkflowResultSummary, WorkflowErrorSummary)):
+        raise RoutineValidationError("result must be WorkflowResultSummary or WorkflowErrorSummary")
+    if result.work_order_id != plan.plan_id:
+        raise RoutineValidationError("result.work_order_id must match plan.plan_id")
+    if (
+        isinstance(result, WorkflowErrorSummary)
+        and result.failure_kind is WorkflowFailureKind.RESTEER_REQUESTED
+        and (
+            result.resteer_request is None
+            or result.resteer_request.original_work_order_id != result.work_order_id
+        )
+    ):
+        raise RoutineValidationError("resteer_request.original_work_order_id must match result.work_order_id")
+    _safe_text(review_id, "review_id")
+    _safe_text(reviewed_by, "reviewed_by")
+    _as_utc(reviewed_at)
+    refs = _safe_refs(evidence_refs, "review_routine_result.evidence_refs")
+
+    if isinstance(result, WorkflowResultSummary):
+        disposition = (
+            RoutineReviewDisposition.ESCALATE_HUMAN_GATE
+            if result.requires_human_gate
+            else RoutineReviewDisposition.ACCEPTED
+        )
+        return PrimeRoutineReview(
+            review_id=review_id,
+            routine_id=routine.routine_id,
+            run_ref=result.work_order_id,
+            reviewed_by=reviewed_by,
+            reviewed_at=reviewed_at,
+            source=RoutineReviewSource.RESULT_SUMMARY,
+            disposition=disposition,
+            summary=result.summary,
+            proof_trail=result.proof_trail,
+            evidence_refs=plan.evidence_refs + refs,
+            gate_required=result.requires_human_gate,
+            escalation_required=result.requires_human_gate,
+        )
+
+    if isinstance(result, WorkflowErrorSummary):
+        if result.failure_kind is WorkflowFailureKind.RESTEER_REQUESTED:
+            disposition = RoutineReviewDisposition.ROUTE_REPAIR
+        elif result.failure_kind is WorkflowFailureKind.INTERNAL_ERROR:
+            disposition = RoutineReviewDisposition.RETRY_AFTER_REPAIR
+        else:
+            disposition = RoutineReviewDisposition.ESCALATE_HUMAN_GATE
+        return PrimeRoutineReview(
+            review_id=review_id,
+            routine_id=routine.routine_id,
+            run_ref=result.work_order_id,
+            reviewed_by=reviewed_by,
+            reviewed_at=reviewed_at,
+            source=RoutineReviewSource.ERROR_SUMMARY,
+            disposition=disposition,
+            summary=result.summary,
+            proof_trail=result.proof_trail,
+            evidence_refs=plan.evidence_refs + refs,
+            gate_required=disposition is RoutineReviewDisposition.ESCALATE_HUMAN_GATE,
+            escalation_required=disposition is RoutineReviewDisposition.ESCALATE_HUMAN_GATE,
+        )
+
+    raise RoutineValidationError("result must be WorkflowResultSummary or WorkflowErrorSummary")
