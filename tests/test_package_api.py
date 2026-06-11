@@ -229,6 +229,76 @@ def test_v25_backend_hardening_exports():
         assert name in meridian_core.__all__, f"{name} missing from __all__"
 
 
+def test_v25_backend_transparency_dispatch_and_release_exports():
+    from meridian_core import (
+        BrowserEvidence,
+        ChunkLineage,
+        CitationRankingMetadata,
+        DispatchEvidence,
+        DriftStatus,
+        DryRunReviewState,
+        EvidenceBackedRationale,
+        FailureRecoveryRecommendation,
+        MemoryProvenance,
+        NextActionRationale,
+        ProofPackageManifest,
+        ReleaseReadinessSnapshot,
+        RetrievalEvidence,
+        RouteSimulation,
+        ToolDryRunPlan,
+        WorkflowIntelligenceReport,
+        build_dispatch_evidence,
+        build_evidence_backed_rationale,
+        build_release_readiness_snapshot,
+        build_tool_dry_run_plan,
+        hash_prompt_payload,
+        ingest_task_results,
+        plan_workflow_tasks,
+        simulate_route_dispatch,
+    )
+
+    exported = (
+        BrowserEvidence,
+        ChunkLineage,
+        CitationRankingMetadata,
+        DispatchEvidence,
+        DriftStatus,
+        DryRunReviewState,
+        EvidenceBackedRationale,
+        FailureRecoveryRecommendation,
+        MemoryProvenance,
+        NextActionRationale,
+        ProofPackageManifest,
+        ReleaseReadinessSnapshot,
+        RetrievalEvidence,
+        RouteSimulation,
+        ToolDryRunPlan,
+        WorkflowIntelligenceReport,
+        build_dispatch_evidence,
+        build_evidence_backed_rationale,
+        build_release_readiness_snapshot,
+        build_tool_dry_run_plan,
+        hash_prompt_payload,
+        ingest_task_results,
+        plan_workflow_tasks,
+        simulate_route_dispatch,
+    )
+    assert all(exported)
+
+    for name in (
+        "RetrievalEvidence",
+        "MemoryProvenance",
+        "NextActionRationale",
+        "RouteSimulation",
+        "DispatchEvidence",
+        "ToolDryRunPlan",
+        "BrowserEvidence",
+        "WorkflowIntelligenceReport",
+        "ReleaseReadinessSnapshot",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
 def test_prompt_metrics_bridge_exports():
     from meridian_core import make_prompt_metrics_finding
 
