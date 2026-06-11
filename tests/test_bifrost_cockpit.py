@@ -1353,9 +1353,12 @@ def test_index_model_harness_detail_surface_backend_binds_existing_snapshots():
     assert 'data-model-harness-backend-binding' in doc
     assert "loading existing backend snapshots" in doc
     assert "existing backend snapshots only" in doc
+    assert "V2.5 capability digest" in doc
+    assert "Backend capability records stay display-safe and advisory until a reviewed bridge route explicitly wires execution authority." in doc
     assert "display-only; no provider calls or settings writes" in doc
     assert "Relay-mediated dispatch posture" in doc
     assert "Harness diagnostics" in doc
+    assert "Diagnostics advisory coverage" in doc
     assert "Backend binding safety" in doc
     assert "No provider call, Auto enablement, settings mutation, route mutation, or prompt payload assembly is authorized here." in doc
     assert "No prompt text, response text, recovered result body, raw provider output, raw evidence body, or worker chat is rendered." in doc
@@ -1427,12 +1430,54 @@ def test_index_model_harness_backend_binding_renders_structured_harness_diagnost
     assert "['dispatch visibility', relayText(snapshots.workflowDispatchStatus?.workflow?.status_policy?.dispatch_surface || 'display_only')]" in backend_binding
     assert "['heartbeat history visible', snapshots.workflowDispatchStatus?.workflow?.status_policy?.heartbeat_history_visible ? 'yes' : 'no']" in backend_binding
     assert "['raw artifacts visible', snapshots.workflowDispatchStatus?.workflow?.status_policy?.raw_artifacts_visible ? 'yes' : 'no']" in backend_binding
+    assert "relaySection('Diagnostics advisory coverage', relayGrid([" in backend_binding
+    assert "['heartbeat anomaly classification', 'documented as reviewed backend diagnostics posture; this panel does not classify or restart workers locally']" in backend_binding
+    assert "['stale worker posture', 'read-only stale, blocked, missing, under-proven, or active posture when the backend provides it']" in backend_binding
+    assert "['reliability score', 'display-safe reliability summary is advisory only and not a permission to execute or recover work']" in backend_binding
+    assert "['backend/display snapshot drift', 'visible drift should trigger review of backend vs. rendered state before trusting the harness display']" in backend_binding
+    assert "['escalation guidance', 'read-only escalation guidance only; no restart, dispatch, queue mutation, or recovery action is performed here']" in backend_binding
     assert "per-harness event history" not in backend_binding
     assert "method: 'POST'" not in backend_binding
     assert "method: 'POST'" not in backend_binding
     assert "fetch(bridgeUrl('message')" not in backend_binding
     assert "fetch(bridgeUrl('call-result')" not in backend_binding
     assert "fetch(bridgeUrl('restart')" not in backend_binding
+
+
+def test_index_v25_harness_copy_covers_security_review_provenance_and_release_advisories():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Security advisory coverage" in doc
+    assert "display-safe proof categories cover secret-like values, local paths, raw prompt/transcript markers, and provider-output markers without echoing unsafe text" in doc
+    assert "fresh, stale, missing, and waived proof posture remains advisory until a reviewed execution path is wired" in doc
+    assert "Review intelligence advisory" in doc
+    assert "duplicate findings should collapse into reviewed groups instead of reading as unrelated repeats" in doc
+    assert "waiver presence may be visible, but the UI does not create, approve, or remove waivers" in doc
+    assert "Memory provenance advisory" in doc
+    assert "Retrieval provenance advisory" in doc
+    assert "FileMap intelligence advisory" in doc
+    assert "Release provenance advisory" in doc
+    assert "candidate, review, intent, and main-chain provenance remain display-safe records only" in doc
+
+
+def test_index_harness_copy_audits_existing_v2_capability_posture():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Prime autonomy posture" in doc
+    assert "Prime exposes reviewed next-action posture with confidence, risk, source refs, targets, blockers, and visible decision proof" in doc
+    assert "Relay / Model Harness capability posture" in doc
+    assert "PromptPacket proof and payload boundaries remain visible without exposing raw prompt text" in doc
+    assert "Session lifecycle posture" in doc
+    assert "restart, resteer, archive, and close paths remain command-plan previews rather than live controls unless separately reviewed" in doc
+    assert "Backlog capability posture" in doc
+    assert "approval, defer, conversion, project linking, import, and archive posture remain visible but non-executable" in doc
+    assert "Prime / workflow continuity posture" in doc
+    assert "Routine capability posture" in doc
+    assert "Archive / close capability posture" in doc
+    assert "reopen, rerun, resume, restart, restore, and archive mutation remain command-plan posture only unless separately reviewed" in doc
+    assert "Voice capability posture" in doc
+    assert "capture, STT, TTS, read-aloud, mute mutation, interrupt, and dictation correction remain display-only unless explicit execution authority exists" in doc
+    assert "Beacon advisory posture" in doc
+    assert "Compass project-boundary posture" in doc
+    assert "Federation capability posture" in doc
 
 
 def test_index_model_harness_selection_is_visible_and_persistent():
