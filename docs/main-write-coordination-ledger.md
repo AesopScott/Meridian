@@ -120,18 +120,7 @@ Status: Complete | Aborted | Blocked
 
 ## Active Coordination
 
-```text
-Time: 2026-06-10 22:20 -06:00
-Writer: Meridian coordinator
-Requested action: push
-Target base: origin/main f7e239fac61577c3a8046cdfb8b304c99b75b62b
-Path-limited scope: docs/FileMap.md; docs/voice-io-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/voice_io.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_voice_io.py; docs/main-write-coordination-ledger.md
-Reason: land Review A/B-cleared backend-only Voice I/O authority boundary for VOC1/VOC3-VOC9.
-Proof to run: python -m pytest tests/test_voice_io.py tests/test_package_api.py tests/test_filemap.py -q; python -m pytest -q; scoped git diff --check.
-Expected duration: 10 minutes
-Requires other party ACK: yes
-Status: ACK granted by frontend lane in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for this exact scope and hash 2635794bf91af62a9c06caa1e8a6046a048d8187.
-```
+No active write lease.
 
 ## Standing Acknowledgements
 
@@ -141,6 +130,20 @@ Status: ACK granted by frontend lane in thread 019ea586-a296-7833-b4cd-fdab7683a
 ## Completed Coordination Log
 
 Start new entries below this line.
+
+```text
+Time: 2026-06-10 22:24 -06:00
+Writer: Meridian coordinator
+Intent: land Review A/B-cleared backend-only Voice I/O authority boundary under UI-lane ACK.
+Action completed: pushed reviewed Voice candidate plus ledger intent record to origin/main from isolated Voice worktree; did not touch shared UI checkout.
+Commit(s): 2635794bf (voice: add backend authority boundary); bca5942ba (docs: post voice authority main-write intent); this completion commit.
+Pushed to origin/main: yes.
+Files changed: docs/FileMap.md; docs/voice-io-authority-contract.md; meridian_core/__init__.py; meridian_core/filemap.py; meridian_core/voice_io.py; tests/test_filemap.py; tests/test_package_api.py; tests/test_voice_io.py; docs/main-write-coordination-ledger.md.
+Proof run: python -m pytest tests/test_voice_io.py tests/test_package_api.py tests/test_filemap.py -q -> 88 passed; python -m pytest -q -> 3473 passed; scoped git diff --check returned only the ledger LF/CRLF warning.
+Final shared main status: origin/main advanced to bca5942ba after Voice push; this completion commit closes the active lease.
+Notes/blockers: UI-lane ACK granted in thread 019ea586-a296-7833-b4cd-fdab7683a8a8 for exact Voice hash 2635794bf91af62a9c06caa1e8a6046a048d8187 and backend-only scope. Scope excluded index.html, Electron/renderer/Bifrost UI, scripts/meridian-model-bridge.js, docs/ui-integration-checklist.md, bridge routes, and UI wiring.
+Status: Complete
+```
 
 ```text
 Time: 2026-06-08 18:50 -06:00
