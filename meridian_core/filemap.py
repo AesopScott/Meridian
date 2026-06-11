@@ -51,6 +51,7 @@ class FileArea:
     BIFROST          = "Bifrost / session harness"
     GOAL_RUNTIME     = "Goal Runtime / Goal Harness"
     BACKLOG          = "Backlog Authority"
+    VOICE_IO         = "Voice I/O Authority"
     PROVIDER_BALANCE = "Provider Balance / Usage"
     WORKFLOW_DISPATCH = "Workflow Sub-Agent Harness / Dispatch"
     WORKFLOW_ATLAS    = "Atlas Workflow Adapter"
@@ -1136,6 +1137,27 @@ def make_default_map() -> FileMap:
             purpose="Test suite for meridian_core/backlog.py: capture/provenance, revision persistence/reload, legal transitions, archive inspectability, Polaris import no-writeback, task-draft projection, query/filter fields, and display-safety rejection.",
             related_tests=[],
             notes="Run before changing meridian_core/backlog.py or Backlog Authority behavior.",
+        ),
+        FileMapEntry(
+            path="docs/voice-io-authority-contract.md",
+            area=FileArea.VOICE_IO,
+            purpose="Voice I/O Authority backend contract for VOC1/VOC3-VOC9 provider/runtime boundary: fail-closed capability state, transcript metadata, command intent normalization, output job state, and privacy redaction.",
+            related_tests=["tests/test_voice_io.py"],
+            notes="Backend-only contract. Read before adding voice providers, capture, read-aloud, mute/interrupt, correction, command-intent runtime, or UI/bridge wiring.",
+        ),
+        FileMapEntry(
+            path="meridian_core/voice_io.py",
+            area=FileArea.VOICE_IO,
+            purpose="Voice I/O Authority domain slice: typed provider capabilities, fail-closed runtime state, transcript draft metadata, command intents, output jobs, and display-safe serialization.",
+            related_tests=["tests/test_voice_io.py"],
+            notes="Pure backend authority only: no microphone capture, browser speech APIs, audio playback, provider/network calls, Relay prompt submission, bridge routes, or UI wiring.",
+        ),
+        FileMapEntry(
+            path="tests/test_voice_io.py",
+            area=FileArea.VOICE_IO,
+            purpose="Test suite for meridian_core/voice_io.py: fail-closed runtime defaults, capability-gated authorization, transcript/output metadata privacy, correction metadata, command confirmation gates, mute/interrupt state, and unsafe text/ref rejection.",
+            related_tests=[],
+            notes="Run before changing meridian_core/voice_io.py or Voice I/O Authority behavior.",
         ),
         FileMapEntry(
             path="meridian_core/provider_balance.py",

@@ -301,6 +301,58 @@ def test_internal_helpers_are_not_root_exports():
     assert "_SEVERITY_MAP" not in meridian_core.__all__
 
 
+def test_voice_io_authority_exports():
+    from meridian_core import (
+        VoiceCommandIntent,
+        VoiceIntentFamily,
+        VoiceMode,
+        VoiceOutputJob,
+        VoiceOutputStatus,
+        VoicePrivacyLevel,
+        VoiceProviderCapability,
+        VoiceRuntimeState,
+        VoiceTranscriptDraft,
+        VoiceTrustState,
+        VoiceValidationError,
+        apply_transcript_correction,
+        build_voice_runtime_state,
+        create_output_job,
+        create_transcript_draft,
+        interrupt_output_job,
+        mute_output_job,
+        normalize_voice_intent,
+    )
+
+    assert VoiceCommandIntent
+    assert VoiceIntentFamily
+    assert VoiceMode
+    assert VoiceOutputJob
+    assert VoiceOutputStatus
+    assert VoicePrivacyLevel
+    assert VoiceProviderCapability
+    assert VoiceRuntimeState
+    assert VoiceTranscriptDraft
+    assert VoiceTrustState
+    assert VoiceValidationError
+    assert apply_transcript_correction
+    assert build_voice_runtime_state
+    assert create_output_job
+    assert create_transcript_draft
+    assert interrupt_output_job
+    assert mute_output_job
+    assert normalize_voice_intent
+    for name in (
+        "VoiceCommandIntent",
+        "VoiceRuntimeState",
+        "VoiceTranscriptDraft",
+        "VoiceValidationError",
+        "build_voice_runtime_state",
+        "create_transcript_draft",
+        "normalize_voice_intent",
+    ):
+        assert name in meridian_core.__all__, f"{name} missing from __all__"
+
+
 def test_cockpit_state_exports():
     from meridian_core import (
         CockpitStatus,
