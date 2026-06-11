@@ -179,6 +179,7 @@ from .backlog import (
     to_goal_objective_ref,
 )
 from .voice_io import (
+    VoiceCommandFamily,
     VoiceCommandIntent,
     VoiceIntentFamily,
     VoiceMode,
@@ -197,6 +198,7 @@ from .voice_io import (
     interrupt_output_job,
     mute_output_job,
     normalize_voice_intent,
+    recognize_voice_command_intent,
 )
 from .routines import (
     PrimeRoutineReview,
@@ -440,6 +442,7 @@ __all__ = [
     "to_goal_objective_ref",
     # -- Voice I/O Authority ------------------------------------------------
     "VoiceCommandIntent",
+    "VoiceCommandFamily",
     "VoiceIntentFamily",
     "VoiceMode",
     "VoiceOutputJob",
@@ -457,6 +460,7 @@ __all__ = [
     "interrupt_output_job",
     "mute_output_job",
     "normalize_voice_intent",
+    "recognize_voice_command_intent",
     # -- Routine Authority --------------------------------------------------
     "PrimeRoutineReview",
     "RoutineDefinition",

@@ -303,6 +303,7 @@ def test_internal_helpers_are_not_root_exports():
 
 def test_voice_io_authority_exports():
     from meridian_core import (
+        VoiceCommandFamily,
         VoiceCommandIntent,
         VoiceIntentFamily,
         VoiceMode,
@@ -321,8 +322,10 @@ def test_voice_io_authority_exports():
         interrupt_output_job,
         mute_output_job,
         normalize_voice_intent,
+        recognize_voice_command_intent,
     )
 
+    assert VoiceCommandFamily
     assert VoiceCommandIntent
     assert VoiceIntentFamily
     assert VoiceMode
@@ -341,7 +344,9 @@ def test_voice_io_authority_exports():
     assert interrupt_output_job
     assert mute_output_job
     assert normalize_voice_intent
+    assert recognize_voice_command_intent
     for name in (
+        "VoiceCommandFamily",
         "VoiceCommandIntent",
         "VoiceRuntimeState",
         "VoiceTranscriptDraft",
@@ -349,6 +354,7 @@ def test_voice_io_authority_exports():
         "build_voice_runtime_state",
         "create_transcript_draft",
         "normalize_voice_intent",
+        "recognize_voice_command_intent",
     ):
         assert name in meridian_core.__all__, f"{name} missing from __all__"
 

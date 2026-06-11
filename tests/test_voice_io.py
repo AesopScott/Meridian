@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import pytest
 
 from meridian_core.voice_io import (
+    VoiceCommandFamily,
     VoiceCommandIntent,
     VoiceIntentFamily,
     VoiceMode,
@@ -23,6 +24,7 @@ from meridian_core.voice_io import (
     interrupt_output_job,
     mute_output_job,
     normalize_voice_intent,
+    recognize_voice_command_intent,
 )
 
 
@@ -152,6 +154,134 @@ def test_normalize_voice_intent_uses_injected_normalizer_and_confirmation_gate()
 
     assert intent.requires_confirmation is True
     assert intent.to_dict()["execution_authorized"] is False
+
+
+def test_recognize_voice_command_intent_maps_harness_panel_commands_without_execution():
+    intent = recognize_voice_command_intent(
+        "Open Review Console",
+        confidence=0.93,
+        evidence_refs=("proof://voice/voc10",),
+    )
+    payload = intent.to_dict()
+
+    assert intent.command_family is VoiceCommandFamily.HARNESS_PANEL
+    assert intent.family is VoiceIntentFamily.COMMAND
+    assert intent.action == "open"
+    assert intent.target_ref == "voice://harness/review-console"
+    assert intent.requires_confirmation is False
+    assert payload["command_family"] == "harness_panel"
+    assert payload["execution_authorized"] is False
+    assert "Open Review Console" not in str(payload)
+
+
+@pytest.mark.parametrize(
+    ("phrase", "expected_action", "expected_target", "requires_confirmation"),
+    (
+        ("Switch to Polaris", "switch", "voice://project/polaris", True),
+        ("Show build lanes", "focus", "voice://lane/build", False),
+        ("Open Build 1", "focus", "voice://lane/build-1", False),
+        ("Show Codex Reviews B", "focus", "voice://review/codex-b", False),
+        ("What is blocked?", "ask", "voice://status/blocked", False),
+        ("What is next?", "ask", "voice://status/next", False),
+        ("Reset", "reset", "voice://surface/reset", True),
+        ("Reload", "reload", "voice://surface/reload", True),
+        ("Open filter", "open", "voice://surface/filter", False),
+    ),
+)
+def test_recognize_voice_command_intent_maps_project_lane_commands(
+    phrase,
+    expected_action,
+    expected_target,
+    requires_confirmation,
+):
+    intent = recognize_voice_command_intent(phrase, confidence=0.9)
+
+    assert intent.command_family is VoiceCommandFamily.PROJECT_LANE
+    assert intent.action == expected_action
+    assert intent.target_ref == expected_target
+    assert intent.requires_confirmation is requires_confirmation
+    assert intent.to_dict()["execution_authorized"] is False
+
+
+@pytest.mark.parametrize(
+    ("phrase", "family", "broad_family", "action", "target", "requires_confirmation"),
+    (
+        ("Start dictation", VoiceCommandFamily.DICTATION, VoiceIntentFamily.DICTATION, "start", "voice://dictation/session", False),
+        ("Clear dictation", VoiceCommandFamily.DICTATION, VoiceIntentFamily.DICTATION, "clear", "voice://dictation/session", True),
+        ("Send to Prime", VoiceCommandFamily.DICTATION, VoiceIntentFamily.DICTATION, "submit", "voice://dictation/prime-submit", True),
+        ("Read Prime's answer", VoiceCommandFamily.SPEECH_OUTPUT, VoiceIntentFamily.CONTROL, "read", "voice://speech/prime-answer", False),
+        ("Stop reading", VoiceCommandFamily.SPEECH_OUTPUT, VoiceIntentFamily.CONTROL, "stop", "voice://speech/current", True),
+        ("Mute", VoiceCommandFamily.SPEECH_OUTPUT, VoiceIntentFamily.CONTROL, "mute", "voice://speech/output", True),
+        ("Show proof", VoiceCommandFamily.PROOF, VoiceIntentFamily.COMMAND, "show", "voice://proof/current", False),
+        ("What changed?", VoiceCommandFamily.PROOF, VoiceIntentFamily.COMMAND, "ask", "voice://proof/change-summary", False),
+        ("Show the latest commit", VoiceCommandFamily.PROOF, VoiceIntentFamily.COMMAND, "show", "voice://proof/latest-commit", False),
+        ("Run crosscheck", VoiceCommandFamily.PROOF, VoiceIntentFamily.COMMAND, "run-preview", "voice://proof/crosscheck", True),
+        ("Run cross check", VoiceCommandFamily.PROOF, VoiceIntentFamily.COMMAND, "run-preview", "voice://proof/crosscheck", True),
+    ),
+)
+def test_recognize_voice_command_intent_maps_dictation_speech_and_proof_commands(
+    phrase,
+    family,
+    broad_family,
+    action,
+    target,
+    requires_confirmation,
+):
+    intent = recognize_voice_command_intent(phrase, confidence=0.88)
+
+    assert intent.command_family is family
+    assert intent.family is broad_family
+    assert intent.action == action
+    assert intent.target_ref == target
+    assert intent.requires_confirmation is requires_confirmation
+    assert intent.to_dict()["execution_authorized"] is False
+
+
+def test_recognize_voice_command_intent_unknown_is_preview_only_and_confirmation_gated():
+    intent = recognize_voice_command_intent("Do the thing", confidence=0.67)
+    payload = intent.to_dict()
+
+    assert intent.command_family is VoiceCommandFamily.UNKNOWN
+    assert intent.action == "unknown"
+    assert intent.target_ref == "voice://command/unknown"
+    assert intent.requires_confirmation is True
+    assert payload["execution_authorized"] is False
+    assert "Do the thing" not in str(payload)
+
+
+def test_recognize_voice_command_intent_gates_low_confidence_known_commands():
+    intent = recognize_voice_command_intent("Open Echo", confidence=0.1)
+
+    assert intent.command_family is VoiceCommandFamily.HARNESS_PANEL
+    assert intent.action == "open"
+    assert intent.requires_confirmation is True
+    assert intent.to_dict()["execution_authorized"] is False
+
+
+def test_recognize_voice_command_intent_honors_custom_confirmation_threshold():
+    intent = recognize_voice_command_intent(
+        "Open Echo",
+        confidence=0.9,
+        confirmation_threshold=0.95,
+    )
+
+    assert intent.command_family is VoiceCommandFamily.HARNESS_PANEL
+    assert intent.requires_confirmation is True
+    assert intent.to_dict()["execution_authorized"] is False
+
+
+def test_recognize_voice_command_intent_rejects_unsafe_phrase_and_bad_confidence():
+    with pytest.raises(VoiceValidationError, match="phrase"):
+        recognize_voice_command_intent(
+            r"Open C:\Users\scott\secret.txt",
+            confidence=0.9,
+        )
+
+    with pytest.raises(VoiceValidationError, match="confidence"):
+        recognize_voice_command_intent("Open Echo", confidence=1.1)
+
+    with pytest.raises(VoiceValidationError, match="confirmation_threshold"):
+        recognize_voice_command_intent("Open Echo", confidence=0.9, confirmation_threshold=1.1)
 
 
 def test_normalize_voice_intent_rejects_bad_normalizer_output():

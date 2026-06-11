@@ -1,7 +1,7 @@
 # Voice I/O Authority Contract
 
 This V2 backend slice owns the typed Voice I/O provider/runtime boundary for
-`VOC1` and `VOC3`-`VOC9`. It is intentionally non-UI and non-provider-live.
+`VOC1`, `VOC3`-`VOC10`. It is intentionally non-UI and non-provider-live.
 
 ## Authority Owned
 
@@ -9,6 +9,9 @@ This V2 backend slice owns the typed Voice I/O provider/runtime boundary for
 - Display-safe transcript draft metadata: hash, length, confidence, correction
   count, provider refs, and evidence refs.
 - Display-safe command intent normalization through injected local callables.
+- Deterministic VOC10 command-family recognition for known harness panel,
+  project/lane, dictation, speech-output, and proof phrases into preview-only
+  `VoiceCommandIntent` objects.
 - Display-safe output job metadata for read-aloud posture, mute, and interrupt.
 - Privacy guards for voice refs, transcript input, output text, and serialized
   display payloads.
@@ -24,6 +27,8 @@ This V2 backend slice owns the typed Voice I/O provider/runtime boundary for
   UI wiring.
 - Raw audio storage, raw transcript display, raw prompt display, provider
   response display, worker chat display, or local filesystem path exposure.
+- Executing recognized commands, changing panels, submitting prompts, closing
+  sessions, running cross-checks, mutating queues, or selecting Relay routes.
 
 ## Display-Safe Evidence
 
@@ -40,3 +45,8 @@ normalize an already-created transcript draft into a typed intent, but they do
 not execute the intent. Every command intent serializes with
 `execution_authorized=False` until a later reviewed Prime/Relay authority slice
 chooses to consume it.
+
+The built-in VOC10 recognizer consumes an explicit phrase supplied by a caller;
+it does not capture audio, retain raw transcript text, call STT/TTS providers,
+touch bridge routes, or operate the Bifrost UI. Unknown phrases become
+confirmation-gated preview intents rather than executable commands.

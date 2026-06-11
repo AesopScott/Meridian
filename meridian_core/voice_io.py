@@ -17,6 +17,7 @@ from typing import Callable, Iterable, Optional
 
 SHORT_TEXT_MAX = 160
 SUMMARY_MAX = 420
+VOICE_COMMAND_CONFIRMATION_THRESHOLD = 0.82
 SAFE_REF_SCHEMES = (
     "proof://",
     "provider://",
@@ -63,6 +64,15 @@ class VoiceIntentFamily(Enum):
     DICTATION = "dictation"
     COMMAND = "command"
     CONTROL = "control"
+
+
+class VoiceCommandFamily(Enum):
+    HARNESS_PANEL = "harness_panel"
+    PROJECT_LANE = "project_lane"
+    DICTATION = "dictation"
+    SPEECH_OUTPUT = "speech_output"
+    PROOF = "proof"
+    UNKNOWN = "unknown"
 
 
 class VoiceOutputStatus(Enum):
@@ -353,11 +363,14 @@ class VoiceCommandIntent:
     confidence: float
     requires_confirmation: bool
     evidence_refs: tuple[str, ...] = ()
+    command_family: VoiceCommandFamily = VoiceCommandFamily.UNKNOWN
 
     def __post_init__(self) -> None:
         _safe_text(self.intent_id, "VoiceCommandIntent.intent_id")
         if not isinstance(self.family, VoiceIntentFamily):
             raise VoiceValidationError("family must be VoiceIntentFamily")
+        if not isinstance(self.command_family, VoiceCommandFamily):
+            raise VoiceValidationError("command_family must be VoiceCommandFamily")
         _safe_text(self.action, "VoiceCommandIntent.action")
         _safe_ref(self.target_ref, "VoiceCommandIntent.target_ref")
         if not 0 <= self.confidence <= 1:
@@ -370,6 +383,7 @@ class VoiceCommandIntent:
         return {
             "intent_id": self.intent_id,
             "family": self.family.value,
+            "command_family": self.command_family.value,
             "action": self.action,
             "target_ref": self.target_ref,
             "confidence": self.confidence,
@@ -380,6 +394,343 @@ class VoiceCommandIntent:
 
 
 VoiceIntentNormalizer = Callable[[VoiceTranscriptDraft], VoiceCommandIntent]
+
+
+_HARNESS_ALIASES = {
+    "echo": "echo",
+    "atlas": "atlas",
+    "aegis": "aegis",
+    "relay": "relay",
+    "session lifecycle": "session-lifecycle",
+    "vulcan": "session-lifecycle",
+    "review console": "review-console",
+    "arbiter": "review-console",
+    "bifrost": "bifrost",
+}
+
+_PROJECT_ALIASES = {
+    "meridian": "meridian",
+    "polaris": "polaris",
+    "obsidian": "obsidian",
+}
+
+_LANE_ALIASES = {
+    "build lanes": "build",
+    "review lanes": "review",
+    "blocked": "blocked",
+    "next": "next",
+}
+
+_SURFACE_COMMANDS = {
+    "reset": (
+        VoiceCommandFamily.PROJECT_LANE,
+        VoiceIntentFamily.CONTROL,
+        "reset",
+        "voice://surface/reset",
+        True,
+    ),
+    "reload": (
+        VoiceCommandFamily.PROJECT_LANE,
+        VoiceIntentFamily.CONTROL,
+        "reload",
+        "voice://surface/reload",
+        True,
+    ),
+    "open filter": (
+        VoiceCommandFamily.PROJECT_LANE,
+        VoiceIntentFamily.COMMAND,
+        "open",
+        "voice://surface/filter",
+        False,
+    ),
+    "show filter": (
+        VoiceCommandFamily.PROJECT_LANE,
+        VoiceIntentFamily.COMMAND,
+        "focus",
+        "voice://surface/filter",
+        False,
+    ),
+    "focus filter": (
+        VoiceCommandFamily.PROJECT_LANE,
+        VoiceIntentFamily.COMMAND,
+        "focus",
+        "voice://surface/filter",
+        False,
+    ),
+    "run crosscheck": (
+        VoiceCommandFamily.PROOF,
+        VoiceIntentFamily.COMMAND,
+        "run-preview",
+        "voice://proof/crosscheck",
+        True,
+    ),
+    "run cross check": (
+        VoiceCommandFamily.PROOF,
+        VoiceIntentFamily.COMMAND,
+        "run-preview",
+        "voice://proof/crosscheck",
+        True,
+    ),
+}
+
+
+def _normalized_phrase(phrase: str) -> str:
+    text = _safe_text(phrase, "phrase", SUMMARY_MAX).lower()
+    text = re.sub(r"\bprime's\b", "prime", text)
+    text = re.sub(r"[^a-z0-9 ]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _command_intent_id(phrase: str, command_family: VoiceCommandFamily, action: str, target_ref: str) -> str:
+    digest = _hash_content("|".join((phrase, command_family.value, action, target_ref)))[:16]
+    return f"voice-intent-{digest}"
+
+
+def _intent(
+    *,
+    phrase: str,
+    command_family: VoiceCommandFamily,
+    family: VoiceIntentFamily,
+    action: str,
+    target_ref: str,
+    confidence: float,
+    requires_confirmation: bool,
+    evidence_refs: tuple[str, ...],
+    confirmation_threshold: float = VOICE_COMMAND_CONFIRMATION_THRESHOLD,
+) -> VoiceCommandIntent:
+    return VoiceCommandIntent(
+        intent_id=_command_intent_id(phrase, command_family, action, target_ref),
+        family=family,
+        command_family=command_family,
+        action=action,
+        target_ref=target_ref,
+        confidence=confidence,
+        requires_confirmation=requires_confirmation or confidence < confirmation_threshold,
+        evidence_refs=evidence_refs,
+    )
+
+
+def recognize_voice_command_intent(
+    phrase: str,
+    *,
+    confidence: float,
+    evidence_refs: tuple[str, ...] = (),
+    confirmation_threshold: float = VOICE_COMMAND_CONFIRMATION_THRESHOLD,
+) -> VoiceCommandIntent:
+    """Recognize VOC10 command families into preview-only typed intents.
+
+    The recognizer is deterministic backend domain logic only. It consumes an
+    explicit phrase supplied by a caller, stores no raw transcript, calls no
+    speech provider, touches no UI/bridge route, and never authorizes execution.
+    """
+    if not 0 <= confidence <= 1:
+        raise VoiceValidationError("confidence must be between 0 and 1")
+    if not 0 <= confirmation_threshold <= 1:
+        raise VoiceValidationError("confirmation_threshold must be between 0 and 1")
+    refs = _safe_refs(evidence_refs, "recognize_voice_command_intent.evidence_refs")
+    phrase_key = _normalized_phrase(phrase)
+    if not phrase_key:
+        raise VoiceValidationError("phrase must not be empty")
+
+    def emit(**kwargs: object) -> VoiceCommandIntent:
+        return _intent(**kwargs, confirmation_threshold=confirmation_threshold)
+
+    if phrase_key in _SURFACE_COMMANDS:
+        command_family, family, action, target_ref, requires_confirmation = _SURFACE_COMMANDS[phrase_key]
+        return emit(
+            phrase=phrase_key,
+            command_family=command_family,
+            family=family,
+            action=action,
+            target_ref=target_ref,
+            confidence=confidence,
+            requires_confirmation=requires_confirmation,
+            evidence_refs=refs,
+        )
+
+    for opener in ("open ", "show ", "focus "):
+        if phrase_key.startswith(opener):
+            target = phrase_key.removeprefix(opener)
+            if target in _HARNESS_ALIASES:
+                action = "focus" if opener in ("show ", "focus ") else "open"
+                return emit(
+                    phrase=phrase_key,
+                    command_family=VoiceCommandFamily.HARNESS_PANEL,
+                    family=VoiceIntentFamily.COMMAND,
+                    action=action,
+                    target_ref=f"voice://harness/{_HARNESS_ALIASES[target]}",
+                    confidence=confidence,
+                    requires_confirmation=False,
+                    evidence_refs=refs,
+                )
+            if target in _PROJECT_ALIASES:
+                action = "focus" if opener in ("show ", "focus ") else "open"
+                return emit(
+                    phrase=phrase_key,
+                    command_family=VoiceCommandFamily.PROJECT_LANE,
+                    family=VoiceIntentFamily.COMMAND,
+                    action=action,
+                    target_ref=f"voice://project/{_PROJECT_ALIASES[target]}",
+                    confidence=confidence,
+                    requires_confirmation=False,
+                    evidence_refs=refs,
+                )
+            if target in _LANE_ALIASES:
+                return emit(
+                    phrase=phrase_key,
+                    command_family=VoiceCommandFamily.PROJECT_LANE,
+                    family=VoiceIntentFamily.COMMAND,
+                    action="focus",
+                    target_ref=f"voice://lane/{_LANE_ALIASES[target]}",
+                    confidence=confidence,
+                    requires_confirmation=False,
+                    evidence_refs=refs,
+                )
+            build_match = re.fullmatch(r"build ([0-9]{1,2})", target)
+            if build_match:
+                return emit(
+                    phrase=phrase_key,
+                    command_family=VoiceCommandFamily.PROJECT_LANE,
+                    family=VoiceIntentFamily.COMMAND,
+                    action="focus",
+                    target_ref=f"voice://lane/build-{build_match.group(1)}",
+                    confidence=confidence,
+                    requires_confirmation=False,
+                    evidence_refs=refs,
+                )
+            review_match = re.fullmatch(r"codex reviews? ([a-z])", target)
+            if review_match:
+                return emit(
+                    phrase=phrase_key,
+                    command_family=VoiceCommandFamily.PROJECT_LANE,
+                    family=VoiceIntentFamily.COMMAND,
+                    action="focus",
+                    target_ref=f"voice://review/codex-{review_match.group(1)}",
+                    confidence=confidence,
+                    requires_confirmation=False,
+                    evidence_refs=refs,
+                )
+
+    if phrase_key == "close this panel":
+        return emit(
+            phrase=phrase_key,
+            command_family=VoiceCommandFamily.HARNESS_PANEL,
+            family=VoiceIntentFamily.CONTROL,
+            action="close",
+            target_ref="voice://harness/current-panel",
+            confidence=confidence,
+            requires_confirmation=True,
+            evidence_refs=refs,
+        )
+
+    if phrase_key.startswith("switch to "):
+        target = phrase_key.removeprefix("switch to ")
+        if target in _PROJECT_ALIASES:
+            return emit(
+                phrase=phrase_key,
+                command_family=VoiceCommandFamily.PROJECT_LANE,
+                family=VoiceIntentFamily.COMMAND,
+                action="switch",
+                target_ref=f"voice://project/{_PROJECT_ALIASES[target]}",
+                confidence=confidence,
+                requires_confirmation=True,
+                evidence_refs=refs,
+            )
+
+    project_lane_questions = {
+        "what is blocked": ("ask", "voice://status/blocked"),
+        "what is next": ("ask", "voice://status/next"),
+    }
+    if phrase_key in project_lane_questions:
+        action, target_ref = project_lane_questions[phrase_key]
+        return emit(
+            phrase=phrase_key,
+            command_family=VoiceCommandFamily.PROJECT_LANE,
+            family=VoiceIntentFamily.COMMAND,
+            action=action,
+            target_ref=target_ref,
+            confidence=confidence,
+            requires_confirmation=False,
+            evidence_refs=refs,
+        )
+
+    dictation_commands = {
+        "focus prompt": ("focus", "voice://dictation/prompt", False),
+        "start dictation": ("start", "voice://dictation/session", False),
+        "stop dictation": ("stop", "voice://dictation/session", False),
+        "clear dictation": ("clear", "voice://dictation/session", True),
+        "append this to the prompt": ("append", "voice://dictation/prompt", True),
+        "send to prime": ("submit", "voice://dictation/prime-submit", True),
+        "cancel": ("cancel", "voice://dictation/session", True),
+    }
+    if phrase_key in dictation_commands:
+        action, target_ref, requires_confirmation = dictation_commands[phrase_key]
+        return emit(
+            phrase=phrase_key,
+            command_family=VoiceCommandFamily.DICTATION,
+            family=VoiceIntentFamily.DICTATION,
+            action=action,
+            target_ref=target_ref,
+            confidence=confidence,
+            requires_confirmation=requires_confirmation,
+            evidence_refs=refs,
+        )
+
+    speech_commands = {
+        "read prime answer": ("read", "voice://speech/prime-answer", False),
+        "read the summary": ("read", "voice://speech/summary", False),
+        "read summary": ("read", "voice://speech/summary", False),
+        "read blockers": ("read", "voice://speech/blockers", False),
+        "pause voice": ("pause", "voice://speech/current", False),
+        "resume voice": ("resume", "voice://speech/current", False),
+        "stop reading": ("stop", "voice://speech/current", True),
+        "mute": ("mute", "voice://speech/output", True),
+        "unmute": ("unmute", "voice://speech/output", False),
+    }
+    if phrase_key in speech_commands:
+        action, target_ref, requires_confirmation = speech_commands[phrase_key]
+        return emit(
+            phrase=phrase_key,
+            command_family=VoiceCommandFamily.SPEECH_OUTPUT,
+            family=VoiceIntentFamily.CONTROL,
+            action=action,
+            target_ref=target_ref,
+            confidence=confidence,
+            requires_confirmation=requires_confirmation,
+            evidence_refs=refs,
+        )
+
+    proof_commands = {
+        "show proof": ("show", "voice://proof/current"),
+        "read proof": ("read", "voice://proof/current"),
+        "why is this blocked": ("ask", "voice://proof/blocker"),
+        "what needs review": ("ask", "voice://proof/review-needed"),
+        "what changed": ("ask", "voice://proof/change-summary"),
+        "show the latest commit": ("show", "voice://proof/latest-commit"),
+    }
+    if phrase_key in proof_commands:
+        action, target_ref = proof_commands[phrase_key]
+        return emit(
+            phrase=phrase_key,
+            command_family=VoiceCommandFamily.PROOF,
+            family=VoiceIntentFamily.COMMAND,
+            action=action,
+            target_ref=target_ref,
+            confidence=confidence,
+            requires_confirmation=False,
+            evidence_refs=refs,
+        )
+
+    return emit(
+        phrase=phrase_key,
+        command_family=VoiceCommandFamily.UNKNOWN,
+        family=VoiceIntentFamily.COMMAND,
+        action="unknown",
+        target_ref="voice://command/unknown",
+        confidence=confidence,
+        requires_confirmation=True,
+        evidence_refs=refs,
+    )
 
 
 def normalize_voice_intent(
