@@ -40,6 +40,20 @@ Use this cadence whenever either party expects to write:
 - **Handoff:** if the lease expires, the writer must post expired/aborted before trying again.
 
 ```text
+Time: 2026-06-11 00:29 -06:00
+Writer: front-end developer lane
+Intent: complete reviewed Archive authority UI promotion under backend/orchestrator exact-hash ACK.
+Action completed: landed the reviewed Archive UI slice on `origin/main` from the clean UI worktree, preserving display-only Session Close Archive Proof posture while adding reviewed archive metadata, catalog, reload/run-again posture, and transcript-access posture with runtime smoke coverage for the route.
+Commit(s): `8e896420567b78eb8b1c4213cabe469b2f00dac1`, `8da1a729bc378095e5d68bf960b27ec9d426c8c2`, `4e07b5e67034a316241ed13639d3da7e455d4d5e`, this commit
+Pushed to origin/main: yes
+Files changed: docs/ui-integration-checklist.md, index.html, scripts/meridian-model-bridge.js, tests/test_bifrost_cockpit.py, docs/main-write-coordination-ledger.md
+Proof run: `python -m pytest tests/test_bifrost_cockpit.py -q` -> 469 passed; `python -m pytest tests/test_session_archive.py tests/test_bifrost_cockpit.py -q` -> 490 passed; `node --check scripts/meridian-model-bridge.js` passed; `node scripts/meridian-model-bridge.js --self-test` returned `ok: true` with `archiveOk: true`; live smoke `GET /bridge/session-close-archive-proof` -> 200 with `ok: true`, `archive_id: archive-session-close-proof`, `catalog_count: 1`, reload/run-again/transcript authorized all false, and no `safe bounded session summary` leak; `git diff --check origin/main...HEAD` passed cleanly before push.
+Final shared main status: reviewed Archive UI candidate and intent landed on `origin/main` at `4e07b5e67034a316241ed13639d3da7e455d4d5e` before this completion write; authoritative promoted UI checklist state is now `239/305 wired`, `4 partial`, `62 planned`, `0 blocked`.
+Notes/blockers: scope stayed path-limited to the four approved UI files plus this ledger. No backend code moved, no provider/model transport change landed, and the archive route remains display-only/non-executing with raw transcript/prompt/detail bodies still withheld.
+Status: Complete
+```
+
+```text
 Time: 2026-06-11 00:28 -06:00
 Writer: front-end developer lane
 Intent: promote reviewed Archive authority UI wiring and repair under backend/orchestrator exact-hash ACK through 2026-06-11 00:38 -06:00.
