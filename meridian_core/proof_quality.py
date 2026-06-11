@@ -6,6 +6,7 @@ snapshot metadata, and results never expose raw proof contents.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from enum import Enum
 
@@ -223,15 +224,17 @@ def _display_safe_ref(value: str) -> str:
 
 
 def _looks_like_raw_payload(value: str) -> bool:
-    lowered = value.lower()
-    unsafe_markers = (
-        "raw prompt:",
-        "full prompt:",
-        "complete prompt:",
-        "raw transcript:",
-        "full transcript:",
-        "complete transcript:",
-        "provider response:",
-        "model response:",
+    return bool(
+        re.search(
+            r"(?is)(?:"
+            r"[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
+            r"\b(?:raw|full|complete)\s+prompt\s*:|"
+            r"\b(?:raw|full|complete)\s+transcript\s*:|"
+            r"\b(?:provider|model)\s+(?:response|output)\s*:|"
+            r"\b(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}|"
+            r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|"
+            r"gh[pousr]_[A-Za-z0-9_]{20,}"
+            r")",
+            value,
+        )
     )
-    return any(marker in lowered for marker in unsafe_markers)

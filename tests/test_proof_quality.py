@@ -125,3 +125,32 @@ def test_display_dict_does_not_leak_raw_text():
     assert display["content_digest"] == "sha256:safe-digest"
     assert "private deployment password" not in str(display)
     assert "raw prompt" not in str(display)
+
+
+def test_display_dict_sanitizes_unsafe_digest_and_waiver_refs():
+    result = evaluate_proof_quality(
+        ProofRef(
+            proof_ref=r"C:\Users\scott\proof",
+            requirement="token=abcdef1234567890",
+            max_age_seconds=300,
+        ),
+        ProofSnapshot(
+            proof_ref=r"C:\Users\scott\proof",
+            captured_at_seconds=1_000,
+            content_digest="/home/scott/digest",
+            sufficient=True,
+            waiver_ref="api_key=abcdef1234567890",
+        ),
+        now_seconds=1_120,
+    )
+
+    display = result.to_display_dict()
+    rendered = str(display)
+
+    assert display["proof_ref"] == "[redacted]"
+    assert display["requirement"] == "[redacted]"
+    assert display["content_digest"] == "[redacted]"
+    assert display["waiver_ref"] == "[redacted]"
+    assert r"C:\Users" not in rendered
+    assert "/home/scott" not in rendered
+    assert "abcdef1234567890" not in rendered

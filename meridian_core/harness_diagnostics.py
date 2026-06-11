@@ -217,10 +217,10 @@ def classify_heartbeat_anomaly(
     status = heartbeat_status.strip().lower()
     if status in {"failed", "error"}:
         return HeartbeatAnomaly.FAILED
-    if status in {"missing", "unknown"} or heartbeat_age_seconds is None:
-        return HeartbeatAnomaly.MISSING
     if status == "blocked" or blocker_count > 0:
         return HeartbeatAnomaly.BLOCKED
+    if status in {"missing", "unknown"} or heartbeat_age_seconds is None:
+        return HeartbeatAnomaly.MISSING
     if status == "stale" or heartbeat_age_seconds > expected_heartbeat_seconds:
         return HeartbeatAnomaly.STALE
     if expected_heartbeat_seconds and heartbeat_age_seconds > expected_heartbeat_seconds * 0.8:

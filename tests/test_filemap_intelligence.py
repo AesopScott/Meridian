@@ -138,3 +138,24 @@ def test_display_dicts_do_not_leak_local_absolute_paths():
     assert link["code_path"] == "meridian_core/filemap.py"
     assert "C:/Users" not in str(display)
     assert r"C:\Users" not in str(display)
+
+
+def test_non_path_fields_are_sanitized_for_paths_and_secrets():
+    entry = FileMapMetadata(
+        path="meridian_core/filemap.py",
+        owner=r"C:\Users\scott\owner",
+        capability="api_key=abcdef1234567890",
+        purpose="provider response: raw private output",
+        proof_refs=("/home/scott/proof", "token=abcdef1234567890"),
+    )
+
+    rendered = str(entry.to_display_dict())
+    links = build_capability_navigation_links([entry])[0].to_display_dict()
+
+    assert r"C:\Users" not in rendered
+    assert "/home/scott" not in rendered
+    assert "abcdef1234567890" not in rendered
+    assert "raw private output" not in rendered
+    assert entry.to_display_dict()["owner"] == "[redacted]"
+    assert entry.to_display_dict()["capability"] == "[redacted]"
+    assert links["proof_refs"] == ("[redacted]",)

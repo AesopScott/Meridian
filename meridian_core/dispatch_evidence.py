@@ -7,6 +7,7 @@ IO, stores raw prompt bodies, or stores raw provider responses.
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping, Protocol
@@ -60,8 +61,8 @@ class PromptPayloadHashRecord:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "payload_ref": self.payload_ref,
-            "algorithm": self.algorithm,
+            "payload_ref": _safe_ref(self.payload_ref, "prompt-payload:redacted"),
+            "algorithm": _safe_label(self.algorithm),
             "sha256": self.sha256,
             "byte_length": self.byte_length,
             "prompt_body_stored": self.prompt_body_stored,
@@ -97,13 +98,15 @@ class ProviderIdentityProof:
 
     def to_display_dict(self, *, now_epoch: int | None = None) -> dict[str, object]:
         return {
-            "provider_ref": self.provider_ref,
-            "provider_name": self.provider_name,
-            "model_name": self.model_name,
-            "capability_tier": self.capability_tier,
-            "trust_state": self.trust_state,
+            "provider_ref": _safe_ref(self.provider_ref, "provider:redacted"),
+            "provider_name": _safe_label(self.provider_name),
+            "model_name": _safe_label(self.model_name),
+            "capability_tier": _safe_label(self.capability_tier),
+            "trust_state": _safe_label(self.trust_state),
             "health_status": self.health_status.value,
-            "evidence_refs": self.evidence_refs,
+            "evidence_refs": tuple(
+                _safe_ref(ref, "evidence:redacted") for ref in self.evidence_refs
+            ),
             "observed_at_epoch": self.observed_at_epoch,
             "expires_at_epoch": self.expires_at_epoch,
             "trust_expiration_status": self.trust_expiration_status(
@@ -125,11 +128,13 @@ class FallbackExplanation:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "from_route": self.from_route,
-            "to_route": self.to_route,
-            "reason": self.reason,
-            "blocker_tags": self.blocker_tags,
-            "evidence_refs": self.evidence_refs,
+            "from_route": _safe_label(self.from_route),
+            "to_route": _safe_label(self.to_route),
+            "reason": _safe_label(self.reason),
+            "blocker_tags": tuple(_safe_label(tag) for tag in self.blocker_tags),
+            "evidence_refs": tuple(
+                _safe_ref(ref, "evidence:redacted") for ref in self.evidence_refs
+            ),
         }
 
 
@@ -147,12 +152,12 @@ class RouteReplayMetadata:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "route_ref": self.route_ref,
-            "route_mode": self.route_mode,
+            "route_ref": _safe_ref(self.route_ref, "relay-route:redacted"),
+            "route_mode": _safe_label(self.route_mode),
             "risk_tier": self.risk_tier,
-            "lane_roles": self.lane_roles,
-            "selected_models": self.selected_models,
-            "route_reason_ref": self.route_reason_ref,
+            "lane_roles": tuple(_safe_label(role) for role in self.lane_roles),
+            "selected_models": tuple(_safe_label(model) for model in self.selected_models),
+            "route_reason_ref": _safe_ref(self.route_reason_ref, "route-reason:redacted"),
             "no_provider_call": self.no_provider_call,
         }
 
@@ -169,11 +174,15 @@ class RouteSimulationLane:
 
     def to_display_dict(self) -> dict[str, object]:
         return {
-            "role": self.role,
-            "preferred_model": self.preferred_model,
+            "role": _safe_label(self.role),
+            "preferred_model": _safe_label(self.preferred_model),
             "independent": self.independent,
-            "provider_ref": self.provider_ref,
-            "provider_health_status": self.provider_health_status,
+            "provider_ref": (
+                None
+                if self.provider_ref is None
+                else _safe_ref(self.provider_ref, "provider:redacted")
+            ),
+            "provider_health_status": _safe_label(self.provider_health_status),
             "confidence_label": self.confidence_label.value,
             "fallback_explanation": (
                 self.fallback_explanation.to_display_dict()
@@ -217,18 +226,25 @@ class DispatchEvidenceChain:
     validation_ref: str
 
     def to_display_dict(self) -> dict[str, object]:
+        intent_ref = _safe_ref(self.intent_ref, "intent:redacted")
+        payload_ref = _safe_ref(self.payload_ref, "prompt-payload:redacted")
+        provider_refs = tuple(
+            _safe_ref(ref, "provider:redacted") for ref in self.provider_refs
+        )
+        response_ref = _safe_ref(self.response_ref, "provider-response:redacted")
+        validation_ref = _safe_ref(self.validation_ref, "validation:redacted")
         return {
-            "intent_ref": self.intent_ref,
-            "payload_ref": self.payload_ref,
-            "provider_refs": self.provider_refs,
-            "response_ref": self.response_ref,
-            "validation_ref": self.validation_ref,
+            "intent_ref": intent_ref,
+            "payload_ref": payload_ref,
+            "provider_refs": provider_refs,
+            "response_ref": response_ref,
+            "validation_ref": validation_ref,
             "sequence": (
-                self.intent_ref,
-                self.payload_ref,
-                *self.provider_refs,
-                self.response_ref,
-                self.validation_ref,
+                intent_ref,
+                payload_ref,
+                *provider_refs,
+                response_ref,
+                validation_ref,
             ),
         }
 
@@ -264,10 +280,11 @@ def hash_prompt_payload(packet_or_payload: _PacketLike | str) -> PromptPayloadHa
         if hasattr(packet_or_payload, "model_payload")
         else str(packet_or_payload)
     )
-    payload_ref = (
+    payload_ref = _safe_ref(
         f"prompt-payload:{packet_or_payload.packet_id}"
         if hasattr(packet_or_payload, "packet_id")
-        else f"prompt-payload:sha256:{_sha256(payload)[:12]}"
+        else f"prompt-payload:sha256:{_sha256(payload)[:12]}",
+        "prompt-payload:redacted",
     )
     return PromptPayloadHashRecord(
         payload_ref=payload_ref,
@@ -511,3 +528,30 @@ def _route_ref(route: RelayRoute) -> str:
 
 def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+_UNSAFE_DISPLAY_PATTERN = re.compile(
+    r"(?is)(?:"
+    r"[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
+    r"\b(?:raw|full|complete)\s+prompt\s*:|"
+    r"\b(?:raw|full|complete)\s+transcript\s*:|"
+    r"\b(?:provider|model)\s+(?:response|output)\s*:|"
+    r"\b(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}|"
+    r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|"
+    r"gh[pousr]_[A-Za-z0-9_]{20,}"
+    r")"
+)
+
+
+def _safe_ref(value: object, fallback: str) -> str:
+    text = str(value).strip()
+    if not text or _UNSAFE_DISPLAY_PATTERN.search(text):
+        return fallback
+    return text
+
+
+def _safe_label(value: object) -> str:
+    text = str(value).strip()
+    if not text or _UNSAFE_DISPLAY_PATTERN.search(text):
+        return "[redacted]"
+    return text

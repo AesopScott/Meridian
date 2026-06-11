@@ -76,6 +76,17 @@ def test_stale_worker_is_classified_from_age_without_process_inspection() -> Non
     assert 0 <= snapshot.reliability.score < 100
 
 
+def test_blocked_status_takes_precedence_over_missing_heartbeat_age() -> None:
+    anomaly = classify_heartbeat_anomaly(
+        "blocked",
+        heartbeat_age_seconds=None,
+        expected_heartbeat_seconds=60,
+        blocker_count=1,
+    )
+
+    assert anomaly.value == "blocked"
+
+
 def test_divergent_backend_snapshot_is_detected_and_escalated() -> None:
     drift = detect_backend_snapshot_drift(
         BackendSnapshotProof(

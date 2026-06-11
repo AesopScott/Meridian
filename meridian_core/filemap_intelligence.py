@@ -6,6 +6,7 @@ filesystem IO and returns display-safe records suitable for UI or bridge use.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -334,7 +335,7 @@ def infer_related_test_hint(
 
 def display_safe_path(path: str) -> str:
     """Return a relative-looking path without leaking local absolute prefixes."""
-    clean = _display_safe_text(path).replace("\\", "/")
+    clean = str(path).strip().replace("\\", "/")
     parts = tuple(part for part in clean.split("/") if part)
     roots = ("meridian_core", "tests", "docs", "bifrost", "scripts", "electron")
 
@@ -346,6 +347,8 @@ def display_safe_path(path: str) -> str:
 
     if len(parts) > 1 and (":" in parts[0] or clean.startswith("/")):
         return parts[-1]
+    if _looks_like_unsafe_text(clean):
+        return "[redacted]"
     return clean
 
 
@@ -386,17 +389,20 @@ def _display_safe_text(value: str | None) -> str:
 
 
 def _looks_like_unsafe_text(value: str) -> bool:
-    lowered = value.lower()
-    markers = (
-        "raw prompt:",
-        "full prompt:",
-        "complete prompt:",
-        "raw transcript:",
-        "full transcript:",
-        "provider response:",
-        "model response:",
+    return bool(
+        re.search(
+            r"(?is)(?:"
+            r"[A-Z]:\\|\\\\[^\\\s]+\\[^\\\s]+\\|/(?:Users|home|var|tmp|mnt|Volumes)/|"
+            r"\b(?:raw|full|complete)\s+prompt\s*:|"
+            r"\b(?:raw|full|complete)\s+transcript\s*:|"
+            r"\b(?:provider|model)\s+(?:response|output)\s*:|"
+            r"\b(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*\S{8,}|"
+            r"sk-(?:proj-)?[A-Za-z0-9_-]{16,}|"
+            r"gh[pousr]_[A-Za-z0-9_]{20,}"
+            r")",
+            value,
+        )
     )
-    return any(marker in lowered for marker in markers)
 
 
 def _require_non_empty(value: str, name: str) -> None:

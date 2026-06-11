@@ -180,3 +180,38 @@ def test_dispatch_evidence_display_dict_leaks_no_prompt_or_response_body():
     assert response_body not in rendered
     assert "provider response body" not in rendered
     assert "sha256" in rendered
+
+
+def test_dispatch_display_sanitizes_unsafe_refs_and_provider_metadata():
+    class UnsafePacket:
+        packet_id = r"C:\Users\scott\secret-packet"
+
+        def model_payload(self) -> str:
+            return "safe payload body"
+
+    proof = ProviderIdentityProof(
+        provider_ref=r"C:\Users\scott\provider",
+        provider_name=r"C:\Users\scott\secret-provider",
+        model_name="/home/scott/model",
+        capability_tier="api_key=abcdef1234567890",
+        trust_state="provider response: private body",
+        health_status=ProviderHealthStatus.HEALTHY,
+        evidence_refs=("token=abcdef1234567890",),
+    )
+    evidence = build_dispatch_evidence(
+        intent_ref=r"C:\Users\scott\intent",
+        route=route_from_tier(1),
+        packet=UnsafePacket(),
+        providers_by_model={"fast-default": proof},
+        response_ref="provider response: private body",
+        validation_ref="/home/scott/validation",
+    )
+
+    rendered = str(evidence.to_display_dict())
+
+    assert r"C:\Users" not in rendered
+    assert "/home/scott" not in rendered
+    assert "abcdef1234567890" not in rendered
+    assert "private body" not in rendered
+    assert "provider:redacted" in rendered
+    assert "prompt-payload:redacted" in rendered
