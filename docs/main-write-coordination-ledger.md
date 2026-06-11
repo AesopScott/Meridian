@@ -48,13 +48,13 @@ Approved implementation files: meridian_core/relay_auto_routing.py, tests/test_r
 Guardrails: no index.html, no Electron/renderer/Bifrost UI files, no bridge routes, no scripts/meridian-model-bridge.js, no docs/ui-integration-checklist.md, no UI wiring, no provider/model transport changes, no Relay prompt submission behavior change, and no dirty shared-checkout promotion source.
 Pre-write check: `origin/main` fetched at `ec4e7f9a7a4f9dec8dfcb3ceb537f49084d53f2c`; BR7 branch is clean and one commit ahead; diff scope matches approved backend/test files before this ledger entry.
 Proof expected before push: focused BR7/FileMap pytest, full pytest suite, and diff-check across approved files plus this ledger.
-Action completed: pending.
-Commit(s): pending
-Pushed to origin/main: pending
+Action completed: pushed reviewed BR7 Auto routing display-safety repair and required ledger record to `origin/main`.
+Commit(s): `2c8cb0337`, `7c5be8048`
+Pushed to origin/main: yes
 Files changed: meridian_core/relay_auto_routing.py, tests/test_relay_auto_routing.py, docs/main-write-coordination-ledger.md
-Proof run: pending
-Final shared main status: pending
-Status: In progress
+Proof run: `python -m pytest tests/test_relay_auto_routing.py tests/test_filemap.py -q` -> 63 passed; `python -m pytest -q` -> 3548 passed; scoped `git diff --check` -> LF/CRLF warning only for this ledger file.
+Final shared main status: clean/aligned with `origin/main` at `7c5be8048c2a4303a0ee9957153f5570f2f99157` before this completion ledger write.
+Status: Complete
 ```
 
 ```text
