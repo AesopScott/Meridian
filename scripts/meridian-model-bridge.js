@@ -10,8 +10,8 @@ const RECENT_CALLS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_CALLS || 40)
 const RECENT_RESULTS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_RESULTS || 20);
 const RECENT_RESULT_TTL_MS = Number(process.env.MERIDIAN_MODEL_RESULT_TTL_MS || 300000);
 const RECENT_RESULT_TEXT_LIMIT = Number(process.env.MERIDIAN_MODEL_RESULT_TEXT_LIMIT || 80000);
-const SESSION_TRANSCRIPT_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_LIMIT || 12);
-const SESSION_TRANSCRIPT_CHAR_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_CHAR_LIMIT || 12000);
+const SESSION_TRANSCRIPT_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_LIMIT || 6);
+const SESSION_TRANSCRIPT_CHAR_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_CHAR_LIMIT || 6000);
 const BRIDGE_VERSION = 'local-bridge-routes-v2';
 const BRIDGE_CAPABILITIES = {
   visibleTranscriptContext: true,
@@ -97,11 +97,14 @@ if (process.argv.includes('--self-test')) {
   const contextOk = (
     contextPrompt.entries === 2 &&
     contextPrompt.chars > 0 &&
+    contextPrompt.prompt.includes('You are Meridian speaking inside the Meridian desktop app.') &&
+    contextPrompt.prompt.includes('Visible recent conversation, for continuity only:') &&
     contextPrompt.prompt.includes('USER: Remember this visible detail.') &&
     contextPrompt.prompt.includes('MODEL: I can see the visible detail.') &&
-    contextPrompt.prompt.includes('CURRENT USER PROMPT: What should I do next?') &&
+    contextPrompt.prompt.includes('Current user message: What should I do next?') &&
     emptyPrompt.entries === 0 &&
-    emptyPrompt.prompt === 'Fresh question'
+    emptyPrompt.prompt.includes('You are Meridian speaking inside the Meridian desktop app.') &&
+    emptyPrompt.prompt.includes('Current user message: Fresh question')
   );
   const maxJsonOk = normalizeModelText('max', JSON.stringify({ result: 'max clean ok' })) === 'max clean ok';
   rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
@@ -238,12 +241,28 @@ function visibleTranscriptContext(transcript) {
 
 function promptWithVisibleSession(prompt, transcript) {
   const context = visibleTranscriptContext(transcript);
-  if (!context.text) return { prompt, entries: 0, chars: 0 };
+  const persona = [
+    'You are Meridian speaking inside the Meridian desktop app.',
+    'Be direct, calm, and useful. Answer as the in-app assistant, not as a raw CLI transcript.',
+    'You may use the visible panel transcript only as short-term conversation context.',
+    'Do not mention that context was injected, do not describe yourself as a command-line tool, and do not repeat metadata unless the user asks.',
+  ].join(' ');
+  if (!context.text) {
+    return {
+      prompt: [
+        persona,
+        `Current user message: ${prompt}`,
+      ].join('\n\n'),
+      entries: 0,
+      chars: 0,
+    };
+  }
   return {
     prompt: [
-      'Use this visible Meridian panel transcript as the conversation context. It is not hidden memory; it is the same visible session text in the UI.',
+      persona,
+      'Visible recent conversation, for continuity only:',
       context.text,
-      `CURRENT USER PROMPT: ${prompt}`,
+      `Current user message: ${prompt}`,
     ].join('\n\n'),
     entries: context.entries,
     chars: context.chars,
