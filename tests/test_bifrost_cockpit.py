@@ -1162,9 +1162,38 @@ def test_ui_checklist_promotes_prime_and_user_prompt_response_surfaces_from_brid
     assert ".session-window-right.is-panel-surface .session-response-output" in index
     assert "display: none;" in index
     assert "const channel = String(body.channel || 'prime').toLowerCase();" in bridge
-    assert "const result = await runModel({ backend, prompt, cwd, transcript });" in bridge
+    assert "const result = await runModel({ backend, prompt: promptForModel, cwd, transcript });" in bridge
     assert "result.channel = channel;" in bridge
     assert "cwd = sessionTarget.cwd;" in bridge
+
+
+def test_session_prompt_supports_pasted_image_attachments_for_bridge_context():
+    index = (ROOT / "index.html").read_text(encoding="utf-8")
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+
+    assert '<div class="session-attachment-tray"' in index
+    assert "input.addEventListener('paste'" in index
+    assert "event.clipboardData?.items" in index
+    assert "item.kind === 'file'" in index
+    assert "String(file.type || '').startsWith('image/')" in index
+    assert "reader.readAsDataURL(file)" in index
+    assert "file.size > 4 * 1024 * 1024" in index
+    assert "Please review the attached image." in index
+    assert "messagePayload = {" in index
+    assert "attachments," in index
+    assert "data-attachment-remove" in index
+    assert "session-output-attachments" in index
+
+    assert "const BRIDGE_VERSION = 'local-bridge-routes-v3';" in bridge
+    assert "const REQUEST_BODY_LIMIT = Number(process.env.MERIDIAN_MODEL_REQUEST_BODY_LIMIT || 8_000_000);" in bridge
+    assert "if (raw.length > REQUEST_BODY_LIMIT)" in bridge
+    assert "pastedImageAttachments: true" in bridge
+    assert "function materializeImageAttachments" in bridge
+    assert "path.join(cwd || DEFAULT_CWD, '.meridian', 'attachments')" in bridge
+    assert "Buffer.from(match[2], 'base64')" in bridge
+    assert "promptWithAttachments(prompt, materializedAttachments)" in bridge
+    assert "Attached image files saved by Meridian for this request:" in bridge
+    assert "result.attachments = materializedAttachments" in bridge
 
 
 def test_bridge_message_results_include_resolved_backend_for_transcript_source_labels():
