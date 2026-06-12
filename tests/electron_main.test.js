@@ -124,15 +124,34 @@ test('ensureModelBridge starts the bridge with Electron-as-Node and log files', 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].bin, 'C:\\Meridian\\Meridian.exe');
   assert.deepEqual(calls[0].args, ['C:\\Meridian\\scripts\\meridian-model-bridge.js']);
+  const pathKey = Object.keys(calls[0].options.env).find((key) => key.toLowerCase() === 'path');
+  const childPath = calls[0].options.env[pathKey].toLowerCase();
+
   assert.equal(calls[0].options.env.ELECTRON_RUN_AS_NODE, '1');
   assert.equal(calls[0].options.env.MERIDIAN_MODEL_HOST, '127.0.0.1');
   assert.equal(calls[0].options.env.MERIDIAN_MODEL_PORT, '8767');
+  assert.match(childPath, /appdata\\roaming\\npm/);
+  assert.match(childPath, /microsoft\\windowsapps/);
   assert.equal(calls[0].options.windowsHide, true);
   assert.equal(fs.existsSync(path.join(tempUserData, 'logs')), true);
 
   assert.equal(main.stopOwnedBridge(), true);
   assert.equal(child.killed, true);
   assert.equal(main.stopOwnedBridge(), false);
+});
+
+test('bridgeRuntimePath preserves existing PATH entries and appends Windows CLI locations', () => {
+  const main = loadMainWithElectronMock();
+  const result = main.bridgeRuntimePath({
+    Path: 'C:\\Existing',
+    APPDATA: 'C:\\Users\\scott\\AppData\\Roaming',
+    LOCALAPPDATA: 'C:\\Users\\scott\\AppData\\Local',
+  });
+
+  assert.equal(result.pathKey, 'Path');
+  assert.equal(result.value.split(path.delimiter)[0], 'C:\\Existing');
+  assert.match(result.value, /AppData\\Roaming\\npm/);
+  assert.match(result.value, /Microsoft\\WindowsApps/);
 });
 
 test('createCockpitWindow keeps the renderer sandboxed', () => {

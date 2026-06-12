@@ -16,6 +16,7 @@
 const { app, BrowserWindow } = require('electron');
 const fs = require('node:fs');
 const http = require('node:http');
+const os = require('node:os');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
@@ -71,6 +72,32 @@ function getBridgeLogPaths(electronApp = app) {
   };
 }
 
+function bridgeRuntimePath(baseEnv = process.env) {
+  const pathKey = Object.keys(baseEnv).find((key) => key.toLowerCase() === 'path') || 'Path';
+  const delimiter = path.delimiter;
+  const segments = String(baseEnv[pathKey] || '')
+    .split(delimiter)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const lowerSegments = new Set(segments.map((item) => item.toLowerCase()));
+  const appendIfMissing = (item) => {
+    if (!item || lowerSegments.has(item.toLowerCase())) return;
+    segments.push(item);
+    lowerSegments.add(item.toLowerCase());
+  };
+
+  if (process.platform === 'win32') {
+    const home = os.homedir();
+    const appData = baseEnv.APPDATA || path.join(home, 'AppData', 'Roaming');
+    const localAppData = baseEnv.LOCALAPPDATA || path.join(home, 'AppData', 'Local');
+    appendIfMissing(path.join(appData, 'npm'));
+    appendIfMissing(path.join(localAppData, 'Microsoft', 'WindowsApps'));
+    appendIfMissing('C:\\Program Files\\nodejs');
+  }
+
+  return { pathKey, value: segments.join(delimiter) };
+}
+
 function bridgeHealthCheck({ request = http.get, timeoutMs = 700 } = {}) {
   return new Promise((resolve) => {
     const req = request(BRIDGE_HEALTH_URL, (res) => {
@@ -123,15 +150,18 @@ async function ensureModelBridge({
   fs.mkdirSync(logDir, { recursive: true });
   const stdout = fs.openSync(stdoutPath, 'a');
   const stderr = fs.openSync(stderrPath, 'a');
+  const runtimePath = bridgeRuntimePath(process.env);
+  const childEnv = {
+    ...process.env,
+    ELECTRON_RUN_AS_NODE: '1',
+    MERIDIAN_MODEL_HOST: BRIDGE_HOST,
+    MERIDIAN_MODEL_PORT: String(BRIDGE_PORT),
+    [runtimePath.pathKey]: runtimePath.value,
+  };
   const child = spawnProcess(nodeRuntime, [bridgeScript], {
     cwd: path.resolve(__dirname, '..'),
     detached: false,
-    env: {
-      ...process.env,
-      ELECTRON_RUN_AS_NODE: '1',
-      MERIDIAN_MODEL_HOST: BRIDGE_HOST,
-      MERIDIAN_MODEL_PORT: String(BRIDGE_PORT),
-    },
+    env: childEnv,
     stdio: ['ignore', stdout, stderr],
     windowsHide: true,
   });
@@ -183,6 +213,7 @@ module.exports = {
   createCockpitWindow,
   ensureModelBridge,
   getBridgeLogPaths,
+  bridgeRuntimePath,
   startMeridianApp,
   stopOwnedBridge,
   UI_FILE,
