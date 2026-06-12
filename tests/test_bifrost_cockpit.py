@@ -1058,10 +1058,12 @@ def test_index_response_transcripts_render_bridge_model_labels_when_known():
     ]
     assert "if (entry.model)" in transcript_renderer
     assert "meta.className = 'session-output-meta'" in transcript_renderer
-    assert "const metaParts = [entry.model]" in transcript_renderer
+    assert "entry.model === 'Codex CLI default' ? 'Meridian' : entry.model" in transcript_renderer
     assert "const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || ''" in transcript_renderer
-    assert "metaParts.push(`source ${backendLabel}`)" in transcript_renderer
-    assert "visible context ${entry.sessionContextEntries} entries" in transcript_renderer
+    assert "meta.dataset.backend = backendLabel" in transcript_renderer
+    assert "meta.dataset.visibleContextEntries = String(entry.sessionContextEntries)" in transcript_renderer
+    assert "meta.title = diagnosticParts.join(' - ')" in transcript_renderer
+    assert "metaParts.push(`source ${backendLabel}`)" not in transcript_renderer
     assert "row.append(meta)" in transcript_renderer
 
     send_prompt = doc[
