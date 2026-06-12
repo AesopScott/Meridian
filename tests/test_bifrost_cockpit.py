@@ -1058,7 +1058,7 @@ def test_index_response_transcripts_render_bridge_model_labels_when_known():
     ]
     assert "if (entry.model)" in transcript_renderer
     assert "meta.className = 'session-output-meta'" in transcript_renderer
-    assert "entry.model === 'Codex CLI default' ? 'Meridian' : entry.model" in transcript_renderer
+    assert "entry.model === 'Codex CLI default' ? 'Prime' : entry.model" in transcript_renderer
     assert "const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || ''" in transcript_renderer
     assert "meta.dataset.backend = backendLabel" in transcript_renderer
     assert "meta.dataset.visibleContextEntries = String(entry.sessionContextEntries)" in transcript_renderer
@@ -1080,6 +1080,16 @@ def test_index_response_transcripts_render_bridge_model_labels_when_known():
     assert "pushEntry(input, result.ok ? 'model'" in send_prompt
     assert "pushEntry(input, recovered.ok ? 'model'" in send_prompt
     assert "Bridge completed ${completedCall.backend || backend} request" in send_prompt
+
+
+def test_bridge_wraps_model_prompt_as_prime_through_spark():
+    doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian." in doc
+    assert "Prime directive: create unabashed progress" in doc
+    assert "Prime directive: speak with confidence" in doc
+    assert "Prime directive: take ultimate ownership of outcomes" in doc
+    assert "Use associated proof when it is available" in doc
+    assert "Response preferences: concise first, decisive by default" in doc
 
 
 def test_ui_checklist_promotes_prime_and_user_prompt_response_surfaces_from_bridge_flow():

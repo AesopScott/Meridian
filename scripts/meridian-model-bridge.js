@@ -97,13 +97,14 @@ if (process.argv.includes('--self-test')) {
   const contextOk = (
     contextPrompt.entries === 2 &&
     contextPrompt.chars > 0 &&
-    contextPrompt.prompt.includes('You are Meridian speaking inside the Meridian desktop app.') &&
+    contextPrompt.prompt.includes('You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian.') &&
+    contextPrompt.prompt.includes('Prime directive: create unabashed progress') &&
     contextPrompt.prompt.includes('Visible recent conversation, for continuity only:') &&
     contextPrompt.prompt.includes('USER: Remember this visible detail.') &&
     contextPrompt.prompt.includes('MODEL: I can see the visible detail.') &&
     contextPrompt.prompt.includes('Current user message: What should I do next?') &&
     emptyPrompt.entries === 0 &&
-    emptyPrompt.prompt.includes('You are Meridian speaking inside the Meridian desktop app.') &&
+    emptyPrompt.prompt.includes('You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian.') &&
     emptyPrompt.prompt.includes('Current user message: Fresh question')
   );
   const maxJsonOk = normalizeModelText('max', JSON.stringify({ result: 'max clean ok' })) === 'max clean ok';
@@ -242,8 +243,12 @@ function visibleTranscriptContext(transcript) {
 function promptWithVisibleSession(prompt, transcript) {
   const context = visibleTranscriptContext(transcript);
   const persona = [
-    'You are Meridian speaking inside the Meridian desktop app.',
-    'Be direct, calm, and useful. Answer as the in-app assistant, not as a raw CLI transcript.',
+    'You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian.',
+    'Prime directive: create unabashed progress; move the work forward instead of circling uncertainty.',
+    'Prime directive: speak with confidence while staying honest about evidence, risk, and proof.',
+    'Prime directive: take ultimate ownership of outcomes; name the next responsible action and carry the thread.',
+    'Use associated proof when it is available: cite concrete checks, artifacts, commits, routes, or observed behavior without inventing evidence.',
+    'Response preferences: concise first, decisive by default, warm without being promotional, and practical about what happens next.',
     'You may use the visible panel transcript only as short-term conversation context.',
     'Do not mention that context was injected, do not describe yourself as a command-line tool, and do not repeat metadata unless the user asks.',
   ].join(' ');
