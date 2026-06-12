@@ -908,11 +908,15 @@ def test_crosscheck_surface_exposes_display_only_approve_posture_without_respons
 def test_index_spark_skills_registry_searches_loaded_metadata_without_execution():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert 'aria-label="Skills"' in doc
-    assert 'aria-label="Skills registry"' in doc
-    assert "Skills Registry" in doc
+    assert 'aria-label="Local skills"' in doc
+    assert "Local Skills" in doc
+    assert "Spark directory" in doc
     assert "const renderSparkSkills = () =>" in doc
     assert "const loadSparkSkills = async () =>" in doc
     assert "const renderSparkSkillsRegistry = (snapshot, query = '') =>" in doc
+    assert "const meridianLocalSkillRows = () =>" in doc
+    assert "const skillRegistryGroup = (row) =>" in doc
+    assert "const skillRegistryGroupOrder = [" in doc
     assert "const skillRegistryRowsFromSnapshots = (fileMapSnapshot, modelsSnapshot) =>" in doc
     assert "renderSparkSkills()" in doc
     assert "data-spark-skills" in doc
@@ -927,20 +931,30 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "aria-pressed" in doc
     assert "Pinned skills" in doc
     assert "pinned for active project/user" in doc
+    assert "relay-skill-name" in doc
+    assert "relay-skill-description" in doc
+    assert "Clear the active Prime or User session window without sending the command to the model." in doc
+    assert "Generate or edit raster images when a bitmap visual asset is needed." in doc
+    assert "Meridian commands" in doc
+    assert "Meridian settings" in doc
+    assert "Codex model skills" in doc
+    assert "Model skills" in doc
+    assert "Project capabilities" in doc
+    assert "groupRows.map((row) => skillResult(row)).join('')" in doc
     assert "Active project skills" in doc
     assert "project-scoped pins" in doc
-    assert "global fallback capabilities" in doc
-    assert "active project context plus UI-local pins over loaded backend metadata" in doc
+    assert "available local skills" in doc
+    assert "available model skills" in doc
+    assert "Spark local registry plus optional bridge metadata" in doc
     assert "project changes refresh this section and use that project pin bucket" in doc
     assert "path:string required repo-relative; area:string optional; related_tests:string[] default []" in doc
     assert "backend:string required from /bridge/models; prompt:text supplied only in Prime/User prompt after manual model selection; auto:boolean default false" in doc
     assert "argument schema" in doc
-    assert "Search skills/capabilities" in doc
-    assert "Skills uses reviewed FileMap and Models bridge snapshots as capability metadata; it does not call a fake skills backend." in doc
-    assert "Search is UI-local over already loaded metadata and does not send prompts, mutate files, install skills, sign in, probe accounts, or enable Auto routing." in doc
-    assert "Registry rows expose description, scope, backend/provider, setup posture, permission boundary, argument schema, provenance, and a non-executing usage example." in doc
-    assert "Argument schemas are display-only metadata; they do not execute skills, validate user prompts, assemble model payloads, or call providers." in doc
-    assert "Pins persist locally for the active project/user UI profile and only reorder already loaded rows; they do not change backend skills, routes, files, accounts, or providers." in doc
+    assert "Search local skills, commands, and capabilities" in doc
+    assert "Meridian commands run only through their owning UI path or local command handler; /clear is handled before model routing." in doc
+    assert "Codex skills are listed for discovery so Prime can explain or use them when you ask in conversation." in doc
+    assert "Search and pins are local UI behavior; rows are not run by clicking this panel." in doc
+    assert "Bridge metadata may add FileMap and model capability rows when the local bridge is available." in doc
     assert "backend:filemap" in doc
     assert "backend:models" in doc
     assert "permission boundary" in doc
@@ -948,18 +962,21 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "usage example" in doc
     assert "Example: inspect" in doc
     assert "Example: select" in doc
+    assert "sparkSkillsRegistrySnapshot = { ok: false, rows: meridianLocalSkillRows() }" in doc
+    assert "sparkSkillsRegistrySnapshot = { ok: false, rows: meridianLocalSkillRows(), error: error.message }" in doc
     assert "logicNode.innerHTML = renderSparkSkillsRegistry(sparkSkillsRegistrySnapshot, target.value)" in doc
     assert "bridgeUrl('filemap')" in doc
     assert "bridgeUrl('models')" in doc
     skills_loader = doc[doc.index("const loadSparkSkills = async () =>"):doc.index("const loadEchoMemory", doc.index("const loadSparkSkills = async () =>"))]
     assert "Promise.all" in skills_loader
     assert "skillRegistryRowsFromSnapshots(fileMapSnapshot, modelsSnapshot)" in skills_loader
+    assert "rows: meridianLocalSkillRows()" in skills_loader
     assert "bridgeUrl('skills')" not in skills_loader
     skills_registry = doc[doc.index("const renderSparkSkillsRegistry"):doc.index("const renderAegisLogicSnapshot")]
-    assert "install skills" in skills_registry
-    assert "sign in" in skills_registry
-    assert "probe accounts" in skills_registry
-    assert "enable Auto routing" in skills_registry
+    assert "relaySection(" in skills_registry
+    assert "Meridian commands" in doc[doc.index("const skillRegistryGroup = (row) =>"):doc.index("const renderSparkSkillsRegistry")]
+    assert "Codex model skills" in doc[doc.index("const skillRegistryGroup = (row) =>"):doc.index("const renderSparkSkillsRegistry")]
+    assert "Model skills" in doc[doc.index("const skillRegistryGroup = (row) =>"):doc.index("const renderSparkSkillsRegistry")]
     assert "row.arguments" in skills_registry
     assert "bridgeUrl('skills')" not in skills_registry
     assert "project-skills" not in skills_registry
@@ -968,7 +985,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "method: 'POST'" not in skills_registry
     skills_start = doc.index("const renderSparkSkills = () =>")
     skills_surface = doc[skills_start:doc.index("const renderProviderBalance", skills_start)]
-    assert "fetch(" not in skills_surface
+    assert "renderSparkSkillsRegistry(sparkSkillsRegistrySnapshot)" in skills_surface
     assert "bridgeUrl('skills')" not in skills_surface
     assert "bridgeUrl('message')" not in skills_surface
     assert "bridgeUrl('call-result')" not in skills_surface
