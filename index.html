@@ -4672,21 +4672,22 @@ body {
     try {
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 180000);
+      const messagePayload = {
+        backend,
+        requestedBackend: selectedBackend,
+        channel: sessionChannel(input),
+        projectContext,
+        requestId,
+        prompt,
+        transcript: visibleTranscript,
+        sessionTargetId: targetSession?.sessionId || '',
+      };
+      if (targetSession?.cwd) messagePayload.cwd = targetSession.cwd;
       const response = await fetch(bridgeUrl('message'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({
-          backend,
-          requestedBackend: selectedBackend,
-          channel: sessionChannel(input),
-          projectContext,
-          requestId,
-          prompt,
-          transcript: visibleTranscript,
-          cwd: targetSession?.cwd || 'C:\\Users\\user\\Code\\Meridian',
-          sessionTargetId: targetSession?.sessionId || '',
-        }),
+        body: JSON.stringify(messagePayload),
       });
       window.clearTimeout(timeout);
       if (!response.headers.get('content-type')?.includes('application/json')) {
