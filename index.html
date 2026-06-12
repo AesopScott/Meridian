@@ -1570,6 +1570,55 @@ body {
   overflow: auto;
 }
 
+.session-attachment-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 0;
+}
+
+.session-attachment-chip {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  border: 1px solid rgba(var(--session-electric), 0.34);
+  background: rgba(0, 0, 0, 0.42);
+  color: rgba(var(--session-electric-soft), 0.96);
+  padding: 4px;
+}
+
+.session-attachment-chip img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border: 1px solid rgba(var(--session-electric), 0.3);
+}
+
+.session-attachment-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-attachment-remove {
+  min-width: 24px;
+  min-height: 24px;
+  border: 1px solid rgba(var(--session-electric), 0.36);
+  background: transparent;
+  color: rgb(var(--session-electric-soft));
+  cursor: pointer;
+}
+
+.session-output-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
 .session-response-output {
   min-height: 0;
   overflow: auto;
@@ -1583,6 +1632,7 @@ body {
 .session-window-right.is-panel-surface .session-top-icons,
 .session-window-right.is-panel-surface .session-interface,
 .session-window-right.is-panel-surface .session-prompt-input,
+.session-window-right.is-panel-surface .session-attachment-tray,
 .session-window-right.is-panel-surface .session-response-output,
 .session-window-right.is-panel-surface .session-model-status {
   display: none;
@@ -4185,6 +4235,7 @@ body {
     workspace.insertAdjacentHTML('afterbegin', `
       <div class="session-interface" aria-label="${isUser ? 'User' : 'Prime'} session interface">
         <textarea class="session-prompt-input" aria-label="${isUser ? 'User prompt input' : 'Prime prompt input'}" spellcheck="false"></textarea>
+        <div class="session-attachment-tray" aria-label="${isUser ? 'User attachments' : 'Prime attachments'}"></div>
         <div class="session-response-output" aria-label="${isUser ? 'User response output' : 'Prime response output'}"></div>
         <div class="session-model-status" aria-live="polite"></div>
       </div>
@@ -4301,7 +4352,7 @@ body {
   const userSessionSelect = document.querySelector('.session-target-select');
   const localBridgeBase = 'http://127.0.0.1:8767/bridge';
   const bridgeUrl = (path) => `${localBridgeBase}/${String(path || '').replace(/^\/+/, '')}`;
-  const expectedBridgeVersion = 'local-bridge-routes-v2';
+  const expectedBridgeVersion = 'local-bridge-routes-v3';
   const pathPattern = /((?:[A-Za-z]:\\|\.{0,2}[\\/])(?:[\w .()@%+=~-]+[\\/])*[\w .()@%+=~-]+\.[A-Za-z0-9]{1,12}|(?:[\w@%+=~-]+[\\/])+(?:[\w .()@%+=~-]+)(?:\.[A-Za-z0-9]{1,12})?|\b[\w@%+=~-]+\.[A-Za-z0-9]{1,12}\b)/g;
   const speechButton = document.querySelector('.speech-mode-button');
   const voiceStateLabel = (voice = {}) => {
@@ -4406,6 +4457,7 @@ body {
     return fragments.length ? fragments : [document.createTextNode(value)];
   };
   const outputFor = (input) => input?.closest('.session-window')?.querySelector('.session-response-output');
+  const attachmentTrayFor = (input) => input?.closest('.session-window')?.querySelector('.session-attachment-tray');
   const statusFor = (input) => input?.closest('.session-window')?.querySelector('.session-model-status');
   const userInput = () => userWindow?.querySelector('.session-prompt-input');
   const updateUserSessionTitle = () => {
@@ -4556,6 +4608,83 @@ body {
     renderUserSessionSelect();
     renderTranscript(userInput());
   };
+  const pendingAttachments = new Map();
+  const attachmentScope = (input) => sessionScope(input);
+  const readPendingAttachments = (input) => pendingAttachments.get(attachmentScope(input)) || [];
+  const writePendingAttachments = (input, attachments) => {
+    pendingAttachments.set(attachmentScope(input), attachments.slice(0, 4));
+    renderPendingAttachments(input);
+  };
+  const attachmentSizeLabel = (size) => {
+    const bytes = Number(size) || 0;
+    if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes >= 1024) return `${Math.ceil(bytes / 1024)} KB`;
+    return `${bytes} B`;
+  };
+  const renderAttachmentChip = (attachment, { removable = false, index = -1 } = {}) => {
+    const chip = document.createElement('div');
+    chip.className = 'session-attachment-chip';
+    const img = document.createElement('img');
+    img.alt = attachment.name || 'Pasted image';
+    img.src = attachment.dataUrl || '';
+    const name = document.createElement('div');
+    name.className = 'session-attachment-name';
+    name.textContent = `${attachment.name || 'pasted-image'} (${attachmentSizeLabel(attachment.size)})`;
+    chip.append(img, name);
+    if (removable) {
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'session-attachment-remove';
+      remove.dataset.attachmentRemove = String(index);
+      remove.setAttribute('aria-label', `Remove ${attachment.name || 'attachment'}`);
+      remove.textContent = 'x';
+      chip.append(remove);
+    }
+    return chip;
+  };
+  const renderPendingAttachments = (input) => {
+    const tray = attachmentTrayFor(input);
+    if (!tray) return;
+    const attachments = readPendingAttachments(input);
+    tray.replaceChildren(...attachments.map((attachment, index) => renderAttachmentChip(attachment, { removable: true, index })));
+  };
+  const clearPendingAttachments = (input) => writePendingAttachments(input, []);
+  const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error || new Error('Could not read pasted image'));
+    reader.readAsDataURL(file);
+  });
+  const addPastedImages = async (input, files) => {
+    const imageFiles = files.filter((file) => String(file.type || '').startsWith('image/'));
+    if (!imageFiles.length) return false;
+    const current = readPendingAttachments(input);
+    const remainingSlots = Math.max(0, 4 - current.length);
+    const accepted = imageFiles.slice(0, remainingSlots);
+    if (!accepted.length) {
+      setStatus(input, 'attachment limit reached');
+      return true;
+    }
+    const attachments = [];
+    for (const file of accepted) {
+      if (file.size > 4 * 1024 * 1024) {
+        setStatus(input, 'pasted image too large');
+        continue;
+      }
+      const dataUrl = await readFileAsDataUrl(file);
+      attachments.push({
+        name: file.name || `pasted-image-${Date.now()}.png`,
+        type: file.type || 'image/png',
+        size: file.size || 0,
+        dataUrl,
+      });
+    }
+    if (attachments.length) {
+      writePendingAttachments(input, [...current, ...attachments]);
+      setStatus(input, `${attachments.length} image${attachments.length === 1 ? '' : 's'} attached`);
+    }
+    return true;
+  };
   const renderTranscript = (input) => {
     const output = outputFor(input);
     if (!output) return;
@@ -4581,6 +4710,12 @@ body {
           row.append(meta);
         }
       }
+      if (Array.isArray(entry.attachments) && entry.attachments.length) {
+        const attachments = document.createElement('div');
+        attachments.className = 'session-output-attachments';
+        attachments.replaceChildren(...entry.attachments.map((attachment) => renderAttachmentChip(attachment)));
+        row.append(attachments);
+      }
       output.append(row);
     });
     output.scrollTop = output.scrollHeight;
@@ -4596,6 +4731,7 @@ body {
     renderTranscript(input);
     input.value = '';
     localStorage.setItem(draftKey(input), '');
+    clearPendingAttachments(input);
     setStatus(input, 'cleared');
   };
   const handleLocalSessionCommand = (input, prompt) => {
@@ -4661,7 +4797,9 @@ body {
   };
   const sendPrompt = async (input) => {
     if (input.dataset.sessionSending === 'true') return;
-    const prompt = input.value.trim();
+    let prompt = input.value.trim();
+    const attachments = readPendingAttachments(input);
+    if (!prompt && attachments.length) prompt = 'Please review the attached image.';
     if (!prompt) return;
     if (handleLocalSessionCommand(input, prompt)) return;
     const selectedBackend = modelSelect?.value || 'codex';
@@ -4697,9 +4835,10 @@ body {
     }
     input.dataset.sessionSending = 'true';
     const projectContext = activeProjectContext();
-    pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '', projectContext });
+    pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '', projectContext, attachments });
     input.value = '';
     localStorage.setItem(draftKey(input), '');
+    clearPendingAttachments(input);
     setStatus(input, `${backend} running`);
     const requestId = `meridian-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     try {
@@ -4713,6 +4852,7 @@ body {
         requestId,
         prompt,
         transcript: visibleTranscript,
+        attachments,
         sessionTargetId: targetSession?.sessionId || '',
       };
       if (targetSession?.cwd) messagePayload.cwd = targetSession.cwd;
@@ -4816,12 +4956,28 @@ body {
   document.querySelectorAll('.session-prompt-input').forEach((input) => {
     input.value = localStorage.getItem(draftKey(input)) || '';
     renderTranscript(input);
+    renderPendingAttachments(input);
     input.addEventListener('input', () => localStorage.setItem(draftKey(input), input.value));
+    input.addEventListener('paste', async (event) => {
+      const files = Array.from(event.clipboardData?.items || [])
+        .filter((item) => item.kind === 'file')
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+      if (await addPastedImages(input, files)) event.preventDefault();
+    });
     input.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         sendPrompt(input);
       }
+    });
+    attachmentTrayFor(input)?.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!target?.matches?.('[data-attachment-remove]')) return;
+      const index = Number(target.dataset.attachmentRemove);
+      const next = readPendingAttachments(input).filter((_, itemIndex) => itemIndex !== index);
+      writePendingAttachments(input, next);
+      input.focus();
     });
   });
   userSessionSelect?.addEventListener('change', () => {

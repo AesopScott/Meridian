@@ -2,6 +2,8 @@
 
 const http = require('node:http');
 const { spawn } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const HOST = process.env.MERIDIAN_MODEL_HOST || '127.0.0.1';
 const PORT = Number(process.env.MERIDIAN_MODEL_PORT || 8767);
@@ -12,7 +14,8 @@ const RECENT_RESULT_TTL_MS = Number(process.env.MERIDIAN_MODEL_RESULT_TTL_MS || 
 const RECENT_RESULT_TEXT_LIMIT = Number(process.env.MERIDIAN_MODEL_RESULT_TEXT_LIMIT || 80000);
 const SESSION_TRANSCRIPT_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_LIMIT || 6);
 const SESSION_TRANSCRIPT_CHAR_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_CHAR_LIMIT || 6000);
-const BRIDGE_VERSION = 'local-bridge-routes-v2';
+const REQUEST_BODY_LIMIT = Number(process.env.MERIDIAN_MODEL_REQUEST_BODY_LIMIT || 8_000_000);
+const BRIDGE_VERSION = 'local-bridge-routes-v3';
 const BRIDGE_CAPABILITIES = {
   visibleTranscriptContext: true,
   recentCallContextDiagnostics: true,
@@ -37,6 +40,7 @@ const BRIDGE_CAPABILITIES = {
   voiceIoSnapshot: true,
   primeAutonomyReleaseSnapshot: true,
   userSessionTargets: true,
+  pastedImageAttachments: true,
 };
 const BRIDGE_ROUTES = Object.freeze({
   health: '/bridge/health',
@@ -141,7 +145,7 @@ if (process.argv.includes('--self-test')) {
     hiddenSession?.status === 'hidden' &&
     sharedMainSession === null
   );
-  const versionOk = BRIDGE_VERSION === 'local-bridge-routes-v2';
+  const versionOk = BRIDGE_VERSION === 'local-bridge-routes-v3';
   const routeNamesOk = Object.values(BRIDGE_ROUTES).every((route) => route.startsWith('/bridge/') && !route.startsWith('/api/'));
   const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
   const restartGuardOk = beginRestartRequest() && !beginRestartRequest();
@@ -182,7 +186,7 @@ function readBody(req) {
     req.setEncoding('utf8');
     req.on('data', (chunk) => {
       raw += chunk;
-      if (raw.length > 200_000) {
+      if (raw.length > REQUEST_BODY_LIMIT) {
         reject(new Error('Request body too large'));
         req.destroy();
       }
@@ -272,6 +276,64 @@ function promptWithVisibleSession(prompt, transcript) {
     entries: context.entries,
     chars: context.chars,
   };
+}
+
+function safeAttachmentName(value, fallback = 'pasted-image') {
+  const name = String(value || fallback)
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+  return name || fallback;
+}
+
+function extensionForMime(type) {
+  const normalized = String(type || '').toLowerCase();
+  if (normalized === 'image/jpeg') return '.jpg';
+  if (normalized === 'image/webp') return '.webp';
+  if (normalized === 'image/gif') return '.gif';
+  return '.png';
+}
+
+function materializeImageAttachments(attachments, requestId, cwd = DEFAULT_CWD) {
+  if (!Array.isArray(attachments) || !attachments.length) return [];
+  const root = path.join(cwd || DEFAULT_CWD, '.meridian', 'attachments');
+  fs.mkdirSync(root, { recursive: true });
+  return attachments
+    .filter((attachment) => String(attachment?.type || '').startsWith('image/'))
+    .slice(0, 4)
+    .map((attachment, index) => {
+      const dataUrl = String(attachment.dataUrl || '');
+      const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([a-zA-Z0-9+/=]+)$/);
+      if (!match) return null;
+      const type = match[1].toLowerCase();
+      const buffer = Buffer.from(match[2], 'base64');
+      if (!buffer.length || buffer.length > 4 * 1024 * 1024) return null;
+      const original = String(attachment.name || '');
+      const baseName = safeAttachmentName(path.basename(original, path.extname(original)), `pasted-image-${index + 1}`);
+      const requestPart = safeAttachmentName(requestId || String(Date.now()), 'request');
+      const filePath = path.join(root, `${requestPart}-${index + 1}-${baseName}${extensionForMime(type)}`);
+      fs.writeFileSync(filePath, buffer);
+      return {
+        name: attachment.name || path.basename(filePath),
+        type,
+        size: buffer.length,
+        path: filePath,
+      };
+    })
+    .filter(Boolean);
+}
+
+function promptWithAttachments(prompt, attachments) {
+  if (!attachments.length) return prompt;
+  const attachmentLines = attachments.map((attachment, index) => (
+    `${index + 1}. ${attachment.name} (${attachment.type}, ${attachment.size} bytes): ${attachment.path}`
+  ));
+  return [
+    prompt,
+    'Attached image files saved by Meridian for this request:',
+    ...attachmentLines,
+    'Use these local file paths when the user asks about the pasted image.',
+  ].join('\n');
 }
 
 function normalizeModelText(backend, stdout) {
@@ -2032,6 +2094,7 @@ const server = http.createServer(async (req, res) => {
       const requestId = String(body.requestId || '');
       const prompt = String(body.prompt || '').trim();
       const transcript = Array.isArray(body.transcript) ? body.transcript : [];
+      const attachments = Array.isArray(body.attachments) ? body.attachments : [];
       const sessionTargetId = String(body.sessionTargetId || '');
       let sessionTarget = null;
       let cwd = body.cwd ? String(body.cwd) : DEFAULT_CWD;
@@ -2047,14 +2110,17 @@ const server = http.createServer(async (req, res) => {
         }
         cwd = sessionTarget.cwd;
       }
+      const materializedAttachments = materializeImageAttachments(attachments, requestId, cwd);
+      const promptForModel = promptWithAttachments(prompt, materializedAttachments);
       const started = Date.now();
-      const result = await runModel({ backend, prompt, cwd, transcript });
+      const result = await runModel({ backend, prompt: promptForModel, cwd, transcript });
       result.requestedBackend = requestedBackend;
       result.backend = backend;
       result.channel = channel;
       result.projectContext = projectContext;
       result.requestId = requestId;
       result.durationMs = Date.now() - started;
+      result.attachments = materializedAttachments;
       result.sessionTarget = sessionTarget ? {
         sessionId: sessionTarget.sessionId,
         sessionName: sessionTarget.sessionName,
