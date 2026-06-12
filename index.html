@@ -4549,7 +4549,7 @@ body {
         if (entry.model) {
           const meta = document.createElement('div');
           meta.className = 'session-output-meta';
-          const metaParts = [entry.model === 'Codex CLI default' ? 'Meridian' : entry.model];
+          const metaParts = [entry.model === 'Codex CLI default' ? 'Prime' : entry.model];
           const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || '';
           if (backendLabel) meta.dataset.backend = backendLabel;
           if (Number(entry.sessionContextEntries) > 0) meta.dataset.visibleContextEntries = String(entry.sessionContextEntries);
