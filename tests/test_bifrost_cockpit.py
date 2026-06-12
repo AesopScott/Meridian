@@ -914,6 +914,8 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "const renderSparkSkills = () =>" in doc
     assert "const loadSparkSkills = async () =>" in doc
     assert "const renderSparkSkillsRegistry = (snapshot, query = '') =>" in doc
+    assert "const skillSection = (title, body, openByDefault = false) =>" in doc
+    assert "`skills-${relaySectionKey(title)}`" in doc
     assert "const meridianLocalSkillRows = () =>" in doc
     assert "const skillRegistryGroup = (row) =>" in doc
     assert "const skillRegistryGroupOrder = [" in doc
@@ -941,6 +943,8 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "Model skills" in doc
     assert "Project capabilities" in doc
     assert "groupRows.map((row) => skillResult(row)).join('')" in doc
+    assert "Boolean(normalizedQuery)" in doc
+    assert "index < 3 || Boolean(normalizedQuery)" not in doc
     assert "Active project skills" in doc
     assert "project-scoped pins" in doc
     assert "available local skills" in doc
@@ -973,7 +977,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "rows: meridianLocalSkillRows()" in skills_loader
     assert "bridgeUrl('skills')" not in skills_loader
     skills_registry = doc[doc.index("const renderSparkSkillsRegistry"):doc.index("const renderAegisLogicSnapshot")]
-    assert "relaySection(" in skills_registry
+    assert "skillSection(" in skills_registry
     assert "Meridian commands" in doc[doc.index("const skillRegistryGroup = (row) =>"):doc.index("const renderSparkSkillsRegistry")]
     assert "Codex model skills" in doc[doc.index("const skillRegistryGroup = (row) =>"):doc.index("const renderSparkSkillsRegistry")]
     assert "Model skills" in doc[doc.index("const skillRegistryGroup = (row) =>"):doc.index("const renderSparkSkillsRegistry")]
@@ -4433,7 +4437,7 @@ def test_index_settings_surface_controls_focus_mode_locally():
     assert "data-focus-mode-preview" in focus_mode
     assert "renderUserSessionSelect();" in focus_mode
     assert "Focus mode does not retarget sessions" in focus_mode
-    assert "const focusMode = readFocusMode();" in session_select
+    assert "localStorage.getItem('meridian.focus-mode.v1') === 'true'" in session_select
     assert "Selected session outside active project" in session_select
     assert "if (focusMode && project !== activeProject) return;" in session_select
     assert "data-focus-mode-surface" in settings_surface

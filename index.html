@@ -4487,7 +4487,8 @@ body {
       return;
     }
     const activeProject = activeProjectContext();
-    const focusMode = readFocusMode();
+    let focusMode = false;
+    try { focusMode = localStorage.getItem('meridian.focus-mode.v1') === 'true'; } catch {}
     const selectedSession = userSessions.find((session) => session.sessionId === current) || null;
     const projects = Array.from(new Set(userSessions.map((session) => session.projectName || 'Meridian'))).sort((a, b) => a.localeCompare(b));
     if (activeProject && !projects.includes(activeProject)) {
@@ -7232,6 +7233,10 @@ body {
     const rows = Array.isArray(snapshot?.rows) ? snapshot.rows : meridianLocalSkillRows();
     const normalizedQuery = String(query || '').trim().toLowerCase();
     const pinnedSkillIds = readSparkSkillsPinned();
+    const skillSection = (title, body, openByDefault = false) => {
+      const key = `skills-${relaySectionKey(title)}`;
+      return `<details class="relay-models-section" data-relay-section="${escapeHtml(key)}"${openByDefault ? ' open' : ''}><summary>${escapeHtml(title)}</summary><div class="relay-models-section-body">${body}</div></details>`;
+    };
     const visibleRows = (normalizedQuery
       ? rows.filter((row) => [
         row.name,
@@ -7285,15 +7290,20 @@ body {
         return (leftIndex === -1 ? 99 : leftIndex) - (rightIndex === -1 ? 99 : rightIndex)
           || left.localeCompare(right);
       })
-      .map(([group, groupRows], index) => relaySection(
+      .map(([group, groupRows]) => skillSection(
         `${group} (${groupRows.length})`,
         groupRows.map((row) => skillResult(row)).join(''),
-        index < 3 || Boolean(normalizedQuery),
+        Boolean(normalizedQuery),
       ));
     const localRows = rows.filter((row) => String(row.provenance || '').startsWith('local:'));
     const modelRows = rows.filter((row) => skillRegistryGroup(row) === 'Model skills');
     return [
-      relaySection('Local skills', relayGrid([
+      `<label class="relay-section-summary" for="spark-skills-search">Search local skills, commands, and capabilities</label>
+      <input id="spark-skills-search" data-spark-skills-search type="search" value="${escapeHtml(query)}" placeholder="Search name, scope, backend, setup, permission" autocomplete="off" />`,
+      visibleRows.length
+        ? groupSections.join('')
+        : skillSection('Skill groups', relayGrid([['status', 'no matching skills or capabilities in loaded metadata']]), true),
+      skillSection('Local skills', relayGrid([
         ['source', 'Spark local registry'],
         ['active project', currentProjectContext()],
         ['local rows', localRows.length],
@@ -7305,16 +7315,14 @@ body {
         ['visible results', visibleRows.length],
         ['pinned skills', pinnedRows.length],
         ['pin scope', 'active project/user UI profile'],
-      ]), true),
-      `<label class="relay-section-summary" for="spark-skills-search">Search local skills, commands, and capabilities</label>
-      <input id="spark-skills-search" data-spark-skills-search type="search" value="${escapeHtml(query)}" placeholder="Search name, scope, backend, setup, permission" autocomplete="off" />`,
-      relaySection('How to use this list', relayList([
+      ]), false),
+      skillSection('How to use this list', relayList([
         'Meridian commands run only through their owning UI path or local command handler; /clear is handled before model routing.',
         'Codex skills are listed for discovery so Prime can explain or use them when you ask in conversation.',
         'Search and pins are local UI behavior; rows are not run by clicking this panel.',
         'Bridge metadata may add FileMap and model capability rows when the local bridge is available.',
-      ]), true),
-      relaySection('Active project skills', relayGrid([
+      ]), false),
+      skillSection('Active project skills', relayGrid([
         ['active project', currentProjectContext()],
         ['project-scoped pins', pinnedRows.length],
         ['available local skills', localRows.length],
@@ -7322,17 +7330,14 @@ body {
         ['total listed rows', rows.length],
         ['scope source', 'Spark local registry plus optional bridge metadata'],
         ['project switch behavior', 'project changes refresh this section and use that project pin bucket'],
-      ]), true),
-      relaySection('Pinned skills', pinnedRows.length
+      ]), false),
+      skillSection('Pinned skills', pinnedRows.length
         ? pinnedRows.map((row) => relayGrid([
           ['name', row.name || 'unknown'],
           ['backend/provider', row.provider || 'unknown'],
           ['provenance', row.provenance || 'unknown'],
         ])).join('')
         : relayGrid([['status', 'no pinned skills for this active project/user UI profile']]), false),
-      visibleRows.length
-        ? groupSections.join('')
-        : relaySection('Skill groups', relayGrid([['status', 'no matching skills or capabilities in loaded metadata']]), true),
     ].join('');
   };
   const renderAegisLogicSnapshot = (snapshot) => {
