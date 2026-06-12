@@ -1582,7 +1582,8 @@ def test_index_user_session_mode_names_target_and_preserves_storage():
     assert "Select a live User Session target before sending" in doc
     assert "const targetSession = sessionChannel(input) === 'user' ? selectedUserSession() : null;" in doc
     assert "if (sessionChannel(input) === 'user' && !targetSession)" in doc
-    assert "cwd: targetSession?.cwd || 'C:\\\\Users\\\\user\\\\Code\\\\Meridian'" in doc
+    assert "if (targetSession?.cwd) messagePayload.cwd = targetSession.cwd;" in doc
+    assert "C:\\\\Users\\\\user\\\\Code\\\\Meridian" not in doc
     assert "sessionTargetId: targetSession?.sessionId || ''" in doc
     assert "sessionTargetId: result.sessionTarget?.sessionId || targetSession?.sessionId || ''" in doc
 
