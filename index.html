@@ -4844,8 +4844,14 @@ body {
   ]);
   const acceptedAttachmentExtensions = new Set(['txt', 'md', 'markdown', 'json', 'csv', 'tsv', 'log', 'pdf', 'doc', 'docx', 'rtf', 'html', 'htm']);
   const attachmentScope = (input) => sessionScope(input);
-  const readPendingAttachments = (input) => pendingAttachments.get(attachmentScope(input)) || [];
+  const supportsAttachments = (input) => sessionChannel(input) === 'prime';
+  const readPendingAttachments = (input) => supportsAttachments(input) ? pendingAttachments.get(attachmentScope(input)) || [] : [];
   const writePendingAttachments = (input, attachments) => {
+    if (!supportsAttachments(input)) {
+      pendingAttachments.delete(attachmentScope(input));
+      renderPendingAttachments(input);
+      return;
+    }
     pendingAttachments.set(attachmentScope(input), attachments.slice(0, attachmentLimit));
     renderPendingAttachments(input);
   };
@@ -4930,6 +4936,7 @@ body {
     return type.startsWith('image/') || acceptedAttachmentTypes.has(type) || acceptedAttachmentExtensions.has(extension);
   };
   const addAttachmentFiles = async (input, files, source = 'upload') => {
+    if (!supportsAttachments(input)) return false;
     const acceptedFiles = files.filter(isAcceptedAttachmentFile);
     if (!acceptedFiles.length) return false;
     const current = readPendingAttachments(input);
@@ -5203,7 +5210,7 @@ body {
   const sendPrompt = async (input) => {
     if (input.dataset.sessionSending === 'true') return;
     let prompt = input.value.trim();
-    const attachments = readPendingAttachments(input);
+    const attachments = supportsAttachments(input) ? readPendingAttachments(input) : [];
     if (!prompt && attachments.length) prompt = 'Please review the attached context files.';
     if (!prompt) return;
     if (await handleLocalSessionCommand(input, prompt)) return;

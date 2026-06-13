@@ -1463,6 +1463,9 @@ def test_session_prompt_supports_pasted_image_attachments_for_bridge_context():
     assert "const primeAttachmentUploadControls = (tray) => {" in index
     assert "upload.textContent = 'Upload';" in index
     assert "input.accept = 'image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm';" in index
+    assert "const supportsAttachments = (input) => sessionChannel(input) === 'prime';" in index
+    assert "const readPendingAttachments = (input) => supportsAttachments(input) ? pendingAttachments.get(attachmentScope(input)) || [] : [];" in index
+    assert "if (!supportsAttachments(input)) {\n      pendingAttachments.delete(attachmentScope(input));" in index
     assert "const controls = sessionChannel(input) === 'prime' ? primeAttachmentUploadControls(tray) : [];" in index
     assert "tray.replaceChildren(\n      ...controls," in index
     upload_button_css = index[index.index(".session-attachment-upload {"):index.index(".session-attachment-upload:hover")]
@@ -1475,6 +1478,7 @@ def test_session_prompt_supports_pasted_image_attachments_for_bridge_context():
     assert "target?.matches?.('.session-attachment-upload')" in index
     assert "attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.click()" in index
     assert "attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.addEventListener('change'" in index
+    assert "if (!supportsAttachments(input)) return false;" in index
     assert "await addAttachmentFiles(input, files, 'upload')" in index
     assert "event.clipboardData?.items" in index
     assert "item.kind === 'file'" in index
@@ -1485,6 +1489,7 @@ def test_session_prompt_supports_pasted_image_attachments_for_bridge_context():
     assert "const attachmentMaxBytes = 8 * 1024 * 1024" in index
     assert "Please review the attached context files." in index
     assert "messagePayload = {" in index
+    assert "const attachments = supportsAttachments(input) ? readPendingAttachments(input) : [];" in index
     assert "attachments," in index
     assert "data-attachment-remove" in index
     assert "session-output-attachments" in index
