@@ -4875,6 +4875,49 @@ body {
     return true;
   };
   const addPastedImages = async (input, files) => addAttachmentFiles(input, files.filter((file) => String(file.type || '').startsWith('image/')), 'paste');
+  const beaconResponseTelemetryKey = 'meridian.beacon.response-telemetry.v1';
+  const defaultBeaconResponseTelemetryState = () => ({ responseTimes: true, tokens: true });
+  const normalizeBeaconResponseTelemetryState = (value) => ({
+    responseTimes: value?.responseTimes !== false,
+    tokens: value?.tokens !== false,
+  });
+  const readBeaconResponseTelemetryState = () => {
+    try {
+      return normalizeBeaconResponseTelemetryState(JSON.parse(localStorage.getItem(beaconResponseTelemetryKey) || '{}'));
+    } catch {
+      return defaultBeaconResponseTelemetryState();
+    }
+  };
+  const writeBeaconResponseTelemetryState = (value) => {
+    const next = normalizeBeaconResponseTelemetryState(value);
+    try { localStorage.setItem(beaconResponseTelemetryKey, JSON.stringify(next)); } catch {}
+    return next;
+  };
+  const formatDurationSeconds = (durationMs) => {
+    const value = Number(durationMs);
+    if (!Number.isFinite(value) || value <= 0) return '';
+    return `${(value / 1000).toFixed(value >= 10000 ? 1 : 2)}s`;
+  };
+  const isTelemetryNumber = (value) => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+  const formatTokenTelemetry = (entry) => {
+    const parts = [];
+    if (isTelemetryNumber(entry.inputTokens)) parts.push(`in ${Number(entry.inputTokens)}`);
+    if (isTelemetryNumber(entry.outputTokens)) parts.push(`out ${Number(entry.outputTokens)}`);
+    return parts.length ? `${parts.join(' / ')} tok` : '';
+  };
+  const beaconTelemetryMetaParts = (entry) => {
+    const state = readBeaconResponseTelemetryState();
+    const parts = [];
+    if (state.responseTimes) {
+      const duration = formatDurationSeconds(entry.durationMs);
+      if (duration) parts.push(duration);
+    }
+    if (state.tokens) {
+      const tokens = formatTokenTelemetry(entry);
+      if (tokens) parts.push(tokens);
+    }
+    return parts;
+  };
   const renderTranscript = (input) => {
     const output = outputFor(input);
     if (!output) return;
@@ -4889,11 +4932,17 @@ body {
           const meta = document.createElement('div');
           meta.className = 'session-output-meta';
           const metaParts = [entry.model === 'Codex CLI default' ? 'Prime' : entry.model];
+          metaParts.push(...beaconTelemetryMetaParts(entry));
           const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || '';
           if (backendLabel) meta.dataset.backend = backendLabel;
+          if (Number(entry.durationMs) > 0) meta.dataset.durationMs = String(entry.durationMs);
+          if (isTelemetryNumber(entry.inputTokens)) meta.dataset.inputTokens = String(entry.inputTokens);
+          if (isTelemetryNumber(entry.outputTokens)) meta.dataset.outputTokens = String(entry.outputTokens);
           if (Number(entry.sessionContextEntries) > 0) meta.dataset.visibleContextEntries = String(entry.sessionContextEntries);
           const diagnosticParts = [];
           if (backendLabel) diagnosticParts.push(`source ${backendLabel}`);
+          if (Number(entry.durationMs) > 0) diagnosticParts.push(`Beacon response time ${formatDurationSeconds(entry.durationMs)}`);
+          if (isTelemetryNumber(entry.inputTokens) || isTelemetryNumber(entry.outputTokens)) diagnosticParts.push(`Beacon token telemetry ${formatTokenTelemetry(entry)}`);
           if (Number(entry.sessionContextEntries) > 0) diagnosticParts.push(`visible context ${entry.sessionContextEntries} entries`);
           if (diagnosticParts.length) meta.title = diagnosticParts.join(' - ');
           meta.textContent = metaParts.join(' - ');
@@ -5135,6 +5184,9 @@ body {
         resolvedBackend: result.backend || backend,
         responseChannel: result.channel || sessionChannel(input),
         requestId: result.requestId || requestId,
+        durationMs: result.durationMs || 0,
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
         sessionContextEntries: result.sessionContextEntries || 0,
         sessionContextChars: result.sessionContextChars || 0,
         sessionTargetId: result.sessionTarget?.sessionId || targetSession?.sessionId || '',
@@ -5151,6 +5203,9 @@ body {
           resolvedBackend: recovered.backend || backend,
           responseChannel: recovered.channel || sessionChannel(input),
           requestId: recovered.requestId || requestId,
+          durationMs: recovered.durationMs || 0,
+          inputTokens: recovered.inputTokens,
+          outputTokens: recovered.outputTokens,
           sessionContextEntries: recovered.sessionContextEntries || 0,
           sessionContextChars: recovered.sessionContextChars || 0,
           recoveredFromBridge: true,
@@ -5167,6 +5222,9 @@ body {
           resolvedBackend: completedCall.backend || backend,
           responseChannel: completedCall.channel || sessionChannel(input),
           requestId,
+          durationMs: completedCall.durationMs || 0,
+          inputTokens: completedCall.inputTokens,
+          outputTokens: completedCall.outputTokens,
           sessionContextEntries: completedCall.sessionContextEntries || 0,
           sessionContextChars: completedCall.sessionContextChars || 0,
           sessionTargetId: completedCall.sessionTargetId || targetSession?.sessionId || '',
@@ -6017,6 +6075,12 @@ body {
         ['stop-condition input', 'Prime, Vulcan, and Crosscheck may read Beacon advisory state as display-safe input for gating and review posture'],
         ['observation boundary', 'heartbeat history and guardrail posture remain advisory evidence; no live worker control route is exposed here'],
       ]), false),
+      relaySection('Beacon response telemetry ownership', relayGrid([
+        ['owned telemetry', 'AI response duration plus reported input/output token counts'],
+        ['truth source', 'model bridge call/result metadata; Relay still owns route/model selection'],
+        ['Spark configuration', 'Settings toggles response-time and token visibility for response rows only'],
+        ['mutation boundary', 'display-only telemetry posture; no prompt, provider, routing, token accounting, or timeout settings are changed'],
+      ]), true),
       relaySection('Heartbeat observations', heartbeats.length
         ? heartbeats.map((heartbeat) => relayGrid([
           ['harness', heartbeat.harness_id || 'unknown'],
@@ -11733,6 +11797,57 @@ body {
     });
     refresh();
   };
+  const renderBeaconResponseTelemetryPreview = (state = readBeaconResponseTelemetryState()) => relayGrid([
+    ['owner harness', 'Beacon'],
+    ['response times', state.responseTimes ? 'shown next to AI responses' : 'hidden from response rows'],
+    ['input/output tokens', state.tokens ? 'shown next to AI responses when reported' : 'hidden from response rows'],
+    ['storage key', beaconResponseTelemetryKey],
+    ['backend mutation', 'none; Spark stores display preferences locally only'],
+  ]);
+  const renderBeaconResponseTelemetrySurface = () => {
+    const state = readBeaconResponseTelemetryState();
+    return [
+      relaySection('Beacon response telemetry', `
+        <div class="relay-models-handoff" aria-label="Beacon response telemetry display">
+          <label class="relay-models-handoff">
+            <input type="checkbox" data-beacon-response-telemetry="responseTimes" ${state.responseTimes ? 'checked' : ''}>
+            <span>Response times</span>
+          </label>
+          <label class="relay-models-handoff">
+            <input type="checkbox" data-beacon-response-telemetry="tokens" ${state.tokens ? 'checked' : ''}>
+            <span>Input/output tokens</span>
+          </label>
+        </div>
+        <div data-beacon-response-telemetry-preview>${renderBeaconResponseTelemetryPreview(state)}</div>
+      `, true),
+      relaySection('Beacon telemetry boundary', relayList([
+        'Beacon owns response-time and token telemetry posture for model calls.',
+        'Spark only stores and renders UI-local visibility preferences for response rows.',
+        'This setting does not change prompts, model routing, bridge calls, token accounting, or provider behavior.',
+      ]), false),
+    ];
+  };
+  const initializeBeaconResponseTelemetrySurface = () => {
+    const root = rightWorkspace?.querySelector('[data-beacon-response-telemetry-surface]');
+    if (!root) return;
+    const refresh = (state = readBeaconResponseTelemetryState()) => {
+      const preview = root.querySelector('[data-beacon-response-telemetry-preview]');
+      if (preview) preview.innerHTML = renderBeaconResponseTelemetryPreview(state);
+      root.querySelectorAll('[data-beacon-response-telemetry]').forEach((input) => {
+        input.checked = Boolean(state[input.dataset.beaconResponseTelemetry]);
+      });
+    };
+    root.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!target?.matches?.('[data-beacon-response-telemetry]')) return;
+      const state = readBeaconResponseTelemetryState();
+      state[target.dataset.beaconResponseTelemetry] = target.checked;
+      const next = writeBeaconResponseTelemetryState(state);
+      refresh(next);
+      document.querySelectorAll('.session-prompt-input').forEach((input) => renderTranscript(input));
+    });
+    refresh();
+  };
   const sessionBandSideKey = 'meridian.session-band-side.v1';
   const sessionBandSideOptions = ['right', 'left'];
   const readSessionBandSide = () => {
@@ -12644,6 +12759,7 @@ body {
       sections.push(`<div data-progress-retention-surface>${renderProgressRetentionSurface().join('')}</div>`);
       sections.push(`<div data-progress-redirect-surface>${renderProgressRedirectDefaultsSurface().join('')}</div>`);
       sections.push(`<div data-instrumentation-band-surface>${renderInstrumentationBandSurface().join('')}</div>`);
+      sections.push(`<div data-beacon-response-telemetry-surface>${renderBeaconResponseTelemetrySurface().join('')}</div>`);
     }
     if (filterSelected) {
       sections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
@@ -12670,6 +12786,7 @@ body {
       initializeProgressRetentionSurface();
       initializeProgressRedirectDefaultsSurface();
       initializeInstrumentationBandSurface();
+      initializeBeaconResponseTelemetrySurface();
     }
     if (rendered && filterSelected) initializeContextFilterSurface();
     return rendered;

@@ -1082,6 +1082,13 @@ def test_index_response_transcripts_render_bridge_model_labels_when_known():
     assert "entry.model === 'Codex CLI default' ? 'Prime' : entry.model" in transcript_renderer
     assert "const backendLabel = entry.resolvedBackend || entry.backend || entry.requestedBackend || ''" in transcript_renderer
     assert "meta.dataset.backend = backendLabel" in transcript_renderer
+    assert "metaParts.push(...beaconTelemetryMetaParts(entry));" in transcript_renderer
+    assert "meta.dataset.durationMs = String(entry.durationMs)" in transcript_renderer
+    assert "const isTelemetryNumber = (value) => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));" in doc
+    assert "if (isTelemetryNumber(entry.inputTokens)) meta.dataset.inputTokens = String(entry.inputTokens);" in transcript_renderer
+    assert "if (isTelemetryNumber(entry.outputTokens)) meta.dataset.outputTokens = String(entry.outputTokens);" in transcript_renderer
+    assert "Beacon response time ${formatDurationSeconds(entry.durationMs)}" in transcript_renderer
+    assert "Beacon token telemetry ${formatTokenTelemetry(entry)}" in transcript_renderer
     assert "meta.dataset.visibleContextEntries = String(entry.sessionContextEntries)" in transcript_renderer
     assert "meta.title = diagnosticParts.join(' - ')" in transcript_renderer
     assert "metaParts.push(`source ${backendLabel}`)" not in transcript_renderer
@@ -1097,6 +1104,9 @@ def test_index_response_transcripts_render_bridge_model_labels_when_known():
     assert "resolvedBackend: result.backend || backend" in send_prompt
     assert "resolvedBackend: recovered.backend || backend" in send_prompt
     assert "resolvedBackend: completedCall.backend || backend" in send_prompt
+    assert "durationMs: result.durationMs || 0" in send_prompt
+    assert "inputTokens: result.inputTokens" in send_prompt
+    assert "outputTokens: result.outputTokens" in send_prompt
     assert "setStatus(input, modelLabel)" in send_prompt
     assert "pushEntry(input, result.ok ? 'model'" in send_prompt
     assert "pushEntry(input, recovered.ok ? 'model'" in send_prompt
@@ -1287,6 +1297,21 @@ def test_bridge_timeout_surfaces_completed_codex_stdout():
     assert "text: completedText" in timeout_branch
     assert "error: completedBeforeTimeout ? null : 'Model call timed out'" in timeout_branch
     assert "codexJsonlOk" in bridge
+
+
+def test_bridge_records_model_usage_tokens_for_beacon_telemetry():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "function extractModelUsage(backend, stdout) {" in bridge
+    assert "payload.input_tokens ?? payload.prompt_tokens" in bridge
+    assert "payload.output_tokens ?? payload.completion_tokens" in bridge
+    assert "inputTokens: usage.inputTokens" in bridge
+    assert "outputTokens: usage.outputTokens" in bridge
+    assert "inputTokens: Number.isFinite(Number(entry.inputTokens)) ? Number(entry.inputTokens) : null" in bridge
+    assert "outputTokens: Number.isFinite(Number(entry.outputTokens)) ? Number(entry.outputTokens) : null" in bridge
+    assert "inputTokens: result.inputTokens" in bridge
+    assert "outputTokens: result.outputTokens" in bridge
+    assert "codexUsage.inputTokens === 123" in bridge
+    assert "codexUsage.outputTokens === 45" in bridge
 
 
 def test_bridge_message_route_enforces_runtime_readiness_gate():
@@ -2516,6 +2541,10 @@ def test_index_beacon_harness_uses_backend_liveness_snapshot():
     assert "Heartbeat observations" in doc
     assert "Advisory families" in doc
     assert "Beacon guardrails" in doc
+    assert "Beacon response telemetry ownership" in doc
+    assert "AI response duration plus reported input/output token counts" in doc
+    assert "Spark configuration" in doc
+    assert "Settings toggles response-time and token visibility for response rows only" in doc
     assert "raw filesystem paths visible" in doc
 
 
@@ -4701,6 +4730,31 @@ def test_index_settings_surface_controls_bottom_band_visibility_locally():
     assert "bridgeUrl('message')" not in band_surface
     assert "bridgeUrl('call-result')" not in band_surface
     assert "method: 'POST'" not in band_surface
+
+
+def test_index_settings_surface_controls_beacon_response_telemetry_locally():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    storage_start = doc.index("const beaconResponseTelemetryKey = 'meridian.beacon.response-telemetry.v1'")
+    storage_end = doc.index("const renderTranscript = (input) =>", storage_start)
+    storage_scope = doc[storage_start:storage_end]
+    render_start = doc.index("const renderBeaconResponseTelemetryPreview =")
+    render_end = doc.index("const sessionBandSideKey = 'meridian.session-band-side.v1'", render_start)
+    telemetry_surface = doc[render_start:render_end]
+    settings_start = doc.index("const renderSparkSurface = (label) =>")
+    settings_end = doc.index("const harnessDraftStorageKey", settings_start)
+    settings_surface = doc[settings_start:settings_end]
+
+    assert "const beaconResponseTelemetryKey = 'meridian.beacon.response-telemetry.v1'" in storage_scope
+    assert "responseTimes: true, tokens: true" in storage_scope
+    assert "data-beacon-response-telemetry=\"responseTimes\"" in telemetry_surface
+    assert "data-beacon-response-telemetry=\"tokens\"" in telemetry_surface
+    assert "Beacon owns response-time and token telemetry posture for model calls." in telemetry_surface
+    assert "Spark only stores and renders UI-local visibility preferences for response rows." in telemetry_surface
+    assert "document.querySelectorAll('.session-prompt-input').forEach((input) => renderTranscript(input));" in telemetry_surface
+    assert "data-beacon-response-telemetry-surface" in settings_surface
+    assert "initializeBeaconResponseTelemetrySurface();" in settings_surface
+    assert "bridgeUrl('message')" not in telemetry_surface
+    assert "method: 'POST'" not in telemetry_surface
 
 
 def test_index_settings_surface_controls_session_band_side_locally():

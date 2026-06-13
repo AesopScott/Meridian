@@ -271,9 +271,10 @@ if (process.argv.includes('--self-test')) {
   const codexJsonl = [
     JSON.stringify({ type: 'thread.started', thread_id: 'self-test' }),
     JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: 'codex clean ok' } }),
-    JSON.stringify({ type: 'turn.completed' }),
+    JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 123, output_tokens: 45 } }),
   ].join('\n');
-  const codexJsonlOk = normalizeModelText('codex', codexJsonl) === 'codex clean ok' && hasCompletedModelText('codex', codexJsonl);
+  const codexUsage = extractModelUsage('codex', codexJsonl);
+  const codexJsonlOk = normalizeModelText('codex', codexJsonl) === 'codex clean ok' && hasCompletedModelText('codex', codexJsonl) && codexUsage.inputTokens === 123 && codexUsage.outputTokens === 45;
   rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
   const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
   const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
@@ -583,6 +584,26 @@ function hasCompletedModelText(backend, stdout) {
   });
 }
 
+function extractModelUsage(backend, stdout) {
+  if (backend !== 'codex') return { inputTokens: null, outputTokens: null };
+  const usage = { inputTokens: null, outputTokens: null };
+  const lines = String(stdout || '').trim().split(/\r?\n/).filter(Boolean);
+  for (const line of lines) {
+    try {
+      const item = JSON.parse(line);
+      const payload = item?.usage || item?.item?.usage || null;
+      if (!payload || typeof payload !== 'object') continue;
+      const input = Number(payload.input_tokens ?? payload.prompt_tokens);
+      const output = Number(payload.output_tokens ?? payload.completion_tokens);
+      if (Number.isFinite(input)) usage.inputTokens = input;
+      if (Number.isFinite(output)) usage.outputTokens = output;
+    } catch {
+      // Keep parsing later JSONL lines; usage is best-effort telemetry.
+    }
+  }
+  return usage;
+}
+
 function backendName(backend) {
   if (backend === 'max') return 'Claude Max';
   if (backend === 'codex') return 'Codex';
@@ -633,6 +654,8 @@ function rememberCall(entry) {
     ok: Boolean(entry.ok),
     setupRequired: Boolean(entry.setupRequired),
     durationMs: entry.durationMs || 0,
+    inputTokens: Number.isFinite(Number(entry.inputTokens)) ? Number(entry.inputTokens) : null,
+    outputTokens: Number.isFinite(Number(entry.outputTokens)) ? Number(entry.outputTokens) : null,
     sessionContextEntries: entry.sessionContextEntries || 0,
     sessionContextChars: entry.sessionContextChars || 0,
     sessionTargetId: entry.sessionTargetId || '',
@@ -690,6 +713,8 @@ function rememberResult(entry) {
     text: String(entry.text || '').slice(0, RECENT_RESULT_TEXT_LIMIT),
     error: entry.error || null,
     durationMs: entry.durationMs || 0,
+    inputTokens: Number.isFinite(Number(entry.inputTokens)) ? Number(entry.inputTokens) : null,
+    outputTokens: Number.isFinite(Number(entry.outputTokens)) ? Number(entry.outputTokens) : null,
     sessionContextEntries: entry.sessionContextEntries || 0,
     sessionContextChars: entry.sessionContextChars || 0,
   });
@@ -718,6 +743,8 @@ function debugRecentCallSummary(call) {
     ok: Boolean(call?.ok),
     setupRequired: Boolean(call?.setupRequired),
     durationMs: Number(call?.durationMs || 0),
+    inputTokens: Number.isFinite(Number(call?.inputTokens)) ? Number(call.inputTokens) : null,
+    outputTokens: Number.isFinite(Number(call?.outputTokens)) ? Number(call.outputTokens) : null,
     sessionTargetId: call?.sessionTargetId || '',
     sessionName: call?.sessionName || '',
     projectName: call?.projectName || call?.projectContext || '',
@@ -739,6 +766,8 @@ function debugRecentResultSummary(result) {
     hasError: Boolean(result?.error),
     error: result?.error || null,
     durationMs: Number(result?.durationMs || 0),
+    inputTokens: Number.isFinite(Number(result?.inputTokens)) ? Number(result.inputTokens) : null,
+    outputTokens: Number.isFinite(Number(result?.outputTokens)) ? Number(result.outputTokens) : null,
     textChars: String(result?.text || '').length,
   };
 }
@@ -2234,12 +2263,15 @@ function runModel({
       child.kill();
       const completedText = normalizeModelText(backend, stdout);
       const completedBeforeTimeout = hasCompletedModelText(backend, stdout);
+      const usage = extractModelUsage(backend, stdout);
       finish({
         ok: completedBeforeTimeout,
         text: completedText,
         error: completedBeforeTimeout ? null : 'Model call timed out',
         model: command.model,
         setupRequired: false,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
         sessionContextEntries: sessionPrompt.entries,
         sessionContextChars: sessionPrompt.chars,
       });
@@ -2247,12 +2279,15 @@ function runModel({
 
     child.on('close', (code) => {
       const rawError = stderr.trim() || `Process exited with code ${code}`;
+      const usage = extractModelUsage(backend, stdout);
       finish({
         ok: code === 0,
         text: normalizeModelText(backend, stdout),
         error: code === 0 ? null : classifySetupError(backend, rawError),
         model: command.model,
         setupRequired: code === 0 ? false : needsSetup(backend, rawError),
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
         sessionContextEntries: sessionPrompt.entries,
         sessionContextChars: sessionPrompt.chars,
       });
@@ -2656,6 +2691,8 @@ const server = http.createServer(async (req, res) => {
         ok: result.ok,
         setupRequired: Boolean(result.setupRequired),
         durationMs: result.durationMs,
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
         sessionContextEntries: result.sessionContextEntries || 0,
         sessionContextChars: result.sessionContextChars || 0,
         sessionTargetId: sessionTarget?.sessionId || '',
@@ -2676,6 +2713,8 @@ const server = http.createServer(async (req, res) => {
         text: result.text || '',
         error: result.error || null,
         durationMs: result.durationMs,
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
         sessionContextEntries: result.sessionContextEntries || 0,
         sessionContextChars: result.sessionContextChars || 0,
         sessionTargetId: sessionTarget?.sessionId || '',
