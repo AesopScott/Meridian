@@ -5491,10 +5491,11 @@ body {
       sendPrompt(input);
       input.focus();
     });
-    attachmentTrayFor(input)?.addEventListener('click', (event) => {
+    const attachmentTray = attachmentTrayFor(input);
+    attachmentTray?.addEventListener('click', (event) => {
       const target = event.target;
       if (target?.matches?.('.session-attachment-upload')) {
-        attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.click();
+        attachmentTray.querySelector('.session-attachment-input')?.click();
         return;
       }
       if (!target?.matches?.('[data-attachment-remove]')) return;
@@ -5503,7 +5504,8 @@ body {
       writePendingAttachments(input, next);
       input.focus();
     });
-    attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.addEventListener('change', async (event) => {
+    attachmentTray?.addEventListener('change', async (event) => {
+      if (!event.target?.matches?.('.session-attachment-input')) return;
       const files = Array.from(event.target?.files || []);
       await addAttachmentFiles(input, files, 'upload');
       if (event.target) event.target.value = '';

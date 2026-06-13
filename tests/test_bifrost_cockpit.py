@@ -1159,7 +1159,7 @@ def test_session_prompt_has_visible_send_button_and_enter_submit_path():
     assert "querySelector('.session-send-button')?.addEventListener('click', () =>" in doc
     assert "sendPrompt(input);" in doc[
         doc.index("input.addEventListener('keydown', (event) => {"):
-        doc.index("attachmentTrayFor(input)?.addEventListener('click'")
+        doc.index("const attachmentTray = attachmentTrayFor(input);")
     ]
     assert "grid-template-rows: auto auto 1fr auto;" in doc
     assert "pointer-events: auto;" in doc[
@@ -1476,8 +1476,10 @@ def test_session_prompt_supports_pasted_image_attachments_for_bridge_context():
     assert "input.addEventListener('paste'" in index
     assert "querySelector('.session-attachment-input')" in index
     assert "target?.matches?.('.session-attachment-upload')" in index
-    assert "attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.click()" in index
-    assert "attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.addEventListener('change'" in index
+    assert "const attachmentTray = attachmentTrayFor(input);" in index
+    assert "attachmentTray.querySelector('.session-attachment-input')?.click()" in index
+    assert "attachmentTray?.addEventListener('change', async (event) => {" in index
+    assert "if (!event.target?.matches?.('.session-attachment-input')) return;" in index
     assert "if (!supportsAttachments(input)) return false;" in index
     assert "await addAttachmentFiles(input, files, 'upload')" in index
     assert "event.clipboardData?.items" in index
