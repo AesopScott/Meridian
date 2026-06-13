@@ -1271,6 +1271,21 @@ def test_bridge_message_applies_prime_contract_in_model_path():
     assert "primeContract = null," in bridge
 
 
+def test_bridge_timeout_surfaces_completed_codex_stdout():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    timeout_branch = bridge[
+        bridge.index("timeout = setTimeout(() => {"):
+        bridge.index("child.on('close'", bridge.index("timeout = setTimeout(() => {"))
+    ]
+    assert "function hasCompletedModelText(backend, stdout) {" in bridge
+    assert "const completedText = normalizeModelText(backend, stdout);" in timeout_branch
+    assert "const completedBeforeTimeout = hasCompletedModelText(backend, stdout);" in timeout_branch
+    assert "ok: completedBeforeTimeout" in timeout_branch
+    assert "text: completedText" in timeout_branch
+    assert "error: completedBeforeTimeout ? null : 'Model call timed out'" in timeout_branch
+    assert "codexJsonlOk" in bridge
+
+
 def test_bridge_message_route_enforces_runtime_readiness_gate():
     bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
     assert "function runtimeMessageReadiness() {" in bridge

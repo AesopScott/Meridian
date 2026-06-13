@@ -267,6 +267,12 @@ if (process.argv.includes('--self-test')) {
     emptyPrompt.prompt.includes('Current user message: Fresh question')
   );
   const maxJsonOk = normalizeModelText('max', JSON.stringify({ result: 'max clean ok' })) === 'max clean ok';
+  const codexJsonl = [
+    JSON.stringify({ type: 'thread.started', thread_id: 'self-test' }),
+    JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: 'codex clean ok' } }),
+    JSON.stringify({ type: 'turn.completed' }),
+  ].join('\n');
+  const codexJsonlOk = normalizeModelText('codex', codexJsonl) === 'codex clean ok' && hasCompletedModelText('codex', codexJsonl);
   rememberResult({ requestId: 'self-test-result', ok: true, text: 'recoverable text' });
   const resultRecoveryOk = resultForRequestId('self-test-result')?.text === 'recoverable text';
   const setupOk = samples.every(Boolean) && setupFlags[0] && setupFlags[1] && !setupFlags[2];
@@ -304,7 +310,7 @@ if (process.argv.includes('--self-test')) {
   const routeNamesOk = Object.values(BRIDGE_ROUTES).every((route) => route.startsWith('/bridge/') && !route.startsWith('/api/'));
   const originOk = isAllowedOrigin({ headers: { origin: 'http://127.0.0.1:5500' } }) && !isAllowedOrigin({ headers: { origin: 'https://example.com' } });
   const restartGuardOk = beginRestartRequest() && !beginRestartRequest();
-  console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && resultRecoveryOk && capabilitiesOk && sessionTargetsOk && versionOk && routeNamesOk && originOk && restartGuardOk, samples, setupFlags, contextOk, maxJsonOk, resultRecoveryOk, capabilitiesOk, sessionTargetsOk, versionOk, routeNamesOk, originOk, restartGuardOk }, null, 2));
+  console.log(JSON.stringify({ ok: setupOk && contextOk && maxJsonOk && codexJsonlOk && resultRecoveryOk && capabilitiesOk && sessionTargetsOk && versionOk && routeNamesOk && originOk && restartGuardOk, samples, setupFlags, contextOk, maxJsonOk, codexJsonlOk, resultRecoveryOk, capabilitiesOk, sessionTargetsOk, versionOk, routeNamesOk, originOk, restartGuardOk }, null, 2));
   process.exit(0);
 }
 
@@ -556,6 +562,24 @@ function normalizeModelText(backend, stdout) {
     }
   }
   return messages.length ? messages.join('\n') : text;
+}
+
+function hasCompletedModelText(backend, stdout) {
+  const text = stdout.trim();
+  if (!text) return false;
+  if (backend !== 'codex') return Boolean(normalizeModelText(backend, stdout).trim());
+  const lines = text.split(/\r?\n/).filter(Boolean);
+  return lines.some((line) => {
+    try {
+      const item = JSON.parse(line);
+      return Boolean(
+        (item?.type === 'agent_message' && item.text)
+        || (item?.item?.type === 'agent_message' && item.item.text)
+      );
+    } catch {
+      return false;
+    }
+  });
 }
 
 function backendName(backend) {
@@ -2207,10 +2231,12 @@ function runModel({
     });
     timeout = setTimeout(() => {
       child.kill();
+      const completedText = normalizeModelText(backend, stdout);
+      const completedBeforeTimeout = hasCompletedModelText(backend, stdout);
       finish({
-        ok: false,
-        text: stdout.trim(),
-        error: 'Model call timed out',
+        ok: completedBeforeTimeout,
+        text: completedText,
+        error: completedBeforeTimeout ? null : 'Model call timed out',
         model: command.model,
         setupRequired: false,
         sessionContextEntries: sessionPrompt.entries,
