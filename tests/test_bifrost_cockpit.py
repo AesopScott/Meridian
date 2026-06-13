@@ -4285,8 +4285,14 @@ def test_package_exposes_v3_runtime_readiness_proof_command():
     assert "node scripts/meridian-model-bridge.js --self-test" in proof
     assert "npm run build:win" in proof
     assert "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/v3-runtime-smoke.ps1" == smoke
-    assert "Reply exactly: v3-smoke-ok" in (ROOT / "scripts" / "v3-runtime-smoke.ps1").read_text(encoding="utf-8")
-    assert "v3-context-smoke.txt" in (ROOT / "scripts" / "v3-runtime-smoke.ps1").read_text(encoding="utf-8")
+    smoke_script = (ROOT / "scripts" / "v3-runtime-smoke.ps1").read_text(encoding="utf-8")
+    assert "Reply exactly: v3-smoke-ok" in smoke_script
+    assert "v3-context-smoke.txt" in smoke_script
+    assert "v3-session-survival" in smoke_script
+    assert "Recent call state did not survive packaged app restart." in smoke_script
+    assert "Call result state did not survive packaged app restart." in smoke_script
+    assert "Session target metadata did not survive packaged app restart." in smoke_script
+    assert "sessionTargetChecked" in smoke_script
 
 
 def test_bridge_exposes_memory_retrieval_and_filemap_routes():

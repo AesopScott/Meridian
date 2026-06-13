@@ -5,6 +5,9 @@ $exePath = Join-Path $repoRoot "dist\win-unpacked\Meridian.exe"
 $healthUri = "http://127.0.0.1:8767/bridge/health"
 $messageUri = "http://127.0.0.1:8767/bridge/message"
 $restartUri = "http://127.0.0.1:8767/bridge/restart"
+$recentCallsUri = "http://127.0.0.1:8767/bridge/recent-calls"
+$callResultUri = "http://127.0.0.1:8767/bridge/call-result"
+$userSessionsUri = "http://127.0.0.1:8767/bridge/user-sessions"
 
 if (-not (Test-Path $exePath)) {
   throw "Packaged Meridian executable not found at $exePath. Run npm run build:win first."
@@ -34,18 +37,21 @@ function Invoke-MeridianMessageSmoke {
     [string]$RequestPrefix,
     [string]$Prompt,
     [string]$ExpectedText,
-    [array]$Attachments = @()
+    [array]$Attachments = @(),
+    [string]$Channel = "prime",
+    [string]$SessionTargetId = ""
   )
 
   $body = @{
     backend = "codex"
     requestedBackend = "codex"
-    channel = "prime"
+    channel = $Channel
     requestId = "$RequestPrefix-$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())"
     prompt = $Prompt
     transcript = @()
     projectContext = "Meridian"
     attachments = $Attachments
+    sessionTargetId = $SessionTargetId
     primeContract = @{
       role = "Prime"
       identity = "Prime speaks through Spark on behalf of Meridian."
@@ -69,6 +75,29 @@ function Invoke-MeridianMessageSmoke {
   return $result
 }
 
+function Stop-MeridianApp {
+  param($Process)
+  if ($Process) {
+    try { Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  $deadline = (Get-Date).AddSeconds(12)
+  do {
+    Start-Sleep -Milliseconds 500
+    if (-not (Test-BridgeReachable)) {
+      return
+    }
+  } while ((Get-Date) -lt $deadline)
+}
+
+function Test-BridgeReachable {
+  try {
+    Invoke-RestMethod -Uri $healthUri -TimeoutSec 2 | Out-Null
+    return $true
+  } catch {
+    return $false
+  }
+}
+
 $appProcess = $null
 $summary = [ordered]@{
   ok = $false
@@ -77,6 +106,7 @@ $summary = [ordered]@{
   restart = $null
   message = $null
   context = $null
+  survival = $null
   shutdown = $null
 }
 
@@ -140,18 +170,72 @@ try {
   }
   $summary.context = @{
     ok = $true
+    requestId = $context.requestId
     attachmentCount = $materialized.Count
     attachmentName = $materialized[0].name
     attachmentPathPresent = [bool]$materialized[0].path
     durationMs = $context.durationMs
   }
 
+  $sessions = Invoke-RestMethod -Uri $userSessionsUri -TimeoutSec 10
+  $liveSession = @($sessions.sessions) |
+    Where-Object { $_.routable -and -not $_.recoverable -and $_.sessionId } |
+    Select-Object -First 1
+  $sessionResult = $null
+  if ($liveSession) {
+    $sessionResult = Invoke-MeridianMessageSmoke `
+      -RequestPrefix "v3-session-survival" `
+      -Prompt "Reply exactly: v3-session-survival-ok" `
+      -ExpectedText "v3-session-survival-ok" `
+      -Channel "user" `
+      -SessionTargetId $liveSession.sessionId
+  }
+  $survivalRequestId = if ($sessionResult) { [string]$sessionResult.requestId } else { [string]$context.requestId }
+  if (-not $survivalRequestId) {
+    throw "Runtime survival smoke did not have a request id to recover."
+  }
+
+  Stop-MeridianApp -Process $appProcess
+  $appProcess = $null
+  $bridgeReachableAfterStop = Test-BridgeReachable
+  if ($bridgeReachableAfterStop) {
+    throw "Bridge was still reachable after packaged app stop."
+  }
+
+  $appProcess = Start-Process -FilePath $exePath -PassThru -WindowStyle Hidden
+  $afterAppRestart = Wait-MeridianBridgeHealthy 25
+  if (-not $afterAppRestart) {
+    throw "Packaged Meridian did not restore a healthy bridge after app restart."
+  }
+  $recent = Invoke-RestMethod -Uri $recentCallsUri -TimeoutSec 10
+  $survivedCall = @($recent.calls) |
+    Where-Object { $_.requestId -eq $survivalRequestId } |
+    Select-Object -First 1
+  if (-not $survivedCall) {
+    throw "Recent call state did not survive packaged app restart."
+  }
+  $recoveredResult = Invoke-RestMethod -Uri "${callResultUri}?requestId=$([uri]::EscapeDataString($survivalRequestId))" -TimeoutSec 10
+  if (-not $recoveredResult.ok -or -not $recoveredResult.result -or $recoveredResult.result.requestId -ne $survivalRequestId) {
+    throw "Call result state did not survive packaged app restart."
+  }
+  $summary.survival = @{
+    ok = $true
+    requestId = $survivalRequestId
+    appRestartPid = $afterAppRestart.pid
+    bridgeReachableAfterStop = $bridgeReachableAfterStop
+    recentCallRecovered = [bool]$survivedCall
+    resultRecovered = [bool]$recoveredResult.result
+    sessionTargetChecked = [bool]$sessionResult
+    sessionTargetId = if ($sessionResult) { [string]$liveSession.sessionId } else { "" }
+    sessionTargetSurvived = if ($sessionResult) { [string]$survivedCall.sessionTargetId -eq [string]$liveSession.sessionId } else { $null }
+  }
+  if ($sessionResult -and -not $summary.survival.sessionTargetSurvived) {
+    throw "Session target metadata did not survive packaged app restart."
+  }
+
   $summary.ok = $true
 } finally {
-  if ($appProcess) {
-    try { Stop-Process -Id $appProcess.Id -Force -ErrorAction SilentlyContinue } catch {}
-    Start-Sleep -Seconds 1
-  }
+  Stop-MeridianApp -Process $appProcess
   try {
     $leftover = Invoke-RestMethod -Uri $healthUri -TimeoutSec 2
     $summary.shutdown = @{

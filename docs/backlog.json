@@ -642,11 +642,14 @@
             "Reopen app.",
             "Previous session is recoverable."
           ],
-          "status": "pending",
+          "status": "done",
           "evidence_refs": [
-            "session disappearance concern remains unresolved"
+            "npm run smoke:v3 passed packaged app close/reopen survival smoke",
+            "v3-runtime-smoke stops the packaged app, verifies the bridge is unreachable, reopens the executable, and recovers the persisted request",
+            "smoke verifies recent-call and call-result state by requestId after app restart",
+            "when a live User Session target exists, smoke verifies sessionTargetId metadata survives the app restart"
           ],
-          "remaining_work": "Gate app close/reopen, bridge restart, Codex session recovery, and session provenance audit."
+          "remaining_work": "None for V3; future work can add full renderer automation for visible transcript restoration."
         },
         {
           "id": "M30-006",
