@@ -148,12 +148,13 @@
             "Sessions persist across bridge restart.",
             "Session records include enough metadata to restore the visible session list."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "sessions are visible/recoverable in current runtime",
-            "user still observed possible missing Codex session"
+            "runtime stores recent call/result state in .meridian/bridge-runtime-state.json",
+            "npm run smoke:v3 passed bridge restart, packaged app close/reopen, recent-call recovery, call-result recovery, and optional sessionTargetId survival",
+            "tests cover user-session target persistence, storage metadata, and bridge runtime state load/persist helpers"
           ],
-          "remaining_work": "Prove survival across app restart, bridge restart, and abnormal close."
+          "remaining_work": "None for V3; future work can add a richer visible session history store beyond recent-call recovery."
         },
         {
           "id": "M27-002",
@@ -168,12 +169,14 @@
             "Recovered session entries include timestamp and last message summary.",
             "User can reopen a recovered session without manual file inspection."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "session recovery UI exists",
-            "missing-session scenario still needs traceable audit trail"
+            "recoverable sessions are reconstructed from persisted bridge runtime state",
+            "User Session selector groups non-routable recoverable sessions separately",
+            "recovered session entries include timestamp, last message summary, request id, project context, and read-only routing posture",
+            "npm run smoke:v3 passed packaged app close/reopen survival proof"
           ],
-          "remaining_work": "Add visible session provenance and recovery audit events."
+          "remaining_work": "None for V3; future work can add a dedicated recovery audit log if needed."
         },
         {
           "id": "M27-003",
@@ -396,12 +399,13 @@
             "Every row has a stable source and authority level.",
             "The data model supports both executable and informational entries."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "skills panel work exists and local/model skills were added",
-            "user observed empty/collapsible behavior regressions during iteration"
+            "Skills panel data model includes Meridian commands, Meridian settings, Codex skills, Graphify, FileMap project capabilities, and model backend rows",
+            "rows carry source/provenance, setup status, permission boundary, argument schema, usage example, and execution mode",
+            "test_index_spark_skills_registry_searches_loaded_metadata_without_execution locks local rows, bridge metadata rows, search, pins, grouping, and no-execution boundaries"
           ],
-          "remaining_work": "Lock data model with tests for local commands, local skills, Codex skills, and bridge metadata."
+          "remaining_work": "None for V3; future work can replace static Codex skill rows with a backend registry when one exists."
         },
         {
           "id": "M29-002",
@@ -475,12 +479,13 @@
             "Identity questions are answered as Prime through Spark on behalf of Meridian.",
             "Persona injection is covered by tests or prompt payload proof."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "persona payload wiring was repaired after primeContractPayload failure",
-            "needs golden prompt proof across providers"
+            "renderer builds primeContractPayload before sendPrompt and includes it in /bridge/message payloads",
+            "bridge accepts body.primeContract and passes it into promptWithVisibleSession for the real model path",
+            "tests/test_bifrost_cockpit.py covers renderer payload wiring and bridge model-path application"
           ],
-          "remaining_work": "Add prompt payload snapshot tests proving persona reaches the real model path."
+          "remaining_work": "None for V3; future work can add provider-specific golden response tests if needed."
         },
         {
           "id": "M29-006",
@@ -665,12 +670,15 @@
             "Simulated missing Codex error produces actionable UI repair steps.",
             "Failure message identifies the failed layer."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
             "npm run proof:v3 passed startup diagnostics failure/warning tests",
-            "packaged restart smoke proves bridge repair path"
+            "packaged restart smoke proves bridge repair path",
+            "startup diagnostics tests lock missing Codex, skill registry unavailable/empty/model-row warnings, storage failures, and blocked startup copy",
+            "debug surface tests lock readiness blockers, model setup issues, recent runtime errors, repair steps, next-step copy, and sanitized copy-debug-report behavior",
+            "timeout handling tests lock completed-output recovery and user-facing Model call timed out copy"
           ],
-          "remaining_work": "Still needs UI proof for missing Codex, unavailable skill registry, and timeout explanation copy from the user-facing panel."
+          "remaining_work": "None for V3; future work can add synthetic browser-level failure injection around the visual debug panel."
         },
         {
           "id": "M30-007",
@@ -690,12 +698,13 @@
             "Release notes distinguish harness capability maturity from runtime competence.",
             "No broad feature expansion is allowed to bypass failed P0 readiness gates."
           ],
-          "status": "pending",
+          "status": "done",
           "evidence_refs": [
-            "runtime foundation, command gate, model-response gate, and context gate now have V3 proof evidence",
-            "session survival and skills UX gates still block final 3.0 truth audit"
+            "npm run proof:v3 passed after runtime readiness, command gate, model-response, context upload, session survival, skills data model, persona payload, and failure explainability proof updates",
+            "npm run smoke:v3 passed against the freshly built packaged executable with bridge restart, Codex response, context attachment, app close/reopen survival, request recovery, optional sessionTargetId survival, and clean shutdown",
+            "remaining V3 backlog rows are P1 polish/clarity items, not P0 release readiness gates"
           ],
-          "remaining_work": "Do not mark 3.0 final until M30-005 session survival and M29 skills UX gates are proven or explicitly deferred."
+          "remaining_work": "None for V3 release readiness; keep P1 polish rows visible for post-gate cleanup."
         }
       ]
     }

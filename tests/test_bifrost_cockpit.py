@@ -1407,6 +1407,7 @@ def test_startup_diagnostics_checks_bridge_codex_storage_and_skills():
     assert "bridgeUrl('models')" in startup
     assert "bridgeUrl('filemap')" in startup
     assert "Codex CLI metadata missing" in startup
+    assert "Codex CLI not installed or not authenticated" in startup
     assert "localStorage not writable" in startup
     assert "skillRegistryRowsFromSnapshots(fileMapSnapshot, registryModelsSnapshot)" in startup
     assert "skill registry model rows missing" in startup
@@ -1415,6 +1416,7 @@ def test_startup_diagnostics_checks_bridge_codex_storage_and_skills():
     assert "warnings: ${state.warnings.join('; ')}" in startup
     assert "startup diagnostics blocked" in startup
     assert "model runtime environment path metadata missing" in startup
+    assert "Error: Model call timed out." in doc
 
 
 def test_startup_diagnostics_runs_on_launch():
