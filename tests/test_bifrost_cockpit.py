@@ -1147,6 +1147,19 @@ def test_session_prompt_has_visible_send_button_and_enter_submit_path():
         doc.index(".session-prompt-row {"):
         doc.index(".session-window[data-session-collapsed=\"true\"] .session-interface")
     ]
+    assert ".session-window-left {" in doc
+    prime_window_css = doc[
+        doc.index(".session-window-left {"):
+        doc.index(".harness-screen[data-session-band-side=\"left\"] .session-window-right")
+    ]
+    assert "z-index: 40;" in prime_window_css
+    assert "pointer-events: auto !important;" in prime_window_css
+    prime_input_css = doc[
+        doc.index(".session-window-left .session-workspace,"):
+        doc.index(".session-window[data-session-collapsed=\"true\"] .session-interface")
+    ]
+    assert ".session-window-left .session-prompt-input" in prime_input_css
+    assert "pointer-events: auto !important;" in prime_input_css
     assert ".session-send-button:hover" in doc
 
 
@@ -4853,6 +4866,8 @@ def test_index_settings_surface_controls_wake_mode_locally():
     assert "window.meridianReloadMarkerPresent = cleanReloadMarker();" in reload_marker
     assert "if (readWakeMode() === 'silent wake')" in restore_panel
     assert "restoreUserPanel({ persist: false });" in restore_panel
+    assert "screen.classList.add('sessions-visible');" in restore_panel
+    assert "document.querySelector('.session-window-left .session-prompt-input')?.focus({ preventScroll: true });" in restore_panel
     assert "if (readWakeMode() === 'full wake')" in restore_panel
     assert "Wake complete: full wake restored the last visible panel." in restore_panel
     assert "Wake complete: full wake restored the session interface." in restore_panel

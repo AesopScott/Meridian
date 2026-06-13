@@ -1101,6 +1101,8 @@ body {
 
 .session-window-left {
   right: calc(50% + ((min(360px, 48vw) + 116px) / 2) + 10px);
+  z-index: 40;
+  pointer-events: auto !important;
 }
 
 .harness-screen[data-session-band-side="left"] .session-window-right {
@@ -1116,6 +1118,14 @@ body {
 .session-window-left::after {
   left: auto;
   right: 15px;
+}
+
+.session-window-left .session-workspace,
+.session-window-left .session-interface,
+.session-window-left .session-prompt-row,
+.session-window-left .session-prompt-input,
+.session-window-left .session-send-button {
+  pointer-events: auto !important;
 }
 
 .session-window::before {
@@ -1546,7 +1556,7 @@ body {
 
 .session-prompt-row {
   position: relative;
-  z-index: 2;
+  z-index: 60;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 7px;
@@ -1574,6 +1584,8 @@ body {
 }
 
 .session-prompt-input {
+  position: relative;
+  z-index: 61;
   height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
   min-height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
   max-height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
@@ -1583,6 +1595,8 @@ body {
 }
 
 .session-send-button {
+  position: relative;
+  z-index: 61;
   min-width: 58px;
   border: 1px solid rgba(var(--session-electric), 0.5);
   border-radius: 0;
@@ -14041,6 +14055,11 @@ body {
     else restoreUserPanel({ persist: false });
   };
   restoreStoredRightPanel();
+  restoreUserPanel({ persist: false });
+  screen.classList.add('sessions-visible');
+  window.setTimeout(() => {
+    document.querySelector('.session-window-left .session-prompt-input')?.focus({ preventScroll: true });
+  }, 0);
   if (readWakeMode() === 'full wake') {
     const input = document.querySelector('.session-window-left .session-prompt-input');
     if (input && typeof pushEntry === 'function') {
