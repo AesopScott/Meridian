@@ -524,6 +524,24 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "status: settingsSelected || filterSelected ? 'Configuration' : 'planned'" in doc
     assert "configurationSections.push(`<div data-quiet-mode-surface>" in doc
     assert "data-focus-mode-surface" not in doc
+    settings_order = [
+        "data-beacon-response-telemetry-surface",
+        "data-diagnostic-default-surface",
+        "data-instrumentation-band-surface",
+        "data-progress-default-surface",
+        "data-progress-redirect-surface",
+        "data-progress-retention-surface",
+        "data-progress-state-surface",
+        "data-quick-reply-order-surface",
+        "data-quiet-mode-surface",
+        "data-risk-tier-override-surface",
+        "data-role-model-overrides-surface",
+        "data-session-band-side-surface",
+        "data-session-window-defaults-surface",
+        "data-wake-mode-surface",
+    ]
+    positions = [doc.index(f"configurationSections.push(`<div {marker}") for marker in settings_order]
+    assert positions == sorted(positions)
     assert "informationSections.push(relaySection('Settings voice boundary'" in doc
     assert "writeRightPanelViewMode(title, current === 'information' ? 'configuration' : 'information')" in doc
     assert "button.textContent = rightPanelToggleTargetLabel(mode);" in doc

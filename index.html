@@ -13036,20 +13036,20 @@ body {
         'Manual prompt sends still use the existing model selector; Auto remains disabled until Relay owns the decision.',
       ]), true));
       informationSections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
+      configurationSections.push(`<div data-beacon-response-telemetry-surface>${renderBeaconResponseTelemetrySurface().join('')}</div>`);
+      configurationSections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
+      configurationSections.push(`<div data-instrumentation-band-surface>${renderInstrumentationBandSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-redirect-surface>${renderProgressRedirectDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-retention-surface>${renderProgressRetentionSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-state-surface>${renderProgressStateDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-quick-reply-order-surface>${renderQuickReplyOrderSurface().join('')}</div>`);
       configurationSections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
-      configurationSections.push(`<div data-wake-mode-surface>${renderWakeModeSurface().join('')}</div>`);
+      configurationSections.push(`<div data-risk-tier-override-surface>${renderRiskTierOverrideSurface().join('')}</div>`);
+      configurationSections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
       configurationSections.push(`<div data-session-band-side-surface>${renderSessionBandSideSurface().join('')}</div>`);
       configurationSections.push(`<div data-session-window-defaults-surface>${renderSessionWindowDefaultsSurface().join('')}</div>`);
-      configurationSections.push(`<div data-risk-tier-override-surface>${renderRiskTierOverrideSurface().join('')}</div>`);
-      configurationSections.push(`<div data-quick-reply-order-surface>${renderQuickReplyOrderSurface().join('')}</div>`);
-      configurationSections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
-      configurationSections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
-      configurationSections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
-      configurationSections.push(`<div data-progress-state-surface>${renderProgressStateDefaultsSurface().join('')}</div>`);
-      configurationSections.push(`<div data-progress-retention-surface>${renderProgressRetentionSurface().join('')}</div>`);
-      configurationSections.push(`<div data-progress-redirect-surface>${renderProgressRedirectDefaultsSurface().join('')}</div>`);
-      configurationSections.push(`<div data-instrumentation-band-surface>${renderInstrumentationBandSurface().join('')}</div>`);
-      configurationSections.push(`<div data-beacon-response-telemetry-surface>${renderBeaconResponseTelemetrySurface().join('')}</div>`);
+      configurationSections.push(`<div data-wake-mode-surface>${renderWakeModeSurface().join('')}</div>`);
     }
     if (filterSelected) {
       configurationSections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
@@ -13064,20 +13064,20 @@ body {
     if (rendered && settingsSelected) {
       loadVoiceIo();
       loadSparkModels();
+      initializeBeaconResponseTelemetrySurface();
+      initializeDiagnosticDefaultSurface();
+      initializeInstrumentationBandSurface();
+      initializeProgressFilterDefaultsSurface();
+      initializeProgressRedirectDefaultsSurface();
+      initializeProgressRetentionSurface();
+      initializeProgressStateDefaultsSurface();
+      initializeQuickReplyOrderSurface();
       initializeQuietModeSurface();
-      initializeWakeModeSurface();
+      initializeRiskTierOverrideSurface();
+      initializeRoleModelOverridesSurface();
       initializeSessionBandSideSurface();
       initializeSessionWindowDefaultsSurface();
-      initializeRiskTierOverrideSurface();
-      initializeQuickReplyOrderSurface();
-      initializeRoleModelOverridesSurface();
-      initializeDiagnosticDefaultSurface();
-      initializeProgressFilterDefaultsSurface();
-      initializeProgressStateDefaultsSurface();
-      initializeProgressRetentionSurface();
-      initializeProgressRedirectDefaultsSurface();
-      initializeInstrumentationBandSurface();
-      initializeBeaconResponseTelemetrySurface();
+      initializeWakeModeSurface();
     }
     if (rendered && filterSelected) initializeContextFilterSurface();
     return rendered;
