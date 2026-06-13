@@ -9411,6 +9411,46 @@ body {
     ['next step', relayStatusNextStep(status, detail)],
     ['error', detail.error || 'none'],
   ]);
+  const debugSummaryNextStep = (summary = {}) => {
+    if (summary.routeError) return 'Use /restart-bridge, then run /debug again.';
+    if (summary.blockers > 0) return 'Review readiness blockers and repair steps below.';
+    if (summary.setupRequired > 0) return 'Resolve model CLI setup/auth items below.';
+    if (summary.recentErrors > 0) return 'Inspect recent runtime results and copy the debug report if needed.';
+    return 'No runtime blockers reported.';
+  };
+  const debugSummaryFromSnapshot = (snapshot = {}) => {
+    const readiness = snapshot.runtimeReadiness || {};
+    const recent = snapshot.recent || {};
+    const results = Array.isArray(recent.results) ? recent.results : [];
+    const models = Array.isArray(snapshot.models) ? snapshot.models : [];
+    const repairSteps = Array.isArray(snapshot.repairSteps) ? snapshot.repairSteps : [];
+    const blockers = Array.isArray(readiness.blockers) ? readiness.blockers.length : 0;
+    const setupRequired = models.filter((model) => model?.setupRequired || !model?.installed).length;
+    const recentErrors = results.filter((result) => !result?.ok || result?.error).length;
+    return {
+      readiness: readiness.ok ? 'ready' : 'blocked',
+      bridgeState: snapshot.health?.state || 'unknown',
+      blockers,
+      setupRequired,
+      recentErrors,
+      repairSteps: repairSteps.length,
+      routeError: snapshot.routeError || '',
+      error: snapshot.error || '',
+    };
+  };
+  const renderDebugSummary = (snapshot = null) => {
+    const summary = snapshot ? debugSummaryFromSnapshot(snapshot) : { readiness: 'checking', bridgeState: 'checking', blockers: 0, setupRequired: 0, recentErrors: 0, repairSteps: 0 };
+    return relayGrid([
+      ['readiness', summary.readiness],
+      ['bridge state', summary.bridgeState],
+      ['blockers', String(summary.blockers)],
+      ['model setup issues', String(summary.setupRequired)],
+      ['recent runtime errors', String(summary.recentErrors)],
+      ['repair steps', String(summary.repairSteps)],
+      ['next step', debugSummaryNextStep(summary)],
+      ['error', summary.error || summary.routeError || 'none'],
+    ]);
+  };
   const renderDebugReportSnapshot = (snapshot = {}) => {
     const readiness = snapshot.runtimeReadiness || {};
     const health = snapshot.health || {};
@@ -9474,9 +9514,14 @@ body {
       const snapshot = await response.json();
       node.dataset.debugReport = JSON.stringify(snapshot, null, 2);
       node.innerHTML = renderDebugReportSnapshot(snapshot);
+      const summaryNode = rightWorkspace?.querySelector('[data-debug-summary]');
+      if (summaryNode) summaryNode.innerHTML = renderDebugSummary(snapshot);
     } catch (error) {
+      const snapshot = { ok: false, error: error.message, routeError: 'debug report route unavailable', runtimeReadiness: { ok: false, blockers: ['debug report route unavailable'] }, repairSteps: ['Use /restart-bridge, then reopen /debug.'] };
       delete node.dataset.debugReport;
-      node.innerHTML = renderDebugReportSnapshot({ ok: false, error: error.message, runtimeReadiness: { ok: false, blockers: ['debug report route unavailable'] }, repairSteps: ['Use /restart-bridge, then reopen /debug.'] });
+      node.innerHTML = renderDebugReportSnapshot(snapshot);
+      const summaryNode = rightWorkspace?.querySelector('[data-debug-summary]');
+      if (summaryNode) summaryNode.innerHTML = renderDebugSummary(snapshot);
     }
   };
   const renderRelayBridgeStatus = async () => {
@@ -12987,12 +13032,12 @@ body {
       ]), false);
     }
     if (mode === 'debug') {
-      return relaySection('Local command result', relayGrid([
+      return relaySection('Debug summary', `
+        <div data-debug-summary>${renderDebugSummary()}</div>
+      `, true) + relaySection('Local command boundary', relayGrid([
         ['command', '/debug'],
-        ['visible result', 'Relay Runtime Logic opened with debug report and repair steps'],
-        ['primary readout', 'Debug report'],
         ['backend action', 'GET-only diagnostics snapshot; no prompt sent'],
-      ]), true);
+      ]), false);
     }
     return '';
   };

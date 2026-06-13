@@ -4024,6 +4024,9 @@ def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
     assert "Runtime status" in relay_models
     assert "data-runtime-status-summary" in relay_models
     assert "renderRuntimeStatusSummary('checking')" in relay_models
+    assert "Debug summary" in relay_models
+    assert "data-debug-summary" in relay_models
+    assert "renderDebugSummary()" in relay_models
     assert "GET-only health snapshot; no prompt sent" in relay_models
     assert "GET-only diagnostics snapshot; no prompt sent" in relay_models
     assert "renderRelayBridgeStatus();" in relay_models
@@ -4054,15 +4057,31 @@ def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
     assert "renderRuntimeStatusSummary('offline', detail)" in render_status
 
     debug_report = doc[
+        doc.index("const debugSummaryNextStep = (summary = {}) => {"):
+        doc.index("const renderRelayBridgeStatus = async () =>")
+    ]
+    assert "const renderDebugSummary = (snapshot = null) =>" in debug_report
+    assert "debugSummaryFromSnapshot" in debug_report
+    assert "['readiness', summary.readiness]" in debug_report
+    assert "['model setup issues', String(summary.setupRequired)]" in debug_report
+    assert "['recent runtime errors', String(summary.recentErrors)]" in debug_report
+    assert "['next step', debugSummaryNextStep(summary)]" in debug_report
+    assert "No runtime blockers reported." in debug_report
+    assert "Review readiness blockers and repair steps below." in debug_report
+    assert "Resolve model CLI setup/auth items below." in debug_report
+    assert "querySelector('[data-debug-summary]')" in debug_report
+    assert "summaryNode.innerHTML = renderDebugSummary(snapshot);" in debug_report
+
+    debug_report_body = doc[
         doc.index("const renderDebugReportSnapshot = (snapshot = {}) => {"):
         doc.index("const renderRelayBridgeStatus = async () =>")
     ]
-    assert "currentBridgeUrl('debug-report')" in debug_report
-    assert "Copy debug report" in debug_report
-    assert "Readiness blockers" in debug_report
-    assert "Recent runtime calls" in debug_report
-    assert "Recent runtime results" in debug_report
-    assert "raw model output omitted" in debug_report
+    assert "currentBridgeUrl('debug-report')" in debug_report_body
+    assert "Copy debug report" in debug_report_body
+    assert "Readiness blockers" in debug_report_body
+    assert "Recent runtime calls" in debug_report_body
+    assert "Recent runtime results" in debug_report_body
+    assert "raw model output omitted" in debug_report_body
 
 
 def test_bridge_exposes_sanitized_debug_report_route():
