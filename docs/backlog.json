@@ -22,12 +22,13 @@
             "Closing PowerShell does not kill Meridian.",
             "Bridge process lifecycle is owned by the app runtime, not the user's shell."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "packaged app starts with bridge healthy in latest smoke",
-            "bridge lifecycle still needs formal app-owned supervisor proof"
+            "npm run proof:v3 passed Electron app-owned bridge tests",
+            "packaged EXE launch smoke reached healthy bridge without terminal dependency",
+            "bridge stopped after packaged app process was stopped"
           ],
-          "remaining_work": "Add release-gate proof that the packaged executable owns bridge startup/restart without a terminal dependency."
+          "remaining_work": "Keep packaged launch and shutdown ownership in V3 release smoke."
         },
         {
           "id": "M26-002",
@@ -42,12 +43,12 @@
             "Bridge status includes last observed error and retry state.",
             "Status updates without requiring a full app restart."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "status/debug UI now exposes bridge health snapshots",
-            "state-machine wording exists but full degraded/offline transitions need proof"
+            "npm run proof:v3 passed bridge health startup/retry/state tests",
+            "packaged EXE health smoke returned state healthy and version local-bridge-routes-v4"
           ],
-          "remaining_work": "Exercise healthy, starting, degraded, and offline states from the packaged app."
+          "remaining_work": "Keep healthy/starting/degraded/unreachable cases covered in Electron runtime tests."
         },
         {
           "id": "M26-003",
@@ -62,12 +63,12 @@
             "Restart action reports progress and final status.",
             "Failed restart shows the blocking reason and next repair step."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "local restart command exists",
-            "restart visibility and failure recovery still need a clean packaged-app proof"
+            "npm run proof:v3 passed supervised respawn tests",
+            "packaged /bridge/restart smoke returned supervised restart and recovered healthy bridge with a new PID"
           ],
-          "remaining_work": "Make restart progress/result visible and prove same-port recovery."
+          "remaining_work": "Keep /restart-bridge visible result covered by command smoke."
         },
         {
           "id": "M26-004",
@@ -81,12 +82,12 @@
             "Meridian does not show a false Codex-not-installed error when Codex works in the user's shell.",
             "Resolved tool paths are visible in diagnostics."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "Codex CLI path/env issue was remediated enough for Prime to respond",
-            "installer/runtime PATH contract still needs durable proof"
+            "npm run proof:v3 passed bridgeRuntimePath PATH normalization tests",
+            "runtime env visibility is persisted from Electron-owned bridge launch"
           ],
-          "remaining_work": "Persist runtime PATH normalization in packaged app startup diagnostics and test after reinstall/restart."
+          "remaining_work": "Keep runtime PATH snapshot visible in startup diagnostics."
         },
         {
           "id": "M26-005",
@@ -102,12 +103,12 @@
             "Failures are captured before the first user message.",
             "Startup diagnostics produce a compact user-facing report."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "startup diagnostics panel exists",
-            "skill registry unavailable was observed as a blocking diagnostic"
+            "npm run proof:v3 passed startup diagnostics tests for PATH, storage, auth, and skill registry states",
+            "diagnostics now treat missing/partial skill registry rows as explicit warning/failure states instead of silent startup ambiguity"
           ],
-          "remaining_work": "Downgrade nonfatal diagnostics and show direct recovery actions."
+          "remaining_work": "Keep startup diagnostics compact and actionable in UI copy."
         },
         {
           "id": "M26-006",
@@ -124,10 +125,10 @@
           ],
           "status": "partial",
           "evidence_refs": [
-            "status/debug/restart command surfaces exist",
-            "diagnostic summaries are visible"
+            "npm run proof:v3 passed runtime diagnostics and restart proof paths",
+            "packaged restart smoke proves supervised repair path for bridge restart"
           ],
-          "remaining_work": "Add direct repair actions for CLI path, bridge restart, log open, and startup retry."
+          "remaining_work": "Add or verify direct UI repair actions for CLI path recheck, log open/copy, and startup retry beyond bridge restart."
         }
       ]
     },
@@ -546,12 +547,13 @@
             "Bridge health reaches healthy or explains the blocker.",
             "Packaged smoke can be repeated after app restart."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "packaged exe smoke passed for the latest upload fix",
-            "not yet recorded as final 3.0 release gate"
+            "npm run proof:v3 passed and produced dist/Meridian-0.1.0-x64.exe",
+            "packaged EXE launch smoke reached healthy bridge without opening PowerShell",
+            "bridge shut down after the app process was stopped"
           ],
-          "remaining_work": "Run final packaged exe smoke from a clean checkout/install artifact."
+          "remaining_work": "Repeat this smoke on the release candidate artifact before tagging 3.0."
         },
         {
           "id": "M30-002",
@@ -591,12 +593,12 @@
             "/restart-bridge works locally.",
             "/skills opens or explains the skills panel locally."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "/status and /debug are visible local commands",
-            "/restart-bridge needs stronger visible result proof"
+            "local command router tests cover /clear, /status, /skills, /debug, and /restart-bridge before model routing",
+            "packaged /bridge/restart smoke recovered the local bridge through supervised restart"
           ],
-          "remaining_work": "Gate /status, /debug, /skills, /clear, and /restart-bridge with visible outcomes."
+          "remaining_work": "Keep command smoke in the V3 proof gate."
         },
         {
           "id": "M30-004",
@@ -659,10 +661,10 @@
           ],
           "status": "partial",
           "evidence_refs": [
-            "debug log and diagnostic panels exist",
-            "debug should become a collapsible log instead of static cards"
+            "npm run proof:v3 passed startup diagnostics failure/warning tests",
+            "packaged restart smoke proves bridge repair path"
           ],
-          "remaining_work": "Gate a failing bridge, missing CLI, unavailable skills registry, and timeout with useful user-facing remedies."
+          "remaining_work": "Still needs UI proof for missing Codex, unavailable skill registry, and timeout explanation copy from the user-facing panel."
         },
         {
           "id": "M30-007",
@@ -684,13 +686,14 @@
           ],
           "status": "pending",
           "evidence_refs": [
-            "version 3.0 should wait for runtime gates rather than feature count"
+            "runtime foundation and command gates now have V3 proof evidence",
+            "model-response, context-to-model, skills UX, and session survival gates still block 3.0 truth audit"
           ],
-          "remaining_work": "Update visible version only after all 3.0 gates pass."
+          "remaining_work": "Do not mark 3.0 final until M30-002, M30-004, M30-005, and remaining partial P0/P1 gates are proven or explicitly deferred."
         }
       ]
     }
   ],
   "status_updated_at": "2026-06-13",
-  "status_note": "Status reflects runtime-ui checkpoint work through commit deb51d235. Items marked partial have working slices or UI proof but still need a named release-gate smoke or deeper runtime proof before 3.0."
+  "status_note": "Status reflects runtime-ui checkpoint work through commit b8e86f6c3 plus V3 proof gate evidence: npm run proof:v3, packaged EXE health smoke, and supervised restart smoke. Model-response, context-to-model, skills UX, and session-survival gates remain open until proven end to end."
 }
