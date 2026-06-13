@@ -21,7 +21,13 @@
             "Launching the Meridian executable starts the model bridge automatically if absent.",
             "Closing PowerShell does not kill Meridian.",
             "Bridge process lifecycle is owned by the app runtime, not the user's shell."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "packaged app starts with bridge healthy in latest smoke",
+            "bridge lifecycle still needs formal app-owned supervisor proof"
+          ],
+          "remaining_work": "Add release-gate proof that the packaged executable owns bridge startup/restart without a terminal dependency."
         },
         {
           "id": "M26-002",
@@ -35,7 +41,13 @@
             "UI shows bridge states: starting, healthy, degraded, and offline.",
             "Bridge status includes last observed error and retry state.",
             "Status updates without requiring a full app restart."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "status/debug UI now exposes bridge health snapshots",
+            "state-machine wording exists but full degraded/offline transitions need proof"
+          ],
+          "remaining_work": "Exercise healthy, starting, degraded, and offline states from the packaged app."
         },
         {
           "id": "M26-003",
@@ -49,7 +61,13 @@
             "User can restart the bridge from Meridian UI without touching PowerShell.",
             "Restart action reports progress and final status.",
             "Failed restart shows the blocking reason and next repair step."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "local restart command exists",
+            "restart visibility and failure recovery still need a clean packaged-app proof"
+          ],
+          "remaining_work": "Make restart progress/result visible and prove same-port recovery."
         },
         {
           "id": "M26-004",
@@ -62,7 +80,13 @@
             "Meridian can find Codex CLI from the packaged app environment.",
             "Meridian does not show a false Codex-not-installed error when Codex works in the user's shell.",
             "Resolved tool paths are visible in diagnostics."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "Codex CLI path/env issue was remediated enough for Prime to respond",
+            "installer/runtime PATH contract still needs durable proof"
+          ],
+          "remaining_work": "Persist runtime PATH normalization in packaged app startup diagnostics and test after reinstall/restart."
         },
         {
           "id": "M26-005",
@@ -77,7 +101,13 @@
             "On launch, Meridian verifies bridge reachability, Codex CLI, auth visibility, writable storage, and skill registry.",
             "Failures are captured before the first user message.",
             "Startup diagnostics produce a compact user-facing report."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "startup diagnostics panel exists",
+            "skill registry unavailable was observed as a blocking diagnostic"
+          ],
+          "remaining_work": "Downgrade nonfatal diagnostics and show direct recovery actions."
         },
         {
           "id": "M26-006",
@@ -91,7 +121,13 @@
             "Each failed check has a clear repair action.",
             "Supported repair actions include restart bridge, recheck CLI, open logs, and copy diagnostic report.",
             "Repair actions update the health state after completion."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "status/debug/restart command surfaces exist",
+            "diagnostic summaries are visible"
+          ],
+          "remaining_work": "Add direct repair actions for CLI path, bridge restart, log open, and startup retry."
         }
       ]
     },
@@ -110,7 +146,13 @@
             "Sessions persist across app restart.",
             "Sessions persist across bridge restart.",
             "Session records include enough metadata to restore the visible session list."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "sessions are visible/recoverable in current runtime",
+            "user still observed possible missing Codex session"
+          ],
+          "remaining_work": "Prove survival across app restart, bridge restart, and abnormal close."
         },
         {
           "id": "M27-002",
@@ -124,7 +166,13 @@
             "Interrupted or incomplete sessions appear under recoverable sessions.",
             "Recovered session entries include timestamp and last message summary.",
             "User can reopen a recovered session without manual file inspection."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "session recovery UI exists",
+            "missing-session scenario still needs traceable audit trail"
+          ],
+          "remaining_work": "Add visible session provenance and recovery audit events."
         },
         {
           "id": "M27-003",
@@ -136,7 +184,13 @@
             "/clear, /status, /skills, and /restart-bridge are handled before model routing.",
             "Local command execution does not wait for a model response.",
             "Unknown slash commands produce a local explanation instead of a model timeout."
-          ]
+          ],
+          "status": "done",
+          "evidence_refs": [
+            "local slash commands are intercepted before model routing",
+            "/status and /debug run without prompt send"
+          ],
+          "remaining_work": "Keep command handler covered by regression tests."
         },
         {
           "id": "M27-004",
@@ -150,7 +204,13 @@
             "Running /clear immediately clears the active visible transcript.",
             "/clear does not call the model.",
             "Clearing the visible window does not delete durable session history unless a separate destructive command is explicitly implemented."
-          ]
+          ],
+          "status": "done",
+          "evidence_refs": [
+            "/clear is handled locally before model routing",
+            "visible prompt/session clearing behavior restored"
+          ],
+          "remaining_work": "Keep clear behavior separate from model context clearing until model-context reset is explicit."
         },
         {
           "id": "M27-005",
@@ -164,7 +224,13 @@
             "Commands have name, description, authority level, owner harness, and execution path metadata.",
             "Registry distinguishes executable local commands from informational capability rows.",
             "Registry can be rendered in the skills panel."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "local command registry is exposed to UI/runtime context",
+            "model-facing command explanations were noisy and needed persona cleanup"
+          ],
+          "remaining_work": "Keep command registry discoverable without forcing it into every model answer."
         },
         {
           "id": "M27-006",
@@ -178,7 +244,13 @@
             "Prime can explain available local commands.",
             "Prime does not claim to execute UI commands directly.",
             "Model context includes command descriptions and local execution boundaries."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "Prime receives runtime command awareness",
+            "Prime over-reported commands until persona/context cleanup"
+          ],
+          "remaining_work": "Move command awareness behind relevance rules and test answer tone."
         }
       ]
     },
@@ -197,7 +269,12 @@
             "Text pasted into Spark input appears reliably.",
             "Pasted text sends normally through the active message flow.",
             "Paste behavior works in the packaged app runtime."
-          ]
+          ],
+          "status": "done",
+          "evidence_refs": [
+            "prompt text entry and send path were restored after prompt lockup fixes"
+          ],
+          "remaining_work": "Keep Enter/send behavior in smoke coverage."
         },
         {
           "id": "M28-002",
@@ -209,7 +286,13 @@
             "Pasted images appear as removable attachment chips.",
             "Pasted images are passed to the bridge as context.",
             "Prime can inspect or discuss a pasted image in the same session."
-          ]
+          ],
+          "status": "done",
+          "evidence_refs": [
+            "pasted image attachment support is implemented and tested",
+            "bridge context attachment tests pass"
+          ],
+          "remaining_work": "Add end-to-end model-visible image proof when model image routing is enabled."
         },
         {
           "id": "M28-003",
@@ -221,7 +304,13 @@
             "User can upload images, markdown, text, JSON, CSV, logs, PDFs, DOC, and DOCX files.",
             "Uploaded files appear as removable attachment chips.",
             "Upload errors explain size or type limits clearly."
-          ]
+          ],
+          "status": "done",
+          "evidence_refs": [
+            "Prime upload control is wired to the Prime attachment tray",
+            "commit deb51d235 preserves the Upload control across tray rerenders"
+          ],
+          "remaining_work": "Keep regression that rerendering pending attachments does not remove Upload or file input."
         },
         {
           "id": "M28-004",
@@ -236,7 +325,13 @@
             "Bridge saves attachments to request-scoped local files.",
             "Saved attachment paths are passed to the Codex or model prompt.",
             "Attachment files are bounded by count and size limits."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "attachments are represented as pending context chips",
+            "materialization path has UI/test coverage"
+          ],
+          "remaining_work": "Prove uploaded docs/images reach the bridge payload and are recoverable in debug logs."
         },
         {
           "id": "M28-005",
@@ -250,7 +345,13 @@
             "Every model call includes prompt, visible session context, persona, command registry, attachments, and app or bridge status.",
             "Context payloads are explicit enough for Prime to know what is available.",
             "Payload contract avoids implying authority the runtime does not have."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "context payload contract exists for Prime attachments",
+            "needs stronger proof for all supported file types"
+          ],
+          "remaining_work": "Add payload inspection proof for image, markdown, txt, json, csv, pdf, and docx where supported."
         },
         {
           "id": "M28-006",
@@ -266,7 +367,13 @@
             "Automated smoke covers pasted image reaching bridge context.",
             "Automated smoke covers uploaded document reaching bridge context.",
             "Smoke tests run against the real UI path, not only isolated helpers."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "focused attachment tests and packaged UI smoke pass",
+            "full upload-to-model context smoke is still open"
+          ],
+          "remaining_work": "Create one named smoke covering paste, upload, send, and model-visible context."
         }
       ]
     },
@@ -287,7 +394,13 @@
             "Panel can represent local commands, Meridian capabilities, Codex skills, project skills, and Graphify.",
             "Every row has a stable source and authority level.",
             "The data model supports both executable and informational entries."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "skills panel work exists and local/model skills were added",
+            "user observed empty/collapsible behavior regressions during iteration"
+          ],
+          "remaining_work": "Lock data model with tests for local commands, local skills, Codex skills, and bridge metadata."
         },
         {
           "id": "M29-002",
@@ -301,7 +414,13 @@
             "Skills panel groups are collapsible.",
             "Skills panel search works across all groups.",
             "Skills panel is populated when opened."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "skills grouping was requested and partially implemented",
+            "collapsible behavior still needs verified UI proof"
+          ],
+          "remaining_work": "Prove all model/local skill groups expand/collapse and preserve search results."
         },
         {
           "id": "M29-003",
@@ -315,7 +434,13 @@
             "Each skill shows name, description, source, authority level, and whether it is executable or informational.",
             "Rows are not clickable as commands unless a real command path exists.",
             "Debug source fields are hidden unless diagnostics mode is active."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "source labels and display-only confusion were identified",
+            "copy still needs product-language cleanup"
+          ],
+          "remaining_work": "Replace harness labels with user-facing source/provenance labels."
         },
         {
           "id": "M29-004",
@@ -327,7 +452,13 @@
             "Prime is defined as a role speaking through Spark on behalf of Meridian.",
             "Prime contract includes directives, proof obligations, and response preferences.",
             "Prime response posture favors progress, confidence, and ownership without false claims."
-          ]
+          ],
+          "status": "done",
+          "evidence_refs": [
+            "Prime persona contract is present in the Prime harness UI",
+            "Prime wording was humanized after robotic runtime context responses"
+          ],
+          "remaining_work": "Keep persona visible as a collapsible Prime panel item."
         },
         {
           "id": "M29-005",
@@ -341,7 +472,13 @@
             "Actual Codex or model calls receive the Prime contract consistently.",
             "Identity questions are answered as Prime through Spark on behalf of Meridian.",
             "Persona injection is covered by tests or prompt payload proof."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "persona payload wiring was repaired after primeContractPayload failure",
+            "needs golden prompt proof across providers"
+          ],
+          "remaining_work": "Add prompt payload snapshot tests proving persona reaches the real model path."
         },
         {
           "id": "M29-006",
@@ -355,7 +492,13 @@
             "Golden tests cover identity questions.",
             "Golden tests cover failure handling and ownership tone.",
             "Golden tests prevent false runtime authority claims."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "persona/static harness tests exist",
+            "tone regression needs output-level fixtures"
+          ],
+          "remaining_work": "Add golden response fixtures for role, command-awareness, and ownership tone."
         },
         {
           "id": "M29-007",
@@ -370,7 +513,13 @@
             "User-facing panels do not lead with display-only or registry jargon unless diagnostics mode is active.",
             "Capability labels are rewritten as user-understandable state.",
             "Internal advisory language remains available where it protects authority boundaries."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "several noisy harness/status surfaces were hidden or collapsed",
+            "debug/status copy still needs a real product pass"
+          ],
+          "remaining_work": "Replace display-only/harness wording with Beacon/Relay/Prime product language."
         }
       ]
     },
@@ -396,7 +545,13 @@
             "Fresh launch from EXE starts UI and bridge with no terminal required.",
             "Bridge health reaches healthy or explains the blocker.",
             "Packaged smoke can be repeated after app restart."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "packaged exe smoke passed for the latest upload fix",
+            "not yet recorded as final 3.0 release gate"
+          ],
+          "remaining_work": "Run final packaged exe smoke from a clean checkout/install artifact."
         },
         {
           "id": "M30-002",
@@ -412,7 +567,13 @@
             "User sends a message.",
             "Prime responds.",
             "Bridge status remains healthy through the exchange."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "message input/send path has been restored",
+            "model timeout path still needs clearer recovery behavior"
+          ],
+          "remaining_work": "Gate on first prompt, timeout recovery, second prompt, and visible elapsed time."
         },
         {
           "id": "M30-003",
@@ -429,7 +590,13 @@
             "/status works locally.",
             "/restart-bridge works locally.",
             "/skills opens or explains the skills panel locally."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "/status and /debug are visible local commands",
+            "/restart-bridge needs stronger visible result proof"
+          ],
+          "remaining_work": "Gate /status, /debug, /skills, /clear, and /restart-bridge with visible outcomes."
         },
         {
           "id": "M30-004",
@@ -448,7 +615,13 @@
             "Uploaded document is visible to Prime in one session.",
             "Pasted image is visible to Prime in one session.",
             "Attachment paths and metadata are visible in bridge proof."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "Prime Upload button survival is smoke-tested",
+            "full context-to-model proof remains open"
+          ],
+          "remaining_work": "Gate paste image, upload document, upload image, and send with debug payload evidence."
         },
         {
           "id": "M30-005",
@@ -463,7 +636,12 @@
             "Close app.",
             "Reopen app.",
             "Previous session is recoverable."
-          ]
+          ],
+          "status": "pending",
+          "evidence_refs": [
+            "session disappearance concern remains unresolved"
+          ],
+          "remaining_work": "Gate app close/reopen, bridge restart, Codex session recovery, and session provenance audit."
         },
         {
           "id": "M30-006",
@@ -478,7 +656,13 @@
             "Simulated missing bridge error produces actionable UI repair steps.",
             "Simulated missing Codex error produces actionable UI repair steps.",
             "Failure message identifies the failed layer."
-          ]
+          ],
+          "status": "partial",
+          "evidence_refs": [
+            "debug log and diagnostic panels exist",
+            "debug should become a collapsible log instead of static cards"
+          ],
+          "remaining_work": "Gate a failing bridge, missing CLI, unavailable skills registry, and timeout with useful user-facing remedies."
         },
         {
           "id": "M30-007",
@@ -497,9 +681,16 @@
             "3.0 is blocked until runtime readiness gates pass.",
             "Release notes distinguish harness capability maturity from runtime competence.",
             "No broad feature expansion is allowed to bypass failed P0 readiness gates."
-          ]
+          ],
+          "status": "pending",
+          "evidence_refs": [
+            "version 3.0 should wait for runtime gates rather than feature count"
+          ],
+          "remaining_work": "Update visible version only after all 3.0 gates pass."
         }
       ]
     }
-  ]
+  ],
+  "status_updated_at": "2026-06-13",
+  "status_note": "Status reflects runtime-ui checkpoint work through commit deb51d235. Items marked partial have working slices or UI proof but still need a named release-gate smoke or deeper runtime proof before 3.0."
 }
