@@ -4788,10 +4788,13 @@ def test_index_settings_surface_controls_bottom_band_visibility_locally():
     assert 'class="instrumentation-band"' in doc
     assert "const instrumentationBandKey = 'meridian.instrumentation-band.v1'" in band_surface
     assert "const instrumentationBandAttentionOnlyKey = 'meridian.instrumentation-band.attention-only.v1'" in band_surface
+    assert "const instrumentationDebugLogOpenKey = 'meridian.instrumentation-debug-log.open.v1'" in band_surface
     assert "const instrumentationBandCap = 6;" in band_surface
     assert "const instrumentationBandOptions = [" in band_surface
     assert "readInstrumentationBandAttentionOnly" in band_surface
     assert "writeInstrumentationBandAttentionOnly" in band_surface
+    assert "readInstrumentationDebugLogOpen" in band_surface
+    assert "writeInstrumentationDebugLogOpen" in band_surface
     assert "instrumentationBandAttentionStatuses" in band_surface
     assert "data-instrumentation-band-attention-only" in band_surface
     assert "const loadInstrumentationBand = async () => {" in band_surface
@@ -4799,12 +4802,16 @@ def test_index_settings_surface_controls_bottom_band_visibility_locally():
     assert "fetch(currentBridgeUrl('review-console'), { cache: 'no-store' })" in band_surface
     assert "fetch(currentBridgeUrl('aegis-logic'), { cache: 'no-store' })" in band_surface
     assert "fetch(currentBridgeUrl('health'), { cache: 'no-store' })" in band_surface
-    assert "gridTemplateColumns = `repeat(${Math.max(1, visible.length)}, minmax(0, 1fr))`" in band_surface
-    assert "instrumentationBandNode.hidden = visible.length === 0;" in band_surface
+    assert "class=\"instrumentation-debug-log\"" in band_surface
+    assert "data-instrumentation-debug-log" in band_surface
+    assert "class=\"instrumentation-debug-summary\"" in band_surface
+    assert "class=\"instrumentation-debug-entries\"" in band_surface
+    assert "writeInstrumentationDebugLogOpen(event.target.open)" in band_surface
     assert "data-instrumentation-band-toggle" in band_surface
     assert "Show only attention cells" in band_surface
-    assert "healthy cells can stay selected but hidden from the live band" in band_surface
-    assert "Attention-only mode hides healthy routine cells" in band_surface
+    assert "bottom collapsible debug log" in band_surface
+    assert "collapsed debug summary; expanded log shows selected attention rows" in band_surface
+    assert "Attention-only mode keeps the collapsed log focused" in band_surface
     assert "data-instrumentation-band-surface" in settings_surface
     assert "initializeInstrumentationBandSurface();" in settings_surface
     assert "bridgeUrl('message')" not in band_surface

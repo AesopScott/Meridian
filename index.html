@@ -1271,14 +1271,10 @@ body {
   right: 24px;
   bottom: 18px;
   z-index: 4;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
-.instrumentation-band-cell {
-  min-height: 58px;
+.instrumentation-debug-log {
   border: 1px solid rgba(87, 239, 255, 0.28);
   background:
     linear-gradient(180deg, rgba(0, 10, 12, 0.94), rgba(0, 5, 7, 0.92)),
@@ -1286,10 +1282,75 @@ body {
   box-shadow:
     inset 0 0 10px rgba(87, 239, 255, 0.06),
     0 0 16px rgba(0, 0, 0, 0.34);
-  padding: 8px 10px 7px;
+  box-shadow:
+    inset 0 0 10px rgba(87, 239, 255, 0.06),
+    0 0 16px rgba(0, 0, 0, 0.34);
+}
+
+.instrumentation-debug-log[open] {
+  border-color: rgba(255, 207, 102, 0.46);
+}
+
+.instrumentation-debug-summary {
+  min-height: 34px;
+  padding: 7px 10px;
   display: grid;
-  gap: 4px;
-  align-content: start;
+  grid-template-columns: minmax(130px, 0.5fr) minmax(0, 1.6fr) auto;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.instrumentation-debug-summary::-webkit-details-marker {
+  display: none;
+}
+
+.instrumentation-debug-title,
+.instrumentation-debug-count,
+.instrumentation-debug-status {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instrumentation-debug-title {
+  color: rgba(149, 225, 255, 0.78);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.instrumentation-debug-count {
+  color: rgba(235, 251, 255, 0.96);
+  font-size: 12px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.instrumentation-debug-status {
+  color: rgba(154, 187, 196, 0.84);
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.instrumentation-debug-entries {
+  max-height: 190px;
+  overflow: auto;
+  border-top: 1px solid rgba(87, 239, 255, 0.18);
+  padding: 8px 10px 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.instrumentation-band-cell {
+  border: 1px solid rgba(87, 239, 255, 0.22);
+  padding: 7px 9px 6px;
+  display: grid;
+  gap: 3px;
 }
 
 .instrumentation-band-label {
@@ -1339,9 +1400,13 @@ body {
     gap: 6px;
   }
 
-  .instrumentation-band-cell {
-    min-height: 54px;
-    padding: 7px 8px 6px;
+  .instrumentation-debug-summary {
+    grid-template-columns: minmax(110px, 0.6fr) minmax(0, 1fr);
+  }
+
+  .instrumentation-debug-status {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 
   .instrumentation-band-value {
@@ -11674,6 +11739,7 @@ body {
   };
   const instrumentationBandKey = 'meridian.instrumentation-band.v1';
   const instrumentationBandAttentionOnlyKey = 'meridian.instrumentation-band.attention-only.v1';
+  const instrumentationDebugLogOpenKey = 'meridian.instrumentation-debug-log.open.v1';
   const instrumentationBandCap = 6;
   const instrumentationBandOptions = [
     { id: 'beacon', label: 'Beacon' },
@@ -11725,6 +11791,12 @@ body {
     const next = value !== false;
     try { localStorage.setItem(instrumentationBandAttentionOnlyKey, String(next)); } catch {}
     return next;
+  };
+  const readInstrumentationDebugLogOpen = () => {
+    try { return localStorage.getItem(instrumentationDebugLogOpenKey) === 'true'; } catch { return false; }
+  };
+  const writeInstrumentationDebugLogOpen = (value) => {
+    try { localStorage.setItem(instrumentationDebugLogOpenKey, value ? 'true' : 'false'); } catch {}
   };
   const instrumentationBandAttentionStatuses = new Set(['busy', 'degraded', 'offline', 'blocked']);
   const instrumentationBandSnapshot = {
@@ -11818,9 +11890,7 @@ body {
     const visible = readInstrumentationBandAttentionOnly()
       ? selected.filter((id) => instrumentationBandAttentionStatuses.has(cellState[id]?.status))
       : selected;
-    instrumentationBandNode.hidden = visible.length === 0;
-    instrumentationBandNode.style.gridTemplateColumns = `repeat(${Math.max(1, visible.length)}, minmax(0, 1fr))`;
-    instrumentationBandNode.innerHTML = visible.map((id) => {
+    const lines = visible.map((id) => {
       const cell = cellState[id];
       return `
         <div class="instrumentation-band-cell" data-status="${escapeHtml(cell.status)}" data-instrumentation-cell="${escapeHtml(id)}">
@@ -11829,7 +11899,34 @@ body {
           <div class="instrumentation-band-detail">${escapeHtml(cell.detail)}</div>
         </div>
       `;
-    }).join('');
+    }).join('') || `
+      <div class="instrumentation-band-cell" data-status="online" data-instrumentation-cell="clear">
+        <div class="instrumentation-band-label">Runtime</div>
+        <div class="instrumentation-band-value">clear</div>
+        <div class="instrumentation-band-detail">no attention states visible</div>
+      </div>
+    `;
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const summary = visible.length
+      ? `${visible.length} attention item${visible.length === 1 ? '' : 's'}`
+      : 'clear';
+    const statusLine = visible.map((id) => `${cellState[id].label}: ${cellState[id].value}`).join(' | ') || 'No blockers, degraded routes, or busy proof states.';
+    instrumentationBandNode.hidden = false;
+    instrumentationBandNode.innerHTML = `
+      <details class="instrumentation-debug-log" data-instrumentation-debug-log ${readInstrumentationDebugLogOpen() ? 'open' : ''}>
+        <summary class="instrumentation-debug-summary">
+          <span class="instrumentation-debug-title">Debug log</span>
+          <span class="instrumentation-debug-count">${escapeHtml(summary)}</span>
+          <span class="instrumentation-debug-status">${escapeHtml(timestamp)} | ${escapeHtml(statusLine)}</span>
+        </summary>
+        <div class="instrumentation-debug-entries" aria-label="Runtime debug log">
+          ${lines}
+        </div>
+      </details>
+    `;
+    instrumentationBandNode.querySelector('[data-instrumentation-debug-log]')?.addEventListener('toggle', (event) => {
+      writeInstrumentationDebugLogOpen(event.target.open);
+    });
   };
   const loadInstrumentationBand = async () => {
     try {
@@ -11863,8 +11960,9 @@ body {
     ['fixed cap', String(instrumentationBandCap)],
     ['storage key', instrumentationBandKey],
     ['attention mode key', instrumentationBandAttentionOnlyKey],
-    ['surface', 'bottom instrumentation band'],
-    ['layout', 'stable fixed-cap grid; healthy cells can stay selected but hidden from the live band'],
+    ['debug log key', instrumentationDebugLogOpenKey],
+    ['surface', 'bottom collapsible debug log'],
+    ['layout', 'collapsed debug summary; expanded log shows selected attention rows'],
   ]);
   };
   const renderInstrumentationBandSurface = () => {
@@ -11886,9 +11984,9 @@ body {
         <div data-instrumentation-band-preview>${renderInstrumentationBandPreview(selected)}</div>
       `, true),
       relaySection('Bottom band boundary', relayList([
-        'Settings chooses which reviewed instrumentation cells stay visible in the live bottom band.',
-        'Attention-only mode hides healthy routine cells from the live band while keeping selected blockers, degraded states, offline routes, and busy proof/queue states visible.',
-        'Selection is capped so the layout stays stable instead of widening as more cells are enabled.',
+        'Settings chooses which reviewed instrumentation cells can appear in the collapsible bottom debug log.',
+        'Attention-only mode keeps the collapsed log focused on blockers, degraded states, offline routes, and busy proof/queue states.',
+        'The bottom surface is collapsed by default; expanding it shows the selected runtime rows without opening a model prompt.',
         'This is UI-local visibility only; no backend queue, route, review, proof, or settings mutation is invoked.',
       ]), false),
     ];
