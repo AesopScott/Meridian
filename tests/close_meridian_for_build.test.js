@@ -6,6 +6,7 @@ const test = require('node:test');
 const {
   closeMeridianForBuild,
   isMeridianBuildProcess,
+  stopProcess,
 } = require('../scripts/close-meridian-for-build');
 
 const repoRoot = 'c:\\users\\scott\\code\\meridian';
@@ -75,4 +76,16 @@ test('closeMeridianForBuild stops only matched processes', () => {
 
   assert.deepEqual(closed.map((item) => item.ProcessId), [201]);
   assert.deepEqual(stopped, [201]);
+  assert.equal(closed[0].stopped, true);
+});
+
+test('stopProcess treats already-gone process races as non-fatal', () => {
+  const result = stopProcess(999, {
+    execFile() {
+      throw new Error('Cannot find a process with the process identifier 999.');
+    },
+  });
+
+  assert.equal(result.stopped, false);
+  assert.match(result.stopError, /Cannot find a process/);
 });

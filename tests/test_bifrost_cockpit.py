@@ -955,7 +955,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "backend:string required from /bridge/models; prompt:text supplied only in Prime/User prompt after manual model selection; auto:boolean default false" in doc
     assert "argument schema" in doc
     assert "Search local skills, commands, and capabilities" in doc
-    assert "Meridian commands run only through their owning UI path or local command handler; /clear is handled before model routing." in doc
+    assert "Meridian commands run through their owning UI path or local command handler before model routing; /clear, /status, /skills, and /restart-bridge are handled locally before model routing." in doc
     assert "Codex skills are listed for discovery so Prime can explain or use them when you ask in conversation." in doc
     assert "Search and pins are local UI behavior; rows are not run by clicking this panel." in doc
     assert "Bridge metadata may add FileMap and model capability rows when the local bridge is available." in doc
@@ -1114,7 +1114,7 @@ def test_clear_command_clears_active_session_window_without_bridge_message():
     assert "input.value = ''" in local_command
     assert "localStorage.setItem(draftKey(input), '')" in local_command
     assert "setStatus(input, 'cleared')" in local_command
-    assert "prompt.trim().toLowerCase() !== '/clear'" in local_command
+    assert "prompt.trim().toLowerCase().split(/\\s+/" in local_command
     assert "clearActiveSessionWindow(input)" in local_command
     assert "bridgeUrl('message')" not in local_command
     assert "pushEntry(" not in local_command
@@ -1123,12 +1123,172 @@ def test_clear_command_clears_active_session_window_without_bridge_message():
         doc.index("const sendPrompt = async (input) =>"):
         doc.index("const insertPromptToken = (input")
     ]
-    assert "if (handleLocalSessionCommand(input, prompt)) return;" in send_prompt
+    assert "if (await handleLocalSessionCommand(input, prompt)) return;" in send_prompt
     assert (
-        send_prompt.index("if (handleLocalSessionCommand(input, prompt)) return;")
+        send_prompt.index("if (await handleLocalSessionCommand(input, prompt)) return;")
         < send_prompt.index("if (!modelReadiness.length) await updateModelReadiness();")
         < send_prompt.index("fetch(bridgeUrl('message')")
     )
+
+
+def test_session_prompt_has_visible_send_button_and_enter_submit_path():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'class="session-prompt-row"' in doc
+    assert 'class="session-send-button" type="button"' in doc
+    assert "Send Prime prompt" in doc
+    assert "Send User prompt" in doc
+    assert "querySelector('.session-send-button')?.addEventListener('click', () =>" in doc
+    assert "sendPrompt(input);" in doc[
+        doc.index("input.addEventListener('keydown', (event) => {"):
+        doc.index("attachmentTrayFor(input)?.addEventListener('click'")
+    ]
+    assert "grid-template-rows: auto auto 1fr auto;" in doc
+    assert "pointer-events: auto;" in doc[
+        doc.index(".session-prompt-row {"):
+        doc.index(".session-window[data-session-collapsed=\"true\"] .session-interface")
+    ]
+    assert ".session-send-button:hover" in doc
+
+
+def test_local_session_command_router_covers_status_skills_and_restart_bridge():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    local_commands = doc[
+        doc.index("const handleLocalSessionCommand = async (input, prompt) => {"):
+        doc.index("const setStatus = (input, text) =>")
+    ]
+    assert "const normalizedCommand = prompt.trim().toLowerCase().split(/\\s+/" in local_commands
+    assert "if (normalizedCommand === '/status')" in local_commands
+    assert "const opened = renderRelayModels();" in local_commands
+    assert "if (normalizedCommand === '/skills')" in local_commands
+    assert "const opened = renderSparkSkills();" in local_commands
+    assert "if (normalizedCommand === '/debug')" in local_commands
+    assert "debug report opened" in local_commands
+    assert "if (normalizedCommand === '/restart-bridge')" in local_commands
+    assert "const restart = await restartModelBridge();" in local_commands
+    assert "? 'bridge restarted'" in local_commands
+    assert "bridge restart blocked:" in local_commands
+    assert "if (normalizedCommand.startsWith('/'))" in local_commands
+
+    meridian_rows = doc[
+        doc.index("const meridianLocalSkillRows = () => ["):
+        doc.index("const skillRegistryRowsFromSnapshots = (fileMapSnapshot, modelsSnapshot) =>")
+    ]
+    assert "name: '/status'" in meridian_rows
+    assert "name: '/skills'" in meridian_rows
+    assert "name: '/debug'" in meridian_rows
+    assert "name: '/restart-bridge'" in meridian_rows
+    assert "Open the local runtime status panel in Spark." in meridian_rows
+    assert "Open the local runtime debug report with health, readiness, model, and recent-call metadata." in meridian_rows
+    assert "Type /restart-bridge in a session prompt to restart the runtime bridge." in meridian_rows
+    assert "Meridian commands run through their owning UI path or local command handler before model routing" in meridian_rows
+
+
+def test_local_session_command_router_explains_unknown_slash_commands():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    local_commands = doc[
+        doc.index("const handleLocalSessionCommand = async (input, prompt) => {"):
+        doc.index("const setStatus = (input, text) =>")
+    ]
+    assert "unknown meridian command ${normalizedCommand}; try /clear, /status, /skills, /debug, or /restart-bridge" in local_commands
+    assert "if (normalizedCommand.startsWith('/')) {" in local_commands
+    assert "bridgeUrl('message')" not in local_commands
+
+
+def test_send_prompt_includes_prime_contract_and_runtime_fields():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    send_prompt = doc[
+        doc.index("const sendPrompt = async (input) =>"):
+        doc.index("const insertPromptToken = (input, token) =>")
+    ]
+    assert "const messagePayload = {" in send_prompt
+    assert "primeContract," in send_prompt
+    assert "transcript: visibleTranscript" in send_prompt
+    assert "attachments," in send_prompt
+    assert "projectContext," in send_prompt
+    assert "sessionTargetId: targetSession?.sessionId || ''" in send_prompt
+    assert (
+        send_prompt.index("if (await handleLocalSessionCommand(input, prompt)) return;")
+        < send_prompt.index("const messagePayload = {")
+        < send_prompt.index("const response = await fetch(bridgeUrl('message'),")
+    )
+
+
+def test_bridge_message_applies_prime_contract_in_model_path():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "const primeContract = body.primeContract || null;" in bridge
+    assert "primeContract," in bridge
+    assert "promptWithVisibleSession(prompt, transcript, { primeContract })" in bridge
+    assert "function runModel({" in bridge
+    assert "primeContract = null," in bridge
+
+
+def test_bridge_message_route_enforces_runtime_readiness_gate():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "function runtimeMessageReadiness() {" in bridge
+    assert "sendJson(res, 503, {" in bridge
+    assert "error: 'runtime readiness gates failed'" in bridge
+    assert "runtimeReadiness:" in bridge
+    assert "if (!readiness.ok) {" in bridge
+    assert "const readiness = runtimeMessageReadiness();" in bridge
+
+
+def test_startup_diagnostics_warns_without_blocking_prompt_send():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    send_prompt = doc[
+        doc.index("const sendPrompt = async (input) =>"):
+        doc.index("const insertPromptToken = (input")
+    ]
+    assert "const startupDiagnostics = await runStartupDiagnostics(selectedBackend);" in send_prompt
+    assert "if (!startupDiagnostics.ok) {" in send_prompt
+    assert "startupDiagnosticsSummary(startupDiagnostics)" in send_prompt
+    diagnostics_branch = send_prompt[
+        send_prompt.index("if (!startupDiagnostics.ok) {"):
+        send_prompt.index("if (!modelReadiness.length) await updateModelReadiness();")
+    ]
+    assert "pushEntry(" not in diagnostics_branch
+    assert "return;" not in diagnostics_branch
+    assert (
+        send_prompt.index("if (await handleLocalSessionCommand(input, prompt)) return;")
+        < send_prompt.index("const startupDiagnostics = await runStartupDiagnostics(selectedBackend);")
+        < send_prompt.index("if (!modelReadiness.length) await updateModelReadiness();")
+    )
+
+
+def test_startup_diagnostics_checks_bridge_codex_storage_and_skills():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    startup = doc[
+        doc.index("const startupDiagnosticsSummary = (state = startupDiagnosticsState) => {"):
+        doc.index("const insertPromptToken = (input, token) =>")
+    ]
+    assert "startupDiagnosticsPromise" in startup
+    assert "bridgeUrl('models')" in startup
+    assert "bridgeUrl('filemap')" in startup
+    assert "Codex CLI metadata missing" in startup
+    assert "localStorage not writable" in startup
+    assert "skillRegistryRowsFromSnapshots(fileMapSnapshot, registryModelsSnapshot)" in startup
+    assert "skill registry model rows missing" in startup
+    assert "state.warnings.push('skill registry unavailable')" in startup
+    assert "state.warnings.push('skill registry empty')" in startup
+    assert "warnings: ${state.warnings.join('; ')}" in startup
+    assert "startup diagnostics blocked" in startup
+    assert "model runtime environment path metadata missing" in startup
+
+
+def test_startup_diagnostics_runs_on_launch():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    startup_init = doc[
+        doc.index("updateModelReadiness();"):
+        doc.index("window.meridianRefreshUserSessionTarget = () => {")
+    ]
+    assert "void runStartupDiagnostics();" in startup_init
+
+
+def test_bridge_models_route_exposes_runtime_environment_path_summary():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "const PATH_ENV_NAME = Object.keys(process.env).find((key) => key.toLowerCase() === 'path') || 'Path';" in bridge
+    assert "function summarizeBridgePath(baseEnv = process.env) {" in bridge
+    assert "pathEnvKey:" in bridge
+    assert "runtimeEnvironment: summarizeBridgePath(process.env)" in bridge
 
 
 def test_bridge_wraps_model_prompt_as_prime_through_spark():
@@ -1162,7 +1322,16 @@ def test_ui_checklist_promotes_prime_and_user_prompt_response_surfaces_from_brid
     assert ".session-window-right.is-panel-surface .session-response-output" in index
     assert "display: none;" in index
     assert "const channel = String(body.channel || 'prime').toLowerCase();" in bridge
-    assert "const result = await runModel({ backend, prompt: promptForModel, cwd, transcript });" in bridge
+    assert "const result = await runModel({" in bridge
+    assert "backend," in bridge
+    assert "prompt: promptForModel," in bridge
+    assert "cwd," in bridge
+    assert "transcript," in bridge
+    assert "bridgeContext," in bridge
+    assert "commandRegistry," in bridge
+    assert "runtimeAttachments:" in bridge
+    assert "sessionContext," in bridge
+    assert "primeContract," in bridge
     assert "result.channel = channel;" in bridge
     assert "cwd = sessionTarget.cwd;" in bridge
 
@@ -1666,7 +1835,7 @@ def test_index_user_session_mode_names_target_and_preserves_storage():
     assert "meridian.user-session.target.v1" in doc
     assert "const loadUserSessions = async () =>" in doc
     assert "bridgeUrl('user-sessions')" in doc
-    assert "userSessions = Array.isArray(result.sessions) ? result.sessions.filter((session) => session.routable) : []" in doc
+    assert "userSessions = Array.isArray(result.sessions) ? result.sessions : []" in doc
     assert "const selected = selectedUserSession();" in doc
     assert "selected ? `User Session: ${selected.sessionName}` : 'User Session'" in doc
     assert "if (!selected && localStorage.getItem(userSessionTargetKey)) return 'selected session unavailable';" in doc
@@ -1674,12 +1843,22 @@ def test_index_user_session_mode_names_target_and_preserves_storage():
     assert "option.textContent = userSessionsLoadFailed ? 'Sessions unavailable' : 'No live sessions';" in doc
     assert "option.textContent = 'No live sessions for active project';" in doc
     assert "option.textContent = 'Selected session unavailable';" in doc
-    assert "const firstLiveTarget = userSessions[0]" in doc
+    assert "const liveSessions = userSessions.filter((session) => session.routable)" in doc
+    assert "const recoveredSessions = userSessions.filter((session) => !session.routable)" in doc
+    assert "const firstLiveTarget = liveSessions[0] || recoveredSessions[0]" in doc
+    assert "if (recoveredSessions.length)" in doc
+    assert "recoveredGroup.label = 'Recoverable sessions'" in doc
+    assert "lastMessageSummary" in doc
+    assert "const restoreRecoverableSessionWindow = (session, input = userInput()) =>" in doc
+    assert "Recovered session reopened from persisted runtime state" in doc
+    assert "This recovered entry is not routable; select a live session before sending." in doc
     assert "userSessionSelect.value = firstLiveTarget.sessionId" in doc
     assert "localStorage.setItem(userSessionTargetKey, userSessionSelect.value)" in doc
     assert "Select a live User Session target before sending" in doc
     assert "const targetSession = sessionChannel(input) === 'user' ? selectedUserSession() : null;" in doc
     assert "if (sessionChannel(input) === 'user' && !targetSession)" in doc
+    assert "if (sessionChannel(input) === 'user' && (targetSession.recoverable || targetSession.routable === false))" in doc
+    assert "Recovered sessions are read-only and will not be sent" in doc
     assert "if (targetSession?.cwd) messagePayload.cwd = targetSession.cwd;" in doc
     assert "C:\\\\Users\\\\user\\\\Code\\\\Meridian" not in doc
     assert "sessionTargetId: targetSession?.sessionId || ''" in doc
@@ -1701,6 +1880,42 @@ def test_bridge_revalidates_user_session_target_before_user_prompt_send():
     assert "sessionTarget = sessionTargetId ? await sessionTargetById(sessionTargetId) : null;" in doc
     assert "sendJson(res, 409, { ok: false, text: '', error: 'Select a live User Session target before sending.', setupRequired: false }, req);" in doc
     assert "cwd = sessionTarget.cwd;" in doc
+
+
+def test_bridge_persists_user_call_attempts_for_runtime_restart_recovery():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "const BRIDGE_RUNTIME_STATE_PATH = path.join(DEFAULT_CWD, '.meridian', 'bridge-runtime-state.json');" in bridge
+    assert "function loadBridgeRuntimeState()" in bridge
+    assert "function persistBridgeRuntimeState()" in bridge
+    assert "function pruneRecentCalls(now = Date.now())" in bridge
+    assert "function recoverableUserSessionsFromRuntime()" in bridge
+    assert "status: 'recoverable'" in bridge
+    assert "routable: false" in bridge
+    assert "lastMessageSummary" in bridge
+    assert "requestSummary" in bridge
+
+
+def test_bridge_user_sessions_route_includes_recoverable_records_for_reopen():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "const liveSessionIds = new Set(liveSessions.map((session) => session.sessionId));" in bridge
+    assert "const recoverableSessions = recoverableUserSessionsFromRuntime()" in bridge
+    assert "const sessions = [...liveSessions, ...recoverableSessions];" in bridge
+    assert "sessionTarget = sessionTargetId ? await sessionTargetById(sessionTargetId) : null;" in bridge
+    assert "if (!sessionTarget) {" in bridge
+
+
+def test_bridge_message_route_records_call_intent_before_model_exec():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    message = bridge[
+        bridge.index("if (req.method === 'POST' && req.url === BRIDGE_ROUTES.message) {"):
+        bridge.index("sendJson(res, 404, { ok: false, error: 'Not found' }, req);")
+    ]
+    assert "const requestSummary = String(promptForModel || prompt)" in message
+    assert "rememberCall({" in message
+    assert "requestSummary," in message
+    assert "result.text || ''" in message
+    assert "rememberResult({" in message
+    assert "sessionName: sessionTarget?.sessionName || ''" in message
 
 
 def test_compass_logic_snapshot_documents_project_context_harness():
@@ -3654,6 +3869,58 @@ def test_index_relay_refresh_reloads_logic_snapshot():
     assert "loadFederationHorizon();" in body
 
 
+def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    relay_models = doc[
+        doc.index("const renderRelayModels = () => {"):
+        doc.index("const renderPrimeLogic = () => {")
+    ]
+    assert "data-relay-bridge-status" in relay_models
+    assert "data-debug-report" in relay_models
+    assert "renderRelayBridgeStatus();" in relay_models
+    assert "loadDebugReport();" in relay_models
+
+    relay_bridge_status = doc[
+        doc.index("const relayBridgeRows = (status, detail) => ["):
+        doc.index("const renderRelayBridgeStatus = async () =>")
+    ]
+    assert "['bridge state', detail.state || 'offline']" in relay_bridge_status
+    assert "['startup probes', String(detail.startupProbes ?? 0)]" in relay_bridge_status
+    assert "['startup uptime', detail.startupUptimeMs ? `${Math.round(detail.startupUptimeMs / 100) / 10}s` : 'n/a']" in relay_bridge_status
+    assert "['error', detail.error || 'none']" in relay_bridge_status
+
+    render_status = doc[
+        doc.index("const renderRelayBridgeStatus = async () => {"):
+        doc.index("const clearRightPanelSurface = () => {")
+    ]
+    assert "state: result.state || 'offline'" in render_status
+    assert "startupProbes: Number(result?.startup?.probes || 0)" in render_status
+    assert "startupUptimeMs: Number(result?.startup?.uptimeMs || 0)" in render_status
+
+    debug_report = doc[
+        doc.index("const renderDebugReportSnapshot = (snapshot = {}) => {"):
+        doc.index("const renderRelayBridgeStatus = async () =>")
+    ]
+    assert "currentBridgeUrl('debug-report')" in debug_report
+    assert "Copy debug report" in debug_report
+    assert "Readiness blockers" in debug_report
+    assert "Recent runtime calls" in debug_report
+    assert "Recent runtime results" in debug_report
+    assert "raw model output omitted" in debug_report
+
+
+def test_bridge_exposes_sanitized_debug_report_route():
+    bridge = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
+    assert "debugReport: '/bridge/debug-report'" in bridge
+    assert "async function buildDebugReport()" in bridge
+    assert "runtimeMessageReadiness()" in bridge
+    assert "debugRecentCallSummary" in bridge
+    assert "debugRecentResultSummary" in bridge
+    assert "textChars: String(result?.text || '').length" in bridge
+    assert "raw model output is not included in this debug report" in bridge
+    assert "req.method === 'GET' && req.url === BRIDGE_ROUTES.debugReport" in bridge
+
+
 def test_bridge_exposes_prime_logic_route_and_capability():
     doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
     assert "primeRuntimeSnapshot: true" in doc
@@ -4395,11 +4662,13 @@ def test_index_settings_surface_promotes_set17_to_local_session_window_posture_d
     checklist = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
 
     assert "const sessionWindowDefaultsKey = 'meridian.session-window-defaults.v1'" in defaults_surface
-    assert "hidden: false, collapsed: false, pinned: false, size: 'standard'" in defaults_surface
-    assert "windowEl.dataset.sessionHidden = config.hidden ? 'true' : 'false';" in defaults_surface
-    assert "windowEl.dataset.sessionCollapsed = config.collapsed ? 'true' : 'false';" in defaults_surface
-    assert "windowEl.dataset.sessionPinned = config.pinned ? 'true' : 'false';" in defaults_surface
-    assert "windowEl.dataset.sessionSize = config.size || 'standard';" in defaults_surface
+    assert "prime: { hidden: false, collapsed: false, pinned: true, size: 'standard' }" in defaults_surface
+    assert "const safeConfig = role === 'prime'" in defaults_surface
+    assert "? { ...config, hidden: false, collapsed: false, pinned: true }" in defaults_surface
+    assert "windowEl.dataset.sessionHidden = safeConfig.hidden ? 'true' : 'false';" in defaults_surface
+    assert "windowEl.dataset.sessionCollapsed = safeConfig.collapsed ? 'true' : 'false';" in defaults_surface
+    assert "windowEl.dataset.sessionPinned = safeConfig.pinned ? 'true' : 'false';" in defaults_surface
+    assert "windowEl.dataset.sessionSize = safeConfig.size || 'standard';" in defaults_surface
     assert "Session window defaults" in defaults_surface
     assert "['Role comparison', JSON.stringify(state.prime) === JSON.stringify(state.user) ? 'Prime and User defaults currently match' : 'Prime and User defaults diverge']" in defaults_surface
     assert "['Exposed defaults', 'hidden | collapsed | pinned | size']" in defaults_surface
@@ -4411,6 +4680,7 @@ def test_index_settings_surface_promotes_set17_to_local_session_window_posture_d
     assert "Archive, transfer, rerun, and close/write-through behavior remain backend-owned and are not implied by these defaults." in defaults_surface
     assert '.session-window[data-session-hidden="true"]' in doc
     assert '.session-window[data-session-pinned="true"]' in doc
+    assert ".harness-screen:has(.harness-dock-wrap.harness-dock-open) .session-window:not(.session-window-left)" in doc
     assert '.session-window[data-session-collapsed="true"] .session-response-output' in doc
     assert '.session-window[data-session-size="compact"]' in doc
     assert '.session-window[data-session-size="wide"]' in doc

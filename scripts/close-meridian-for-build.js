@@ -50,17 +50,27 @@ function listWindowsProcesses({ execFile = execFileSync } = {}) {
 }
 
 function stopProcess(processId, { execFile = execFileSync } = {}) {
-  execFile('powershell.exe', [
-    '-NoProfile',
-    '-Command',
-    `Stop-Process -Id ${Number(processId)} -Force -ErrorAction SilentlyContinue`,
-  ], { stdio: 'ignore', windowsHide: true });
+  try {
+    execFile('powershell.exe', [
+      '-NoProfile',
+      '-Command',
+      `Stop-Process -Id ${Number(processId)} -Force -ErrorAction SilentlyContinue`,
+    ], { stdio: 'ignore', windowsHide: true });
+    return { stopped: true };
+  } catch (error) {
+    return {
+      stopped: false,
+      stopError: error?.message || 'process stop failed',
+    };
+  }
 }
 
 function closeMeridianForBuild({ execFile = execFileSync, root = repoRootLower } = {}) {
   const candidates = listWindowsProcesses({ execFile })
     .filter((processInfo) => isMeridianBuildProcess(processInfo, root));
-  candidates.forEach((processInfo) => stopProcess(processInfo.ProcessId, { execFile }));
+  candidates.forEach((processInfo) => {
+    Object.assign(processInfo, stopProcess(processInfo.ProcessId, { execFile }));
+  });
   return candidates;
 }
 
@@ -76,4 +86,5 @@ module.exports = {
   isMeridianBuildProcess,
   listWindowsProcesses,
   normalizeCommandLine,
+  stopProcess,
 };

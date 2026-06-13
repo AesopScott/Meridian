@@ -183,6 +183,11 @@ def test_package_json_start_does_not_regenerate_preview(package_json_data):
     assert "preview" not in start, "`start` must open the UI without regenerating preview HTML"
 
 
+def test_package_json_packages_spark_center_media(package_json_data):
+    files = package_json_data.get("build", {}).get("files", [])
+    assert "bifrost/static/media/**/*" in files
+
+
 def test_package_json_preview_invokes_python_preview(package_json_data):
     preview = package_json_data["scripts"]["preview"]
     # Accept either the module form (`python -m bifrost.preview`) or the

@@ -11,11 +11,35 @@ const DEFAULT_CWD = process.env.MERIDIAN_MODEL_CWD || process.cwd();
 const RECENT_CALLS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_CALLS || 40);
 const RECENT_RESULTS_LIMIT = Number(process.env.MERIDIAN_MODEL_RECENT_RESULTS || 20);
 const RECENT_RESULT_TTL_MS = Number(process.env.MERIDIAN_MODEL_RESULT_TTL_MS || 300000);
+const RECENT_CALL_TTL_MS = Number(process.env.MERIDIAN_MODEL_RECENT_CALL_TTL_MS || 3600000);
 const RECENT_RESULT_TEXT_LIMIT = Number(process.env.MERIDIAN_MODEL_RESULT_TEXT_LIMIT || 80000);
+const SESSION_RECOVERY_SUMMARY_LIMIT = Number(process.env.MERIDIAN_SESSION_RECOVERY_SUMMARY_LIMIT || 240);
 const SESSION_TRANSCRIPT_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_LIMIT || 6);
 const SESSION_TRANSCRIPT_CHAR_LIMIT = Number(process.env.MERIDIAN_SESSION_TRANSCRIPT_CHAR_LIMIT || 6000);
 const REQUEST_BODY_LIMIT = Number(process.env.MERIDIAN_MODEL_REQUEST_BODY_LIMIT || 24_000_000);
+const BRIDGE_RUNTIME_STATE_PATH = path.join(DEFAULT_CWD, '.meridian', 'bridge-runtime-state.json');
+const APP_SUPERVISED = process.env.MERIDIAN_APP_SUPERVISED === '1';
 const BRIDGE_VERSION = 'local-bridge-routes-v4';
+const BRIDGE_STARTED_AT = Date.now();
+const PATH_ENV_NAME = Object.keys(process.env).find((key) => key.toLowerCase() === 'path') || 'Path';
+const PRIME_PERSONA_TEXT = [
+  'You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian.',
+  'Prime directive: create unabashed progress; move the work forward instead of circling uncertainty.',
+  'Prime directive: speak with confidence while staying honest about evidence, risk, and proof.',
+  'Prime directive: take ultimate ownership of outcomes; name the next responsible action and carry the thread.',
+  'Use associated proof when it is available: cite concrete checks, artifacts, commits, routes, or observed behavior without inventing evidence.',
+  'Response preferences: concise first, decisive by default, warm without being promotional, and practical about what happens next.',
+  'You may use the visible panel transcript only as short-term conversation context.',
+  'Do not mention that context was injected, do not describe yourself as a command-line tool, and do not repeat metadata unless the user asks.',
+].join(' ');
+
+const BRIDGE_LOCAL_COMMANDS = Object.freeze([
+  '/clear',
+  '/status',
+  '/skills',
+  '/debug',
+  '/restart-bridge',
+]);
 const BRIDGE_CAPABILITIES = {
   visibleTranscriptContext: true,
   recentCallContextDiagnostics: true,
@@ -42,6 +66,11 @@ const BRIDGE_CAPABILITIES = {
   userSessionTargets: true,
   contextFileAttachments: true,
 };
+const INITIAL_HEALTH_STATE = 'starting';
+let bridgeHealthState = INITIAL_HEALTH_STATE;
+let bridgeHealthError = '';
+let bridgeReadyAt = null;
+let bridgeHealthProbeCount = 0;
 const BRIDGE_ROUTES = Object.freeze({
   health: '/bridge/health',
   models: '/bridge/models',
@@ -65,6 +94,7 @@ const BRIDGE_ROUTES = Object.freeze({
   primeAutonomyRelease: '/bridge/prime-autonomy',
   userSessions: '/bridge/user-sessions',
   recentCalls: '/bridge/recent-calls',
+  debugReport: '/bridge/debug-report',
   callResult: '/bridge/call-result',
   restart: '/bridge/restart',
   message: '/bridge/message',
@@ -73,9 +103,134 @@ const ALLOWED_ORIGINS = new Set((process.env.MERIDIAN_MODEL_ALLOWED_ORIGINS || '
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean));
-const recentCalls = [];
-const recentResults = [];
+function loadBridgeRuntimeState() {
+  try {
+    const raw = fs.readFileSync(BRIDGE_RUNTIME_STATE_PATH, 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      recentCalls: Array.isArray(parsed?.recentCalls) ? parsed.recentCalls : [],
+      recentResults: Array.isArray(parsed?.recentResults) ? parsed.recentResults : [],
+    };
+  } catch {
+    return { recentCalls: [], recentResults: [] };
+  }
+}
+
+function persistBridgeRuntimeState() {
+  try {
+    fs.mkdirSync(path.dirname(BRIDGE_RUNTIME_STATE_PATH), { recursive: true });
+    fs.writeFileSync(BRIDGE_RUNTIME_STATE_PATH, JSON.stringify({
+      savedAt: new Date().toISOString(),
+      recentCalls,
+      recentResults,
+    }), 'utf8');
+  } catch {
+    return;
+  }
+}
+
+const runtimeState = loadBridgeRuntimeState();
+const recentCalls = Array.isArray(runtimeState.recentCalls) ? runtimeState.recentCalls : [];
+const recentResults = Array.isArray(runtimeState.recentResults) ? runtimeState.recentResults : [];
 let restartInProgress = false;
+
+function summarizeBridgePath(baseEnv = process.env) {
+  const rawPath = String(baseEnv[PATH_ENV_NAME] || '');
+  const entries = rawPath.split(path.delimiter).map((entry) => String(entry || '').trim()).filter(Boolean);
+  const sampleCount = Math.min(entries.length, 4);
+  return {
+    pathEnvKey: PATH_ENV_NAME,
+    pathEntryCount: entries.length,
+    sampleHead: entries.slice(0, sampleCount),
+    sampleTail: entries.slice(Math.max(0, entries.length - sampleCount)),
+  };
+}
+
+function meridianCommandRows() {
+  return BRIDGE_LOCAL_COMMANDS.map((command) => ({
+    name: command,
+    scope: 'Meridian command',
+    authority: 'local UI',
+    provider: 'Spark local runtime',
+  }));
+}
+
+function summarizeBridgeRuntimeForModel() {
+  return {
+    service: 'meridian-model-bridge',
+    version: BRIDGE_VERSION,
+    pid: process.pid,
+    host: HOST,
+    port: PORT,
+    state: bridgeHealthState,
+    startedAt: BRIDGE_STARTED_AT,
+    readyAt: bridgeReadyAt,
+    uptimeMs: Date.now() - BRIDGE_STARTED_AT,
+    probes: bridgeHealthProbeCount,
+    runtimeEnvironment: summarizeBridgePath(process.env),
+    capabilities: BRIDGE_CAPABILITIES,
+    localCommands: meridianCommandRows(),
+  };
+}
+
+function updateBridgeHealthState(nextState, error = '') {
+  bridgeHealthState = nextState;
+  bridgeHealthError = error ? String(error) : '';
+  if (nextState === 'healthy' && !bridgeReadyAt) {
+    bridgeReadyAt = Date.now();
+  }
+  if (nextState !== 'healthy') {
+    bridgeReadyAt = null;
+  }
+}
+
+function buildHealthPayload() {
+  const payload = {
+    ok: bridgeHealthState === 'healthy',
+    state: bridgeHealthState,
+    service: 'meridian-model-bridge',
+    version: BRIDGE_VERSION,
+    capabilities: BRIDGE_CAPABILITIES,
+    pid: process.pid,
+    host: HOST,
+    port: PORT,
+    startup: {
+      startedAt: BRIDGE_STARTED_AT,
+      readyAt: bridgeReadyAt,
+      uptimeMs: Date.now() - BRIDGE_STARTED_AT,
+      probes: bridgeHealthProbeCount,
+    },
+  };
+  if (bridgeHealthError) payload.error = bridgeHealthError;
+  return payload;
+}
+
+function runtimeMessageReadiness() {
+  const blockers = [];
+  if (bridgeHealthState !== 'healthy') {
+    blockers.push(`bridge not ready (state=${bridgeHealthState || 'unknown'})`);
+  }
+  if (bridgeHealthState !== 'healthy' || bridgeHealthError) {
+    blockers.push('bridge not healthy');
+  }
+  if (!BRIDGE_CAPABILITIES.visibleTranscriptContext) {
+    blockers.push('bridge context contract disabled');
+  }
+  const payload = buildHealthPayload();
+  if (payload.version !== BRIDGE_VERSION) {
+    blockers.push(`bridge version mismatch (${payload.version || 'unknown'} != ${BRIDGE_VERSION})`);
+  }
+  return {
+    ok: blockers.length === 0,
+    blockers,
+    service: 'meridian-model-bridge',
+    version: BRIDGE_VERSION,
+    observedVersion: payload.version,
+    state: bridgeHealthState,
+    readyAt: bridgeReadyAt,
+    runtimeEnvironment: summarizeBridgePath(process.env),
+  };
+}
 
 function beginRestartRequest() {
   if (restartInProgress) return false;
@@ -244,18 +399,46 @@ function visibleTranscriptContext(transcript) {
   return { text: lines.join('\n\n'), entries: lines.length, chars };
 }
 
-function promptWithVisibleSession(prompt, transcript) {
+function buildPrimeContractPrompt(primeContract) {
+  if (typeof primeContract === 'string') {
+    const normalized = primeContract.trim();
+    if (normalized) return normalized;
+  }
+
+  if (!primeContract || typeof primeContract !== 'object') return null;
+
+  const role = String(primeContract.role || '').trim();
+  const identity = String(primeContract.identity || '').trim();
+  const lines = [];
+  if (role || identity) {
+    lines.push(`You are ${role || 'Prime'}${identity ? `, ${identity}` : ''}.`);
+  }
+
+  for (const directive of Array.isArray(primeContract.directives) ? primeContract.directives : []) {
+    const text = String(directive || '').trim();
+    if (text) lines.push(`Prime directive: ${text}`);
+  }
+  for (const obligation of Array.isArray(primeContract.proofObligations) ? primeContract.proofObligations : []) {
+    const text = String(obligation || '').trim();
+    if (text) lines.push(`Proof obligation: ${text}`);
+  }
+  for (const preference of Array.isArray(primeContract.responsePreferences) ? primeContract.responsePreferences : []) {
+    const text = String(preference || '').trim();
+    if (text) lines.push(`Response preference: ${text}`);
+  }
+
+  if (primeContract.projectContext) {
+    const context = String(primeContract.projectContext || '').trim();
+    if (context) lines.push(`Project context: ${context}`);
+  }
+
+  if (!lines.length) return null;
+  return lines.join(' ');
+}
+
+function promptWithVisibleSession(prompt, transcript, { primeContract = null } = {}) {
   const context = visibleTranscriptContext(transcript);
-  const persona = [
-    'You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian.',
-    'Prime directive: create unabashed progress; move the work forward instead of circling uncertainty.',
-    'Prime directive: speak with confidence while staying honest about evidence, risk, and proof.',
-    'Prime directive: take ultimate ownership of outcomes; name the next responsible action and carry the thread.',
-    'Use associated proof when it is available: cite concrete checks, artifacts, commits, routes, or observed behavior without inventing evidence.',
-    'Response preferences: concise first, decisive by default, warm without being promotional, and practical about what happens next.',
-    'You may use the visible panel transcript only as short-term conversation context.',
-    'Do not mention that context was injected, do not describe yourself as a command-line tool, and do not repeat metadata unless the user asks.',
-  ].join(' ');
+  const persona = buildPrimeContractPrompt(primeContract) || PRIME_PERSONA_TEXT;
   if (!context.text) {
     return {
       prompt: [
@@ -413,10 +596,49 @@ function classifySetupError(backend, errorText) {
 }
 
 function rememberCall(entry) {
-  recentCalls.push({
+  const requestId = String(entry?.requestId || '');
+  if (!requestId) return null;
+  const normalized = {
     at: new Date().toISOString(),
-    ...entry,
-  });
+    requestId,
+    channel: entry.channel || '',
+    requestedBackend: entry.requestedBackend || '',
+    backend: entry.backend || '',
+    model: entry.model || '',
+    ok: Boolean(entry.ok),
+    setupRequired: Boolean(entry.setupRequired),
+    durationMs: entry.durationMs || 0,
+    sessionContextEntries: entry.sessionContextEntries || 0,
+    sessionContextChars: entry.sessionContextChars || 0,
+    sessionTargetId: entry.sessionTargetId || '',
+    sessionName: entry.sessionName || '',
+    projectName: entry.projectName || '',
+    projectContext: entry.projectContext || '',
+    requestSummary: String(entry.requestSummary || '').slice(0, SESSION_RECOVERY_SUMMARY_LIMIT),
+    cwd: entry.cwd || '',
+  };
+  for (let index = recentCalls.length - 1; index >= 0; index -= 1) {
+    if (recentCalls[index]?.requestId === requestId) {
+      recentCalls.splice(index, 1);
+      break;
+    }
+  }
+  recentCalls.push(normalized);
+  while (recentCalls.length > RECENT_CALLS_LIMIT) recentCalls.shift();
+  pruneRecentCalls();
+  persistBridgeRuntimeState();
+  return normalized;
+}
+
+function pruneRecentCalls(now = Date.now()) {
+  while (recentCalls.length) {
+    const at = Date.parse(recentCalls[0]?.at || '');
+    if (Number.isNaN(at) || at <= now - RECENT_CALL_TTL_MS) {
+      recentCalls.shift();
+      continue;
+    }
+    break;
+  }
   while (recentCalls.length > RECENT_CALLS_LIMIT) recentCalls.shift();
 }
 
@@ -429,6 +651,7 @@ function rememberResult(entry) {
   if (!entry?.requestId) return;
   const now = Date.now();
   pruneRecentResults(now);
+  pruneRecentCalls(now);
   recentResults.push({
     at: new Date(now).toISOString(),
     expiresAtMs: now + RECENT_RESULT_TTL_MS,
@@ -446,6 +669,7 @@ function rememberResult(entry) {
     sessionContextChars: entry.sessionContextChars || 0,
   });
   pruneRecentResults(now);
+  persistBridgeRuntimeState();
 }
 
 function resultForRequestId(requestId) {
@@ -458,6 +682,118 @@ function resultForRequestId(requestId) {
   }
   return null;
 }
+
+function debugRecentCallSummary(call) {
+  return {
+    at: call?.at || '',
+    requestId: call?.requestId || '',
+    channel: call?.channel || '',
+    requestedBackend: call?.requestedBackend || '',
+    backend: call?.backend || '',
+    ok: Boolean(call?.ok),
+    setupRequired: Boolean(call?.setupRequired),
+    durationMs: Number(call?.durationMs || 0),
+    sessionTargetId: call?.sessionTargetId || '',
+    sessionName: call?.sessionName || '',
+    projectName: call?.projectName || call?.projectContext || '',
+    cwd: call?.cwd || '',
+    requestSummaryChars: String(call?.requestSummary || '').length,
+  };
+}
+
+function debugRecentResultSummary(result) {
+  return {
+    at: result?.at || '',
+    requestId: result?.requestId || '',
+    channel: result?.channel || '',
+    requestedBackend: result?.requestedBackend || '',
+    backend: result?.backend || '',
+    model: result?.model || '',
+    ok: Boolean(result?.ok),
+    setupRequired: Boolean(result?.setupRequired),
+    hasError: Boolean(result?.error),
+    error: result?.error || null,
+    durationMs: Number(result?.durationMs || 0),
+    textChars: String(result?.text || '').length,
+  };
+}
+
+async function buildDebugReport() {
+  const models = await modelStatus();
+  const readiness = runtimeMessageReadiness();
+  const recoverableSessions = recoverableUserSessionsFromRuntime();
+  return {
+    ok: true,
+    service: 'meridian-model-bridge',
+    version: BRIDGE_VERSION,
+    generatedAt: new Date().toISOString(),
+    health: buildHealthPayload(),
+    runtimeReadiness: readiness,
+    runtimeEnvironment: summarizeBridgePath(process.env),
+    capabilities: BRIDGE_CAPABILITIES,
+    models: Array.isArray(models.models) ? models.models.map((model) => ({
+      backend: model.backend || '',
+      label: model.label || '',
+      cli: model.cli || '',
+      installed: Boolean(model.installed),
+      setupHint: model.setupHint || '',
+    })) : [],
+    routes: {
+      health: BRIDGE_ROUTES.health,
+      models: BRIDGE_ROUTES.models,
+      message: BRIDGE_ROUTES.message,
+      restart: BRIDGE_ROUTES.restart,
+      userSessions: BRIDGE_ROUTES.userSessions,
+      recentCalls: BRIDGE_ROUTES.recentCalls,
+      debugReport: BRIDGE_ROUTES.debugReport,
+    },
+    recent: {
+      calls: recentCalls.slice(-8).reverse().map(debugRecentCallSummary),
+      results: recentResults.slice(-8).reverse().map(debugRecentResultSummary),
+    },
+    recovery: {
+      recoverableSessionCount: recoverableSessions.length,
+      recoverableSessions,
+    },
+    repairSteps: [
+      readiness.ok ? 'Runtime readiness gates are clear.' : `Fix readiness blockers: ${readiness.blockers.join('; ')}`,
+      'Use /restart-bridge to restart the local model bridge from Meridian.',
+      'Use /status or /debug to refresh this report after a repair.',
+      'If Codex is missing or unauthenticated, install/sign in from the same Windows user profile and relaunch Meridian.',
+    ],
+    redaction: 'Recent result text is summarized by character count only; raw model output is not included in this debug report.',
+  };
+}
+
+function recoverableUserSessionsFromRuntime() {
+  const completedRequestIds = new Set(recentResults.map((result) => String(result.requestId || '')));
+  const sessionById = new Map();
+  [...recentCalls]
+    .sort((left, right) => new Date(right.at).getTime() - new Date(left.at).getTime())
+    .forEach((call) => {
+      const requestId = String(call?.requestId || '');
+      const sessionId = String(call?.sessionTargetId || '').trim();
+      if (!requestId || !sessionId) return;
+      if (completedRequestIds.has(requestId) || sessionById.has(sessionId)) return;
+      sessionById.set(sessionId, {
+        sessionId,
+        sessionName: call.sessionName || sessionId,
+        projectName: call.projectName || call.projectContext || 'Meridian',
+        status: 'recoverable',
+        routable: false,
+        recoverable: true,
+        lastActivityAt: call.at || new Date().toISOString(),
+        lastMessageSummary: call.requestSummary || '',
+        requestId,
+        cwd: call.cwd || '',
+      });
+  });
+  return Array.from(sessionById.values());
+}
+
+pruneRecentCalls();
+pruneRecentResults();
+persistBridgeRuntimeState();
 
 function needsSetup(backend, errorText) {
   const text = String(errorText || '').toLowerCase();
@@ -488,7 +824,12 @@ function spawnModelProcess(command, cwd) {
 }
 
 function restartBridge() {
+  updateBridgeHealthState('degraded', 'manual restart requested');
   server.close(() => {
+    if (APP_SUPERVISED) {
+      setTimeout(() => process.exit(0), 50);
+      return;
+    }
     const child = spawn(process.execPath, [__filename], {
       cwd: DEFAULT_CWD,
       detached: true,
@@ -523,6 +864,7 @@ async function modelStatus() {
     ok: true,
     service: 'meridian-model-bridge',
     version: BRIDGE_VERSION,
+    runtimeEnvironment: summarizeBridgePath(process.env),
     capabilities: BRIDGE_CAPABILITIES,
     models: [
       {
@@ -541,6 +883,53 @@ async function modelStatus() {
       },
     ],
   };
+}
+
+function promptWithBridgeRuntimeContext(prompt, options = {}) {
+  const context = String(prompt || '');
+  const {
+    bridgeContext = {},
+    projectContext = 'Meridian',
+    commandRegistry = [],
+    runtimeAttachments = [],
+    sessionContext = null,
+  } = options;
+  const lines = [];
+  if (projectContext) {
+    lines.push(`Active project context: ${projectContext}`);
+  }
+  if (bridgeContext?.version || bridgeContext?.state || bridgeContext?.runtimeEnvironment?.pathEnvKey) {
+    const state = bridgeContext.state || 'unknown';
+    const version = bridgeContext.version || BRIDGE_VERSION;
+    const pathKey = bridgeContext.runtimeEnvironment?.pathEnvKey || PATH_ENV_NAME;
+    const pathEntries = Number(bridgeContext.runtimeEnvironment?.pathEntryCount) || 0;
+    lines.push(`Bridge runtime: version=${version}; state=${state}; pathEnvKey=${pathKey}; pathEntries=${pathEntries}`);
+  }
+  if (Array.isArray(commandRegistry) && commandRegistry.length) {
+    const commandNames = [...new Set(commandRegistry.map((command) => String(command?.name || '')))]
+      .filter(Boolean)
+      .sort()
+      .slice(0, 12)
+      .join(', ');
+    lines.push(`Local command registry: ${commandNames || 'none configured'}`);
+  }
+  if (runtimeAttachments.length) {
+    const attachmentSummary = runtimeAttachments
+      .map((attachment, index) => `${index + 1}. ${attachment?.name || 'attachment'} (${attachment?.type || 'unknown'}, ${attachment?.size || 0} bytes, path=${attachment?.path || 'unknown'})`)
+      .join('; ');
+    lines.push(`Runtime attachments (${runtimeAttachments.length}): ${attachmentSummary}`);
+  }
+  if (sessionContext && typeof sessionContext === 'object') {
+    const bits = [];
+    if (sessionContext.sessionId) bits.push(`id=${sessionContext.sessionId}`);
+    if (sessionContext.sessionName) bits.push(`name=${sessionContext.sessionName}`);
+    if (sessionContext.cwd) bits.push(`cwd=${sessionContext.cwd}`);
+    if (sessionContext.branch) bits.push(`branch=${sessionContext.branch}`);
+    if (sessionContext.status) bits.push(`status=${sessionContext.status}`);
+    lines.push(`Session context: ${bits.length ? bits.join('; ') : 'none configured'}`);
+  }
+  if (!lines.length) return context;
+  return `${context}\n\nRuntime context for model execution:\n- ${lines.join('\n- ')}`;
 }
 
 function relayLogicSnapshot() {
@@ -1735,10 +2124,14 @@ function userSessionTargets() {
         resolve({ ok: false, error: stderr.trim() || `git worktree exited with code ${code}`, sessions: [] });
         return;
       }
-      const sessions = parseGitWorktrees(stdout)
+      const liveSessions = parseGitWorktrees(stdout)
         .map(sessionTargetFromWorktree)
         .filter(Boolean)
         .sort((left, right) => left.projectName.localeCompare(right.projectName) || left.sessionName.localeCompare(right.sessionName));
+      const liveSessionIds = new Set(liveSessions.map((session) => session.sessionId));
+      const recoverableSessions = recoverableUserSessionsFromRuntime()
+        .filter((session) => !liveSessionIds.has(session.sessionId));
+      const sessions = [...liveSessions, ...recoverableSessions];
       resolve({
         ok: true,
         service: 'meridian-model-bridge',
@@ -1756,12 +2149,29 @@ async function sessionTargetById(sessionId) {
   return snapshot.sessions.find((session) => session.sessionId === sessionId && session.routable) || null;
 }
 
-function runModel({ backend, prompt, cwd, transcript }) {
+function runModel({
+  backend,
+  prompt,
+  cwd,
+  transcript,
+  bridgeContext = null,
+  commandRegistry = null,
+  runtimeAttachments = [],
+  sessionContext = null,
+  primeContract = null,
+}) {
   return new Promise((resolve) => {
     let command;
-    const sessionPrompt = promptWithVisibleSession(prompt, transcript);
+    const sessionPrompt = promptWithVisibleSession(prompt, transcript, { primeContract });
+    const promptForModel = promptWithBridgeRuntimeContext(sessionPrompt.prompt, {
+      bridgeContext,
+      projectContext: bridgeContext?.projectContext || 'Meridian',
+      commandRegistry: Array.isArray(commandRegistry) ? commandRegistry : meridianCommandRows(),
+      runtimeAttachments,
+      sessionContext,
+    });
     try {
-      command = commandForBackend(backend, sessionPrompt.prompt);
+      command = commandForBackend(backend, promptForModel);
     } catch (error) {
       resolve({ ok: false, text: '', error: error.message });
       return;
@@ -1833,12 +2243,9 @@ const server = http.createServer(async (req, res) => {
   if (blockDisallowedOrigin(req, res)) return;
 
   if (req.method === 'GET' && req.url === BRIDGE_ROUTES.health) {
-    sendJson(res, 200, {
-      ok: true,
-      service: 'meridian-model-bridge',
-      version: BRIDGE_VERSION,
-      capabilities: BRIDGE_CAPABILITIES,
-    }, req);
+    bridgeHealthProbeCount += 1;
+    const payload = buildHealthPayload();
+    sendJson(res, payload.ok ? 200 : 503, payload, req);
     return;
   }
 
@@ -2068,6 +2475,11 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && req.url === BRIDGE_ROUTES.debugReport) {
+    sendJson(res, 200, await buildDebugReport(), req);
+    return;
+  }
+
   if (req.method === 'GET' && req.url.startsWith(BRIDGE_ROUTES.callResult)) {
     const requestUrl = new URL(req.url, `http://${HOST}:${PORT}`);
     const requestId = String(requestUrl.searchParams.get('requestId') || '');
@@ -2089,15 +2501,40 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'POST' && req.url === BRIDGE_ROUTES.restart) {
     if (!beginRestartRequest()) {
-      sendJson(res, 202, { ok: true, restarting: true, alreadyRestarting: true }, req);
+      sendJson(res, 202, {
+        ok: true,
+        restarting: true,
+        alreadyRestarting: true,
+        supervised: APP_SUPERVISED,
+        state: bridgeHealthState,
+        nextRepairStep: 'Wait for the active restart to finish, then recheck bridge health.',
+      }, req);
       return;
     }
-    sendJson(res, 202, { ok: true, restarting: true }, req);
+    sendJson(res, 202, {
+      ok: true,
+      restarting: true,
+      supervised: APP_SUPERVISED,
+      state: 'degraded',
+      message: APP_SUPERVISED
+        ? 'Bridge restart requested; Meridian app supervisor will start the next bridge process.'
+        : 'Bridge restart requested; standalone bridge will restart itself.',
+      nextRepairStep: 'If the bridge does not become healthy, open runtime diagnostics and inspect bridge stderr logs.',
+    }, req);
     setTimeout(restartBridge, 25);
     return;
   }
 
   if (req.method === 'POST' && req.url === BRIDGE_ROUTES.message) {
+    const readiness = runtimeMessageReadiness();
+    if (!readiness.ok) {
+      sendJson(res, 503, {
+        ok: false,
+        error: 'runtime readiness gates failed',
+        runtimeReadiness: readiness,
+      }, req);
+      return;
+    }
     try {
       const body = JSON.parse(await readBody(req));
       const backend = String(body.backend || '').toLowerCase();
@@ -2109,8 +2546,10 @@ const server = http.createServer(async (req, res) => {
       const transcript = Array.isArray(body.transcript) ? body.transcript : [];
       const attachments = Array.isArray(body.attachments) ? body.attachments : [];
       const sessionTargetId = String(body.sessionTargetId || '');
+      const primeContract = body.primeContract || null;
       let sessionTarget = null;
       let cwd = body.cwd ? String(body.cwd) : DEFAULT_CWD;
+      const bridgeContext = summarizeBridgeRuntimeForModel();
       if (!prompt) {
         sendJson(res, 400, { ok: false, error: 'Missing prompt' }, req);
         return;
@@ -2125,8 +2564,48 @@ const server = http.createServer(async (req, res) => {
       }
       const materializedAttachments = materializeContextAttachments(attachments, requestId, cwd);
       const promptForModel = promptWithAttachments(prompt, materializedAttachments);
+      const requestSummary = String(promptForModel || prompt)
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, SESSION_RECOVERY_SUMMARY_LIMIT);
+      rememberCall({
+        requestId,
+        channel,
+        requestedBackend,
+        backend,
+        ok: false,
+        setupRequired: false,
+        durationMs: 0,
+        sessionContextEntries: 0,
+        sessionContextChars: 0,
+        sessionTargetId: sessionTarget?.sessionId || '',
+        sessionName: sessionTarget?.sessionName || '',
+        projectName: sessionTarget?.projectName || '',
+        projectContext,
+        requestSummary,
+        cwd,
+      });
       const started = Date.now();
-      const result = await runModel({ backend, prompt: promptForModel, cwd, transcript });
+      const commandRegistry = meridianCommandRows().map((row) => ({ ...row, localOnly: true }));
+      bridgeContext.projectContext = projectContext;
+      const sessionContext = sessionTarget ? {
+        sessionId: sessionTarget.sessionId,
+        sessionName: sessionTarget.sessionName,
+        cwd: sessionTarget.cwd,
+        branch: sessionTarget.branch || '',
+        status: sessionTarget.status || '',
+      } : null;
+      const result = await runModel({
+        backend,
+        prompt: promptForModel,
+        cwd,
+        transcript,
+        bridgeContext,
+        commandRegistry,
+        runtimeAttachments: materializedAttachments,
+        sessionContext,
+        primeContract,
+      });
       result.requestedBackend = requestedBackend;
       result.backend = backend;
       result.channel = channel;
@@ -2134,6 +2613,8 @@ const server = http.createServer(async (req, res) => {
       result.requestId = requestId;
       result.durationMs = Date.now() - started;
       result.attachments = materializedAttachments;
+      result.bridgeContext = bridgeContext;
+      result.commandRegistry = commandRegistry;
       result.sessionTarget = sessionTarget ? {
         sessionId: sessionTarget.sessionId,
         sessionName: sessionTarget.sessionName,
@@ -2151,7 +2632,11 @@ const server = http.createServer(async (req, res) => {
         sessionContextEntries: result.sessionContextEntries || 0,
         sessionContextChars: result.sessionContextChars || 0,
         sessionTargetId: sessionTarget?.sessionId || '',
+        sessionName: sessionTarget?.sessionName || '',
+        projectName: sessionTarget?.projectName || '',
         projectContext,
+        requestSummary,
+        cwd,
       });
       rememberResult({
         requestId,
@@ -2179,6 +2664,11 @@ const server = http.createServer(async (req, res) => {
   sendJson(res, 404, { ok: false, error: 'Not found' }, req);
 });
 
+server.on('error', (error) => {
+  updateBridgeHealthState('degraded', error.message);
+});
 server.listen(PORT, HOST, () => {
+  updateBridgeHealthState('healthy');
+  bridgeReadyAt = Date.now();
   console.log(`[meridian-model-bridge] http://${HOST}:${PORT}`);
 });

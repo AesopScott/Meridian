@@ -1,3 +1,505 @@
 {
-  "tasks": []
+  "schema": "meridian.backlog.runtime_readiness.v1",
+  "title": "Meridian 2.5 to 3.0 Runtime Readiness Backlog",
+  "created_at": "2026-06-12",
+  "source": "Prime runtime remediation planning",
+  "principle": "Meridian 3.0 is a competence milestone, not a feature milestone.",
+  "definition_of_done": "I can open Meridian like a normal app, talk to Prime, run local commands, attach context, recover sessions, inspect skills, restart the bridge, and understand failures without opening PowerShell.",
+  "milestones": [
+    {
+      "id": "2.6",
+      "name": "Real Runtime Foundation",
+      "goal": "Make Meridian launch, supervise, diagnose, and repair its own local runtime without requiring a terminal.",
+      "items": [
+        {
+          "id": "M26-001",
+          "priority": "P0",
+          "title": "App-owned bridge supervisor",
+          "depends_on": [],
+          "surface": "runtime",
+          "acceptance_criteria": [
+            "Launching the Meridian executable starts the model bridge automatically if absent.",
+            "Closing PowerShell does not kill Meridian.",
+            "Bridge process lifecycle is owned by the app runtime, not the user's shell."
+          ]
+        },
+        {
+          "id": "M26-002",
+          "priority": "P0",
+          "title": "Bridge health state machine",
+          "depends_on": [
+            "M26-001"
+          ],
+          "surface": "runtime diagnostics",
+          "acceptance_criteria": [
+            "UI shows bridge states: starting, healthy, degraded, and offline.",
+            "Bridge status includes last observed error and retry state.",
+            "Status updates without requiring a full app restart."
+          ]
+        },
+        {
+          "id": "M26-003",
+          "priority": "P0",
+          "title": "Restart bridge control",
+          "depends_on": [
+            "M26-001"
+          ],
+          "surface": "diagnostics UI",
+          "acceptance_criteria": [
+            "User can restart the bridge from Meridian UI without touching PowerShell.",
+            "Restart action reports progress and final status.",
+            "Failed restart shows the blocking reason and next repair step."
+          ]
+        },
+        {
+          "id": "M26-004",
+          "priority": "P0",
+          "title": "App runtime PATH normalization",
+          "depends_on": [],
+          "surface": "runtime environment",
+          "proof_command": "powershell -NoProfile -Command \"$snapshot = Get-ChildItem $env:APPDATA -Recurse -Filter meridian-model-bridge-runtime-env.json -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if (-not $snapshot) { Write-Error 'runtime snapshot not found; start Meridian and retry'; exit 1 }; Get-Content $snapshot.FullName | ConvertFrom-Json | Select-Object pathEnvKey, originalPathSegmentCount, normalizedPathSegmentCount, appendedSegments | Format-List\"",
+          "acceptance_criteria": [
+            "Meridian can find Codex CLI from the packaged app environment.",
+            "Meridian does not show a false Codex-not-installed error when Codex works in the user's shell.",
+            "Resolved tool paths are visible in diagnostics."
+          ]
+        },
+        {
+          "id": "M26-005",
+          "priority": "P0",
+          "title": "Startup diagnostics pass",
+          "depends_on": [
+            "M26-002",
+            "M26-004"
+          ],
+          "surface": "startup diagnostics",
+          "acceptance_criteria": [
+            "On launch, Meridian verifies bridge reachability, Codex CLI, auth visibility, writable storage, and skill registry.",
+            "Failures are captured before the first user message.",
+            "Startup diagnostics produce a compact user-facing report."
+          ]
+        },
+        {
+          "id": "M26-006",
+          "priority": "P1",
+          "title": "Diagnostic repair actions",
+          "depends_on": [
+            "M26-005"
+          ],
+          "surface": "diagnostics UI",
+          "acceptance_criteria": [
+            "Each failed check has a clear repair action.",
+            "Supported repair actions include restart bridge, recheck CLI, open logs, and copy diagnostic report.",
+            "Repair actions update the health state after completion."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2.7",
+      "name": "Session And Command Competence",
+      "goal": "Make sessions durable and make local commands execute locally before model routing.",
+      "items": [
+        {
+          "id": "M27-001",
+          "priority": "P0",
+          "title": "Durable session store",
+          "depends_on": [],
+          "surface": "session runtime",
+          "acceptance_criteria": [
+            "Sessions persist across app restart.",
+            "Sessions persist across bridge restart.",
+            "Session records include enough metadata to restore the visible session list."
+          ]
+        },
+        {
+          "id": "M27-002",
+          "priority": "P0",
+          "title": "Session recovery flow",
+          "depends_on": [
+            "M27-001"
+          ],
+          "surface": "session UI",
+          "acceptance_criteria": [
+            "Interrupted or incomplete sessions appear under recoverable sessions.",
+            "Recovered session entries include timestamp and last message summary.",
+            "User can reopen a recovered session without manual file inspection."
+          ]
+        },
+        {
+          "id": "M27-003",
+          "priority": "P0",
+          "title": "Local slash command router",
+          "depends_on": [],
+          "surface": "command runtime",
+          "acceptance_criteria": [
+            "/clear, /status, /skills, and /restart-bridge are handled before model routing.",
+            "Local command execution does not wait for a model response.",
+            "Unknown slash commands produce a local explanation instead of a model timeout."
+          ]
+        },
+        {
+          "id": "M27-004",
+          "priority": "P0",
+          "title": "/clear clears visible session window",
+          "depends_on": [
+            "M27-003"
+          ],
+          "surface": "Spark UI",
+          "acceptance_criteria": [
+            "Running /clear immediately clears the active visible transcript.",
+            "/clear does not call the model.",
+            "Clearing the visible window does not delete durable session history unless a separate destructive command is explicitly implemented."
+          ]
+        },
+        {
+          "id": "M27-005",
+          "priority": "P1",
+          "title": "Local command registry",
+          "depends_on": [
+            "M27-003"
+          ],
+          "surface": "command metadata",
+          "acceptance_criteria": [
+            "Commands have name, description, authority level, owner harness, and execution path metadata.",
+            "Registry distinguishes executable local commands from informational capability rows.",
+            "Registry can be rendered in the skills panel."
+          ]
+        },
+        {
+          "id": "M27-006",
+          "priority": "P1",
+          "title": "Model command awareness context",
+          "depends_on": [
+            "M27-005"
+          ],
+          "surface": "model context",
+          "acceptance_criteria": [
+            "Prime can explain available local commands.",
+            "Prime does not claim to execute UI commands directly.",
+            "Model context includes command descriptions and local execution boundaries."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2.8",
+      "name": "Context Intake",
+      "goal": "Make copied, pasted, uploaded, and attached user context reliably visible to Prime.",
+      "items": [
+        {
+          "id": "M28-001",
+          "priority": "P0",
+          "title": "Paste text support",
+          "depends_on": [],
+          "surface": "Spark input",
+          "acceptance_criteria": [
+            "Text pasted into Spark input appears reliably.",
+            "Pasted text sends normally through the active message flow.",
+            "Paste behavior works in the packaged app runtime."
+          ]
+        },
+        {
+          "id": "M28-002",
+          "priority": "P0",
+          "title": "Paste image support",
+          "depends_on": [],
+          "surface": "Spark input",
+          "acceptance_criteria": [
+            "Pasted images appear as removable attachment chips.",
+            "Pasted images are passed to the bridge as context.",
+            "Prime can inspect or discuss a pasted image in the same session."
+          ]
+        },
+        {
+          "id": "M28-003",
+          "priority": "P0",
+          "title": "File upload support",
+          "depends_on": [],
+          "surface": "Spark input",
+          "acceptance_criteria": [
+            "User can upload images, markdown, text, JSON, CSV, logs, PDFs, DOC, and DOCX files.",
+            "Uploaded files appear as removable attachment chips.",
+            "Upload errors explain size or type limits clearly."
+          ]
+        },
+        {
+          "id": "M28-004",
+          "priority": "P0",
+          "title": "Attachment materialization",
+          "depends_on": [
+            "M28-002",
+            "M28-003"
+          ],
+          "surface": "bridge context",
+          "acceptance_criteria": [
+            "Bridge saves attachments to request-scoped local files.",
+            "Saved attachment paths are passed to the Codex or model prompt.",
+            "Attachment files are bounded by count and size limits."
+          ]
+        },
+        {
+          "id": "M28-005",
+          "priority": "P1",
+          "title": "Context payload contract",
+          "depends_on": [
+            "M28-004"
+          ],
+          "surface": "model context",
+          "acceptance_criteria": [
+            "Every model call includes prompt, visible session context, persona, command registry, attachments, and app or bridge status.",
+            "Context payloads are explicit enough for Prime to know what is available.",
+            "Payload contract avoids implying authority the runtime does not have."
+          ]
+        },
+        {
+          "id": "M28-006",
+          "priority": "P1",
+          "title": "Attachment smoke tests",
+          "depends_on": [
+            "M28-002",
+            "M28-003",
+            "M28-004"
+          ],
+          "surface": "test suite",
+          "acceptance_criteria": [
+            "Automated smoke covers pasted image reaching bridge context.",
+            "Automated smoke covers uploaded document reaching bridge context.",
+            "Smoke tests run against the real UI path, not only isolated helpers."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2.9",
+      "name": "Skills And Prime",
+      "goal": "Make skills discoverable and make Prime consistent in the actual response path.",
+      "items": [
+        {
+          "id": "M29-001",
+          "priority": "P0",
+          "title": "Skills panel data model",
+          "depends_on": [
+            "M27-005"
+          ],
+          "surface": "skills UI",
+          "acceptance_criteria": [
+            "Panel can represent local commands, Meridian capabilities, Codex skills, project skills, and Graphify.",
+            "Every row has a stable source and authority level.",
+            "The data model supports both executable and informational entries."
+          ]
+        },
+        {
+          "id": "M29-002",
+          "priority": "P0",
+          "title": "Collapsible skill groups",
+          "depends_on": [
+            "M29-001"
+          ],
+          "surface": "skills UI",
+          "acceptance_criteria": [
+            "Skills panel groups are collapsible.",
+            "Skills panel search works across all groups.",
+            "Skills panel is populated when opened."
+          ]
+        },
+        {
+          "id": "M29-003",
+          "priority": "P1",
+          "title": "Skill source clarity",
+          "depends_on": [
+            "M29-001"
+          ],
+          "surface": "skills UI",
+          "acceptance_criteria": [
+            "Each skill shows name, description, source, authority level, and whether it is executable or informational.",
+            "Rows are not clickable as commands unless a real command path exists.",
+            "Debug source fields are hidden unless diagnostics mode is active."
+          ]
+        },
+        {
+          "id": "M29-004",
+          "priority": "P0",
+          "title": "Prime persona contract",
+          "depends_on": [],
+          "surface": "persona",
+          "acceptance_criteria": [
+            "Prime is defined as a role speaking through Spark on behalf of Meridian.",
+            "Prime contract includes directives, proof obligations, and response preferences.",
+            "Prime response posture favors progress, confidence, and ownership without false claims."
+          ]
+        },
+        {
+          "id": "M29-005",
+          "priority": "P0",
+          "title": "Persona injected into real model path",
+          "depends_on": [
+            "M29-004"
+          ],
+          "surface": "model context",
+          "acceptance_criteria": [
+            "Actual Codex or model calls receive the Prime contract consistently.",
+            "Identity questions are answered as Prime through Spark on behalf of Meridian.",
+            "Persona injection is covered by tests or prompt payload proof."
+          ]
+        },
+        {
+          "id": "M29-006",
+          "priority": "P1",
+          "title": "Persona regression tests",
+          "depends_on": [
+            "M29-005"
+          ],
+          "surface": "test suite",
+          "acceptance_criteria": [
+            "Golden tests cover identity questions.",
+            "Golden tests cover failure handling and ownership tone.",
+            "Golden tests prevent false runtime authority claims."
+          ]
+        },
+        {
+          "id": "M29-007",
+          "priority": "P1",
+          "title": "Remove harness leakage from user UX",
+          "depends_on": [
+            "M29-001",
+            "M29-004"
+          ],
+          "surface": "user experience",
+          "acceptance_criteria": [
+            "User-facing panels do not lead with display-only or registry jargon unless diagnostics mode is active.",
+            "Capability labels are rewritten as user-understandable state.",
+            "Internal advisory language remains available where it protects authority boundaries."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3.0",
+      "name": "Runtime Readiness Gate",
+      "goal": "Block 3.0 until Meridian behaves like a real app and passes end-to-end readiness smoke tests.",
+      "items": [
+        {
+          "id": "M30-001",
+          "priority": "P0",
+          "title": "Packaged executable smoke",
+          "depends_on": [
+            "M26-001",
+            "M26-002",
+            "M26-003",
+            "M26-004",
+            "M26-005",
+            "M26-006"
+          ],
+          "surface": "release validation",
+          "acceptance_criteria": [
+            "Fresh launch from EXE starts UI and bridge with no terminal required.",
+            "Bridge health reaches healthy or explains the blocker.",
+            "Packaged smoke can be repeated after app restart."
+          ]
+        },
+        {
+          "id": "M30-002",
+          "priority": "P0",
+          "title": "End-to-end message smoke",
+          "depends_on": [
+            "M26-001",
+            "M26-002",
+            "M29-005"
+          ],
+          "surface": "release validation",
+          "acceptance_criteria": [
+            "User sends a message.",
+            "Prime responds.",
+            "Bridge status remains healthy through the exchange."
+          ]
+        },
+        {
+          "id": "M30-003",
+          "priority": "P0",
+          "title": "End-to-end command smoke",
+          "depends_on": [
+            "M27-003",
+            "M27-004",
+            "M27-005"
+          ],
+          "surface": "release validation",
+          "acceptance_criteria": [
+            "/clear works locally.",
+            "/status works locally.",
+            "/restart-bridge works locally.",
+            "/skills opens or explains the skills panel locally."
+          ]
+        },
+        {
+          "id": "M30-004",
+          "priority": "P0",
+          "title": "End-to-end context smoke",
+          "depends_on": [
+            "M28-001",
+            "M28-002",
+            "M28-003",
+            "M28-004",
+            "M28-005",
+            "M28-006"
+          ],
+          "surface": "release validation",
+          "acceptance_criteria": [
+            "Uploaded document is visible to Prime in one session.",
+            "Pasted image is visible to Prime in one session.",
+            "Attachment paths and metadata are visible in bridge proof."
+          ]
+        },
+        {
+          "id": "M30-005",
+          "priority": "P0",
+          "title": "Session survival smoke",
+          "depends_on": [
+            "M27-001",
+            "M27-002"
+          ],
+          "surface": "release validation",
+          "acceptance_criteria": [
+            "Close app.",
+            "Reopen app.",
+            "Previous session is recoverable."
+          ]
+        },
+        {
+          "id": "M30-006",
+          "priority": "P0",
+          "title": "Failure explainability smoke",
+          "depends_on": [
+            "M26-005",
+            "M26-006"
+          ],
+          "surface": "release validation",
+          "acceptance_criteria": [
+            "Simulated missing bridge error produces actionable UI repair steps.",
+            "Simulated missing Codex error produces actionable UI repair steps.",
+            "Failure message identifies the failed layer."
+          ]
+        },
+        {
+          "id": "M30-007",
+          "priority": "P0",
+          "title": "Version truth audit",
+          "depends_on": [
+            "M30-001",
+            "M30-002",
+            "M30-003",
+            "M30-004",
+            "M30-005",
+            "M30-006"
+          ],
+          "surface": "release governance",
+          "acceptance_criteria": [
+            "3.0 is blocked until runtime readiness gates pass.",
+            "Release notes distinguish harness capability maturity from runtime competence.",
+            "No broad feature expansion is allowed to bypass failed P0 readiness gates."
+          ]
+        }
+      ]
+    }
+  ]
 }

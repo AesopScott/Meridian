@@ -1070,7 +1070,7 @@ body {
   transform: translateY(0) scale(1);
 }
 
-.harness-screen:has(.harness-dock-wrap.harness-dock-open) .session-window {
+.harness-screen:has(.harness-dock-wrap.harness-dock-open) .session-window:not(.session-window-left) {
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px) scale(0.985);
@@ -1537,11 +1537,22 @@ body {
   inset: 12px 12px 24px 34px;
   z-index: 1;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   gap: 7px;
   font-family: "Cascadia Code", "JetBrains Mono", monospace;
   font-size: var(--session-text-size, 16px);
   line-height: 1.45;
+}
+
+.session-prompt-row {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: stretch;
+  min-width: 0;
+  pointer-events: auto;
 }
 
 .session-window[data-session-collapsed="true"] .session-interface {
@@ -1568,6 +1579,29 @@ body {
   max-height: calc((var(--session-text-size, 16px) * 1.45 * 2) + 14px);
   resize: none;
   overflow: auto;
+  pointer-events: auto;
+}
+
+.session-send-button {
+  min-width: 58px;
+  border: 1px solid rgba(var(--session-electric), 0.5);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.58);
+  color: rgba(var(--session-electric-soft), 0.96);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 0 8px rgba(var(--session-electric), 0.18),
+    inset 0 0 8px rgba(var(--session-electric), 0.04);
+}
+
+.session-send-button:hover,
+.session-send-button:focus-visible {
+  border-color: rgba(var(--session-electric), 0.8);
+  color: rgb(var(--session-electric));
 }
 
 .session-attachment-tray {
@@ -1579,12 +1613,21 @@ body {
 }
 
 .session-attachment-upload {
-  min-height: 30px;
+  position: absolute;
+  right: 202px;
+  top: -33px;
+  z-index: 3;
+  height: 20px;
+  min-height: 20px;
   border: 1px solid rgba(var(--session-electric), 0.38);
   background: rgba(0, 0, 0, 0.44);
   color: rgb(var(--session-electric-soft));
   font: inherit;
-  padding: 3px 8px;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1px 9px;
   cursor: pointer;
 }
 
@@ -3989,7 +4032,9 @@ body {
   border-radius: 0 !important;
   overflow: visible !important;
   isolation: isolate !important;
-  background: url("bifrost/static/media/spark-center-final.png") center / contain no-repeat !important;
+  background:
+    url("bifrost/static/media/spark-center-final.png") center / contain no-repeat,
+    radial-gradient(circle at 50% 50%, rgba(18, 56, 64, 0.98) 0 9%, rgba(2, 13, 17, 0.98) 10% 38%, rgba(0, 0, 0, 1) 39% 100%) !important;
   box-shadow: none !important;
   animation: spark-final-breathe 8.6s ease-in-out infinite !important;
   filter: none !important;
@@ -4249,6 +4294,7 @@ body {
   const userWindow = document.querySelector('.session-window-right');
   const sessionWindows = Array.from(document.querySelectorAll('.session-window'));
   if (!screen || !sessionWindows.length) return;
+  screen.classList.add('sessions-visible');
   if (primeWindow && !primeWindow.querySelector('.session-model-select')) {
     primeWindow.insertAdjacentHTML('afterbegin', `
       <select class="session-model-select" aria-label="Models">
@@ -4256,6 +4302,12 @@ body {
         <option value="max">Max</option>
         <option value="auto" disabled>Auto</option>
       </select>
+    `);
+  }
+  if (primeWindow && !primeWindow.querySelector('.session-attachment-upload')) {
+    primeWindow.insertAdjacentHTML('afterbegin', `
+      <button class="session-attachment-upload" type="button" aria-label="Upload Prime context files">Upload</button>
+      <input class="session-attachment-input" type="file" multiple accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm" aria-label="Upload Prime context files">
     `);
   }
   if (userWindow && !userWindow.querySelector('.session-target-select')) {
@@ -4272,11 +4324,11 @@ body {
     const isUser = windowEl.classList.contains('session-window-right');
     workspace.insertAdjacentHTML('afterbegin', `
       <div class="session-interface" aria-label="${isUser ? 'User' : 'Prime'} session interface">
-        <textarea class="session-prompt-input" aria-label="${isUser ? 'User prompt input' : 'Prime prompt input'}" spellcheck="false"></textarea>
-        <div class="session-attachment-tray" aria-label="${isUser ? 'User attachments' : 'Prime attachments'}">
-          <button class="session-attachment-upload" type="button">Upload</button>
-          <input class="session-attachment-input" type="file" multiple accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm" aria-label="${isUser ? 'Upload User context files' : 'Upload Prime context files'}">
+        <div class="session-prompt-row">
+          <textarea class="session-prompt-input" aria-label="${isUser ? 'User prompt input' : 'Prime prompt input'}" spellcheck="false"></textarea>
+          <button class="session-send-button" type="button" aria-label="${isUser ? 'Send User prompt' : 'Send Prime prompt'}">Send</button>
         </div>
+        <div class="session-attachment-tray" aria-label="${isUser ? 'User attachments' : 'Prime attachments'}"></div>
         <div class="session-response-output" aria-label="${isUser ? 'User response output' : 'Prime response output'}"></div>
         <div class="session-model-status" aria-live="polite"></div>
       </div>
@@ -4387,6 +4439,8 @@ body {
   let modelReadiness = [];
   let bridgeCapabilities = {};
   let bridgeOnline = false;
+  let startupDiagnosticsState = { checked: false, ok: false, failures: [] };
+  let startupDiagnosticsPromise = null;
   let userSessions = [];
   let userSessionsLoadFailed = false;
   const userSessionTargetKey = 'meridian.user-session.target.v1';
@@ -4508,6 +4562,11 @@ body {
   };
   const sessionOptionLabel = (session) => {
     const status = session.status && session.status !== 'live' ? ` (${session.status.replaceAll('_', ' ')})` : '';
+    if (session.recoverable || session.routable === false) {
+      const timestamp = session.lastActivityAt ? new Date(session.lastActivityAt).toLocaleString() : 'unknown time';
+      const summary = String(session.lastMessageSummary || 'last message unavailable').slice(0, 90);
+      return `${session.sessionName}${status} - ${timestamp} - ${summary}`;
+    }
     return `${session.sessionName}${status}`;
   };
   const userSessionStatusText = () => {
@@ -4516,6 +4575,7 @@ body {
     const selected = selectedUserSession();
     if (!selected && localStorage.getItem(userSessionTargetKey)) return 'selected session unavailable';
     if (!selected) return 'select live session';
+    if (selected.recoverable || selected.routable === false) return `recoverable session ${selected.sessionName} - not routable`;
     const status = selected.status && selected.status !== 'live' ? ` (${selected.status.replaceAll('_', ' ')})` : '';
     return `target ${selected.sessionName}${status}`;
   };
@@ -4580,10 +4640,12 @@ body {
       return;
     }
     const activeProject = activeProjectContext();
+    const liveSessions = userSessions.filter((session) => session.routable);
+    const recoveredSessions = userSessions.filter((session) => !session.routable);
     let focusMode = false;
     try { focusMode = localStorage.getItem('meridian.focus-mode.v1') === 'true'; } catch {}
     const selectedSession = userSessions.find((session) => session.sessionId === current) || null;
-    const projects = Array.from(new Set(userSessions.map((session) => session.projectName || 'Meridian'))).sort((a, b) => a.localeCompare(b));
+    const projects = Array.from(new Set(liveSessions.map((session) => session.projectName || 'Meridian'))).sort((a, b) => a.localeCompare(b));
     if (activeProject && !projects.includes(activeProject)) {
       const group = document.createElement('optgroup');
       group.label = `${activeProject} (active project)`;
@@ -4607,7 +4669,7 @@ body {
       if (focusMode && project !== activeProject) return;
       const group = document.createElement('optgroup');
       group.label = project === activeProject ? `${project} (active project)` : project;
-      userSessions
+      liveSessions
         .filter((session) => (session.projectName || 'Meridian') === project)
         .sort((left, right) => left.sessionName.localeCompare(right.sessionName))
         .forEach((session) => {
@@ -4618,6 +4680,20 @@ body {
         });
       userSessionSelect.append(group);
     });
+    if (recoveredSessions.length) {
+      const recoveredGroup = document.createElement('optgroup');
+      recoveredGroup.label = 'Recoverable sessions';
+      recoveredSessions
+        .slice()
+        .sort((left, right) => left.sessionName.localeCompare(right.sessionName))
+        .forEach((session) => {
+          const option = document.createElement('option');
+          option.value = session.sessionId;
+          option.textContent = sessionOptionLabel(session);
+          recoveredGroup.append(option);
+        });
+      userSessionSelect.append(recoveredGroup);
+    }
     if (userSessions.some((session) => session.sessionId === current)) {
       userSessionSelect.value = current;
       localStorage.setItem(userSessionTargetKey, userSessionSelect.value);
@@ -4628,7 +4704,7 @@ body {
       userSessionSelect.prepend(option);
       userSessionSelect.value = '';
     } else {
-      const firstLiveTarget = userSessions[0];
+      const firstLiveTarget = liveSessions[0] || recoveredSessions[0];
       userSessionSelect.value = firstLiveTarget.sessionId;
       localStorage.setItem(userSessionTargetKey, userSessionSelect.value);
     }
@@ -4640,7 +4716,7 @@ body {
     try {
       const response = await fetch(bridgeUrl('user-sessions'), { cache: 'no-store' });
       const result = await response.json();
-      userSessions = Array.isArray(result.sessions) ? result.sessions.filter((session) => session.routable) : [];
+      userSessions = Array.isArray(result.sessions) ? result.sessions : [];
       userSessionsLoadFailed = false;
     } catch {
       userSessions = [];
@@ -4711,11 +4787,7 @@ body {
     const tray = attachmentTrayFor(input);
     if (!tray) return;
     const attachments = readPendingAttachments(input);
-    const uploadButton = tray.querySelector('.session-attachment-upload');
-    const uploadInput = tray.querySelector('.session-attachment-input');
     tray.replaceChildren(...attachments.map((attachment, index) => renderAttachmentChip(attachment, { removable: true, index })));
-    if (uploadButton) tray.append(uploadButton);
-    if (uploadInput) tray.append(uploadInput);
   };
   const clearPendingAttachments = (input) => writePendingAttachments(input, []);
   const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
@@ -4804,6 +4876,30 @@ body {
     writeTranscript(input, entries);
     renderTranscript(input);
   };
+  const restoreRecoverableSessionWindow = (session, input = userInput()) => {
+    if (!input || !(session?.recoverable || session?.routable === false)) return false;
+    const timestamp = session.lastActivityAt ? new Date(session.lastActivityAt).toLocaleString() : 'unknown time';
+    const summary = String(session.lastMessageSummary || 'No last message summary was persisted.').trim();
+    const requestId = String(session.requestId || session.sessionId || '');
+    const existing = readTranscript(input).some((entry) => entry.recoveredRequestId === requestId);
+    if (!existing) {
+      pushEntry(
+        input,
+        'system',
+        `Recovered session reopened from persisted runtime state. Last activity: ${timestamp}. Last message: ${summary}. This recovered entry is not routable; select a live session before sending.`,
+        'Session recovery',
+        {
+          recoveredRequestId: requestId,
+          sessionTargetId: session.sessionId || '',
+          projectContext: session.projectName || session.projectContext || activeProjectContext(),
+        },
+      );
+    } else {
+      renderTranscript(input);
+    }
+    setStatus(input, `recoverable session ${session.sessionName} reopened; not routable`);
+    return true;
+  };
   const clearActiveSessionWindow = (input) => {
     writeTranscript(input, []);
     renderTranscript(input);
@@ -4812,10 +4908,45 @@ body {
     clearPendingAttachments(input);
     setStatus(input, 'cleared');
   };
-  const handleLocalSessionCommand = (input, prompt) => {
-    if (prompt.trim().toLowerCase() !== '/clear') return false;
-    clearActiveSessionWindow(input);
-    return true;
+  const localMeridianCommands = new Set(['/clear', '/status', '/skills', '/debug', '/restart-bridge']);
+  const handleLocalSessionCommand = async (input, prompt) => {
+    const normalizedCommand = prompt.trim().toLowerCase().split(/\s+/)[0];
+    if (!normalizedCommand.startsWith('/')) return false;
+    if (normalizedCommand === '/clear') {
+      clearActiveSessionWindow(input);
+      return true;
+    }
+    if (normalizedCommand === '/status') {
+      openSpark();
+      const opened = renderRelayModels();
+      setStatus(input, opened ? 'runtime status panel opened' : 'runtime status unavailable');
+      return true;
+    }
+    if (normalizedCommand === '/skills') {
+      openSpark();
+      const opened = renderSparkSkills();
+      setStatus(input, opened ? 'skills panel opened' : 'skills panel unavailable');
+      return true;
+    }
+    if (normalizedCommand === '/debug') {
+      openSpark();
+      const opened = renderRelayModels();
+      setStatus(input, opened ? 'debug report opened' : 'debug report unavailable');
+      return true;
+    }
+    if (normalizedCommand === '/restart-bridge') {
+      setStatus(input, 'restarting local bridge');
+      const restart = await restartModelBridge();
+      setStatus(input, restart.ok
+        ? 'bridge restarted'
+        : `bridge restart blocked: ${restart.error || restart.nextRepairStep || 'check runtime diagnostics'}`);
+      return true;
+    }
+    if (normalizedCommand.startsWith('/')) {
+      setStatus(input, `unknown meridian command ${normalizedCommand}; try /clear, /status, /skills, /debug, or /restart-bridge`);
+      return true;
+    }
+    return false;
   };
   const setStatus = (input, text) => {
     const status = statusFor(input);
@@ -4879,9 +5010,13 @@ body {
     const attachments = readPendingAttachments(input);
     if (!prompt && attachments.length) prompt = 'Please review the attached context files.';
     if (!prompt) return;
-    if (handleLocalSessionCommand(input, prompt)) return;
+    if (await handleLocalSessionCommand(input, prompt)) return;
     const selectedBackend = modelSelect?.value || 'codex';
     const backend = selectedBackend === 'auto' ? 'codex' : selectedBackend;
+    const startupDiagnostics = await runStartupDiagnostics(selectedBackend);
+    if (!startupDiagnostics.ok) {
+      setStatus(input, startupDiagnosticsSummary(startupDiagnostics));
+    }
     if (!modelReadiness.length) await updateModelReadiness();
     if (!bridgeOnline) {
       setStatus(input, 'model bridge offline');
@@ -4911,8 +5046,14 @@ body {
       pushEntry(input, 'error', 'Error: Select a live User Session target before sending.', backend, { requestedBackend: selectedBackend, projectContext: activeProjectContext() });
       return;
     }
+    if (sessionChannel(input) === 'user' && (targetSession.recoverable || targetSession.routable === false)) {
+      restoreRecoverableSessionWindow(targetSession, input);
+      pushEntry(input, 'error', 'Error: Recovered sessions are read-only and will not be sent; select a live User Session target before sending.', backend, { requestedBackend: selectedBackend, projectContext: activeProjectContext(), sessionTargetId: targetSession.sessionId || '' });
+      return;
+    }
     input.dataset.sessionSending = 'true';
     const projectContext = activeProjectContext();
+    const primeContract = primeContractPayload();
     pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '', projectContext, attachments });
     input.value = '';
     localStorage.setItem(draftKey(input), '');
@@ -4927,6 +5068,7 @@ body {
         requestedBackend: selectedBackend,
         channel: sessionChannel(input),
         projectContext,
+        primeContract,
         requestId,
         prompt,
         transcript: visibleTranscript,
@@ -4997,6 +5139,88 @@ body {
       input.dataset.sessionSending = 'false';
     }
   };
+  const startupDiagnosticsSummary = (state = startupDiagnosticsState) => {
+    if (!state?.checked) return 'startup diagnostics: running';
+    const warningText = Array.isArray(state.warnings) && state.warnings.length ? `; warnings: ${state.warnings.join('; ')}` : '';
+    if (state.ok) {
+      const entryCount = state.runtimeEnvironment?.pathEntryCount;
+      if (typeof entryCount === 'number') {
+        return `startup diagnostics: passed (path entries ${entryCount})${warningText}`;
+      }
+      return `startup diagnostics: passed${warningText}`;
+    }
+    if (!state.failures.length) return 'startup diagnostics blocked';
+    return `startup diagnostics blocked: ${state.failures.join('; ')}`;
+  };
+  const applyStartupDiagnosticStatus = (state = startupDiagnosticsState) => {
+    document.querySelectorAll('.session-prompt-input').forEach((input) => setStatus(input, startupDiagnosticsSummary(state)));
+  };
+  const runStartupDiagnostics = async (requestedBackend = 'codex') => {
+    if (startupDiagnosticsPromise) return startupDiagnosticsPromise;
+    if (startupDiagnosticsState.checked && startupDiagnosticsState.ok) return startupDiagnosticsState;
+    startupDiagnosticsPromise = (async () => {
+      const state = { checked: false, ok: false, failures: [], warnings: [] };
+      state.runtimeEnvironment = null;
+      startupDiagnosticsState = state;
+      applyStartupDiagnosticStatus({ checked: false, ok: false, failures: ['running'], warnings: [] });
+      try {
+        let modelsSnapshot = null;
+        try {
+          const response = await fetch(bridgeUrl('models'), { cache: 'no-store' });
+          modelsSnapshot = await response.json();
+          state.runtimeEnvironment = modelsSnapshot?.runtimeEnvironment || null;
+          if (!state.runtimeEnvironment?.pathEnvKey) state.failures.push('model runtime environment path metadata missing');
+          if (modelsSnapshot?.version !== expectedBridgeVersion) state.failures.push('model bridge version mismatch');
+          if (!modelsSnapshot?.capabilities?.visibleTranscriptContext) state.failures.push('model bridge context disabled');
+          const models = Array.isArray(modelsSnapshot?.models) ? modelsSnapshot.models : [];
+          if (!models.length) state.failures.push('model metadata missing');
+          const selected = requestedBackend === 'auto' ? 'codex' : requestedBackend;
+          const codex = models.find((model) => model.backend === 'codex');
+          if (!codex) {
+            state.failures.push('Codex model entry missing');
+          } else {
+            if (!codex.cli) state.failures.push('Codex CLI metadata missing');
+            if (selected === 'codex' && !codex.installed) state.failures.push('Codex CLI not installed or not authenticated');
+            if (!codex.setupHint) state.failures.push('Codex auth visibility missing');
+          }
+        } catch {
+          state.failures.push('model bridge unreachable');
+          bridgeOnline = false;
+        }
+
+        try {
+          const storageProbeKey = 'meridian.startup.diag.storage';
+          localStorage.setItem(storageProbeKey, 'ok');
+          localStorage.removeItem(storageProbeKey);
+        } catch {
+          state.failures.push('localStorage not writable');
+        }
+
+        try {
+          const [fileMapResponse, modelsResponse] = await Promise.all([
+            fetch(bridgeUrl('filemap'), { cache: 'no-store' }),
+            fetch(bridgeUrl('models'), { cache: 'no-store' }),
+          ]);
+          const fileMapSnapshot = await fileMapResponse.json();
+          const registryModelsSnapshot = await modelsResponse.json();
+          const registryRows = skillRegistryRowsFromSnapshots(fileMapSnapshot, registryModelsSnapshot);
+          if (!Array.isArray(registryRows) || !registryRows.length) state.warnings.push('skill registry empty');
+          if (!registryRows.some((row) => row?.name === '/status')) state.warnings.push('skill registry missing local command rows');
+          if (!registryRows.some((row) => row?.provenance === 'backend:models')) state.warnings.push('skill registry model rows missing');
+        } catch {
+          state.warnings.push('skill registry unavailable');
+        }
+
+        state.ok = state.failures.length === 0;
+        state.checked = true;
+        applyStartupDiagnosticStatus(state);
+        return state;
+      } finally {
+        startupDiagnosticsPromise = null;
+      }
+    })();
+    return startupDiagnosticsPromise;
+  };
   const insertPromptToken = (input, token) => {
     const start = input.selectionStart ?? input.value.length;
     const end = input.selectionEnd ?? input.value.length;
@@ -5049,13 +5273,8 @@ body {
         sendPrompt(input);
       }
     });
-    attachmentTrayFor(input)?.querySelector('.session-attachment-upload')?.addEventListener('click', () => {
-      attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.click();
-    });
-    attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.addEventListener('change', async (event) => {
-      const files = Array.from(event.target?.files || []);
-      await addAttachmentFiles(input, files, 'upload');
-      if (event.target) event.target.value = '';
+    input.closest('.session-interface')?.querySelector('.session-send-button')?.addEventListener('click', () => {
+      sendPrompt(input);
       input.focus();
     });
     attachmentTrayFor(input)?.addEventListener('click', (event) => {
@@ -5067,18 +5286,32 @@ body {
       input.focus();
     });
   });
+  primeWindow?.querySelector('.session-attachment-upload')?.addEventListener('click', () => {
+    primeWindow.querySelector('.session-attachment-input')?.click();
+  });
+  primeWindow?.querySelector('.session-attachment-input')?.addEventListener('change', async (event) => {
+    const input = primeInput();
+    const files = Array.from(event.target?.files || []);
+    if (input) await addAttachmentFiles(input, files, 'upload');
+    if (event.target) event.target.value = '';
+    input?.focus();
+  });
   userSessionSelect?.addEventListener('change', () => {
     localStorage.setItem(userSessionTargetKey, userSessionSelect.value || '');
     updateUserSessionTitle();
     const input = userInput();
     if (input) {
       input.value = localStorage.getItem(draftKey(input)) || '';
-      renderTranscript(input);
-      updateUserSessionStatus();
+      const selected = selectedUserSession();
+      if (!restoreRecoverableSessionWindow(selected, input)) {
+        renderTranscript(input);
+        updateUserSessionStatus();
+      }
     }
   });
   updateModelReadiness();
   loadUserSessions();
+  void runStartupDiagnostics();
   refreshSpeechButtonVoiceState();
   updatePrimeProjectStatus();
   window.meridianRefreshUserSessionTarget = () => {
@@ -5294,6 +5527,30 @@ body {
   const currentProjectContext = () => document.querySelector('.project-context-select')?.value || window.meridianActiveProject || 'Meridian';
   const currentBridgeUrl = (path) => `http://127.0.0.1:8767/bridge/${String(path || '').replace(/^\/+/, '')}`;
   const primeBool = (value) => (value ? 'yes' : 'no');
+  const primePersonaContract = {
+    contractVersion: 'prime-persona-v1',
+    role: 'Prime',
+    identity: 'Spark speaking on behalf of Meridian',
+    directives: [
+      'Favor visible progress with ownership and practical next steps.',
+      'Avoid false capability claims when actions are display-only or pending backend execution routes.',
+      'Favor evidence and constraints before closing recommendations.',
+    ],
+    proofObligations: [
+      'Surface blockers, assumptions, and uncertainty before declaring completion.',
+      'Call out boundary limits before suggesting execution actions.',
+      'Use explicit reasoning only where supported by visible context.',
+    ],
+    responsePreferences: [
+      'Use plain language and concise structure.',
+      'Prioritize actionable next steps with confidence and risk context.',
+      'Keep suggestions grounded in what is actually available in this active Meridian context.',
+    ],
+  };
+  const primeContractPayload = () => ({
+    ...primePersonaContract,
+    projectContext: currentProjectContext(),
+  });
   const primeLogicStrip = (items) => `<div class="prime-logic-strip">${items.map(([label, value]) => `
     <div class="prime-logic-cell">
       <div class="prime-logic-label">${escapeHtml(label)}</div>
@@ -7240,9 +7497,53 @@ body {
       description: 'Clear the active Prime or User session window without sending the command to the model.',
       provenance: 'local:meridian-command',
       setup: 'available',
-      permission: 'local UI state only; clears visible transcript and draft for the active window',
+      permission: 'Meridian commands run through their owning UI path or local command handler before model routing; local UI state only; clears visible transcript and draft for the active window',
       arguments: '/clear',
       example: 'Type /clear in a session prompt to clear that window.',
+    },
+    {
+      name: '/status',
+      scope: 'Meridian command',
+      provider: 'Spark local runtime',
+      description: 'Open the local runtime status panel in Spark.',
+      provenance: 'local:meridian-command',
+      setup: 'available',
+      permission: 'local UI diagnostics read-only',
+      arguments: '/status',
+      example: 'Type /status in a session prompt to review bridge/runtime status.',
+    },
+    {
+      name: '/skills',
+      scope: 'Meridian command',
+      provider: 'Spark local runtime',
+      description: 'Open the local skills registry in Spark.',
+      provenance: 'local:meridian-command',
+      setup: 'available',
+      permission: 'local UI discovery only; rows are not run from this surface',
+      arguments: '/skills',
+      example: 'Type /skills in a session prompt to show command and skill rows.',
+    },
+    {
+      name: '/debug',
+      scope: 'Meridian command',
+      provider: 'Spark local runtime',
+      description: 'Open the local runtime debug report with health, readiness, model, and recent-call metadata.',
+      provenance: 'local:meridian-command',
+      setup: 'available',
+      permission: 'local diagnostics read-only; copies sanitized report metadata only',
+      arguments: '/debug',
+      example: 'Type /debug in a session prompt to inspect runtime blockers and copy a diagnostic report.',
+    },
+    {
+      name: '/restart-bridge',
+      scope: 'Meridian command',
+      provider: 'Spark local runtime',
+      description: 'Trigger local model-bridge restart and readiness refresh.',
+      provenance: 'local:meridian-command',
+      setup: 'available',
+      permission: 'local reviewed restart path only; no model payload mutation',
+      arguments: '/restart-bridge',
+      example: 'Type /restart-bridge in a session prompt to restart the runtime bridge.',
     },
     {
       name: 'Reset',
@@ -7420,6 +7721,18 @@ body {
       arguments: 'workbook goal, data files, formulas, charts',
       example: 'Ask Prime to clean a CSV and produce an XLSX summary.',
     },
+    {
+      name: 'graphify',
+      scope: 'Project skill',
+      provider: 'Graphify engine',
+      description: 'Query project knowledge graph nodes, communities, and cross-file relationships.',
+      provenance: 'local:graphify',
+      setup: 'available when graphify snapshot is present',
+      permission: 'model-mediated graph exploration only; not executable from this skills list',
+      arguments: 'query:text; optional node or path filter',
+      example: 'Ask Prime to map ownership or relationship paths across project files.',
+      executionMode: 'Informational',
+    },
   ];
   const skillRegistryRowsFromSnapshots = (fileMapSnapshot, modelsSnapshot) => {
     const entries = Array.isArray(fileMapSnapshot?.focus_entries) ? fileMapSnapshot.focus_entries : [];
@@ -7435,6 +7748,7 @@ body {
       permission: 'read-only metadata; relative paths only',
       arguments: 'path:string required repo-relative; area:string optional; related_tests:string[] default []',
       example: entry.path ? `Example: inspect ${entry.path} through FileMap or Atlas context.` : 'Example: inspect through FileMap or Atlas context.',
+      executionMode: 'Informational',
     }));
     const modelRows = models.map((model) => ({
       name: model.label || model.backend || 'unknown model backend',
@@ -7451,6 +7765,7 @@ body {
       example: model.installed
         ? `Example: select ${model.label || model.backend || 'this backend'} in the manual model selector before sending a typed prompt.`
         : 'Example: complete CLI/provider setup outside this surface before use.',
+      executionMode: 'Informational',
     }));
     return [...meridianLocalSkillRows(), ...fileMapRows, ...modelRows];
   };
@@ -7460,6 +7775,7 @@ body {
     if (provenance === 'local:meridian-command') return 'Meridian commands';
     if (provenance === 'local:meridian-setting') return 'Meridian settings';
     if (provenance === 'local:codex-skill') return 'Codex model skills';
+    if (provenance === 'local:graphify') return 'Graphify';
     if (provenance === 'backend:models') return 'Model skills';
     if (provenance === 'backend:filemap') return 'Project capabilities';
     return 'Other skills';
@@ -7468,12 +7784,20 @@ body {
     'Meridian commands',
     'Meridian settings',
     'Codex model skills',
+    'Graphify',
     'Model skills',
     'Project capabilities',
     'Other skills',
   ];
+  const inferSkillExecutionMode = (row) => {
+    if (typeof row?.executionMode === 'string' && row.executionMode.trim()) return row.executionMode.trim();
+    return 'Informational';
+  };
   const renderSparkSkillsRegistry = (snapshot, query = '') => {
-    const rows = Array.isArray(snapshot?.rows) ? snapshot.rows : meridianLocalSkillRows();
+    const rows = (Array.isArray(snapshot?.rows) ? snapshot.rows : meridianLocalSkillRows()).map((row) => ({
+      ...row,
+      executionMode: inferSkillExecutionMode(row),
+    }));
     const normalizedQuery = String(query || '').trim().toLowerCase();
     const pinnedSkillIds = readSparkSkillsPinned();
     const skillSection = (title, body, openByDefault = false) => {
@@ -7487,6 +7811,7 @@ body {
         row.provider,
         row.description,
         row.provenance,
+        row.executionMode,
         row.setup,
         row.permission,
         row.arguments,
@@ -7510,9 +7835,12 @@ body {
         ${relayGrid([
           ['scope', row.scope || 'unknown'],
           ['backend/provider', row.provider || 'unknown'],
+          ['authority', row.provider || 'unknown'],
+          ['source', row.provenance || 'unknown'],
           ['setup status', row.setup || 'unknown'],
           ['permission boundary', row.permission || 'unknown'],
           ['argument schema', row.arguments || 'not exposed by backend metadata'],
+          ['execution mode', row.executionMode || 'Informational'],
           ['provenance', row.provenance || 'unknown'],
           ['usage example', row.example || 'none'],
           ['favorite', pinned ? 'pinned for active project/user' : 'not pinned'],
@@ -7560,7 +7888,7 @@ body {
         ['pin scope', 'active project/user UI profile'],
       ]), false),
       skillSection('How to use this list', relayList([
-        'Meridian commands run only through their owning UI path or local command handler; /clear is handled before model routing.',
+        'Meridian commands run through their owning UI path or local command handler before model routing; /clear, /status, /skills, and /restart-bridge are handled locally before model routing.',
         'Codex skills are listed for discovery so Prime can explain or use them when you ask in conversation.',
         'Search and pins are local UI behavior; rows are not run by clicking this panel.',
         'Bridge metadata may add FileMap and model capability rows when the local bridge is available.',
@@ -8920,10 +9248,82 @@ body {
   };
   const relayBridgeRows = (status, detail) => [
     ['bridge', status],
+    ['bridge state', detail.state || 'offline'],
     ['version', detail.version || 'unknown'],
     ['visible context', detail.visibleContext ? 'enabled' : 'blocked'],
+    ['startup probes', String(detail.startupProbes ?? 0)],
+    ['startup uptime', detail.startupUptimeMs ? `${Math.round(detail.startupUptimeMs / 100) / 10}s` : 'n/a'],
     ['restart', detail.samePortRestart ? 'same-port reset recovery' : 'manual restart required'],
+    ['error', detail.error || 'none'],
   ];
+  const renderDebugReportSnapshot = (snapshot = {}) => {
+    const readiness = snapshot.runtimeReadiness || {};
+    const health = snapshot.health || {};
+    const recent = snapshot.recent || {};
+    const calls = Array.isArray(recent.calls) ? recent.calls : [];
+    const results = Array.isArray(recent.results) ? recent.results : [];
+    const models = Array.isArray(snapshot.models) ? snapshot.models : [];
+    const repairSteps = Array.isArray(snapshot.repairSteps) ? snapshot.repairSteps : [];
+    return [
+      relaySection('Debug snapshot', relayGrid([
+        ['generated', snapshot.generatedAt || 'unknown'],
+        ['bridge state', health.state || 'unknown'],
+        ['readiness', readiness.ok ? 'ready' : 'blocked'],
+        ['version', snapshot.version || 'unknown'],
+        ['pid', health.pid || 'unknown'],
+        ['path entries', snapshot.runtimeEnvironment?.pathEntryCount ?? 'unknown'],
+        ['recoverable sessions', snapshot.recovery?.recoverableSessionCount ?? 0],
+        ['redaction', snapshot.redaction || 'raw model output omitted'],
+      ]), true),
+      relaySection('Readiness blockers', readiness.blockers?.length
+        ? relayList(readiness.blockers)
+        : relayGrid([['status', 'no readiness blockers reported']]), true),
+      relaySection('Model CLI visibility', models.length
+        ? models.map((model) => relayGrid([
+          ['backend', model.backend || 'unknown'],
+          ['label', model.label || 'unknown'],
+          ['cli', model.cli || 'unknown'],
+          ['installed/auth visible', model.installed ? 'yes' : 'no'],
+          ['setup hint', model.setupHint || 'none'],
+        ])).join('')
+        : relayGrid([['status', 'no model metadata reported']]), false),
+      relaySection('Recent runtime calls', calls.length
+        ? calls.map((call) => relayGrid([
+          ['request', call.requestId || 'unknown'],
+          ['channel/backend', `${call.channel || 'unknown'} / ${call.backend || call.requestedBackend || 'unknown'}`],
+          ['project/session', `${call.projectName || 'unknown'} / ${call.sessionName || call.sessionTargetId || 'none'}`],
+          ['ok/setup', `${call.ok ? 'ok' : 'not-ok'} / ${call.setupRequired ? 'setup required' : 'setup clear'}`],
+          ['duration', `${call.durationMs || 0}ms`],
+          ['summary chars', call.requestSummaryChars ?? 0],
+        ])).join('')
+        : relayGrid([['status', 'no recent call metadata']]), false),
+      relaySection('Recent runtime results', results.length
+        ? results.map((result) => relayGrid([
+          ['request', result.requestId || 'unknown'],
+          ['backend/model', `${result.backend || result.requestedBackend || 'unknown'} / ${result.model || 'unknown'}`],
+          ['ok/setup', `${result.ok ? 'ok' : 'not-ok'} / ${result.setupRequired ? 'setup required' : 'setup clear'}`],
+          ['duration', `${result.durationMs || 0}ms`],
+          ['error', result.error || 'none'],
+          ['text chars', result.textChars ?? 0],
+        ])).join('')
+        : relayGrid([['status', 'no recent result metadata']]), false),
+      relaySection('Repair steps', repairSteps.length ? relayList(repairSteps) : relayGrid([['status', 'no repair steps reported']]), true),
+      `<button class="relay-small-action" type="button" data-copy-debug-report>Copy debug report</button>`,
+    ].join('');
+  };
+  const loadDebugReport = async () => {
+    const node = rightWorkspace?.querySelector('[data-debug-report]');
+    if (!node) return;
+    try {
+      const response = await fetch(currentBridgeUrl('debug-report'), { cache: 'no-store' });
+      const snapshot = await response.json();
+      node.dataset.debugReport = JSON.stringify(snapshot, null, 2);
+      node.innerHTML = renderDebugReportSnapshot(snapshot);
+    } catch (error) {
+      delete node.dataset.debugReport;
+      node.innerHTML = renderDebugReportSnapshot({ ok: false, error: error.message, runtimeReadiness: { ok: false, blockers: ['debug report route unavailable'] }, repairSteps: ['Use /restart-bridge, then reopen /debug.'] });
+    }
+  };
   const renderRelayBridgeStatus = async () => {
     const bridgeNode = rightWorkspace?.querySelector('[data-relay-bridge-status]');
     if (!bridgeNode) return;
@@ -8934,10 +9334,14 @@ body {
         version: result.version,
         visibleContext: Boolean(result.capabilities?.visibleTranscriptContext),
         samePortRestart: Boolean(result.capabilities?.samePortRestart),
+        state: result.state || 'offline',
+        error: result.error || '',
+        startupProbes: Number(result?.startup?.probes || 0),
+        startupUptimeMs: Number(result?.startup?.uptimeMs || 0),
       };
       bridgeNode.innerHTML = relayGrid(relayBridgeRows(result.ok ? 'online' : 'degraded', detail));
     } catch {
-      bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', { visibleContext: false, samePortRestart: false }));
+      bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', { visibleContext: false, samePortRestart: false, state: 'offline', error: 'unable to fetch health route' }));
     }
   };
   const clearRightPanelSurface = () => {
@@ -11344,7 +11748,7 @@ body {
   const sessionWindowDefaultRoles = ['prime', 'user'];
   const sessionWindowSizeOptions = ['compact', 'standard', 'wide'];
   const defaultSessionWindowDefaultsState = () => ({
-    prime: { hidden: false, collapsed: false, pinned: false, size: 'standard' },
+    prime: { hidden: false, collapsed: false, pinned: true, size: 'standard' },
     user: { hidden: false, collapsed: false, pinned: false, size: 'standard' },
   });
   const normalizeSessionWindowDefaultsState = (value) => {
@@ -11381,10 +11785,13 @@ body {
     document.querySelectorAll('.session-window').forEach((windowEl) => {
       const role = sessionWindowRole(windowEl);
       const config = state[role] || defaultSessionWindowDefaultsState()[role];
-      windowEl.dataset.sessionHidden = config.hidden ? 'true' : 'false';
-      windowEl.dataset.sessionCollapsed = config.collapsed ? 'true' : 'false';
-      windowEl.dataset.sessionPinned = config.pinned ? 'true' : 'false';
-      windowEl.dataset.sessionSize = config.size || 'standard';
+      const safeConfig = role === 'prime'
+        ? { ...config, hidden: false, collapsed: false, pinned: true }
+        : config;
+      windowEl.dataset.sessionHidden = safeConfig.hidden ? 'true' : 'false';
+      windowEl.dataset.sessionCollapsed = safeConfig.collapsed ? 'true' : 'false';
+      windowEl.dataset.sessionPinned = safeConfig.pinned ? 'true' : 'false';
+      windowEl.dataset.sessionSize = safeConfig.size || 'standard';
     });
     return state;
   };
@@ -12318,6 +12725,7 @@ body {
           </div>
           <div class="relay-models-body">
             ${relaySection('Bridge route', '<div data-relay-bridge-status></div>', true)}
+            <div data-debug-report>${relaySection('Debug report', relayGrid([['status', 'loading debug report']]), true)}</div>
             <div data-relay-logic>${relaySection('Relay logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>
             <div data-relay-evidence>${relaySection('Relay evidence source', relayGrid([['status', 'loading backend snapshot']]))}</div>
           </div>
@@ -12330,7 +12738,16 @@ body {
         state[section.dataset.relaySection] = section.open;
         localStorage.setItem(relaySectionStateKey, JSON.stringify(state));
       }, true);
+      rightWorkspace.querySelector('.relay-models-surface')?.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (!target?.matches?.('[data-copy-debug-report]')) return;
+        const report = rightWorkspace.querySelector('[data-debug-report]')?.dataset.debugReport || '';
+        if (!report) return;
+        await navigator.clipboard?.writeText(report);
+        target.textContent = 'Copied debug report';
+      });
       renderRelayBridgeStatus();
+      loadDebugReport();
       loadRelayLogic();
       loadRelayEvidence();
       return true;
@@ -13278,10 +13695,23 @@ body {
   };
   const restartModelBridge = async () => {
     try {
-      await fetch(currentBridgeUrl('restart'), { method: 'POST', cache: 'no-store' });
-      await waitForModelBridge();
+      const response = await fetch(currentBridgeUrl('restart'), { method: 'POST', cache: 'no-store' });
+      const restart = await response.json().catch(() => ({}));
+      const ready = await waitForModelBridge();
+      await updateModelReadiness();
+      return {
+        ...restart,
+        ok: ready,
+        ready,
+        error: ready ? '' : (restart.nextRepairStep || 'bridge did not become healthy after restart request'),
+      };
     } catch {
-      // Reset still reloads the UI; offline bridge status remains visible after reload.
+      return {
+        ok: false,
+        ready: false,
+        error: 'bridge restart request failed',
+        nextRepairStep: 'Open runtime diagnostics and inspect bridge logs.',
+      };
     }
   };
   let resetInProgress = false;
