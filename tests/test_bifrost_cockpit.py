@@ -945,8 +945,10 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "const renderSparkSkills = () =>" in doc
     assert "const loadSparkSkills = async () =>" in doc
     assert "const renderSparkSkillsRegistry = (snapshot, query = '') =>" in doc
-    assert "const skillSection = (title, body, openByDefault = false) =>" in doc
-    assert "`skills-${relaySectionKey(title)}`" in doc
+    assert "const skillSection = (title, body, openByDefault = false, stateTitle = title, forceOpen = false) =>" in doc
+    assert "`skills-${relaySectionKey(stateTitle)}`" in doc
+    assert "Object.prototype.hasOwnProperty.call(state, key) ? Boolean(state[key]) : openByDefault" in doc
+    assert "forceOpen" in doc
     assert "const meridianLocalSkillRows = () =>" in doc
     assert "const skillRegistryGroup = (row) =>" in doc
     assert "const skillRegistryGroupOrder = [" in doc
@@ -974,6 +976,7 @@ def test_index_spark_skills_registry_searches_loaded_metadata_without_execution(
     assert "Model skills" in doc
     assert "Project capabilities" in doc
     assert "groupRows.map((row) => skillResult(row)).join('')" in doc
+    assert "group," in doc
     assert "Boolean(normalizedQuery)" in doc
     assert "index < 3 || Boolean(normalizedQuery)" not in doc
     assert "Active project skills" in doc

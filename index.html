@@ -8053,9 +8053,12 @@ body {
     }));
     const normalizedQuery = String(query || '').trim().toLowerCase();
     const pinnedSkillIds = readSparkSkillsPinned();
-    const skillSection = (title, body, openByDefault = false) => {
-      const key = `skills-${relaySectionKey(title)}`;
-      return `<details class="relay-models-section" data-relay-section="${escapeHtml(key)}"${openByDefault ? ' open' : ''}><summary>${escapeHtml(title)}</summary><div class="relay-models-section-body">${body}</div></details>`;
+    const skillSection = (title, body, openByDefault = false, stateTitle = title, forceOpen = false) => {
+      const key = `skills-${relaySectionKey(stateTitle)}`;
+      const state = relaySectionState();
+      const open = forceOpen
+        || (Object.prototype.hasOwnProperty.call(state, key) ? Boolean(state[key]) : openByDefault);
+      return `<details class="relay-models-section" data-relay-section="${escapeHtml(key)}"${open ? ' open' : ''}><summary>${escapeHtml(title)}</summary><div class="relay-models-section-body">${body}</div></details>`;
     };
     const visibleRows = (normalizedQuery
       ? rows.filter((row) => [
@@ -8117,6 +8120,8 @@ body {
       .map(([group, groupRows]) => skillSection(
         `${group} (${groupRows.length})`,
         groupRows.map((row) => skillResult(row)).join(''),
+        true,
+        group,
         Boolean(normalizedQuery),
       ));
     const localRows = rows.filter((row) => String(row.provenance || '').startsWith('local:'));
