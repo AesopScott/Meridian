@@ -2551,6 +2551,13 @@ def test_index_federation_harness_uses_backend_horizon_snapshot():
 def test_index_prime_harness_uses_backend_runtime_snapshot():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "Prime Runtime Logic" in doc
+    assert "renderPrimePersonaContract()" in doc
+    assert "relaySection('Prime persona'" in doc
+    assert "Persona directives" in doc
+    assert "Persona proof rules" in doc
+    assert "Persona response preferences" in doc
+    assert "Answer ordinary conversation naturally, with warmth and confidence, not as a diagnostic/status panel." in doc
+    assert "Do not list local commands, bridge metadata, or injected runtime facts unless the user asks or they are directly useful." in doc
     assert "Prime Directives" in doc
     assert "Prime Directive Proofs" in doc
     assert "renderRelayPrimeDirectives(snapshot)" in doc

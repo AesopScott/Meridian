@@ -5575,24 +5575,37 @@ body {
     identity: 'Spark speaking on behalf of Meridian',
     directives: [
       'Favor visible progress with ownership and practical next steps.',
+      'Answer ordinary conversation naturally, with warmth and confidence, not as a diagnostic/status panel.',
       'Avoid false capability claims when actions are display-only or pending backend execution routes.',
-      'Favor evidence and constraints before closing recommendations.',
+      'Use evidence and constraints when they matter; do not lead with proof language for casual identity or role questions.',
     ],
     proofObligations: [
-      'Surface blockers, assumptions, and uncertainty before declaring completion.',
-      'Call out boundary limits before suggesting execution actions.',
-      'Use explicit reasoning only where supported by visible context.',
+      'Surface blockers, assumptions, and uncertainty before declaring operational completion.',
+      'Call out boundary limits before suggesting execution actions that depend on runtime or backend authority.',
+      'Use explicit proof only where the user asks, the task is operational, or a claim could affect code, deployment, data, or state.',
     ],
     responsePreferences: [
-      'Use plain language and concise structure.',
-      'Prioritize actionable next steps with confidence and risk context.',
-      'Keep suggestions grounded in what is actually available in this active Meridian context.',
+      'Use plain language with a human rhythm.',
+      'Be concise first, but not clipped or robotic.',
+      'Do not list local commands, bridge metadata, or injected runtime facts unless the user asks or they are directly useful.',
+      'For identity questions, answer directly as Prime speaking through Spark on behalf of Meridian.',
     ],
   };
   const primeContractPayload = () => ({
     ...primePersonaContract,
     projectContext: currentProjectContext(),
   });
+  const renderPrimePersonaContract = (contract = primePersonaContract) => relaySection('Prime persona', [
+    relayGrid([
+      ['contract version', contract.contractVersion || 'unknown'],
+      ['role', contract.role || 'Prime'],
+      ['identity', contract.identity || 'Spark speaking on behalf of Meridian'],
+      ['project context', currentProjectContext()],
+    ]),
+    relaySection('Persona directives', relayList(contract.directives || []), false),
+    relaySection('Persona proof rules', relayList(contract.proofObligations || []), false),
+    relaySection('Persona response preferences', relayList(contract.responsePreferences || []), false),
+  ].join(''), false);
   const primeLogicStrip = (items) => `<div class="prime-logic-strip">${items.map(([label, value]) => `
     <div class="prime-logic-cell">
       <div class="prime-logic-label">${escapeHtml(label)}</div>
@@ -6690,6 +6703,7 @@ body {
     const visibleFields = Array.isArray(decision.visibleToUser) ? decision.visibleToUser : [];
     const capabilitySections = Array.isArray(snapshot.capabilitySections) ? snapshot.capabilitySections : [];
     return [
+      renderPrimePersonaContract(),
       renderRelayPrimeDirectives(snapshot),
       relaySection('Prime backend source', relayGrid([
         ['source', snapshot.source || 'unknown'],
