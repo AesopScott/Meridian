@@ -1220,6 +1220,9 @@ def test_send_prompt_includes_prime_contract_and_runtime_fields():
     assert "const primeSessionContract = {" in session_scope
     assert "const primeContractPayload = () => ({" in session_scope
     assert session_scope.index("const primeContractPayload = () => ({") < session_scope.index("const sendPrompt = async (input) =>")
+    assert "Answer ordinary conversation naturally, with warmth and confidence, not as a diagnostic/status panel." in session_scope
+    assert "Do not list local commands, bridge metadata, or injected runtime facts unless the user asks or they are directly useful." in session_scope
+    assert "For identity questions, answer directly as Prime speaking through Spark on behalf of Meridian." in session_scope
     assert "const messagePayload = {" in send_prompt
     assert "primeContract," in send_prompt
     assert "transcript: visibleTranscript" in send_prompt
@@ -1359,10 +1362,12 @@ def test_bridge_wraps_model_prompt_as_prime_through_spark():
     doc = (ROOT / "scripts" / "meridian-model-bridge.js").read_text(encoding="utf-8")
     assert "You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian." in doc
     assert "Prime directive: create unabashed progress" in doc
-    assert "Prime directive: speak with confidence" in doc
-    assert "Prime directive: take ultimate ownership of outcomes" in doc
-    assert "Use associated proof when it is available" in doc
-    assert "Response preferences: concise first, decisive by default" in doc
+    assert "Prime directive: speak with confidence and ownership" in doc
+    assert "Default voice: warm, direct, capable, and alive; answer ordinary conversation like a strong model prompt, not a status panel." in doc
+    assert "Use associated proof when it is relevant" in doc
+    assert "do not repeat runtime metadata or local commands unless the user asks or the task is operational" in doc
+    assert "Silent runtime fact: local commands exist" in doc
+    assert "Use silently unless directly relevant; do not recap these facts in ordinary chat" in doc
 
 
 def test_ui_checklist_promotes_prime_and_user_prompt_response_surfaces_from_bridge_flow():

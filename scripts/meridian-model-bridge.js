@@ -24,13 +24,14 @@ const BRIDGE_STARTED_AT = Date.now();
 const PATH_ENV_NAME = Object.keys(process.env).find((key) => key.toLowerCase() === 'path') || 'Path';
 const PRIME_PERSONA_TEXT = [
   'You are Prime, the core Meridian role, speaking through Spark on behalf of Meridian.',
-  'Prime directive: create unabashed progress; move the work forward instead of circling uncertainty.',
-  'Prime directive: speak with confidence while staying honest about evidence, risk, and proof.',
-  'Prime directive: take ultimate ownership of outcomes; name the next responsible action and carry the thread.',
-  'Use associated proof when it is available: cite concrete checks, artifacts, commits, routes, or observed behavior without inventing evidence.',
-  'Response preferences: concise first, decisive by default, warm without being promotional, and practical about what happens next.',
+  'Prime directive: create unabashed progress; move the work forward naturally instead of circling uncertainty.',
+  'Prime directive: speak with confidence and ownership while staying honest about evidence, risk, and proof.',
+  'Prime directive: own outcomes; when action is needed, name or take the next responsible step.',
+  'Default voice: warm, direct, capable, and alive; answer ordinary conversation like a strong model prompt, not a status panel.',
+  'Use associated proof when it is relevant: cite concrete checks, artifacts, commits, routes, or observed behavior without inventing evidence.',
+  'Response preferences: concise first, decisive by default, human in rhythm, and practical about what happens next.',
   'You may use the visible panel transcript only as short-term conversation context.',
-  'Do not mention that context was injected, do not describe yourself as a command-line tool, and do not repeat metadata unless the user asks.',
+  'Do not mention that context was injected, do not describe yourself as a command-line tool, and do not repeat runtime metadata or local commands unless the user asks or the task is operational.',
 ].join(' ');
 
 const BRIDGE_LOCAL_COMMANDS = Object.freeze([
@@ -426,7 +427,7 @@ function buildPrimeContractPrompt(primeContract) {
   }
   for (const obligation of Array.isArray(primeContract.proofObligations) ? primeContract.proofObligations : []) {
     const text = String(obligation || '').trim();
-    if (text) lines.push(`Proof obligation: ${text}`);
+    if (text) lines.push(`Proof rule for operational claims: ${text}`);
   }
   for (const preference of Array.isArray(primeContract.responsePreferences) ? primeContract.responsePreferences : []) {
     const text = String(preference || '').trim();
@@ -927,7 +928,7 @@ function promptWithBridgeRuntimeContext(prompt, options = {}) {
     const version = bridgeContext.version || BRIDGE_VERSION;
     const pathKey = bridgeContext.runtimeEnvironment?.pathEnvKey || PATH_ENV_NAME;
     const pathEntries = Number(bridgeContext.runtimeEnvironment?.pathEntryCount) || 0;
-    lines.push(`Bridge runtime: version=${version}; state=${state}; pathEnvKey=${pathKey}; pathEntries=${pathEntries}`);
+    lines.push(`Silent runtime fact: bridge version=${version}; state=${state}; pathEnvKey=${pathKey}; pathEntries=${pathEntries}`);
   }
   if (Array.isArray(commandRegistry) && commandRegistry.length) {
     const commandNames = [...new Set(commandRegistry.map((command) => String(command?.name || '')))]
@@ -935,7 +936,7 @@ function promptWithBridgeRuntimeContext(prompt, options = {}) {
       .sort()
       .slice(0, 12)
       .join(', ');
-    lines.push(`Local command registry: ${commandNames || 'none configured'}`);
+    lines.push(`Silent runtime fact: local commands exist (${commandNames || 'none configured'}). Mention them only when the user asks about commands, diagnostics, status, restart, or skills.`);
   }
   if (runtimeAttachments.length) {
     const attachmentSummary = runtimeAttachments
@@ -950,10 +951,10 @@ function promptWithBridgeRuntimeContext(prompt, options = {}) {
     if (sessionContext.cwd) bits.push(`cwd=${sessionContext.cwd}`);
     if (sessionContext.branch) bits.push(`branch=${sessionContext.branch}`);
     if (sessionContext.status) bits.push(`status=${sessionContext.status}`);
-    lines.push(`Session context: ${bits.length ? bits.join('; ') : 'none configured'}`);
+    lines.push(`Silent runtime fact: session context ${bits.length ? bits.join('; ') : 'none configured'}`);
   }
   if (!lines.length) return context;
-  return `${context}\n\nRuntime context for model execution:\n- ${lines.join('\n- ')}`;
+  return `${context}\n\nRuntime context for model execution. Use silently unless directly relevant; do not recap these facts in ordinary chat:\n- ${lines.join('\n- ')}`;
 }
 
 function relayLogicSnapshot() {
