@@ -4275,11 +4275,15 @@ def test_bridge_exposes_reviewed_display_only_capability_routes():
 def test_package_exposes_v3_runtime_readiness_proof_command():
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     proof = package["scripts"]["proof:v3"]
+    smoke = package["scripts"]["smoke:v3"]
 
     assert "node --test tests/electron_main.test.js tests/close_meridian_for_build.test.js" in proof
     assert "python -m pytest tests/test_bifrost_cockpit.py tests/test_bifrost_preview.py tests/test_release_readiness.py -q" in proof
     assert "node scripts/meridian-model-bridge.js --self-test" in proof
     assert "npm run build:win" in proof
+    assert "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/v3-runtime-smoke.ps1" == smoke
+    assert "Reply exactly: v3-smoke-ok" in (ROOT / "scripts" / "v3-runtime-smoke.ps1").read_text(encoding="utf-8")
+    assert "v3-context-smoke.txt" in (ROOT / "scripts" / "v3-runtime-smoke.ps1").read_text(encoding="utf-8")
 
 
 def test_bridge_exposes_memory_retrieval_and_filemap_routes():

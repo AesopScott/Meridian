@@ -327,12 +327,12 @@
             "Saved attachment paths are passed to the Codex or model prompt.",
             "Attachment files are bounded by count and size limits."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "attachments are represented as pending context chips",
-            "materialization path has UI/test coverage"
+            "npm run smoke:v3 passed attachment materialization through packaged bridge",
+            "v3-context-smoke.txt returned materialized attachment metadata with path present"
           ],
-          "remaining_work": "Prove uploaded docs/images reach the bridge payload and are recoverable in debug logs."
+          "remaining_work": "Keep attachment materialization in live V3 smoke coverage."
         },
         {
           "id": "M28-005",
@@ -347,12 +347,12 @@
             "Context payloads are explicit enough for Prime to know what is available.",
             "Payload contract avoids implying authority the runtime does not have."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "context payload contract exists for Prime attachments",
-            "needs stronger proof for all supported file types"
+            "npm run proof:v3 passed prompt/context contract tests",
+            "npm run smoke:v3 passed live Prime message and attachment context payloads through Codex backend"
           ],
-          "remaining_work": "Add payload inspection proof for image, markdown, txt, json, csv, pdf, and docx where supported."
+          "remaining_work": "Keep prompt payload contract tests and live context smoke aligned with supported attachment types."
         },
         {
           "id": "M28-006",
@@ -369,12 +369,12 @@
             "Automated smoke covers uploaded document reaching bridge context.",
             "Smoke tests run against the real UI path, not only isolated helpers."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "focused attachment tests and packaged UI smoke pass",
-            "full upload-to-model context smoke is still open"
+            "npm run proof:v3 covers static attachment and bridge materialization contracts",
+            "npm run smoke:v3 covers live uploaded document reaching packaged bridge context and Codex response path"
           ],
-          "remaining_work": "Create one named smoke covering paste, upload, send, and model-visible context."
+          "remaining_work": "Keep live context smoke as the release-gate proof for uploaded document context."
         }
       ]
     },
@@ -570,12 +570,13 @@
             "Prime responds.",
             "Bridge status remains healthy through the exchange."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "message input/send path has been restored",
-            "model timeout path still needs clearer recovery behavior"
+            "npm run smoke:v3 passed live packaged Codex message smoke",
+            "Codex returned exact v3-smoke-ok response with duration and token telemetry present",
+            "bridge remained healthy through the exchange"
           ],
-          "remaining_work": "Gate on first prompt, timeout recovery, second prompt, and visible elapsed time."
+          "remaining_work": "Keep live message smoke in release validation; timeout recovery remains covered under failure explainability."
         },
         {
           "id": "M30-003",
@@ -618,12 +619,13 @@
             "Pasted image is visible to Prime in one session.",
             "Attachment paths and metadata are visible in bridge proof."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "Prime Upload button survival is smoke-tested",
-            "full context-to-model proof remains open"
+            "npm run smoke:v3 passed live packaged context smoke",
+            "uploaded v3-context-smoke.txt returned attachment metadata with materialized path present",
+            "Codex returned exact v3-context-ok response through the attachment-bearing request"
           ],
-          "remaining_work": "Gate paste image, upload document, upload image, and send with debug payload evidence."
+          "remaining_work": "Keep live attachment smoke in release validation; add image-specific live smoke later if image model routing becomes required."
         },
         {
           "id": "M30-005",
@@ -686,14 +688,14 @@
           ],
           "status": "pending",
           "evidence_refs": [
-            "runtime foundation and command gates now have V3 proof evidence",
-            "model-response, context-to-model, skills UX, and session survival gates still block 3.0 truth audit"
+            "runtime foundation, command gate, model-response gate, and context gate now have V3 proof evidence",
+            "session survival and skills UX gates still block final 3.0 truth audit"
           ],
-          "remaining_work": "Do not mark 3.0 final until M30-002, M30-004, M30-005, and remaining partial P0/P1 gates are proven or explicitly deferred."
+          "remaining_work": "Do not mark 3.0 final until M30-005 session survival and M29 skills UX gates are proven or explicitly deferred."
         }
       ]
     }
   ],
   "status_updated_at": "2026-06-13",
-  "status_note": "Status reflects runtime-ui checkpoint work through commit b8e86f6c3 plus V3 proof gate evidence: npm run proof:v3, packaged EXE health smoke, and supervised restart smoke. Model-response, context-to-model, skills UX, and session-survival gates remain open until proven end to end."
+  "status_note": "Status reflects V3 proof gates on 2026-06-13: npm run proof:v3 and npm run smoke:v3 both passed against the rebuilt packaged app. Runtime launch, bridge restart, Codex message response, and attachment materialization are now proven. Session-survival and skills UX gates remain open before final 3.0 truth audit."
 }
