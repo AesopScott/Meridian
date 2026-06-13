@@ -5018,6 +5018,7 @@ body {
     }
     if (normalizedCommand === '/status') {
       window.meridianOpenSpark?.();
+      window.meridianRelayCommandMode = 'status';
       const opened = Boolean(window.meridianRenderRelayModels?.());
       setStatus(input, opened ? 'runtime status panel opened' : 'runtime status unavailable');
       completeLocalSessionCommand(input, normalizedCommand, opened ? 'runtime status panel opened' : 'runtime status unavailable');
@@ -5032,6 +5033,7 @@ body {
     }
     if (normalizedCommand === '/debug') {
       window.meridianOpenSpark?.();
+      window.meridianRelayCommandMode = 'debug';
       const opened = Boolean(window.meridianRenderRelayModels?.());
       setStatus(input, opened ? 'debug report opened' : 'debug report unavailable');
       completeLocalSessionCommand(input, normalizedCommand, opened ? 'debug report opened' : 'debug report unavailable');
@@ -12914,9 +12916,30 @@ body {
     }
     return rendered;
   };
+  const renderRelayCommandFeedback = (mode = 'models') => {
+    if (mode === 'status') {
+      return relaySection('Local command result', relayGrid([
+        ['command', '/status'],
+        ['visible result', 'Relay Runtime Logic opened with bridge health and startup diagnostics'],
+        ['primary readout', 'Bridge route'],
+        ['backend action', 'GET-only health/debug snapshots; no prompt sent'],
+      ]), true);
+    }
+    if (mode === 'debug') {
+      return relaySection('Local command result', relayGrid([
+        ['command', '/debug'],
+        ['visible result', 'Relay Runtime Logic opened with debug report and repair steps'],
+        ['primary readout', 'Debug report'],
+        ['backend action', 'GET-only diagnostics snapshot; no prompt sent'],
+      ]), true);
+    }
+    return '';
+  };
   const renderRelayModels = () => {
     if (!rightWindow || !rightWorkspace) return false;
     try {
+      const commandMode = window.meridianRelayCommandMode || 'models';
+      window.meridianRelayCommandMode = 'models';
       clearRightPanelSurface();
       rightWindow.classList.add('is-panel-surface');
       rightWindow.classList.add('is-relay-models');
@@ -12928,6 +12951,7 @@ body {
             <div class="relay-models-status">Auto disabled</div>
           </div>
           <div class="relay-models-body">
+            ${renderRelayCommandFeedback(commandMode)}
             ${relaySection('Bridge route', '<div data-relay-bridge-status></div>', true)}
             <div data-debug-report>${relaySection('Debug report', relayGrid([['status', 'loading debug report']]), true)}</div>
             <div data-relay-logic>${relaySection('Relay logic source', relayGrid([['status', 'loading backend snapshot']]))}</div>

@@ -1129,6 +1129,8 @@ def test_clear_command_clears_active_session_window_without_bridge_message():
     assert "prompt.trim().toLowerCase().split(/\\s+/" in local_command
     assert "clearActiveSessionWindow(input)" in local_command
     assert "window.meridianOpenSpark?.();" in local_command
+    assert "window.meridianRelayCommandMode = 'status';" in local_command
+    assert "window.meridianRelayCommandMode = 'debug';" in local_command
     assert "window.meridianRenderRelayModels?.()" in local_command
     assert "window.meridianRenderSparkSkills?.()" in local_command
     assert "completeLocalSessionCommand(input, normalizedCommand, opened ? 'runtime status panel opened' : 'runtime status unavailable');" in local_command
@@ -1192,10 +1194,12 @@ def test_local_session_command_router_covers_status_skills_and_restart_bridge():
     ]
     assert "const normalizedCommand = prompt.trim().toLowerCase().split(/\\s+/" in local_commands
     assert "if (normalizedCommand === '/status')" in local_commands
+    assert "window.meridianRelayCommandMode = 'status';" in local_commands
     assert "const opened = Boolean(window.meridianRenderRelayModels?.());" in local_commands
     assert "if (normalizedCommand === '/skills')" in local_commands
     assert "const opened = Boolean(window.meridianRenderSparkSkills?.());" in local_commands
     assert "if (normalizedCommand === '/debug')" in local_commands
+    assert "window.meridianRelayCommandMode = 'debug';" in local_commands
     assert "window.meridianOpenSpark?.();" in local_commands
     assert "debug report opened" in local_commands
     assert "if (normalizedCommand === '/restart-bridge')" in local_commands
@@ -4007,11 +4011,18 @@ def test_index_relay_refresh_reloads_logic_snapshot():
 def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     relay_models = doc[
-        doc.index("const renderRelayModels = () => {"):
+        doc.index("const renderRelayCommandFeedback = (mode = 'models') => {"):
         doc.index("const renderPrimeLogic = () => {")
     ]
     assert "data-relay-bridge-status" in relay_models
     assert "data-debug-report" in relay_models
+    assert "renderRelayCommandFeedback(commandMode)" in relay_models
+    assert "const commandMode = window.meridianRelayCommandMode || 'models';" in relay_models
+    assert "window.meridianRelayCommandMode = 'models';" in relay_models
+    assert "['command', '/status']" in relay_models
+    assert "['command', '/debug']" in relay_models
+    assert "GET-only health/debug snapshots; no prompt sent" in relay_models
+    assert "GET-only diagnostics snapshot; no prompt sent" in relay_models
     assert "renderRelayBridgeStatus();" in relay_models
     assert "loadDebugReport();" in relay_models
 
