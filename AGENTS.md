@@ -10,3 +10,7 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+## UI implementation notes
+
+- In Meridian CSS, do not rely on the browser default `hidden` display behavior when a component also has an author-level `display` rule. Add or preserve an explicit selector such as `.component[hidden] { display: none !important; }` so toggled panels actually disappear.

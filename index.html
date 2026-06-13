@@ -2314,17 +2314,18 @@ body {
 }
 
 .relay-panel-mode-toggle {
-  display: inline-grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(var(--session-electric), 0.45);
-  min-width: 238px;
+  min-width: 172px;
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .relay-panel-mode-button {
   border: 0;
-  border-right: 1px solid rgba(var(--session-electric), 0.28);
-  background: rgba(0, 0, 0, 0.45);
-  color: rgba(var(--session-electric-soft), 0.72);
+  background: transparent;
+  color: rgba(var(--session-electric-soft), 0.96);
   padding: 5px 8px;
   font: inherit;
   font-size: 0.76em;
@@ -2334,14 +2335,10 @@ body {
   cursor: pointer;
 }
 
-.relay-panel-mode-button:last-child {
-  border-right: 0;
-}
-
-.relay-panel-mode-button.is-selected {
-  background: rgba(var(--session-electric), 0.16);
+.relay-panel-mode-button:hover,
+.relay-panel-mode-button:focus-visible {
   color: rgba(var(--session-electric-soft), 1);
-  text-shadow: 0 0 7px rgba(var(--session-electric), 0.7);
+  text-shadow: 0 0 7px rgba(var(--session-electric), 0.72);
 }
 
 .relay-models-body {
@@ -2350,6 +2347,10 @@ body {
   gap: 9px;
   overflow: auto;
   padding-right: 5px;
+}
+
+.relay-models-body[hidden] {
+  display: none !important;
 }
 
 .relay-models-section {
@@ -9711,9 +9712,8 @@ body {
         : `<div class="relay-models-body">${sections.join('')}</div>`;
       const headerAction = hasModeToggle
         ? `
-          <div class="relay-panel-mode-toggle" role="group" aria-label="${escapeHtml(title)} view mode">
-            <button class="relay-panel-mode-button${selectedMode === 'information' ? '' : ' is-selected'}" type="button" data-right-panel-mode="configuration">Configuration</button>
-            <button class="relay-panel-mode-button${selectedMode === 'information' ? ' is-selected' : ''}" type="button" data-right-panel-mode="information">Information</button>
+          <div class="relay-panel-mode-toggle" aria-label="${escapeHtml(title)} view mode">
+            <button class="relay-panel-mode-button" type="button" data-right-panel-mode-toggle aria-pressed="${selectedMode === 'information' ? 'true' : 'false'}">${selectedMode === 'information' ? 'Information' : 'Configuration'}</button>
           </div>
         `
         : `<div class="relay-models-status">${escapeHtml(status)}</div>`;
@@ -9729,11 +9729,11 @@ body {
       const surface = rightWorkspace.querySelector('.right-panel-surface');
       surface?.addEventListener('click', (event) => {
         const button = event.target;
-        if (!button?.matches?.('[data-right-panel-mode]')) return;
-        const mode = writeRightPanelViewMode(title, button.dataset.rightPanelMode);
-        surface.querySelectorAll('[data-right-panel-mode]').forEach((node) => {
-          node.classList.toggle('is-selected', node.dataset.rightPanelMode === mode);
-        });
+        if (!button?.matches?.('[data-right-panel-mode-toggle]')) return;
+        const current = readRightPanelViewMode(title);
+        const mode = writeRightPanelViewMode(title, current === 'information' ? 'configuration' : 'information');
+        button.textContent = mode === 'information' ? 'Information' : 'Configuration';
+        button.setAttribute('aria-pressed', mode === 'information' ? 'true' : 'false');
         surface.querySelectorAll('[data-right-panel-mode-body]').forEach((node) => {
           node.hidden = node.dataset.rightPanelModeBody !== mode;
         });

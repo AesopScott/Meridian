@@ -178,8 +178,8 @@ def test_index_harness_mode_uses_full_panel_logic_surface_without_prompt_window(
     assert ".session-window-right.is-panel-surface .session-response-output" in doc
     assert "display: none;" in doc
     assert "const renderRightPanelSurface = ({ title, status, sections, configurationSections = null, informationSections = null, surfaceClass = '' }) =>" in doc
-    assert "data-right-panel-mode=\"configuration\"" in doc
-    assert "data-right-panel-mode=\"information\"" in doc
+    assert "data-right-panel-mode-toggle" in doc
+    assert ".relay-models-body[hidden]" in doc
     assert "rightWindow.classList.add('is-panel-surface')" in doc
     assert "rightWorkspace.insertAdjacentHTML('beforeend', `" in doc
     assert 'class="right-panel-surface${safeSurfaceClass}"' in doc
@@ -520,7 +520,7 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "status: settingsSelected || filterSelected ? 'Configuration' : 'planned'" in doc
     assert "configurationSections.push(`<div data-focus-mode-surface>" in doc
     assert "informationSections.push(relaySection('Settings voice boundary'" in doc
-    assert "writeRightPanelViewMode(title, button.dataset.rightPanelMode)" in doc
+    assert "writeRightPanelViewMode(title, current === 'information' ? 'configuration' : 'information')" in doc
     assert "loadVoiceIo();" in doc
     assert "loadSparkModels();" in doc
     assert "initializeContextFilterSurface();" in doc
