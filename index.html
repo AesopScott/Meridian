@@ -9695,6 +9695,12 @@ body {
     try { localStorage.setItem(rightPanelViewModeKey(title), next); } catch {}
     return next;
   };
+  const rightPanelViewTitle = (title, mode) => {
+    const base = String(title || 'Panel').replace(/\s+Surface$/i, '');
+    if (base === 'Settings') return mode === 'information' ? 'Settings Information' : 'Configuration Settings';
+    return mode === 'information' ? `${base} Information` : `${base} Configuration`;
+  };
+  const rightPanelToggleTargetLabel = (mode) => mode === 'information' ? 'Configuration' : 'Information';
   const renderRightPanelSurface = ({ title, status, sections, configurationSections = null, informationSections = null, surfaceClass = '' }) => {
     if (!rightWindow || !rightWorkspace) return false;
     try {
@@ -9704,6 +9710,8 @@ body {
       const safeSurfaceClass = surfaceClass ? ` ${surfaceClass}` : '';
       const hasModeToggle = Array.isArray(configurationSections) && Array.isArray(informationSections);
       const selectedMode = hasModeToggle ? readRightPanelViewMode(title) : '';
+      const visibleTitle = hasModeToggle ? rightPanelViewTitle(title, selectedMode) : title;
+      const toggleTargetLabel = hasModeToggle ? rightPanelToggleTargetLabel(selectedMode) : '';
       const bodyHtml = hasModeToggle
         ? `
           <div class="relay-models-body" data-right-panel-mode-body="configuration" ${selectedMode === 'information' ? 'hidden' : ''}>${configurationSections.join('')}</div>
@@ -9713,14 +9721,14 @@ body {
       const headerAction = hasModeToggle
         ? `
           <div class="relay-panel-mode-toggle" aria-label="${escapeHtml(title)} view mode">
-            <button class="relay-panel-mode-button" type="button" data-right-panel-mode-toggle aria-pressed="${selectedMode === 'information' ? 'true' : 'false'}">${selectedMode === 'information' ? 'Information' : 'Configuration'}</button>
+            <button class="relay-panel-mode-button" type="button" data-right-panel-mode-toggle aria-label="Show ${escapeHtml(rightPanelViewTitle(title, selectedMode === 'information' ? 'configuration' : 'information'))}">${escapeHtml(toggleTargetLabel)}</button>
           </div>
         `
         : `<div class="relay-models-status">${escapeHtml(status)}</div>`;
       rightWorkspace.insertAdjacentHTML('beforeend', `
-        <div class="right-panel-surface${safeSurfaceClass}" role="region" aria-label="${escapeHtml(title)}">
+        <div class="right-panel-surface${safeSurfaceClass}" role="region" aria-label="${escapeHtml(visibleTitle)}">
           <div class="relay-models-header">
-            <div class="relay-models-title">${escapeHtml(title)}</div>
+            <div class="relay-models-title" data-right-panel-title>${escapeHtml(visibleTitle)}</div>
             ${headerAction}
           </div>
           ${bodyHtml}
@@ -9732,8 +9740,13 @@ body {
         if (!button?.matches?.('[data-right-panel-mode-toggle]')) return;
         const current = readRightPanelViewMode(title);
         const mode = writeRightPanelViewMode(title, current === 'information' ? 'configuration' : 'information');
-        button.textContent = mode === 'information' ? 'Information' : 'Configuration';
-        button.setAttribute('aria-pressed', mode === 'information' ? 'true' : 'false');
+        const nextTitle = rightPanelViewTitle(title, mode);
+        const nextTargetMode = mode === 'information' ? 'configuration' : 'information';
+        const titleNode = surface.querySelector('[data-right-panel-title]');
+        if (titleNode) titleNode.textContent = nextTitle;
+        surface.setAttribute('aria-label', nextTitle);
+        button.textContent = rightPanelToggleTargetLabel(mode);
+        button.setAttribute('aria-label', `Show ${rightPanelViewTitle(title, nextTargetMode)}`);
         surface.querySelectorAll('[data-right-panel-mode-body]').forEach((node) => {
           node.hidden = node.dataset.rightPanelModeBody !== mode;
         });

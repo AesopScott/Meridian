@@ -179,6 +179,10 @@ def test_index_harness_mode_uses_full_panel_logic_surface_without_prompt_window(
     assert "display: none;" in doc
     assert "const renderRightPanelSurface = ({ title, status, sections, configurationSections = null, informationSections = null, surfaceClass = '' }) =>" in doc
     assert "data-right-panel-mode-toggle" in doc
+    assert "const rightPanelViewTitle = (title, mode) => {" in doc
+    assert "if (base === 'Settings') return mode === 'information' ? 'Settings Information' : 'Configuration Settings';" in doc
+    assert "const rightPanelToggleTargetLabel = (mode) => mode === 'information' ? 'Configuration' : 'Information';" in doc
+    assert "data-right-panel-title" in doc
     assert ".relay-models-body[hidden]" in doc
     assert "rightWindow.classList.add('is-panel-surface')" in doc
     assert "rightWorkspace.insertAdjacentHTML('beforeend', `" in doc
@@ -521,6 +525,8 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "configurationSections.push(`<div data-focus-mode-surface>" in doc
     assert "informationSections.push(relaySection('Settings voice boundary'" in doc
     assert "writeRightPanelViewMode(title, current === 'information' ? 'configuration' : 'information')" in doc
+    assert "button.textContent = rightPanelToggleTargetLabel(mode);" in doc
+    assert "surface.setAttribute('aria-label', nextTitle);" in doc
     assert "loadVoiceIo();" in doc
     assert "loadSparkModels();" in doc
     assert "initializeContextFilterSurface();" in doc
