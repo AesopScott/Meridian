@@ -1695,7 +1695,7 @@ body {
   position: absolute;
   right: 202px;
   top: -33px;
-  z-index: 3;
+  z-index: 5;
   height: 20px;
   min-height: 20px;
   border: 1px solid rgba(var(--session-electric), 0.38);
@@ -4383,12 +4383,6 @@ body {
       </select>
     `);
   }
-  if (primeWindow && !primeWindow.querySelector('.session-attachment-upload')) {
-    primeWindow.insertAdjacentHTML('afterbegin', `
-      <button class="session-attachment-upload" type="button" aria-label="Upload Prime context files">Upload</button>
-      <input class="session-attachment-input" type="file" multiple accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm" aria-label="Upload Prime context files">
-    `);
-  }
   if (userWindow && !userWindow.querySelector('.session-target-select')) {
     userWindow.insertAdjacentHTML('afterbegin', `
       <select class="session-target-select" aria-label="User Sessions">
@@ -4407,13 +4401,14 @@ body {
           <textarea class="session-prompt-input" aria-label="${isUser ? 'User prompt input' : 'Prime prompt input'}" spellcheck="false"></textarea>
           <button class="session-send-button" type="button" aria-label="${isUser ? 'Send User prompt' : 'Send Prime prompt'}">Send</button>
         </div>
-        <div class="session-attachment-tray" aria-label="${isUser ? 'User attachments' : 'Prime attachments'}"></div>
+        <div class="session-attachment-tray" aria-label="${isUser ? 'User attachments' : 'Prime attachments'}">
+          ${!isUser ? '<button class="session-attachment-upload" type="button" aria-label="Upload Prime context files">Upload</button><input class="session-attachment-input" type="file" multiple accept="image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm" aria-label="Upload Prime context files">' : ''}
+        </div>
         <div class="session-response-output" aria-label="${isUser ? 'User response output' : 'Prime response output'}"></div>
         <div class="session-model-status" aria-live="polite"></div>
       </div>
     `);
   });
-
   document.querySelector('.session-window-right .session-text-slider')?.remove();
   const textSliders = Array.from(document.querySelectorAll('.session-text-slider input[type="range"]'));
   const textSizeKey = 'meridian.session.text-size';
@@ -4889,11 +4884,38 @@ body {
     }
     return chip;
   };
+  const primeAttachmentUploadControls = (tray) => {
+    const controls = [];
+    let upload = tray.querySelector('.session-attachment-upload');
+    if (!upload) {
+      upload = document.createElement('button');
+      upload.type = 'button';
+      upload.className = 'session-attachment-upload';
+      upload.setAttribute('aria-label', 'Upload Prime context files');
+      upload.textContent = 'Upload';
+    }
+    controls.push(upload);
+    let input = tray.querySelector('.session-attachment-input');
+    if (!input) {
+      input = document.createElement('input');
+      input.className = 'session-attachment-input';
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = 'image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm';
+      input.setAttribute('aria-label', 'Upload Prime context files');
+    }
+    controls.push(input);
+    return controls;
+  };
   const renderPendingAttachments = (input) => {
     const tray = attachmentTrayFor(input);
     if (!tray) return;
     const attachments = readPendingAttachments(input);
-    tray.replaceChildren(...attachments.map((attachment, index) => renderAttachmentChip(attachment, { removable: true, index })));
+    const controls = sessionChannel(input) === 'prime' ? primeAttachmentUploadControls(tray) : [];
+    tray.replaceChildren(
+      ...controls,
+      ...attachments.map((attachment, index) => renderAttachmentChip(attachment, { removable: true, index })),
+    );
   };
   const clearPendingAttachments = (input) => writePendingAttachments(input, []);
   const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
@@ -5464,22 +5486,22 @@ body {
     });
     attachmentTrayFor(input)?.addEventListener('click', (event) => {
       const target = event.target;
+      if (target?.matches?.('.session-attachment-upload')) {
+        attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.click();
+        return;
+      }
       if (!target?.matches?.('[data-attachment-remove]')) return;
       const index = Number(target.dataset.attachmentRemove);
       const next = readPendingAttachments(input).filter((_, itemIndex) => itemIndex !== index);
       writePendingAttachments(input, next);
       input.focus();
     });
-  });
-  primeWindow?.querySelector('.session-attachment-upload')?.addEventListener('click', () => {
-    primeWindow.querySelector('.session-attachment-input')?.click();
-  });
-  primeWindow?.querySelector('.session-attachment-input')?.addEventListener('change', async (event) => {
-    const input = primeInput();
-    const files = Array.from(event.target?.files || []);
-    if (input) await addAttachmentFiles(input, files, 'upload');
-    if (event.target) event.target.value = '';
-    input?.focus();
+    attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.addEventListener('change', async (event) => {
+      const files = Array.from(event.target?.files || []);
+      await addAttachmentFiles(input, files, 'upload');
+      if (event.target) event.target.value = '';
+      input.focus();
+    });
   });
   userSessionSelect?.addEventListener('change', () => {
     localStorage.setItem(userSessionTargetKey, userSessionSelect.value || '');

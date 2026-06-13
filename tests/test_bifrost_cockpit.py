@@ -1454,10 +1454,28 @@ def test_session_prompt_supports_pasted_image_attachments_for_bridge_context():
     assert '<div class="session-attachment-tray"' in index
     assert 'class="session-attachment-upload"' in index
     assert 'class="session-attachment-input" type="file" multiple' in index
+    assert "Upload Prime context files" in index
+    assert "${!isUser ? '<button class=\"session-attachment-upload\"" in index
+    assert "const userAttachmentTray = userWindow?.querySelector('.session-attachment-tray');" not in index
+    assert "userAttachmentTray.insertAdjacentHTML('beforeend'" not in index
+    assert "Upload User context files" not in index
+    assert "primeWindow.insertAdjacentHTML('afterbegin', `\n      <button class=\"session-attachment-upload\"" not in index
+    assert "const primeAttachmentUploadControls = (tray) => {" in index
+    assert "upload.textContent = 'Upload';" in index
+    assert "input.accept = 'image/*,.txt,.md,.markdown,.json,.csv,.tsv,.log,.pdf,.doc,.docx,.rtf,.html,.htm';" in index
+    assert "const controls = sessionChannel(input) === 'prime' ? primeAttachmentUploadControls(tray) : [];" in index
+    assert "tray.replaceChildren(\n      ...controls," in index
+    upload_button_css = index[index.index(".session-attachment-upload {"):index.index(".session-attachment-upload:hover")]
+    assert "position: absolute" in upload_button_css
+    assert "right: 202px" in upload_button_css
+    assert "top: -33px" in upload_button_css
     assert '.pdf,.doc,.docx' in index
     assert "input.addEventListener('paste'" in index
-    assert "querySelector('.session-attachment-upload')" in index
     assert "querySelector('.session-attachment-input')" in index
+    assert "target?.matches?.('.session-attachment-upload')" in index
+    assert "attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.click()" in index
+    assert "attachmentTrayFor(input)?.querySelector('.session-attachment-input')?.addEventListener('change'" in index
+    assert "await addAttachmentFiles(input, files, 'upload')" in index
     assert "event.clipboardData?.items" in index
     assert "item.kind === 'file'" in index
     assert "String(file.type || '').startsWith('image/')" in index
