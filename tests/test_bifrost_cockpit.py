@@ -4021,7 +4021,10 @@ def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
     assert "window.meridianRelayCommandMode = 'models';" in relay_models
     assert "['command', '/status']" in relay_models
     assert "['command', '/debug']" in relay_models
-    assert "GET-only health/debug snapshots; no prompt sent" in relay_models
+    assert "Runtime status" in relay_models
+    assert "data-runtime-status-summary" in relay_models
+    assert "renderRuntimeStatusSummary('checking')" in relay_models
+    assert "GET-only health snapshot; no prompt sent" in relay_models
     assert "GET-only diagnostics snapshot; no prompt sent" in relay_models
     assert "renderRelayBridgeStatus();" in relay_models
     assert "loadDebugReport();" in relay_models
@@ -4034,6 +4037,10 @@ def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
     assert "['startup probes', String(detail.startupProbes ?? 0)]" in relay_bridge_status
     assert "['startup uptime', detail.startupUptimeMs ? `${Math.round(detail.startupUptimeMs / 100) / 10}s` : 'n/a']" in relay_bridge_status
     assert "['error', detail.error || 'none']" in relay_bridge_status
+    assert "const renderRuntimeStatusSummary = (status = 'checking', detail = {}) => relayGrid([" in relay_bridge_status
+    assert "['next step', relayStatusNextStep(status, detail)]" in relay_bridge_status
+    assert "Meridian runtime is available; continue working." in relay_bridge_status
+    assert "Use /restart-bridge, then run /status again." in relay_bridge_status
 
     render_status = doc[
         doc.index("const renderRelayBridgeStatus = async () => {"):
@@ -4042,6 +4049,9 @@ def test_relay_status_panel_surfaces_startup_and_diagnostic_readouts():
     assert "state: result.state || 'offline'" in render_status
     assert "startupProbes: Number(result?.startup?.probes || 0)" in render_status
     assert "startupUptimeMs: Number(result?.startup?.uptimeMs || 0)" in render_status
+    assert "querySelector('[data-runtime-status-summary]')" in render_status
+    assert "renderRuntimeStatusSummary(result.ok ? 'online' : 'degraded', detail)" in render_status
+    assert "renderRuntimeStatusSummary('offline', detail)" in render_status
 
     debug_report = doc[
         doc.index("const renderDebugReportSnapshot = (snapshot = {}) => {"):

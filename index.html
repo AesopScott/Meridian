@@ -9396,6 +9396,21 @@ body {
     ['restart', detail.samePortRestart ? 'same-port reset recovery' : 'manual restart required'],
     ['error', detail.error || 'none'],
   ];
+  const relayStatusNextStep = (status, detail = {}) => {
+    if (status === 'online' && detail.state === 'healthy') return 'Meridian runtime is available; continue working.';
+    if (detail.samePortRestart) return 'Use /restart-bridge, then run /status again.';
+    return 'Restart Meridian or inspect runtime diagnostics.';
+  };
+  const renderRuntimeStatusSummary = (status = 'checking', detail = {}) => relayGrid([
+    ['bridge', status],
+    ['state', detail.state || (status === 'checking' ? 'checking health route' : 'offline')],
+    ['version', detail.version || 'unknown'],
+    ['visible context', detail.visibleContext ? 'enabled' : (status === 'checking' ? 'checking' : 'blocked')],
+    ['uptime', detail.startupUptimeMs ? `${Math.round(detail.startupUptimeMs / 100) / 10}s` : 'n/a'],
+    ['restart', detail.samePortRestart ? 'available with /restart-bridge' : 'manual restart may be required'],
+    ['next step', relayStatusNextStep(status, detail)],
+    ['error', detail.error || 'none'],
+  ]);
   const renderDebugReportSnapshot = (snapshot = {}) => {
     const readiness = snapshot.runtimeReadiness || {};
     const health = snapshot.health || {};
@@ -9480,8 +9495,13 @@ body {
         startupUptimeMs: Number(result?.startup?.uptimeMs || 0),
       };
       bridgeNode.innerHTML = relayGrid(relayBridgeRows(result.ok ? 'online' : 'degraded', detail));
+      const summaryNode = rightWorkspace?.querySelector('[data-runtime-status-summary]');
+      if (summaryNode) summaryNode.innerHTML = renderRuntimeStatusSummary(result.ok ? 'online' : 'degraded', detail);
     } catch {
-      bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', { visibleContext: false, samePortRestart: false, state: 'offline', error: 'unable to fetch health route' }));
+      const detail = { visibleContext: false, samePortRestart: false, state: 'offline', error: 'unable to fetch health route' };
+      bridgeNode.innerHTML = relayGrid(relayBridgeRows('offline', detail));
+      const summaryNode = rightWorkspace?.querySelector('[data-runtime-status-summary]');
+      if (summaryNode) summaryNode.innerHTML = renderRuntimeStatusSummary('offline', detail);
     }
   };
   const clearRightPanelSurface = () => {
@@ -12959,12 +12979,12 @@ body {
   };
   const renderRelayCommandFeedback = (mode = 'models') => {
     if (mode === 'status') {
-      return relaySection('Local command result', relayGrid([
+      return relaySection('Runtime status', `
+        <div data-runtime-status-summary>${renderRuntimeStatusSummary('checking')}</div>
+      `, true) + relaySection('Local command boundary', relayGrid([
         ['command', '/status'],
-        ['visible result', 'Relay Runtime Logic opened with bridge health and startup diagnostics'],
-        ['primary readout', 'Bridge route'],
-        ['backend action', 'GET-only health/debug snapshots; no prompt sent'],
-      ]), true);
+        ['backend action', 'GET-only health snapshot; no prompt sent'],
+      ]), false);
     }
     if (mode === 'debug') {
       return relaySection('Local command result', relayGrid([
