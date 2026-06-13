@@ -12138,15 +12138,15 @@ body {
   const renderBeaconResponseTelemetrySurface = () => {
     const state = readBeaconResponseTelemetryPreference();
     return [
-      relaySection('Beacon response telemetry', `
-        <div class="relay-models-handoff" aria-label="Beacon response telemetry display">
+      relaySection('AI response metrics', `
+        <div class="relay-models-handoff" aria-label="AI response metrics display">
           <label class="relay-models-handoff">
             <input type="checkbox" data-beacon-response-telemetry="responseTimes" ${state.responseTimes ? 'checked' : ''}>
-            <span>Response times</span>
+            <span>Show response time</span>
           </label>
           <label class="relay-models-handoff">
             <input type="checkbox" data-beacon-response-telemetry="tokens" ${state.tokens ? 'checked' : ''}>
-            <span>Input/output tokens</span>
+            <span>Show input/output tokens</span>
           </label>
         </div>
         <div data-beacon-response-telemetry-preview>${renderBeaconResponseTelemetryPreview(state)}</div>

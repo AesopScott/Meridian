@@ -4918,8 +4918,11 @@ def test_index_settings_surface_controls_beacon_response_telemetry_locally():
     assert "beaconResponseTelemetrySettings" in telemetry_surface
     assert "readBeaconResponseTelemetryPreference" in telemetry_surface
     assert "writeBeaconResponseTelemetryPreference" in telemetry_surface
+    assert "AI response metrics" in telemetry_surface
     assert "data-beacon-response-telemetry=\"responseTimes\"" in telemetry_surface
     assert "data-beacon-response-telemetry=\"tokens\"" in telemetry_surface
+    assert "Show response time" in telemetry_surface
+    assert "Show input/output tokens" in telemetry_surface
     assert "Beacon owns response-time and token telemetry posture for model calls." in telemetry_surface
     assert "Spark only stores and renders UI-local visibility preferences for response rows." in telemetry_surface
     assert "document.querySelectorAll('.session-prompt-input').forEach((input) => renderTranscript(input));" in telemetry_surface
