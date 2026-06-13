@@ -2313,6 +2313,37 @@ body {
   text-transform: uppercase;
 }
 
+.relay-panel-mode-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid rgba(var(--session-electric), 0.45);
+  min-width: 238px;
+}
+
+.relay-panel-mode-button {
+  border: 0;
+  border-right: 1px solid rgba(var(--session-electric), 0.28);
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(var(--session-electric-soft), 0.72);
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 0.76em;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.relay-panel-mode-button:last-child {
+  border-right: 0;
+}
+
+.relay-panel-mode-button.is-selected {
+  background: rgba(var(--session-electric), 0.16);
+  color: rgba(var(--session-electric-soft), 1);
+  text-shadow: 0 0 7px rgba(var(--session-electric), 0.7);
+}
+
 .relay-models-body {
   min-height: 0;
   display: grid;
@@ -9649,23 +9680,65 @@ body {
     rightWindow.classList.remove('is-relay-models');
     rightWorkspace.querySelectorAll('.relay-models-surface, .right-panel-surface').forEach((node) => node.remove());
   };
-  const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) => {
+  const rightPanelViewModeKey = (title) => `meridian.right-panel-view-mode.v1.${String(title || 'panel').toLowerCase().replace(/[^a-z0-9._-]+/g, '-')}`;
+  const readRightPanelViewMode = (title) => {
+    try {
+      const stored = localStorage.getItem(rightPanelViewModeKey(title));
+      return stored === 'information' ? 'information' : 'configuration';
+    } catch {
+      return 'configuration';
+    }
+  };
+  const writeRightPanelViewMode = (title, mode) => {
+    const next = mode === 'information' ? 'information' : 'configuration';
+    try { localStorage.setItem(rightPanelViewModeKey(title), next); } catch {}
+    return next;
+  };
+  const renderRightPanelSurface = ({ title, status, sections, configurationSections = null, informationSections = null, surfaceClass = '' }) => {
     if (!rightWindow || !rightWorkspace) return false;
     try {
       clearRightPanelSurface();
       rightWindow.classList.add('is-panel-surface');
       rightWorkspace.removeAttribute('aria-hidden');
       const safeSurfaceClass = surfaceClass ? ` ${surfaceClass}` : '';
+      const hasModeToggle = Array.isArray(configurationSections) && Array.isArray(informationSections);
+      const selectedMode = hasModeToggle ? readRightPanelViewMode(title) : '';
+      const bodyHtml = hasModeToggle
+        ? `
+          <div class="relay-models-body" data-right-panel-mode-body="configuration" ${selectedMode === 'information' ? 'hidden' : ''}>${configurationSections.join('')}</div>
+          <div class="relay-models-body" data-right-panel-mode-body="information" ${selectedMode === 'information' ? '' : 'hidden'}>${informationSections.join('')}</div>
+        `
+        : `<div class="relay-models-body">${sections.join('')}</div>`;
+      const headerAction = hasModeToggle
+        ? `
+          <div class="relay-panel-mode-toggle" role="group" aria-label="${escapeHtml(title)} view mode">
+            <button class="relay-panel-mode-button${selectedMode === 'information' ? '' : ' is-selected'}" type="button" data-right-panel-mode="configuration">Configuration</button>
+            <button class="relay-panel-mode-button${selectedMode === 'information' ? ' is-selected' : ''}" type="button" data-right-panel-mode="information">Information</button>
+          </div>
+        `
+        : `<div class="relay-models-status">${escapeHtml(status)}</div>`;
       rightWorkspace.insertAdjacentHTML('beforeend', `
         <div class="right-panel-surface${safeSurfaceClass}" role="region" aria-label="${escapeHtml(title)}">
           <div class="relay-models-header">
             <div class="relay-models-title">${escapeHtml(title)}</div>
-            <div class="relay-models-status">${escapeHtml(status)}</div>
+            ${headerAction}
           </div>
-          <div class="relay-models-body">${sections.join('')}</div>
+          ${bodyHtml}
         </div>
       `);
-      rightWorkspace.querySelector('.right-panel-surface')?.addEventListener('toggle', (event) => {
+      const surface = rightWorkspace.querySelector('.right-panel-surface');
+      surface?.addEventListener('click', (event) => {
+        const button = event.target;
+        if (!button?.matches?.('[data-right-panel-mode]')) return;
+        const mode = writeRightPanelViewMode(title, button.dataset.rightPanelMode);
+        surface.querySelectorAll('[data-right-panel-mode]').forEach((node) => {
+          node.classList.toggle('is-selected', node.dataset.rightPanelMode === mode);
+        });
+        surface.querySelectorAll('[data-right-panel-mode-body]').forEach((node) => {
+          node.hidden = node.dataset.rightPanelModeBody !== mode;
+        });
+      });
+      surface?.addEventListener('toggle', (event) => {
         const section = event.target;
         if (!(section instanceof HTMLDetailsElement) || !section.dataset.relaySection) return;
         const state = relaySectionState();
@@ -12984,7 +13057,7 @@ body {
     const selectedLabel = label || 'Settings';
     const settingsSelected = selectedLabel === 'Settings';
     const filterSelected = selectedLabel === 'Filter';
-    const sections = [
+    const informationSections = [
       relaySection('Surface logic', relayGrid([
         ['mode', 'Settings/Spark'],
         ['selected surface', selectedLabel],
@@ -12997,43 +13070,46 @@ body {
         ['drift guard', 'visible controls must match backend settings before writes are enabled'],
       ]), true),
     ];
+    const configurationSections = [];
     if (settingsSelected) {
-      sections.push(`<div data-project-focus-surface>${renderProjectFocusSnapshot()}</div>`);
-      sections.push(relaySection('Settings voice boundary', relayList([
+      informationSections.push(`<div data-project-focus-surface>${renderProjectFocusSnapshot()}</div>`);
+      informationSections.push(relaySection('Settings voice boundary', relayList([
         'Settings/Spark renders compact Voice I/O state from the reviewed backend snapshot.',
         'No microphone capture, speech output, read-aloud, mute mutation, prompt text, response text, raw worker history, or worker chat is exposed.',
         'Settings writes remain blocked until an explicit settings backend exists.',
       ]), true));
-      sections.push(`<div data-voice-io>${relaySection('Voice I/O source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
-      sections.push(relaySection('Settings public CLI setup boundary', relayList([
+      informationSections.push(`<div data-voice-io>${relaySection('Voice I/O source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
+      informationSections.push(relaySection('Settings public CLI setup boundary', relayList([
         'Settings/Spark renders public Codex and Claude/Max CLI setup status from the reviewed Models bridge snapshot.',
         'Missing CLI/install/login state is setup guidance only; Settings does not install software, sign in, read secrets, probe provider accounts, or mutate model routing.',
         'Manual prompt sends still use the existing model selector; Auto remains disabled until Relay owns the decision.',
       ]), true));
-      sections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
-      sections.push(`<div data-focus-mode-surface>${renderFocusModeSurface().join('')}</div>`);
-      sections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
-      sections.push(`<div data-wake-mode-surface>${renderWakeModeSurface().join('')}</div>`);
-      sections.push(`<div data-session-band-side-surface>${renderSessionBandSideSurface().join('')}</div>`);
-      sections.push(`<div data-session-window-defaults-surface>${renderSessionWindowDefaultsSurface().join('')}</div>`);
-      sections.push(`<div data-risk-tier-override-surface>${renderRiskTierOverrideSurface().join('')}</div>`);
-      sections.push(`<div data-quick-reply-order-surface>${renderQuickReplyOrderSurface().join('')}</div>`);
-      sections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
-      sections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
-      sections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
-      sections.push(`<div data-progress-state-surface>${renderProgressStateDefaultsSurface().join('')}</div>`);
-      sections.push(`<div data-progress-retention-surface>${renderProgressRetentionSurface().join('')}</div>`);
-      sections.push(`<div data-progress-redirect-surface>${renderProgressRedirectDefaultsSurface().join('')}</div>`);
-      sections.push(`<div data-instrumentation-band-surface>${renderInstrumentationBandSurface().join('')}</div>`);
-      sections.push(`<div data-beacon-response-telemetry-surface>${renderBeaconResponseTelemetrySurface().join('')}</div>`);
+      informationSections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
+      configurationSections.push(`<div data-focus-mode-surface>${renderFocusModeSurface().join('')}</div>`);
+      configurationSections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
+      configurationSections.push(`<div data-wake-mode-surface>${renderWakeModeSurface().join('')}</div>`);
+      configurationSections.push(`<div data-session-band-side-surface>${renderSessionBandSideSurface().join('')}</div>`);
+      configurationSections.push(`<div data-session-window-defaults-surface>${renderSessionWindowDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-risk-tier-override-surface>${renderRiskTierOverrideSurface().join('')}</div>`);
+      configurationSections.push(`<div data-quick-reply-order-surface>${renderQuickReplyOrderSurface().join('')}</div>`);
+      configurationSections.push(`<div data-role-model-overrides-surface>${renderRoleModelOverridesSurface().join('')}</div>`);
+      configurationSections.push(`<div data-diagnostic-default-surface>${renderDiagnosticDefaultSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-default-surface>${renderProgressFilterDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-state-surface>${renderProgressStateDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-retention-surface>${renderProgressRetentionSurface().join('')}</div>`);
+      configurationSections.push(`<div data-progress-redirect-surface>${renderProgressRedirectDefaultsSurface().join('')}</div>`);
+      configurationSections.push(`<div data-instrumentation-band-surface>${renderInstrumentationBandSurface().join('')}</div>`);
+      configurationSections.push(`<div data-beacon-response-telemetry-surface>${renderBeaconResponseTelemetrySurface().join('')}</div>`);
     }
     if (filterSelected) {
-      sections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
+      configurationSections.push(`<div data-context-filter-surface>${renderContextFilterSurface().join('')}</div>`);
     }
     const rendered = renderRightPanelSurface({
       title: `${label || 'Settings'} Surface`,
-      status: settingsSelected || filterSelected ? 'Display-only' : 'planned',
-      sections,
+      status: settingsSelected || filterSelected ? 'Configuration' : 'planned',
+      sections: [...informationSections, ...configurationSections],
+      configurationSections: settingsSelected || filterSelected ? configurationSections : null,
+      informationSections: settingsSelected || filterSelected ? informationSections : null,
     });
     if (rendered && settingsSelected) {
       loadVoiceIo();

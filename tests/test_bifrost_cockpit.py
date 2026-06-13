@@ -177,7 +177,9 @@ def test_index_harness_mode_uses_full_panel_logic_surface_without_prompt_window(
     assert ".session-window-right.is-panel-surface .session-prompt-input" in doc
     assert ".session-window-right.is-panel-surface .session-response-output" in doc
     assert "display: none;" in doc
-    assert "const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) =>" in doc
+    assert "const renderRightPanelSurface = ({ title, status, sections, configurationSections = null, informationSections = null, surfaceClass = '' }) =>" in doc
+    assert "data-right-panel-mode=\"configuration\"" in doc
+    assert "data-right-panel-mode=\"information\"" in doc
     assert "rightWindow.classList.add('is-panel-surface')" in doc
     assert "rightWorkspace.insertAdjacentHTML('beforeend', `" in doc
     assert 'class="right-panel-surface${safeSurfaceClass}"' in doc
@@ -515,7 +517,10 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "Settings writes remain blocked until an explicit settings backend exists." in doc
     assert "Settings/Spark renders public Codex and Claude/Max CLI setup status from the reviewed Models bridge snapshot." in doc
     assert "Settings does not install software, sign in, read secrets, probe provider accounts, or mutate model routing." in doc
-    assert "status: settingsSelected || filterSelected ? 'Display-only' : 'planned'" in doc
+    assert "status: settingsSelected || filterSelected ? 'Configuration' : 'planned'" in doc
+    assert "configurationSections.push(`<div data-focus-mode-surface>" in doc
+    assert "informationSections.push(relaySection('Settings voice boundary'" in doc
+    assert "writeRightPanelViewMode(title, button.dataset.rightPanelMode)" in doc
     assert "loadVoiceIo();" in doc
     assert "loadSparkModels();" in doc
     assert "initializeContextFilterSurface();" in doc
@@ -5318,7 +5323,7 @@ def test_ui_checklist_promotes_right_panel_toggle_only_after_surface_rows_are_wi
     assert "Prime Runtime Logic renders a display-only `Prime review before dispatch` section plus Beacon liveness input from `/bridge/prime-logic`" in doc
     assert "| HN1 | Prime | Opens/focuses Prime runtime logic surface. | wired | Click opens Prime Runtime Logic with backend-sourced decision, context, source refs, proof logic, blockers, and Beacon liveness advisory input from `/bridge/prime-logic`. |" in doc
     assert "leaving route/provider/payload decisions with Relay and Model Harness" in doc
-    assert "const renderRightPanelSurface = ({ title, status, sections, surfaceClass = '' }) =>" in index
+    assert "const renderRightPanelSurface = ({ title, status, sections, configurationSections = null, informationSections = null, surfaceClass = '' }) =>" in index
     assert "const renderHarnessSurface = (button) =>" in index
     assert "const renderSparkSurface = (label) =>" in index
     assert "setRightPanelAuthority('harness', button.dataset.harness || 'Harness', { persist })" in index
