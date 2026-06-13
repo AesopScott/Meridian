@@ -1124,10 +1124,17 @@ def test_clear_command_clears_active_session_window_without_bridge_message():
     assert "input.value = ''" in local_command
     assert "localStorage.setItem(draftKey(input), '')" in local_command
     assert "setStatus(input, 'cleared')" in local_command
+    assert "const completeLocalSessionCommand = (input, command, message) => {" in local_command
+    assert "pushEntry(input, 'system', `${command}: ${message}`, 'Meridian local command');" in local_command
     assert "prompt.trim().toLowerCase().split(/\\s+/" in local_command
     assert "clearActiveSessionWindow(input)" in local_command
+    assert "window.meridianOpenSpark?.();" in local_command
+    assert "window.meridianRenderRelayModels?.()" in local_command
+    assert "window.meridianRenderSparkSkills?.()" in local_command
+    assert "completeLocalSessionCommand(input, normalizedCommand, opened ? 'runtime status panel opened' : 'runtime status unavailable');" in local_command
+    assert "completeLocalSessionCommand(input, normalizedCommand, opened ? 'skills panel opened' : 'skills panel unavailable');" in local_command
+    assert "completeLocalSessionCommand(input, normalizedCommand, message);" in local_command
     assert "bridgeUrl('message')" not in local_command
-    assert "pushEntry(" not in local_command
 
     send_prompt = doc[
         doc.index("const sendPrompt = async (input) =>"):
@@ -1179,18 +1186,24 @@ def test_local_session_command_router_covers_status_skills_and_restart_bridge():
         doc.index("const handleLocalSessionCommand = async (input, prompt) => {"):
         doc.index("const setStatus = (input, text) =>")
     ]
+    restart_scope = doc[
+        doc.index("const restartModelBridge = async () => {"):
+        doc.index("let resetInProgress = false;")
+    ]
     assert "const normalizedCommand = prompt.trim().toLowerCase().split(/\\s+/" in local_commands
     assert "if (normalizedCommand === '/status')" in local_commands
-    assert "const opened = renderRelayModels();" in local_commands
+    assert "const opened = Boolean(window.meridianRenderRelayModels?.());" in local_commands
     assert "if (normalizedCommand === '/skills')" in local_commands
-    assert "const opened = renderSparkSkills();" in local_commands
+    assert "const opened = Boolean(window.meridianRenderSparkSkills?.());" in local_commands
     assert "if (normalizedCommand === '/debug')" in local_commands
+    assert "window.meridianOpenSpark?.();" in local_commands
     assert "debug report opened" in local_commands
     assert "if (normalizedCommand === '/restart-bridge')" in local_commands
-    assert "const restart = await restartModelBridge();" in local_commands
+    assert "const restart = await window.meridianRestartModelBridge?.() || { ok: false, error: 'bridge restart handler unavailable' };" in local_commands
     assert "? 'bridge restarted'" in local_commands
     assert "bridge restart blocked:" in local_commands
     assert "if (normalizedCommand.startsWith('/'))" in local_commands
+    assert "window.meridianRestartModelBridge = restartModelBridge;" in restart_scope
 
     meridian_rows = doc[
         doc.index("const meridianLocalSkillRows = () => ["):
@@ -3415,6 +3428,23 @@ def test_close_action_refreshes_reviewed_boundary_warning_without_executing_sess
     assert "| SK9 | Close boundary surface | Restores User Session while exposing reviewed close/write-through posture before live close authority exists. | wired | Spark Close restores the visible right-panel surface to User Session and refreshes a reviewed close-boundary status note from `/bridge/session-close-archive-proof`, surfacing reviewed close readiness, gate/proof posture, and write-through status while keeping session close/write-through control, Obsidian capture action, and archive mutation unavailable; executable close behavior remains tracked in `CLS-*`. |" in checklist
 
 
+def test_voice_io_surface_uses_published_speech_button_updater():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    speech_button = doc[
+        doc.index("const applySpeechButtonVoiceState = (snapshot = {}) =>"):
+        doc.index("const refreshSpeechButtonVoiceState = async () =>")
+    ]
+    loader = doc[
+        doc.index("const loadVoiceIo = async () => {"):
+        doc.index("const loadSparkModels = async () =>")
+    ]
+
+    assert "window.meridianApplySpeechButtonVoiceState = applySpeechButtonVoiceState;" in speech_button
+    assert "window.meridianApplySpeechButtonVoiceState?.(snapshot);" in loader
+    assert "window.meridianApplySpeechButtonVoiceState?.({ ok: false });" in loader
+    assert "applySpeechButtonVoiceState(snapshot);" not in loader
+
+
 def test_archive_surface_exposes_transcript_access_posture_without_opening_transcripts():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
     checklist = (ROOT / "docs" / "ui-integration-checklist.md").read_text(encoding="utf-8")
@@ -4507,7 +4537,7 @@ def test_index_settings_surface_shows_public_cli_setup_without_mutation_paths():
 
 def test_index_settings_surface_reflects_project_focus_without_second_switch():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
-    render_start = doc.index("const renderProjectFocusSnapshot = () =>")
+    render_start = doc.index("const projectFocusStorageKey = 'meridian.session.project'")
     render_end = doc.index("const renderDiagnosticDefaultPreview = (state) =>", render_start)
     project_focus = doc[render_start:render_end]
     settings_start = doc.index("const renderSparkSurface = (label) =>")
@@ -4519,7 +4549,9 @@ def test_index_settings_surface_reflects_project_focus_without_second_switch():
 
     assert "Project focus authority" in project_focus
     assert "currentProjectContext()" in project_focus
-    assert "projectSelectKey" in project_focus
+    assert "const projectFocusStorageKey = 'meridian.session.project'" in project_focus
+    assert "['storage key', projectFocusStorageKey]" in project_focus
+    assert "projectSelectKey" not in project_focus
     assert ".session-project-select" in project_focus
     assert "selected separately; project switch does not retarget sessions" in project_focus
     assert "Project-scoped refresh path" in project_focus
@@ -4746,11 +4778,19 @@ def test_index_settings_surface_controls_beacon_response_telemetry_locally():
 
     assert "const beaconResponseTelemetryKey = 'meridian.beacon.response-telemetry.v1'" in storage_scope
     assert "responseTimes: true, tokens: true" in storage_scope
+    assert "window.meridianBeaconResponseTelemetry = {" in storage_scope
+    assert "read: readBeaconResponseTelemetryState" in storage_scope
+    assert "write: writeBeaconResponseTelemetryState" in storage_scope
+    assert "beaconResponseTelemetrySettings" in telemetry_surface
+    assert "readBeaconResponseTelemetryPreference" in telemetry_surface
+    assert "writeBeaconResponseTelemetryPreference" in telemetry_surface
     assert "data-beacon-response-telemetry=\"responseTimes\"" in telemetry_surface
     assert "data-beacon-response-telemetry=\"tokens\"" in telemetry_surface
     assert "Beacon owns response-time and token telemetry posture for model calls." in telemetry_surface
     assert "Spark only stores and renders UI-local visibility preferences for response rows." in telemetry_surface
     assert "document.querySelectorAll('.session-prompt-input').forEach((input) => renderTranscript(input));" in telemetry_surface
+    assert "readBeaconResponseTelemetryState()" not in telemetry_surface
+    assert "writeBeaconResponseTelemetryState(" not in telemetry_surface
     assert "data-beacon-response-telemetry-surface" in settings_surface
     assert "initializeBeaconResponseTelemetrySurface();" in settings_surface
     assert "bridgeUrl('message')" not in telemetry_surface
@@ -5008,6 +5048,8 @@ def test_index_settings_surface_controls_risk_tier_override_locally():
 
     assert "const riskTierOverrideKey = 'meridian.risk-tier-overrides.v1'" in risk_override
     assert "riskTierOverrideOptions" in risk_override
+    assert "selectedUserSessionTarget" in risk_override
+    assert "selectedUserSessionLabel" in risk_override
     assert "'follow-prime-proposal'" in risk_override
     assert "'tier-4'" in risk_override
     assert "riskOverrideScopeEntries" in risk_override
@@ -5019,6 +5061,8 @@ def test_index_settings_surface_controls_risk_tier_override_locally():
     assert "data-risk-tier-override-preview" in risk_override
     assert "Prime still owns the live proposed risk tier" in risk_override
     assert "No backend settings route, prompt send, result recovery, or proof-gate mutation is invoked." in risk_override
+    assert "selectedUserSessionId()" not in risk_override
+    assert "selectedUserSession()" not in risk_override
     assert "Prime risk override" in filter_preview
     assert "User risk override" in filter_preview
     assert "data-risk-tier-override-surface" in settings_surface

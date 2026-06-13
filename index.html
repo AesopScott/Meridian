@@ -4539,6 +4539,7 @@ body {
     if (authorized) speechButton.dataset.voiceAuthorization = 'backend-authorized';
     else speechButton.dataset.voiceAuthorization = 'display-only';
   };
+  window.meridianApplySpeechButtonVoiceState = applySpeechButtonVoiceState;
   const refreshSpeechButtonVoiceState = async () => {
     if (!speechButton) return;
     try {
@@ -4893,6 +4894,11 @@ body {
     try { localStorage.setItem(beaconResponseTelemetryKey, JSON.stringify(next)); } catch {}
     return next;
   };
+  window.meridianBeaconResponseTelemetry = {
+    key: beaconResponseTelemetryKey,
+    read: readBeaconResponseTelemetryState,
+    write: writeBeaconResponseTelemetryState,
+  };
   const formatDurationSeconds = (durationMs) => {
     const value = Number(durationMs);
     if (!Number.isFinite(value) || value <= 0) return '';
@@ -4998,6 +5004,11 @@ body {
     setStatus(input, 'cleared');
   };
   const localMeridianCommands = new Set(['/clear', '/status', '/skills', '/debug', '/restart-bridge']);
+  const completeLocalSessionCommand = (input, command, message) => {
+    input.value = '';
+    localStorage.setItem(draftKey(input), '');
+    pushEntry(input, 'system', `${command}: ${message}`, 'Meridian local command');
+  };
   const handleLocalSessionCommand = async (input, prompt) => {
     const normalizedCommand = prompt.trim().toLowerCase().split(/\s+/)[0];
     if (!normalizedCommand.startsWith('/')) return false;
@@ -5006,33 +5017,40 @@ body {
       return true;
     }
     if (normalizedCommand === '/status') {
-      openSpark();
-      const opened = renderRelayModels();
+      window.meridianOpenSpark?.();
+      const opened = Boolean(window.meridianRenderRelayModels?.());
       setStatus(input, opened ? 'runtime status panel opened' : 'runtime status unavailable');
+      completeLocalSessionCommand(input, normalizedCommand, opened ? 'runtime status panel opened' : 'runtime status unavailable');
       return true;
     }
     if (normalizedCommand === '/skills') {
-      openSpark();
-      const opened = renderSparkSkills();
+      window.meridianOpenSpark?.();
+      const opened = Boolean(window.meridianRenderSparkSkills?.());
       setStatus(input, opened ? 'skills panel opened' : 'skills panel unavailable');
+      completeLocalSessionCommand(input, normalizedCommand, opened ? 'skills panel opened' : 'skills panel unavailable');
       return true;
     }
     if (normalizedCommand === '/debug') {
-      openSpark();
-      const opened = renderRelayModels();
+      window.meridianOpenSpark?.();
+      const opened = Boolean(window.meridianRenderRelayModels?.());
       setStatus(input, opened ? 'debug report opened' : 'debug report unavailable');
+      completeLocalSessionCommand(input, normalizedCommand, opened ? 'debug report opened' : 'debug report unavailable');
       return true;
     }
     if (normalizedCommand === '/restart-bridge') {
       setStatus(input, 'restarting local bridge');
-      const restart = await restartModelBridge();
-      setStatus(input, restart.ok
+      const restart = await window.meridianRestartModelBridge?.() || { ok: false, error: 'bridge restart handler unavailable' };
+      const message = restart.ok
         ? 'bridge restarted'
-        : `bridge restart blocked: ${restart.error || restart.nextRepairStep || 'check runtime diagnostics'}`);
+        : `bridge restart blocked: ${restart.error || restart.nextRepairStep || 'check runtime diagnostics'}`;
+      setStatus(input, message);
+      completeLocalSessionCommand(input, normalizedCommand, message);
       return true;
     }
     if (normalizedCommand.startsWith('/')) {
-      setStatus(input, `unknown meridian command ${normalizedCommand}; try /clear, /status, /skills, /debug, or /restart-bridge`);
+      const message = `unknown meridian command ${normalizedCommand}; try /clear, /status, /skills, /debug, or /restart-bridge`;
+      setStatus(input, message);
+      completeLocalSessionCommand(input, normalizedCommand, message);
       return true;
     }
     return false;
@@ -9320,10 +9338,10 @@ body {
       const response = await fetch(currentBridgeUrl('voice-io'), { cache: 'no-store' });
       const snapshot = await response.json();
       logicNode.innerHTML = renderVoiceIoSnapshot(snapshot);
-      applySpeechButtonVoiceState(snapshot);
+      window.meridianApplySpeechButtonVoiceState?.(snapshot);
     } catch (error) {
       logicNode.innerHTML = renderVoiceIoSnapshot({ ok: false, error: error.message });
-      applySpeechButtonVoiceState({ ok: false });
+      window.meridianApplySpeechButtonVoiceState?.({ ok: false });
     }
   };
   const loadSparkModels = async () => {
@@ -11314,6 +11332,11 @@ body {
   const progressRedirectOptions = Array.from(new Set(Object.values(progressRedirectDefaults)));
   const riskTierOverrideKey = 'meridian.risk-tier-overrides.v1';
   const riskTierOverrideOptions = ['follow-prime-proposal', 'tier-0', 'tier-1', 'tier-2', 'tier-3', 'tier-4'];
+  const selectedUserSessionTarget = () => document.querySelector('.session-target-select')?.value || '';
+  const selectedUserSessionLabel = () => {
+    const select = document.querySelector('.session-target-select');
+    return select?.selectedOptions?.[0]?.textContent?.trim() || 'selected User session';
+  };
   const progressStateList = (value) => Array.isArray(value)
     ? value.map((item) => String(item || '').trim()).filter(Boolean)
     : String(value || '').split(/[\n,]+/).map((item) => item.trim()).filter(Boolean);
@@ -11364,8 +11387,8 @@ body {
   };
   const riskOverrideScopeEntries = () => {
     const primeScope = `prime.${currentProjectContext()}`;
-    const userSessionId = selectedUserSessionId() || 'unselected';
-    const userLabel = selectedUserSession()?.sessionName || 'selected User session';
+    const userSessionId = selectedUserSessionTarget() || 'unselected';
+    const userLabel = selectedUserSessionLabel();
     return [
       { key: primeScope, label: `Prime (${currentProjectContext()})` },
       { key: `user.${userSessionId}`, label: `User (${userLabel})` },
@@ -11797,15 +11820,22 @@ body {
     });
     refresh();
   };
-  const renderBeaconResponseTelemetryPreview = (state = readBeaconResponseTelemetryState()) => relayGrid([
+  const beaconResponseTelemetrySettings = () => window.meridianBeaconResponseTelemetry || {
+    key: 'meridian.beacon.response-telemetry.v1',
+    read: () => ({ responseTimes: true, tokens: true }),
+    write: (state) => ({ responseTimes: state?.responseTimes !== false, tokens: state?.tokens !== false }),
+  };
+  const readBeaconResponseTelemetryPreference = () => beaconResponseTelemetrySettings().read();
+  const writeBeaconResponseTelemetryPreference = (state) => beaconResponseTelemetrySettings().write(state);
+  const renderBeaconResponseTelemetryPreview = (state = readBeaconResponseTelemetryPreference()) => relayGrid([
     ['owner harness', 'Beacon'],
     ['response times', state.responseTimes ? 'shown next to AI responses' : 'hidden from response rows'],
     ['input/output tokens', state.tokens ? 'shown next to AI responses when reported' : 'hidden from response rows'],
-    ['storage key', beaconResponseTelemetryKey],
+    ['storage key', beaconResponseTelemetrySettings().key],
     ['backend mutation', 'none; Spark stores display preferences locally only'],
   ]);
   const renderBeaconResponseTelemetrySurface = () => {
-    const state = readBeaconResponseTelemetryState();
+    const state = readBeaconResponseTelemetryPreference();
     return [
       relaySection('Beacon response telemetry', `
         <div class="relay-models-handoff" aria-label="Beacon response telemetry display">
@@ -11830,7 +11860,7 @@ body {
   const initializeBeaconResponseTelemetrySurface = () => {
     const root = rightWorkspace?.querySelector('[data-beacon-response-telemetry-surface]');
     if (!root) return;
-    const refresh = (state = readBeaconResponseTelemetryState()) => {
+    const refresh = (state = readBeaconResponseTelemetryPreference()) => {
       const preview = root.querySelector('[data-beacon-response-telemetry-preview]');
       if (preview) preview.innerHTML = renderBeaconResponseTelemetryPreview(state);
       root.querySelectorAll('[data-beacon-response-telemetry]').forEach((input) => {
@@ -11840,9 +11870,9 @@ body {
     root.addEventListener('change', (event) => {
       const target = event.target;
       if (!target?.matches?.('[data-beacon-response-telemetry]')) return;
-      const state = readBeaconResponseTelemetryState();
+      const state = readBeaconResponseTelemetryPreference();
       state[target.dataset.beaconResponseTelemetry] = target.checked;
-      const next = writeBeaconResponseTelemetryState(state);
+      const next = writeBeaconResponseTelemetryPreference(state);
       refresh(next);
       document.querySelectorAll('.session-prompt-input').forEach((input) => renderTranscript(input));
     });
@@ -12048,11 +12078,12 @@ body {
     });
     refresh(applySessionWindowDefaults());
   };
+  const projectFocusStorageKey = 'meridian.session.project';
   const renderProjectFocusSnapshot = () => [
     relaySection('Project focus authority', relayGrid([
       ['active project', currentProjectContext()],
       ['selector owner', '.session-project-select'],
-      ['storage key', projectSelectKey],
+      ['storage key', projectFocusStorageKey],
       ['Prime context', document.querySelector('.session-window-left')?.dataset.projectContext || currentProjectContext()],
       ['screen context', document.querySelector('.session-screen')?.dataset.projectContext || currentProjectContext()],
       ['User Session target', 'selected separately; project switch does not retarget sessions'],
@@ -12327,7 +12358,7 @@ body {
   const renderRiskTierOverridePreview = (state) => relayGrid([
     ['storage key', riskTierOverrideKey],
     ['Prime override', riskTierScopeValue(state, `prime.${currentProjectContext()}`)],
-    ['User override', riskTierScopeValue(state, `user.${selectedUserSessionId() || 'unselected'}`)],
+    ['User override', riskTierScopeValue(state, `user.${selectedUserSessionTarget() || 'unselected'}`)],
     ['routing effect', 'future routing/proof metadata preview only'],
     ['authority boundary', 'no backend route or proof gate mutation'],
   ]);
@@ -12645,7 +12676,7 @@ body {
       ['system health route default', readProgressRedirectDefaults()['system health']],
       ['progress retention window', renderProgressRetentionWindowLabel()],
       ['Prime risk override', riskTierScopeValue(readRiskTierOverrides(), `prime.${currentProjectContext()}`)],
-      ['User risk override', riskTierScopeValue(readRiskTierOverrides(), `user.${selectedUserSessionId() || 'unselected'}`)],
+      ['User risk override', riskTierScopeValue(readRiskTierOverrides(), `user.${selectedUserSessionTarget() || 'unselected'}`)],
       ['quiet mode', readQuietMode() ? 'enabled for routine surfaces' : 'disabled'],
       ['wake mode', readWakeMode()],
       ['quick replies', readQuickReplyOrder().join(', ')],
@@ -13337,6 +13368,8 @@ body {
       return false;
     }
   };
+  window.meridianRenderRelayModels = renderRelayModels;
+  window.meridianRenderSparkSkills = renderSparkSkills;
   const renderProviderBalance = () => {
     if (!rightWindow || !rightWorkspace) return false;
     try {
@@ -13643,6 +13676,7 @@ body {
     stage.classList.add('spark-menu-open');
     harnessDock.classList.remove('harness-dock-open');
   };
+  window.meridianOpenSpark = openSpark;
   const restoreUserPanel = ({ persist = true, warning = '' } = {}) => {
     screen.classList.add('session-theme-aqua');
     screen.classList.remove('session-theme-green');
@@ -13887,6 +13921,7 @@ body {
       };
     }
   };
+  window.meridianRestartModelBridge = restartModelBridge;
   let resetInProgress = false;
   const resetUi = async (button) => {
     if (resetInProgress) return;
