@@ -11608,6 +11608,7 @@ body {
     return next;
   };
   const instrumentationBandKey = 'meridian.instrumentation-band.v1';
+  const instrumentationBandAttentionOnlyKey = 'meridian.instrumentation-band.attention-only.v1';
   const instrumentationBandCap = 6;
   const instrumentationBandOptions = [
     { id: 'beacon', label: 'Beacon' },
@@ -11647,6 +11648,20 @@ body {
     try { localStorage.setItem(instrumentationBandKey, JSON.stringify(next)); } catch {}
     return next;
   };
+  const readInstrumentationBandAttentionOnly = () => {
+    try {
+      const stored = localStorage.getItem(instrumentationBandAttentionOnlyKey);
+      return stored === null ? true : stored !== 'false';
+    } catch {
+      return true;
+    }
+  };
+  const writeInstrumentationBandAttentionOnly = (value) => {
+    const next = value !== false;
+    try { localStorage.setItem(instrumentationBandAttentionOnlyKey, String(next)); } catch {}
+    return next;
+  };
+  const instrumentationBandAttentionStatuses = new Set(['busy', 'degraded', 'offline', 'blocked']);
   const instrumentationBandSnapshot = {
     beacon: null,
     relay: null,
@@ -11735,8 +11750,12 @@ body {
     if (!instrumentationBandNode) return;
     const selected = readInstrumentationBandSelection();
     const cellState = instrumentationBandCellState();
-    instrumentationBandNode.style.gridTemplateColumns = `repeat(${Math.max(1, selected.length)}, minmax(0, 1fr))`;
-    instrumentationBandNode.innerHTML = selected.map((id) => {
+    const visible = readInstrumentationBandAttentionOnly()
+      ? selected.filter((id) => instrumentationBandAttentionStatuses.has(cellState[id]?.status))
+      : selected;
+    instrumentationBandNode.hidden = visible.length === 0;
+    instrumentationBandNode.style.gridTemplateColumns = `repeat(${Math.max(1, visible.length)}, minmax(0, 1fr))`;
+    instrumentationBandNode.innerHTML = visible.map((id) => {
       const cell = cellState[id];
       return `
         <div class="instrumentation-band-cell" data-status="${escapeHtml(cell.status)}" data-instrumentation-cell="${escapeHtml(id)}">
@@ -11767,17 +11786,30 @@ body {
     }
     renderInstrumentationBand();
   };
-  const renderInstrumentationBandPreview = (selected = readInstrumentationBandSelection()) => relayGrid([
+  const renderInstrumentationBandPreview = (selected = readInstrumentationBandSelection()) => {
+    const cellState = instrumentationBandCellState();
+    const visible = readInstrumentationBandAttentionOnly()
+      ? selected.filter((id) => instrumentationBandAttentionStatuses.has(cellState[id]?.status))
+      : selected;
+    return relayGrid([
     ['visible cells', selected.map((id) => instrumentationBandOptions.find((option) => option.id === id)?.label || id).join(' | ') || 'none'],
+    ['live rendered cells', visible.map((id) => instrumentationBandOptions.find((option) => option.id === id)?.label || id).join(' | ') || 'none while clear'],
+    ['attention-only mode', readInstrumentationBandAttentionOnly() ? 'enabled' : 'disabled'],
     ['fixed cap', String(instrumentationBandCap)],
     ['storage key', instrumentationBandKey],
+    ['attention mode key', instrumentationBandAttentionOnlyKey],
     ['surface', 'bottom instrumentation band'],
-    ['layout', 'stable fixed-cap grid; hidden cells remain available in Settings'],
+    ['layout', 'stable fixed-cap grid; healthy cells can stay selected but hidden from the live band'],
   ]);
+  };
   const renderInstrumentationBandSurface = () => {
     const selected = readInstrumentationBandSelection();
     return [
       relaySection('Bottom band visibility', `
+        <label class="relay-models-handoff">
+          <input type="checkbox" data-instrumentation-band-attention-only ${readInstrumentationBandAttentionOnly() ? 'checked' : ''}>
+          <span>Show only attention cells</span>
+        </label>
         <div class="relay-models-handoff" aria-label="Bottom band cell visibility">
           ${instrumentationBandOptions.map((option) => `
             <label class="relay-models-handoff">
@@ -11790,6 +11822,7 @@ body {
       `, true),
       relaySection('Bottom band boundary', relayList([
         'Settings chooses which reviewed instrumentation cells stay visible in the live bottom band.',
+        'Attention-only mode hides healthy routine cells from the live band while keeping selected blockers, degraded states, offline routes, and busy proof/queue states visible.',
         'Selection is capped so the layout stays stable instead of widening as more cells are enabled.',
         'This is UI-local visibility only; no backend queue, route, review, proof, or settings mutation is invoked.',
       ]), false),
@@ -11807,9 +11840,17 @@ body {
         input.checked = checked;
         input.disabled = !checked && atCap;
       });
+      const attentionOnly = root.querySelector('[data-instrumentation-band-attention-only]');
+      if (attentionOnly) attentionOnly.checked = readInstrumentationBandAttentionOnly();
     };
     root.addEventListener('change', (event) => {
       const target = event.target;
+      if (target?.matches?.('[data-instrumentation-band-attention-only]')) {
+        writeInstrumentationBandAttentionOnly(target.checked);
+        refresh(readInstrumentationBandSelection());
+        renderInstrumentationBand();
+        return;
+      }
       if (!target?.matches?.('[data-instrumentation-band-toggle]')) return;
       const selected = readInstrumentationBandSelection();
       const id = target.dataset.instrumentationBandToggle;

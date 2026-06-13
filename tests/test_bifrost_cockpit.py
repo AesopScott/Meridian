@@ -4758,16 +4758,24 @@ def test_index_settings_surface_controls_bottom_band_visibility_locally():
 
     assert 'class="instrumentation-band"' in doc
     assert "const instrumentationBandKey = 'meridian.instrumentation-band.v1'" in band_surface
+    assert "const instrumentationBandAttentionOnlyKey = 'meridian.instrumentation-band.attention-only.v1'" in band_surface
     assert "const instrumentationBandCap = 6;" in band_surface
     assert "const instrumentationBandOptions = [" in band_surface
+    assert "readInstrumentationBandAttentionOnly" in band_surface
+    assert "writeInstrumentationBandAttentionOnly" in band_surface
+    assert "instrumentationBandAttentionStatuses" in band_surface
+    assert "data-instrumentation-band-attention-only" in band_surface
     assert "const loadInstrumentationBand = async () => {" in band_surface
     assert "fetch(currentBridgeUrl('beacon-liveness'), { cache: 'no-store' })" in band_surface
     assert "fetch(currentBridgeUrl('review-console'), { cache: 'no-store' })" in band_surface
     assert "fetch(currentBridgeUrl('aegis-logic'), { cache: 'no-store' })" in band_surface
     assert "fetch(currentBridgeUrl('health'), { cache: 'no-store' })" in band_surface
-    assert "gridTemplateColumns = `repeat(${Math.max(1, selected.length)}, minmax(0, 1fr))`" in band_surface
+    assert "gridTemplateColumns = `repeat(${Math.max(1, visible.length)}, minmax(0, 1fr))`" in band_surface
+    assert "instrumentationBandNode.hidden = visible.length === 0;" in band_surface
     assert "data-instrumentation-band-toggle" in band_surface
-    assert "stable fixed-cap grid; hidden cells remain available in Settings" in band_surface
+    assert "Show only attention cells" in band_surface
+    assert "healthy cells can stay selected but hidden from the live band" in band_surface
+    assert "Attention-only mode hides healthy routine cells" in band_surface
     assert "data-instrumentation-band-surface" in settings_surface
     assert "initializeInstrumentationBandSurface();" in settings_surface
     assert "bridgeUrl('message')" not in band_surface
