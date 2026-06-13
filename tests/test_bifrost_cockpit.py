@@ -1209,10 +1209,17 @@ def test_local_session_command_router_explains_unknown_slash_commands():
 
 def test_send_prompt_includes_prime_contract_and_runtime_fields():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    session_scope = doc[
+        doc.index("const activeProjectContext = () => projectSelect?.value || 'Meridian';"):
+        doc.index("const insertPromptToken = (input, token) =>")
+    ]
     send_prompt = doc[
         doc.index("const sendPrompt = async (input) =>"):
         doc.index("const insertPromptToken = (input, token) =>")
     ]
+    assert "const primeSessionContract = {" in session_scope
+    assert "const primeContractPayload = () => ({" in session_scope
+    assert session_scope.index("const primeContractPayload = () => ({") < session_scope.index("const sendPrompt = async (input) =>")
     assert "const messagePayload = {" in send_prompt
     assert "primeContract," in send_prompt
     assert "transcript: visibleTranscript" in send_prompt
@@ -1223,6 +1230,35 @@ def test_send_prompt_includes_prime_contract_and_runtime_fields():
         send_prompt.index("if (await handleLocalSessionCommand(input, prompt)) return;")
         < send_prompt.index("const messagePayload = {")
         < send_prompt.index("const response = await fetch(bridgeUrl('message'),")
+    )
+
+
+def test_send_prompt_cannot_leave_session_sending_stuck_true():
+    doc = (ROOT / "index.html").read_text(encoding="utf-8")
+    send_prompt = doc[
+        doc.index("const sendPrompt = async (input) =>"):
+        doc.index("const insertPromptToken = (input, token) =>")
+    ]
+    initialization = doc[
+        doc.index("document.querySelectorAll('.session-prompt-input').forEach((input) => {"):
+        doc.index("input.closest('.session-interface')?.querySelector('.session-send-button')?.addEventListener('click'", doc.index("document.querySelectorAll('.session-prompt-input').forEach((input) => {"))
+    ]
+    assert "input.dataset.sessionSending = 'false';" in initialization
+    assert "input.dataset.sessionSending = 'true';" in send_prompt
+    assert "let requestId = '';" in send_prompt
+    assert (
+        send_prompt.index("input.dataset.sessionSending = 'true';")
+        < send_prompt.index("try {")
+        < send_prompt.index("const projectContext = activeProjectContext();")
+        < send_prompt.index("pushEntry(input, 'user', prompt")
+        < send_prompt.index("requestId = `meridian-${Date.now()}")
+    )
+    assert "const recovered = requestId ? await recoverBridgeResult(requestId) : null;" in send_prompt
+    assert "const completedCall = requestId ? await findRecentBridgeCall(requestId) : null;" in send_prompt
+    assert (
+        send_prompt.index("input.dataset.sessionSending = 'true';")
+        < send_prompt.index("finally {")
+        < send_prompt.index("input.dataset.sessionSending = 'false';")
     )
 
 

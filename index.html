@@ -4389,6 +4389,30 @@ body {
   const projectSelectKey = 'meridian.session.project';
   const projectOptions = ['Bifrost', 'Meridian', 'Spark'];
   const activeProjectContext = () => projectSelect?.value || 'Meridian';
+  const primeSessionContract = {
+    contractVersion: 'prime-persona-v1',
+    role: 'Prime',
+    identity: 'Spark speaking on behalf of Meridian',
+    directives: [
+      'Favor visible progress with ownership and practical next steps.',
+      'Avoid false capability claims when actions are display-only or pending backend execution routes.',
+      'Favor evidence and constraints before closing recommendations.',
+    ],
+    proofObligations: [
+      'Surface blockers, assumptions, and uncertainty before declaring completion.',
+      'Call out boundary limits before suggesting execution actions.',
+      'Use explicit reasoning only where supported by visible context.',
+    ],
+    responsePreferences: [
+      'Use plain language and concise structure.',
+      'Prioritize actionable next steps with confidence and risk context.',
+      'Keep suggestions grounded in what is actually available in this active Meridian context.',
+    ],
+  };
+  const primeContractPayload = () => ({
+    ...primeSessionContract,
+    projectContext: activeProjectContext(),
+  });
   let lastProjectValue = '';
   const hasUnsentPromptDraft = () => Array.from(document.querySelectorAll('.session-prompt-input'))
     .some((input) => String(input.value || '').trim().length > 0);
@@ -5066,15 +5090,16 @@ body {
       return;
     }
     input.dataset.sessionSending = 'true';
-    const projectContext = activeProjectContext();
-    const primeContract = primeContractPayload();
-    pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '', projectContext, attachments });
-    input.value = '';
-    localStorage.setItem(draftKey(input), '');
-    clearPendingAttachments(input);
-    setStatus(input, `${backend} running`);
-    const requestId = `meridian-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    let requestId = '';
     try {
+      const projectContext = activeProjectContext();
+      const primeContract = primeContractPayload();
+      pushEntry(input, 'user', prompt, '', { requestedBackend: selectedBackend, sessionTargetId: targetSession?.sessionId || '', projectContext, attachments });
+      input.value = '';
+      localStorage.setItem(draftKey(input), '');
+      clearPendingAttachments(input);
+      setStatus(input, `${backend} running`);
+      requestId = `meridian-${Date.now()}-${Math.random().toString(16).slice(2)}`;
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 180000);
       const messagePayload = {
@@ -5115,7 +5140,7 @@ body {
       });
     } catch (error) {
       setStatus(input, backend);
-      const recovered = await recoverBridgeResult(requestId);
+      const recovered = requestId ? await recoverBridgeResult(requestId) : null;
       if (recovered) {
         const modelLabel = recovered.model || backend;
         setStatus(input, modelLabel);
@@ -5132,7 +5157,7 @@ body {
         });
         return;
       }
-      const completedCall = await findRecentBridgeCall(requestId);
+      const completedCall = requestId ? await findRecentBridgeCall(requestId) : null;
       if (completedCall) {
         const modelLabel = completedCall.model || backend;
         pushEntry(input, 'error', `Error: Bridge completed ${completedCall.backend || backend} request, but the browser lost the response.`, modelLabel, {
@@ -5270,6 +5295,7 @@ body {
   };
 
   document.querySelectorAll('.session-prompt-input').forEach((input) => {
+    input.dataset.sessionSending = 'false';
     input.value = localStorage.getItem(draftKey(input)) || '';
     renderTranscript(input);
     renderPendingAttachments(input);
