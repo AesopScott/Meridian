@@ -522,7 +522,8 @@ def test_index_planned_spark_surfaces_do_not_fetch_fake_backends():
     assert "Settings/Spark renders public Codex and Claude/Max CLI setup status from the reviewed Models bridge snapshot." in doc
     assert "Settings does not install software, sign in, read secrets, probe provider accounts, or mutate model routing." in doc
     assert "status: settingsSelected || filterSelected ? 'Configuration' : 'planned'" in doc
-    assert "configurationSections.push(`<div data-focus-mode-surface>" in doc
+    assert "configurationSections.push(`<div data-quiet-mode-surface>" in doc
+    assert "data-focus-mode-surface" not in doc
     assert "informationSections.push(relaySection('Settings voice boundary'" in doc
     assert "writeRightPanelViewMode(title, current === 'information' ? 'configuration' : 'information')" in doc
     assert "button.textContent = rightPanelToggleTargetLabel(mode);" in doc
@@ -2291,8 +2292,8 @@ def test_ui_checklist_remaining_tail_shape_is_intentional():
     planned = [row_id for row_id, status in rows if status == "planned"]
     partial = [row_id for row_id, status in rows if status == "partial"]
 
-    assert len(rows) == 305
-    assert counts["wired"] == 305
+    assert len(rows) == 304
+    assert counts["wired"] == 304
     assert counts["partial"] == 0
     assert counts["planned"] == 0
     assert counts["blocked"] == 0
@@ -4499,8 +4500,8 @@ def test_ui_checklist_pins_backend_backed_spark_surfaces():
     assert "without deleting progress source data or calling backend progress" in doc
     assert "| SET10 | Quiet mode | Reduces non-critical UI noise and routine progress surfacing. | wired |" in doc
     assert "UI-local quiet mode backed by `meridian.quiet-mode.v1`" in doc
-    assert "| SET11 | Focus mode | Collapses portfolio noise to the active project. | wired |" in doc
-    assert "UI-local focus mode backed by `meridian.focus-mode.v1`" in doc
+    assert "Focus mode" not in doc
+    assert "meridian.focus-mode.v1" not in doc
     assert "| SET15 | Wake mode | Selects full wake, fast wake, or silent wake. | wired |" in doc
     assert "UI-local wake mode backed by `meridian.wake-mode.v1`" in doc
     assert "| SET16 | Quick reply order | Chooses which prompt macro buttons appear and their order. | wired |" in doc
@@ -4983,11 +4984,8 @@ def test_index_settings_surface_persists_role_model_overrides_locally():
     assert "method: 'POST'" not in role_override
 
 
-def test_index_settings_surface_controls_focus_mode_locally():
+def test_index_settings_surface_does_not_expose_focus_mode():
     doc = (ROOT / "index.html").read_text(encoding="utf-8")
-    render_start = doc.index("const focusModeKey = 'meridian.focus-mode.v1'")
-    render_end = doc.index("const filterToggle = (key, label, state) =>", render_start)
-    focus_mode = doc[render_start:render_end]
     settings_start = doc.index("const renderSparkSurface = (label) =>")
     settings_end = doc.index("const harnessDraftStorageKey", settings_start)
     settings_surface = doc[settings_start:settings_end]
@@ -4995,22 +4993,14 @@ def test_index_settings_surface_controls_focus_mode_locally():
     session_select_end = doc.index("const loadUserSessions = async () =>", session_select_start)
     session_select = doc[session_select_start:session_select_end]
 
-    assert "const focusModeKey = 'meridian.focus-mode.v1'" in focus_mode
-    assert "readFocusMode" in focus_mode
-    assert "writeFocusMode" in focus_mode
-    assert "Focus mode" in focus_mode
-    assert "data-focus-mode-toggle" in focus_mode
-    assert "data-focus-mode-preview" in focus_mode
-    assert "renderUserSessionSelect();" in focus_mode
-    assert "Focus mode does not retarget sessions" in focus_mode
-    assert "localStorage.getItem('meridian.focus-mode.v1') === 'true'" in session_select
-    assert "Selected session outside active project" in session_select
-    assert "if (focusMode && project !== activeProject) return;" in session_select
-    assert "data-focus-mode-surface" in settings_surface
-    assert "initializeFocusModeSurface();" in settings_surface
-    assert "bridgeUrl('message')" not in focus_mode
-    assert "bridgeUrl('call-result')" not in focus_mode
-    assert "method: 'POST'" not in focus_mode
+    assert "focusMode" not in session_select
+    assert "meridian.focus-mode.v1" not in doc
+    assert "Selected session outside active project" not in session_select
+    assert "data-focus-mode" not in settings_surface
+    assert "initializeFocusModeSurface" not in settings_surface
+    assert "renderFocusModeSurface" not in doc
+    assert "readFocusMode" not in doc
+    assert "writeFocusMode" not in doc
 
 
 def test_index_settings_surface_controls_quiet_mode_locally():

@@ -110,7 +110,7 @@ Decision inputs Prime weighs:
 
 - **Category and severity** from the producer.
 - **Recent context.** If Scott just asked about lane 3, a related lane 3 event may surface as an Orchestrator Queue line; otherwise it stays on the Progress Surface.
-- **Time-of-day / focus mode.** If Scott has marked himself focused on a different project, routine activity gets quieter.
+- **Time-of-day / quiet mode.** If routine activity is not urgent, the Progress Surface can keep it quieter without changing project scope.
 - **Per-Scott routing preferences.** Stored mute lists, pin lists, severity thresholds (§6).
 - **Burst suppression.** If 12 `routine progress` updates land in 30 seconds, Prime aggregates them into one card (`12 polls, all nominal`) rather than 12 cards.
 - **Aegis gate state.** When Aegis is holding a tier-3+ gate open, related findings escalate one level until Scott has dispositioned the gate.
@@ -148,7 +148,6 @@ V0 controls per producer / per category:
 V0 globals:
 
 - **Quiet mode** — temporarily suppress all `info` severity Progress Surface entries (still recorded).
-- **Focus mode** — narrows the feed to the active project; portfolio-wide info collapses to a single summary header.
 - **Retention window** — adjust default 200 entries / 24 hours.
 - **Default routing per category** — override the table in §3 once; applies until Scott changes it again.
 
@@ -258,7 +257,7 @@ Held for V1+ unless promoted explicitly:
 - **Drag-and-drop reordering by Scott.** Reverse-chronological with pin is enough.
 - **User-defined custom categories.** V0 ships the typed set in §3; new categories require a brief and a producer update.
 - **AI-summarized digest cards.** Burst suppression (§5) is structural, not generative, in V0.
-- **Cross-project portfolio feed.** Focus mode collapses to active project; portfolio rollup is V1.
+- **Cross-project portfolio feed.** The cockpit remains scoped to the active project; portfolio rollup is V1.
 - **Sound / haptic alerts.** Critical-only alerts will probably arrive in V1; not in V0.
 - **Real-time-streaming session output.** Per-lane streaming belongs in the lane detail panel, not on the Progress Surface.
 - **Voice readout.** NASA-style Go calls are wake-only (`bifrost-v0-cockpit-layout-brief.md` §8). The Progress Surface does not speak.

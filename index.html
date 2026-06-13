@@ -4775,9 +4775,6 @@ body {
     const activeProject = activeProjectContext();
     const liveSessions = userSessions.filter((session) => session.routable);
     const recoveredSessions = userSessions.filter((session) => !session.routable);
-    let focusMode = false;
-    try { focusMode = localStorage.getItem('meridian.focus-mode.v1') === 'true'; } catch {}
-    const selectedSession = userSessions.find((session) => session.sessionId === current) || null;
     const projects = Array.from(new Set(liveSessions.map((session) => session.projectName || 'Meridian'))).sort((a, b) => a.localeCompare(b));
     if (activeProject && !projects.includes(activeProject)) {
       const group = document.createElement('optgroup');
@@ -4789,17 +4786,7 @@ body {
       group.append(option);
       userSessionSelect.append(group);
     }
-    if (focusMode && selectedSession && (selectedSession.projectName || 'Meridian') !== activeProject) {
-      const outsideGroup = document.createElement('optgroup');
-      outsideGroup.label = 'Selected session outside active project';
-      const option = document.createElement('option');
-      option.value = selectedSession.sessionId;
-      option.textContent = sessionOptionLabel(selectedSession);
-      outsideGroup.append(option);
-      userSessionSelect.append(outsideGroup);
-    }
     projects.forEach((project) => {
-      if (focusMode && project !== activeProject) return;
       const group = document.createElement('optgroup');
       group.label = project === activeProject ? `${project} (active project)` : project;
       liveSessions
@@ -11710,18 +11697,6 @@ body {
     try { localStorage.setItem(roleModelOverrideKey, JSON.stringify(next)); } catch {}
     return next;
   };
-  const focusModeKey = 'meridian.focus-mode.v1';
-  const readFocusMode = () => {
-    try {
-      return localStorage.getItem(focusModeKey) === 'true';
-    } catch {
-      return false;
-    }
-  };
-  const writeFocusMode = (enabled) => {
-    try { localStorage.setItem(focusModeKey, enabled ? 'true' : 'false'); } catch {}
-    return enabled;
-  };
   const quietModeKey = 'meridian.quiet-mode.v1';
   const readQuietMode = () => {
     try {
@@ -12776,43 +12751,6 @@ body {
     });
     refresh();
   };
-  const renderFocusModePreview = () => relayGrid([
-    ['focus mode', readFocusMode() ? 'enabled' : 'disabled'],
-    ['storage key', focusModeKey],
-      ['active project', currentProjectContext()],
-    ['session list effect', readFocusMode() ? 'active project sessions are the only prominent group' : 'all project groups remain visible'],
-    ['routing effect', 'none; focus mode never retargets the selected session'],
-  ]);
-  const renderFocusModeSurface = () => [
-    relaySection('Focus mode', `
-      <label class="relay-models-handoff">
-        <input type="checkbox" data-focus-mode-toggle ${readFocusMode() ? 'checked' : ''}>
-        <span>Keep the active project in focus</span>
-      </label>
-      <div data-focus-mode-preview>${renderFocusModePreview()}</div>
-    `, true),
-    relaySection('Focus mode boundary', relayList([
-      'Focus mode is stored only in the local UI profile.',
-      'Active-project Spark surfaces stay prominent while the User Session list suppresses non-active project groups unless the current target lives outside the active project.',
-      'Focus mode does not retarget sessions, send prompts, mutate backend project state, or hide a selected out-of-project session silently.',
-    ]), false),
-  ];
-  const initializeFocusModeSurface = () => {
-    const root = rightWorkspace?.querySelector('[data-focus-mode-surface]');
-    if (!root) return;
-    const refresh = () => {
-      const preview = root.querySelector('[data-focus-mode-preview]');
-      if (preview) preview.innerHTML = renderFocusModePreview();
-    };
-    root.addEventListener('change', (event) => {
-      const target = event.target;
-      if (!target?.matches?.('[data-focus-mode-toggle]')) return;
-      writeFocusMode(target.checked);
-      refresh();
-      renderUserSessionSelect();
-    });
-    refresh();
-  };
   const renderQuietModePreview = () => relayGrid([
     ['quiet mode', readQuietMode() ? 'enabled' : 'disabled'],
     ['storage key', quietModeKey],
@@ -13098,7 +13036,6 @@ body {
         'Manual prompt sends still use the existing model selector; Auto remains disabled until Relay owns the decision.',
       ]), true));
       informationSections.push(`<div data-spark-models>${relaySection('Models bridge source', relayGrid([['status', 'loading backend snapshot']]))}</div>`);
-      configurationSections.push(`<div data-focus-mode-surface>${renderFocusModeSurface().join('')}</div>`);
       configurationSections.push(`<div data-quiet-mode-surface>${renderQuietModeSurface().join('')}</div>`);
       configurationSections.push(`<div data-wake-mode-surface>${renderWakeModeSurface().join('')}</div>`);
       configurationSections.push(`<div data-session-band-side-surface>${renderSessionBandSideSurface().join('')}</div>`);
@@ -13127,7 +13064,6 @@ body {
     if (rendered && settingsSelected) {
       loadVoiceIo();
       loadSparkModels();
-      initializeFocusModeSurface();
       initializeQuietModeSurface();
       initializeWakeModeSurface();
       initializeSessionBandSideSurface();

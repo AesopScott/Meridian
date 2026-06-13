@@ -133,7 +133,7 @@ V1 contract:
 - Eight V0 categories shipped: `routine progress / blocker / review result / proof summary / repair routed / completion / human gate / system health`. Producer-emitted, never inferred.
 - Each card has: source, category, severity glyph, timestamp, summary, drilldown ref.
 - Filter / Mute / Pin / Collapse / Severity threshold inline on each card and in a surface settings panel.
-- Quiet mode and Focus mode globally (settings panel).
+- Quiet mode globally (settings panel).
 - Retention default: last 200 entries or last 24 hours. Older entries roll to `events.jsonl` / Vault.
 - Burst suppression aggregates ≥ 8 same-category events within 30 seconds into a single rolled-up card.
 - Codex Reviews lanes (`docs/live-codex-reviews.md`, `docs/live-codex-reviews-2.md`) emit `review result` and `repair routed` cards. Aegis emits `proof summary` cards.
@@ -251,7 +251,7 @@ User-configurable in V1:
 
 - **Project focus** — switches all per-project state (Orchestrator Queue, Review Console, lane band, Progress Surface, instrumentation cells where applicable).
 - **Risk Tier override** — Prime proposes a tier; Scott may pin or override per session (`docs/meridian-pillars.md` Pillars 2 + 6 + 7).
-- **Progress Surface** — Pin / Mute / Collapse / Filter / Redirect / Clear / Severity threshold (per-card); Quiet mode / Focus mode / Retention window / Default routing per category (global) (`bifrost-configurable-progress-surface-brief.md` §6).
+- **Progress Surface** — Pin / Mute / Collapse / Filter / Redirect / Clear / Severity threshold (per-card); Quiet mode / Retention window / Default routing per category (global) (`bifrost-configurable-progress-surface-brief.md` §6).
 - **Cockpit layout** — Lane band side (left / right). Progress Surface collapse-to-glyph. Bottom-band cell visibility within a fixed cap.
 - **Model selector** — Visible role/model mapping; per-role override. Orchestrator may choose; Scott may pin.
 - **Wake mode** — `full wake / fast wake / silent wake` (`bifrost-v0-cockpit-layout-brief.md` §8).
@@ -360,7 +360,6 @@ Demo criterion: Scott no longer hand-paste a polling command into any lane; Prim
 | Lane band side | Right |
 | Progress Surface | Visible (not collapsed) |
 | Quiet mode | Off |
-| Focus mode | Off |
 | Severity threshold (Progress Surface) | `info` and up (everything shown) |
 | Retention window | 200 entries / 24 hours, whichever is smaller |
 | Default routing per category | As specified in `bifrost-configurable-progress-surface-brief.md` §3 |
@@ -383,7 +382,7 @@ Held for V2 unless promoted explicitly:
 - **Per-card drag-and-drop reordering** on the Progress Surface.
 - **Per-card threaded replies.** The Progress Surface is a feed, not chat.
 - **AI-summarized digests** on the Progress Surface. Burst suppression in V1 is structural, not generative.
-- **Cross-project portfolio aggregation.** Focus mode collapses to the active project; portfolio view is V2.
+- **Cross-project portfolio aggregation.** The cockpit remains scoped to the active project; portfolio view is V2.
 - **Custom Progress Surface categories.**
 - **Routing reconfiguration between harnesses** beyond the role/model picker.
 - **Voice input.**
@@ -412,11 +411,9 @@ Build 5 should not block on these landing in any specific order; the slices in �
 ## 14. Open V1 Questions
 
 - Final layout when the viewport is narrow (< 1280 px). Current lean: collapse the Lane band into a stacked summary above the Progress Surface, never below the Prime panel.
-- Whether the bottom band's `Queue` cell shows the project's queue state or the portfolio-wide state in Focus mode.
 - Where the per-lane force-poll button lives: only in lane detail, or also as a tiny inline icon on the lane row.
 - Whether Review Console disposition actions are keyboard-accessible from the Orchestrator Queue (so Scott can resolve items without tab-switching).
 - Wake brief audio enablement — opt-in, opt-out, or always-off until the audio stack lands.
-- How V1 surfaces a portfolio-wide attention count when Focus mode is on for a single project.
 - Whether the Progress Surface collapse-to-glyph in the bottom band counts toward instrumentation cell budget.
 
 These should be resolved before slice 5 ships. Slices 1–4 can land with the current leans.

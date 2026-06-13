@@ -92,7 +92,7 @@ The right panel supports three mutually exclusive modes, switchable via the Spar
 - Project focus, last project persistence
 - Risk tier override
 - Progress pin/mute lists, collapse state, filter defaults, redirect defaults, retention window
-- Quiet mode, focus mode
+- Quiet mode
 - Lane band side, bottom band visibility, role/model mapping
 - Wake mode, quick reply order, session card defaults
 - Diagnostic log visibility
