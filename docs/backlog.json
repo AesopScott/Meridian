@@ -416,12 +416,13 @@
             "Skills panel search works across all groups.",
             "Skills panel is populated when opened."
           ],
-          "status": "partial",
+          "status": "done",
           "evidence_refs": [
-            "skills grouping was requested and partially implemented",
-            "collapsible behavior still needs verified UI proof"
+            "commit 7cf3b3aa6 persists Skills group open/closed state with stable group keys",
+            "Skills groups open populated by default, can collapse, and search force-opens matching groups",
+            "npm run proof:v3 and npm run smoke:v3 passed after the Skills renderer update"
           ],
-          "remaining_work": "Prove all model/local skill groups expand/collapse and preserve search results."
+          "remaining_work": "None for V3; future work can add richer backend skill registry metadata when available."
         },
         {
           "id": "M29-003",
